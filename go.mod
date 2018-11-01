@@ -10,12 +10,12 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
+	github.com/golang/protobuf v1.2.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
-	github.com/google/uuid v1.0.0 // indirect
-	github.com/infinimesh/device-registry v0.0.0-20181030080033-d9ae813b0131
+	github.com/google/uuid v1.0.0
 	github.com/infinimesh/mqtt-go v0.0.0-20180816112855-cb9ae8251e60
-	github.com/jinzhu/gorm v1.9.1 // indirect
+	github.com/jinzhu/gorm v1.9.1
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
 	github.com/lib/pq v1.0.0 // indirect
@@ -27,5 +27,6 @@ require (
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/yosssi/gmq v0.0.1
 	golang.org/x/crypto v0.0.0-20181030102418-4d3f4d9ffa16 // indirect
+	golang.org/x/net v0.0.0-20180826012351-8a410e7b638d
 	google.golang.org/grpc v1.16.0
 )
