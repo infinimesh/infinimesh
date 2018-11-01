@@ -7,7 +7,6 @@ jobs:
           GO111MODULE: "on"
     working_directory: /go/src/github.com/infinimesh/infinimesh
     steps:
-      - setup_remote_docker
       - checkout
       - run: go mod verify
       - run: make build
