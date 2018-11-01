@@ -1,0 +1,35 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+    - $PWD/hack/ddl_device_registry.sql:/docker-entrypoint-initdb.d/ddl_device_registry.sql
+  mqtt-bridge:
+    image: infinimesh/mqtt-bridge:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      - $PWD/hack/server.crt:/server.crt
+      - $PWD/hack/server.key:/server.key
+    environment:
+      - KAFKA_HOST=kafka:9092
+      - DEVICE_REGISTRY_URL=device-registry:8080
+    depends_on:
+      - kafka
+  device-registry:
+    image: infinimesh/device-registry:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - DB_ADDR=postgresql://postgres@postgres:5432/test?sslmode=disable
+    restart: unless-stopped
+  kafka:
+    image: landoop/fast-data-dev:2.0
+    environment:
+      - ADV_HOST=localhost
+    ports:
+      - "9092:9092"
