@@ -18,6 +18,7 @@ services:
       - DEVICE_REGISTRY_URL=device-registry:8080
     depends_on:
       - kafka
+    restart: always
   device-registry:
     image: infinimesh/device-registry:latest
     ports:
