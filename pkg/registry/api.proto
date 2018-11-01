@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package registry;
+
+service Devices {
+  rpc Create (CreateRequest) returns (CreateReply) {}
+
+  rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintReply) {}
+}
+
+message CreateRequest {
+  string name = 1;
+  string namespace = 2;
+  bool enabled = 3;
+  Certificate certificate = 4;
+}
+
+message Certificate {
+  string pem_data = 1;
+  string algorithm = 2;
+  uint64 valid_to = 3;
+}
+
+message CreateReply {
+  bytes fingerprint = 1;
+}
+
+message GetByFingerprintRequest {
+  bytes fingerprint = 1;
+}
+
+message GetByFingerprintReply {
+  string name = 1;
+  string namespace = 2;
+}
+
