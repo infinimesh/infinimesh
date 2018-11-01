@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11
+        environment:
+          GO111MODULE: "on"
+    working_directory: /go/src/github.com/infinimesh/infinimesh
+    steps:
+      - checkout
+      - run: go mod verify
+      - run: make build
