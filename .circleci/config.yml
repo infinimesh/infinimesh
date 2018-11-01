@@ -10,3 +10,9 @@ jobs:
       - checkout
       - run: go mod verify
       - run: make build
+      - run:
+          name: Build and push Docker image
+          command: |
+            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USER --password-stdin
+            docker build -t infinimesh/mqtt-bridge:latest -f Dockerfiles/mqtt-bridge/Dockerfile .
+            docker push infinimesh/mqtt-bridge:latest
