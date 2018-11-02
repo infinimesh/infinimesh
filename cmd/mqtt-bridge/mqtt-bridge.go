@@ -208,8 +208,16 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn) error {
 }
 
 func publishTelemetry(topic string, data []byte) error {
+	var targetTopic string
+
+	if topic == "_shadow" {
+		targetTopic = "public.delta.reported-state"
+	} else {
+		targetTopic = kafkaTopic
+	}
+
 	producer.Input() <- &sarama.ProducerMessage{
-		Topic: kafkaTopic,
+		Topic: targetTopic,
 		Key:   sarama.StringEncoder("someDevice"), // TODO
 		Value: sarama.ByteEncoder(data),
 	}
