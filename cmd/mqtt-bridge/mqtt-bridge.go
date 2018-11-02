@@ -210,6 +210,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn) error {
 func publishTelemetry(topic string, data []byte) error {
 	var targetTopic string
 
+	fmt.Println("Send to topic", topic)
 	if topic == "_shadow" {
 		targetTopic = "public.delta.reported-state"
 	} else {
