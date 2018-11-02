@@ -37,8 +37,6 @@ func main() {
 		panic(err)
 	}
 
-	// defer func() { _ = group.Close() }()
-
 	go func() {
 		for err := range group.Errors() {
 			fmt.Printf("Consumer group error: %v\n", err)
