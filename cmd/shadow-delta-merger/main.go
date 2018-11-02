@@ -59,7 +59,7 @@ func main() {
 	pconfig.Producer.Partitioner = sarama.NewManualPartitioner
 	pconfig.Version = sarama.V1_1_0_0
 
-	producerClient, err := sarama.NewClient([]string{"localhost:9092"}, pconfig)
+	producerClient, err := sarama.NewClient([]string{broker}, pconfig)
 	if err != nil {
 		panic(err)
 	}
@@ -72,7 +72,7 @@ func main() {
 	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 
-	localStateConsumerClient, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	localStateConsumerClient, err := sarama.NewClient([]string{broker}, config)
 	if err != nil {
 		panic(err)
 	}
