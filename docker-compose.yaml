@@ -36,7 +36,7 @@ services:
       - DEVICE_REGISTRY_URL=device-registry:8080
     depends_on:
       - kafka
-    restart: always
+    restart: unless-stopped
   device-registry:
     image: quay.io/infinimesh/device-registry:latest
     ports:
@@ -46,3 +46,11 @@ services:
     environment:
       - DB_ADDR=postgresql://postgres@postgres:5432/test?sslmode=disable
     restart: unless-stopped
+  shadow-delta-merger:
+    image: quay.io/infinimesh/shadow-delta-merger:latest
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_HOST=kafka:29092
+    restart: unless-stopped
+

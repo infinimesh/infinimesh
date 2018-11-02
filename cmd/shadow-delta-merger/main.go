@@ -10,15 +10,23 @@ import (
 
 	sarama "github.com/Shopify/sarama"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/spf13/viper"
 )
 
 var (
 	consumerGroup = "shadow"
-	broker        = "localhost:9092"
+	broker        string
 	topics        = []string{topic}
 	topic         = "public.delta.reported-state"
 	mergedTopic   = "private.changelog.reported-state"
 )
+
+func init() {
+	viper.SetDefault("KAFKA_HOST", "localhost:9092")
+	viper.AutomaticEnv()
+
+	broker = viper.GetString("KAFKA_HOST")
+}
 
 func main() {
 	consumerGroupClient := sarama.NewConfig()
