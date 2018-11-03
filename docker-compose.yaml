@@ -53,4 +53,12 @@ services:
     environment:
       - KAFKA_HOST=kafka:29092
     restart: unless-stopped
+  shadow-api:
+    image: quay.io/infinimesh/shadow-api:latest
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_HOST=kafka:29092
+      - KAFKA_TOPIC=private.changelog.reported-state
+    restart: unless-stopped
 
