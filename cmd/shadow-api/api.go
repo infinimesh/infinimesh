@@ -23,9 +23,7 @@ var (
 	subscribers = make(map[string]map[chan *DeviceState]bool)
 )
 
-type DeviceState struct {
-	State json.RawMessage
-}
+type DeviceState json.RawMessage
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
@@ -57,11 +55,13 @@ func main() {
 			}
 
 			for message := range pc.Messages() {
-				d := DeviceState{}
-				err := json.Unmarshal(message.Value, &d)
+				rawMessage := json.RawMessage{}
+				err := json.Unmarshal(message.Value, &rawMessage)
 				if err != nil {
-					fmt.Printf("Invalid message at offset %v", message.Offset)
+					fmt.Printf("Invalid message at offset %v, err=%v\n", message.Offset, err)
 				}
+
+				d := DeviceState(rawMessage)
 
 				localStateMtx.Lock()
 				localState[string(message.Key)] = &d
@@ -82,7 +82,7 @@ func main() {
 
 	r := httprouter.New()
 	r.HandlerFunc("GET", "/:id", handler)
-	err = http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8085", r)
 	if err != nil {
 		panic(err)
 	}
@@ -123,7 +123,7 @@ outer:
 	for {
 		select {
 		case doc := <-ch:
-			str, _ := json.Marshal(doc)
+			str, _ := json.Marshal(json.RawMessage(*doc))
 			fmt.Fprintf(w, "data: %s\n\n", str)
 			flusher.Flush()
 		case _ = <-notify:

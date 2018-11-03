@@ -55,6 +55,8 @@ services:
     restart: unless-stopped
   shadow-api:
     image: quay.io/infinimesh/shadow-api:latest
+    ports:
+      - "8085:8085"
     depends_on:
       - kafka
     environment:
