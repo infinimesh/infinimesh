@@ -1,17 +1,31 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
+
+	"flag"
 
 	"github.com/yosssi/gmq/mqtt/client"
 )
 
+var (
+	topic string
+)
+
+func init() {
+	flag.StringVar(&topic, "topic", "/", "MQTT Topic name")
+}
+
 func main() {
+	flag.Parse()
 	// Create an MQTT Client.
 	cli := client.New(&client.Options{
 		ErrorHandler: func(err error) {
@@ -60,10 +74,13 @@ func main() {
 		panic(err)
 	}
 
+	buf := bytes.Buffer{}
+	io.Copy(&buf, os.Stdin)
+
 	err = cli.Publish(&client.PublishOptions{
 		QoS:       byte(1),
-		TopicName: []byte("bla"),
-		Message:   []byte("Test!"),
+		TopicName: []byte("_shadow"),
+		Message:   buf.Bytes(),
 	})
 	if err != nil {
 		panic(err)
