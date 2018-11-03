@@ -9,11 +9,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/julienschmidt/httprouter"
+	"github.com/spf13/viper"
 )
 
 var (
-	brokers = []string{"localhost:9092"}
-	topic   = "public.shadow.states"
+	broker string
+	topic  string
 
 	localStateMtx sync.Mutex
 	localState    = make(map[string]*DeviceState)
@@ -23,9 +24,16 @@ var (
 )
 
 type DeviceState struct {
-	Version  int64
-	Reported json.RawMessage
-	Desired  json.RawMessage
+	State json.RawMessage
+}
+
+func init() {
+	viper.SetDefault("KAFKA_HOST", "localhost:9092")
+	viper.SetDefault("KAFKA_TOPIC", "private.changelog.reported-state")
+	viper.AutomaticEnv()
+
+	broker = viper.GetString("KAFKA_HOST")
+	topic = viper.GetString("KAFKA_TOPIC")
 }
 
 func main() {
@@ -35,7 +43,7 @@ func main() {
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-	consumer, err := sarama.NewConsumer(brokers, config)
+	consumer, err := sarama.NewConsumer([]string{broker}, config)
 	if err != nil {
 		panic(err)
 	}
