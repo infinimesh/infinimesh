@@ -106,7 +106,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	id := strings.TrimPrefix(r.URL.Path, "/")
 
-	ch := make(chan *DeviceState)
+	ch := make(chan *DeviceState, 10)
 	subMtx.Lock()
 	if _, ok := subscribers[id]; !ok {
 		subscribers[id] = make(map[chan *DeviceState]bool)
