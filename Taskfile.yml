@@ -7,3 +7,7 @@ tasks:
   build:
     cmds:
       - go build ./...
+    env:
+      GO111MODULE: on
+  test:
+    - go test ./...
