@@ -107,6 +107,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/")
 
 	ch := make(chan *DeviceState, 10)
+
+	// FIXME deadlock possible if kafka consume loop is blocked while writing to channel and they also hold the mutex, nobody can make progress. buffered channel just makes it more unlikely.
 	subMtx.Lock()
 	if _, ok := subscribers[id]; !ok {
 		subscribers[id] = make(map[chan *DeviceState]bool)
