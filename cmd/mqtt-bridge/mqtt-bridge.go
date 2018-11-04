@@ -92,7 +92,7 @@ func main() {
 		panic(err)
 	}
 
-	tlsl, err := tls.Listen("tcp", ":8081", &tls.Config{
+	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
 		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
@@ -108,7 +108,18 @@ func main() {
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
 		}
-		go handleConn(conn)
+
+		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
+		reply, err := client.GetByFingerprint(context.Background(), &registry.GetByFingerprintRequest{
+			Fingerprint: getFingerprint(rawcert),
+		})
+		if err != nil {
+			_ = conn.Close()
+			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
+			continue
+		}
+		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetName())
+		go handleConn(conn, reply.GetName())
 	}
 
 }
@@ -135,7 +146,7 @@ func printConnState(con net.Conn) {
 
 // Connection is expected to be valid & legitimate at this point
 // TODO maybe provide a connection-context struct with metadata about this client, e.g. the associated device, ..
-func handleConn(c net.Conn) {
+func handleConn(c net.Conn, deviceID string) {
 	p, err := packet.ReadPacket(c)
 
 	if debug {
@@ -184,7 +195,7 @@ func handleConn(c net.Conn) {
 
 		switch p := p.(type) {
 		case *packet.PublishControlPacket:
-			err = handlePublish(p, c)
+			err = handlePublish(p, c, deviceID)
 			if err != nil {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
@@ -192,8 +203,8 @@ func handleConn(c net.Conn) {
 	}
 }
 
-func handlePublish(p *packet.PublishControlPacket, c net.Conn) error {
-	if err := publishTelemetry(p.VariableHeader.Topic, p.Payload); err != nil {
+func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) error {
+	if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
 		return err
 	}
 	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
@@ -207,7 +218,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn) error {
 	return nil
 }
 
-func publishTelemetry(topic string, data []byte) error {
+func publishTelemetry(topic string, data []byte, deviceID string) error {
 	var targetTopic string
 
 	fmt.Println("Send to topic", topic)
@@ -219,7 +230,7 @@ func publishTelemetry(topic string, data []byte) error {
 
 	producer.Input() <- &sarama.ProducerMessage{
 		Topic: targetTopic,
-		Key:   sarama.StringEncoder("someDevice"), // TODO
+		Key:   sarama.StringEncoder(deviceID), // TODO
 		Value: sarama.ByteEncoder(data),
 	}
 	return nil

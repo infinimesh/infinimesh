@@ -27,7 +27,7 @@ services:
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
-      - "8081:8081"
+      - "8089:8089"
     volumes:
       - $PWD/hack/server.crt:/server.crt
       - $PWD/hack/server.key:/server.key

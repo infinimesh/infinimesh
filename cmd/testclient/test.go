@@ -64,7 +64,7 @@ func main() {
 		ClientID: []byte("test"),
 		Network:  "tcp",
 		// Address is the address which the Client connects to.
-		Address: "localhost:8081",
+		Address: "localhost:8089",
 		// TLSConfig is the configuration for the TLS connection.
 		// If this property is not nil, the Client tries to use TLS
 		// for the connection.
