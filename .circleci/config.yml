@@ -24,3 +24,6 @@ jobs:
       - run:
           name: Run build
           command: task build
+      - run:
+          name: Run tests
+          command: task test
