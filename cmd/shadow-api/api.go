@@ -62,6 +62,7 @@ func main() {
 				err := json.Unmarshal(message.Value, &rawMessage)
 				if err != nil {
 					fmt.Printf("Invalid message at offset %v, err=%v\n", message.Offset, err)
+					continue
 				}
 
 				d := DeviceState(rawMessage)
