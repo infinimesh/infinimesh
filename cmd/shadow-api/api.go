@@ -41,6 +41,7 @@ func main() {
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
+	fmt.Printf("Connect with broker %v\n", broker)
 	consumer, err := sarama.NewConsumer([]string{broker}, config)
 	if err != nil {
 		panic(err)
