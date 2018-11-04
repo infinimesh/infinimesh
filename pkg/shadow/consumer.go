@@ -87,7 +87,7 @@ func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	c.localState = localState
 	c.localStateMaxOffsets = offsets
 
-	fmt.Printf("Restored local state: %v shadows in %v seconds.\n", len(localState), time.Now().Sub(start).Seconds())
+	fmt.Printf("Restored local state: %v shadows in %v seconds.\n", len(localState), time.Since(start).Seconds())
 	fmt.Println(localState)
 	return nil
 }
@@ -157,6 +157,9 @@ func (h *StateMerger) processMessage(msg *sarama.ConsumerMessage) {
 		Value:     sarama.StringEncoder(newState),
 		Partition: msg.Partition, // Always use the same partition number in the target topic as in the source topic
 	})
+	if err != nil {
+		fmt.Println("Failed to send message", err)
+	}
 }
 
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {

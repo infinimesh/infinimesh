@@ -75,7 +75,7 @@ func main() {
 	}
 
 	buf := bytes.Buffer{}
-	io.Copy(&buf, os.Stdin)
+	_, _ = io.Copy(&buf, os.Stdin)
 
 	err = cli.Publish(&client.PublishOptions{
 		QoS:       byte(1),

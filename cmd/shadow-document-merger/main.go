@@ -14,7 +14,6 @@ import (
 var (
 	brokers         = []string{"localhost:9092"}
 	groupIDreported = "mixer-reported"
-	groupIDdesired  = "mixer-desired"
 	topicReported   = "private.changelog.reported-state"
 	topicDesired    = "private.changelog.desired-state"
 	changelogTopic  = "public.shadow.states"
@@ -156,9 +155,6 @@ func (h *handler) Cleanup(s sarama.ConsumerGroupSession) error {
 	h.localStates = nil
 	fmt.Println("Cleaning consumer group session")
 	return nil
-}
-
-func (h *handler) processMessage(message *sarama.ConsumerMessage) {
 }
 
 func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {

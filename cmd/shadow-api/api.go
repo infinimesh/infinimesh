@@ -49,6 +49,9 @@ func main() {
 	fmt.Println("Connected to broker")
 
 	partitions, err := consumer.Partitions(topic)
+	if err != nil {
+		panic(err)
+	}
 	for _, partition := range partitions {
 		go func(partition int32) {
 			pc, err := consumer.ConsumePartition(topic, partition, sarama.OffsetOldest)
@@ -132,12 +135,10 @@ outer:
 			str, _ := json.Marshal(json.RawMessage(*doc))
 			fmt.Fprintf(w, "data: %s\n\n", str)
 			flusher.Flush()
-		case _ = <-notify:
+		case <-notify:
 			break outer
 
 		}
 
 	}
-
-	return
 }
