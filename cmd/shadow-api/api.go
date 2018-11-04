@@ -46,6 +46,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Connected to broker")
 
 	partitions, err := consumer.Partitions(topic)
 	for _, partition := range partitions {
@@ -56,6 +57,7 @@ func main() {
 			}
 
 			for message := range pc.Messages() {
+				fmt.Println("Got Msg", message.Value)
 				rawMessage := json.RawMessage{}
 				err := json.Unmarshal(message.Value, &rawMessage)
 				if err != nil {
@@ -83,7 +85,6 @@ func main() {
 
 	r := httprouter.New()
 	r.HandlerFunc("GET", "/:id", handler)
-	err = http.ListenAndServe(":8085", r)
 	if err != nil {
 		panic(err)
 	}
