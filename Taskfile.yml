@@ -1,0 +1,9 @@
+version: '2'
+
+tasks:
+  lint:
+    cmds:
+      - golangci-lint run
+  build:
+    cmds:
+      - go build ./...
