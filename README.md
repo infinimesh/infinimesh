@@ -1,8 +1,8 @@
 # Infinimesh Platform
+Infinimesh Platform is an opinionated Platform to connect IoT devices securely. It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully cloud native. No vendor lock-in - run it yourself on Kubernetes or use our SaaS offering (TBA).
+## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) 
 [![GoReportCard](https://goreportcard.com/badge/github.com/infinimesh/infinimesh)](https://goreportcard.com/report/github.com/infinimesh/infinimesh) 
-
-## Build status
 
 | Docker Image  | Build status  |
 | ------------- |---------------|
