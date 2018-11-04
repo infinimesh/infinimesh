@@ -86,6 +86,7 @@ func main() {
 
 	r := httprouter.New()
 	r.HandlerFunc("GET", "/:id", handler)
+	err = http.ListenAndServe(":8085", r)
 	if err != nil {
 		panic(err)
 	}
@@ -108,7 +109,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	ch := make(chan *DeviceState, 10)
 
-	// FIXME deadlock possible if kafka consume loop is blocked while writing to channel and they also hold the mutex, nobody can make progress. buffered channel just makes it more unlikely.
+	// FIXME deadlock possible if kafka consume loop is blocked while writing to channel and they also hold the mutex, nobody can make progress.
 	subMtx.Lock()
 	if _, ok := subscribers[id]; !ok {
 		subscribers[id] = make(map[chan *DeviceState]bool)
