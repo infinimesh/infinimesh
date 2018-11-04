@@ -13,11 +13,14 @@ jobs:
           name: Verify go.mod
           command: go mod verify
       - run:
+          name: Install Task
+          command: curl -s https://taskfile.org/install.sh | sh
+      - run:
           name: Install linters
           command: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s v1.11.2 && mv ./bin/* /go/bin/
       - run:
           name: Lint
-          command: golangci-lint run
+          command: task lint
       - run:
           name: Run build
-          command: make build
+          command: task build
