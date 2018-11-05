@@ -6,7 +6,7 @@ tasks:
       - golangci-lint run
   build:
     cmds:
-      - go build ./...
+      - go install ./...
     env:
       GO111MODULE: on
   test:
