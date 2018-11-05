@@ -10,4 +10,5 @@ tasks:
     env:
       GO111MODULE: on
   test:
-    - go test ./...
+    cmds:
+      - go test ./...
