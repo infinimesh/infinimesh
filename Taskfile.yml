@@ -12,3 +12,6 @@ tasks:
   test:
     cmds:
       - go test ./...
+  default:
+    cmds:
+      - task: build
