@@ -5,6 +5,8 @@ import (
 
 	"time"
 
+	"encoding/json"
+
 	sarama "github.com/Shopify/sarama"
 )
 
@@ -130,14 +132,29 @@ inner:
 
 }
 
+type MQTTBridgeData struct {
+	SourceTopic  string
+	SourceDevice string
+	Data         []byte
+}
+
 func (h *StateMerger) processMessage(msg *sarama.ConsumerMessage) {
+
+	data := MQTTBridgeData{}
+	err := json.Unmarshal(msg.Value, &data)
+	if err != nil {
+		fmt.Printf("Failed to unmarshal message, err=%v", err)
+	}
+
+	value := data.Data
+
 	localState, ok := h.localState[string(msg.Key)]
 	if !ok {
 		fmt.Println("Didn't find local state. assuming {}")
 		localState = "{}"
 	}
 
-	newState, err := applyDelta(localState, string(msg.Value))
+	newState, err := applyDelta(localState, string(value))
 	if err != nil {
 		fmt.Println("Failed to apply delta, ignoring msg")
 		return

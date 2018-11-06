@@ -12,6 +12,10 @@ import (
 
 	"crypto/sha256"
 
+	"strings"
+
+	"encoding/json"
+
 	"github.com/Shopify/sarama"
 	"github.com/infinimesh/infinimesh/pkg/registry"
 	"github.com/infinimesh/mqtt-go/packet"
@@ -51,9 +55,9 @@ var (
 	client      registry.DevicesClient
 	debug       bool
 
-	deviceRegistryHost string
-	kafkaHost          string
-	kafkaTopic         string
+	deviceRegistryHost  string
+	kafkaHost           string
+	kafkaTopicTelemetry string
 )
 
 func init() {
@@ -64,7 +68,7 @@ func init() {
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
 	kafkaHost = viper.GetString("KAFKA_HOST")
-	kafkaTopic = viper.GetString("KAFKA_TOPIC")
+	kafkaTopicTelemetry = viper.GetString("KAFKA_TOPIC")
 
 }
 
@@ -145,7 +149,6 @@ func printConnState(con net.Conn) {
 }
 
 // Connection is expected to be valid & legitimate at this point
-// TODO maybe provide a connection-context struct with metadata about this client, e.g. the associated device, ..
 func handleConn(c net.Conn, deviceID string) {
 	p, err := packet.ReadPacket(c)
 
@@ -218,20 +221,51 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 	return nil
 }
 
+type MQTTBridgeData struct {
+	SourceTopic  string
+	SourceDevice string
+	Data         []byte
+}
+
 func publishTelemetry(topic string, data []byte, deviceID string) error {
 	var targetTopic string
 
-	fmt.Println("Send to topic", topic)
-	if topic == "_shadow" {
-		targetTopic = "public.delta.reported-state"
+	// Current allowed layout:
+	// /devices/%v/... for any telemetry data
+	// /shadows/%v/... for any shadows (json-diffs)
+
+	fmt.Println("Try to send to topic", topic)
+	// Currently, only the exact shadow & telemetry topic of the device is
+	// allowed. Later, this will be dynamic, a device can have multiple
+	// shadows or even write to other device's shadows + telemetry topics
+
+	// TODO specific data types! shadow = text or json only; telemetry is raw binary.
+
+	// Anything below the shadow topic or device topic of the device is allowed
+	if strings.HasPrefix(topic, fmt.Sprintf("/shadows/%v", deviceID)) {
+		targetTopic = "public.delta.reported-state" // shadows
+	} else if strings.HasPrefix(topic, fmt.Sprintf("/devices/%v", deviceID)) {
+		targetTopic = kafkaTopicTelemetry // public.bridge.mqtt - "raw" telemetry
 	} else {
-		targetTopic = kafkaTopic
+		// Dead letter queue - we didn't have permission,...
+		targetTopic = "public.bridge.dlq"
+	}
+
+	message := MQTTBridgeData{
+		SourceTopic:  topic,
+		SourceDevice: deviceID,
+		Data:         data,
+	}
+
+	serialized, err := json.Marshal(&message)
+	if err != nil {
+		return err
 	}
 
 	producer.Input() <- &sarama.ProducerMessage{
 		Topic: targetTopic,
 		Key:   sarama.StringEncoder(deviceID), // TODO
-		Value: sarama.ByteEncoder(data),
+		Value: sarama.ByteEncoder(serialized),
 	}
 	return nil
 }
