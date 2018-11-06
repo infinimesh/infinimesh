@@ -249,6 +249,7 @@ func publishTelemetry(topic string, data []byte, deviceID string) error {
 	} else {
 		// Dead letter queue - we didn't have permission,...
 		targetTopic = "public.bridge.dlq"
+		// TODO maybe write a reason
 	}
 
 	message := MQTTBridgeData{
