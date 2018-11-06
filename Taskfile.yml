@@ -12,6 +12,17 @@ tasks:
   test:
     cmds:
       - go test ./...
+  docker:
+    silent: true
+    cmds:
+      - |
+        set -e
+        _root=$PWD
+        cd ./Dockerfiles
+        for f in *; do
+          echo docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root
+          docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root
+        done
   default:
     cmds:
       - task: build
