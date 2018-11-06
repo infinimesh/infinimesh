@@ -79,7 +79,7 @@ func main() {
 
 	err = cli.Publish(&client.PublishOptions{
 		QoS:       byte(1),
-		TopicName: []byte("_shadow"),
+		TopicName: []byte(topic),
 		Message:   buf.Bytes(),
 	})
 	if err != nil {
