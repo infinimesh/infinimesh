@@ -163,7 +163,7 @@ func handleConn(c net.Conn, deviceID string) {
 
 	connectPacket, ok := p.(*packet.ConnectControlPacket)
 	if !ok {
-		fmt.Println("Got wrong packet as first packjet..need connect!")
+		fmt.Println("Got wrong packet as first packet..need connect!")
 		return
 	}
 
