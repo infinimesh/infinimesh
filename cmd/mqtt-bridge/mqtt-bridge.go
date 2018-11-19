@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"sync"
 
 	"crypto/sha256"
 
@@ -18,6 +17,7 @@ import (
 	"encoding/json"
 
 	"github.com/Shopify/sarama"
+	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/registry"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
@@ -103,29 +103,13 @@ func readBackchannelFromKafka() {
 			if err != nil {
 				fmt.Println("Failed to unmarshal message from kafka", err)
 			}
-			// TODO the datatype for the kafka message has
-			// to be specific; needs: payload, topic,
-			// (client but it's in the key)
 
-			mtx.Lock()
-			clients, ok := subscribedClients[m.Topic]
-			mtx.Unlock()
-			// TODO ensure that we make copy of this list. What if concurrently a client drops, .. ?
-
-			var clientsWrittenTo int
-			if ok {
-				for _, ch := range clients {
-					ch <- &msg{
-						Topic: m.Topic,
-						Data:  m.Data,
-					}
-					clientsWrittenTo++
-				}
-			}
-			fmt.Printf("Wrote to %v clients\n", clientsWrittenTo)
+			ps.Pub(&m, m.Topic)
 		}
 	}
 }
+
+var ps *pubsub.PubSub
 
 func main() {
 	serverCert, err := tls.LoadX509KeyPair("server.crt", "server.key")
@@ -150,6 +134,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	ps = pubsub.New(10)
 
 	tlsl, err := tls.Listen("tcp", ":8088", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
@@ -184,7 +170,7 @@ func main() {
 		}
 		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetName())
 
-		backChannel := make(chan *msg, 100)
+		backChannel := ps.Sub()
 
 		go handleConn(conn, reply.GetName(), backChannel)
 		go handleBackChannel(conn, reply.GetName(), backChannel)
@@ -194,27 +180,23 @@ func main() {
 
 var (
 
-	// TODO maybe better use a publish/subscribe package for this instead of
-	// doing this ourselves
-	mtx               sync.Mutex
-	subscribedClients map[string]map[string]chan *msg
+// TODO maybe better use a publish/subscribe package for this instead of
+// doing this ourselves
+// mtx               sync.Mutex
+// subscribedClients map[string]map[string]chan *msg
 )
 
 func init() {
-	subscribedClients = make(map[string]map[string]chan *msg)
+	// subscribedClients = make(map[string]map[string]chan *msg)
 }
 
-type msg struct {
-	Topic string
-	Data  []byte
-}
-
-func handleBackChannel(c net.Conn, deviceID string, backChannel chan *msg) {
+// TODO need context struct for connection; context struct has []subscription-channels, select from those?
+func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}) {
 	for message := range backChannel {
 
 		// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
-
-		p := packet.NewPublish(message.Topic, uint16(0), message.Data)
+		m := message.(*Message)
+		p := packet.NewPublish(m.Topic /* TODO */, uint16(0), m.Data)
 		_, err := p.WriteTo(c)
 		if err != nil {
 			panic(err)
@@ -245,18 +227,10 @@ func printConnState(con net.Conn) {
 }
 
 // Connection is expected to be valid & legitimate at this point
-func handleConn(c net.Conn, deviceID string, backChannel chan *msg) {
+func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 	defer fmt.Println("Client disconnected ", deviceID)
 	defer func() {
-		mtx.Lock()
-
-		for topic, subscribers := range subscribedClients {
-			fmt.Println("Removed subscriber from topic", topic)
-			delete(subscribers, deviceID)
-		}
-
-		mtx.Unlock()
-		close(backChannel)
+		ps.Unsub(backChannel)
 	}()
 	p, err := packet.ReadPacket(c)
 
@@ -319,14 +293,8 @@ func handleConn(c net.Conn, deviceID string, backChannel chan *msg) {
 
 			// TODO better loop over subscribing topics..
 			topic := p.Payload.Subscriptions[0].Topic
-			mtx.Lock()
-			subscribers, ok := subscribedClients[topic]
-			if !ok {
-				subscribedClients[topic] = map[string]chan *msg{deviceID: backChannel}
-			} else {
-				subscribers[deviceID] = backChannel
-			}
-			mtx.Unlock()
+
+			ps.AddSub(backChannel, topic)
 		}
 	}
 }
