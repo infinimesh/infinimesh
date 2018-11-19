@@ -1,12 +1,8 @@
 syntax = "proto3";
 
-package registry;
+package api;
 
-service Devices {
-  rpc Create (CreateRequest) returns (CreateReply) {}
-
-  rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintReply) {}
-}
+option go_package = "api";
 
 message CreateRequest {
   string name = 1;
@@ -21,7 +17,7 @@ message Certificate {
   uint64 valid_to = 3;
 }
 
-message CreateReply {
+message CreateResponse {
   bytes fingerprint = 1;
 }
 
@@ -29,8 +25,12 @@ message GetByFingerprintRequest {
   bytes fingerprint = 1;
 }
 
-message GetByFingerprintReply {
+message GetByFingerprintResponse {
   string name = 1;
   string namespace = 2;
 }
 
+service Devices {
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintResponse);
+}

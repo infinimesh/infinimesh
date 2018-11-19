@@ -18,7 +18,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/infinimesh/infinimesh/pkg/registry"
+	"github.com/infinimesh/infinimesh/api"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -30,7 +30,7 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		fmt.Printf("Validating certificate with fingerprint sha256-%X\n", digest)
 
 		// Request information about a potential device with this fingerprint
-		reply, err := client.GetByFingerprint(context.Background(), &registry.GetByFingerprintRequest{Fingerprint: digest})
+		reply, err := client.GetByFingerprint(context.Background(), &api.GetByFingerprintRequest{Fingerprint: digest})
 		if err != nil {
 			fmt.Printf("Failed to find device for fingerprint")
 			continue
@@ -53,7 +53,7 @@ var (
 	conn        *grpc.ClientConn
 	kafkaClient sarama.Client
 	producer    sarama.AsyncProducer
-	client      registry.DevicesClient
+	client      api.DevicesClient
 	debug       bool
 
 	deviceRegistryHost    string
@@ -122,7 +122,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	client = registry.NewDevicesClient(conn)
+	client = api.NewDevicesClient(conn)
 
 	conf := sarama.NewConfig()
 	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
@@ -160,7 +160,7 @@ func main() {
 			continue
 		}
 		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
-		reply, err := client.GetByFingerprint(context.Background(), &registry.GetByFingerprintRequest{
+		reply, err := client.GetByFingerprint(context.Background(), &api.GetByFingerprintRequest{
 			Fingerprint: getFingerprint(rawcert),
 		})
 		if err != nil {

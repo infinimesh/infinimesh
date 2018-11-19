@@ -6,6 +6,9 @@ tasks:
       PORT: 8089
     cmds:
       - go run hack/mqtt_testclients/produce/produce.go -broker localhost:$PORT
+  proto:
+    cmds:
+      - prototool generate
   lint:
     cmds:
       - golangci-lint run
