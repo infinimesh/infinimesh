@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 
 	"crypto/sha256"
 
@@ -55,21 +56,75 @@ var (
 	client      registry.DevicesClient
 	debug       bool
 
-	deviceRegistryHost  string
-	kafkaHost           string
-	kafkaTopicTelemetry string
+	deviceRegistryHost    string
+	kafkaHost             string
+	kafkaTopicTelemetry   string
+	kafkaTopicBackChannel string
 )
+
+type Message struct {
+	Topic string
+	Data  []byte
+}
 
 func init() {
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "public.bridge.mqtt")
+	viper.SetDefault("KAFKA_TOPIC_BACK", "public.bridge.mqtt.back-channel")
 	viper.AutomaticEnv()
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
 	kafkaHost = viper.GetString("KAFKA_HOST")
 	kafkaTopicTelemetry = viper.GetString("KAFKA_TOPIC")
+	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
 
+}
+
+func readBackchannelFromKafka() {
+	consumer, err := sarama.NewConsumerFromClient(kafkaClient)
+	if err != nil {
+		panic(err)
+	}
+
+	partitions, err := consumer.Partitions(kafkaTopicBackChannel)
+	if err != nil {
+		panic(err)
+	}
+	for _, partition := range partitions {
+		pc, err := consumer.ConsumePartition(kafkaTopicBackChannel, partition, sarama.OffsetNewest) // TODO, currently no guarantees, just process new messages
+		if err != nil {
+			panic(err)
+		}
+
+		for message := range pc.Messages() {
+			var m Message
+			err = json.Unmarshal(message.Value, &m)
+			if err != nil {
+				fmt.Println("Failed to unmarshal message from kafka", err)
+			}
+			// TODO the datatype for the kafka message has
+			// to be specific; needs: payload, topic,
+			// (client but it's in the key)
+
+			mtx.Lock()
+			clients, ok := subscribedClients[m.Topic]
+			mtx.Unlock()
+			// TODO ensure that we make copy of this list. What if concurrently a client drops, .. ?
+
+			var clientsWrittenTo int
+			if ok {
+				for _, ch := range clients {
+					ch <- &msg{
+						Topic: m.Topic,
+						Data:  m.Data,
+					}
+					clientsWrittenTo++
+				}
+			}
+			fmt.Printf("Wrote to %v clients\n", clientsWrittenTo)
+		}
+	}
 }
 
 func main() {
@@ -96,7 +151,7 @@ func main() {
 		panic(err)
 	}
 
-	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
+	tlsl, err := tls.Listen("tcp", ":8088", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
 		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
@@ -106,6 +161,8 @@ func main() {
 		panic(err)
 	}
 
+	go readBackchannelFromKafka()
+
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		err := conn.(*tls.Conn).Handshake()
@@ -113,6 +170,9 @@ func main() {
 			fmt.Println("Handshake of client failed", err)
 		}
 
+		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
+			continue
+		}
 		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
 		reply, err := client.GetByFingerprint(context.Background(), &registry.GetByFingerprintRequest{
 			Fingerprint: getFingerprint(rawcert),
@@ -123,10 +183,46 @@ func main() {
 			continue
 		}
 		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetName())
-		go handleConn(conn, reply.GetName())
+
+		backChannel := make(chan *msg, 100)
+
+		go handleConn(conn, reply.GetName(), backChannel)
+		go handleBackChannel(conn, reply.GetName(), backChannel)
 	}
 
 }
+
+var (
+
+	// TODO maybe better use a publish/subscribe package for this instead of
+	// doing this ourselves
+	mtx               sync.Mutex
+	subscribedClients map[string]map[string]chan *msg
+)
+
+func init() {
+	subscribedClients = make(map[string]map[string]chan *msg)
+}
+
+type msg struct {
+	Topic string
+	Data  []byte
+}
+
+func handleBackChannel(c net.Conn, deviceID string, backChannel chan *msg) {
+	for message := range backChannel {
+
+		// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
+
+		p := packet.NewPublish(message.Topic, uint16(0), message.Data)
+		_, err := p.WriteTo(c)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+}
+
 func printConnState(con net.Conn) {
 	conn := con.(*tls.Conn)
 	log.Print(">>>>>>>>>>>>>>>> State <<<<<<<<<<<<<<<<")
@@ -149,7 +245,19 @@ func printConnState(con net.Conn) {
 }
 
 // Connection is expected to be valid & legitimate at this point
-func handleConn(c net.Conn, deviceID string) {
+func handleConn(c net.Conn, deviceID string, backChannel chan *msg) {
+	defer fmt.Println("Client disconnected ", deviceID)
+	defer func() {
+		mtx.Lock()
+
+		for topic, subscribers := range subscribedClients {
+			fmt.Println("Removed subscriber from topic", topic)
+			delete(subscribers, deviceID)
+		}
+
+		mtx.Unlock()
+		close(backChannel)
+	}()
 	p, err := packet.ReadPacket(c)
 
 	if debug {
@@ -202,6 +310,23 @@ func handleConn(c net.Conn, deviceID string) {
 			if err != nil {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
+		case *packet.SubscribeControlPacket:
+			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), []byte{1})
+			_, err := response.WriteTo(c)
+			if err != nil {
+				panic(err)
+			}
+
+			// TODO better loop over subscribing topics..
+			topic := p.Payload.Subscriptions[0].Topic
+			mtx.Lock()
+			subscribers, ok := subscribedClients[topic]
+			if !ok {
+				subscribedClients[topic] = map[string]chan *msg{deviceID: backChannel}
+			} else {
+				subscribers[deviceID] = backChannel
+			}
+			mtx.Unlock()
 		}
 	}
 }
@@ -211,7 +336,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 		return err
 	}
 	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
-		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID))
+		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)) // TODO better always use directly uint16 for PacketIDs,everywhere
 		_, err := pubAck.WriteTo(c)
 		if err != nil {
 			return err
