@@ -18,6 +18,8 @@
 package packet
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"io"
 )
@@ -30,7 +32,7 @@ type PublishControlPacket struct {
 }
 
 type PublishHeaderFlags struct {
-	QoS    qosLevel
+	QoS    QosLevel
 	Dup    bool
 	Retain bool
 }
@@ -51,7 +53,7 @@ func interpretPublishHeaderFlags(header byte) (flags PublishHeaderFlags, err err
 	if header&2 > 0 {
 		flags.QoS = QoSLevelAtLeastOnce
 	} else if header&4 > 0 {
-		flags.QoS = QoSLevelExactyleOnce
+		flags.QoS = QoSLevelExactlyOnce
 	} else {
 		flags.QoS = QoSLevelNone
 	}
@@ -73,7 +75,7 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 
 	vh.Topic = string(bufTopic)
 
-	if flags.QoS == QoSLevelAtLeastOnce || flags.QoS == QoSLevelExactyleOnce {
+	if flags.QoS == QoSLevelAtLeastOnce || flags.QoS == QoSLevelExactlyOnce {
 		vh.PacketID, err = readUint16(r)
 		if err != nil {
 			return
@@ -88,4 +90,75 @@ func readPublishPayload(r io.Reader, len int) (buf []byte, err error) {
 	buf = make([]byte, len)
 	_, err = io.ReadFull(r, buf)
 	return
+}
+
+func (p *PublishControlPacket) WriteTo(w io.Writer) (n int64, err error) {
+	var nWritten int64
+
+	// Calc Variable Header + Payload
+	p.FixedHeader.RemainingLength = 2 + len(p.VariableHeader.Topic) + len(p.Payload)
+
+	if p.FixedHeaderFlags.QoS == QoSLevelAtLeastOnce || p.FixedHeaderFlags.QoS == QoSLevelExactlyOnce {
+		p.FixedHeader.RemainingLength += 2
+	}
+
+	nWritten, err = p.FixedHeader.WriteTo(w)
+	n += nWritten
+	if err != nil {
+		return n, err
+	}
+
+	nWritten, err = p.VariableHeader.WriteTo(w)
+	n += nWritten
+	if err != nil {
+		return n, err
+	}
+
+	nWritten, err = io.Copy(w, bytes.NewReader(p.Payload))
+	n += nWritten
+	return n, err
+}
+
+func (c *PublishVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
+	b := make([]byte, 2)
+	binary.BigEndian.PutUint16(b, uint16(len(c.Topic)))
+
+	var written int
+	written, err = w.Write(b)
+	n += int64(written)
+	if err != nil {
+		return
+	}
+	written, err = w.Write([]byte(c.Topic))
+	n += int64(written)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPacket {
+	fh := FixedHeader{
+		ControlPacketType: PUBLISH,
+		RemainingLength:   0, // will be populated by WriteTo for the moment
+	}
+
+	vh := PublishVariableHeader{
+		Topic:    topic,
+		PacketID: int(packetID),
+	}
+
+	flags := PublishHeaderFlags{
+		QoS:    QoSLevelNone, // TODO
+		Dup:    false,        // TODO
+		Retain: false,        // TODO
+	}
+
+	return &PublishControlPacket{
+		FixedHeader:      fh,
+		FixedHeaderFlags: flags,
+		VariableHeader:   vh,
+		Payload:          payload,
+	}
 }

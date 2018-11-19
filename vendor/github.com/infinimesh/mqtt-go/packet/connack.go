@@ -33,12 +33,14 @@ type ConnAckVariableHeader struct {
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 	p.FixedHeader.RemainingLength = 2
-	if n, err = p.FixedHeader.WriteTo(w); err != nil {
+	var nWritten int64
+	nWritten, err = p.FixedHeader.WriteTo(w)
+	n += nWritten
+	if err != nil {
 		return n, err
 	}
-	if n, err = p.VariableHeader.WriteTo(w); err != nil {
-		return n, err
-	}
+	nWritten, err = p.VariableHeader.WriteTo(w)
+	n += nWritten
 	return n, err
 }
 

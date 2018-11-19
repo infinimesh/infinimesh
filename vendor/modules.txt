@@ -1,5 +1,7 @@
 # github.com/Shopify/sarama v1.19.0
 github.com/Shopify/sarama
+# github.com/cskr/pubsub v1.0.1
+github.com/cskr/pubsub
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/eapache/go-resiliency v1.1.0
@@ -34,7 +36,7 @@ github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
 # github.com/imdario/mergo v0.3.6
 github.com/imdario/mergo
-# github.com/infinimesh/mqtt-go v0.0.0-20181101213858-3f3e18eb0846
+# github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 github.com/infinimesh/mqtt-go/packet
 # github.com/jinzhu/gorm v1.9.1
 github.com/jinzhu/gorm
