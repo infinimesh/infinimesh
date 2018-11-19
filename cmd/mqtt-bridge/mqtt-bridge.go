@@ -137,7 +137,7 @@ func main() {
 
 	ps = pubsub.New(10)
 
-	tlsl, err := tls.Listen("tcp", ":8088", &tls.Config{
+	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
 		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
