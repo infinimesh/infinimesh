@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"flag"
@@ -14,16 +15,20 @@ import (
 )
 
 var (
-	topic string
+	topic  string
+	broker string
 )
 
 func init() {
 	flag.StringVar(&topic, "topic", "/", "MQTT Topic name")
+	flag.StringVar(&broker, "broker", "localhost:8089", "MQTT Broker port. Defaults to localhost:8089")
 
 }
 
 func main() {
 	flag.Parse()
+
+	fmt.Println(os.Args)
 	// Create an MQTT Client.
 	cli := client.New(&client.Options{
 		ErrorHandler: func(err error) {
@@ -34,13 +39,12 @@ func main() {
 	// Terminate the Client.
 	defer cli.Terminate()
 
-	// Read the certificate file.
-	b, err := ioutil.ReadFile("../mqtt-bridge/server.crt")
+	b, err := ioutil.ReadFile("hack/server.crt")
 	if err != nil {
 		panic(err)
 	}
 
-	kp, err := tls.LoadX509KeyPair("../mqtt-bridge/server.crt", "../mqtt-bridge/server.key")
+	kp, err := tls.LoadX509KeyPair("hack/server.crt", "hack/server.key")
 	if err != nil {
 		log.Println(err)
 		return
@@ -62,7 +66,7 @@ func main() {
 		ClientID: []byte("test"),
 		Network:  "tcp",
 		// Address is the address which the Client connects to.
-		Address: "localhost:8088",
+		Address: broker,
 		// TLSConfig is the configuration for the TLS connection.
 		// If this property is not nil, the Client tries to use TLS
 		// for the connection.
@@ -72,7 +76,7 @@ func main() {
 		panic(err)
 	}
 
-	cli.Subscribe(&client.SubscribeOptions{
+	err = cli.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{&client.SubReq{
 			Handler: func(topicName, message []byte) {
 				fmt.Println("recv", string(topicName), string(message))
@@ -81,6 +85,9 @@ func main() {
 			QoS:         byte(0),
 		}},
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	time.Sleep(time.Second * 100)
 

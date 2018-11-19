@@ -1,6 +1,11 @@
-version: '2'
+version: '2.2'
 
 tasks:
+  debug-mqtt-send:
+    env:
+      PORT: 8089
+    cmds:
+      - go run hack/mqtt_testclients/produce/produce.go -broker localhost:$PORT
   lint:
     cmds:
       - golangci-lint run
