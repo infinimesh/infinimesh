@@ -11,7 +11,7 @@ import (
 	"encoding/base64"
 
 	"github.com/google/uuid"
-	"github.com/infinimesh/infinimesh/api"
+	"github.com/infinimesh/infinimesh/pkg/proto/api"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres" // nolint: golint
 	context "golang.org/x/net/context"

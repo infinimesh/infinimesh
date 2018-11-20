@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/infinimesh/infinimesh/api"
+	"github.com/infinimesh/infinimesh/pkg/proto/api"
 	"github.com/infinimesh/infinimesh/pkg/registry"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"

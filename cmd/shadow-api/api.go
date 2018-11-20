@@ -1,15 +1,21 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/Shopify/sarama"
+	"github.com/infinimesh/infinimesh/pkg/proto/api"
 	"github.com/julienschmidt/httprouter"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -87,12 +93,33 @@ func main() {
 		}(partition)
 	}
 
+	go func() {
+		lis, err := net.Listen("tcp", ":8096")
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		srv := grpc.NewServer()
+		serverHandler := &Server{}
+		api.RegisterShadowServer(srv, serverHandler)
+		reflection.Register(srv)
+		if err := srv.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
 	r := httprouter.New()
 	r.HandlerFunc("GET", "/:id", handler)
-	err = http.ListenAndServe(":8085", r)
+	err = http.ListenAndServe(":8084", r)
 	if err != nil {
 		panic(err)
 	}
+}
+
+type Server struct{}
+
+func (s *Server) GetReported(context.Context, *api.GetReportedRequest) (*api.GetReportedResponse, error) {
+	return &api.GetReportedResponse{}, nil
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

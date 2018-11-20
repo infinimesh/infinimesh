@@ -18,7 +18,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/infinimesh/infinimesh/api"
+	"github.com/infinimesh/infinimesh/pkg/proto/api"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
