@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package infinimesh.api;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "api";
+
+message GetReportedRequest {
+  string device_id = 1;
+}
+
+message GetReportedResponse{
+  google.protobuf.Value state = 1;
+}
+
+service Shadow {
+  rpc GetReported(GetReportedRequest) returns (GetReportedResponse);
+}
