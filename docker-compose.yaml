@@ -22,8 +22,6 @@ services:
     image: postgres:11-alpine
     ports:
       - "5432:5432"
-    volumes:
-    - $PWD/hack/ddl_device_registry.sql:/docker-entrypoint-initdb.d/ddl_device_registry.sql
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
@@ -44,7 +42,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DB_ADDR=postgresql://postgres@postgres:5432/test?sslmode=disable
+      - DB_ADDR=postgresql://postgres@postgres:5432/postgres?sslmode=disable
     restart: unless-stopped
   shadow-delta-merger:
     image: quay.io/infinimesh/shadow-delta-merger:latest
