@@ -2,6 +2,7 @@ package registry
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"crypto/sha256"
@@ -90,7 +91,7 @@ func (s *Server) Create(ctx context.Context, request *api.CreateRequest) (*api.C
 		CertificateType:        request.Certificate.Algorithm,
 		CertificateFingerprint: fp,
 	}).Error; err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Failed to create device")
+		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
 	}
 	return &api.CreateResponse{
 		Fingerprint: fp,
