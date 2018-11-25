@@ -17,6 +17,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
@@ -300,14 +301,8 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 	return nil
 }
 
-type MQTTBridgeData struct {
-	SourceTopic  string
-	SourceDevice string
-	Data         []byte
-}
-
 func publishTelemetry(topic string, data []byte, deviceID string) error {
-	message := MQTTBridgeData{
+	message := mqtt.MQTTBridgeData{
 		SourceTopic:  topic,
 		SourceDevice: deviceID,
 		Data:         data,

@@ -122,13 +122,6 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-// Topic infinimesh.bridge.incoming.raw
-type MQTTBridgeData struct {
-	SourceTopic  string
-	SourceDevice string
-	Data         []byte
-}
-
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	h.m.Lock()
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
