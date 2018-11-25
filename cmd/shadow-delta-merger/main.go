@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/shadow"
+	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/spf13/viper"
 )
 
