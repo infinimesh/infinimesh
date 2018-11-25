@@ -23,7 +23,6 @@ services:
     command: start --insecure
     ports:
       - "8093:8080"
-      - "26257:26257"
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
