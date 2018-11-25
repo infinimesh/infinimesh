@@ -122,33 +122,6 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func consumeBatch(c <-chan *sarama.ConsumerMessage, buf []*sarama.ConsumerMessage) (n int, ok bool) {
-	item, ok := <-c
-	if !ok {
-		return 0, false
-	}
-	buf[0] = item
-
-	i := 0
-
-inner:
-	for i = 1; i < len(buf); i++ {
-		select {
-
-		case item, ok := <-c:
-			if !ok {
-				return i, false
-			}
-			buf[i] = item
-		default:
-			break inner
-		}
-	}
-
-	return i, true
-
-}
-
 // Topic infinimesh.bridge.incoming.raw
 type MQTTBridgeData struct {
 	SourceTopic  string
@@ -175,6 +148,10 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		old := string(deviceState.State)
 
 		newState, err := applyDelta(old, delta)
+		if err != nil {
+			fmt.Println("Failed to apply new delta", err)
+			continue
+		}
 
 		if newState == old {
 			fmt.Println("No change, skip")
