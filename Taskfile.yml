@@ -35,8 +35,9 @@ tasks:
         cd ./Dockerfiles
         for f in *; do
           echo docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root
-          docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root
+          docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root &
         done
+        wait
   default:
     cmds:
       - task: build
