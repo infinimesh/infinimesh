@@ -6,13 +6,12 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+
 	"io"
 	"log"
 	"net"
 
 	"crypto/sha256"
-
-	"strings"
 
 	"encoding/json"
 
@@ -32,7 +31,7 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		// Request information about a potential device with this fingerprint
 		reply, err := client.GetByFingerprint(context.Background(), &api.GetByFingerprintRequest{Fingerprint: digest})
 		if err != nil {
-			fmt.Printf("Failed to find device for fingerprint")
+			fmt.Printf("Failed to find device for fingerprint: %v\n", err)
 			continue
 		}
 
@@ -60,6 +59,8 @@ var (
 	kafkaHost             string
 	kafkaTopicTelemetry   string
 	kafkaTopicBackChannel string
+
+	ps *pubsub.PubSub
 )
 
 type Message struct {
@@ -108,8 +109,6 @@ func readBackchannelFromKafka() {
 		}
 	}
 }
-
-var ps *pubsub.PubSub
 
 func main() {
 	serverCert, err := tls.LoadX509KeyPair("server.crt", "server.key")
@@ -178,24 +177,11 @@ func main() {
 
 }
 
-var (
-
-// TODO maybe better use a publish/subscribe package for this instead of
-// doing this ourselves
-// mtx               sync.Mutex
-// subscribedClients map[string]map[string]chan *msg
-)
-
-func init() {
-	// subscribedClients = make(map[string]map[string]chan *msg)
-}
-
-// TODO need context struct for connection; context struct has []subscription-channels, select from those?
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}) {
+	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
-
-		// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 		m := message.(*Message)
+		// TODO PacketID
 		p := packet.NewPublish(m.Topic /* TODO */, uint16(0), m.Data)
 		_, err := p.WriteTo(c)
 		if err != nil {
@@ -321,30 +307,6 @@ type MQTTBridgeData struct {
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string) error {
-	var targetTopic string
-
-	// Current allowed layout:
-	// /devices/%v/... for any telemetry data
-	// /shadows/%v/... for any shadows (json-diffs)
-
-	fmt.Println("Try to send to topic", topic)
-	// Currently, only the exact shadow & telemetry topic of the device is
-	// allowed. Later, this will be dynamic, a device can have multiple
-	// shadows or even write to other device's shadows + telemetry topics
-
-	// TODO specific data types! shadow = text or json only; telemetry is raw binary.
-
-	// Anything below the shadow topic or device topic of the device is allowed
-	if strings.HasPrefix(topic, fmt.Sprintf("/shadows/%v", deviceID)) {
-		targetTopic = "public.delta.reported-state" // shadows
-	} else if strings.HasPrefix(topic, fmt.Sprintf("/devices/%v", deviceID)) {
-		targetTopic = kafkaTopicTelemetry // public.bridge.mqtt - "raw" telemetry
-	} else {
-		// Dead letter queue - we didn't have permission,...
-		targetTopic = "public.bridge.dlq"
-		// TODO maybe write a reason
-	}
-
 	message := MQTTBridgeData{
 		SourceTopic:  topic,
 		SourceDevice: deviceID,
@@ -357,7 +319,7 @@ func publishTelemetry(topic string, data []byte, deviceID string) error {
 	}
 
 	producer.Input() <- &sarama.ProducerMessage{
-		Topic: targetTopic,
+		Topic: kafkaTopicTelemetry,
 		Key:   sarama.StringEncoder(deviceID), // TODO
 		Value: sarama.ByteEncoder(serialized),
 	}

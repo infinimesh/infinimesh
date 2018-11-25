@@ -1,5 +1,7 @@
 # github.com/Shopify/sarama v1.19.0
 github.com/Shopify/sarama
+# github.com/armon/go-radix v1.0.0
+github.com/armon/go-radix
 # github.com/cskr/pubsub v1.0.1
 github.com/cskr/pubsub
 # github.com/davecgh/go-spew v1.1.1
@@ -75,8 +77,8 @@ github.com/spf13/pflag
 # github.com/spf13/viper v1.2.1
 github.com/spf13/viper
 # github.com/stretchr/testify v1.2.2
-github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+github.com/stretchr/testify/assert
 # github.com/yosssi/gmq v0.0.1
 github.com/yosssi/gmq/mqtt/client
 github.com/yosssi/gmq/mqtt

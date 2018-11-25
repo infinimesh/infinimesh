@@ -18,10 +18,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  postgres:
-    image: postgres:11-alpine
+  database:
+    image: cockroachdb/cockroach:latest
+    command: start --insecure
     ports:
-      - "5432:5432"
+      - "8093:8080"
+      - "26257:26257"
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
@@ -35,14 +37,21 @@ services:
     depends_on:
       - kafka
     restart: unless-stopped
+  telemetry-router:
+    image: quay.io/infinimesh/telemetry-router:latest
+    environment:
+      - KAFKA_HOST=kafka:29092
+    depends_on:
+      - kafka
+    restart: unless-stopped
   device-registry:
     image: quay.io/infinimesh/device-registry:latest
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - database
     environment:
-      - DB_ADDR=postgresql://postgres@postgres:5432/postgres?sslmode=disable
+      - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
     restart: unless-stopped
   shadow-delta-merger:
     image: quay.io/infinimesh/shadow-delta-merger:latest
