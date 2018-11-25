@@ -6,11 +6,13 @@ import (
 	"github.com/imdario/mergo"
 )
 
-func applyDelta(full, delta string) (string, error) {
+func applyDelta(full, delta string) (merged string, err error) {
 	fullMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(full), &fullMap)
-	if err != nil {
-		return "", err
+	if full != "" {
+		err := json.Unmarshal([]byte(full), &fullMap)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	deltaMap := make(map[string]interface{})

@@ -6,7 +6,15 @@ import (
 	"encoding/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestMergeEmptyString(t *testing.T) {
+	old := ""
+	merged, err := applyDelta(old, `{"abc" : 13}`)
+	require.NoError(t, err)
+	require.Equal(t, `{"abc":13}`, merged)
+}
 
 func TestMerge(t *testing.T) {
 	state := `
