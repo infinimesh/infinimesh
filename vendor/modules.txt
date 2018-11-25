@@ -24,7 +24,7 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
 github.com/golang/snappy
-# github.com/google/uuid v1.0.0
+# github.com/google/uuid v1.1.0
 github.com/google/uuid
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
@@ -83,7 +83,7 @@ github.com/stretchr/testify/assert
 github.com/yosssi/gmq/mqtt/client
 github.com/yosssi/gmq/mqtt
 github.com/yosssi/gmq/mqtt/packet
-# golang.org/x/net v0.0.0-20181101160248-e11730110bbd
+# golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
 golang.org/x/net/context
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
