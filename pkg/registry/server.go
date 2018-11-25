@@ -1,21 +1,18 @@
 package registry
 
 import (
+	"context"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"log"
 
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
-
-	"encoding/base64"
-
 	"github.com/google/uuid"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres" // nolint: golint
-	context "golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

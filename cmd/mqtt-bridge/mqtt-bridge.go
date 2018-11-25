@@ -2,18 +2,15 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
-
 	"io"
 	"log"
 	"net"
-
-	"crypto/sha256"
-
-	"encoding/json"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"

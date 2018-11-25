@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"os"
 	"os/signal"
 	"syscall"
 
-	sarama "github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/Shopify/sarama"
+	"github.com/infinimesh/shadow"
 	"github.com/spf13/viper"
 )
 
