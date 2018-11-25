@@ -53,10 +53,11 @@ func main() {
 	}()
 
 	pconfig := sarama.NewConfig()
-	pconfig.Producer.Return.Successes = true
 	pconfig.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	pconfig.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 	pconfig.Producer.Partitioner = sarama.NewManualPartitioner
+	pconfig.Producer.Return.Errors = false
+	pconfig.Producer.Return.Successes = false
 	pconfig.Version = sarama.V1_1_0_0
 
 	producerClient, err := sarama.NewClient([]string{broker}, pconfig)
@@ -68,7 +69,8 @@ func main() {
 	config.Version = sarama.V1_0_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	config.Producer.Return.Successes = true
+	pconfig.Producer.Return.Errors = false
+	pconfig.Producer.Return.Successes = false
 	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 

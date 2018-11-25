@@ -2,6 +2,7 @@ package shadow
 
 import (
 	"fmt"
+	"sync"
 
 	"time"
 
@@ -10,20 +11,25 @@ import (
 	sarama "github.com/Shopify/sarama"
 )
 
+type DeviceState struct {
+	Version int64
+	State   json.RawMessage
+}
+
 type StateMerger struct {
 	SourceTopic    string
 	ChangelogTopic string
 
-	localState           map[string]string // device id to state string
-	localStateMaxOffsets map[int32]int64
+	m           sync.Mutex
+	localStates map[int32]map[string]*DeviceState // device id to state string
 
 	ChangelogConsumerClient sarama.Client
 	ChangelogProducerClient sarama.Client
 
-	changelogProducer sarama.SyncProducer
+	changelogProducer sarama.AsyncProducer
 }
 
-func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) (localState map[string]string, offsets map[int32]int64, err error) {
+func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) (localStates map[int32]map[string]*DeviceState, offsets map[int32]int64, err error) {
 	consumer, err := sarama.NewConsumerFromClient(client)
 	if err != nil {
 		return nil, nil, err
@@ -32,10 +38,11 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		go consumer.Close()
 	}()
 
-	localState = make(map[string]string)
+	localStates = make(map[int32]map[string]*DeviceState)
 
 	offsets = make(map[int32]int64)
 	for _, partition := range partitions {
+		localStates[partition] = make(map[string]*DeviceState)
 		offsets[partition] = 0
 		pc, err := consumer.ConsumePartition(c.ChangelogTopic, partition, int64(0))
 		if err != nil {
@@ -53,7 +60,14 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		}
 
 		for item := range pc.Messages() {
-			localState[string(item.Key)] = string(item.Value)
+			var st DeviceState
+
+			err := json.Unmarshal(item.Value, &st)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			localStates[partition][string(item.Key)] = &st
 
 			if item.Offset == pc.HighWaterMarkOffset()-1 {
 				break
@@ -65,10 +79,13 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 }
 
 func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
+	fmt.Println("Work with topic", c.SourceTopic)
 	fmt.Println("Rebalance, assigned partitions:", s.Claims())
-	c.localState = make(map[string]string)
+	c.localStates = make(map[int32]map[string]*DeviceState)
 
-	producer, err := sarama.NewSyncProducerFromClient(c.ChangelogProducerClient)
+	//TODO enforce co-partitioning
+
+	producer, err := sarama.NewAsyncProducerFromClient(c.ChangelogProducerClient)
 	if err != nil {
 		return err
 	}
@@ -81,16 +98,16 @@ func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	}
 
 	start := time.Now()
-	localState, offsets, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
+	localStates, _, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
 	if err != nil {
 		return err
 	}
 
-	c.localState = localState
-	c.localStateMaxOffsets = offsets
+	c.localStates = localStates
+	// c.localStateMaxOffsets = offsets
 
-	fmt.Printf("Restored local state: %v shadows in %v seconds.\n", len(localState), time.Since(start).Seconds())
-	fmt.Println(localState)
+	fmt.Printf("Restored local state: %v shadows in %v seconds.\n", len(localStates), time.Since(start).Seconds())
+	fmt.Println(localStates)
 	return nil
 }
 func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
@@ -98,8 +115,8 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 
 	h.changelogProducer.Close()
 	h.changelogProducer = nil
-	h.localStateMaxOffsets = nil
-	h.localState = nil
+	// h.localStateMaxOffsets = nil
+	h.localStates = nil
 
 	fmt.Println("return")
 	return nil
@@ -132,79 +149,53 @@ inner:
 
 }
 
+// Topic infinimesh.bridge.incoming.raw
 type MQTTBridgeData struct {
 	SourceTopic  string
 	SourceDevice string
 	Data         []byte
 }
 
-func (h *StateMerger) processMessage(msg *sarama.ConsumerMessage) {
-
-	data := MQTTBridgeData{}
-	err := json.Unmarshal(msg.Value, &data)
-	if err != nil {
-		fmt.Printf("Failed to unmarshal message, err=%v", err)
-	}
-
-	value := data.Data
-
-	localState, ok := h.localState[string(msg.Key)]
-	if !ok {
-		fmt.Println("Didn't find local state. assuming {}")
-		localState = "{}"
-	}
-
-	newState, err := applyDelta(localState, string(value))
-	if err != nil {
-		fmt.Println("Failed to apply delta, ignoring msg")
-		return
-	}
-
-	if newState == localState {
-		return
-	}
-
-	h.localState[string(msg.Key)] = newState
-
-	// TODO Model checks would happen here
-
-	_, _, err = h.changelogProducer.SendMessage(&sarama.ProducerMessage{
-		Topic:     h.ChangelogTopic,
-		Key:       sarama.StringEncoder(msg.Key),
-		Value:     sarama.StringEncoder(newState),
-		Partition: msg.Partition, // Always use the same partition number in the target topic as in the source topic
-	})
-	if err != nil {
-		fmt.Println("Failed to send message", err)
-	}
-}
-
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for {
-		batch := make([]*sarama.ConsumerMessage, 100)
-		n, ok := consumeBatch(claim.Messages(), batch)
-		if !ok {
-			break
-		}
-		for _, x := range batch[:n] {
-			h.processMessage(x)
+	h.m.Lock()
+	localState := h.localStates[claim.Partition()] // local state for exactly this partition
+	h.m.Unlock()
+	for message := range claim.Messages() {
+		key := string(message.Key)
 
+		var deviceState *DeviceState
+		if ds, ok := localState[key]; !ok {
+			deviceState = &DeviceState{}
+			localState[key] = deviceState
+		} else {
+			deviceState = ds
 		}
-		if n > 0 {
-			// We mark the message after we wrote them to the local-state log. If the process crashes before the next line,
-			// but after processMessage (or before the marked message offset is communicated to the broker as async). \
-			// After restart the message will be processed again (at least once semantics).
-			sess.MarkMessage(batch[n-1], "")
+
+		delta := string(message.Value)
+		old := string(deviceState.State)
+
+		newState, err := applyDelta(old, delta)
+
+		if newState == old {
+			fmt.Println("No change, skip")
+			continue
 		}
+
+		deviceState.State = json.RawMessage(newState)
+		deviceState.Version++
+
+		stateDocument, err := json.Marshal(deviceState)
+		if err != nil {
+			panic(err)
+		}
+
+		h.changelogProducer.Input() <- &sarama.ProducerMessage{
+			Topic:     h.ChangelogTopic,
+			Key:       sarama.StringEncoder(message.Key),
+			Value:     sarama.StringEncoder(stateDocument),
+			Partition: message.Partition,
+		}
+		sess.MarkMessage(message, "")
 	}
-
-	// for msg := range claim.Messages() {
-	// 	switch msg.Topic {
-	// 	case h.SourceTopic:
-	// 	case h.TopicDesired:
-	// 	}
-	// 	fmt.Printf("Message topic:%q partition:%d offset:%d\n", msg.Topic, msg.Partition, msg.Offset)
-	// 	sess.MarkMessage(msg, "")
-	// }
 	return nil
 }
