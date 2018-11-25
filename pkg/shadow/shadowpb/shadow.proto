@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package infinimesh.api;
+package infinimesh.shadow;
 
 import "google/protobuf/struct.proto";
 
-option go_package = "api";
+option go_package = "shadowpb";
 
 message GetReportedRequest {
   string device_id = 1;

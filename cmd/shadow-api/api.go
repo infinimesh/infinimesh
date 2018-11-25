@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/proto/api"
+	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/julienschmidt/httprouter"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -101,7 +101,7 @@ func main() {
 
 		srv := grpc.NewServer()
 		serverHandler := &Server{}
-		api.RegisterShadowServer(srv, serverHandler)
+		shadowpb.RegisterShadowServer(srv, serverHandler)
 		reflection.Register(srv)
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
@@ -118,8 +118,8 @@ func main() {
 
 type Server struct{}
 
-func (s *Server) GetReported(context.Context, *api.GetReportedRequest) (*api.GetReportedResponse, error) {
-	return &api.GetReportedResponse{}, nil
+func (s *Server) GetReported(context.Context, *shadowpb.GetReportedRequest) (*shadowpb.GetReportedResponse, error) {
+	return &shadowpb.GetReportedResponse{}, nil
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

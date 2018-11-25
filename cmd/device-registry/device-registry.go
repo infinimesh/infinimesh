@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/infinimesh/infinimesh/pkg/proto/api"
 	"github.com/infinimesh/infinimesh/pkg/registry"
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -30,7 +30,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	api.RegisterDevicesServer(s, server)
+	registrypb.RegisterDevicesServer(s, server)
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {

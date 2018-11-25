@@ -12,7 +12,7 @@ import (
 	"encoding/base64"
 
 	"github.com/google/uuid"
-	"github.com/infinimesh/infinimesh/pkg/proto/api"
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres" // nolint: golint
 	context "golang.org/x/net/context"
@@ -61,7 +61,7 @@ func sha256Sum(c []byte) []byte {
 	return s.Sum(nil)
 }
 
-func (s *Server) Create(ctx context.Context, request *api.CreateRequest) (*api.CreateResponse, error) {
+func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
 	if request.Certificate == nil {
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
 	}
@@ -93,17 +93,17 @@ func (s *Server) Create(ctx context.Context, request *api.CreateRequest) (*api.C
 	}).Error; err != nil {
 		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
 	}
-	return &api.CreateResponse{
+	return &registrypb.CreateResponse{
 		Fingerprint: fp,
 	}, nil
 }
 
-func (s *Server) GetByFingerprint(ctx context.Context, request *api.GetByFingerprintRequest) (*api.GetByFingerprintResponse, error) {
+func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetByFingerprintRequest) (*registrypb.GetByFingerprintResponse, error) {
 	device := &Device{}
 	if err := s.db.Take(device, &Device{CertificateFingerprint: request.Fingerprint}).Error; err != nil {
-		return &api.GetByFingerprintResponse{}, status.Error(codes.FailedPrecondition, err.Error())
+		return &registrypb.GetByFingerprintResponse{}, status.Error(codes.FailedPrecondition, err.Error())
 	}
-	return &api.GetByFingerprintResponse{
+	return &registrypb.GetByFingerprintResponse{
 		Name:      device.Name,
 		Namespace: device.Namespace,
 	}, nil
