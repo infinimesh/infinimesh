@@ -15,6 +15,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type Server struct {
