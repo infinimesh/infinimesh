@@ -2,25 +2,31 @@ version: '2.2'
 
 tasks:
   debug-mqtt-send:
+    desc: Send mqtt message to local broker
     env:
       PORT: 8089
     cmds:
       - go run hack/mqtt_testclients/produce/produce.go -broker localhost:$PORT
   proto:
+    desc: Generate protobuf files
     cmds:
       - prototool generate
   lint:
+    desc: Run linter
     cmds:
       - golangci-lint run
   build:
+    desc: Perform full go build of all binaries
     cmds:
       - go install ./...
     env:
       GO111MODULE: on
   test:
+    desc: Run tests
     cmds:
       - go test ./...
   docker:
+    desc: Perform docker build for all Dockerfiles
     silent: true
     cmds:
       - |
