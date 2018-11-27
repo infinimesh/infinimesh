@@ -41,13 +41,13 @@ func TestMerge(t *testing.T) {
 }
 
 func TestMergeNested(t *testing.T) {
-	state := `{"alex_sucks":false}`
+	state := `{"a":false}`
 
-	delta := `{"alex_sucks":{"very_much":true, "bla": 13}}`
+	delta := `{"a":{"very_much":true,"bla":13}}`
 	mutatedState, err := applyDelta(state, delta)
 	assert.NoError(t, err)
 
 	assert.NoError(t, err)
-	assert.EqualValues(t, `{"alex_sucks":{"very_much":true, "bla": 13}}`, mutatedState)
+	assert.EqualValues(t, `{"a":{"bla":13,"very_much":true}}`, mutatedState)
 
 }

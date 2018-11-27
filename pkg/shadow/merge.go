@@ -3,8 +3,17 @@ package shadow
 import (
 	"encoding/json"
 
-	"github.com/imdario/mergo"
+	"github.com/birdayz/conjungo"
 )
+
+func init() {
+	conjungoOpts = conjungo.NewOptions()
+	conjungoOpts.Overwrite = true
+	conjungoOpts.OverwriteDifferentTypes = true
+
+}
+
+var conjungoOpts *conjungo.Options
 
 func applyDelta(full, delta string) (merged string, err error) {
 	fullMap := make(map[string]interface{})
@@ -21,7 +30,7 @@ func applyDelta(full, delta string) (merged string, err error) {
 		return "", err
 	}
 
-	err = mergo.Merge(&fullMap, deltaMap, mergo.WithOverride)
+	err = conjungo.Merge(&fullMap, deltaMap, conjungoOpts)
 	if err != nil {
 		return "", err
 	}
