@@ -39,3 +39,15 @@ func TestMerge(t *testing.T) {
 	assert.EqualValues(t, 15, r["temp_celsius"])
 	assert.EqualValues(t, "20 kmh", r["speed"])
 }
+
+func TestMergeNested(t *testing.T) {
+	state := `{"alex_sucks":false}`
+
+	delta := `{"alex_sucks":{"very_much":true, "bla": 13}}`
+	mutatedState, err := applyDelta(state, delta)
+	assert.NoError(t, err)
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, `{"alex_sucks":{"very_much":true, "bla": 13}}`, mutatedState)
+
+}
