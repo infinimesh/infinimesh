@@ -22,9 +22,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type CreateRequest struct {
+type Device struct {
 	Name                 string       `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Namespace            string       `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	Enabled              bool         `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	Certificate          *Certificate `protobuf:"bytes,4,opt,name=certificate,proto3" json:"certificate,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
@@ -32,11 +31,64 @@ type CreateRequest struct {
 	XXX_sizecache        int32        `json:"-"`
 }
 
+func (m *Device) Reset()         { *m = Device{} }
+func (m *Device) String() string { return proto.CompactTextString(m) }
+func (*Device) ProtoMessage()    {}
+func (*Device) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{0}
+}
+
+func (m *Device) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Device.Unmarshal(m, b)
+}
+func (m *Device) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Device.Marshal(b, m, deterministic)
+}
+func (m *Device) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Device.Merge(m, src)
+}
+func (m *Device) XXX_Size() int {
+	return xxx_messageInfo_Device.Size(m)
+}
+func (m *Device) XXX_DiscardUnknown() {
+	xxx_messageInfo_Device.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Device proto.InternalMessageInfo
+
+func (m *Device) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Device) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+func (m *Device) GetCertificate() *Certificate {
+	if m != nil {
+		return m.Certificate
+	}
+	return nil
+}
+
+type CreateRequest struct {
+	Device               *Device  `protobuf:"bytes,1,opt,name=device,proto3" json:"device,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
 func (m *CreateRequest) Reset()         { *m = CreateRequest{} }
 func (m *CreateRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateRequest) ProtoMessage()    {}
 func (*CreateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ff97fec4b2fb717, []int{0}
+	return fileDescriptor_4ff97fec4b2fb717, []int{1}
 }
 
 func (m *CreateRequest) XXX_Unmarshal(b []byte) error {
@@ -57,30 +109,9 @@ func (m *CreateRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateRequest proto.InternalMessageInfo
 
-func (m *CreateRequest) GetName() string {
+func (m *CreateRequest) GetDevice() *Device {
 	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *CreateRequest) GetNamespace() string {
-	if m != nil {
-		return m.Namespace
-	}
-	return ""
-}
-
-func (m *CreateRequest) GetEnabled() bool {
-	if m != nil {
-		return m.Enabled
-	}
-	return false
-}
-
-func (m *CreateRequest) GetCertificate() *Certificate {
-	if m != nil {
-		return m.Certificate
+		return m.Device
 	}
 	return nil
 }
@@ -98,7 +129,7 @@ func (m *Certificate) Reset()         { *m = Certificate{} }
 func (m *Certificate) String() string { return proto.CompactTextString(m) }
 func (*Certificate) ProtoMessage()    {}
 func (*Certificate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ff97fec4b2fb717, []int{1}
+	return fileDescriptor_4ff97fec4b2fb717, []int{2}
 }
 
 func (m *Certificate) XXX_Unmarshal(b []byte) error {
@@ -151,7 +182,7 @@ func (m *CreateResponse) Reset()         { *m = CreateResponse{} }
 func (m *CreateResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateResponse) ProtoMessage()    {}
 func (*CreateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ff97fec4b2fb717, []int{2}
+	return fileDescriptor_4ff97fec4b2fb717, []int{3}
 }
 
 func (m *CreateResponse) XXX_Unmarshal(b []byte) error {
@@ -190,7 +221,7 @@ func (m *GetByFingerprintRequest) Reset()         { *m = GetByFingerprintRequest
 func (m *GetByFingerprintRequest) String() string { return proto.CompactTextString(m) }
 func (*GetByFingerprintRequest) ProtoMessage()    {}
 func (*GetByFingerprintRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ff97fec4b2fb717, []int{3}
+	return fileDescriptor_4ff97fec4b2fb717, []int{4}
 }
 
 func (m *GetByFingerprintRequest) XXX_Unmarshal(b []byte) error {
@@ -230,7 +261,7 @@ func (m *GetByFingerprintResponse) Reset()         { *m = GetByFingerprintRespon
 func (m *GetByFingerprintResponse) String() string { return proto.CompactTextString(m) }
 func (*GetByFingerprintResponse) ProtoMessage()    {}
 func (*GetByFingerprintResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4ff97fec4b2fb717, []int{4}
+	return fileDescriptor_4ff97fec4b2fb717, []int{5}
 }
 
 func (m *GetByFingerprintResponse) XXX_Unmarshal(b []byte) error {
@@ -265,12 +296,245 @@ func (m *GetByFingerprintResponse) GetNamespace() string {
 	return ""
 }
 
+type GetByNameRequest struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetByNameRequest) Reset()         { *m = GetByNameRequest{} }
+func (m *GetByNameRequest) String() string { return proto.CompactTextString(m) }
+func (*GetByNameRequest) ProtoMessage()    {}
+func (*GetByNameRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{6}
+}
+
+func (m *GetByNameRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetByNameRequest.Unmarshal(m, b)
+}
+func (m *GetByNameRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetByNameRequest.Marshal(b, m, deterministic)
+}
+func (m *GetByNameRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetByNameRequest.Merge(m, src)
+}
+func (m *GetByNameRequest) XXX_Size() int {
+	return xxx_messageInfo_GetByNameRequest.Size(m)
+}
+func (m *GetByNameRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetByNameRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetByNameRequest proto.InternalMessageInfo
+
+func (m *GetByNameRequest) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+type GetByNameResponse struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Enabled              bool     `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetByNameResponse) Reset()         { *m = GetByNameResponse{} }
+func (m *GetByNameResponse) String() string { return proto.CompactTextString(m) }
+func (*GetByNameResponse) ProtoMessage()    {}
+func (*GetByNameResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{7}
+}
+
+func (m *GetByNameResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetByNameResponse.Unmarshal(m, b)
+}
+func (m *GetByNameResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetByNameResponse.Marshal(b, m, deterministic)
+}
+func (m *GetByNameResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetByNameResponse.Merge(m, src)
+}
+func (m *GetByNameResponse) XXX_Size() int {
+	return xxx_messageInfo_GetByNameResponse.Size(m)
+}
+func (m *GetByNameResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetByNameResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetByNameResponse proto.InternalMessageInfo
+
+func (m *GetByNameResponse) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *GetByNameResponse) GetEnabled() bool {
+	if m != nil {
+		return m.Enabled
+	}
+	return false
+}
+
+type ListDevicesRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListDevicesRequest) Reset()         { *m = ListDevicesRequest{} }
+func (m *ListDevicesRequest) String() string { return proto.CompactTextString(m) }
+func (*ListDevicesRequest) ProtoMessage()    {}
+func (*ListDevicesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{8}
+}
+
+func (m *ListDevicesRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListDevicesRequest.Unmarshal(m, b)
+}
+func (m *ListDevicesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListDevicesRequest.Marshal(b, m, deterministic)
+}
+func (m *ListDevicesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListDevicesRequest.Merge(m, src)
+}
+func (m *ListDevicesRequest) XXX_Size() int {
+	return xxx_messageInfo_ListDevicesRequest.Size(m)
+}
+func (m *ListDevicesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListDevicesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListDevicesRequest proto.InternalMessageInfo
+
+type ListResponse struct {
+	Devices              []*Device `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *ListResponse) Reset()         { *m = ListResponse{} }
+func (m *ListResponse) String() string { return proto.CompactTextString(m) }
+func (*ListResponse) ProtoMessage()    {}
+func (*ListResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{9}
+}
+
+func (m *ListResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListResponse.Unmarshal(m, b)
+}
+func (m *ListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListResponse.Marshal(b, m, deterministic)
+}
+func (m *ListResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListResponse.Merge(m, src)
+}
+func (m *ListResponse) XXX_Size() int {
+	return xxx_messageInfo_ListResponse.Size(m)
+}
+func (m *ListResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListResponse proto.InternalMessageInfo
+
+func (m *ListResponse) GetDevices() []*Device {
+	if m != nil {
+		return m.Devices
+	}
+	return nil
+}
+
+type DeleteRequest struct {
+	DeviceName           string   `protobuf:"bytes,1,opt,name=device_name,json=deviceName,proto3" json:"device_name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteRequest) Reset()         { *m = DeleteRequest{} }
+func (m *DeleteRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteRequest) ProtoMessage()    {}
+func (*DeleteRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{10}
+}
+
+func (m *DeleteRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteRequest.Unmarshal(m, b)
+}
+func (m *DeleteRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteRequest.Merge(m, src)
+}
+func (m *DeleteRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteRequest.Size(m)
+}
+func (m *DeleteRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteRequest proto.InternalMessageInfo
+
+func (m *DeleteRequest) GetDeviceName() string {
+	if m != nil {
+		return m.DeviceName
+	}
+	return ""
+}
+
+type DeleteResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteResponse) Reset()         { *m = DeleteResponse{} }
+func (m *DeleteResponse) String() string { return proto.CompactTextString(m) }
+func (*DeleteResponse) ProtoMessage()    {}
+func (*DeleteResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4ff97fec4b2fb717, []int{11}
+}
+
+func (m *DeleteResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteResponse.Unmarshal(m, b)
+}
+func (m *DeleteResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteResponse.Marshal(b, m, deterministic)
+}
+func (m *DeleteResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteResponse.Merge(m, src)
+}
+func (m *DeleteResponse) XXX_Size() int {
+	return xxx_messageInfo_DeleteResponse.Size(m)
+}
+func (m *DeleteResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteResponse proto.InternalMessageInfo
+
 func init() {
+	proto.RegisterType((*Device)(nil), "infinimesh.deviceregistry.Device")
 	proto.RegisterType((*CreateRequest)(nil), "infinimesh.deviceregistry.CreateRequest")
 	proto.RegisterType((*Certificate)(nil), "infinimesh.deviceregistry.Certificate")
 	proto.RegisterType((*CreateResponse)(nil), "infinimesh.deviceregistry.CreateResponse")
 	proto.RegisterType((*GetByFingerprintRequest)(nil), "infinimesh.deviceregistry.GetByFingerprintRequest")
 	proto.RegisterType((*GetByFingerprintResponse)(nil), "infinimesh.deviceregistry.GetByFingerprintResponse")
+	proto.RegisterType((*GetByNameRequest)(nil), "infinimesh.deviceregistry.GetByNameRequest")
+	proto.RegisterType((*GetByNameResponse)(nil), "infinimesh.deviceregistry.GetByNameResponse")
+	proto.RegisterType((*ListDevicesRequest)(nil), "infinimesh.deviceregistry.ListDevicesRequest")
+	proto.RegisterType((*ListResponse)(nil), "infinimesh.deviceregistry.ListResponse")
+	proto.RegisterType((*DeleteRequest)(nil), "infinimesh.deviceregistry.DeleteRequest")
+	proto.RegisterType((*DeleteResponse)(nil), "infinimesh.deviceregistry.DeleteResponse")
 }
 
 func init() {
@@ -278,29 +542,39 @@ func init() {
 }
 
 var fileDescriptor_4ff97fec4b2fb717 = []byte{
-	// 346 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x52, 0x41, 0x4f, 0xf2, 0x40,
-	0x10, 0x4d, 0xbf, 0x8f, 0x50, 0x98, 0xa2, 0x31, 0x7b, 0xb1, 0x10, 0x0f, 0x4d, 0x0f, 0xa6, 0x1e,
-	0x2c, 0x49, 0x39, 0x7a, 0x03, 0xa2, 0x1e, 0x3c, 0x35, 0x9e, 0x4c, 0x0c, 0x59, 0xda, 0xa1, 0x6c,
-	0xa4, 0xdb, 0x75, 0x77, 0x25, 0x21, 0xfe, 0x1e, 0x7f, 0x9a, 0xff, 0xc3, 0xb0, 0x50, 0xda, 0x68,
-	0x40, 0x39, 0x75, 0xe7, 0xcd, 0x7b, 0x99, 0xd7, 0x37, 0x03, 0xd7, 0xe2, 0x25, 0xeb, 0x4b, 0xcc,
-	0x98, 0xd2, 0x72, 0xb5, 0x7b, 0x88, 0x69, 0x3f, 0xc5, 0x25, 0x4b, 0x70, 0x52, 0x22, 0xa1, 0x90,
-	0x85, 0x2e, 0x48, 0x97, 0xf1, 0x19, 0xe3, 0x2c, 0x47, 0x35, 0x0f, 0x37, 0x8c, 0x92, 0xe0, 0x7f,
-	0x58, 0x70, 0x32, 0x92, 0x48, 0x35, 0xc6, 0xf8, 0xfa, 0x86, 0x4a, 0x13, 0x02, 0x0d, 0x4e, 0x73,
-	0x74, 0x2d, 0xcf, 0x0a, 0xda, 0xb1, 0x79, 0x93, 0x0b, 0x68, 0xaf, 0xbf, 0x4a, 0xd0, 0x04, 0xdd,
-	0x7f, 0xa6, 0x51, 0x01, 0xc4, 0x05, 0x1b, 0x39, 0x9d, 0x2e, 0x30, 0x75, 0xff, 0x7b, 0x56, 0xd0,
-	0x8a, 0xcb, 0x92, 0xdc, 0x83, 0x93, 0xa0, 0xd4, 0x6c, 0xc6, 0x12, 0xaa, 0xd1, 0x6d, 0x78, 0x56,
-	0xe0, 0x44, 0x97, 0xe1, 0x5e, 0x3b, 0xe1, 0xa8, 0x62, 0xc7, 0x75, 0xa9, 0x4f, 0xc1, 0xa9, 0xf5,
-	0x48, 0x17, 0x5a, 0x02, 0xf3, 0x49, 0x4a, 0x35, 0xdd, 0x1a, 0xb5, 0x05, 0xe6, 0x63, 0xaa, 0xe9,
-	0xda, 0x2b, 0x5d, 0x64, 0x85, 0x64, 0x7a, 0x9e, 0x97, 0x5e, 0x77, 0xc0, 0x5a, 0xb8, 0xa4, 0x0b,
-	0x96, 0x4e, 0x74, 0x61, 0xcc, 0x36, 0x62, 0xdb, 0xd4, 0x8f, 0x85, 0x1f, 0xc1, 0x69, 0x99, 0x84,
-	0x12, 0x05, 0x57, 0x48, 0x3c, 0x70, 0x66, 0x8c, 0x67, 0x28, 0x85, 0x64, 0x5c, 0x9b, 0x41, 0x9d,
-	0xb8, 0x0e, 0xf9, 0x37, 0x70, 0x7e, 0x87, 0x7a, 0xb8, 0xba, 0xad, 0xb0, 0x32, 0xc7, 0xdf, 0xc5,
-	0x0f, 0xe0, 0xfe, 0x14, 0x6f, 0x47, 0x1f, 0xbd, 0x85, 0xe8, 0xd3, 0x02, 0x7b, 0x6c, 0xd2, 0x54,
-	0xe4, 0x19, 0x9a, 0x9b, 0x5f, 0x21, 0xc1, 0xa1, 0xb0, 0xeb, 0x7b, 0xef, 0x5d, 0xfd, 0x81, 0xb9,
-	0x35, 0xf7, 0x0e, 0x67, 0xdf, 0x8d, 0x93, 0xe8, 0x80, 0x7c, 0x4f, 0x44, 0xbd, 0xc1, 0x51, 0x9a,
-	0xcd, 0xf0, 0x61, 0xe7, 0x09, 0xaa, 0x83, 0x9f, 0x36, 0xcd, 0x85, 0x0f, 0xbe, 0x02, 0x00, 0x00,
-	0xff, 0xff, 0x80, 0x5a, 0xe9, 0x73, 0x12, 0x03, 0x00, 0x00,
+	// 501 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0x95, 0xa9, 0x15, 0x37, 0xe3, 0xb4, 0x2a, 0x2b, 0x24, 0xdc, 0xa8, 0x12, 0x66, 0x0f, 0x25,
+	0x08, 0x9a, 0x22, 0xf7, 0x84, 0x7a, 0xa2, 0x8d, 0x00, 0x41, 0xc5, 0xc1, 0xe2, 0x84, 0x54, 0xa2,
+	0x4d, 0x32, 0x49, 0x57, 0xc4, 0x1f, 0x78, 0x97, 0x4a, 0x15, 0x17, 0x7e, 0x00, 0x3f, 0x1a, 0x79,
+	0xbd, 0x6b, 0x6f, 0xd5, 0xc4, 0x09, 0xa7, 0xd8, 0x2f, 0xf3, 0xe6, 0xcd, 0xec, 0x7b, 0x5e, 0x38,
+	0xc9, 0x7f, 0x2c, 0x4e, 0x0b, 0x5c, 0x70, 0x21, 0x8b, 0xbb, 0xfa, 0x21, 0x9f, 0x9c, 0xce, 0xf0,
+	0x96, 0x4f, 0x71, 0x6c, 0x90, 0x61, 0x5e, 0x64, 0x32, 0x23, 0x87, 0x3c, 0x9d, 0xf3, 0x94, 0x27,
+	0x28, 0x6e, 0x86, 0x55, 0x85, 0x29, 0xa0, 0x7f, 0x1c, 0xe8, 0x8c, 0x14, 0x44, 0x08, 0xb8, 0x29,
+	0x4b, 0x30, 0x70, 0x42, 0x67, 0xd0, 0x8d, 0xd5, 0x33, 0x09, 0xc0, 0xc3, 0x94, 0x4d, 0x96, 0x38,
+	0x0b, 0x76, 0x42, 0x67, 0xb0, 0x1b, 0x9b, 0x57, 0xf2, 0x11, 0xfc, 0x29, 0x16, 0x92, 0xcf, 0xf9,
+	0x94, 0x49, 0x0c, 0xdc, 0xd0, 0x19, 0xf8, 0xd1, 0xf1, 0x70, 0xad, 0xd2, 0xf0, 0xb2, 0xa9, 0x8e,
+	0x6d, 0x2a, 0xfd, 0x04, 0x7b, 0x97, 0x05, 0x96, 0x30, 0xfe, 0xfc, 0x85, 0x42, 0x92, 0xb7, 0xd0,
+	0xa9, 0xb8, 0x6a, 0x14, 0x3f, 0x7a, 0xde, 0xd2, 0xb5, 0x9a, 0x3d, 0xd6, 0x04, 0xca, 0xc0, 0xb7,
+	0x74, 0xc8, 0x21, 0xec, 0xe6, 0x98, 0x8c, 0x67, 0x4c, 0x32, 0xbd, 0x96, 0x97, 0x63, 0x32, 0x62,
+	0x92, 0x91, 0x23, 0xe8, 0xb2, 0xe5, 0x22, 0x2b, 0xb8, 0xbc, 0x49, 0x82, 0x47, 0xea, 0xbf, 0x06,
+	0x28, 0x89, 0xb7, 0x6c, 0xc9, 0x67, 0x63, 0x99, 0xa9, 0xc5, 0xdd, 0xd8, 0x53, 0xef, 0x5f, 0x33,
+	0x1a, 0xc1, 0xbe, 0x19, 0x57, 0xe4, 0x59, 0x2a, 0x90, 0x84, 0xe0, 0xcf, 0x79, 0xba, 0xc0, 0x22,
+	0x2f, 0x78, 0x2a, 0x95, 0x50, 0x2f, 0xb6, 0x21, 0x7a, 0x0e, 0x4f, 0x3f, 0xa0, 0xbc, 0xb8, 0x7b,
+	0xdf, 0x60, 0x66, 0xd9, 0xcd, 0xe4, 0x2b, 0x08, 0x1e, 0x92, 0xb5, 0xf4, 0x2a, 0xcf, 0x8e, 0xa0,
+	0x5b, 0xfe, 0x8a, 0x9c, 0x4d, 0xd1, 0x6c, 0x56, 0x03, 0xf4, 0x18, 0x0e, 0x54, 0xb7, 0x2f, 0x2c,
+	0xa9, 0x0f, 0x7c, 0x45, 0x17, 0xfa, 0x0e, 0x1e, 0x5b, 0x75, 0x2d, 0x72, 0x6b, 0x23, 0x42, 0x9f,
+	0x00, 0xb9, 0xe2, 0x42, 0x56, 0x16, 0x09, 0x2d, 0x46, 0x3f, 0x43, 0xaf, 0x44, 0xeb, 0x9e, 0xe7,
+	0xe0, 0x55, 0xe6, 0x89, 0xc0, 0x09, 0x77, 0xb6, 0xb3, 0xdb, 0x30, 0xe8, 0x1b, 0xd8, 0x1b, 0xe1,
+	0x12, 0x9b, 0xec, 0x3c, 0x03, 0x5f, 0x7f, 0x03, 0xd6, 0xa0, 0x50, 0x41, 0xe5, 0x2a, 0xf4, 0x00,
+	0xf6, 0x0d, 0xa3, 0x1a, 0x20, 0xfa, 0xeb, 0x82, 0xa7, 0x67, 0x24, 0xd7, 0xd0, 0xa9, 0xcc, 0x25,
+	0x83, 0xb6, 0x28, 0xdb, 0x71, 0xed, 0xbf, 0xdc, 0xa2, 0x52, 0xef, 0xfa, 0x5b, 0x1f, 0xbe, 0x65,
+	0x25, 0x89, 0x5a, 0xe8, 0x6b, 0x42, 0xd3, 0x3f, 0xfb, 0x2f, 0x8e, 0x16, 0x9f, 0x43, 0xb7, 0x76,
+	0x94, 0xbc, 0xda, 0xd4, 0xc1, 0xca, 0x47, 0xff, 0xf5, 0x76, 0xc5, 0x5a, 0xe7, 0x3b, 0xb8, 0xa5,
+	0xc1, 0xe4, 0xa4, 0x85, 0xf5, 0x30, 0x17, 0xfd, 0x17, 0x1b, 0xca, 0xeb, 0xfe, 0xd7, 0xe5, 0x8d,
+	0x55, 0x3a, 0xd8, 0xea, 0xd1, 0xbd, 0x58, 0xb4, 0x7a, 0x74, 0x3f, 0x0e, 0x17, 0xbd, 0x6f, 0xd0,
+	0x5c, 0xa8, 0x93, 0x8e, 0xba, 0x41, 0xcf, 0xfe, 0x05, 0x00, 0x00, 0xff, 0xff, 0x4a, 0x7d, 0x5a,
+	0x0a, 0x72, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -317,6 +591,9 @@ const _ = grpc.SupportPackageIsVersion4
 type DevicesClient interface {
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	GetByFingerprint(ctx context.Context, in *GetByFingerprintRequest, opts ...grpc.CallOption) (*GetByFingerprintResponse, error)
+	GetByName(ctx context.Context, in *GetByNameRequest, opts ...grpc.CallOption) (*GetByNameResponse, error)
+	List(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
 type devicesClient struct {
@@ -345,10 +622,40 @@ func (c *devicesClient) GetByFingerprint(ctx context.Context, in *GetByFingerpri
 	return out, nil
 }
 
+func (c *devicesClient) GetByName(ctx context.Context, in *GetByNameRequest, opts ...grpc.CallOption) (*GetByNameResponse, error) {
+	out := new(GetByNameResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.deviceregistry.Devices/GetByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesClient) List(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListResponse, error) {
+	out := new(ListResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.deviceregistry.Devices/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.deviceregistry.Devices/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DevicesServer is the server API for Devices service.
 type DevicesServer interface {
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	GetByFingerprint(context.Context, *GetByFingerprintRequest) (*GetByFingerprintResponse, error)
+	GetByName(context.Context, *GetByNameRequest) (*GetByNameResponse, error)
+	List(context.Context, *ListDevicesRequest) (*ListResponse, error)
+	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 }
 
 func RegisterDevicesServer(s *grpc.Server, srv DevicesServer) {
@@ -391,6 +698,60 @@ func _Devices_GetByFingerprint_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Devices_GetByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServer).GetByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.deviceregistry.Devices/GetByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServer).GetByName(ctx, req.(*GetByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Devices_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDevicesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.deviceregistry.Devices/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServer).List(ctx, req.(*ListDevicesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Devices_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.deviceregistry.Devices/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServer).Delete(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Devices_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "infinimesh.deviceregistry.Devices",
 	HandlerType: (*DevicesServer)(nil),
@@ -402,6 +763,18 @@ var _Devices_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetByFingerprint",
 			Handler:    _Devices_GetByFingerprint_Handler,
+		},
+		{
+			MethodName: "GetByName",
+			Handler:    _Devices_GetByName_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _Devices_List_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _Devices_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

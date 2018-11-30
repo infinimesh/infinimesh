@@ -4,11 +4,14 @@ package infinimesh.deviceregistry;
 
 option go_package = "registrypb";
 
-message CreateRequest {
+message Device {
   string name = 1;
-  string namespace = 2;
   bool enabled = 3;
   Certificate certificate = 4;
+}
+
+message CreateRequest {
+  Device device = 1;
 }
 
 message Certificate {
@@ -30,7 +33,32 @@ message GetByFingerprintResponse {
   string namespace = 2;
 }
 
+message GetByNameRequest {
+  string name = 1;
+}
+
+message GetByNameResponse {
+  string name = 1;
+  bool enabled = 3;
+}
+
+message ListDevicesRequest {}
+
+message ListResponse {
+  repeated Device devices = 1;
+}
+
+message DeleteRequest {
+  string device_name = 1;
+}
+
+message DeleteResponse {}
+
+
 service Devices {
   rpc Create(CreateRequest) returns (CreateResponse);
   rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintResponse);
+  rpc GetByName(GetByNameRequest) returns (GetByNameResponse);
+  rpc List(ListDevicesRequest) returns (ListResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
 }
