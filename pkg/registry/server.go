@@ -61,14 +61,14 @@ func sha256Sum(c []byte) []byte {
 }
 
 func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
-	if request.Certificate == nil {
+	if request.Device.Certificate == nil {
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
 	}
-	st, err := base64.StdEncoding.DecodeString(request.Certificate.PemData)
+	st, err := base64.StdEncoding.DecodeString(request.Device.Certificate.PemData)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, "PEM data is not valid base64")
 	}
-	fp, err := s.getFingerprint(st, request.Certificate.Algorithm)
+	fp, err := s.getFingerprint(st, request.Device.Certificate.Algorithm)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
 	}
@@ -83,11 +83,10 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 
 	if err := s.db.Create(&Device{
 		ID:                     uuidBytes,
-		Namespace:              request.Namespace,
-		Name:                   request.Name,
-		Enabled:                request.Enabled,
+		Name:                   request.Device.Name,
+		Enabled:                request.Device.Enabled,
 		Certificate:            string(st),
-		CertificateType:        request.Certificate.Algorithm,
+		CertificateType:        request.Device.Certificate.Algorithm,
 		CertificateFingerprint: fp,
 	}).Error; err != nil {
 		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
@@ -106,4 +105,14 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 		Name:      device.Name,
 		Namespace: device.Namespace,
 	}, nil
+}
+
+func (s *Server) GetByName(context.Context, *registrypb.GetByNameRequest) (*registrypb.GetByNameResponse, error) {
+	return &registrypb.GetByNameResponse{}, nil
+}
+func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registrypb.ListResponse, error) {
+	return &registrypb.ListResponse{}, nil
+}
+func (s *Server) Delete(context.Context, *registrypb.DeleteRequest) (*registrypb.DeleteResponse, error) {
+	return &registrypb.DeleteResponse{}, nil
 }
