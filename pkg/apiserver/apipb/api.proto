@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package infinimesh.api;
+
+option go_package = "apipb";
+
+import "pkg/registry/registrypb/device_registry.proto";
+
+service Devices {
+  rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse);
+  rpc GetByName(infinimesh.deviceregistry.GetByNameRequest) returns (infinimesh.deviceregistry.GetByNameResponse);
+  rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse);
+  rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse);
+}
