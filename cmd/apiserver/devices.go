@@ -7,19 +7,19 @@ import (
 )
 
 type deviceAPI struct {
+	client registrypb.DevicesClient
 }
 
-func (d *deviceAPI) Create(context.Context, *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
-	return &registrypb.CreateResponse{}, nil
+func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateRequest) (response *registrypb.CreateResponse, err error) {
+	return d.client.Create(ctx, request)
 }
-func (d *deviceAPI) GetByName(context.Context, *registrypb.GetByNameRequest) (*registrypb.GetByNameResponse, error) {
-	return &registrypb.GetByNameResponse{}, nil
+func (d *deviceAPI) GetByName(ctx context.Context, request *registrypb.GetByNameRequest) (response *registrypb.GetByNameResponse, err error) {
+	return d.client.GetByName(ctx, request)
 
 }
-func (d *deviceAPI) List(context.Context, *registrypb.ListDevicesRequest) (*registrypb.ListResponse, error) {
-	return &registrypb.ListResponse{}, nil
-
+func (d *deviceAPI) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	return d.client.List(ctx, request)
 }
-func (d *deviceAPI) Delete(context.Context, *registrypb.DeleteRequest) (*registrypb.DeleteResponse, error) {
-	return &registrypb.DeleteResponse{}, nil
+func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+	return d.client.Delete(ctx, request)
 }
