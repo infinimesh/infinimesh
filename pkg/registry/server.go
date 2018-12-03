@@ -102,8 +102,7 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 		return &registrypb.GetByFingerprintResponse{}, status.Error(codes.FailedPrecondition, err.Error())
 	}
 	return &registrypb.GetByFingerprintResponse{
-		Name:      device.Name,
-		Namespace: device.Namespace,
+		Name: device.Name,
 	}, nil
 }
 

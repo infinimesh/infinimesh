@@ -30,7 +30,6 @@ message GetByFingerprintRequest {
 
 message GetByFingerprintResponse {
   string name = 1;
-  string namespace = 2;
 }
 
 message GetByNameRequest {
