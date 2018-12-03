@@ -1,5 +1,6 @@
 excludes:
   - vendor/
+  - tools/proto
 
 protoc:
   version: 3.6.1
