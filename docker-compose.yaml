@@ -70,7 +70,7 @@ services:
   apiserver:
     image: quay.io/infinimesh/apiserver:latest
     ports:
-      - "8086:8080"
+      - "8080:8080"
     depends_on:
       - device-registry
     restart: unless-stopped
