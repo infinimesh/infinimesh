@@ -5,10 +5,46 @@ package infinimesh.api;
 option go_package = "apipb";
 
 import "pkg/registry/registrypb/device_registry.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+import "google/api/annotations.proto";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  host: "api.infinimesh.io";
+  info: {
+    title: "Infinimesh IoT Platform";
+    description: "Cloud Native IoT Platform";
+    version: "0.0.1";
+    contact: {
+      name: "Infinimesh";
+      url: "http://infinimesh.io";
+      email: "joe@infinimesh.io";
+    };
+  };
+  schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+};
 
 service Devices {
-  rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse);
-  rpc GetByName(infinimesh.deviceregistry.GetByNameRequest) returns (infinimesh.deviceregistry.GetByNameResponse);
-  rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse);
-  rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse);
+  rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse) {
+    option (google.api.http) = {
+      post: "/devices"
+      body: "device"
+    };
+  };
+  rpc GetByName(infinimesh.deviceregistry.GetByNameRequest) returns (infinimesh.deviceregistry.GetByNameResponse) {
+    option (google.api.http) = {
+      get: "/devices/{name}"
+    };
+  };
+  rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse) {
+    option (google.api.http) = {
+      get: "/devices"
+    };
+  }
+  rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
+    option (google.api.http) = {
+      delete: "/devices/{name}"
+    };
+  };
 }

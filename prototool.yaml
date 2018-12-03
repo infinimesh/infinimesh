@@ -3,6 +3,8 @@ excludes:
 
 protoc:
   version: 3.6.1
+  includes:
+    - tools/proto/
 
 lint:
   rules:
@@ -15,6 +17,9 @@ lint:
 generate:
   go_options:
     import_path: "github.com/infinimesh/infinimesh"
+    extra_modifiers:
+      google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
+      google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations
   plugins:
     - name: go
       type: go
