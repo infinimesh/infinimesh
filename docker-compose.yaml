@@ -45,8 +45,6 @@ services:
     restart: unless-stopped
   device-registry:
     image: quay.io/infinimesh/device-registry:latest
-    ports:
-      - "8080:8080"
     depends_on:
       - database
     environment:
