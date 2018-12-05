@@ -130,7 +130,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		if err := h.db.Save(&State{
 			ID:      string(message.Key),
 			Version: state.Version,
-			State:   postgres.Jsonb{state.State},
+			State:   postgres.Jsonb{state.State}, //nolint
 		}).Error; err != nil {
 			fmt.Println("Failed to persist message with offset", message.Offset)
 		}
