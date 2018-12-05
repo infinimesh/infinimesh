@@ -16,7 +16,7 @@ const port = ":8080"
 var dbAddr string
 
 func init() {
-	viper.SetDefault("DB_HOST", "localhost")
+	viper.SetDefault("DB_ADDR", "localhost")
 	viper.AutomaticEnv()
 
 	dbAddr = viper.GetString("DB_ADDR")
