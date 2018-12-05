@@ -11,11 +11,6 @@ import (
 	sarama "github.com/Shopify/sarama"
 )
 
-type DeviceState struct {
-	Version int64
-	State   json.RawMessage
-}
-
 type StateMerger struct {
 	SourceTopic    string
 	ChangelogTopic string
