@@ -68,6 +68,14 @@ services:
       - KAFKA_HOST=kafka:29092
       - KAFKA_TOPIC=private.changelog.reported-state
     restart: unless-stopped
+  shadow-persister:
+    image: quay.io/infinimesh/shadow-persister:latest
+    depends_on:
+      - kafka
+      - database
+    environment:
+      - KAFKA_HOST=kafka:29092
+      - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
   apiserver:
     image: quay.io/infinimesh/apiserver:latest
     ports:
