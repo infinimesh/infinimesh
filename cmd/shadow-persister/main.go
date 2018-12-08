@@ -19,18 +19,20 @@ import (
 )
 
 var (
-	addr        = "postgresql://root@localhost:26257/postgres?sslmode=disable"
-	broker      string
-	sourceTopic = "private.changelog.reported-state"
-	table       = "reported"
+	addr                = "postgresql://root@localhost:26257/postgres?sslmode=disable"
+	broker              string
+	sourceTopicReported = "private.changelog.reported-state"
+	sourceTopicDesired  = "private.changelog.desired-state"
 
 	consumerGroup = "persister"
 )
 
-type State struct {
-	ID      string
-	Version int64
-	State   postgres.Jsonb
+type DeviceState struct {
+	ID              string
+	ReportedVersion int64
+	ReportedState   postgres.Jsonb
+	DesiredVersion  int64
+	DesiredState    postgres.Jsonb
 }
 
 func init() {
@@ -53,8 +55,7 @@ func main() {
 
 	db.LogMode(false)
 	db.SingularTable(true)
-	db.AutoMigrate(&State{})
-	db.Table(table)
+	db.AutoMigrate(&DeviceState{})
 
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -83,7 +84,7 @@ func main() {
 	outer:
 		for {
 
-			err = group.Consume(context.Background(), []string{sourceTopic}, handler)
+			err = group.Consume(context.Background(), []string{sourceTopicDesired, sourceTopicReported}, handler)
 			if err != nil {
 				panic(err)
 			}
@@ -104,7 +105,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
@@ -121,17 +121,26 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 
 		fmt.Println("got msg", string(message.Value))
 
-		var state shadow.DeviceState
-		if err := json.Unmarshal(message.Value, &state); err != nil {
+		var stateFromKafka shadow.DeviceState
+		if err := json.Unmarshal(message.Value, &stateFromKafka); err != nil {
 			fmt.Println("Failed to deserialize message with offset ", message.Offset)
 			continue
 		}
 
-		if err := h.db.Save(&State{
-			ID:      string(message.Key),
-			Version: state.Version,
-			State:   postgres.Jsonb{state.State}, //nolint
-		}).Error; err != nil {
+		var deviceState DeviceState
+
+		deviceState.ID = string(message.Key)
+
+		switch message.Topic {
+		case sourceTopicReported:
+			deviceState.DesiredVersion = stateFromKafka.Version
+			deviceState.DesiredState = postgres.Jsonb{stateFromKafka.State} //nolint
+		case sourceTopicDesired:
+			deviceState.ReportedVersion = stateFromKafka.Version
+			deviceState.ReportedState = postgres.Jsonb{stateFromKafka.State} //nolint
+		}
+
+		if err := h.db.Save(deviceState).Error; err != nil {
 			fmt.Println("Failed to persist message with offset", message.Offset)
 		}
 
