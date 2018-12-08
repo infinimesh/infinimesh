@@ -18,11 +18,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	addr                = "postgresql://root@localhost:26257/postgres?sslmode=disable"
-	broker              string
+const (
 	sourceTopicReported = "private.changelog.reported-state"
 	sourceTopicDesired  = "private.changelog.desired-state"
+)
+
+var (
+	addr   = "postgresql://root@localhost:26257/postgres?sslmode=disable"
+	broker string
 
 	consumerGroup = "persister"
 )
@@ -37,10 +40,10 @@ type DeviceState struct {
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
+	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
 	viper.AutomaticEnv()
-
 	broker = viper.GetString("KAFKA_HOST")
-
+	addr = viper.GetString("DB_ADDR")
 }
 
 type handler struct {
