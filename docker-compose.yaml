@@ -76,6 +76,7 @@ services:
     environment:
       - KAFKA_HOST=kafka:29092
       - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
+    restart: unless-stopped
   apiserver:
     image: quay.io/infinimesh/apiserver:latest
     ports:
