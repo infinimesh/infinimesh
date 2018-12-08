@@ -143,8 +143,8 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			deviceState.ReportedState = postgres.Jsonb{stateFromKafka.State} //nolint
 		}
 
-		if err := h.db.Save(deviceState).Error; err != nil {
-			fmt.Println("Failed to persist message with offset", message.Offset)
+		if err := h.db.Save(&deviceState).Error; err != nil {
+			fmt.Println("Failed to persist message with offset", message.Offset, err)
 		}
 
 		s.MarkMessage(message, "")
