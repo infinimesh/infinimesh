@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
+	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/julienschmidt/httprouter"
 	"github.com/spf13/viper"
@@ -27,6 +27,8 @@ var (
 
 	subMtx      sync.Mutex
 	subscribers = make(map[string]map[chan *DeviceState]bool)
+
+	dbAddr string
 )
 
 type DeviceState json.RawMessage
@@ -34,13 +36,19 @@ type DeviceState json.RawMessage
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "private.changelog.reported-state")
+	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
 	viper.AutomaticEnv()
 
 	broker = viper.GetString("KAFKA_HOST")
 	topic = viper.GetString("KAFKA_TOPIC")
+	dbAddr = viper.GetString("DB_ADDR")
 }
 
 func main() {
+	repo, err := shadow.NewPostgresRepo(dbAddr)
+	if err != nil {
+		panic(err)
+	}
 
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_0_0_0
@@ -66,7 +74,6 @@ func main() {
 			}
 
 			for message := range pc.Messages() {
-				fmt.Println("Got Msg", message.Value)
 				rawMessage := json.RawMessage{}
 				err := json.Unmarshal(message.Value, &rawMessage)
 				if err != nil {
@@ -94,18 +101,20 @@ func main() {
 	}
 
 	go func() {
-		lis, err := net.Listen("tcp", ":8096")
+		lis, err := net.Listen("tcp", ":8097")
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 
 		srv := grpc.NewServer()
-		serverHandler := &Server{}
+		serverHandler := &shadow.Server{Repo: repo}
 		shadowpb.RegisterShadowServer(srv, serverHandler)
 		reflection.Register(srv)
+		fmt.Println("serve")
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
+		fmt.Println("nach serve")
 	}()
 
 	r := httprouter.New()
@@ -114,14 +123,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-type Server struct{}
-
-func (s *Server) GetReported(context.Context, *shadowpb.GetReportedRequest) (*shadowpb.GetReportedResponse, error) {
-	// fetch data
-	// TODO common data access layer for (latest) (rep/des) state
-	return &shadowpb.GetReportedResponse{}, nil
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

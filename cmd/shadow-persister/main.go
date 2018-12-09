@@ -123,7 +123,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			dbErr = h.repo.SetReported(shadow.DeviceState{
 				ID:      string(message.Key),
 				Version: stateFromKafka.Version,
-				State:   string(stateFromKafka.State),
+				State:   stateFromKafka.State,
 			})
 		case sourceTopicDesired:
 		}

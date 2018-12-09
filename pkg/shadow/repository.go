@@ -1,6 +1,8 @@
 package shadow
 
 import (
+	"encoding/json"
+
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -8,7 +10,7 @@ import (
 
 type Repo interface {
 	SetReported(DeviceState) (err error)
-	GetReported() (DeviceState, error)
+	GetReported(id string) (DeviceState, error)
 	// SetDesired(DeviceState)
 	// GetDesired() (DeviceState, error)
 }
@@ -16,7 +18,7 @@ type Repo interface {
 type DeviceState struct {
 	ID      string
 	Version int64
-	State   string
+	State   json.RawMessage
 }
 
 type DeviceStateDB struct {
@@ -50,16 +52,20 @@ func (p *postgresRepo) SetReported(d DeviceState) (err error) {
 	if err := p.db.Save(&DeviceStateDB{
 		ID:              d.ID,
 		ReportedVersion: d.Version,
-		ReportedState:   postgres.Jsonb{[]byte(d.State)}, // nolint
+		ReportedState:   postgres.Jsonb{d.State}, // nolint
 	}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *postgresRepo) GetReported() (d DeviceState, err error) {
-	if err := p.db.First(&DeviceState{}, 10).Error; err != nil {
+func (p *postgresRepo) GetReported(id string) (DeviceState, error) {
+	var d DeviceStateDB
+	if err := p.db.First(&d, "id = ?", id).Error; err != nil {
 		return DeviceState{}, err
 	}
-	return
+	return DeviceState{ID: d.ID,
+		Version: d.ReportedVersion,
+		State:   d.ReportedState.RawMessage,
+	}, nil
 }
