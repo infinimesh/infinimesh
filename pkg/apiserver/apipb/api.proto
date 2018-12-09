@@ -5,6 +5,7 @@ package infinimesh.api;
 option go_package = "apipb";
 
 import "pkg/registry/registrypb/device_registry.proto";
+import "pkg/shadow/shadowpb/shadow.proto";
 import "protoc-gen-swagger/options/annotations.proto";
 import "google/api/annotations.proto";
 
@@ -45,6 +46,14 @@ service Devices {
   rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
       delete: "/devices/{name}"
+    };
+  };
+}
+
+service Shadow {
+  rpc GetReported(infinimesh.shadow.GetReportedRequest) returns (infinimesh.shadow.GetReportedResponse) {
+    option (google.api.http) = {
+      get: "/devices/{device_id}/reported"
     };
   };
 }

@@ -101,7 +101,7 @@ func main() {
 	}
 
 	go func() {
-		lis, err := net.Listen("tcp", ":8097")
+		lis, err := net.Listen("tcp", ":8096")
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
