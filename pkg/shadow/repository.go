@@ -50,7 +50,7 @@ func (p *postgresRepo) SetReported(d DeviceState) (err error) {
 	if err := p.db.Save(&DeviceStateDB{
 		ID:              d.ID,
 		ReportedVersion: d.Version,
-		ReportedState:   postgres.Jsonb{[]byte(d.State)},
+		ReportedState:   postgres.Jsonb{[]byte(d.State)}, // nolint
 	}).Error; err != nil {
 		return err
 	}
