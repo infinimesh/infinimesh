@@ -13,4 +13,4 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 | Shadow | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-delta-merger/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-delta-merger) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-api/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-api) |
 
 ## API Documentation
-You can find swagger docs for the APIServer [here](https://infinimesh.github.io/infinimesh/)
+You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
