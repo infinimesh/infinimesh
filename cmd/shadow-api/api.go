@@ -119,6 +119,8 @@ func main() {
 type Server struct{}
 
 func (s *Server) GetReported(context.Context, *shadowpb.GetReportedRequest) (*shadowpb.GetReportedResponse, error) {
+	// fetch data
+	// TODO common data access layer for (latest) (rep/des) state
 	return &shadowpb.GetReportedResponse{}, nil
 }
 
