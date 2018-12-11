@@ -6,15 +6,24 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 var (
-	addr         = ":8080"
-	registryHost = "device-registry:8080"
-	shadowHost   = "shadow-api:8096"
+	registryHost string
+	shadowHost   string
 )
+
+func init() {
+	viper.SetDefault("REGISTRY_HOST", "device-registry:8080")
+	viper.SetDefault("SHADOW_HOST", "shadow-api:8096")
+	viper.AutomaticEnv()
+
+	registryHost = viper.Get("REGISTRY_HOST")
+	shadowHost = viper.Get("SHADOW_HOST")
+}
 
 func main() {
 	srv := grpc.NewServer()
@@ -33,7 +42,7 @@ func main() {
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient})
 	apipb.RegisterShadowServer(srv, &shadowAPI{client: shadowClient})
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		panic(err)
 	}
