@@ -21,8 +21,8 @@ func init() {
 	viper.SetDefault("SHADOW_HOST", "shadow-api:8096")
 	viper.AutomaticEnv()
 
-	registryHost = viper.Get("REGISTRY_HOST")
-	shadowHost = viper.Get("SHADOW_HOST")
+	registryHost = viper.GetString("REGISTRY_HOST")
+	shadowHost = viper.GetString("SHADOW_HOST")
 }
 
 func main() {

@@ -36,12 +36,12 @@ func run() error {
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := apipb.RegisterDevicesHandlerFromEndpoint(ctx, mux, *apiserverEndpoint, opts)
+	err := apipb.RegisterDevicesHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
 		return err
 	}
 
-	err = apipb.RegisterShadowHandlerFromEndpoint(ctx, mux, *apiserverEndpoint, opts)
+	err = apipb.RegisterShadowHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
 		return err
 	}
