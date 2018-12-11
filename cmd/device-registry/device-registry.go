@@ -16,7 +16,7 @@ const port = ":8080"
 var dbAddr string
 
 func init() {
-	viper.SetDefault("DB_ADDR", "localhost")
+	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
 	viper.AutomaticEnv()
 
 	dbAddr = viper.GetString("DB_ADDR")

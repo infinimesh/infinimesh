@@ -106,12 +106,48 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 	}, nil
 }
 
-func (s *Server) GetByName(context.Context, *registrypb.GetByNameRequest) (*registrypb.GetByNameResponse, error) {
-	return &registrypb.GetByNameResponse{}, nil
+func (s *Server) GetByName(ctx context.Context, request *registrypb.GetByNameRequest) (response *registrypb.GetByNameResponse, err error) {
+	var device Device
+	if err := s.db.First(&device, "name = ?", request.Name).Error; err != nil {
+		return nil, err
+	}
+	return &registrypb.GetByNameResponse{
+		Name:    device.Name,
+		Enabled: false,
+		// TODO
+	}, nil
 }
 func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registrypb.ListResponse, error) {
-	return &registrypb.ListResponse{}, nil
+	var devices []*Device
+	if err := s.db.Find(&devices).Error; err != nil {
+		return nil, err
+	}
+
+	var protoDevices []*registrypb.Device
+	for _, device := range devices {
+		protoDevices = append(protoDevices, toProto(device))
+	}
+
+	return &registrypb.ListResponse{
+		Devices: protoDevices,
+	}, nil
 }
-func (s *Server) Delete(context.Context, *registrypb.DeleteRequest) (*registrypb.DeleteResponse, error) {
+
+func toProto(device *Device) *registrypb.Device {
+	return &registrypb.Device{
+		Name:    device.Name,
+		Enabled: true, // TODO
+		Certificate: &registrypb.Certificate{
+			PemData:   device.Certificate,
+			Algorithm: "",        // TODO
+			ValidTo:   uint64(0), // TODO
+		},
+	}
+}
+
+func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+	if err := s.db.Delete(&Device{Name: request.Name}).Error; err != nil {
+		return nil, err
+	}
 	return &registrypb.DeleteResponse{}, nil
 }
