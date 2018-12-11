@@ -60,8 +60,6 @@ services:
     restart: unless-stopped
   shadow-api:
     image: quay.io/infinimesh/shadow-api:latest
-    ports:
-      - "8085:8085"
     depends_on:
       - kafka
     environment:
@@ -85,3 +83,13 @@ services:
     depends_on:
       - device-registry
     restart: unless-stopped
+  apiserver:
+    image: quay.io/infinimesh/apiserver-rest:latest
+    environment:
+      - APISERVER_ENDPOINT=apiserver:8080
+    ports:
+      - "8081:8081"
+    depends_on:
+      - apiserver
+    restart: unless-stopped
+
