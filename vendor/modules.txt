@@ -16,12 +16,14 @@ github.com/eapache/go-xerial-snappy
 github.com/eapache/queue
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
+# github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+github.com/golang/glog
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
+github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/ptypes/struct
 github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes/any
-github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 github.com/golang/protobuf/ptypes
@@ -30,8 +32,8 @@ github.com/golang/snappy
 # github.com/google/uuid v1.1.0
 github.com/google/uuid
 # github.com/grpc-ecosystem/grpc-gateway v1.5.1
-github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options
 github.com/grpc-ecosystem/grpc-gateway/runtime
+github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options
 github.com/grpc-ecosystem/grpc-gateway/utilities
 github.com/grpc-ecosystem/grpc-gateway/runtime/internal
 # github.com/hashicorp/hcl v1.0.0
@@ -48,8 +50,8 @@ github.com/hashicorp/hcl/json/token
 # github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 github.com/infinimesh/mqtt-go/packet
 # github.com/jinzhu/gorm v1.9.1
-github.com/jinzhu/gorm
 github.com/jinzhu/gorm/dialects/postgres
+github.com/jinzhu/gorm
 # github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
 github.com/jinzhu/inflection
 # github.com/julienschmidt/httprouter v1.2.0
