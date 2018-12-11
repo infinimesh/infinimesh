@@ -83,7 +83,7 @@ services:
     depends_on:
       - device-registry
     restart: unless-stopped
-  apiserver:
+  apiserver-rest:
     image: quay.io/infinimesh/apiserver-rest:latest
     environment:
       - APISERVER_ENDPOINT=apiserver:8080
