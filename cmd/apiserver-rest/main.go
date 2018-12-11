@@ -2,21 +2,26 @@ package main
 
 import (
 	"context"
-	"flag"
 	"net/http"
 
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
 var (
-	apiserverEndpoint = flag.String("apiserver", "localhost:8080", "gRPC APIServer Host:Port pair")
+	apiserverEndpoint string
 )
 
+func init() {
+	viper.SetDefault("APISERVER_ENDPOINT", "localhost:8080")
+	viper.AutomaticEnv()
+	apiserverEndpoint = viper.GetString("APISERVER_ENDPOINT")
+}
+
 func main() {
-	flag.Parse()
 	defer glog.Flush()
 
 	if err := run(); err != nil {
