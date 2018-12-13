@@ -1,7 +1,7 @@
 <template>
   <v-container xs9>
     <v-layout column wrap>
-      <h1 class="mb-3">Register a device</h1>
+      <h1 class="mb-3">Register new device</h1>
       <v-flex>
         <v-text-field
           v-model="device.name"
