@@ -4,31 +4,31 @@
       <h1 class="mb-3">Register new device</h1>
       <v-flex>
         <v-text-field
-          v-model="device.name"
+          v-model="name"
           label="Device name"
           outline
           clearable
         ></v-text-field>
         <v-text-field
-          v-model="device.description"
+          v-model="description"
           label="Device description"
           outline
           clearable
         ></v-text-field>
         <v-text-field
-          v-model="device.location"
+          v-model="location"
           label="Device location"
           outline
           clearable
         ></v-text-field>
         <v-text-field
-          v-model="device.tags"
+          v-model="tags"
           label="Device tags"
           outline
           clearable
         ></v-text-field>
         <v-textarea
-           v-model="device.certificate"
+           v-model="certificate"
            auto-grow
            outline
            label="Certificate"
@@ -65,6 +65,7 @@
            >
            Register and don't activate</v-btn>
            </div>
+           <p v-for="device in devices">{{ device }}</p>
          </v-layout>
       </v-flex>
     </v-layout>
@@ -75,14 +76,12 @@
 export default {
   data() {
     return {
-      device: {
-        name: "",
-        description: "",
-        location: "",
-        tags: "",
-        certificate: "",
-        activated: false
-      },
+      name: "",
+      description: "",
+      location: "",
+      tags: "",
+      certificate: "",
+      activated: false,
       messageSuccess: {
         message: "Your device has been activated",
         value: false
@@ -94,28 +93,50 @@ export default {
       }
     };
   },
+  computed: {
+    devices() {
+      return this.$store.getters.getAllDevices;
+    }
+  },
   methods: {
     register(activate) {
-      this.device.activated = activate;
-      this.$http
-        .post("testdata.json", this.device)
-        .then(() => {
-          this.resetForm();
-          this.messageSuccess.value = true;
-          setTimeout(() => (this.messageSuccess.value = false), 5000);
-        })
-        .catch(e => {
-          this.messageFailure.value = true;
-          this.messageFailure.error = e;
-        });
+    const deviceId = this.name + Math.random();
+
+    this.activated = activate;
+
+    let newDevice = {};
+
+    newDevice[`${deviceId}`] = {
+      status: this.activated,
+      name: this.name,
+      description: this.description,
+      location: this.location,
+      tags: this.tags,
+      certificate: this.certificate
+    };
+
+    this.$store.dispatch("addDevice", newDevice);
+
+    this.resetForm();
+      // this.$http
+      //   .post("testdata.json", this.device)
+      //   .then(() => {
+      //     this.resetForm();
+      //     this.messageSuccess.value = true;
+      //     setTimeout(() => (this.messageSuccess.value = false), 5000);
+      //   })
+      //   .catch(e => {
+      //     this.messageFailure.value = true;
+      //     this.messageFailure.error = e;
+      //   });
     },
     resetForm() {
-      this.device.name = "";
-      this.device.description = "";
-      this.device.location = "";
-      this.device.tags = "";
-      this.device.certificate = "";
-      this.device.activated = false;
+      this.name = "";
+      this.description = "";
+      this.location = "";
+      this.tags = "";
+      this.certificate = "";
+      this.activated = false;
     }
   }
 };
