@@ -65,7 +65,7 @@
            >
            Register and don't activate</v-btn>
            </div>
-           <p v-for="device in devices">{{ device }}</p>
+           <p>{{ devices }}</p>
          </v-layout>
       </v-flex>
     </v-layout>
@@ -100,24 +100,25 @@ export default {
   },
   methods: {
     register(activate) {
-    const deviceId = this.name + Math.random();
+      const deviceId = this.name + Math.random();
 
-    this.activated = activate;
+      this.activated = activate;
 
-    let newDevice = {};
+      let newDevice = {};
 
-    newDevice[`${deviceId}`] = {
-      status: this.activated,
-      name: this.name,
-      description: this.description,
-      location: this.location,
-      tags: this.tags,
-      certificate: this.certificate
-    };
+      newDevice = {
+        deviceId: deviceId,
+        status: this.activated,
+        name: this.name,
+        description: this.description,
+        location: this.location,
+        tags: this.tags,
+        certificate: this.certificate
+      };
 
-    this.$store.dispatch("addDevice", newDevice);
+      this.$store.dispatch("addDevice", newDevice);
 
-    this.resetForm();
+      this.resetForm();
       // this.$http
       //   .post("testdata.json", this.device)
       //   .then(() => {
