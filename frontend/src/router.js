@@ -1,8 +1,9 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Home from "./views/Home.vue";
+import Devices from "./views/Devices.vue";
 import RegisterDevice from "./views/RegisterDevice.vue";
 import DeleteDevice from "./views/DeleteDevice.vue";
+import Shadow from "./views/Shadow.vue";
 
 Vue.use(Router);
 
@@ -12,13 +13,18 @@ export default new Router({
   routes: [
     {
       path: "/devices",
-      name: "View your devices",
-      component: Home
+      name: "View devices",
+      component: Devices
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       // component: () =>
-      //   import(/* webpackChunkName: "Home" */ "./views/Home.vue")
+      //   import(/* webpackChunkName: "Home" */ "./views/Home.vue"),
+    },
+    {
+      path: "/devices/:id",
+      component: Shadow,
+      name: Shadow
     },
     {
       path: "/devices/register",
@@ -26,9 +32,13 @@ export default new Router({
       component: RegisterDevice
     },
     {
-      path: "/devices/delete",
+      path: "/devices/:id/delete",
       name: "Delete device",
       component: DeleteDevice
+    },
+    {
+      path: "*",
+      redirect: "/devices"
     }
   ]
 });

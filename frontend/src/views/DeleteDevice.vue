@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Delete a device </h1>
+    <h1>Do you really want to delete device {{ this.$route.params.id }}? </h1>
   </div>
 </template>
 
