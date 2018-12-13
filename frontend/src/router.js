@@ -22,7 +22,7 @@ export default new Router({
       //   import(/* webpackChunkName: "Home" */ "./views/Home.vue"),
     },
     {
-      path: "/devices/:id",
+      path: "/devices/show/:id",
       component: Shadow,
       name: Shadow
     },

@@ -11,14 +11,16 @@ export default new Vuex.Store({
         deviceId: 25,
         name: "Device 6",
         location: "Düsseldorf",
-        tags: "test"
+        tags: "test",
+        certificate: "abc"
       },
       {
         status: "inactive",
         deviceId: 6,
         name: "Device 6",
         location: "Düsseldorf",
-        tags: "test"
+        tags: "test",
+        certificate: "abdd"
       }
     ]
   },
