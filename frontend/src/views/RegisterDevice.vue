@@ -64,8 +64,7 @@
            @click="register(false)"
            >
            Register and don't activate</v-btn>
-           </div>
-           <p>{{ devices }}</p>
+         </div>
          </v-layout>
       </v-flex>
     </v-layout>

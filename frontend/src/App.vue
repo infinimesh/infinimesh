@@ -13,14 +13,12 @@
 <script>
 import Footer from "./components/Footer.vue";
 import Header from "./components/Header.vue";
-import Sidebar from "./components/Sidebar.vue";
 
 export default {
   name: "App",
   components: {
     Footer,
-    Header,
-    Sidebar
+    Header
   },
   data() {
     return {
