@@ -5,36 +5,42 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    devices: {
-      testid123: {
-        status: "active",
-        name: "Device 3",
-        location: "Berlin",
+    devices: [
+      {
+        status: "inactive",
+        deviceId: 25,
+        name: "Device 6",
+        location: "Düsseldorf",
         tags: "test"
       },
-      testid124: {
-        status: "active",
-        name: "Device 4",
-        location: "Ddorf",
+      {
+        status: "inactive",
+        deviceId: 6,
+        name: "Device 6",
+        location: "Düsseldorf",
         tags: "test"
       }
-    }
+    ]
   },
   getters: {
     getDevice: (state, deviceId) => {
-      return state.devices.deviceId;
+      return state.devices.find(device => device.deviceId === deviceId);
     },
-    getAllDevices: (state) => {
+    getAllDevices: state => {
       return state.devices;
     }
   },
   mutations: {
     addDevice: (state, device) => {
-      state.devices[Object.keys(device)[0]] = device.deviceId;
-      console.log(device)
+      state.devices.push(device);
     },
     deleteDevice: (state, deviceId) => {
-      delete state.devices.deviceId;
+      let deviceIndex;
+
+      deviceIndex = state.devices.findIndex(
+        device => device.deviceId === deviceId
+      );
+      state.devices.splice(deviceIndex, 1);
     }
   },
   actions: {

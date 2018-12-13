@@ -26,7 +26,7 @@
            class="text-xs-left"
            style="cursor: pointer"
            :key="i"
-            @click="navigateTo(props.item.id)"
+            @click="navigateTo(props.item.deviceId)"
            >
            {{ attribute }}
            </td>
@@ -45,7 +45,7 @@
                <v-list-tile
                  v-for="(option, index) in options"
                  :key="index"
-                 :to="{name: option, params: { id: props.item.id }}"
+                 :to="{name: option, params: { id: props.item.deviceId }}"
                >
                  <v-list-tile-title>{{ option }}</v-list-tile-title>
                </v-list-tile>
@@ -63,6 +63,7 @@
         color="primary lighten-1"
         bottom
         left
+        round
         :to="{ name: 'Register device' }"
         >
         <v-icon>add</v-icon>
@@ -87,7 +88,7 @@ export default {
         {
           text: "Id",
           align: "left",
-          value: "id"
+          value: "deviceId"
         },
         {
           text: "Name",
@@ -110,58 +111,58 @@ export default {
           align: "center"
         }
       ],
-      options: ["Delete device"],
-      devices: [
-        {
-          status: "active",
-          id: 1,
-          name: "Device 1",
-          location: "Düsseldorf",
-          tags: "test"
-        },
-        {
-          status: "active",
-          id: 2,
-          name: "Device 2",
-          location: "Essen",
-          tags: "test"
-        },
-        {
-          status: "active",
-          id: 3,
-          name: "Device 3",
-          location: "Berlin",
-          tags: "test"
-        },
-        {
-          status: "active",
-          id: 4,
-          name: "Device 4",
-          location: "Düsseldorf",
-          tags: "prod"
-        },
-        {
-          status: "active",
-          id: 5,
-          name: "Device 5",
-          location: "Düsseldorf",
-          tags: "test"
-        },
-        {
-          status: "inactive",
-          id: 6,
-          name: "Device 6",
-          location: "Düsseldorf",
-          tags: "test"
-        },
-        {
-          status: "active",
-          id: 7,
-          name: "Device 7",
-          location: "Essen",
-          tags: "test"
-        }
-      ]
+      options: ["Delete device"]
+      // devices: [
+      //   {
+      //     status: "active",
+      //     id: 1,
+      //     name: "Device 1",
+      //     location: "Düsseldorf",
+      //     tags: "test"
+      //   },
+      //   {
+      //     status: "active",
+      //     id: 2,
+      //     name: "Device 2",
+      //     location: "Essen",
+      //     tags: "test"
+      //   },
+      //   {
+      //     status: "active",
+      //     id: 3,
+      //     name: "Device 3",
+      //     location: "Berlin",
+      //     tags: "test"
+      //   },
+      //   {
+      //     status: "active",
+      //     id: 4,
+      //     name: "Device 4",
+      //     location: "Düsseldorf",
+      //     tags: "prod"
+      //   },
+      //   {
+      //     status: "active",
+      //     id: 5,
+      //     name: "Device 5",
+      //     location: "Düsseldorf",
+      //     tags: "test"
+      //   },
+      //   {
+      //     status: "inactive",
+      //     id: 6,
+      //     name: "Device 6",
+      //     location: "Düsseldorf",
+      //     tags: "test"
+      //   },
+      //   {
+      //     status: "active",
+      //     id: 7,
+      //     name: "Device 7",
+      //     location: "Essen",
+      //     tags: "test"
+      //   }
+      // ]
     };
   },
   computed: {
@@ -169,6 +170,9 @@ export default {
       return this.pagination.rowsPerPage
         ? Math.ceil(this.items.length / this.pagination.rowsPerPage)
         : 0;
+    },
+    devices() {
+      return this.$store.getters.getAllDevices;
     }
   },
   methods: {
