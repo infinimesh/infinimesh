@@ -22,16 +22,41 @@
        <template slot="items" slot-scope="props">
          <tr>
            <td
-           v-for="(attribute, i) in props.item"
-           class="text-xs-left"
-           style="cursor: pointer"
-           :key="i"
-            @click="navigateTo(props.item.deviceId)"
+             class="text-xs-left"
+             style="cursor: pointer"
+             @click="navigateTo(props.item.deviceId)"
            >
-           {{ attribute }}
+           {{ props.item.status }}
            </td>
            <td
-           class="text-xs-center"
+             class="text-xs-left"
+             style="cursor: pointer"
+             @click="navigateTo(props.item.deviceId)"
+           >
+           {{ props.item.deviceId }}
+           </td>
+           <td
+             class="text-xs-left"
+             style="cursor: pointer"
+             @click="navigateTo(props.item.deviceId)"
+           >
+           {{ props.item.name }}
+           <td
+             class="text-xs-left"
+             style="cursor: pointer"
+             @click="navigateTo(props.item.deviceId)"
+           >
+           {{ props.item.location }}
+           </td>
+           <td
+             class="text-xs-left"
+             style="cursor: pointer"
+             @click="navigateTo(props.item.deviceId)"
+           >
+           {{ props.item.tags }}
+           </td>
+           <td
+             class="text-xs-center"
            >
            <v-menu offset-y>
              <v-btn
@@ -112,57 +137,6 @@ export default {
         }
       ],
       options: ["Delete device"]
-      // devices: [
-      //   {
-      //     status: "active",
-      //     id: 1,
-      //     name: "Device 1",
-      //     location: "Düsseldorf",
-      //     tags: "test"
-      //   },
-      //   {
-      //     status: "active",
-      //     id: 2,
-      //     name: "Device 2",
-      //     location: "Essen",
-      //     tags: "test"
-      //   },
-      //   {
-      //     status: "active",
-      //     id: 3,
-      //     name: "Device 3",
-      //     location: "Berlin",
-      //     tags: "test"
-      //   },
-      //   {
-      //     status: "active",
-      //     id: 4,
-      //     name: "Device 4",
-      //     location: "Düsseldorf",
-      //     tags: "prod"
-      //   },
-      //   {
-      //     status: "active",
-      //     id: 5,
-      //     name: "Device 5",
-      //     location: "Düsseldorf",
-      //     tags: "test"
-      //   },
-      //   {
-      //     status: "inactive",
-      //     id: 6,
-      //     name: "Device 6",
-      //     location: "Düsseldorf",
-      //     tags: "test"
-      //   },
-      //   {
-      //     status: "active",
-      //     id: 7,
-      //     name: "Device 7",
-      //     location: "Essen",
-      //     tags: "test"
-      //   }
-      // ]
     };
   },
   computed: {
@@ -177,7 +151,7 @@ export default {
   },
   methods: {
     navigateTo(id) {
-      this.$router.push("devices/" + id);
+      this.$router.push("devices/show/" + id);
     }
   }
 };
