@@ -19,7 +19,6 @@
        :items="devices"
        :search="search"
        item-key="name"
-      >
         <template slot="items" slot-scope="props">
           <tr>
             <td
@@ -118,7 +117,7 @@ export default {
         {
           text: "Id",
           align: "left",
-          value: "id"
+          value: "deviceId"
         },
         {
           text: "Tags",
