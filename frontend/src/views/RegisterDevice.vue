@@ -107,6 +107,11 @@ export default {
       }
     };
   },
+  computed: {
+    devices() {
+      return this.$store.getters.getAllDevices;
+    }
+  },
   methods: {
     addTag(event) {
       this.tags.push(event.target.value);
