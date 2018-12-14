@@ -2,7 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import Devices from "./views/Devices.vue";
 import RegisterDevice from "./views/RegisterDevice.vue";
-import DeleteDevice from "./views/DeleteDevice.vue";
+import UnRegisterDevice from "./views/UnRegisterDevice.vue";
 import Shadow from "./views/Shadow.vue";
 
 Vue.use(Router);
@@ -32,9 +32,9 @@ export default new Router({
       component: RegisterDevice
     },
     {
-      path: "/devices/:id/delete",
-      name: "Delete device",
-      component: DeleteDevice
+      path: "/devices/:id/unregister",
+      name: "Unregister device",
+      component: UnRegisterDevice
     },
     {
       path: "*",
