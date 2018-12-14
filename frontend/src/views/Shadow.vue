@@ -18,24 +18,62 @@
         </v-flex>
         <v-flex>
           <v-card flat>
-            <v-card-title primary-title>
-              <h3>Device information</h3>
-            </v-card-title>
-            <v-card-text>
-              Device Id: {{ device.deviceId }}
-            </v-card-text>
-            <v-card-text>
-              Device name: {{ device.name }}
-            </v-card-text>
-            <v-card-text>
-              Device description: {{ device.description }}
-            </v-card-text>
-            <v-card-text>
-              Device location: {{ device.location }}
-            </v-card-text>
-            <v-card-text>
-              Device tags: {{ device.tags }}
-            </v-card-text>
+            <v-layout column wrap>
+              <v-flex
+                mb-3
+              >
+                <div class="caption grey--text mb-1">
+                  Active
+                </div>
+                <div>
+                  {{ device.activated }}
+                </div>
+              </v-flex>
+              <v-flex
+                mb-3
+              >
+                <div class="caption grey--text mb-1">
+                  Id
+                </div>
+                <div>
+                  {{ device.deviceId }}
+                </div>
+              </v-flex>
+              <v-flex
+                mb-3
+              >
+                <div class="caption grey--text mb-1">
+                  Name
+                </div>
+                <div>
+                  {{ device.name }}
+                </div>
+              </v-flex>
+              <v-flex
+                mb-3
+              >
+                <div class="caption grey--text mb-1">
+                  Description
+                </div>
+                <div>
+                  {{ device.description }}
+                </div>
+              </v-flex>
+              <v-flex
+                mb-3
+              >
+                <div class="caption grey--text mb-1">
+                  Tags
+                </div>
+                <v-layout row wrap>
+                  <div
+                    v-for="tag in device.tags"
+                  >
+                    <v-chip>{{ tag }}</v-chip>
+                  </div>
+                </v-layout>
+              </v-flex>
+            </v-layout>
           </v-card>
         </v-flex>
       </v-layout>
@@ -47,7 +85,8 @@
 export default {
   data() {
     return {
-      device: this.$store.getters.getDevice(parseInt(this.$route.params.id))
+      device: this.$store.getters.getDevice(parseInt(this.$route.params.id)),
+      headers: ["Active", "Id", "Name", "Location", "Tags"]
       }
     }
   }

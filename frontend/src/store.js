@@ -11,7 +11,7 @@ export default new Vuex.Store({
         deviceId: 25,
         name: "Device 6",
         location: "Düsseldorf",
-        tags: "test",
+        tags: ["test", "bbc"],
         certificate: "abc"
       },
       {
@@ -19,7 +19,7 @@ export default new Vuex.Store({
         deviceId: 6,
         name: "Device 6",
         location: "Düsseldorf",
-        tags: "test",
+        tags: ["test"],
         certificate: "abdd"
       }
     ]
