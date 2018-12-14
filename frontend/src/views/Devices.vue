@@ -64,7 +64,11 @@
              style="cursor: pointer"
              @click="navigateTo(props.item.deviceId)"
            >
-           {{ props.item.tags }}
+             <v-chip
+              v-for="tag in props.item.tags"
+             >
+              {{ tag }}
+            </v-chip>
            </td>
            <td
              class="text-xs-center"
