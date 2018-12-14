@@ -1,6 +1,6 @@
 <template>
-  <v-container xs12>
-    <v-layout column wrap>
+  <v-container>
+    <v-layout column wrap md9 lg6 xl4>
       <h1 class="mb-3">Register new device</h1>
       <v-flex>
         <v-text-field
