@@ -1,5 +1,5 @@
 <template>
-  <v-container xs9>
+  <v-container xs12>
     <h1 class="mb-3">Your devices</h1>
     <v-card>
      <v-card-title>
@@ -26,7 +26,18 @@
              style="cursor: pointer"
              @click="navigateTo(props.item.deviceId)"
            >
-           {{ props.item.status }}
+           <v-icon
+             v-if="props.item.activated"
+             color="green"
+           >
+            check_circle
+           </v-icon>
+           <v-icon
+             v-else
+             color="grey"
+           >
+            block
+          </v-icon>
            </td>
            <td
              class="text-xs-left"
@@ -106,9 +117,9 @@ export default {
       search: "",
       headers: [
         {
-          text: "Status",
+          text: "Active",
           align: "left",
-          value: "status"
+          value: "activated"
         },
         {
           text: "Id",
@@ -136,7 +147,7 @@ export default {
           align: "center"
         }
       ],
-      options: ["Delete device"]
+      options: ["Unregister device"]
     };
   },
   computed: {

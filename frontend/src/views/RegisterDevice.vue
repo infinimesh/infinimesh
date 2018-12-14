@@ -1,5 +1,5 @@
 <template>
-  <v-container xs9>
+  <v-container xs12>
     <v-layout column wrap>
       <h1 class="mb-3">Register new device</h1>
       <v-flex>
@@ -8,64 +8,84 @@
           label="Device name"
           outline
           clearable
-        ></v-text-field>
+        >
+        </v-text-field>
         <v-text-field
           v-model="description"
           label="Device description"
           outline
           clearable
-        ></v-text-field>
+        >
+        </v-text-field>
         <v-text-field
           v-model="location"
           label="Device location"
           outline
           clearable
-        ></v-text-field>
+        >
+        </v-text-field>
         <v-text-field
           v-model="tags"
           label="Device tags"
           outline
           clearable
-        ></v-text-field>
+        >
+        </v-text-field>
         <v-textarea
-           v-model="certificate"
-           auto-grow
-           outline
-           label="Certificate"
-           rows="1"
-         ></v-textarea>
-           <v-alert
-            :value="messageSuccess.value"
-            type="success"
-            icon="check_circle"
+         v-model="certificate"
+         auto-grow
+         outline
+         label="Certificate"
+         rows="1"
+         >
+        </v-textarea>
+        <v-alert
+          :value="messageSuccess.value"
+          type="success"
+          icon="check_circle"
+        >
+          {{ messageSuccess.message }}
+        </v-alert>
+        <v-alert
+         :value="messageFailure.value"
+         type="error"
+         icon="error"
+        >
+          {{ messageFailure.value }}: {{ messageFailure.error }}
+        </v-alert>
+        <v-layout row wrap>
+          <div>
+            <v-btn
+              round
+              class="mr-5"
+              to="/devices"
             >
-            {{ messageSuccess.message }}
-            </v-alert>
-            <v-alert
-             :value="messageFailure.value"
-             type="error"
-             icon="error"
-             >
-             {{ messageFailure.value }}: {{ messageFailure.error }}
-             </v-alert>
-         <v-layout row wrap>
-           <div >
+              <v-icon
+                left
+              >
+                chevron_left
+              </v-icon>
+              Return
+            </v-btn>
+          </div>
+          <div>
            <v-btn
-           round color="primary"
-           dark
-           @click="register(true)"
+             round color="primary"
+             dark
+             @click="register(true)"
            >
-           Register and activate</v-btn>
+             Register and activate</v-btn>
            </div>
-           <div >
+           <div>
            <v-btn
-           round color="secondary lighten-2"
-           dark
-           @click="register(false)"
+             round color="secondary lighten-2"
+             dark
+             @click="register(false)"
            >
-           Register and don't activate</v-btn>
+             Register and don't activate
+          </v-btn>
          </div>
-         </v-layout>
+       </v-layout>
       </v-flex>
     </v-layout>
   </v-container>
@@ -92,11 +112,6 @@ export default {
       }
     };
   },
-  computed: {
-    devices() {
-      return this.$store.getters.getAllDevices;
-    }
-  },
   methods: {
     register(activate) {
       const deviceId = this.name + Math.random();
@@ -107,7 +122,7 @@ export default {
 
       newDevice = {
         deviceId: deviceId,
-        status: this.activated,
+        activated: this.activated,
         name: this.name,
         description: this.description,
         location: this.location,
