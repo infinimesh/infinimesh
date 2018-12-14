@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     devices: [
       {
-        status: "inactive",
+        activated: false,
         deviceId: 25,
         name: "Device 6",
         location: "Düsseldorf",
@@ -15,7 +15,7 @@ export default new Vuex.Store({
         certificate: "abc"
       },
       {
-        status: "inactive",
+        activated: "true",
         deviceId: 6,
         name: "Device 6",
         location: "Düsseldorf",
@@ -25,7 +25,7 @@ export default new Vuex.Store({
     ]
   },
   getters: {
-    getDevice: (state, deviceId) => {
+    getDevice: (state) => (deviceId) => {
       return state.devices.find(device => device.deviceId === deviceId);
     },
     getAllDevices: state => {
@@ -36,7 +36,7 @@ export default new Vuex.Store({
     addDevice: (state, device) => {
       state.devices.push(device);
     },
-    deleteDevice: (state, deviceId) => {
+    unRegisterDevice: (state, deviceId) => {
       let deviceIndex;
 
       deviceIndex = state.devices.findIndex(
@@ -50,8 +50,8 @@ export default new Vuex.Store({
       commit("addDevice", device);
       return device;
     },
-    deleteDevice: ({ commit }, deviceId) => {
-      commit("deleteDevice", deviceId);
+    unRegisterDevice: ({ commit }, deviceId) => {
+      commit("unRegisterDevice", deviceId);
       return deviceId;
     }
   }
