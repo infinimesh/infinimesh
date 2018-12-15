@@ -23,7 +23,6 @@
             style="color: grey"
           >
             cancel
-          </v-icon>
        </v-chip>
         <v-textarea
          v-model="certificate"
