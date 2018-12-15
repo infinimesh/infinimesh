@@ -32,9 +32,14 @@
          v-for="(tag, key, i) in tags"
          :key="i"
          small
-         close
         >
-         {{ tag }}
+           {{ tag }}
+          <v-icon
+            small
+            @click="tags.splice(i, 1)"
+          >
+            clear
+          </v-icon>
        </v-chip>
         <v-textarea
          v-model="certificate"
@@ -141,6 +146,7 @@ export default {
       };
 
       this.$store.dispatch("addDevice", newDevice);
+      this.messageSuccess.value = true;
       setTimeout(() => (this.messageSuccess.value = false), 5000);
       this.resetForm();
       // this.$http
@@ -159,7 +165,7 @@ export default {
       this.name = "";
       this.description = "";
       this.location = "";
-      this.tags = "";
+      this.tags = [];
       this.certificate = "";
       this.activated = false;
     }
