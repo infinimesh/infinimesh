@@ -6,35 +6,40 @@
         <v-text-field
           v-model="name"
           label="Device name"
-          outline
           clearable
         >
         </v-text-field>
         <v-text-field
           v-model="description"
           label="Device description"
-          outline
           clearable
         >
         </v-text-field>
         <v-text-field
           v-model="location"
           label="Device location"
-          outline
           clearable
         >
         </v-text-field>
         <v-text-field
-          v-model="tags"
+          v-model="tag"
           label="Device tags"
-          outline
           clearable
+          v-on:keyup.enter="addTag($event)"
         >
         </v-text-field>
+        <v-chip
+         v-for="(tag, key, i) in tags"
+         :key="i"
+         small
+         close
+        >
+         {{ tag }}
+       </v-chip>
         <v-textarea
          v-model="certificate"
          auto-grow
-         outline
+         clearable
          label="Certificate"
          rows="1"
          >
@@ -98,7 +103,8 @@ export default {
       name: "",
       description: "",
       location: "",
-      tags: "",
+      tag: "",
+      tags: [],
       certificate: "",
       activated: false,
       messageSuccess: {
@@ -113,6 +119,10 @@ export default {
     };
   },
   methods: {
+    addTag(event) {
+      this.tags.push(event.target.value);
+      this.tag = "";
+    },
     register(activate) {
       const deviceId = this.name + Math.random();
 
@@ -131,7 +141,7 @@ export default {
       };
 
       this.$store.dispatch("addDevice", newDevice);
-
+      setTimeout(() => (this.messageSuccess.value = false), 5000);
       this.resetForm();
       // this.$http
       //   .post("testdata.json", this.device)
