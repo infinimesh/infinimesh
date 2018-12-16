@@ -17,7 +17,7 @@ var (
 	broker        string
 	topics        = []string{topic}
 	topic         = "public.delta.reported-state"
-	mergedTopic   = "private.changelog.reported-state"
+	mergedTopic   = "shadow.reported-state.full"
 )
 
 func init() {
