@@ -42,6 +42,19 @@ tasks:
           docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root &
         done
         wait
+  docker-pull-images:
+    desc: Pull all latest docker images from quay
+    silent: true
+    cmds:
+      - |
+        set -e
+        _root=$PWD
+        cd ./Dockerfiles
+        for f in *; do
+          echo docker pull quay.io/infinimesh/$f:latest
+          docker pull quay.io/infinimesh/$f:latest
+        done
+
   default:
     cmds:
       - task: build
