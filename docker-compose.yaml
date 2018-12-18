@@ -9,6 +9,7 @@ services:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
+    restart: unless-stopped
     ports:
       - 9092:9092
     environment:
@@ -24,6 +25,7 @@ services:
     ports:
       - "8093:8080"
       - "26257:26257"
+    restart: unless-stopped
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
