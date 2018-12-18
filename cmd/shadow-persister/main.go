@@ -18,7 +18,7 @@ import (
 
 const (
 	sourceTopicReported = "shadow.reported-state.full"
-	sourceTopicDesired  = "private.changelog.desired-state"
+	sourceTopicDesired  = "shadow.desired-state.full"
 )
 
 var (
