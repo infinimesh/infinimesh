@@ -126,8 +126,14 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				State:   stateFromKafka.State,
 			})
 		case sourceTopicDesired:
+			dbErr = h.repo.SetDesired(shadow.DeviceState{
+				ID:      string(message.Key),
+				Version: stateFromKafka.Version,
+				State:   stateFromKafka.State,
+			})
 		}
 
+		// FIXME ignore errors for now
 		if dbErr != nil {
 			fmt.Println("Failed to persist message with offset", message.Offset, dbErr)
 		}
