@@ -49,12 +49,19 @@ func NewPostgresRepo(addr string) (Repo, error) {
 }
 
 func (p *postgresRepo) SetReported(d DeviceState) (err error) {
-	if err := p.db.Table("device_state_db").Updates(&DeviceStateDB{
+	update := DeviceStateDB{
 		ID:              d.ID,
 		ReportedVersion: d.Version,
 		ReportedState:   postgres.Jsonb{d.State}, // nolint
-	}).Error; err != nil {
+	}
+	if result := p.db.Model(&update).Updates(update); result.Error != nil {
 		return err
+	} else {
+		if result.RowsAffected == 0 {
+			if err := p.db.Create(&update).Error; err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -71,12 +78,19 @@ func (p *postgresRepo) GetReported(id string) (DeviceState, error) {
 }
 
 func (p *postgresRepo) SetDesired(d DeviceState) (err error) {
-	if err := p.db.Table("device_state_db").Updates(&DeviceStateDB{
+	update := DeviceStateDB{
 		ID:             d.ID,
 		DesiredVersion: d.Version,
 		DesiredState:   postgres.Jsonb{d.State}, // nolint
-	}).Error; err != nil {
+	}
+	if result := p.db.Model(&update).Updates(update); result.Error != nil {
 		return err
+	} else {
+		if result.RowsAffected == 0 {
+			if err := p.db.Create(&update).Error; err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
