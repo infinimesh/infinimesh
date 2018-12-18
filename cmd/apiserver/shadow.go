@@ -7,9 +7,9 @@ import (
 )
 
 type shadowAPI struct {
-	client shadowpb.ShadowClient
+	client shadowpb.ShadowsClient
 }
 
-func (s *shadowAPI) GetReported(ctx context.Context, request *shadowpb.GetReportedRequest) (response *shadowpb.GetReportedResponse, err error) {
-	return s.client.GetReported(ctx, request)
+func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+	return s.client.Get(ctx, request)
 }

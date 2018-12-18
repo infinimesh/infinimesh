@@ -108,7 +108,7 @@ func main() {
 
 		srv := grpc.NewServer()
 		serverHandler := &shadow.Server{Repo: repo}
-		shadowpb.RegisterShadowServer(srv, serverHandler)
+		shadowpb.RegisterShadowsServer(srv, serverHandler)
 		reflection.Register(srv)
 		fmt.Println("serve")
 		if err := srv.Serve(lis); err != nil {

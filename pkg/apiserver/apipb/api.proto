@@ -50,10 +50,10 @@ service Devices {
   };
 }
 
-service Shadow {
-  rpc GetReported(infinimesh.shadow.GetReportedRequest) returns (infinimesh.shadow.GetReportedResponse) {
+service Shadows {
+  rpc Get(infinimesh.shadow.GetRequest) returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{device_id}/reported"
+      get: "/devices/{id}/shadow"
     };
   };
 }

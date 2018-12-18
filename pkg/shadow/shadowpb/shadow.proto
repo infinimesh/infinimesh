@@ -1,19 +1,31 @@
 syntax = "proto3";
 
 package infinimesh.shadow;
-
-import "google/protobuf/struct.proto";
-
 option go_package = "shadowpb";
 
-message GetReportedRequest {
-  string device_id = 1;
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message VersionedValue {
+  uint64 version = 1;
+  google.protobuf.Value value = 2;
+  google.protobuf.Timestamp timestamp = 3;
 }
 
-message GetReportedResponse{
-  google.protobuf.Value state = 1;
+message GetRequest { string id = 1; }
+
+message GetResponse { Shadow shadow = 1; }
+
+message Shadow {
+  VersionedValue config = 2;
+  VersionedValue reported = 3;
+  VersionedValue desired = 4;
 }
 
-service Shadow {
-  rpc GetReported(GetReportedRequest) returns (GetReportedResponse);
+message PatchDesiredRequest {}
+message PatchDesiredResponse {}
+
+service Shadows {
+  rpc Get(GetRequest) returns (GetResponse);
+  // rpc PatchDesired(PatchDesiredRequest) returns (PatchDesiredResponse);
 }

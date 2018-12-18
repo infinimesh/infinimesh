@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
+	"time"
 
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/struct"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
@@ -15,19 +16,31 @@ type Server struct {
 	Repo Repo
 }
 
-func (s *Server) GetReported(context context.Context, req *shadowpb.GetReportedRequest) (response *shadowpb.GetReportedResponse, err error) {
-	state, err := s.Repo.GetReported(req.DeviceId)
+func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+	state, err := s.Repo.GetReported(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	u := &jsonpb.Unmarshaler{}
-	fmt.Println("test", string(state.State))
 
 	var value structpb.Value
 	if err := u.Unmarshal(bytes.NewReader(state.State), &value); err != nil {
 		return nil, errors.New("Failed to unmarshal JSON from database")
 	}
 
-	return &shadowpb.GetReportedResponse{State: &value}, nil
+	ts, err := ptypes.TimestampProto(time.Now())
+	if err != nil {
+		return nil, err
+	}
+
+	return &shadowpb.GetResponse{
+		Shadow: &shadowpb.Shadow{
+			Reported: &shadowpb.VersionedValue{
+				Version:   uint64(state.Version),
+				Value:     &value,
+				Timestamp: ts,
+			},
+		},
+	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	_struct "github.com/golang/protobuf/ptypes/struct"
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 	math "math"
@@ -23,107 +24,291 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type GetReportedRequest struct {
-	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+type VersionedValue struct {
+	Version              uint64               `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	Value                *_struct.Value       `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Timestamp            *timestamp.Timestamp `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *VersionedValue) Reset()         { *m = VersionedValue{} }
+func (m *VersionedValue) String() string { return proto.CompactTextString(m) }
+func (*VersionedValue) ProtoMessage()    {}
+func (*VersionedValue) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{0}
+}
+
+func (m *VersionedValue) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VersionedValue.Unmarshal(m, b)
+}
+func (m *VersionedValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VersionedValue.Marshal(b, m, deterministic)
+}
+func (m *VersionedValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VersionedValue.Merge(m, src)
+}
+func (m *VersionedValue) XXX_Size() int {
+	return xxx_messageInfo_VersionedValue.Size(m)
+}
+func (m *VersionedValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_VersionedValue.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VersionedValue proto.InternalMessageInfo
+
+func (m *VersionedValue) GetVersion() uint64 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
+func (m *VersionedValue) GetValue() *_struct.Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (m *VersionedValue) GetTimestamp() *timestamp.Timestamp {
+	if m != nil {
+		return m.Timestamp
+	}
+	return nil
+}
+
+type GetRequest struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetReportedRequest) Reset()         { *m = GetReportedRequest{} }
-func (m *GetReportedRequest) String() string { return proto.CompactTextString(m) }
-func (*GetReportedRequest) ProtoMessage()    {}
-func (*GetReportedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_40d60d4453ee7b12, []int{0}
+func (m *GetRequest) Reset()         { *m = GetRequest{} }
+func (m *GetRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRequest) ProtoMessage()    {}
+func (*GetRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{1}
 }
 
-func (m *GetReportedRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetReportedRequest.Unmarshal(m, b)
+func (m *GetRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRequest.Unmarshal(m, b)
 }
-func (m *GetReportedRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetReportedRequest.Marshal(b, m, deterministic)
+func (m *GetRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRequest.Marshal(b, m, deterministic)
 }
-func (m *GetReportedRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetReportedRequest.Merge(m, src)
+func (m *GetRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRequest.Merge(m, src)
 }
-func (m *GetReportedRequest) XXX_Size() int {
-	return xxx_messageInfo_GetReportedRequest.Size(m)
+func (m *GetRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRequest.Size(m)
 }
-func (m *GetReportedRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetReportedRequest.DiscardUnknown(m)
+func (m *GetRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetReportedRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetRequest proto.InternalMessageInfo
 
-func (m *GetReportedRequest) GetDeviceId() string {
+func (m *GetRequest) GetId() string {
 	if m != nil {
-		return m.DeviceId
+		return m.Id
 	}
 	return ""
 }
 
-type GetReportedResponse struct {
-	State                *_struct.Value `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+type GetResponse struct {
+	Shadow               *Shadow  `protobuf:"bytes,1,opt,name=shadow,proto3" json:"shadow,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetReportedResponse) Reset()         { *m = GetReportedResponse{} }
-func (m *GetReportedResponse) String() string { return proto.CompactTextString(m) }
-func (*GetReportedResponse) ProtoMessage()    {}
-func (*GetReportedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_40d60d4453ee7b12, []int{1}
+func (m *GetResponse) Reset()         { *m = GetResponse{} }
+func (m *GetResponse) String() string { return proto.CompactTextString(m) }
+func (*GetResponse) ProtoMessage()    {}
+func (*GetResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{2}
 }
 
-func (m *GetReportedResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetReportedResponse.Unmarshal(m, b)
+func (m *GetResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetResponse.Unmarshal(m, b)
 }
-func (m *GetReportedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetReportedResponse.Marshal(b, m, deterministic)
+func (m *GetResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetResponse.Marshal(b, m, deterministic)
 }
-func (m *GetReportedResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetReportedResponse.Merge(m, src)
+func (m *GetResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetResponse.Merge(m, src)
 }
-func (m *GetReportedResponse) XXX_Size() int {
-	return xxx_messageInfo_GetReportedResponse.Size(m)
+func (m *GetResponse) XXX_Size() int {
+	return xxx_messageInfo_GetResponse.Size(m)
 }
-func (m *GetReportedResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetReportedResponse.DiscardUnknown(m)
+func (m *GetResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetReportedResponse proto.InternalMessageInfo
+var xxx_messageInfo_GetResponse proto.InternalMessageInfo
 
-func (m *GetReportedResponse) GetState() *_struct.Value {
+func (m *GetResponse) GetShadow() *Shadow {
 	if m != nil {
-		return m.State
+		return m.Shadow
 	}
 	return nil
 }
 
+type Shadow struct {
+	Config               *VersionedValue `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	Reported             *VersionedValue `protobuf:"bytes,3,opt,name=reported,proto3" json:"reported,omitempty"`
+	Desired              *VersionedValue `protobuf:"bytes,4,opt,name=desired,proto3" json:"desired,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *Shadow) Reset()         { *m = Shadow{} }
+func (m *Shadow) String() string { return proto.CompactTextString(m) }
+func (*Shadow) ProtoMessage()    {}
+func (*Shadow) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{3}
+}
+
+func (m *Shadow) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Shadow.Unmarshal(m, b)
+}
+func (m *Shadow) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Shadow.Marshal(b, m, deterministic)
+}
+func (m *Shadow) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Shadow.Merge(m, src)
+}
+func (m *Shadow) XXX_Size() int {
+	return xxx_messageInfo_Shadow.Size(m)
+}
+func (m *Shadow) XXX_DiscardUnknown() {
+	xxx_messageInfo_Shadow.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Shadow proto.InternalMessageInfo
+
+func (m *Shadow) GetConfig() *VersionedValue {
+	if m != nil {
+		return m.Config
+	}
+	return nil
+}
+
+func (m *Shadow) GetReported() *VersionedValue {
+	if m != nil {
+		return m.Reported
+	}
+	return nil
+}
+
+func (m *Shadow) GetDesired() *VersionedValue {
+	if m != nil {
+		return m.Desired
+	}
+	return nil
+}
+
+type PatchDesiredRequest struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PatchDesiredRequest) Reset()         { *m = PatchDesiredRequest{} }
+func (m *PatchDesiredRequest) String() string { return proto.CompactTextString(m) }
+func (*PatchDesiredRequest) ProtoMessage()    {}
+func (*PatchDesiredRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{4}
+}
+
+func (m *PatchDesiredRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PatchDesiredRequest.Unmarshal(m, b)
+}
+func (m *PatchDesiredRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PatchDesiredRequest.Marshal(b, m, deterministic)
+}
+func (m *PatchDesiredRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PatchDesiredRequest.Merge(m, src)
+}
+func (m *PatchDesiredRequest) XXX_Size() int {
+	return xxx_messageInfo_PatchDesiredRequest.Size(m)
+}
+func (m *PatchDesiredRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PatchDesiredRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PatchDesiredRequest proto.InternalMessageInfo
+
+type PatchDesiredResponse struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PatchDesiredResponse) Reset()         { *m = PatchDesiredResponse{} }
+func (m *PatchDesiredResponse) String() string { return proto.CompactTextString(m) }
+func (*PatchDesiredResponse) ProtoMessage()    {}
+func (*PatchDesiredResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_40d60d4453ee7b12, []int{5}
+}
+
+func (m *PatchDesiredResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PatchDesiredResponse.Unmarshal(m, b)
+}
+func (m *PatchDesiredResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PatchDesiredResponse.Marshal(b, m, deterministic)
+}
+func (m *PatchDesiredResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PatchDesiredResponse.Merge(m, src)
+}
+func (m *PatchDesiredResponse) XXX_Size() int {
+	return xxx_messageInfo_PatchDesiredResponse.Size(m)
+}
+func (m *PatchDesiredResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_PatchDesiredResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PatchDesiredResponse proto.InternalMessageInfo
+
 func init() {
-	proto.RegisterType((*GetReportedRequest)(nil), "infinimesh.shadow.GetReportedRequest")
-	proto.RegisterType((*GetReportedResponse)(nil), "infinimesh.shadow.GetReportedResponse")
+	proto.RegisterType((*VersionedValue)(nil), "infinimesh.shadow.VersionedValue")
+	proto.RegisterType((*GetRequest)(nil), "infinimesh.shadow.GetRequest")
+	proto.RegisterType((*GetResponse)(nil), "infinimesh.shadow.GetResponse")
+	proto.RegisterType((*Shadow)(nil), "infinimesh.shadow.Shadow")
+	proto.RegisterType((*PatchDesiredRequest)(nil), "infinimesh.shadow.PatchDesiredRequest")
+	proto.RegisterType((*PatchDesiredResponse)(nil), "infinimesh.shadow.PatchDesiredResponse")
 }
 
 func init() { proto.RegisterFile("pkg/shadow/shadowpb/shadow.proto", fileDescriptor_40d60d4453ee7b12) }
 
 var fileDescriptor_40d60d4453ee7b12 = []byte{
-	// 214 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x28, 0xc8, 0x4e, 0xd7,
-	0x2f, 0xce, 0x48, 0x4c, 0xc9, 0x2f, 0x87, 0x52, 0x05, 0x49, 0x50, 0x86, 0x5e, 0x41, 0x51, 0x7e,
-	0x49, 0xbe, 0x90, 0x60, 0x66, 0x5e, 0x5a, 0x66, 0x5e, 0x66, 0x6e, 0x6a, 0x71, 0x86, 0x1e, 0x44,
-	0x42, 0x4a, 0x26, 0x3d, 0x3f, 0x3f, 0x3d, 0x27, 0x55, 0x1f, 0xac, 0x20, 0xa9, 0x34, 0x4d, 0xbf,
-	0xb8, 0xa4, 0xa8, 0x34, 0xb9, 0x04, 0xa2, 0x41, 0xc9, 0x90, 0x4b, 0xc8, 0x3d, 0xb5, 0x24, 0x28,
-	0xb5, 0x20, 0xbf, 0xa8, 0x24, 0x35, 0x25, 0x28, 0xb5, 0xb0, 0x34, 0xb5, 0xb8, 0x44, 0x48, 0x9a,
-	0x8b, 0x33, 0x25, 0xb5, 0x2c, 0x33, 0x39, 0x35, 0x3e, 0x33, 0x45, 0x82, 0x51, 0x81, 0x51, 0x83,
-	0x33, 0x88, 0x03, 0x22, 0xe0, 0x99, 0xa2, 0xe4, 0xcc, 0x25, 0x8c, 0xa2, 0xa5, 0xb8, 0x20, 0x3f,
-	0xaf, 0x38, 0x55, 0x48, 0x87, 0x8b, 0xb5, 0xb8, 0x24, 0xb1, 0x24, 0x15, 0xac, 0x9e, 0xdb, 0x48,
-	0x4c, 0x0f, 0x62, 0xaf, 0x1e, 0xcc, 0x5e, 0xbd, 0xb0, 0xc4, 0x9c, 0xd2, 0xd4, 0x20, 0x88, 0x22,
-	0xa3, 0x34, 0x2e, 0xb6, 0x60, 0xb0, 0xfb, 0x84, 0x62, 0xb8, 0xb8, 0x91, 0x8c, 0x13, 0x52, 0xd5,
-	0xc3, 0xf0, 0x82, 0x1e, 0xa6, 0x0b, 0xa5, 0xd4, 0x08, 0x29, 0x83, 0xb8, 0xca, 0x89, 0x2b, 0x8a,
-	0x03, 0x16, 0x52, 0x49, 0x6c, 0x60, 0xa7, 0x18, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xb8, 0x22,
-	0xf7, 0x0a, 0x47, 0x01, 0x00, 0x00,
+	// 352 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xc1, 0x4e, 0xea, 0x40,
+	0x14, 0x86, 0x53, 0xe0, 0x16, 0x38, 0x24, 0x24, 0x77, 0xee, 0x95, 0xd4, 0x06, 0x15, 0xbb, 0x62,
+	0x61, 0x4a, 0xc4, 0x8d, 0xc6, 0x98, 0x18, 0x43, 0xc2, 0x52, 0x33, 0x1a, 0x16, 0xee, 0x0a, 0x73,
+	0x28, 0x13, 0xa1, 0x53, 0x3b, 0x53, 0x7c, 0x0f, 0x5f, 0xc8, 0x57, 0x33, 0xcc, 0x4c, 0x21, 0x08,
+	0x26, 0xac, 0xa6, 0x73, 0xce, 0xff, 0xfd, 0xa7, 0xe7, 0x6f, 0xa1, 0x93, 0xbe, 0xc5, 0x3d, 0x39,
+	0x8b, 0x98, 0xf8, 0xb0, 0x47, 0x3a, 0xb6, 0x0f, 0x61, 0x9a, 0x09, 0x25, 0xc8, 0x5f, 0x9e, 0x4c,
+	0x79, 0xc2, 0x17, 0x28, 0x67, 0xa1, 0x69, 0xf8, 0xed, 0x58, 0x88, 0x78, 0x8e, 0x3d, 0x2d, 0x18,
+	0xe7, 0xd3, 0x9e, 0x54, 0x59, 0x3e, 0x51, 0x06, 0xf0, 0xcf, 0x7e, 0x76, 0xd5, 0x0a, 0x56, 0xd1,
+	0x22, 0x35, 0x82, 0xe0, 0xd3, 0x81, 0xe6, 0x08, 0x33, 0xc9, 0x45, 0x82, 0x6c, 0x14, 0xcd, 0x73,
+	0x24, 0x1e, 0x54, 0x97, 0xa6, 0xe2, 0x39, 0x1d, 0xa7, 0x5b, 0xa1, 0xc5, 0x95, 0x5c, 0xc0, 0x9f,
+	0xe5, 0x4a, 0xe2, 0x95, 0x3a, 0x4e, 0xb7, 0xd1, 0x6f, 0x85, 0xc6, 0x3d, 0x2c, 0xdc, 0x43, 0x6d,
+	0x40, 0x8d, 0x88, 0x5c, 0x43, 0x7d, 0x3d, 0xcd, 0x2b, 0x6b, 0xc2, 0xdf, 0x21, 0x5e, 0x0a, 0x05,
+	0xdd, 0x88, 0x83, 0x36, 0xc0, 0x10, 0x15, 0xc5, 0xf7, 0x1c, 0xa5, 0x22, 0x4d, 0x28, 0x71, 0xa6,
+	0x5f, 0xa5, 0x4e, 0x4b, 0x9c, 0x05, 0xf7, 0xd0, 0xd0, 0x5d, 0x99, 0x8a, 0x44, 0x22, 0xb9, 0x04,
+	0xd7, 0x44, 0xa1, 0x25, 0x8d, 0xfe, 0x71, 0xb8, 0x13, 0x52, 0xf8, 0xac, 0x0f, 0x6a, 0x85, 0xc1,
+	0x97, 0x03, 0xae, 0x29, 0x91, 0x1b, 0x70, 0x27, 0x22, 0x99, 0xf2, 0xd8, 0xee, 0x74, 0xbe, 0x87,
+	0xde, 0xce, 0x87, 0x5a, 0x80, 0xdc, 0x41, 0x2d, 0xc3, 0x54, 0x64, 0x0a, 0x99, 0x5d, 0xef, 0x00,
+	0x78, 0x8d, 0x90, 0x5b, 0xa8, 0x32, 0x94, 0x3c, 0x43, 0xe6, 0x55, 0x0e, 0xa5, 0x0b, 0x22, 0x38,
+	0x82, 0x7f, 0x4f, 0x91, 0x9a, 0xcc, 0x06, 0xe6, 0x6e, 0xa3, 0x0a, 0x5a, 0xf0, 0x7f, 0xbb, 0x6c,
+	0x32, 0xea, 0x3f, 0x42, 0xd5, 0xec, 0x2b, 0xc9, 0x00, 0xca, 0x43, 0x54, 0xe4, 0x64, 0xcf, 0xb0,
+	0x4d, 0xe6, 0xfe, 0xe9, 0x6f, 0x6d, 0x63, 0xf8, 0x00, 0xaf, 0xb5, 0xe2, 0x0f, 0x1d, 0xbb, 0xfa,
+	0x63, 0x5e, 0x7d, 0x07, 0x00, 0x00, 0xff, 0xff, 0x35, 0xc2, 0x8f, 0xba, 0xbf, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -134,64 +319,64 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// ShadowClient is the client API for Shadow service.
+// ShadowsClient is the client API for Shadows service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ShadowClient interface {
-	GetReported(ctx context.Context, in *GetReportedRequest, opts ...grpc.CallOption) (*GetReportedResponse, error)
+type ShadowsClient interface {
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 }
 
-type shadowClient struct {
+type shadowsClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewShadowClient(cc *grpc.ClientConn) ShadowClient {
-	return &shadowClient{cc}
+func NewShadowsClient(cc *grpc.ClientConn) ShadowsClient {
+	return &shadowsClient{cc}
 }
 
-func (c *shadowClient) GetReported(ctx context.Context, in *GetReportedRequest, opts ...grpc.CallOption) (*GetReportedResponse, error) {
-	out := new(GetReportedResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadow/GetReported", in, out, opts...)
+func (c *shadowsClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ShadowServer is the server API for Shadow service.
-type ShadowServer interface {
-	GetReported(context.Context, *GetReportedRequest) (*GetReportedResponse, error)
+// ShadowsServer is the server API for Shadows service.
+type ShadowsServer interface {
+	Get(context.Context, *GetRequest) (*GetResponse, error)
 }
 
-func RegisterShadowServer(s *grpc.Server, srv ShadowServer) {
-	s.RegisterService(&_Shadow_serviceDesc, srv)
+func RegisterShadowsServer(s *grpc.Server, srv ShadowsServer) {
+	s.RegisterService(&_Shadows_serviceDesc, srv)
 }
 
-func _Shadow_GetReported_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetReportedRequest)
+func _Shadows_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShadowServer).GetReported(ctx, in)
+		return srv.(ShadowsServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.shadow.Shadow/GetReported",
+		FullMethod: "/infinimesh.shadow.Shadows/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShadowServer).GetReported(ctx, req.(*GetReportedRequest))
+		return srv.(ShadowsServer).Get(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Shadow_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "infinimesh.shadow.Shadow",
-	HandlerType: (*ShadowServer)(nil),
+var _Shadows_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "infinimesh.shadow.Shadows",
+	HandlerType: (*ShadowsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetReported",
-			Handler:    _Shadow_GetReported_Handler,
+			MethodName: "Get",
+			Handler:    _Shadows_Get_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

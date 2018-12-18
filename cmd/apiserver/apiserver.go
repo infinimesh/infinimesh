@@ -38,10 +38,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	shadowClient := shadowpb.NewShadowClient(shadowConn)
+	shadowClient := shadowpb.NewShadowsClient(shadowConn)
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient})
-	apipb.RegisterShadowServer(srv, &shadowAPI{client: shadowClient})
+	apipb.RegisterShadowsServer(srv, &shadowAPI{client: shadowClient})
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		panic(err)

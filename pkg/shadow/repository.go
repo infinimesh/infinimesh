@@ -17,15 +17,15 @@ type Repo interface {
 
 type DeviceState struct {
 	ID      string
-	Version int64
+	Version uint64
 	State   json.RawMessage
 }
 
 type DeviceStateDB struct {
 	ID              string
-	ReportedVersion int64
+	ReportedVersion uint64
 	ReportedState   postgres.Jsonb
-	DesiredVersion  int64
+	DesiredVersion  uint64
 	DesiredState    postgres.Jsonb
 }
 

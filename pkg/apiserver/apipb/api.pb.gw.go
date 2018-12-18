@@ -110,8 +110,8 @@ func request_Devices_Delete_0(ctx context.Context, marshaler runtime.Marshaler, 
 
 }
 
-func request_Shadow_GetReported_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq shadowpb.GetReportedRequest
+func request_Shadows_Get_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq shadowpb.GetRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -121,18 +121,18 @@ func request_Shadow_GetReported_0(ctx context.Context, marshaler runtime.Marshal
 		_   = err
 	)
 
-	val, ok = pathParams["device_id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	protoReq.DeviceId, err = runtime.String(val)
+	protoReq.Id, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
-	msg, err := client.GetReported(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.Get(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
@@ -278,9 +278,9 @@ var (
 	forward_Devices_Delete_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterShadowHandlerFromEndpoint is same as RegisterShadowHandler but
+// RegisterShadowsHandlerFromEndpoint is same as RegisterShadowsHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterShadowHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterShadowsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -300,23 +300,23 @@ func RegisterShadowHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMu
 		}()
 	}()
 
-	return RegisterShadowHandler(ctx, mux, conn)
+	return RegisterShadowsHandler(ctx, mux, conn)
 }
 
-// RegisterShadowHandler registers the http handlers for service Shadow to "mux".
+// RegisterShadowsHandler registers the http handlers for service Shadows to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterShadowHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterShadowHandlerClient(ctx, mux, NewShadowClient(conn))
+func RegisterShadowsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterShadowsHandlerClient(ctx, mux, NewShadowsClient(conn))
 }
 
-// RegisterShadowHandlerClient registers the http handlers for service Shadow
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ShadowClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ShadowClient"
+// RegisterShadowsHandlerClient registers the http handlers for service Shadows
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ShadowsClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ShadowsClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "ShadowClient" to call the correct interceptors.
-func RegisterShadowHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ShadowClient) error {
+// "ShadowsClient" to call the correct interceptors.
+func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ShadowsClient) error {
 
-	mux.Handle("GET", pattern_Shadow_GetReported_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Shadows_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -325,14 +325,14 @@ func RegisterShadowHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Shadow_GetReported_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Shadows_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Shadow_GetReported_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Shadows_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -340,9 +340,9 @@ func RegisterShadowHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 }
 
 var (
-	pattern_Shadow_GetReported_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "device_id", "reported"}, ""))
+	pattern_Shadows_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "shadow"}, ""))
 )
 
 var (
-	forward_Shadow_GetReported_0 = runtime.ForwardResponseMessage
+	forward_Shadows_Get_0 = runtime.ForwardResponseMessage
 )

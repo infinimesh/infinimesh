@@ -41,7 +41,7 @@ func run() error {
 		return err
 	}
 
-	err = apipb.RegisterShadowHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
+	err = apipb.RegisterShadowsHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
 		return err
 	}
