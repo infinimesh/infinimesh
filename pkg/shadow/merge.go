@@ -16,26 +16,26 @@ func init() {
 var conjungoOpts *conjungo.Options
 
 func applyDelta(full, delta string) (merged string, err error) {
-	fullMap := make(map[string]interface{})
+	var fullJson interface{}
 	if full != "" {
-		err := json.Unmarshal([]byte(full), &fullMap)
+		err := json.Unmarshal([]byte(full), &fullJson)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	deltaMap := make(map[string]interface{})
-	err = json.Unmarshal([]byte(delta), &deltaMap)
+	var deltaJson interface{}
+	err = json.Unmarshal([]byte(delta), &deltaJson)
 	if err != nil {
 		return "", err
 	}
 
-	err = conjungo.Merge(&fullMap, deltaMap, conjungoOpts)
+	err = conjungo.Merge(&fullJson, deltaJson, conjungoOpts)
 	if err != nil {
 		return "", err
 	}
 
-	result, err := json.Marshal(fullMap)
+	result, err := json.Marshal(fullJson)
 	if err != nil {
 		return "", err
 	}

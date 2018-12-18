@@ -5,7 +5,6 @@ import (
 
 	"encoding/json"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,13 +30,13 @@ func TestMerge(t *testing.T) {
 `
 
 	mutatedState, err := applyDelta(state, delta)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	r := make(map[string]interface{})
 	err = json.Unmarshal([]byte(mutatedState), &r)
-	assert.NoError(t, err)
-	assert.EqualValues(t, 15, r["temp_celsius"])
-	assert.EqualValues(t, "20 kmh", r["speed"])
+	require.NoError(t, err)
+	require.EqualValues(t, 15, r["temp_celsius"])
+	require.EqualValues(t, "20 kmh", r["speed"])
 }
 
 func TestMergeNested(t *testing.T) {
@@ -45,9 +44,19 @@ func TestMergeNested(t *testing.T) {
 
 	delta := `{"a":{"very_much":true,"bla":13}}`
 	mutatedState, err := applyDelta(state, delta)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, err)
-	assert.EqualValues(t, `{"a":{"bla":13,"very_much":true}}`, mutatedState)
+	require.NoError(t, err)
+	require.EqualValues(t, `{"a":{"bla":13,"very_much":true}}`, mutatedState)
 
+}
+
+func TestMergePrimitive(t *testing.T) {
+	old := `{"a" : "test"}`
+	newDelta := `true`
+
+	merged, err := applyDelta(old, newDelta)
+
+	require.NoError(t, err)
+	require.EqualValues(t, "true", merged)
 }
