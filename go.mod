@@ -20,7 +20,7 @@ require (
 	github.com/google/uuid v1.1.0
 	github.com/grpc-ecosystem/grpc-gateway v1.6.2
 	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
-	github.com/jinzhu/gorm v1.9.1
+	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20181116074157-8ec929ed50c3 // indirect
 	github.com/julienschmidt/httprouter v1.2.0

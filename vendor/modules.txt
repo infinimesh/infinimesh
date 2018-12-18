@@ -53,7 +53,7 @@ github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
 # github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 github.com/infinimesh/mqtt-go/packet
-# github.com/jinzhu/gorm v1.9.1
+# github.com/jinzhu/gorm v1.9.2
 github.com/jinzhu/gorm/dialects/postgres
 github.com/jinzhu/gorm
 # github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
