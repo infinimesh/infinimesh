@@ -61,27 +61,27 @@
         ]
       }
     },
-    "/devices/{device_id}/reported": {
+    "/devices/{id}/shadow": {
       "get": {
-        "operationId": "GetReported",
+        "operationId": "Get",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/shadowGetReportedResponse"
+              "$ref": "#/definitions/shadowGetResponse"
             }
           }
         },
         "parameters": [
           {
-            "name": "device_id",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "tags": [
-          "Shadow"
+          "Shadows"
         ]
       }
     },
@@ -264,11 +264,41 @@
       },
       "description": "`Value` represents a dynamically typed value which can be either\nnull, a number, a string, a boolean, a recursive struct value, or a\nlist of values. A producer of value is expected to set one of that\nvariants, absence of any variant indicates an error.\n\nThe JSON representation for `Value` is JSON value."
     },
-    "shadowGetReportedResponse": {
+    "shadowGetResponse": {
       "type": "object",
       "properties": {
-        "state": {
+        "shadow": {
+          "$ref": "#/definitions/shadowShadow"
+        }
+      }
+    },
+    "shadowShadow": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/shadowVersionedValue"
+        },
+        "reported": {
+          "$ref": "#/definitions/shadowVersionedValue"
+        },
+        "desired": {
+          "$ref": "#/definitions/shadowVersionedValue"
+        }
+      }
+    },
+    "shadowVersionedValue": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "data": {
           "$ref": "#/definitions/protobufValue"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     }
