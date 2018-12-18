@@ -7,6 +7,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -45,6 +46,6 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
-	return http.ListenAndServe(":8081", mux)
+	corsMiddleware := cors.Default().Handler(mux)
+	return http.ListenAndServe(":8081", corsMiddleware)
 }
