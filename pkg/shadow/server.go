@@ -38,7 +38,7 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 		Shadow: &shadowpb.Shadow{
 			Reported: &shadowpb.VersionedValue{
 				Version:   uint64(state.Version),
-				Value:     &value,
+				Data:      &value,
 				Timestamp: ts,
 			},
 		},

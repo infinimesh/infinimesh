@@ -8,7 +8,7 @@ import "google/protobuf/timestamp.proto";
 
 message VersionedValue {
   uint64 version = 1;
-  google.protobuf.Value value = 2;
+  google.protobuf.Value data = 2;
   google.protobuf.Timestamp timestamp = 3;
 }
 
