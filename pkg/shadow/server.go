@@ -3,7 +3,8 @@ package shadow
 import (
 	"bytes"
 	"context"
-	"errors"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -31,12 +32,12 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 
 	var reportedValue structpb.Value
 	if err := u.Unmarshal(bytes.NewReader(reportedState.State), &reportedValue); err != nil {
-		return nil, errors.New("Failed to unmarshal JSON from database")
+		fmt.Fprintf(os.Stderr, "Failed to unmarshal JSON from database: %v", err)
 	}
 
 	var desiredValue structpb.Value
 	if err := u.Unmarshal(bytes.NewReader(desiredState.State), &desiredValue); err != nil {
-		return nil, errors.New("Failed to unmarshal JSON from database")
+		fmt.Fprintf(os.Stderr, "Failed to unmarshal JSON from database: %v", err)
 	}
 
 	ts, err := ptypes.TimestampProto(time.Now())
