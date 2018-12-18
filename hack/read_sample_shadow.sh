@@ -1,2 +1,2 @@
 #!/bin/bash
-grpcurl -plaintext -d '{"device_id" : "testdevice4"}' localhost:8080 infinimesh.api.Shadow/GetReported | jq
+grpcurl -plaintext -d '{"id" : "testdevice4"}' localhost:8080 infinimesh.api.Shadows/Get | jq
