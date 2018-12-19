@@ -1,6 +1,7 @@
 <template>
   <v-container xs12>
     <h1 class="mb-3">Your devices</h1>
+    <v-btn color="primary" @click="getAllDevices">Get Devices</v-btn>
     <v-card>
       <v-card-title>
       <v-text-field
@@ -19,6 +20,7 @@
        :items="devices"
        :search="search"
        item-key="name"
+      >
         <template slot="items" slot-scope="props">
           <tr>
             <td
