@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,11 +14,13 @@ import (
 )
 
 var (
-	consumerGroup = "shadow"
-	broker        string
-	topics        = []string{topic}
-	topic         = "public.delta.reported-state"
-	mergedTopic   = "shadow.reported-state.full"
+	consumerGroupReported = "shadow-reported"
+	consumerGroupDesired  = "shadow-desired"
+	broker                string
+	topicReportedState    = "public.delta.reported-state"
+	topicDesiredState     = "public.delta.desired-state"
+	mergedTopicReported   = "shadow.reported-state.full"
+	mergedTopicDesired    = "shadow.desired-state.full"
 )
 
 func init() {
@@ -27,12 +30,12 @@ func init() {
 	broker = viper.GetString("KAFKA_HOST")
 }
 
-func main() {
+func runMerger(inputTopic, outputTopic, consumerGroup string, stop chan bool, ctx context.Context) (close io.Closer, done chan bool) {
+	done = make(chan bool)
 	consumerGroupClient := sarama.NewConfig()
 	consumerGroupClient.Version = sarama.V1_0_0_0
 	consumerGroupClient.Consumer.Return.Errors = true
 	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
-	consumerGroupClient.Consumer.Group.Member.UserData = []byte("test:8080")
 
 	client, err := sarama.NewClient([]string{broker}, consumerGroupClient)
 	if err != nil {
@@ -79,29 +82,24 @@ func main() {
 	}
 
 	handler := &shadow.StateMerger{
-		SourceTopic:             topic,
-		ChangelogTopic:          mergedTopic,
+		SourceTopic:             inputTopic,
+		MergedTopic:             outputTopic,
 		ChangelogProducerClient: producerClient,
 		ChangelogConsumerClient: localStateConsumerClient,
 	}
-
-	c := make(chan os.Signal, 1)
-
-	signal.Notify(c, syscall.SIGINT)
-
-	done := make(chan bool, 1)
 
 	go func() {
 	outer:
 		for {
 
-			err = group.Consume(context.Background(), topics, handler)
+			err = group.Consume(ctx, []string{inputTopic}, handler)
 			if err != nil {
 				panic(err)
 			}
 
 			select {
-			case <-done:
+			case <-stop:
+				done <- true
 				break outer
 			default:
 			}
@@ -109,11 +107,30 @@ func main() {
 		}
 
 	}()
+	return group, done
+}
 
-	<-c
-	done <- true
-	err = group.Close()
-	if err != nil {
-		panic(err)
-	}
+func main() {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT)
+
+	stopReported := make(chan bool, 2)
+	stopDesired := make(chan bool, 2)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, consumerGroupReported, stopReported, ctx)
+	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, consumerGroupDesired, stopDesired, ctx)
+
+	go func() {
+		<-signals
+		stopDesired <- true
+		stopReported <- true
+		cancel()
+		closeDesired.Close()
+		closeReported.Close()
+	}()
+
+	<-doneReported
+	<-doneDesired
 }

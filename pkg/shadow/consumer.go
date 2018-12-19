@@ -12,8 +12,8 @@ import (
 )
 
 type StateMerger struct {
-	SourceTopic    string
-	ChangelogTopic string
+	SourceTopic string
+	MergedTopic string
 
 	m           sync.Mutex
 	localStates map[int32]map[string]*FullDeviceStateMessage // device id to state string
@@ -39,13 +39,13 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 	for _, partition := range partitions {
 		localStates[partition] = make(map[string]*FullDeviceStateMessage)
 		offsets[partition] = 0
-		pc, err := consumer.ConsumePartition(c.ChangelogTopic, partition, int64(0))
+		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, int64(0))
 		if err != nil {
 			return nil, nil, err
 		}
 		defer pc.Close()
 
-		newestOffset, err := client.GetOffset(c.ChangelogTopic, partition, sarama.OffsetNewest)
+		newestOffset, err := client.GetOffset(c.MergedTopic, partition, sarama.OffsetNewest)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -74,7 +74,6 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 }
 
 func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
-	fmt.Println("Work with topic", c.SourceTopic)
 	fmt.Println("Rebalance, assigned partitions:", s.Claims())
 	c.localStates = make(map[int32]map[string]*FullDeviceStateMessage)
 
@@ -110,10 +109,8 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 
 	h.changelogProducer.Close()
 	h.changelogProducer = nil
-	// h.localStateMaxOffsets = nil
 	h.localStates = nil
 
-	fmt.Println("return")
 	return nil
 }
 
@@ -132,6 +129,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 			deviceState = ds
 		}
 
+		// Input: any JSON
 		delta := string(message.Value)
 		old := string(deviceState.State)
 
@@ -155,7 +153,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		}
 
 		h.changelogProducer.Input() <- &sarama.ProducerMessage{
-			Topic:     h.ChangelogTopic,
+			Topic:     h.MergedTopic,
 			Key:       sarama.StringEncoder(message.Key),
 			Value:     sarama.StringEncoder(stateDocument),
 			Partition: message.Partition,
