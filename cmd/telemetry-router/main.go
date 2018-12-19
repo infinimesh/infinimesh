@@ -23,7 +23,7 @@ var (
 	consumerGroup = "dispatcher"
 	broker        string
 
-	sourceTopic  = "public.bridge.mqtt"
+	sourceTopic  = "mqtt.messages.incoming"
 	defaultRoute = "public.bridge.dlq"
 	routes       = map[string]string{
 		"shadows/": "public.delta.reported-state",

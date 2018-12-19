@@ -69,8 +69,8 @@ type Message struct {
 func init() {
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("KAFKA_TOPIC", "public.bridge.mqtt")
-	viper.SetDefault("KAFKA_TOPIC_BACK", "public.bridge.mqtt.back-channel")
+	viper.SetDefault("KAFKA_TOPIC", "mqtt.messages.incoming")
+	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
 	viper.AutomaticEnv()
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
