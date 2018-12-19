@@ -1,36 +1,36 @@
 <template>
   <v-container xs12>
     <h1 class="mb-3">Your devices</h1>
+    <v-btn color="primary" @click="getAllDevices">Get Devices</v-btn>
     <v-card>
-     <v-card-title>
-       <v-text-field
+      <v-card-title>
+      <v-text-field
          v-model="search"
          append-icon="search"
          label="Search"
          single-line
          hide-details
-       ></v-text-field>
-       <v-spacer></v-spacer>
-       <v-spacer></v-spacer>
-     </v-card-title>
-     <v-data-table
+      >
+      </v-text-field>
+      <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
+      </v-card-title>
+      <v-data-table
        :headers="headers"
        :items="devices"
        :search="search"
        item-key="name"
-     >
-       <template slot="items" slot-scope="props">
-         <tr>
-           <td
-             class="text-xs-left"
-             style="cursor: pointer"
-             @click="navigateTo(props.item.deviceId)"
-           >
-           <v-icon
-             v-if="props.item.activated"
-             color="green"
-           >
-            check_circle
+      >
+        <template slot="items" slot-scope="props">
+          <tr>
+            <td
+              class="text-xs-left"
+            >
+            <v-icon
+              v-if="props.item.enabled"
+              color="green"
+            >
+              check_circle
            </v-icon>
            <v-icon
              v-else
@@ -38,79 +38,82 @@
            >
             block
           </v-icon>
-           </td>
-           <td
-             class="text-xs-left"
-             style="cursor: pointer"
-             @click="navigateTo(props.item.deviceId)"
-           >
-           {{ props.item.deviceId }}
-           </td>
-           <td
-             class="text-xs-left"
-             style="cursor: pointer"
-             @click="navigateTo(props.item.deviceId)"
-           >
-           {{ props.item.name }}
-           <td
-             class="text-xs-left"
-             style="cursor: pointer"
-             @click="navigateTo(props.item.deviceId)"
-           >
-           {{ props.item.location }}
-           </td>
-           <td
-             class="text-xs-left"
-             style="cursor: pointer"
-             @click="navigateTo(props.item.deviceId)"
-           >
-             <v-chip
-              v-for="tag in props.item.tags"
-             >
-              {{ tag }}
-            </v-chip>
-           </td>
-           <td
-             class="text-xs-center"
-           >
-           <v-menu offset-y>
-             <v-btn
-               slot="activator"
-               color="primary"
-               flat
-             >
-              <v-icon>more_vert</v-icon>
-             </v-btn>
-             <v-list>
-               <v-list-tile
-                 v-for="(option, index) in options"
-                 :key="index"
-                 :to="{name: option, params: { id: props.item.deviceId }}"
-               >
-                 <v-list-tile-title>{{ option }}</v-list-tile-title>
-               </v-list-tile>
-             </v-list>
+            </td>
+            <td
+              class="text-xs-left"
+              style="cursor: pointer"
+              @click="navigateTo(props.item.deviceId)"
+            >
+              {{ props.item.deviceId }}
+            </td>
+            <td
+              class="text-xs-left"
+              style="cursor: pointer"
+              @click="navigateTo(props.item.deviceId)"
+            >
+              {{ props.item.name }}
+            </td>
+            <td
+              class="text-xs-left"
+            >
+              {{ props.item.location }}
+            </td>
+            <td
+              class="text-xs-left"
+            >
+              <v-chip
+                v-for="tag in props.item.tags"
+              >
+                {{ tag }}
+              </v-chip>
+            </td>
+            <td
+              class="text-xs-center"
+            >
+            <v-menu offset-y>
+              <v-btn
+                slot="activator"
+                color="primary"
+                flat
+              >
+                <v-icon>
+                  more_vert
+                </v-icon>
+              </v-btn>
+              <v-list>
+                <v-list-tile
+                  v-for="(option, index) in options"
+                  :key="index"
+                  :to="{name: option, params: { id: props.item.deviceId }}"
+                >
+                  <v-list-tile-title>
+                    {{ option }}
+                  </v-list-tile-title>
+                </v-list-tile>
+              </v-list>
             </v-menu>
-           </td>
-         </tr>
-       </template>
-       <v-alert slot="no-results" :value="true" color="error" icon="warning">
-         Your search for "{{ search }}" found no results.
-       </v-alert>
-     </v-data-table>
-     <v-card-actions>
-       <v-btn
+          </td>
+        </tr>
+      </template>
+      <v-alert slot="no-results" :value="true" color="error" icon="warning">
+        Your search for "{{ search }}" found no results.
+      </v-alert>
+    </v-data-table>
+    <v-card-actions>
+      <v-btn
         color="primary lighten-1"
         bottom
         left
         round
         :to="{ name: 'Register device' }"
-        >
-        <v-icon>add</v-icon>
+      >
+        <v-icon>
+          add
+        </v-icon>
       </v-btn>
-     </v-card-actions>
-   </v-card>
- </v-container>
+    </v-card-actions>
+  </v-card>
+</v-container>
 </template>
 
 <script>
@@ -123,7 +126,7 @@ export default {
         {
           text: "Active",
           align: "left",
-          value: "activated"
+          value: "enabled"
         },
         {
           text: "Id",
@@ -167,7 +170,22 @@ export default {
   methods: {
     navigateTo(id) {
       this.$router.push("devices/show/" + id);
+    },
+    getAllDevices() {
+      this.$http
+        .get("http://localhost:8081/devices")
+        .then(response => {
+          console.log("response")
+        })
+        // .then(jsondata => {
+        //   this.realData = jsondata;
+        //   console.log("ok")
+        // })
+        .catch(e => {});
     }
+  },
+  beforeMount() {
+    this.getAllDevices();
   }
 };
 </script>

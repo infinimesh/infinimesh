@@ -17,7 +17,8 @@ Vue.use(Vuetify, {
 
 Vue.use(VueResource);
 
-Vue.http.options.root = "https://vuejs-http-151a8.firebaseio.com/";
+// Vue.http.options.root = "https://localhost:8081";
+
 
 new Vue({
   router,
