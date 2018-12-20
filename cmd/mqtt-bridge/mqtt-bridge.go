@@ -61,11 +61,6 @@ var (
 	ps *pubsub.PubSub
 )
 
-type Message struct {
-	Topic string
-	Data  []byte
-}
-
 func init() {
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
@@ -97,7 +92,7 @@ func readBackchannelFromKafka() {
 		}
 
 		for message := range pc.Messages() {
-			var m Message
+			var m mqtt.OutgoingMessage
 			err = json.Unmarshal(message.Value, &m)
 			if err != nil {
 				fmt.Println("Failed to unmarshal message from kafka", err)
@@ -178,7 +173,7 @@ func main() {
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
-		m := message.(*Message)
+		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
 		p := packet.NewPublish(m.Topic /* TODO */, uint16(0), m.Data)
 		_, err := p.WriteTo(c)
@@ -299,7 +294,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string) error {
-	message := mqtt.MQTTBridgeData{
+	message := mqtt.IncomingMessage{
 		SourceTopic:  topic,
 		SourceDevice: deviceID,
 		Data:         data,

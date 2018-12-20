@@ -119,7 +119,7 @@ func (h *handler) Cleanup(s sarama.ConsumerGroupSession) error {
 
 func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		var msg mqtt.MQTTBridgeData
+		var msg mqtt.IncomingMessage
 		err := json.Unmarshal(message.Value, &msg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
