@@ -33,9 +33,9 @@ service Devices {
       body: "device"
     };
   };
-  rpc GetByName(infinimesh.deviceregistry.GetByNameRequest) returns (infinimesh.deviceregistry.GetByNameResponse) {
+  rpc Get(infinimesh.deviceregistry.GetRequest) returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{name}"
+      get: "/devices/{id}"
     };
   };
   rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse) {
@@ -45,7 +45,7 @@ service Devices {
   }
   rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete: "/devices/{name}"
+      delete: "/devices/{id}"
     };
   };
 }

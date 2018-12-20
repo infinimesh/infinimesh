@@ -83,7 +83,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 
 	if err := s.db.Create(&Device{
 		ID:                     uuidBytes,
-		Name:                   request.Device.Name,
+		Name:                   request.Device.Id,
 		Enabled:                request.Device.Enabled,
 		Certificate:            string(st),
 		CertificateType:        request.Device.Certificate.Algorithm,
@@ -102,17 +102,17 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 		return &registrypb.GetByFingerprintResponse{}, status.Error(codes.FailedPrecondition, err.Error())
 	}
 	return &registrypb.GetByFingerprintResponse{
-		Name: device.Name,
+		Id: device.Name,
 	}, nil
 }
 
-func (s *Server) GetByName(ctx context.Context, request *registrypb.GetByNameRequest) (response *registrypb.GetByNameResponse, err error) {
+func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 	var device Device
-	if err := s.db.First(&device, "name = ?", request.Name).Error; err != nil {
+	if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
 		return nil, err
 	}
-	return &registrypb.GetByNameResponse{
-		Name:    device.Name,
+	return &registrypb.GetResponse{
+		Id:      device.Name,
 		Enabled: false,
 		// TODO
 	}, nil
@@ -135,7 +135,7 @@ func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registr
 
 func toProto(device *Device) *registrypb.Device {
 	return &registrypb.Device{
-		Name:    device.Name,
+		Id:      device.Name,
 		Enabled: true, // TODO
 		Certificate: &registrypb.Certificate{
 			PemData:   device.Certificate,
@@ -146,7 +146,7 @@ func toProto(device *Device) *registrypb.Device {
 }
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
-	if err := s.db.Delete(&Device{Name: request.Name}).Error; err != nil {
+	if err := s.db.Delete(&Device{Name: request.Id}).Error; err != nil {
 		return nil, err
 	}
 	return &registrypb.DeleteResponse{}, nil

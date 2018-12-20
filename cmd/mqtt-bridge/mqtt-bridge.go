@@ -34,7 +34,7 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		}
 
 		// TODO verify with configured CACert.
-		fmt.Printf("Verified client with fingerprint device for fingerprint: %v\n", reply.Name)
+		fmt.Printf("Verified client with fingerprint device for fingerprint: %v\n", reply.Id)
 		return nil
 	}
 	return errors.New("Could not verify fingerprint")
@@ -160,12 +160,12 @@ func main() {
 			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
 			continue
 		}
-		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetName())
+		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetId())
 
 		backChannel := ps.Sub()
 
-		go handleConn(conn, reply.GetName(), backChannel)
-		go handleBackChannel(conn, reply.GetName(), backChannel)
+		go handleConn(conn, reply.GetId(), backChannel)
+		go handleBackChannel(conn, reply.GetId(), backChannel)
 	}
 
 }
