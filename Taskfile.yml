@@ -11,9 +11,6 @@ tasks:
     desc: Generate protobuf files
     cmds:
       - prototool generate
-  generate-swagger:
-    deps: [proto]
-    cmds:
       - cp pkg/apiserver/apipb/api.swagger.json docs/swagger-ui/swagger.json
   lint:
     desc: Run linter
