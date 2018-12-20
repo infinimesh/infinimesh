@@ -17,8 +17,8 @@ var (
 	consumerGroupReported = "shadow-reported"
 	consumerGroupDesired  = "shadow-desired"
 	broker                string
-	topicReportedState    = "public.delta.reported-state"
-	topicDesiredState     = "public.delta.desired-state"
+	topicReportedState    = "shadow.reported-state.delta"
+	topicDesiredState     = "shadow.desired-state.delta"
 	mergedTopicReported   = "shadow.reported-state.full"
 	mergedTopicDesired    = "shadow.desired-state.full"
 )

@@ -26,7 +26,7 @@ var (
 	sourceTopic  = "mqtt.messages.incoming"
 	defaultRoute = "public.bridge.dlq"
 	routes       = map[string]string{
-		"shadows/": "public.delta.reported-state",
+		"shadows/": "shadow.reported-state.delta",
 	}
 )
 
