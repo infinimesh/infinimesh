@@ -61,44 +61,20 @@
         ]
       }
     },
-    "/devices/{id}/shadow": {
+    "/devices/{id}": {
       "get": {
         "operationId": "Get",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/shadowGetResponse"
+              "$ref": "#/definitions/infinimeshdeviceregistryGetResponse"
             }
           }
         },
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Shadows"
-        ]
-      }
-    },
-    "/devices/{name}": {
-      "get": {
-        "operationId": "GetByName",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryGetByNameResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "name",
             "in": "path",
             "required": true,
             "type": "string"
@@ -120,7 +96,7 @@
         },
         "parameters": [
           {
-            "name": "name",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -128,6 +104,30 @@
         ],
         "tags": [
           "Devices"
+        ]
+      }
+    },
+    "/devices/{id}/shadow": {
+      "get": {
+        "operationId": "Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshshadowGetResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shadows"
         ]
       }
     }
@@ -163,7 +163,7 @@
     "deviceregistryDevice": {
       "type": "object",
       "properties": {
-        "name": {
+        "id": {
           "type": "string"
         },
         "enabled": {
@@ -172,18 +172,12 @@
         },
         "certificate": {
           "$ref": "#/definitions/deviceregistryCertificate"
-        }
-      }
-    },
-    "deviceregistryGetByNameResponse": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
         },
-        "enabled": {
-          "type": "boolean",
-          "format": "boolean"
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -195,6 +189,22 @@
           "items": {
             "$ref": "#/definitions/deviceregistryDevice"
           }
+        }
+      }
+    },
+    "infinimeshdeviceregistryGetResponse": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/deviceregistryDevice"
+        }
+      }
+    },
+    "infinimeshshadowGetResponse": {
+      "type": "object",
+      "properties": {
+        "shadow": {
+          "$ref": "#/definitions/shadowShadow"
         }
       }
     },
@@ -263,14 +273,6 @@
         }
       },
       "description": "`Value` represents a dynamically typed value which can be either\nnull, a number, a string, a boolean, a recursive struct value, or a\nlist of values. A producer of value is expected to set one of that\nvariants, absence of any variant indicates an error.\n\nThe JSON representation for `Value` is JSON value."
-    },
-    "shadowGetResponse": {
-      "type": "object",
-      "properties": {
-        "shadow": {
-          "$ref": "#/definitions/shadowShadow"
-        }
-      }
     },
     "shadowShadow": {
       "type": "object",
