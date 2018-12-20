@@ -83,6 +83,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 
 	if err := s.db.Create(&Device{
 		ID:                     uuidBytes,
+		Tags:                   request.Device.Tags,
 		Name:                   request.Device.Id,
 		Enabled:                request.Device.Enabled,
 		Certificate:            string(st),
@@ -112,9 +113,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 		return nil, err
 	}
 	return &registrypb.GetResponse{
-		Id:      device.Name,
-		Enabled: false,
-		// TODO
+		Device: toProto(&device),
 	}, nil
 }
 func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registrypb.ListResponse, error) {
@@ -137,6 +136,7 @@ func toProto(device *Device) *registrypb.Device {
 	return &registrypb.Device{
 		Id:      device.Name,
 		Enabled: true, // TODO
+		Tags:    device.Tags,
 		Certificate: &registrypb.Certificate{
 			PemData:   device.Certificate,
 			Algorithm: "",        // TODO

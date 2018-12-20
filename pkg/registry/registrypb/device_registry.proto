@@ -8,6 +8,7 @@ message Device {
   string id = 1;
   bool enabled = 3;
   Certificate certificate = 4;
+  repeated string tags = 5;
 }
 
 message CreateRequest {
@@ -37,8 +38,7 @@ message GetRequest {
 }
 
 message GetResponse {
-  string id = 1;
-  bool enabled = 3;
+  Device device = 1;
 }
 
 message ListDevicesRequest {}
