@@ -10,9 +10,9 @@
       "email": "joe@infinimesh.io"
     }
   },
-  "host": "api.infinimesh.io",
+  "host": "api.infinimesh.io:8081",
   "schemes": [
-    "https"
+    "http"
   ],
   "consumes": [
     "application/json"
