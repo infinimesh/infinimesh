@@ -22,6 +22,8 @@ var (
 	broker string
 	topic  string
 
+	topicDesiredDelta = "shadow.desired-state.delta"
+
 	localStateMtx sync.Mutex
 	localState    = make(map[string]*DeviceState)
 
@@ -54,6 +56,7 @@ func main() {
 	config.Version = sarama.V1_0_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	config.Producer.Return.Successes = true
 
 	fmt.Printf("Connect with broker %v\n", broker)
 	consumer, err := sarama.NewConsumer([]string{broker}, config)
@@ -107,7 +110,17 @@ func main() {
 		}
 
 		srv := grpc.NewServer()
-		serverHandler := &shadow.Server{Repo: repo}
+
+		producer, err := sarama.NewSyncProducer([]string{broker}, config)
+		if err != nil {
+			panic(err)
+		}
+		serverHandler := &shadow.Server{
+			Repo:         repo,
+			Producer:     producer,
+			ProduceTopic: topicDesiredDelta,
+		}
+
 		shadowpb.RegisterShadowsServer(srv, serverHandler)
 		reflection.Register(srv)
 		fmt.Println("serve")

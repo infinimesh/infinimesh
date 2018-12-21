@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/struct"
@@ -14,7 +15,9 @@ import (
 )
 
 type Server struct {
-	Repo Repo
+	Repo         Repo
+	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
+	ProduceTopic string
 }
 
 func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
@@ -62,4 +65,25 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 	}
 
 	return
+}
+
+func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+	// TODO sanity-check request
+
+	var marshaler jsonpb.Marshaler
+	var b bytes.Buffer
+	err = marshaler.Marshal(&b, req.GetData())
+	if err != nil {
+		return nil, err
+	}
+
+	_, _, err = s.Producer.SendMessage(&sarama.ProducerMessage{
+		Topic: s.ProduceTopic,
+		Key:   sarama.StringEncoder(req.GetId()),
+		Value: sarama.ByteEncoder(b.Bytes()),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &shadowpb.PatchDesiredStateResponse{}, nil
 }

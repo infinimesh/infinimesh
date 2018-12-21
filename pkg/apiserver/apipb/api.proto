@@ -10,50 +10,68 @@ import "protoc-gen-swagger/options/annotations.proto";
 import "google/api/annotations.proto";
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
-  host: "api.infinimesh.io";
-  info: {
-    title: "Infinimesh IoT Platform";
-    description: "Cloud Native IoT Platform";
-    version: "0.0.1";
-    contact: {
-      name: "Infinimesh";
-      url: "http://infinimesh.io";
-      email: "joe@infinimesh.io";
-    };
-  };
-  schemes: HTTPS;
-  consumes: "application/json";
-  produces: "application/json";
+  host : "api.infinimesh.io";
+info : {
+title:
+  "Infinimesh IoT Platform";
+description:
+  "Cloud Native IoT Platform";
+version:
+  "0.0.1";
+contact : {
+name:
+  "Infinimesh";
+url:
+  "http://infinimesh.io";
+email:
+  "joe@infinimesh.io";
 };
+};
+schemes : HTTPS;
+consumes : "application/json";
+produces : "application/json";
+}
+;
 
 service Devices {
-  rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse) {
+  rpc Create(infinimesh.deviceregistry.CreateRequest)
+      returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
-      post: "/devices"
-      body: "device"
+      post : "/devices"
+      body : "device"
     };
   };
-  rpc Get(infinimesh.deviceregistry.GetRequest) returns (infinimesh.deviceregistry.GetResponse) {
+  rpc Get(infinimesh.deviceregistry.GetRequest)
+      returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}"
+      get : "/devices/{id}"
     };
   };
-  rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse) {
+  rpc List(infinimesh.deviceregistry.ListDevicesRequest)
+      returns (infinimesh.deviceregistry.ListResponse) {
     option (google.api.http) = {
-      get: "/devices"
+      get : "/devices"
     };
   }
-  rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
+  rpc Delete(infinimesh.deviceregistry.DeleteRequest)
+      returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete: "/devices/{id}"
+      delete : "/devices/{id}"
     };
   };
 }
 
 service Shadows {
-  rpc Get(infinimesh.shadow.GetRequest) returns (infinimesh.shadow.GetResponse) {
+  rpc Get(infinimesh.shadow.GetRequest)
+      returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}/shadow"
+      get : "/devices/{id}/shadow"
     };
   };
+  rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
+      returns (infinimesh.shadow.PatchDesiredStateResponse) {
+    option (google.api.http) = {
+      post : "/devices/{id}/shadow/desired"
+    };
+  }
 }

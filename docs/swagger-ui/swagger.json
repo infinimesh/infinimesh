@@ -130,6 +130,30 @@
           "Shadows"
         ]
       }
+    },
+    "/devices/{id}/shadow/desired": {
+      "post": {
+        "operationId": "PatchDesiredState",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowPatchDesiredStateResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shadows"
+        ]
+      }
     }
   },
   "definitions": {
@@ -273,6 +297,9 @@
         }
       },
       "description": "`Value` represents a dynamically typed value which can be either\nnull, a number, a string, a boolean, a recursive struct value, or a\nlist of values. A producer of value is expected to set one of that\nvariants, absence of any variant indicates an error.\n\nThe JSON representation for `Value` is JSON value."
+    },
+    "shadowPatchDesiredStateResponse": {
+      "type": "object"
     },
     "shadowShadow": {
       "type": "object",

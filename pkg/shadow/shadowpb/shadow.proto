@@ -22,10 +22,13 @@ message Shadow {
   VersionedValue desired = 4;
 }
 
-message PatchDesiredRequest {}
-message PatchDesiredResponse {}
+message PatchDesiredStateRequest {
+  string id = 1;
+  google.protobuf.Value data = 2;
+}
+message PatchDesiredStateResponse {}
 
 service Shadows {
   rpc Get(GetRequest) returns (GetResponse);
-  // rpc PatchDesired(PatchDesiredRequest) returns (PatchDesiredResponse);
+  rpc PatchDesiredState(PatchDesiredStateRequest) returns (PatchDesiredStateResponse);
 }
