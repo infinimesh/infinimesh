@@ -72,6 +72,7 @@ service Shadows {
       returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
       post : "/devices/{id}/shadow/desired"
+      body: "data"
     };
   }
 }
