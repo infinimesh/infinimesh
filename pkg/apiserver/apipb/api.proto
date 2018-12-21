@@ -10,7 +10,7 @@ import "protoc-gen-swagger/options/annotations.proto";
 import "google/api/annotations.proto";
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
-  host : "api.infinimesh.io:8081";
+  host : "api.infinimesh.io";
 info : {
 title:
   "Infinimesh IoT Platform";
@@ -27,7 +27,7 @@ email:
   "joe@infinimesh.io";
 };
 };
-schemes : HTTP;
+schemes : HTTPS;
 consumes : "application/json";
 produces : "application/json";
 }
