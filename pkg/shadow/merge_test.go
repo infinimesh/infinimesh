@@ -60,3 +60,13 @@ func TestMergePrimitive(t *testing.T) {
 	require.NoError(t, err)
 	require.EqualValues(t, "true", merged)
 }
+
+func TestCalculateDelta(t *testing.T) {
+	old := `{"a":{"very_much":true}}`
+	new := `{"a":{"very_much":true,"bla":13}}`
+
+	patch := calculateDelta(old, new)
+
+	expected := `{"a":{"bla":13}}`
+	require.EqualValues(t, expected, patch)
+}

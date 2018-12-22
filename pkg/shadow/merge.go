@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/birdayz/conjungo"
+	"github.com/evanphx/json-patch"
 )
 
 func init() {
@@ -14,6 +15,14 @@ func init() {
 }
 
 var conjungoOpts *conjungo.Options
+
+func calculateDelta(old, new string) string {
+	patch, err := jsonpatch.CreateMergePatch([]byte(old), []byte(new))
+	if err != nil {
+		return new
+	}
+	return string(patch)
+}
 
 func applyDelta(full, delta string) (merged string, err error) {
 	var fullJson interface{}

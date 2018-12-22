@@ -148,10 +148,12 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		// We got a change, so also publish a message to the broker.
 		// TODO better split this into multiple topics; ticks (deltas, that may or may not result in a change) -> full state + deltas
 
+		mergePatch := calculateDelta(old, newState)
+
 		outgoing := mqtt.OutgoingMessage{
 			DeviceID: string(message.Key),
 			SubPath:  "shadow/updates",
-			Data:     message.Value,
+			Data:     []byte(mergePatch),
 		}
 
 		outBytes, err := json.Marshal(&outgoing)
