@@ -97,8 +97,9 @@ func readBackchannelFromKafka() {
 			if err != nil {
 				fmt.Println("Failed to unmarshal message from kafka", err)
 			}
-
-			ps.Pub(&m, m.Topic)
+			topic := "/devices/" + m.DeviceID + "/" + m.SubPath
+			fmt.Println("pub to topic", topic)
+			ps.Pub(&m, topic)
 		}
 	}
 }
@@ -175,7 +176,9 @@ func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}
 	for message := range backChannel {
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
-		p := packet.NewPublish(m.Topic /* TODO */, uint16(0), m.Data)
+		topic := "/devices/" + m.DeviceID + "/" + m.SubPath
+		fmt.Println("Publish to topic ", topic, "of client", deviceID)
+		p := packet.NewPublish(topic, uint16(0), m.Data)
 		_, err := p.WriteTo(c)
 		if err != nil {
 			panic(err)
@@ -274,6 +277,7 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 			topic := p.Payload.Subscriptions[0].Topic
 
 			ps.AddSub(backChannel, topic)
+			fmt.Println("Added Subscription", topic, deviceID)
 		}
 	}
 }

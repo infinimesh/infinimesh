@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"flag"
@@ -20,7 +22,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&topic, "topic", "/", "MQTT Topic name")
+	flag.StringVar(&topic, "topic", "/devices/testdevice4/shadow/updates", "MQTT Topic name")
 	flag.StringVar(&broker, "broker", "localhost:8089", "MQTT Broker port. Defaults to localhost:8089")
 
 }
@@ -76,12 +78,13 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println("Sub", topic)
 	err = cli.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{&client.SubReq{
 			Handler: func(topicName, message []byte) {
 				fmt.Println("recv", string(topicName), string(message))
 			},
-			TopicFilter: []byte("/updates"),
+			TopicFilter: []byte(topic),
 			QoS:         byte(0),
 		}},
 	})
@@ -91,8 +94,12 @@ func main() {
 
 	time.Sleep(time.Second * 100)
 
-	// if err := cli.Disconnect(); err != nil {
-	// 	panic(err)
-	// }
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT)
+
+	<-signals
+	if err := cli.Disconnect(); err != nil {
+		panic(err)
+	}
 
 }

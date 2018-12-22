@@ -6,8 +6,10 @@ type IncomingMessage struct {
 	Data         []byte
 }
 
+// TBD: MQTT Subsystem will never be aware of the type/content of the message.
+// Currently this is a deliberate design choice. Is it optimaL?
 type OutgoingMessage struct {
-	Topic string
-	Data  []byte
-	// Device is not necessary; anyone who is allowed to access given topic may get it
+	DeviceID string // "Target" device; does not necessarily have to be the connected device (e.g. sub-device)
+	SubPath  string // Should not start with "/"
+	Data     []byte
 }

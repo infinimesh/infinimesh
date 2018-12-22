@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 
 	sarama "github.com/Shopify/sarama"
+	"github.com/infinimesh/infinimesh/pkg/mqtt"
 )
 
 type StateMerger struct {
@@ -142,6 +143,26 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		if newState == old {
 			fmt.Println("No change, skip")
 			continue
+		}
+
+		// We got a change, so also publish a message to the broker.
+		// TODO better split this into multiple topics; ticks (deltas, that may or may not result in a change) -> full state + deltas
+
+		outgoing := mqtt.OutgoingMessage{
+			DeviceID: string(message.Key),
+			SubPath:  "shadow/updates",
+			Data:     message.Value,
+		}
+
+		outBytes, err := json.Marshal(&outgoing)
+		if err != nil {
+			fmt.Printf("Failed to marshal outgoing msg: %v\n", err)
+		}
+
+		h.changelogProducer.Input() <- &sarama.ProducerMessage{
+			Topic: "mqtt.messages.outgoing",
+			Key:   sarama.StringEncoder(message.Key),
+			Value: sarama.ByteEncoder(outBytes),
 		}
 
 		deviceState.State = json.RawMessage(newState)
