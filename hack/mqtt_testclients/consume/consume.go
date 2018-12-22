@@ -30,11 +30,11 @@ func init() {
 func main() {
 	flag.Parse()
 
-	fmt.Println(os.Args)
 	// Create an MQTT Client.
 	cli := client.New(&client.Options{
 		ErrorHandler: func(err error) {
-			fmt.Println("ERR", err)
+			fmt.Println("Received error", err)
+			os.Exit(1)
 		},
 	})
 
