@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     devices: [
       {
-        activated: false,
+        enabled: false,
         deviceId: 25,
         name: "Device 6",
         location: "Düsseldorf",
@@ -15,7 +15,7 @@ export default new Vuex.Store({
         certificate: "abc"
       },
       {
-        activated: "true",
+        enabled: "true",
         deviceId: 6,
         name: "Device 6",
         location: "Düsseldorf",
