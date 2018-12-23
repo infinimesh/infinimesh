@@ -1,7 +1,6 @@
 <template>
   <v-container xs12>
     <h1 class="mb-3">Your devices</h1>
-    <v-btn color="primary" @click="getAllDevices">Get Devices</v-btn>
     <v-card>
       <v-card-title>
       <v-text-field
@@ -173,14 +172,10 @@ export default {
     },
     getAllDevices() {
       this.$http
-        .get("http://localhost:8081/devices")
+        .get("http://159.69.144.12:8081/devices")
         .then(response => {
-          console.log("response")
+          console.log(response)
         })
-        // .then(jsondata => {
-        //   this.realData = jsondata;
-        //   console.log("ok")
-        // })
         .catch(e => {});
     }
   },
