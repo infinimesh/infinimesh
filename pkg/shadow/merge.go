@@ -25,26 +25,26 @@ func calculateDelta(old, new string) string {
 }
 
 func applyDelta(full, delta string) (merged string, err error) {
-	var fullJson interface{}
+	var fullJSON interface{}
 	if full != "" {
-		err := json.Unmarshal([]byte(full), &fullJson)
+		err := json.Unmarshal([]byte(full), &fullJSON)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	var deltaJson interface{}
-	err = json.Unmarshal([]byte(delta), &deltaJson)
+	var deltaJSON interface{}
+	err = json.Unmarshal([]byte(delta), &deltaJSON)
 	if err != nil {
 		return "", err
 	}
 
-	err = conjungo.Merge(&fullJson, deltaJson, conjungoOpts)
+	err = conjungo.Merge(&fullJSON, deltaJSON, conjungoOpts)
 	if err != nil {
 		return "", err
 	}
 
-	result, err := json.Marshal(fullJson)
+	result, err := json.Marshal(fullJSON)
 	if err != nil {
 		return "", err
 	}
