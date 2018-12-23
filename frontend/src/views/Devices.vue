@@ -41,21 +41,9 @@
             <td
               class="text-xs-left"
               style="cursor: pointer"
-              @click="navigateTo(props.item.deviceId)"
+              @click="navigateTo(props.item.id)"
             >
-              {{ props.item.deviceId }}
-            </td>
-            <td
-              class="text-xs-left"
-              style="cursor: pointer"
-              @click="navigateTo(props.item.deviceId)"
-            >
-              {{ props.item.name }}
-            </td>
-            <td
-              class="text-xs-left"
-            >
-              {{ props.item.location }}
+              {{ props.item.id }}
             </td>
             <td
               class="text-xs-left"
@@ -81,9 +69,9 @@
               </v-btn>
               <v-list>
                 <v-list-tile
-                  v-for="(option, index) in options"
-                  :key="index"
-                  :to="{name: option, params: { id: props.item.deviceId }}"
+                  v-for="option in options"
+                  :key="option"
+                  :to="{name: option, params: { id: props.item.id }}"
                 >
                   <v-list-tile-title>
                     {{ option }}
@@ -130,24 +118,13 @@ export default {
         {
           text: "Id",
           align: "left",
-          value: "deviceId"
-        },
-        {
-          text: "Name",
-          align: "left",
-          value: "name"
-        },
-        {
-          text: "Location",
-          align: "left",
-          value: "location"
+          value: "id"
         },
         {
           text: "Tags",
           align: "left",
           value: "tags"
         },
-
         {
           text: "Further actions",
           align: "center"
@@ -170,17 +147,23 @@ export default {
     navigateTo(id) {
       this.$router.push("devices/show/" + id);
     },
-    getAllDevices() {
+    storeRemoteDevices() {
       this.$http
-        .get("http://159.69.144.12:8081/devices")
+        .get("http://localhost:8081/devices")
         .then(response => {
-          console.log(response)
+          let device = {};
+          for (device of response.body.devices) {
+            if (!device.tags) {
+              device.tags = [];
+            }
+            this.$store.dispatch("addDevice", device);
+          }
         })
         .catch(e => {});
     }
   },
   beforeMount() {
-    this.getAllDevices();
+    this.storeRemoteDevices();
   }
 };
 </script>
