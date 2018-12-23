@@ -66,7 +66,6 @@ services:
       - kafka
     environment:
       - KAFKA_HOST=kafka:29092
-      - KAFKA_TOPIC=shadow.reported-state.full
       - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
     restart: unless-stopped
   shadow-persister:

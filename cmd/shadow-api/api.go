@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/Shopify/sarama"
+	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/julienschmidt/httprouter"
@@ -37,7 +38,7 @@ type DeviceState json.RawMessage
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.full")
+	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.delta")
 	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
 	viper.AutomaticEnv()
 
@@ -65,6 +66,8 @@ func main() {
 	}
 	fmt.Println("Connected to broker")
 
+	ps := pubsub.New(10)
+
 	partitions, err := consumer.Partitions(topic)
 	if err != nil {
 		panic(err)
@@ -78,11 +81,14 @@ func main() {
 
 			for message := range pc.Messages() {
 				rawMessage := json.RawMessage{}
+
 				err := json.Unmarshal(message.Value, &rawMessage)
 				if err != nil {
 					fmt.Printf("Invalid message at offset %v, err=%v\n", message.Offset, err)
 					continue
 				}
+
+				ps.Pub(rawMessage, string(message.Key))
 
 				d := DeviceState(rawMessage)
 
@@ -119,6 +125,7 @@ func main() {
 			Repo:         repo,
 			Producer:     producer,
 			ProduceTopic: topicDesiredDelta,
+			PubSub:       ps,
 		}
 
 		shadowpb.RegisterShadowsServer(srv, serverHandler)

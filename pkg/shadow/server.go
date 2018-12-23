@@ -3,11 +3,13 @@ package shadow
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/cskr/pubsub"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/struct"
@@ -18,6 +20,8 @@ type Server struct {
 	Repo         Repo
 	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
 	ProduceTopic string
+
+	PubSub *pubsub.PubSub
 }
 
 func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
@@ -86,4 +90,37 @@ func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchD
 		return nil, err
 	}
 	return &shadowpb.PatchDesiredStateResponse{}, nil
+}
+
+func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
+	// TODO validate request/Id
+	events := s.PubSub.Sub(request.Id)
+	defer s.PubSub.Unsub(events)
+	for event := range events {
+
+		var value structpb.Value
+		if raw, ok := event.(json.RawMessage); ok {
+			var u jsonpb.Unmarshaler
+			err = u.Unmarshal(bytes.NewReader(raw), &value)
+			if err != nil {
+				fmt.Println("Failed to unmarshal jsonpb: ", err)
+				continue
+			}
+		} else {
+			fmt.Println("Failed type assertion")
+			continue
+		}
+
+		err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+			ReportedDelta: &shadowpb.VersionedValue{
+				Version:   0,
+				Data:      &value,
+				Timestamp: ptypes.TimestampNow(), // TODO
+			},
+		})
+		if err != nil {
+			break
+		}
+	}
+	return nil
 }

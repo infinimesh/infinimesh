@@ -28,7 +28,16 @@ message PatchDesiredStateRequest {
 }
 message PatchDesiredStateResponse {}
 
+message StreamReportedStateChangesRequest {
+  string id = 1;
+}
+
+message StreamReportedStateChangesResponse {
+  VersionedValue reportedDelta = 1;
+}
+
 service Shadows {
   rpc Get(GetRequest) returns (GetResponse);
   rpc PatchDesiredState(PatchDesiredStateRequest) returns (PatchDesiredStateResponse);
+  rpc StreamReportedStateChanges(StreamReportedStateChangesRequest) returns (stream StreamReportedStateChangesResponse);
 }
