@@ -8,25 +8,21 @@ export default new Vuex.Store({
     devices: [
       {
         enabled: false,
-        deviceId: 25,
-        name: "Device 6",
-        location: "Düsseldorf",
+        id: 25,
         tags: ["test", "bbc"],
         certificate: "abc"
       },
       {
         enabled: "true",
-        deviceId: 6,
-        name: "Device 6",
-        location: "Düsseldorf",
+        id: 6,
         tags: ["test"],
         certificate: "abdd"
       }
     ]
   },
   getters: {
-    getDevice: (state) => (deviceId) => {
-      return state.devices.find(device => device.deviceId === deviceId);
+    getDevice: (state) => (id) => {
+      return state.devices.find(device => device.id === id);
     },
     getAllDevices: state => {
       return state.devices;
@@ -36,11 +32,11 @@ export default new Vuex.Store({
     addDevice: (state, device) => {
       state.devices.push(device);
     },
-    unRegisterDevice: (state, deviceId) => {
+    unRegisterDevice: (state, id) => {
       let deviceIndex;
 
       deviceIndex = state.devices.findIndex(
-        device => device.deviceId === deviceId
+        device => device.id === id
       );
       state.devices.splice(deviceIndex, 1);
     }
@@ -50,9 +46,9 @@ export default new Vuex.Store({
       commit("addDevice", device);
       return device;
     },
-    unRegisterDevice: ({ commit }, deviceId) => {
-      commit("unRegisterDevice", deviceId);
-      return deviceId;
+    unRegisterDevice: ({ commit }, id) => {
+      commit("unRegisterDevice", id);
+      return id;
     }
   }
 });
