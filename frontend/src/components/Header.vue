@@ -8,7 +8,7 @@
       <span>Infinimesh</span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-menu :nudge-width="100">
+    <v-menu :nudge-width="100" offset-y>
       <v-toolbar-title slot="activator">
         <span
         color="white"

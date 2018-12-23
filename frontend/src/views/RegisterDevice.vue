@@ -34,6 +34,7 @@
          small
         >
            {{ tag }}
+          <br>
           <v-icon
             small
             @click="tags.splice(i, 1)"
