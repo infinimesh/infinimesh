@@ -16,7 +16,6 @@
          small
         >
            {{ tag }}
-          <br>
           <v-icon
             class="ml-1"
             small
@@ -24,6 +23,7 @@
             style="color: grey"
           >
             cancel
+          </v-icon>
        </v-chip>
         <v-textarea
          v-model="certificate"
@@ -136,6 +136,7 @@ export default {
     resetForm() {
       this.id = "";
       this.tags = [];
+      this.certificate = "";
       this.enabled = false;
     }
   }
