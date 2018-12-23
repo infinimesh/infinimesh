@@ -16,6 +16,7 @@
          small
         >
            {{ tag }}
+          <br>
           <v-icon
             class="ml-1"
             small
