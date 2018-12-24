@@ -113,17 +113,10 @@ export default {
       this.tag = "";
     },
     register(enabled) {
-      const id = this.tags[0] + Math.random();
-      let newDevice = {};
-      newDevice = {
-        id,
-        enabled,
-        tags: this.tags,
-        certificate: this.certificate
-      };
-      this.addRemote(newDevice);
+
+      this.addRemote(enabled);
     },
-    addRemote(device) {
+    addRemote(enabled) {
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
@@ -147,7 +140,6 @@ export default {
     resetForm() {
       this.id = "";
       this.tags = [];
-      this.certificate = "";
       this.enabled = false;
     }
   }
