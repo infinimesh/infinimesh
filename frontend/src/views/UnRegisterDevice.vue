@@ -5,7 +5,7 @@
       <v-flex>
         <v-card>
           <v-card-title primary-title>
-            Are you sure you want to unregister device with Id: {{ deviceId }}
+            Are you sure you want to unregister device with Id: {{ id }}
           </v-card-title>
           <v-card-text>
             This will prevent clients from further communication with this device.
@@ -14,7 +14,7 @@
             <v-btn
             round color="primary"
             dark
-            @click="unRegisterDevice(deviceId)"
+            @click="unRegisterDevice(id)"
             >
             Unregister device
             </v-btn>
@@ -45,35 +45,38 @@
 export default {
   data() {
     return {
-      deviceId: this.$route.params.id,
+      id: this.$route.params.id,
       messageSuccess: {
-        message: "Your device has been activated",
+        message: "Your device has been unregistered",
         value: false
       },
       messageFailure: {
-        message: "Error in registering device",
+        message: "Error in unregistering device",
         value: false,
         error: ""
       }
     };
   },
   methods: {
-    unRegisterDevice(deviceId) {
+    unRegisterDevice(id) {
 
-      this.$store.dispatch("unRegisterDevice", deviceId);
+      this.$store.dispatch("unRegisterDevice", id);
 
-      this.$router.push("/devices");
-      // this.$http
-      //   .post("testdata.json", this.device)
-      //   .then(() => {
-      //     this.resetForm();
-      //     this.messageSuccess.value = true;
-      //     setTimeout(() => (this.messageSuccess.value = false), 5000);
-      //   })
-      //   .catch(e => {
-      //     this.messageFailure.value = true;
-      //     this.messageFailure.error = e;
-      //   });
+      this.$http
+        .delete("http://localhost:8081/devices/" + id)
+        .then((response) => {
+          if (response.status === 200) {
+            this.messageSuccess.value = true;
+            setTimeout(() => {
+              this.messageSuccess.value = false;
+              this.$router.push("/devices");
+            }, 1000)
+          }
+        })
+        .catch(e => {
+          this.messageFailure.value = true;
+          this.messageFailure.error = e;
+        });
     }
   }
 };

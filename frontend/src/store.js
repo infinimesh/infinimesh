@@ -30,7 +30,11 @@ export default new Vuex.Store({
   },
   mutations: {
     addDevice: (state, device) => {
-      state.devices.push(device);
+      let deviceExists;
+      deviceExists = state.devices.find(item => item.id === device.id);
+      if (!deviceExists) {
+        state.devices.push(device);
+      }
     },
     unRegisterDevice: (state, id) => {
       let deviceIndex;
