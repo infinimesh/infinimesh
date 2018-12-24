@@ -110,9 +110,7 @@ export default {
     },
     register(enabled) {
       const id = this.tags[0] + Math.random();
-
       let newDevice = {};
-
       newDevice = {
         id,
         enabled,
