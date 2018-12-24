@@ -113,10 +113,6 @@ export default {
       this.tag = "";
     },
     register(enabled) {
-
-      this.addRemote(enabled);
-    },
-    addRemote(enabled) {
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
