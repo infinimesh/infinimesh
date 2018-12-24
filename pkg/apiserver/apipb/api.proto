@@ -75,4 +75,10 @@ service Shadows {
       body : "data"
     };
   }
+  rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest)
+      returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
+    option (google.api.http) = {
+      get : "/devices/{id}/shadow/reported"
+    };
+  }
 }
