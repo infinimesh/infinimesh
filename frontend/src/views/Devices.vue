@@ -130,7 +130,7 @@ export default {
           align: "center"
         }
       ],
-      options: ["Unregister device"]
+      options: ["Unregister device", "Update device"]
     };
   },
   computed: {

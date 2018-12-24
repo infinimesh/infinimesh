@@ -108,11 +108,14 @@ export default {
     };
   },
   methods: {
-    addTag(event) {
-      this.tags.push(event.target.value);
-      this.tag = "";
+    addTag() {
+      if (this.tag) {
+        this.tags.push(this.tag);
+        this.tag = "";
+      }
     },
     register(enabled) {
+      this.addTag();
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
