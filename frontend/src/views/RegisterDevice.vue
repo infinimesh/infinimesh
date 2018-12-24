@@ -113,10 +113,6 @@ export default {
       this.tag = "";
     },
     register(enabled) {
-
-      this.addRemote(enabled);
-    },
-    addRemote(enabled) {
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
@@ -126,10 +122,11 @@ export default {
         })
         .then((response) => {
           console.log(response);
-          // this.$store.dispatch("addDevice", newDevice);
-          this.resetForm();
-          this.messageSuccess.value = true;
-          setTimeout(() => (this.messageSuccess.value = false), 5000);
+          if (response.status === 200) {
+            this.resetForm();
+            this.messageSuccess.value = true;
+            setTimeout(() => (this.messageSuccess.value = false), 5000);
+          }
         })
         .catch(e => {
           this.messageFailure.value = true;
