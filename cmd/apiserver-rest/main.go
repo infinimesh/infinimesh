@@ -46,6 +46,6 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	corsMiddleware := cors.Default().Handler(mux)
+	corsMiddleware := cors.AllowAll().Handler(mux)
 	return http.ListenAndServe(":8081", corsMiddleware)
 }
