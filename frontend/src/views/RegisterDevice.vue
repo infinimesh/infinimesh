@@ -89,9 +89,13 @@
 export default {
   data() {
     return {
+      id: "testid" + Math.random(),
       tag: "",
       tags: [],
-      certificate: "",
+      certificate: {
+        pem_data: `LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURpRENDQW5DZ0F3SUJBZ0lKQU1OTk9LaE05ZXlPTUEwR0NTcUdTSWIzRFFFQkN3VUFNRmt4Q3pBSkJnTlYKQkFZVEFrRlZNUk13RVFZRFZRUUlEQXBUYjIxbExWTjBZWFJsTVNFd0h3WURWUVFLREJoSmJuUmxjbTVsZENCWAphV1JuYVhSeklGQjBlU0JNZEdReEVqQVFCZ05WQkFNTUNXeHZZMkZzYUc5emREQWVGdzB4T0RBNE1EWXlNVFU0Ck5UUmFGdzB5T0RBNE1ETXlNVFU0TlRSYU1Ga3hDekFKQmdOVkJBWVRBa0ZWTVJNd0VRWURWUVFJREFwVGIyMWwKTFZOMFlYUmxNU0V3SHdZRFZRUUtEQmhKYm5SbGNtNWxkQ0JYYVdSbmFYUnpJRkIwZVNCTWRHUXhFakFRQmdOVgpCQU1NQ1d4dlkyRnNhRzl6ZERDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTHEyCjVUMms5Ujk4aldtR1hqZUZyK2l1dGlndHV3STlUUTVDUTErMlJoOXNZcEV6eVpTZUhtMi9rZU1taGZ1TEQ5dnYKcU42a0hXV0FybXFMRkdaN01NMjh3cHNYT3hNZ0s1VUNsbVliOTVqWVVlbUtRbjZvcFNZQ25hcHZVajZVaHVCbwpjcGc3bTZlTHlzRzBXTVFaQW8xTEMyZU1JUUdUQ0JtWHVWRmFrUkwrMENGamFENWQ0K1ZKVUtodk1QTTV4cHR5CnFEMkJrOUtYTkhnUzh1WDhZeHhlMHRCK3A2UDYwS2d2OSt5V0NybTJSVVYvenVTbFhYNjluVUUvVnJlelNkR24KYy90VlNJY3NwaVhUcERsS2lITFBvWWZMODN4d01yd2c0WTFFVVREemtBa3U5OHVwc3MrR0RhbGtKYVNsZHk2NwpKSkxUczk0WmdHNXZKVFpQSmUwQ0F3RUFBYU5UTUZFd0hRWURWUjBPQkJZRUZKT0Vtb2I2cHRobkZacTJsWnpmCjM4d2ZRWmhwTUI4R0ExVWRJd1FZTUJhQUZKT0Vtb2I2cHRobkZacTJsWnpmMzh3ZlFaaHBNQThHQTFVZEV3RUIKL3dRRk1BTUJBZjh3RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUpVaUFHSlFiSFBNZVlXaTRiT2hzdVVydkhoUAptTi9nNG53dGprQWl1NlE1UU9IeTF4VmRHelI3dTZyYkhaRk1tZElyVVBRLzVta3FKZFpuZGw1V1NoYnZhRy84CkkwVTNVcTBCM1h1ZjBmMVBjbjI1aW9UaitVN1BJVVlxV1FYdmpOMVlubHNVamNiUTdDUTJFT0hLbU5BN3YyZmcKT21XckJBcDRxcU9hRUtXcGcwTjlmWklDYjdnNGtsT05RT3J5QWFaWWNiZUNCd1h5ZzBiYUNaTFhmSnphdG40MQpYa3JyMG5Wd2VYaUVFazVCb3NOMjBGeUZaQmVrcGJ5MTF0aDJNMVhrc0FyTFRXUTQxSUwxVGZXS0pBTERaZ1BMCkFYOTlJS0VMelZUc25ka2ZGOG1MVldacjFPb2I3c29UVlhmT0kvVkJuMWUrM3FrVXJLOTRKWXRZajA0PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==`,
+        algorithm: "testalg"
+      },
       messageSuccess: {
         message: "Your device has been enabled",
         value: false
@@ -109,22 +113,20 @@ export default {
       this.tag = "";
     },
     register(enabled) {
-      const id = this.tags[0] + Math.random();
-      let newDevice = {};
-      newDevice = {
-        id,
-        enabled,
-        tags: this.tags,
-        certificate: this.certificate
-      };
-      this.addRemote(newDevice);
+
+      this.addRemote(enabled);
     },
-    addRemote(device) {
+    addRemote(enabled) {
       this.$http
-        .post("http://localhost:8081/devices", device)
+        .post("http://localhost:8081/devices", {
+          id: this.id,
+          enabled,
+          certificate: this.certificate,
+          tags: this.tags
+        })
         .then((response) => {
           console.log(response);
-          this.$store.dispatch("addDevice", newDevice);
+          // this.$store.dispatch("addDevice", newDevice);
           this.resetForm();
           this.messageSuccess.value = true;
           setTimeout(() => (this.messageSuccess.value = false), 5000);
@@ -135,11 +137,8 @@ export default {
         });
     },
     resetForm() {
-      this.name = "";
-      this.description = "";
-      this.location = "";
+      this.id = "";
       this.tags = [];
-      this.certificate = "";
       this.enabled = false;
     }
   }
