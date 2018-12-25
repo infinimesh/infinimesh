@@ -36,7 +36,7 @@
                   Id
                 </div>
                 <div>
-                  {{ device.deviceId }}
+                  {{ device.id }}
                 </div>
               </v-flex>
               <v-flex
@@ -85,7 +85,7 @@
 export default {
   data() {
     return {
-      device: this.$store.getters.getDevice(parseInt(this.$route.params.id)),
+      device: this.$store.getters.getDevice(this.$route.params.id),
       headers: ["Active", "Id", "Name", "Location", "Tags"]
       }
     }
