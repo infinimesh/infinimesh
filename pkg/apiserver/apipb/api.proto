@@ -41,6 +41,17 @@ service Devices {
       body : "device"
     };
   };
+  rpc Update(infinimesh.deviceregistry.UpdateRequest)
+      returns (infinimesh.deviceregistry.UpdateResponse) {
+    option (google.api.http) = {
+      patch : "/devices/{device.id}"
+      body : "device"
+      additional_bindings {
+        put : "/devices/{device.id}"
+        body : "device"
+      }
+    };
+  };
   rpc Get(infinimesh.deviceregistry.GetRequest)
       returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
@@ -75,7 +86,8 @@ service Shadows {
       body : "data"
     };
   }
-  rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest)
+  rpc StreamReportedStateChanges(
+      infinimesh.shadow.StreamReportedStateChangesRequest)
       returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
       get : "/devices/{id}/shadow/reported"

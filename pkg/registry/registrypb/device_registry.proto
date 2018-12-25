@@ -4,6 +4,8 @@ package infinimesh.deviceregistry;
 
 option go_package = "registrypb";
 
+import "google/protobuf/field_mask.proto";
+
 message Device {
   string id = 1;
   bool enabled = 3;
@@ -53,9 +55,17 @@ message DeleteRequest {
 
 message DeleteResponse {}
 
+message UpdateRequest {
+  google.protobuf.FieldMask fieldMask = 1;
+  Device device = 2;
+}
+
+message UpdateResponse{}
+
 
 service Devices {
   rpc Create(CreateRequest) returns (CreateResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
   rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc List(ListDevicesRequest) returns (ListResponse);
