@@ -11,7 +11,7 @@
         >
         </v-text-field>
         <v-chip
-         v-for="(tag, key, i) in tags"
+         v-for="(tag, i) in tags"
          :key="i"
          small
         >
@@ -25,14 +25,37 @@
             cancel
           </v-icon>
        </v-chip>
-        <v-textarea
-         v-model="certificate"
-         auto-grow
-         clearable
-         label="Certificate"
-         rows="1"
+       <v-layout row wrap>
+         <v-flex>
+           <v-textarea
+            v-model="certificate.pem_data"
+            auto-grow
+            clearable
+            label="Certificate"
+            rows="1"
+            >
+           </v-textarea>
+         </v-flex>
+         <v-flex
+          class="ml-3"
          >
-        </v-textarea>
+          <upload-button
+            round
+            color="secondary lighten-2"
+            class="white--text"
+            :fileChangedCallback="fileChanged"
+          >
+            <template slot="icon">
+              <v-icon
+                class="ml-2"
+                style="color: white"
+              >
+                cloud_upload
+              </v-icon>
+            </template>
+          </upload-button>
+         </v-flex>
+       </v-layout>
         <v-alert
           :value="messageSuccess.value"
           type="success"
@@ -72,7 +95,8 @@
            </div>
            <div>
            <v-btn
-             round color="secondary lighten-2"
+             round
+             color="secondary lighten-2"
              dark
              @click="register(false)"
            >
@@ -86,10 +110,12 @@
 </template>
 
 <script>
+import UploadButton from 'vuetify-upload-button';
+
 export default {
   data() {
     return {
-      id: "testid" + Math.random(),
+      id: "",
       tag: "",
       tags: [],
       certificate: {
@@ -114,8 +140,20 @@ export default {
         this.tag = "";
       }
     },
+    setId() {
+      this.id = "id-" + Math.random();
+    },
+    fileChanged(file) {
+      let reader = new FileReader();
+      let that = this;
+      reader.onload = function(e) {
+        that.certificate.pem_data = reader.result;
+      }
+      reader.readAsText(file);
+     },
     register(enabled) {
       this.addTag();
+      this.setId();
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
@@ -124,7 +162,6 @@ export default {
           tags: this.tags
         })
         .then((response) => {
-          console.log(response);
           if (response.status === 200) {
             this.resetForm();
             this.messageSuccess.value = true;
@@ -141,6 +178,9 @@ export default {
       this.tags = [];
       this.enabled = false;
     }
+  },
+  components: {
+    UploadButton
   }
 };
 </script>
