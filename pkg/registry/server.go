@@ -82,11 +82,16 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.Internal, "Internal error")
 	}
 
+	var enabled bool
+	if request.Device.Enabled != nil {
+		enabled = request.Device.Enabled.GetValue()
+	}
+
 	if err := s.db.Create(&Device{
 		ID:                              uuidBytes,
 		Tags:                            request.Device.Tags,
 		Name:                            request.Device.Id,
-		Enabled:                         request.Device.Enabled.GetValue(),
+		Enabled:                         enabled,
 		Certificate:                     string(st),
 		CertificateType:                 request.Device.Certificate.Algorithm,
 		CertificateFingerprintAlgorithm: "sha256",
