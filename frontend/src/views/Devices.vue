@@ -119,7 +119,7 @@ export default {
         {
           text: "Id",
           align: "left",
-          value: "deviceId"
+          value: "id"
         },
         {
           text: "Tags",
