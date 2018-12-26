@@ -82,19 +82,60 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}
 
 	if err := s.db.Create(&Device{
-		ID:                     uuidBytes,
-		Tags:                   request.Device.Tags,
-		Name:                   request.Device.Id,
-		Enabled:                request.Device.Enabled,
-		Certificate:            string(st),
-		CertificateType:        request.Device.Certificate.Algorithm,
-		CertificateFingerprint: fp,
+		ID:                              uuidBytes,
+		Tags:                            request.Device.Tags,
+		Name:                            request.Device.Id,
+		Enabled:                         request.Device.Enabled,
+		Certificate:                     string(st),
+		CertificateType:                 request.Device.Certificate.Algorithm,
+		CertificateFingerprintAlgorithm: "sha256",
+		CertificateFingerprint:          fp,
 	}).Error; err != nil {
 		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
 	}
 	return &registrypb.CreateResponse{
 		Fingerprint: fp,
 	}, nil
+}
+
+func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
+	update := make(map[string]interface{})
+	for _, field := range request.FieldMask.GetPaths() {
+		fmt.Println("Field", field)
+		switch field {
+		case "Enabled":
+			update["enabled"] = request.Device.Enabled
+		case "Tags":
+			update["tags"] = request.Device.Tags
+		case "Certificate.Algorithm":
+			update["certificate_fingerprint_algorithm"] = request.Device.Certificate.Algorithm
+		case "Certificate.PemData":
+			update["certificate"] = request.Device.Certificate.PemData
+		}
+
+	}
+
+	if _, ok := update["certificate"]; ok {
+		// recalc fingerprint
+		st, err := base64.StdEncoding.DecodeString(request.Device.Certificate.PemData)
+		if err != nil {
+			return nil, status.Error(codes.FailedPrecondition, "PEM data is not valid base64")
+		}
+
+		fp, err := s.getFingerprint(st, request.Device.Certificate.Algorithm)
+		if err != nil {
+			return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
+		}
+
+		update["certificate_fingerprint"] = fp
+		update["certificate_fingerprint_algorithm"] = "sha256"
+	}
+
+	if err := s.db.Model(&Device{}).Updates(update).Error; err != nil {
+		return nil, err
+	}
+
+	return &registrypb.UpdateResponse{}, nil
 }
 
 func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetByFingerprintRequest) (*registrypb.GetByFingerprintResponse, error) {

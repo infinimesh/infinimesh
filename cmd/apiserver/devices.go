@@ -13,6 +13,11 @@ type deviceAPI struct {
 func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateRequest) (response *registrypb.CreateResponse, err error) {
 	return d.client.Create(ctx, request)
 }
+
+func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
+	return d.client.Update(ctx, request)
+}
+
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 	return d.client.Get(ctx, request)
 
