@@ -6,6 +6,19 @@
         <v-card
           class="pa-3"
         >
+          <v-card-title
+            primary-title
+            class="body-2"
+          >
+            Device ID
+          </v-card-title>
+          <v-card-text>
+            {{ device.id }}
+          </v-card-text>
+        </v-card>
+        <v-card
+          class="mt-2 pa-3"
+        >
           <v-checkbox
             label="Device enabled"
             v-model="checkbox"
@@ -74,7 +87,7 @@
            <v-btn
              round
              color="primary"
-             @click="update()"
+             @click="updateDevice()"
            >
              Update device
            </v-btn>
@@ -112,22 +125,20 @@ export default {
         this.device.tags.push(this.tag);
         this.tag = "";
       }
-    }
     },
-    update(enabled) {
+    updateDevice() {
       this.addTag();
       this.$http
-        .patch("http://localhost:8081/devices" + this.id, {
+        .patch("http://localhost:8081/devices/" + this.id, {
           enabled: this.checkbox,
           tags: this.device.tags
         })
         .then(response => {
           if (response.status === 200) {
-            this.resetForm();
             this.messageSuccess.value = true;
             setTimeout(() => {
-              this.messageSuccess.value = false
-              this.$router.push("/devices")
+              this.messageSuccess.value = false;
+              this.$router.push("/devices");
             }, 1000);
           }
         })
@@ -135,6 +146,7 @@ export default {
           this.messageFailure.value = true;
           this.messageFailure.error = e;
         });
+      }
     },
     resetForm() {
       this.id = "";

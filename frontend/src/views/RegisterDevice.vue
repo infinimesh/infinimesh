@@ -3,59 +3,75 @@
     <v-layout column wrap md9 lg6 xl4>
       <h1 class="mb-3">Register new device</h1>
       <v-flex>
-        <v-text-field
-          v-model="tag"
-          label="Device tags"
-          clearable
-          v-on:keyup.enter="addTag($event)"
+        <v-card
+          class="pa-3"
         >
-        </v-text-field>
-        <v-chip
-         v-for="(tag, i) in tags"
-         :key="i"
-         small
+          <v-checkbox
+            label="Device enabled"
+            v-model="checkbox"
+          ></v-checkbox>
+        </v-card>
+        <v-card
+          class="mt-2 pa-3"
         >
-           {{ tag }}
-          <v-icon
-            class="ml-1"
-            small
-            @click="tags.splice(i, 1)"
-            style="color: grey"
-          >
-            cancel
-          </v-icon>
-       </v-chip>
-       <v-layout row wrap>
-         <v-flex>
-           <v-textarea
-            v-model="certificate.pem_data"
-            auto-grow
+          <v-text-field
+            v-model="tag"
+            label="Device tags"
             clearable
-            label="Certificate"
-            rows="1"
-            >
-           </v-textarea>
-         </v-flex>
-         <v-flex
-          class="ml-3"
-         >
-          <upload-button
-            round
-            color="secondary lighten-2"
-            class="white--text"
-            :fileChangedCallback="fileChanged"
+            v-on:keyup.enter="addTag($event)"
           >
-            <template slot="icon">
-              <v-icon
-                class="ml-2"
-                style="color: white"
-              >
-                cloud_upload
-              </v-icon>
-            </template>
-          </upload-button>
-         </v-flex>
-       </v-layout>
+          </v-text-field>
+          <v-chip
+           v-for="(tag, i) in tags"
+           :key="i"
+           small
+          >
+             {{ tag }}
+            <v-icon
+              class="ml-1"
+              small
+              @click="tags.splice(i, 1)"
+              style="color: grey"
+            >
+              cancel
+            </v-icon>
+         </v-chip>
+        </v-card>
+        <v-card
+        class="mt-2 pa-3"
+        >
+          <v-layout row wrap>
+            <v-flex>
+              <v-textarea
+               v-model="certificate.pem_data"
+               auto-grow
+               clearable
+               label="Certificate"
+               rows="1"
+               >
+              </v-textarea>
+            </v-flex>
+            <v-flex
+             class="ml-3"
+            >
+             <upload-button
+               round
+               color="secondary lighten-2"
+               class="white--text"
+               :fileChangedCallback="fileChanged"
+             >
+               <template slot="icon">
+                 <v-icon
+                   class="ml-2"
+                   style="color: white"
+                 >
+                   cloud_upload
+                 </v-icon>
+               </template>
+             </upload-button>
+            </v-flex>
+          </v-layout>
+        </v-card>
         <v-alert
           :value="messageSuccess.value"
           type="success"
@@ -90,19 +106,10 @@
              round
              color="primary"
              dark
-             @click="register(true)"
+             @click="register()"
            >
-             Register and activate</v-btn>
-           </div>
-           <div>
-           <v-btn
-             round
-             color="secondary lighten-2"
-             dark
-             @click="register(false)"
-           >
-             Register and don't activate
-          </v-btn>
+             Register device
+           </v-btn>
          </div>
        </v-layout>
       </v-flex>
@@ -112,11 +119,11 @@
 
 <script>
 import UploadButton from "vuetify-upload-button";
-
 export default {
   data() {
     return {
-      id: "",
+      checkbox: true,
+      id: "id-" + Math.random(),
       tag: "",
       tags: [],
       certificate: {
@@ -124,7 +131,7 @@ export default {
         algorithm: "testalg"
       },
       messageSuccess: {
-        message: "Your device has been enabled",
+        message: "Your device has been registered",
         value: false
       },
       messageFailure: {
@@ -141,9 +148,6 @@ export default {
         this.tag = "";
       }
     },
-    setId() {
-      this.id = "id-" + Math.random();
-    },
     fileChanged(file) {
       let reader = new FileReader();
       let that = this;
@@ -154,11 +158,10 @@ export default {
     },
     register(enabled) {
       this.addTag();
-      this.setId();
       this.$http
         .post("http://localhost:8081/devices", {
           id: this.id,
-          enabled,
+          enabled: this.checkbox,
           certificate: this.certificate,
           tags: this.tags
         })
