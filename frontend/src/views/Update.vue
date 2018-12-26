@@ -92,7 +92,6 @@
              Update device
            </v-btn>
            </div>
-           </div>
        </v-layout>
       </v-flex>
     </v-layout>
