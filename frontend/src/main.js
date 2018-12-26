@@ -19,7 +19,6 @@ Vue.use(VueResource);
 
 // Vue.http.options.root = "https://localhost:8081";
 
-
 new Vue({
   router,
   store,
