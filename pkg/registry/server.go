@@ -176,7 +176,7 @@ func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registr
 func toProto(device *Device) *registrypb.Device {
 	return &registrypb.Device{
 		Id:      device.Name,
-		Enabled: true, // TODO
+		Enabled: device.Enabled,
 		Tags:    device.Tags,
 		Certificate: &registrypb.Certificate{
 			PemData:   device.Certificate,
