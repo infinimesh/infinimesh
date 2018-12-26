@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/google/uuid"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/jinzhu/gorm"
@@ -85,7 +86,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		ID:                              uuidBytes,
 		Tags:                            request.Device.Tags,
 		Name:                            request.Device.Id,
-		Enabled:                         request.Device.Enabled,
+		Enabled:                         request.Device.Enabled.GetValue(),
 		Certificate:                     string(st),
 		CertificateType:                 request.Device.Certificate.Algorithm,
 		CertificateFingerprintAlgorithm: "sha256",
@@ -104,7 +105,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		fmt.Println("Field", field)
 		switch field {
 		case "Enabled":
-			update["enabled"] = request.Device.Enabled
+			update["enabled"] = request.Device.Enabled.GetValue()
 		case "Tags":
 			update["tags"] = request.Device.Tags
 		case "Certificate.Algorithm":
@@ -130,6 +131,8 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		update["certificate_fingerprint"] = fp
 		update["certificate_fingerprint_algorithm"] = "sha256"
 	}
+
+	fmt.Println("Updating", update)
 
 	if err := s.db.Model(&Device{}).Updates(update).Error; err != nil {
 		return nil, err
@@ -176,7 +179,7 @@ func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registr
 func toProto(device *Device) *registrypb.Device {
 	return &registrypb.Device{
 		Id:      device.Name,
-		Enabled: device.Enabled,
+		Enabled: &wrappers.BoolValue{Value: device.Enabled},
 		Tags:    device.Tags,
 		Certificate: &registrypb.Certificate{
 			PemData:   device.Certificate,
