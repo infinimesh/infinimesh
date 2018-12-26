@@ -27,3 +27,21 @@ jobs:
       - run:
           name: Run tests
           command: task test
+  build-frontend:
+    docker:
+      - image: circleci/node:10.14.2
+    working_directory: ~/build
+    steps:
+      - checkout
+      - run:
+          name: deps
+          command: cd frontend && npm i
+      - run:
+          name: build
+          command: cd frontend && npm run build
+workflows:
+  version: 2
+  all:
+    jobs:
+      - build
+      - build-frontend
