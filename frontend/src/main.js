@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuetify from "vuetify";
 import VueResource from "vue-resource";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
+import "@mdi/font/css/materialdesignicons.css";
 import "./plugins/vuetify";
 
 import App from "./App.vue";
@@ -16,7 +17,7 @@ Vue.use(Vuetify, {
 
 Vue.use(VueResource);
 
-Vue.http.options.root = "https://vuejs-http-151a8.firebaseio.com/";
+// Vue.http.options.root = "https://localhost:8081";
 
 new Vue({
   router,
