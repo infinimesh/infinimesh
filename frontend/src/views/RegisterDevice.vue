@@ -87,7 +87,8 @@
           </div>
           <div>
            <v-btn
-             round color="primary"
+             round
+             color="primary"
              dark
              @click="register(true)"
            >
@@ -110,7 +111,7 @@
 </template>
 
 <script>
-import UploadButton from 'vuetify-upload-button';
+import UploadButton from "vuetify-upload-button";
 
 export default {
   data() {
@@ -146,11 +147,11 @@ export default {
     fileChanged(file) {
       let reader = new FileReader();
       let that = this;
-      reader.onload = function(e) {
+      reader.onload = function() {
         that.certificate.pem_data = reader.result;
-      }
+      };
       reader.readAsText(file);
-     },
+    },
     register(enabled) {
       this.addTag();
       this.setId();
@@ -161,7 +162,7 @@ export default {
           certificate: this.certificate,
           tags: this.tags
         })
-        .then((response) => {
+        .then(response => {
           if (response.status === 200) {
             this.resetForm();
             this.messageSuccess.value = true;

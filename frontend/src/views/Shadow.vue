@@ -68,6 +68,7 @@
                 <v-layout row wrap>
                   <div
                     v-for="tag in device.tags"
+                    :key="tag"
                   >
                     <v-chip>{{ tag }}</v-chip>
                   </div>
@@ -87,9 +88,9 @@ export default {
     return {
       device: this.$store.getters.getDevice(this.$route.params.id),
       headers: ["Active", "Id", "Name", "Location", "Tags"]
-      }
-    }
+    };
   }
+};
 </script>
 
 <style lang="css">

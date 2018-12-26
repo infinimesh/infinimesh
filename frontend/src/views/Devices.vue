@@ -50,6 +50,7 @@
             >
               <v-chip
                 v-for="tag in props.item.tags"
+                :key="tag"
               >
                 {{ tag }}
               </v-chip>
@@ -153,13 +154,12 @@ export default {
         .then(response => {
           let device = {};
           for (device of response.body.devices) {
-            if (!device.tags) {
-              device.tags = [];
-            }
             this.$store.dispatch("addDevice", device);
           }
         })
-        .catch(e => {});
+        .catch(e => {
+          console.log(e);
+        });
     }
   },
   beforeMount() {

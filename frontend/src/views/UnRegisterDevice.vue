@@ -59,18 +59,17 @@ export default {
   },
   methods: {
     unRegisterDevice(id) {
-
       this.$store.dispatch("unRegisterDevice", id);
 
       this.$http
         .delete("http://localhost:8081/devices/" + id)
-        .then((response) => {
+        .then(response => {
           if (response.status === 200) {
             this.messageSuccess.value = true;
             setTimeout(() => {
               this.messageSuccess.value = false;
               this.$router.push("/devices");
-            }, 1000)
+            }, 1000);
           }
         })
         .catch(e => {

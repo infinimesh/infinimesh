@@ -8,20 +8,20 @@ export default new Vuex.Store({
     devices: [
       {
         enabled: false,
-        id: 25,
+        id: "25",
         tags: ["test", "bbc"],
         certificate: "abc"
       },
       {
         enabled: "true",
-        id: 6,
+        id: "6",
         tags: ["test"],
         certificate: "abdd"
       }
     ]
   },
   getters: {
-    getDevice: (state) => (id) => {
+    getDevice: state => id => {
       return state.devices.find(device => device.id === id);
     },
     getAllDevices: state => {
@@ -39,9 +39,7 @@ export default new Vuex.Store({
     unRegisterDevice: (state, id) => {
       let deviceIndex;
 
-      deviceIndex = state.devices.findIndex(
-        device => device.id === id
-      );
+      deviceIndex = state.devices.findIndex(device => device.id === id);
       state.devices.splice(deviceIndex, 1);
     }
   },
