@@ -150,7 +150,7 @@ export default {
     },
     storeRemoteDevices() {
       this.$http
-        .get("http://localhost:8081/devices")
+        .get("devices")
         .then(response => {
           let device = {};
           for (device of response.body.devices) {

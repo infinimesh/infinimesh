@@ -62,7 +62,7 @@ export default {
       this.$store.dispatch("unRegisterDevice", id);
 
       this.$http
-        .delete("http://localhost:8081/devices/" + id)
+        .delete("devices/" + id)
         .then(response => {
           if (response.status === 200) {
             this.messageSuccess.value = true;

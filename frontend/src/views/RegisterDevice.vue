@@ -176,7 +176,7 @@ export default {
     register(enabled) {
       this.addTag();
       this.$http
-        .post("http://localhost:8081/devices", {
+        .post("devices", {
           id: this.id,
           enabled: this.checkbox,
           certificate: this.certificate,

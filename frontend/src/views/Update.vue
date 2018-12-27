@@ -132,7 +132,7 @@ export default {
     updateDevice() {
       this.addTag();
       this.$http
-        .patch("http://localhost:8081/devices/" + this.id, {
+        .patch("devices/" + this.id, {
           enabled: this.checkbox,
           tags: this.device.tags
         })
