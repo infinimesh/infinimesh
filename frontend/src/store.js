@@ -13,18 +13,43 @@ export default new Vuex.Store({
         certificate: "abc"
       },
       {
-        enabled: "true",
+        enabled: true,
         id: "6",
         tags: ["test"],
         certificate: "abdd"
       }
-    ]
+    ],
+    model: {
+      enabled: undefined,
+      id: "",
+      tags: [],
+      certificate: {
+        pem_data: "",
+        algorithm: ""
+      }
+    }
   },
   getters: {
     getDevice: state => id => {
-      return state.devices.find(device => device.id === id);
+      let device;
+      let key;
+      device = state.devices.find(device => device.id === id);
+      for (key in state.model) {
+        if (!device[key])
+          device[key] = state.model[key]
+      }
+      return device;
     },
     getAllDevices: state => {
+      let device;
+      let key;
+      for (device of state.devices) {
+        for (key in state.model) {
+          if (!device[key]) {
+            device[key] = state.model[key]
+          }
+        }
+      }
       return state.devices;
     }
   },

@@ -83,12 +83,20 @@
 </template>
 
 <script>
+import { APIMixins } from "../mixins/APIMixins";
+
 export default {
+  mixins: [APIMixins],
   data() {
     return {
-      device: this.$store.getters.getDevice(this.$route.params.id),
+      device: {},
+      checkbox: false,
+      id: this.$route.params.id,
       headers: ["Active", "Id", "Name", "Location", "Tags"]
     };
+  },
+  mounted() {
+    this.getRemoteDevice();
   }
 };
 </script>

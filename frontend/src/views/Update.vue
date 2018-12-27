@@ -100,11 +100,14 @@
 </template>
 
 <script>
+import { APIMixins } from "../mixins/APIMixins";
+
 export default {
+  mixins: [APIMixins],
   data() {
     return {
-      device: this.$store.getters.getDevice(this.$route.params.id),
-      checkbox: this.$store.getters.getDevice(this.$route.params.id).enabled,
+      device: {},
+      checkbox: false,
       id: this.$route.params.id,
       headers: ["Active", "Id", "Name", "Location", "Tags"],
       tag: "",
@@ -152,7 +155,10 @@ export default {
       this.id = "";
       this.device.tags = [];
       this.enabled = false;
-    }
+    },
+  mounted() {
+    this.getRemoteDevice();
+  }
 };
 </script>
 
