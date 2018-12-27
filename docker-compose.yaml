@@ -96,7 +96,7 @@ services:
   controlplane-ui:
     image: quay.io/infinimesh/controlplane-ui:latest
     ports:
-      - "8090:8080"
+      - "8090:80"
     depends_on:
       - apiserver-rest
 
