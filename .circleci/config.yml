@@ -37,6 +37,9 @@ jobs:
           name: deps
           command: cd frontend && npm i
       - run:
+          name: lint
+          command: cd frontend && npm run lint
+      - run:
           name: build
           command: cd frontend && npm run build
 workflows:
