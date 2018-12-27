@@ -139,7 +139,12 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 
 	fmt.Println("Updating", update)
 
-	if err := s.db.Model(&Device{}).Updates(update).Error; err != nil {
+	var device Device
+	if err := s.db.First(&device, "name = ?", request.Device.GetId()).Error; err != nil {
+		return nil, err
+	}
+
+	if err := s.db.Model(&device).Updates(update).Error; err != nil {
 		return nil, err
 	}
 
