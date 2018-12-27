@@ -95,6 +95,8 @@ services:
     restart: unless-stopped
   controlplane-ui:
     image: quay.io/infinimesh/controlplane-ui:latest
+    environment:
+      - APISERVER_URL=http://localhost:8081
     ports:
       - "8090:80"
     depends_on:
