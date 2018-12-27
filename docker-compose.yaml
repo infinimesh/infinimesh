@@ -93,4 +93,10 @@ services:
     depends_on:
       - apiserver
     restart: unless-stopped
+  frontend:
+    image: quay.io/infinimesh/frontend:latest
+    ports:
+      - "8090:8080"
+    depends_on:
+      - apiserver-rest
 
