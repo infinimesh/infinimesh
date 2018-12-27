@@ -195,7 +195,12 @@ func toProto(device *Device) *registrypb.Device {
 }
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
-	if err := s.db.Delete(&Device{Name: request.Id}).Error; err != nil {
+	var device Device
+	if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
+		return nil, err
+	}
+
+	if err := s.db.Delete(device).Error; err != nil {
 		return nil, err
 	}
 	return &registrypb.DeleteResponse{}, nil
