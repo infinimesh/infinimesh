@@ -6,9 +6,19 @@
         <v-card
           class="pa-3"
         >
+          <v-text-field
+            label="Device Id"
+            v-model="id"
+            :rules="idRules"
+          ></v-text-field>
+        </v-card>
+        <v-card
+          class="mt-2 pa-3"
+        >
           <v-checkbox
             label="Device enabled"
             v-model="checkbox"
+            clearable
           ></v-checkbox>
         </v-card>
         <v-card
@@ -119,11 +129,18 @@
 
 <script>
 import UploadButton from "vuetify-upload-button";
+import { storeRemoteDevices } from "../mixins/APIMixins";
+
 export default {
+  mixins: [storeRemoteDevices],
   data() {
     return {
       checkbox: true,
-      id: "id-" + Math.random(),
+      id: "",
+      idRules: [
+        v => !!v || "Id is required",
+        v => !this.$store.getters.getDevice(v) || "This device Id already exists"
+      ],
       tag: "",
       tags: [],
       certificate: {
@@ -185,6 +202,9 @@ export default {
   },
   components: {
     UploadButton
+  },
+  beforeMount() {
+    this.storeRemoteDevices();
   }
 };
 </script>

@@ -138,6 +138,11 @@ export default {
         })
         .then(response => {
           if (response.status === 200) {
+            this.$store.dispatch("updateDevice", {
+              id: this.id,
+              enabled: this.checkbox,
+              tags: this.device.tags
+            })
             this.messageSuccess.value = true;
             setTimeout(() => {
               this.messageSuccess.value = false;
