@@ -4,8 +4,15 @@
   flat
   >
   <v-toolbar color="primary lighten-1" dark>
-    <v-toolbar-title class="headline text-uppercase white--text">
-      <span>Infinimesh</span>
+    <v-toolbar-title
+      class="headline text-uppercase white--text"
+    >
+      <span
+        @click="$router.push('/devices')"
+        style="cursor: pointer"
+      >
+        Infinimesh
+      </span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-menu :nudge-width="100" offset-y>

@@ -92,7 +92,6 @@
              Update device
            </v-btn>
            </div>
-           </div>
        </v-layout>
       </v-flex>
     </v-layout>
@@ -142,7 +141,7 @@ export default {
               id: this.id,
               enabled: this.checkbox,
               tags: this.device.tags
-            })
+            });
             this.messageSuccess.value = true;
             setTimeout(() => {
               this.messageSuccess.value = false;
@@ -154,13 +153,13 @@ export default {
           this.messageFailure.value = true;
           this.messageFailure.error = e;
         });
-      }
-    },
-    resetForm() {
-      this.id = "";
-      this.device.tags = [];
-      this.enabled = false;
-    },
+    }
+  },
+  resetForm() {
+    this.id = "";
+    this.device.tags = [];
+    this.enabled = false;
+  },
   mounted() {
     this.getRemoteDevice();
   }

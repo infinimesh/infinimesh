@@ -17,10 +17,10 @@ Vue.use(Vuetify, {
 
 Vue.use(VueResource);
 
-Vue.http.options.root = '$APISERVER_URL';
+Vue.http.options.root = "$APISERVER_URL";
 
-if (Vue.http.options.root.startsWith('$')) {
-    Vue.http.options.root = "http://localhost:8081";
+if (Vue.http.options.root.startsWith("$")) {
+  Vue.http.options.root = "http://localhost:8081";
 }
 
 new Vue({
