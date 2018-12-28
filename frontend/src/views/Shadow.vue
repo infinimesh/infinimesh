@@ -13,14 +13,10 @@
         </v-card>
       </v-flex>
       <v-flex>
-        <v-card
-        <v-icon
-        >
-          edit
-        </v-icon>
-        >
+        <v-card>
           <component
             :is="activeComp"
+            @edit="activeComp='Update'"
           ></component>
         </v-card>
       </v-flex>
@@ -38,7 +34,7 @@ export default {
   data() {
     return {
       activeComp: DeviceInfo
-    }
+    };
   },
   mounted() {
     this.getRemoteDevice();
@@ -47,7 +43,7 @@ export default {
     DeviceInfo,
     Update
   }
-}
+};
 </script>
 
 <style lang="css">

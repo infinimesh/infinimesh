@@ -4,20 +4,16 @@
       <h1 class="mb-3">Update device information</h1>
       <v-flex>
         <v-card
-          class="pa-3"
+          flat
         >
-          <v-card-title
-            primary-title
-            class="body-2"
-          >
-            Device ID
-          </v-card-title>
-          <v-card-text>
-            {{ device.id }}
-          </v-card-text>
+          <v-text-field
+            label="Id"
+            v-model="newId"
+            :rules="idRules"
+          ></v-text-field>
         </v-card>
         <v-card
-          class="mt-2 pa-3"
+          flat
         >
           <v-checkbox
             label="Device enabled"
@@ -25,7 +21,8 @@
           ></v-checkbox>
         </v-card>
         <v-card
-        class="mt-2 pa-3"
+          class="pb-3"
+          flat
         >
           <v-text-field
             v-model="tag"
@@ -78,9 +75,9 @@
               <v-icon
                 left
               >
-                chevron_left
+                close
               </v-icon>
-              Return
+              Abort
             </v-btn>
           </div>
           <div>
@@ -108,6 +105,12 @@ export default {
       device: {},
       checkbox: false,
       id: this.$route.params.id,
+      newId: this.$route.params.id,
+      idRules: [
+        v => !!v || "Id is required",
+        v =>
+          !this.$store.getters.getDevice(v) || "This device Id already exists"
+      ],
       headers: ["Active", "Id", "Name", "Location", "Tags"],
       tag: "",
       messageSuccess: {
