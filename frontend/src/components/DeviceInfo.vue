@@ -31,7 +31,7 @@
         </v-card-text>
       </v-flex>
       <v-flex
-        offset-lg7
+        offset-lg6
       >
         <v-icon
           style="cursor: pointer"

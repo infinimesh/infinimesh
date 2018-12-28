@@ -1,96 +1,100 @@
 <template>
   <v-container>
     <v-layout column wrap md9 lg6 xl4>
-      <h1 class="mb-3">Update device information</h1>
-      <v-flex>
-        <v-card
-          flat
+      <v-card
+        flat
+      >
+        <v-card-title
+          primary-title
+          class="body-2"
         >
-          <v-text-field
-            label="Id"
-            v-model="newId"
-            :rules="idRules"
-          ></v-text-field>
-        </v-card>
-        <v-card
-          flat
-        >
-          <v-checkbox
-            label="Device enabled"
-            v-model="checkbox"
-          ></v-checkbox>
-        </v-card>
-        <v-card
-          class="pb-3"
-          flat
-        >
-          <v-text-field
-            v-model="tag"
-            label="Device tags"
-            clearable
-            v-on:keyup.enter="addTag($event)"
+          Update device information
+        </v-card-title>
+        <v-flex>
+          <v-card
+            flat
+            class="ml-3"
           >
-          </v-text-field>
-          <v-chip
-           v-for="(tag, i) in device.tags"
-           :key="i"
-           small
+            <v-checkbox
+              label="Device enabled"
+              v-model="checkbox"
+            ></v-checkbox>
+          </v-card>
+          <v-card
+            class="pb-3 ml-3"
+            flat
           >
-             {{ tag }}
-            <v-icon
-              class="ml-1"
-              small
-              @click="device.tags.splice(i, 1)"
-              style="color: grey"
+            <v-text-field
+              v-model="tag"
+              label="Device tags"
+              clearable
+              v-on:keyup.enter="addTag($event)"
             >
-              cancel
-            </v-icon>
-         </v-chip>
-        </v-card>
-        <v-alert
-          :value="messageSuccess.value"
-          type="success"
-          icon="check_circle"
-        >
-          {{ messageSuccess.message }}
-        </v-alert>
-        <v-alert
-         :value="messageFailure.value"
-         type="error"
-         icon="error"
-        >
-          {{ messageFailure.value }}: {{ messageFailure.error }}
-        </v-alert>
-        <v-layout
-          row
-          wrap
-          class="mt-3"
-        >
-          <div>
-            <v-btn
-              round
-              class="mr-5"
-              to="/devices"
+            </v-text-field>
+            <v-chip
+             v-for="(tag, i) in device.tags"
+             :key="i"
+             small
             >
+               {{ tag }}
               <v-icon
-                left
+                class="ml-1"
+                small
+                @click="device.tags.splice(i, 1)"
+                style="color: grey"
               >
-                close
+                cancel
               </v-icon>
-              Abort
-            </v-btn>
-          </div>
-          <div>
-           <v-btn
-             round
-             color="primary"
-             @click="updateDevice()"
-           >
-             Update device
-           </v-btn>
-           </div>
-       </v-layout>
-      </v-flex>
+           </v-chip>
+          </v-card>
+          <v-card>
+            <v-alert
+              :value="messageSuccess.value"
+              type="success"
+              icon="check_circle"
+            >
+              {{ messageSuccess.message }}
+            </v-alert>
+            <v-alert
+             :value="messageFailure.value"
+             type="error"
+             icon="error"
+            >
+              {{ messageFailure.value }}: {{ messageFailure.error }}
+            </v-alert>
+          </v-card>          
+          <v-layout
+            row
+            wrap
+            class="mt-3 ml-2"
+          >
+            <div>
+              <v-btn
+                round
+                class="mr-4"
+                @click="$emit('close')"
+                small
+              >
+                <v-icon
+                  left
+                >
+                  close
+                </v-icon>
+                Abort
+              </v-btn>
+            </div>
+            <div>
+             <v-btn
+               round
+               small
+               @click="updateDevice()"
+             >
+               Update device
+             </v-btn>
+             </div>
+         </v-layout>
+        </v-flex>
+      </v-card>
     </v-layout>
   </v-container>
 </template>
@@ -105,13 +109,6 @@ export default {
       device: {},
       checkbox: false,
       id: this.$route.params.id,
-      newId: this.$route.params.id,
-      idRules: [
-        v => !!v || "Id is required",
-        v =>
-          !this.$store.getters.getDevice(v) || "This device Id already exists"
-      ],
-      headers: ["Active", "Id", "Name", "Location", "Tags"],
       tag: "",
       messageSuccess: {
         message: "Update successful",
@@ -148,7 +145,7 @@ export default {
             this.messageSuccess.value = true;
             setTimeout(() => {
               this.messageSuccess.value = false;
-              this.$router.push("/devices");
+              this.$emit('close');
             }, 1000);
           }
         })
