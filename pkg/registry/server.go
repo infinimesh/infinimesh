@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -65,14 +64,12 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	if request.Device.Certificate == nil {
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
 	}
-	st, err := base64.StdEncoding.DecodeString(request.Device.Certificate.PemData)
-	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "PEM data is not valid base64")
-	}
-	fp, err := s.getFingerprint(st, request.Device.Certificate.Algorithm)
+
+	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
 	}
+
 	u, err := uuid.NewRandom()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Internal error")
@@ -92,7 +89,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		Tags:                            request.Device.Tags,
 		Name:                            request.Device.Id,
 		Enabled:                         enabled,
-		Certificate:                     string(st),
+		Certificate:                     request.Device.Certificate.PemData,
 		CertificateType:                 request.Device.Certificate.Algorithm,
 		CertificateFingerprintAlgorithm: "sha256",
 		CertificateFingerprint:          fp,
@@ -123,12 +120,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 
 	if _, ok := update["certificate"]; ok {
 		// recalc fingerprint
-		st, err := base64.StdEncoding.DecodeString(request.Device.Certificate.PemData)
-		if err != nil {
-			return nil, status.Error(codes.FailedPrecondition, "PEM data is not valid base64")
-		}
-
-		fp, err := s.getFingerprint(st, request.Device.Certificate.Algorithm)
+		fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
 		if err != nil {
 			return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
 		}
