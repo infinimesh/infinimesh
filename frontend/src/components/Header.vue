@@ -29,7 +29,6 @@
         <v-list-tile
           v-for="page in links"
           :key="page"
-          @click=""
           :to="{ name: page }"
           exact
           >

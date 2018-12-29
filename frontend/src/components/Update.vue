@@ -145,7 +145,7 @@ export default {
             this.messageSuccess.value = true;
             setTimeout(() => {
               this.messageSuccess.value = false;
-              this.$emit('close');
+              this.$emit("close");
             }, 1000);
           }
         })
