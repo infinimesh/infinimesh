@@ -139,6 +139,7 @@ export default {
       id: "",
       idRules: [
         v => !!v || "Id is required",
+        v => !v.match(/\s/) || "No whitespace allowed",
         v =>
           !this.$store.getters.getDevice(v) || "This device Id already exists"
       ],

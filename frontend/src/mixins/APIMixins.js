@@ -2,7 +2,7 @@ export const APIMixins = {
   methods: {
     getRemoteDevice() {
       this.$http
-        .get("devices/" + this.id)
+        .get("http://localhost:8081/devices/" + this.id)
         .then(response => {
           this.$store.dispatch("addDevice", response.body.device);
           this.device = this.$store.getters.getDevice(this.id);
@@ -19,7 +19,7 @@ export const storeRemoteDevices = {
   methods: {
     storeRemoteDevices() {
       this.$http
-        .get("devices")
+        .get("http://localhost:8081/devices")
         .then(response => {
           let device = {};
           for (device of response.body.devices) {

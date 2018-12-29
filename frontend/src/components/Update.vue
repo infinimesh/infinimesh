@@ -62,7 +62,7 @@
             >
               {{ messageFailure.value }}: {{ messageFailure.error }}
             </v-alert>
-          </v-card>          
+          </v-card>
           <v-layout
             row
             wrap
@@ -161,7 +161,7 @@ export default {
     this.enabled = false;
   },
   mounted() {
-    this.getRemoteDevice();
+    this.getRemoteDevice(this.id);
   }
 };
 </script>

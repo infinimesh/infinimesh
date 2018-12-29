@@ -43,11 +43,24 @@ export default {
   mixins: [APIMixins],
   data() {
     return {
-      activeComp: DeviceInfo
+      activeComp: DeviceInfo,
+      id: this.$route.params.id
     };
+  },
+  methods: {
+    connectToShadow(id) {
+      let xhr = new XMLHttpRequest();
+
+      xhr.open("GET", `http://localhost:8081/devices/${id}/shadow/reported`, true)
+      xhr.onprogress = function () {
+       console.log("PROGRESS:", xhr.responseText)
+      }
+      xhr.send()
+    }
   },
   mounted() {
     this.getRemoteDevice();
+    this.connectToShadow(this.id);
   },
   components: {
     DeviceInfo,
