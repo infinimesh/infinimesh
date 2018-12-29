@@ -36,12 +36,10 @@ export default new Vuex.Store({
       device = state.devices.find(device => device.id === id);
       if (device) {
         for (key in state.model) {
-          if (!device[key])
-            device[key] = state.model[key]
+          if (!device[key]) device[key] = state.model[key];
         }
         return device;
-      }
-      else {
+      } else {
         return undefined;
       }
     },
@@ -52,14 +50,13 @@ export default new Vuex.Store({
         for (device of state.devices) {
           for (key in state.model) {
             if (!device[key]) {
-              device[key] = state.model[key]
+              device[key] = state.model[key];
             }
           }
         }
         return state.devices;
-      }
-      else {
-        return undefined
+      } else {
+        return undefined;
       }
     }
   },
@@ -74,7 +71,9 @@ export default new Vuex.Store({
     updateDevice: (state, properties) => {
       let deviceIndex;
       let property;
-      deviceIndex = state.devices.findIndex(device => device.id === properties.id);
+      deviceIndex = state.devices.findIndex(
+        device => device.id === properties.id
+      );
       if (deviceIndex) {
         for (property in properties) {
           state.devices[deviceIndex][property] = properties[property];
@@ -86,9 +85,8 @@ export default new Vuex.Store({
       deviceIndex = state.devices.findIndex(device => device.id === id);
       if (deviceIndex) {
         state.devices.splice(deviceIndex, 1);
-      }
-      else {
-        return "Device Id doesn't exist"
+      } else {
+        return "Device Id doesn't exist";
       }
     }
   },

@@ -4,77 +4,29 @@
     <v-card>
       <v-layout row wrap>
         <v-flex>
-          <v-card flat>
-            <v-card-title primary-title>
-              <h3>Status</h3>
+          <v-card
+            flat
+          >
+            <v-card-title
+            primary-title
+            class="body-2"
+            >
+              Device shadow
             </v-card-title>
-            <v-card-text>
-              Desired state:
-            </v-card-text>
-            <v-card-text>
-              Actual state:
-            </v-card-text>
           </v-card>
         </v-flex>
+        <v-divider
+          vertical
+        ></v-divider>
         <v-flex>
-          <v-card flat>
-            <v-layout column wrap>
-              <v-flex
-                mb-3
-              >
-                <div class="caption grey--text mb-1">
-                  Active
-                </div>
-                <div>
-                  {{ device.activated }}
-                </div>
-              </v-flex>
-              <v-flex
-                mb-3
-              >
-                <div class="caption grey--text mb-1">
-                  Id
-                </div>
-                <div>
-                  {{ device.id }}
-                </div>
-              </v-flex>
-              <v-flex
-                mb-3
-              >
-                <div class="caption grey--text mb-1">
-                  Name
-                </div>
-                <div>
-                  {{ device.name }}
-                </div>
-              </v-flex>
-              <v-flex
-                mb-3
-              >
-                <div class="caption grey--text mb-1">
-                  Description
-                </div>
-                <div>
-                  {{ device.description }}
-                </div>
-              </v-flex>
-              <v-flex
-                mb-3
-              >
-                <div class="caption grey--text mb-1">
-                  Tags
-                </div>
-                <v-layout row wrap>
-                  <div
-                    v-for="tag in device.tags"
-                    :key="tag"
-                  >
-                    <v-chip>{{ tag }}</v-chip>
-                  </div>
-                </v-layout>
-              </v-flex>
-            </v-layout>
+          <v-card
+            flat
+          >
+            <component
+              :is="activeComp"
+              @edit="activeComp='Update'"
+              @close="activeComp='DeviceInfo'"
+            ></component>
           </v-card>
         </v-flex>
       </v-layout>
@@ -84,19 +36,39 @@
 
 <script>
 import { APIMixins } from "../mixins/APIMixins";
+import DeviceInfo from "../components/DeviceInfo.vue";
+import Update from "../components/Update.vue";
 
 export default {
   mixins: [APIMixins],
   data() {
     return {
-      device: {},
-      checkbox: false,
-      id: this.$route.params.id,
-      headers: ["Active", "Id", "Name", "Location", "Tags"]
+      activeComp: DeviceInfo,
+      id: this.$route.params.id
     };
+  },
+  methods: {
+    connectToShadow(id) {
+      let xhr = new XMLHttpRequest();
+
+      xhr.open(
+        "GET",
+        `http://localhost:8081/devices/${id}/shadow/reported`,
+        true
+      );
+      xhr.onprogress = function() {
+        console.log("PROGRESS:", xhr.responseText);
+      };
+      xhr.send();
+    }
   },
   mounted() {
     this.getRemoteDevice();
+    this.connectToShadow(this.id);
+  },
+  components: {
+    DeviceInfo,
+    Update
   }
 };
 </script>

@@ -4,7 +4,7 @@ import Devices from "./views/Devices.vue";
 import RegisterDevice from "./views/RegisterDevice.vue";
 import UnRegisterDevice from "./views/UnRegisterDevice.vue";
 import Shadow from "./views/Shadow.vue";
-import Update from "./views/Update.vue";
+import Update from "./components/Update.vue";
 
 Vue.use(Router);
 
