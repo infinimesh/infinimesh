@@ -15,3 +15,13 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 
 ## API Documentation
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+
+## Graph Database
+Everything in the Graph is a Node.
+
+node = object | subject | device | clearance | credential | namespace
+
+Things can be `contained_in` an object
+Nothing can be contained_in a device (for now); sub devices use a different predicate
+
+A clearance is connected to an `node` and a `subject`. It has properties; including actions granted by this clearance. For now, actions are pre-defined: `write`, `read`
