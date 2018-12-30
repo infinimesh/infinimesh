@@ -101,4 +101,8 @@ services:
       - "8090:80"
     depends_on:
       - apiserver-rest
-
+  authserver:
+    image: quay.io/infinimesh/authserver:latest
+    ports:
+      - "8088:8082"
+    restart: unless-stopped

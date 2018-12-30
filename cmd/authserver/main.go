@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	dgraphURL   = "127.0.0.1:9080"
+	dgraphURL   = "localhost:9080"
 	grpcAddress = ":8082"
 )
 
@@ -39,7 +39,7 @@ func main() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	lis, err := net.Listen("tcp", ":8082")
+	lis, err := net.Listen("tcp", grpcAddress)
 	if err != nil {
 		log.Fatal("Failed to listen", zap.String("address", grpcAddress), zap.Error(err))
 	}

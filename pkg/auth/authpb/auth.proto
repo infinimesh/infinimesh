@@ -11,8 +11,24 @@ message AuthorizeRequest {
   string action = 3;
 }
 
-message AuthorizeResponse {
-  google.protobuf.BoolValue decision = 1;
+message AuthorizeResponse { google.protobuf.BoolValue decision = 1; }
+
+message Authenticate_X509 {
+  string cert = 1;
 }
 
-service Auth { rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse); }
+message AuthenticateRequest {
+  oneof method {
+    Authenticate_X509 x509 = 1;
+    Authenticate_JWT jwt = 2;
+  }
+}
+
+message Authenticate_JWT { string token = 1; }
+
+message AuthenticateResponse { string node = 1; }
+
+service Auth {
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+}

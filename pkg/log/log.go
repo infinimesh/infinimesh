@@ -7,6 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// NewProdOrDev returns a Prod logger if the application is running in Docker,
+// otherwise it returns a Dev logger.
 func NewProdOrDev() (log *zap.Logger, err error) {
 	if runningInDocker() {
 		return zap.NewProduction()
@@ -15,7 +17,7 @@ func NewProdOrDev() (log *zap.Logger, err error) {
 	}
 }
 
-// Will this work with CRI-O or other container runtimes?
+// TODO Will this work with CRI-O, rkt and other container runtimes beside docker?
 func runningInDocker() bool {
 	f, err := ioutil.ReadFile("/proc/1/cgroup")
 	if err != nil {
