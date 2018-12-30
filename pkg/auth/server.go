@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/infinimesh/infinimesh/pkg/auth/authpb"
@@ -21,36 +20,34 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 		"$user_email": request.GetSubject(),
 		"$action":     request.GetAction(),
 	}
-	fmt.Println(params)
-	const q = `{
-  var(func: eq(device_id,"testdevice4")) @recurse @normalize @cascade {
-    parentObjectUIDs as uid
-    contained_in  {
-    }
-  }
+	const q = `query permissions($action: string, $device_id: string, $user_email: string){
+                     var(func: eq(device_id,$device_id)) @recurse @normalize @cascade {
+                       parentObjectUIDs as uid
+                       contained_in  {
+                       }
+                     }
 
-  var(func: uid(parentObjectUIDs)) @normalize  @cascade {
-    clearances @filter(eq(action, "write")) {
-      clearanceIDs as uid
-      
-    }
-  }
-      
-  firstWriteClearance(func: uid(clearanceIDs), first: 1) @cascade {
-    uid
-    action
-    granted_to @filter(eq(email, "birdy@nerden.de")) {}
-  }
-}`
+                     var(func: uid(parentObjectUIDs)) @normalize  @cascade {
+                       clearances @filter(eq(action, $action)) {
+                         clearanceIDs as uid
+                       }
+                     }
 
-	res, err := s.Dgraph.NewTxn().Query(ctx, q)
+                     clearance(func: uid(clearanceIDs), first: 1) @cascade {
+                       uid
+                       action
+                       granted_to @filter(eq(email, $user_email)) {}
+                     }
+                   }`
 
-	type Permission struct {
+	res, err := s.Dgraph.NewTxn().QueryWithVars(ctx, q, params)
+
+	type Clearance struct {
 		Action string `json:"action"`
 	}
 
 	type Permissions struct {
-		Permissions []Permission `json:"firstWriteClearance"`
+		Permissions []Clearance `json:"clearance"`
 	}
 
 	if err != nil {
@@ -63,7 +60,13 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 		return &authpb.AuthorizeResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	spew.Dump(p)
+	if len(p.Permissions) > 0 {
+		permission := p.Permissions[0]
+		if permission.Action == request.Action {
+			fmt.Printf("Granting access on object %v to subject %v for action %v. Clearance: %v\n", request.GetObject(), request.GetSubject(), request.GetAction(), permission.Action)
+			return &authpb.AuthorizeResponse{Decision: &wrappers.BoolValue{Value: true}}, err
+		}
+	}
 
-	return nil, nil
+	return &authpb.AuthorizeResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 }
