@@ -7,8 +7,8 @@ type Device struct {
 	Name                            string         `gorm:"NOT NULL;unique_index:device_name_namespace_uq"`
 	Tags                            pq.StringArray `gorm:"type:varchar(100)[]"`
 	Enabled                         bool
-	Certificate                     string `gorm:"index"`
+	Certificate                     string `gorm:"unique_index"`
 	CertificateType                 string
-	CertificateFingerprint          []byte `gorm:"index"`
+	CertificateFingerprint          []byte `gorm:"unique_index"`
 	CertificateFingerprintAlgorithm string
 }
