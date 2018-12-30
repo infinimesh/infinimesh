@@ -40,7 +40,7 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 	for _, partition := range partitions {
 		localStates[partition] = make(map[string]*FullDeviceStateMessage)
 		offsets[partition] = 0
-		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, int64(0))
+		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
 		if err != nil {
 			return nil, nil, err
 		}
