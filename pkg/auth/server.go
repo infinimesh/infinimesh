@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
@@ -27,8 +28,8 @@ func (s *Server) CreateUser(ctx context.Context, request *authpb.CreateUserReque
 
 	txn := s.Dgraph.NewTxn()
 
-	q := `query userExists($name: string) @filter(eq(type, "user")) {
-                exists(func: eq(name, $name)) {
+	q := `query userExists($name: string) {
+                exists(func: eq(name, $name)) @filter(eq(type, "user")) {
                   uid
                 }
               }
@@ -40,6 +41,7 @@ func (s *Server) CreateUser(ctx context.Context, request *authpb.CreateUserReque
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$name": request.GetName()})
 	if err != nil {
+		fmt.Println("zz")
 		return nil, err
 	}
 	err = json.Unmarshal(resp.Json, &result)
@@ -81,6 +83,39 @@ func (s *Server) SetCredentials(ctx context.Context, request *authpb.SetCredenti
 	return nil, nil
 }
 
+func checkExists(ctx context.Context, log *zap.Logger, txn *dgo.Txn, uid, _type string) bool {
+	log = log.Named("checkExists")
+	q := `query object($_uid: string, $type: string) {
+                object(func: uid($_uid)) @filter(eq(type, $type)) {
+                  uid
+                }
+              }
+             `
+	{
+
+	}
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$type": _type,
+		"$_uid": uid,
+	})
+	if err != nil {
+		log.Error("Query failed", zap.Error(err))
+		return false
+	}
+
+	var result struct {
+		Object []map[string]interface{} `json:"object"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		log.Error("Failed to unmarshal response from dgraph", zap.Error(err))
+		return false
+	}
+
+	return len(result.Object) > 0
+}
+
 func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest) (response *authpb.AuthorizeResponse, err error) {
 	// Upsert add node user -> CRED -> resource
 
@@ -88,24 +123,30 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 
 	txn := s.Dgraph.NewTxn()
 
-	in := Clearance{
+	if ok := checkExists(ctx, log, txn, request.GetEntityUid(), "user"); !ok {
+		return nil, errors.New("Entity does not exist")
+	}
+
+	if ok := checkExists(ctx, log, txn, request.GetResourceUid(), "resource"); !ok {
+		return nil, errors.New("Resource does not exist")
+	}
+
+	in := User{
 		Node: Node{
-			Type: "clearance",
-			UID:  "0x9c6b",
+			UID: request.GetEntityUid(),
 		},
-		GrantedTo: User{
+		AccessTo: &Resource{
 			Node: Node{
-				UID: request.GetEntityUid(),
-			},
-		},
-		AccessTo: Resource{
-			Node{
 				UID: request.GetResourceUid(),
 			},
+			AccessToPermission: "WRITE",
 		},
 	}
 
-	js, _ := json.Marshal(&in)
+	js, err := json.Marshal(&in)
+	if err != nil {
+		return nil, err
+	}
 
 	a, err := txn.Mutate(ctx, &api.Mutation{
 		SetJson:   js,

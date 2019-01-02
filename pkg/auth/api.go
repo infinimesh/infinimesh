@@ -7,8 +7,10 @@ type Node struct {
 
 type User struct {
 	Node
-	Name       string      `json:"name,omitempty"`
-	Credential *Credential `json:"credential,omitempty"`
+	Name               string      `json:"name,omitempty"`
+	Credential         *Credential `json:"credential,omitempty"`
+	AccessTo           *Resource   `json:"access.to,omitempty"`
+	AccessToPermission string      `json:"access.to|permission,omitempty"`
 }
 
 type Credential struct {
@@ -17,12 +19,7 @@ type Credential struct {
 	ClientSecret string `json:"client_secret"`
 }
 
-type Clearance struct {
-	Node
-	GrantedTo User     `json:"granted.to,omitempty"`
-	AccessTo  Resource `json:"access.to,omitempty"`
-}
-
 type Resource struct {
 	Node
+	AccessToPermission string `json:"access.to|permission,omitempty"`
 }
