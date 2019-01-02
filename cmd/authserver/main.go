@@ -27,8 +27,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		_ = log.Sync()
+	}()
 
-	defer log.Sync()
 	log.Info("Connecting to dgraph", zap.String("URL", dgraphURL))
 	conn, err := grpc.Dial(dgraphURL, grpc.WithInsecure())
 	if err != nil {
