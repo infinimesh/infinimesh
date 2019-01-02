@@ -5,30 +5,50 @@ option go_package = "authpb";
 
 import "google/protobuf/wrappers.proto";
 
-message AuthorizeRequest {
+message IsAuthorizedRequest {
   string object = 1;
   string subject = 2;
   string action = 3;
 }
 
-message AuthorizeResponse { google.protobuf.BoolValue decision = 1; }
+message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
 
-message Authenticate_X509 {
-  string cert = 1;
+message LoginRequest{
+  string clientID = 1;
+  string clientSecret = 2;
+}
+message LoginResponse{}
+
+message CreateUserRequest{
+  string name = 1;
+}
+message CreateUserResponse{
+  string uid = 1;
 }
 
-message AuthenticateRequest {
-  oneof method {
-    Authenticate_X509 x509 = 1;
-    Authenticate_JWT jwt = 2;
-  }
+enum Action {
+  NONE = 0;
+  READ = 1;
+  WRITE = 2;
 }
 
-message Authenticate_JWT { string token = 1; }
+message AuthorizeRequest{
+  string entity_uid = 1;
+  string resource_uid = 2;
+  string action = 3;
+}
+message AuthorizeResponse{}
 
-message AuthenticateResponse { string node = 1; }
+message SetCredentialsRequest{
+  string password = 1;
+}
+message SetCredentialsResponse{}
 
 service Auth {
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse);
+
+  rpc Login(LoginRequest) returns (LoginResponse);
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
-  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
-}
+>>>>>>> clearance w/o facets

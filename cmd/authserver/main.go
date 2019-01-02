@@ -48,6 +48,7 @@ func main() {
 
 	serverHandler := &auth.Server{
 		Dgraph: dg,
+		Log:    log.Named("server"),
 	}
 
 	authpb.RegisterAuthServer(srv, serverHandler)
