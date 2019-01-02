@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
@@ -41,7 +40,6 @@ func (s *Server) CreateUser(ctx context.Context, request *authpb.CreateUserReque
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$name": request.GetName()})
 	if err != nil {
-		fmt.Println("zz")
 		return nil, err
 	}
 	err = json.Unmarshal(resp.Json, &result)
