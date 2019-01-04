@@ -189,15 +189,15 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 	}
 
 	const qDirect = `query direct_access($device_id: string, $user_id: string){
-                         direct(func: uid(0x9c70)) @normalize @cascade {
-                           access.to  @filter(uid(0x9c7c) AND eq(type, "device")) @facets(permission,inherit) {
+                         direct(func: uid($user_id)) @normalize @cascade {
+                           access.to  @filter(uid($device_id) AND eq(type, "device")) @facets(permission,inherit) {
                              type: type
                            }
                          }
 
-                         direct_via_one_object(func: uid(0x9c70)) @normalize @cascade {
+                         direct_via_one_object(func: uid($user_id)) @normalize @cascade {
                            access.to @filter(eq(type, "object")) @facets(permission,inherit) {
-                             contains @filter(uid(0x9c77) AND eq(type, "device")) {
+                             contains @filter(uid($device_id) AND eq(type, "device")) {
                                uid
                                type: type
                              }
