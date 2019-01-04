@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -115,8 +114,6 @@ func checkExists(ctx context.Context, log *zap.Logger, txn *dgo.Txn, uid, _type 
 }
 
 func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest) (response *authpb.AuthorizeResponse, err error) {
-	// Upsert add node user -> CRED -> resource
-
 	log := s.Log.Named("Authorize")
 
 	txn := s.Dgraph.NewTxn()
@@ -125,8 +122,11 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 		return nil, errors.New("Entity does not exist")
 	}
 
-	if ok := checkExists(ctx, log, txn, request.GetResourceUid(), "resource"); !ok {
-		return nil, errors.New("Resource does not exist")
+	// TODO optimize
+	if ok := checkExists(ctx, log, txn, request.GetResourceUid(), "object"); !ok {
+		if ok := checkExists(ctx, log, txn, request.GetResourceUid(), "device"); !ok {
+			return nil, errors.New("resource does not exist")
+		}
 	}
 
 	in := User{
@@ -137,7 +137,8 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 			Node: Node{
 				UID: request.GetResourceUid(),
 			},
-			AccessToPermission: "WRITE",
+			AccessToPermission: request.GetAction(),
+			AccessToInherit:    request.GetInherit(),
 		},
 	}
 
@@ -146,7 +147,9 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 		return nil, err
 	}
 
-	a, err := txn.Mutate(ctx, &api.Mutation{
+	log.Debug("Run mutation", zap.Any("json", &in))
+
+	_, err = txn.Mutate(ctx, &api.Mutation{
 		SetJson:   js,
 		CommitNow: true,
 	})
@@ -155,9 +158,18 @@ func (s *Server) Authorize(ctx context.Context, request *authpb.AuthorizeRequest
 		return nil, errors.New("Failed to mutate")
 	}
 
-	spew.Dump(a)
-
 	return &authpb.AuthorizeResponse{}, nil
+}
+
+func isPermissionSufficient(required, actual string) bool {
+	switch required {
+	case "WRITE":
+		return actual == "WRITE"
+	case "READ":
+		return actual == "WRITE" || actual == "READ"
+	default:
+		return false
+	}
 }
 
 func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedRequest) (response *authpb.IsAuthorizedResponse, err error) {
@@ -166,74 +178,65 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
 	}
 	log := s.Log.Named("Authorize").With(
-		zap.String("subject", request.GetSubject()),
-		zap.String("action", request.GetAction()),
-		zap.String("object", request.GetObject()),
+		zap.String("request.subject", request.GetSubject()),
+		zap.String("request.action", request.GetAction()),
+		zap.String("request.object", request.GetObject()),
 	)
 
-	// Compute all clearances which are sufficient to perform the requested action
-	var sufficientClearances string
-	switch request.GetAction() {
-	case "write":
-		sufficientClearances = "write"
-	case "read":
-		sufficientClearances = "write read"
-	default:
-		return nil, errors.New("Invalid action")
-	}
-
 	params := map[string]string{
-		"$device_id":    request.GetObject(),
-		"$subject_uuid": request.GetSubject(),
-		"$action":       sufficientClearances,
+		"$device_id": request.GetObject(),
+		"$user_id":   request.GetSubject(),
 	}
-	const q = `query permissions($action: string, $device_id: string, $subject_uuid: string){
-                     var(func: eq(device_id,$device_id)) @recurse @normalize @cascade {
-                       parentObjectUIDs as uid
-                       contained_in  {
-                       }
-                     }
 
-                     var(func: uid(parentObjectUIDs)) @normalize  @cascade {
-                       accessed_through @filter(anyofterms(action, $action)) {
-                         clearanceIDs as uid
-                       }
-                     }
+	const qDirect = `query direct_access($device_id: string, $user_id: string){
+                         direct(func: uid(0x9c70)) @normalize @cascade {
+                           access.to  @filter(uid(0x9c7c) AND eq(type, "device")) @facets(permission,inherit) {
+                             type: type
+                           }
+                         }
 
-                     clearance(func: uid(clearanceIDs), first: 1) @cascade {
-                       uid
-                       action
-                       granted_to @filter(eq(uuid, $subject_uuid)) {}
-                     }
-                   }`
+                         direct_via_one_object(func: uid(0x9c70)) @normalize @cascade {
+                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
+                             contains @filter(uid(0x9c77) AND eq(type, "device")) {
+                               uid
+                               type: type
+                             }
+                           }
+                         }
+                        }`
 
-	res, err := s.Dgraph.NewTxn().QueryWithVars(ctx, q, params)
+	res, err := s.Dgraph.NewTxn().QueryWithVars(ctx, qDirect, params)
 	if err != nil {
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	type Clearance struct {
-		Action string `json:"action"`
+	var permissions struct {
+		Direct          []Resource `json:"direct"`
+		DirectViaObject []Resource `json:"direct_via_one_object"`
 	}
 
-	type Permissions struct {
-		Permissions []Clearance `json:"clearance"`
-	}
-
-	var p Permissions
-	err = json.Unmarshal(res.Json, &p)
+	err = json.Unmarshal(res.Json, &permissions)
 	if err != nil {
-		// s.Log.Info("Failed to unmarshal result from dgraph", fields ...zapcore.Field)
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	if len(p.Permissions) > 0 {
-		permission := p.Permissions[0]
-		if permission.Action == request.Action {
+	log.Debug("Dgraph response", zap.Any("json", permissions))
+
+	if len(permissions.Direct) > 0 {
+		if isPermissionSufficient(request.GetAction(), permissions.Direct[0].AccessToPermission) {
 			log.Info("Granting access")
 			return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
 		}
 	}
+
+	if len(permissions.DirectViaObject) > 0 {
+		if isPermissionSufficient(request.GetAction(), permissions.DirectViaObject[0].AccessToPermission) {
+			log.Info("Granting access")
+			return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
+		}
+	}
+
+	// TODO: recursive lookup if inherit=true
 
 	log.Info("Denying access")
 	return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err

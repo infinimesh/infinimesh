@@ -7,10 +7,9 @@ type Node struct {
 
 type User struct {
 	Node
-	Name               string      `json:"name,omitempty"`
-	Credential         *Credential `json:"credential,omitempty"`
-	AccessTo           *Resource   `json:"access.to,omitempty"`
-	AccessToPermission string      `json:"access.to|permission,omitempty"`
+	Name       string      `json:"name,omitempty"`
+	Credential *Credential `json:"credential,omitempty"`
+	AccessTo   *Resource   `json:"access.to,omitempty"`
 }
 
 type Credential struct {
@@ -22,4 +21,5 @@ type Credential struct {
 type Resource struct {
 	Node
 	AccessToPermission string `json:"access.to|permission,omitempty"`
+	AccessToInherit    bool   `json:"access.to|inherit"`
 }

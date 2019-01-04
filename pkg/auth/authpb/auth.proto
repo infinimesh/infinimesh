@@ -36,6 +36,7 @@ message AuthorizeRequest{
   string entity_uid = 1;
   string resource_uid = 2;
   string action = 3;
+  bool inherit = 4;
 }
 message AuthorizeResponse{}
 
