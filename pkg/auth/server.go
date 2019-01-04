@@ -179,7 +179,7 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 	}
 	log := s.Log.Named("Authorize").With(
 		zap.String("request.subject", request.GetSubject()),
-		zap.String("request.action", request.GetAction()),
+		zap.String("request.action", request.GetAction().String()),
 		zap.String("request.object", request.GetObject()),
 	)
 
@@ -223,14 +223,14 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 	log.Debug("Dgraph response", zap.Any("json", permissions))
 
 	if len(permissions.Direct) > 0 {
-		if isPermissionSufficient(request.GetAction(), permissions.Direct[0].AccessToPermission) {
+		if isPermissionSufficient(request.GetAction().String(), permissions.Direct[0].AccessToPermission) {
 			log.Info("Granting access")
 			return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
 		}
 	}
 
 	if len(permissions.DirectViaObject) > 0 {
-		if isPermissionSufficient(request.GetAction(), permissions.DirectViaObject[0].AccessToPermission) {
+		if isPermissionSufficient(request.GetAction().String(), permissions.DirectViaObject[0].AccessToPermission) {
 			log.Info("Granting access")
 			return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
 		}

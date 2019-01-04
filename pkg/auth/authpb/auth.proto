@@ -8,7 +8,7 @@ import "google/protobuf/wrappers.proto";
 message IsAuthorizedRequest {
   string object = 1;
   string subject = 2;
-  string action = 3;
+  Action action = 3;
 }
 
 message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
