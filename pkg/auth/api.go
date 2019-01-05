@@ -20,6 +20,8 @@ type Credential struct {
 
 type Resource struct {
 	Node
-	AccessToPermission string `json:"access.to|permission,omitempty"`
-	AccessToInherit    bool   `json:"access.to|inherit"`
+	Name               string    `json:"name,omitempty"`
+	AccessToPermission string    `json:"access.to|permission,omitempty"`
+	AccessToInherit    bool      `json:"access.to|inherit"`
+	Contains           *Resource `json:"contains"`
 }

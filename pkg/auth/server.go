@@ -173,20 +173,24 @@ func isPermissionSufficient(required, actual string) bool {
 }
 
 func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedRequest) (response *authpb.IsAuthorizedResponse, err error) {
-
-	if request.GetObject() == request.GetSubject() {
-		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
-	}
 	log := s.Log.Named("Authorize").With(
 		zap.String("request.subject", request.GetSubject()),
 		zap.String("request.action", request.GetAction().String()),
 		zap.String("request.object", request.GetObject()),
 	)
+	log.Debug("IsAuthorized started")
+
+	if request.GetObject() == request.GetSubject() {
+		log.Info("Grant access to self")
+		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
+	}
 
 	params := map[string]string{
 		"$device_id": request.GetObject(),
 		"$user_id":   request.GetSubject(),
 	}
+
+	txn := s.Dgraph.NewReadOnlyTxn()
 
 	const qDirect = `query direct_access($device_id: string, $user_id: string){
                          direct(func: uid($user_id)) @normalize @cascade {
@@ -205,7 +209,7 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
                          }
                         }`
 
-	res, err := s.Dgraph.NewTxn().QueryWithVars(ctx, qDirect, params)
+	res, err := txn.QueryWithVars(ctx, qDirect, params)
 	if err != nil {
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
@@ -220,7 +224,7 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	log.Debug("Dgraph response", zap.Any("json", permissions))
+	log.Debug("Dgraph response for direct permission", zap.Any("json", permissions))
 
 	if len(permissions.Direct) > 0 {
 		if isPermissionSufficient(request.GetAction().String(), permissions.Direct[0].AccessToPermission) {
@@ -236,7 +240,54 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 		}
 	}
 
-	// TODO: recursive lookup if inherit=true
+	qRecursive := `query recursive_access($user_id: string, $device_id: string){
+                         var(func: uid($user_id)) @cascade {
+                           access.to @filter(eq(type, "object")) @facets(eq(inherit, true)) @facets(permission,inherit) {
+                             OBJS as uid
+                             name
+                             type: type
+                           }
+                         }
+
+                         var(func: uid(OBJS)) @recurse {
+                           contains @filter(eq(type,"object")) {
+                           }
+		           SUB as  uid
+                           name
+                           type
+                         }
+
+                         target(func: uid(SUB)) {
+                           contains @filter(eq(type,"device") AND uid($device_id)) {
+                             uid : uid
+                             name
+                             type
+                           }
+                         }
+                       }`
+
+	res, err = txn.QueryWithVars(ctx, qRecursive, params)
+	if err != nil {
+		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
+	}
+
+	var target struct {
+		Target []Node `json:"target"`
+	}
+
+	if err = json.Unmarshal(res.Json, &target); err != nil {
+		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
+	}
+
+	log.Debug("Dgraph response for inherited permission", zap.Any("json", target))
+
+	// TODO check permission. Rather hard to do locally as we lose the "route", and can't look into the first access.to predicate afterwards.
+	// Can also not be solved within the query, due to https://github.com/dgraph-io/dgraph/issues/2867. Maybe with something else than anyofterms, e.g. ins and greater/greaterequal.
+	if len(target.Target) > 0 {
+		log.Info("Granting access")
+		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
+
+	}
 
 	log.Info("Denying access")
 	return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
