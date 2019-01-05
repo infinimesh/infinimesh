@@ -240,50 +240,77 @@ func (s *Server) IsAuthorized(ctx context.Context, request *authpb.IsAuthorizedR
 		}
 	}
 
-	qRecursive := `query recursive_access($user_id: string, $device_id: string){
-                         var(func: uid($user_id)) @cascade {
-                           access.to @filter(eq(type, "object")) @facets(eq(inherit, true)) @facets(permission,inherit) {
-                             OBJS as uid
-                             name
-                             type: type
-                           }
-                         }
+	// qRecursive := `query recursive_access($user_id: string, $device_id: string){
+	//                  var(func: uid($user_id)) @cascade {
+	//                    access.to @filter(eq(type, "object")) @facets(eq(inherit, true)) @facets(permission,inherit) {
+	//                      OBJS as uid
+	//                      name
+	//                      type: type
+	//                    }
+	//                  }
 
-                         var(func: uid(OBJS)) @recurse {
-                           contains @filter(eq(type,"object")) {
-                           }
-		           SUB as  uid
-                           name
-                           type
-                         }
+	//                  var(func: uid(OBJS)) @recurse {
+	//                    contains @filter(eq(type,"object")) {
+	//                    }
+	// 	           SUB as  uid
+	//                    name
+	//                    type
+	//                  }
 
-                         target(func: uid(SUB)) {
-                           contains @filter(eq(type,"device") AND uid($device_id)) {
-                             uid : uid
-                             name
-                             type
-                           }
+	//                  rez(func: uid(SUB)) {
+	//                    contains @filter(eq(type,"device") AND uid($device_id)) {
+	//                      uid : uid
+	//                      name
+	//                      type
+	//                    }
+	//                  }
+	//                }`
+
+	qRecursiveWrite := `query recursive($user_id: string, $device_id: string){
+                         shortest(from: $user_id, to: $device_id) {
+                           access.to @facets(eq(inherit, true) AND eq(permission,"WRITE")) @filter(eq(type, "object"))
+                           contains @filter(eq(type, "object"))
+                           contains.device @filter(eq(type, "device"))
                          }
                        }`
+
+	qRecursiveRead := `query recursive($user_id: string, $device_id: string){
+                         shortest(from: $user_id, to: $device_id) {
+                           access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ"))) @filter(eq(type, "object"))
+                           contains @filter(eq(type, "object"))
+                           contains.device @filter(eq(type, "device"))
+                         }
+                       }`
+
+	var qRecursive string
+	switch request.GetAction() {
+	case authpb.Action_READ:
+		qRecursive = qRecursiveRead
+	case authpb.Action_WRITE:
+		qRecursive = qRecursiveWrite
+	default:
+		return nil, errors.New("Invalid action")
+	}
 
 	res, err = txn.QueryWithVars(ctx, qRecursive, params)
 	if err != nil {
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	var target struct {
-		Target []Node `json:"target"`
+	var rez struct {
+		Path []map[string]interface{} `json:"_path_"`
 	}
 
-	if err = json.Unmarshal(res.Json, &target); err != nil {
+	if err = json.Unmarshal(res.Json, &rez); err != nil {
+		log.Error("Failed to unmarshal", zap.Error(err))
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: false}}, err
 	}
 
-	log.Debug("Dgraph response for inherited permission", zap.Any("json", target))
+	log.Debug("Dgraph response for inherited permission", zap.Any("json", rez))
 
 	// TODO check permission. Rather hard to do locally as we lose the "route", and can't look into the first access.to predicate afterwards.
 	// Can also not be solved within the query, due to https://github.com/dgraph-io/dgraph/issues/2867. Maybe with something else than anyofterms, e.g. ins and greater/greaterequal.
-	if len(target.Target) > 0 {
+	if len(rez.Path) > 0 {
 		log.Info("Granting access")
 		return &authpb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: true}}, err
 

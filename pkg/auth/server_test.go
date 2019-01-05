@@ -41,7 +41,7 @@ func TestStuff(t *testing.T) {
 					Type: "object",
 				},
 				Name: "Living Room",
-				Contains: &Resource{
+				ContainsDevice: &Device{
 					Node: Node{
 						UID:  "_:PC",
 						Type: "device",
@@ -79,5 +79,24 @@ func TestStuff(t *testing.T) {
 	require.NoError(t, err)
 
 	fmt.Println(a1.GetUids())
+
+	r2 := &Resource{
+		Node: Node{
+			UID: a.GetUids()["home"],
+		},
+		Contains: &Resource{
+			Node: Node{
+				UID:  "_:second-floor",
+				Type: "object",
+			},
+			Name: "Second Floor",
+		},
+	}
+
+	bytes, _ = json.Marshal(&r2)
+	a2, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
+	require.NoError(t, err)
+
+	fmt.Println(a2.GetUids())
 
 }
