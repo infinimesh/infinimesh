@@ -1,4 +1,4 @@
-package auth
+package node
 
 import (
 	"context"
@@ -59,7 +59,7 @@ func TestStuff(t *testing.T) {
 
 	fmt.Println(a.GetUids())
 
-	u := &User{
+	u := &Account{
 		Node: Node{
 			UID:  "_:user",
 			Type: "user",

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package infinimesh.node;
+option go_package = "nodepb";
+
+import "google/protobuf/wrappers.proto";
+
+message IsAuthorizedRequest {
+  string node = 1;
+  string account = 2;
+  Action action = 3;
+}
+
+message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
+
+message LoginRequest{
+  string clientID = 1;
+  string clientSecret = 2;
+}
+message LoginResponse{}
+
+message CreateAccountRequest{
+  string name = 1;
+}
+message CreateAccountResponse{
+  string uid = 1;
+}
+
+enum Action {
+  NONE = 0;
+  READ = 1;
+  WRITE = 2;
+}
+
+message AuthorizeRequest{
+  string account = 1;
+  string node = 2;
+  string action = 3;
+  bool inherit = 4;
+}
+message AuthorizeResponse{}
+
+// TODO maybe path-based; path as string instead of parent id? id = uuid, i.e.
+// caller can give it? currently DB assigns it
+message CreateObjectRequest{
+  string parent = 1;
+  string name = 2;
+}
+
+message CreateObjectResponse{
+  string uid = 1;
+}
+
+service Authorization {
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+}
+
+service Account {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+}
+
+service Object {
+  rpc CreateObject(CreateObjectRequest) returns (CreateObjectResponse);
+}

@@ -1,22 +1,15 @@
-package auth
+package node
 
 type Node struct {
 	Type string `json:"type,omitempty"`
 	UID  string `json:"uid,omitempty"`
 }
 
-type User struct {
+type Account struct {
 	Node
-	Name           string      `json:"name,omitempty"`
-	Credential     *Credential `json:"credential,omitempty"`
-	AccessTo       *Resource   `json:"access.to,omitempty"`
-	AccessToDevice *Device     `json:"access.to.device,omitEmpty"`
-}
-
-type Credential struct {
-	Node
-	ClientID     string `json:"clientid"`
-	ClientSecret string `json:"client_secret"`
+	Name           string    `json:"name,omitempty"`
+	AccessTo       *Resource `json:"access.to,omitempty"`
+	AccessToDevice *Device   `json:"access.to.device,omitEmpty"`
 }
 
 type Resource struct {
