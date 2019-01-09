@@ -16,11 +16,13 @@ require (
 	github.com/evanphx/json-patch v4.1.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gofrs/uuid v3.1.0+incompatible // indirect
+	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.2.0
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/uuid v1.1.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.6.2
 	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 	github.com/jinzhu/gorm v1.9.2

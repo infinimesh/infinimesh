@@ -8,8 +8,9 @@ type Node struct {
 type Account struct {
 	Node
 	Name           string    `json:"name,omitempty"`
+	IsRoot         bool      `json:"isRoot"`
 	AccessTo       *Resource `json:"access.to,omitempty"`
-	AccessToDevice *Device   `json:"access.to.device,omitEmpty"`
+	AccessToDevice *Device   `json:"access.to.device,omitempty"`
 }
 
 type Resource struct {

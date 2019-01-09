@@ -40,26 +40,45 @@ message AuthorizeRequest{
 }
 message AuthorizeResponse{}
 
+message Context {
+  string account = 1;
+  bool root = 2;
+}
+
 // TODO maybe path-based; path as string instead of parent id? id = uuid, i.e.
 // caller can give it? currently DB assigns it
 message CreateObjectRequest{
-  string parent = 1;
-  string name = 2;
+  Context context = 1;
+  string parent = 2;
+  string name = 3;
 }
 
 message CreateObjectResponse{
   string uid = 1;
 }
 
-service Authorization {
-  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
-  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+message Object {
+  string uid = 1;
+}
+
+message ListObjectsRequest{
+  string path = 1;
+}
+message ListObjectsResponse{
+  repeated ObjectLevel levels = 1;
+}
+
+message ObjectLevel{
+  repeated Object objects = 1;
 }
 
 service Account {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
 }
 
-service Object {
-  rpc CreateObject(CreateObjectRequest) returns (CreateObjectResponse);
+service ObjectService {
+  rpc CreateObject(CreateObjectRequest) returns (Object);
+  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
 }

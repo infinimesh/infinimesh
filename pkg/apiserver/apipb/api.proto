@@ -94,3 +94,7 @@ service Shadows {
     };
   }
 }
+
+service Objects {
+  rpc CreateObject(infinimesh.node.CreateObjectRequest) returns (infinimesh.node.Object);
+}

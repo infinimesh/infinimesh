@@ -183,6 +183,26 @@ func (s *Server) IsAuthorized(ctx context.Context, request *nodepb.IsAuthorizedR
 	return &nodepb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
-func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectRequest) (response *nodepb.CreateObjectResponse, err error) {
-	return nil, nil
+func (s *Server) checkPerm(ctxAccount interface{}, node string, action string) (decision bool) {
+	account, ok := ctxAccount.(string)
+	if !ok {
+		return false
+	}
+	log := s.Log.Named("checkPerm").With(zap.String("node", node), zap.String("account", account), zap.String("action", action))
+
+	decision, err := s.Repo.IsAuthorized(context.TODO(), node, account, action)
+	if err != nil {
+		log.Debug("Permission checked", zap.Bool("decision", false))
+	}
+	log.Debug("Permission checked", zap.Bool("decision", decision))
+	return decision
+}
+
+func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectRequest) (response *nodepb.Object, err error) {
+	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &nodepb.Object{Uid: id}, nil
 }

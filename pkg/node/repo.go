@@ -6,18 +6,64 @@ import (
 	"errors"
 
 	"github.com/dgraph-io/dgo"
+	"github.com/dgraph-io/dgo/protos/api"
 )
 
 type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
+	CreateObject(ctx context.Context, name, parent string) (id string, err error)
 }
 
 type dGraphRepo struct {
 	dg *dgo.Dgraph
 }
 
+const ContextKeyAccount = "infinimesh/pkg/node/account"
+
 func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 	return &dGraphRepo{dg: dg}
+}
+
+func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id string, err error) {
+	var newObject *Resource
+	if parent == "" {
+		newObject = &Resource{
+			Node: Node{
+				UID:  "_:new",
+				Type: "object",
+			},
+			Name: name,
+		}
+	} else {
+		newObject = &Resource{
+			Node: Node{
+				UID: parent,
+			},
+			Contains: &Resource{
+				Node: Node{
+					UID:  "_:new",
+					Type: "object",
+				},
+				Name: name,
+			},
+		}
+	}
+
+	js, err := json.Marshal(&newObject)
+	if err != nil {
+		return "", err
+	}
+
+	a, err := s.dg.NewTxn().Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return a.GetUids()["new"], nil
+
 }
 
 func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
@@ -92,6 +138,7 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
                        }`
 
 	var qRecursive string
+
 	switch action {
 	case "READ":
 		qRecursive = qRecursiveRead

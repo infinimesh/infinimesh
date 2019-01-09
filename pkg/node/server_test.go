@@ -80,6 +80,24 @@ func TestStuff(t *testing.T) {
 
 	fmt.Println(a1.GetUids())
 
+	// Direct access
+	u2 := &Account{
+		Node: Node{
+			UID: a1.GetUids()["user"],
+		},
+		AccessToDevice: &Device{
+			Node: Node{
+				UID: "_:device2",
+			},
+			Name:                     "some device",
+			AccessToDevicePermission: "WRITE",
+		},
+	}
+
+	bytes, _ = json.Marshal(&u2)
+	_, err = dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
+	require.NoError(t, err)
+
 	r2 := &Resource{
 		Node: Node{
 			UID: a.GetUids()["home"],
