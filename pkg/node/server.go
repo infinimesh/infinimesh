@@ -206,3 +206,11 @@ func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectR
 
 	return &nodepb.Object{Uid: id}, nil
 }
+
+func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
+	err = s.Repo.ListForAccount(ctx, request.GetAccount())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &nodepb.ListObjectsResponse{}, nil
+}

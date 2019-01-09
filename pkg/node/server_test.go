@@ -118,4 +118,23 @@ func TestStuff(t *testing.T) {
 
 	fmt.Println(a2.GetUids())
 
+	r3 := &Resource{
+		Node: Node{
+			UID: a.GetUids()["home"],
+		},
+		ContainsDevice: &Device{
+			Node: Node{
+				UID:  "_:lamp1",
+				Type: "device",
+			},
+			Name: "le lamp",
+		},
+	}
+
+	bytes, _ = json.Marshal(&r3)
+	a3, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
+	require.NoError(t, err)
+
+	fmt.Println(a3.GetUids())
+
 }

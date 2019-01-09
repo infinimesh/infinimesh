@@ -59,17 +59,18 @@ message CreateObjectResponse{
 
 message Object {
   string uid = 1;
+  string type = 2;
 }
 
 message ListObjectsRequest{
-  string path = 1;
+  string account = 1;
 }
 message ListObjectsResponse{
   repeated ObjectLevel levels = 1;
 }
 
 message ObjectLevel{
-  repeated Object objects = 1;
+  map<string,Object> objects = 1;
 }
 
 service Account {

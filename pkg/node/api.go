@@ -22,6 +22,13 @@ type Resource struct {
 	ContainsDevice     *Device   `json:"contains.device"`
 }
 
+type ResourceArr struct {
+	Node
+	Name           string        `json:"name,omitempty"`
+	Contains       []ResourceArr `json:"contains"`
+	ContainsDevice []Device      `json:"contains.device"`
+}
+
 type Device struct {
 	Node
 	Name                     string `json:"name,omitempty"`
