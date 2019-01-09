@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="mb-3">Device overview</h1>
+    <h1 class="mb-3">{{ device.id }} - Device overview</h1>
     <v-card>
       <v-layout row wrap>
         <v-flex>
@@ -34,13 +34,11 @@
         <v-divider
           vertical
         ></v-divider>
-        <v-flex>
-          <component
-            :is="activeComp"
-            @edit="activeComp='Update'"
-            @close="activeComp='DeviceInfo'"
-          ></component>
-        </v-flex>
+        <component
+          :is="activeComp"
+          @edit="activeComp='Update'"
+          @close="activeComp='DeviceInfo'"
+        ></component>
       </v-layout>
     </v-card>
   </v-container>
@@ -55,6 +53,7 @@ export default {
   mixins: [APIMixins],
   data() {
     return {
+      device: {},
       activeComp: DeviceInfo,
       id: this.$route.params.id,
       initialState: "",

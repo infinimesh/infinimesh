@@ -1,6 +1,7 @@
 <template>
   <v-card
     flat
+    max-width="500"
   >
       <v-layout row wrap>
       <v-card-title
@@ -20,12 +21,24 @@
             edit
           </v-icon>
       </v-layout>
-      <v-card-text>
-        Enabled: {{ device.enabled }}
-      </v-card-text>
-      <v-card-text>
-        Id: {{ device.id }}
-      </v-card-text>
+        <v-card-text
+        >
+          <v-icon
+            v-if="device.enabled"
+            color="green"
+            class="mr-2"
+          >
+            check_circle
+          </v-icon>
+          <v-icon
+            v-else
+            color="grey"
+            class="mr-2"
+          >
+            block
+          </v-icon>
+          {{ (device.enabled) ? "Device enabled" : "Device disabled" }}
+        </v-card-text>
       <v-card-text>
         <v-chip
          v-for="(tag, i) in device.tags"
