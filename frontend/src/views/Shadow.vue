@@ -9,35 +9,37 @@
           >
             <v-card-title
             primary-title
-            class="body-2"
             >
-              Device shadow
+              <h2>Reported state</h2>
             </v-card-title>
-            <v-list>
-              <v-list-tile
-                v-for="(response, index) in xhrResponse"
-                :key="index"
-              >
-                <v-list-tile-content>
-                  {{ response }}
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
+            <v-card>
+              <v-card-text>
+                <strong>Initial timestamp</strong>: {{ initialState.shadow.reported.timestamp }}
+                <v-spacer></v-spacer>
+                <strong>Initial data</strong>: {{ initialState.shadow.reported.data }}
+              </v-card-text>
+            </v-card>
+            <v-card
+              v-for="(response, index) in messages"
+              :key="index"
+            >
+              <v-card-text>
+                <strong>Timestamp</strong>: {{ response.result.reportedDelta.timestamp }}
+                <v-spacer></v-spacer>
+                <strong>Data</strong>: {{ response.result.reportedDelta.data }}
+              </v-card-text>
+            </v-card>
           </v-card>
         </v-flex>
         <v-divider
           vertical
         ></v-divider>
         <v-flex>
-          <v-card
-            flat
-          >
-            <component
-              :is="activeComp"
-              @edit="activeComp='Update'"
-              @close="activeComp='DeviceInfo'"
-            ></component>
-          </v-card>
+          <component
+            :is="activeComp"
+            @edit="activeComp='Update'"
+            @close="activeComp='DeviceInfo'"
+          ></component>
         </v-flex>
       </v-layout>
     </v-card>
@@ -55,12 +57,14 @@ export default {
     return {
       activeComp: DeviceInfo,
       id: this.$route.params.id,
-      xhrResponse: {}
+      initialState: "",
+      messages: []
     };
   },
   methods: {
     connectToShadow(id) {
       let xhr = new XMLHttpRequest();
+      let that = this;
 
       xhr.open(
         "GET",
@@ -70,19 +74,31 @@ export default {
       xhr.onprogress = function() {
         let jsonObjects = [];
         let obj = "";
-        let jsObjects = [];
-        
+        that.messages = [];
+
         jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
         for (obj of jsonObjects) {
-          jsObjects.push(JSON.parse(obj));
+          that.messages.push(JSON.parse(obj));
         }
-        console.log(jsObjects);
+        console.log(jsonObjects)
       };
       xhr.send();
+    },
+    getInitialShadow(id) {
+      this.$http
+        .get(`devices/${id}/shadow`)
+        .then(response => {
+          console.log(response.body)
+          this.initialState = response.body;
+        })
+        .catch(e => {
+          console.log(e);
+        });
     }
   },
   mounted() {
     this.getRemoteDevice();
+    this.getInitialShadow(this.id);
     this.connectToShadow(this.id);
   },
   components: {
