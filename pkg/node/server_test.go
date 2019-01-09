@@ -87,7 +87,8 @@ func TestStuff(t *testing.T) {
 		},
 		AccessToDevice: &Device{
 			Node: Node{
-				UID: "_:device2",
+				UID:  "_:device2",
+				Type: "device",
 			},
 			Name:                     "some device",
 			AccessToDevicePermission: "WRITE",
