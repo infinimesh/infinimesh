@@ -70,7 +70,8 @@ export default {
       xhr.onprogress = function() {
         let jsonObjects = [];
         let obj = "";
-        let jsObjects = [];.replace(/\n$/, "")
+        let jsObjects = [];
+        
         jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
         for (obj of jsonObjects) {
           jsObjects.push(JSON.parse(obj));
