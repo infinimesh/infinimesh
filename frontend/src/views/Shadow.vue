@@ -13,6 +13,16 @@
             >
               Device shadow
             </v-card-title>
+            <v-list>
+              <v-list-tile
+                v-for="(response, index) in xhrResponse"
+                :key="index"
+              >
+                <v-list-tile-content>
+                  {{ response }}
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
           </v-card>
         </v-flex>
         <v-divider
@@ -44,7 +54,8 @@ export default {
   data() {
     return {
       activeComp: DeviceInfo,
-      id: this.$route.params.id
+      id: this.$route.params.id,
+      xhrResponse: {}
     };
   },
   methods: {
@@ -57,7 +68,14 @@ export default {
         true
       );
       xhr.onprogress = function() {
-        console.log("PROGRESS:", xhr.responseText);
+        let jsonObjects = [];
+        let obj = "";
+        let jsObjects = [];.replace(/\n$/, "")
+        jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
+        for (obj of jsonObjects) {
+          jsObjects.push(JSON.parse(obj));
+        }
+        console.log(jsObjects);
       };
       xhr.send();
     }

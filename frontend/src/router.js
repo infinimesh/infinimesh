@@ -38,11 +38,6 @@ export default new Router({
       component: UnRegisterDevice
     },
     {
-      path: "/devices/update/:id",
-      name: "Update device",
-      component: Update
-    },
-    {
       path: "*",
       redirect: "/devices"
     }
