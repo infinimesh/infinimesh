@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 )
@@ -14,7 +12,7 @@ import (
 type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
-	ListForAccount(ctx context.Context, account string) (err error)
+	ListForAccount(ctx context.Context, account string) (directDevices []ObjectList, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
 }
 
 type dGraphRepo struct {
@@ -28,9 +26,9 @@ func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 }
 
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id string, err error) {
-	var newObject *Resource
+	var newObject *Object
 	if parent == "" {
-		newObject = &Resource{
+		newObject = &Object{
 			Node: Node{
 				UID:  "_:new",
 				Type: "object",
@@ -38,11 +36,11 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id 
 			Name: name,
 		}
 	} else {
-		newObject = &Resource{
+		newObject = &Object{
 			Node: Node{
 				UID: parent,
 			},
-			Contains: &Resource{
+			Contains: &Object{
 				Node: Node{
 					UID:  "_:new",
 					Type: "object",
@@ -69,7 +67,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id 
 
 }
 
-func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) error {
+func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []ObjectList, directObjects []ObjectList, inheritedObjects []ObjectList, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
 	const q = `query list($account: string) {
@@ -111,10 +109,10 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) error {
                   }`
 
 	var result struct {
-		Inherited []ResourceArr `json:"inherited"`
+		Inherited []ObjectList `json:"inherited"`
 		Direct    []struct {
-			AccessTo       []ResourceArr `json:"access.to"`
-			AccessToDevice []ResourceArr `json:"access.to.device"`
+			AccessTo       []ObjectList `json:"access.to"`
+			AccessToDevice []ObjectList `json:"access.to.device"`
 		} `json:"direct"`
 	}
 
@@ -124,19 +122,22 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) error {
 
 	res, err := txn.QueryWithVars(ctx, q, params)
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
-
-	fmt.Println("got res", string(res.Json))
 
 	err = json.Unmarshal(res.Json, &result)
 	if err != nil {
-		fmt.Println("err", err)
-		return err
+		return nil, nil, nil, err
 	}
 
-	spew.Dump(result)
-	return nil
+	if len(result.Direct) > 0 {
+		directDevices = result.Direct[0].AccessToDevice
+		directObjects = result.Direct[0].AccessTo
+	}
+
+	inheritedObjects = result.Inherited
+
+	return
 }
 
 func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
@@ -173,8 +174,8 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	}
 
 	var permissions struct {
-		Direct          []Resource `json:"direct"`
-		DirectViaObject []Resource `json:"direct_via_one_object"`
+		Direct          []Object `json:"direct"`
+		DirectViaObject []Object `json:"direct_via_one_object"`
 	}
 
 	err = json.Unmarshal(res.Json, &permissions)

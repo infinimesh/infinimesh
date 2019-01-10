@@ -128,7 +128,7 @@ func (s *Server) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest
 		Node: Node{
 			UID: request.GetAccount(),
 		},
-		AccessTo: &Resource{
+		AccessTo: &Object{
 			Node: Node{
 				UID: request.GetNode(),
 			},
@@ -208,9 +208,50 @@ func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectR
 }
 
 func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	err = s.Repo.ListForAccount(ctx, request.GetAccount())
+	_, _, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return &nodepb.ListObjectsResponse{}, nil
+
+	objs := make(map[string]*nodepb.ObjectList)
+
+	for _, internalObject := range inheritedObjects {
+		obj := mapObject(internalObject)
+		objs[obj.Uid] = obj
+	}
+
+	// TODO FIXME honor direct objs
+
+	return &nodepb.ListObjectsResponse{
+		Objects: objs,
+	}, nil
+}
+
+func mapObject(o ObjectList) *nodepb.ObjectList {
+	// var objects *nodepb.ObjectList
+	objects := make(map[string]*nodepb.ObjectList)
+	if len(o.Contains) > 0 {
+		for _, v := range o.Contains {
+			bla := mapObject(v)
+			objects[v.UID] = bla
+
+		}
+	}
+
+	var devices []*nodepb.Device
+	for _, device := range o.ContainsDevice {
+		devices = append(devices, &nodepb.Device{
+			Uid:  device.UID,
+			Name: device.Name,
+		})
+	}
+
+	res := &nodepb.ObjectList{
+		Uid:     o.UID,
+		Name:    o.Name,
+		Objects: objects,
+		Devices: devices,
+	}
+
+	return res
 }

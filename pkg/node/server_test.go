@@ -23,19 +23,19 @@ func TestStuff(t *testing.T) {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	r := &Resource{
+	r := &Object{
 		Node: Node{
 			UID:  "_:home",
 			Type: "object",
 		},
 		Name: "Johannes' Home",
-		Contains: &Resource{
+		Contains: &Object{
 			Node: Node{
 				UID:  "_:first-floor",
 				Type: "object",
 			},
 			Name: "First Floor",
-			Contains: &Resource{
+			Contains: &Object{
 				Node: Node{
 					UID:  "_:living-room",
 					Type: "object",
@@ -65,7 +65,7 @@ func TestStuff(t *testing.T) {
 			Type: "user",
 		},
 		Name: "joe",
-		AccessTo: &Resource{
+		AccessTo: &Object{
 			Node: Node{
 				UID: a.GetUids()["home"],
 			},
@@ -99,11 +99,11 @@ func TestStuff(t *testing.T) {
 	_, err = dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
 	require.NoError(t, err)
 
-	r2 := &Resource{
+	r2 := &Object{
 		Node: Node{
 			UID: a.GetUids()["home"],
 		},
-		Contains: &Resource{
+		Contains: &Object{
 			Node: Node{
 				UID:  "_:second-floor",
 				Type: "object",
@@ -118,7 +118,7 @@ func TestStuff(t *testing.T) {
 
 	fmt.Println(a2.GetUids())
 
-	r3 := &Resource{
+	r3 := &Object{
 		Node: Node{
 			UID: a.GetUids()["home"],
 		},

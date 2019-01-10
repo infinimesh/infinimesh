@@ -7,26 +7,26 @@ type Node struct {
 
 type Account struct {
 	Node
-	Name           string    `json:"name,omitempty"`
-	IsRoot         bool      `json:"isRoot"`
-	AccessTo       *Resource `json:"access.to,omitempty"`
-	AccessToDevice *Device   `json:"access.to.device,omitempty"`
+	Name           string  `json:"name,omitempty"`
+	IsRoot         bool    `json:"isRoot"`
+	AccessTo       *Object `json:"access.to,omitempty"`
+	AccessToDevice *Device `json:"access.to.device,omitempty"`
 }
 
-type Resource struct {
+type Object struct {
 	Node
-	Name               string    `json:"name,omitempty"`
-	AccessToPermission string    `json:"access.to|permission,omitempty"`
-	AccessToInherit    bool      `json:"access.to|inherit"`
-	Contains           *Resource `json:"contains"`
-	ContainsDevice     *Device   `json:"contains.device"`
+	Name               string  `json:"name,omitempty"`
+	AccessToPermission string  `json:"access.to|permission,omitempty"`
+	AccessToInherit    bool    `json:"access.to|inherit"`
+	Contains           *Object `json:"contains"`
+	ContainsDevice     *Device `json:"contains.device"`
 }
 
-type ResourceArr struct {
+type ObjectList struct {
 	Node
-	Name           string        `json:"name,omitempty"`
-	Contains       []ResourceArr `json:"contains"`
-	ContainsDevice []Device      `json:"contains.device"`
+	Name           string       `json:"name,omitempty"`
+	Contains       []ObjectList `json:"contains"`
+	ContainsDevice []Device     `json:"contains.device"`
 }
 
 type Device struct {
