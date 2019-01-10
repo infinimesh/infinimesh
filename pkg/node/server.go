@@ -208,32 +208,43 @@ func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectR
 }
 
 func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	_, _, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
+	directDevices, _, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	objs := make(map[string]*nodepb.ObjectList)
+	objects := make([]*nodepb.ObjectList, 0)
 
 	for _, internalObject := range inheritedObjects {
-		obj := mapObject(internalObject)
-		objs[obj.Uid] = obj
+		object := mapObject(internalObject)
+		objects = append(objects, object)
 	}
 
-	// TODO FIXME honor direct objs
+	var devices []*nodepb.Device
+	if len(directDevices) > 0 {
+		for _, directDevice := range directDevices {
+			devices = append(devices, &nodepb.Device{
+				Uid:  directDevice.UID,
+				Name: directDevice.Name,
+			})
+		}
+	}
+
+	// TODO FIXME honor direct objects
 
 	return &nodepb.ListObjectsResponse{
-		Objects: objs,
+		Objects: objects,
+		Devices: devices,
 	}, nil
 }
 
 func mapObject(o ObjectList) *nodepb.ObjectList {
 	// var objects *nodepb.ObjectList
-	objects := make(map[string]*nodepb.ObjectList)
+	objects := make([]*nodepb.ObjectList, 0)
 	if len(o.Contains) > 0 {
 		for _, v := range o.Contains {
-			bla := mapObject(v)
-			objects[v.UID] = bla
+			object := mapObject(v)
+			objects = append(objects, object)
 
 		}
 	}

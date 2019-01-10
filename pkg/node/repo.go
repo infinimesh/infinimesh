@@ -12,7 +12,7 @@ import (
 type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
-	ListForAccount(ctx context.Context, account string) (directDevices []ObjectList, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
+	ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
 }
 
 type dGraphRepo struct {
@@ -67,7 +67,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id 
 
 }
 
-func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []ObjectList, directObjects []ObjectList, inheritedObjects []ObjectList, err error) {
+func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
 	const q = `query list($account: string) {
@@ -112,7 +112,7 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 		Inherited []ObjectList `json:"inherited"`
 		Direct    []struct {
 			AccessTo       []ObjectList `json:"access.to"`
-			AccessToDevice []ObjectList `json:"access.to.device"`
+			AccessToDevice []Device     `json:"access.to.device"`
 		} `json:"direct"`
 	}
 
