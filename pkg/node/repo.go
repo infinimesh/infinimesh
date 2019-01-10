@@ -88,7 +88,7 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
                    direct(func: uid($account)) {
                    # Via enclosing object
-                     access.to {
+                     access.to @facets(eq(inherit,false)) {
                        uid
                        name
                        type
