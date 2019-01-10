@@ -64,8 +64,8 @@ func main() {
 	}
 
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{kp},
-		RootCAs:      roots,
+		InsecureSkipVerify: true,
+		Certificates:       []tls.Certificate{kp},
 	}
 
 	// Connect to the MQTT Server using TLS.
