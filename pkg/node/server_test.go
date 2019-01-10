@@ -137,4 +137,31 @@ func TestStuff(t *testing.T) {
 
 	fmt.Println(a3.GetUids())
 
+	// Direct access
+	u4 := &Account{
+		Node: Node{
+			UID: a1.GetUids()["user"],
+		},
+		AccessTo: &Object{
+			Node: Node{
+				UID:  "_:enclosingroom",
+				Type: "object",
+			},
+			Name: "Enclosing Room",
+			ContainsDevice: &Device{
+				Node: Node{
+					UID:  "_:enclosedobject",
+					Type: "device",
+				},
+				Name: "Enclosing-room-device",
+			},
+		},
+	}
+
+	bytes, _ = json.Marshal(&u4)
+	a6, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
+	require.NoError(t, err)
+
+	fmt.Println(a6.GetUids())
+
 }

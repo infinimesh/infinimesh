@@ -208,7 +208,7 @@ func (s *Server) CreateObject(ctx context.Context, request *nodepb.CreateObjectR
 }
 
 func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	directDevices, _, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
+	directDevices, directObjects, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -230,7 +230,32 @@ func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsReq
 		}
 	}
 
-	// TODO FIXME honor direct objects
+	objs2 := make([]*nodepb.ObjectList, 0)
+	if len(directObjects) > 0 {
+		for _, o := range directObjects {
+			objs2 = append(objs2, mapObject(o))
+		}
+		// Add nodepb
+		// Add childs of the node
+
+	}
+
+	// Add direct objects and their devices to the result set, if they are not contained yet
+	// Rather inefficient if there's many inherited objects/the slice is long.
+	for _, directObject := range directObjects {
+
+		var found bool
+		for _, inheritedObject := range inheritedObjects {
+			if inheritedObject.Name == directObject.Name {
+				found = true
+			}
+		}
+
+		if !found {
+			objects = append(objects, mapObject(directObject))
+		}
+
+	}
 
 	return &nodepb.ListObjectsResponse{
 		Objects: objects,
@@ -239,7 +264,6 @@ func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsReq
 }
 
 func mapObject(o ObjectList) *nodepb.ObjectList {
-	// var objects *nodepb.ObjectList
 	objects := make([]*nodepb.ObjectList, 0)
 	if len(o.Contains) > 0 {
 		for _, v := range o.Contains {
