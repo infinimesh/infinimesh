@@ -1,4 +1,6 @@
-<template>
+<template
+  v-on:onload="test"
+>
   <v-container>
     <h1 class="mb-3">{{ device.id }} - Device overview</h1>
     <v-card>
@@ -6,19 +8,17 @@
         <v-flex>
           <v-card
             flat
+            class="pb-3"
           >
             <v-card-title
             primary-title
             >
               <h2>Reported state</h2>
             </v-card-title>
+            <div
+              id="scrollableCard"
+            >
             <v-card>
-              <v-card-text>
-                <strong>Initial timestamp</strong>: {{ initialState.shadow.reported.timestamp }}
-                <v-spacer></v-spacer>
-                <strong>Initial data</strong>: {{ initialState.shadow.reported.data }}
-              </v-card-text>
-            </v-card>
             <v-card
               v-for="(response, index) in messages"
               :key="index"
@@ -29,6 +29,13 @@
                 <strong>Data</strong>: {{ response.result.reportedDelta.data }}
               </v-card-text>
             </v-card>
+            <v-card-text>
+              <strong>Initial timestamp</strong>: {{ initialState.shadow.reported.timestamp }}
+              <v-spacer></v-spacer>
+              <strong>Initial data</strong>: {{ initialState.shadow.reported.data }}
+            </v-card-text>
+          </v-card>
+            </div>
           </v-card>
         </v-flex>
         <v-divider
@@ -61,27 +68,34 @@ export default {
     };
   },
   methods: {
+    test() {
+      console.log("onload works")
+    },
     connectToShadow(id) {
+      console.log("shadow connection established")
       let xhr = new XMLHttpRequest();
       let that = this;
 
-      xhr.open(
-        "GET",
-        `http://localhost:8081/devices/${id}/shadow/reported`,
-        true
-      );
-      xhr.onprogress = function() {
-        let jsonObjects = [];
-        let obj = "";
-        that.messages = [];
+      setTimeout(() => {
+        xhr.open(
+          "GET",
+          `http://localhost:8081/devices/${id}/shadow/reported`,
+          true
+        );
+        xhr.onprogress = function() {
+          let jsonObjects = [];
+          let obj = "";
+          that.messages = [];
 
-        jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
-        for (obj of jsonObjects) {
-          that.messages.push(JSON.parse(obj));
-        }
-        console.log(jsonObjects)
-      };
-      xhr.send();
+          jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
+          for (obj of jsonObjects) {
+            that.messages.push(JSON.parse(obj));
+          }
+          that.messages.reverse();
+          console.log(that.messages)
+        };
+        xhr.send();
+      }, 1000);
     },
     getInitialShadow(id) {
       this.$http
@@ -108,4 +122,8 @@ export default {
 </script>
 
 <style lang="css">
+  #scrollableCard {
+  height: 400px;
+  overflow-y: auto;
+  }
 </style>
