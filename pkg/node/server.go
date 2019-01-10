@@ -230,16 +230,6 @@ func (s *Server) ListObjects(ctx context.Context, request *nodepb.ListObjectsReq
 		}
 	}
 
-	objs2 := make([]*nodepb.ObjectList, 0)
-	if len(directObjects) > 0 {
-		for _, o := range directObjects {
-			objs2 = append(objs2, mapObject(o))
-		}
-		// Add nodepb
-		// Add childs of the node
-
-	}
-
 	// Add direct objects and their devices to the result set, if they are not contained yet
 	// Rather inefficient if there's many inherited objects/the slice is long.
 	for _, directObject := range directObjects {
