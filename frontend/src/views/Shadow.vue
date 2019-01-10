@@ -69,8 +69,7 @@ export default {
     };
   },
   methods: {
-    test() {
-    },
+    test() {},
     connectToShadow(id) {
       let xhr = new XMLHttpRequest();
       let that = this;
@@ -78,7 +77,7 @@ export default {
       setTimeout(() => {
         xhr.open(
           "GET",
-          Vue.http.options.root +  `/devices/${id}/shadow/reported`,
+          Vue.http.options.root + `/devices/${id}/shadow/reported`,
           true
         );
         xhr.onprogress = function() {
