@@ -69,10 +69,8 @@ export default {
   },
   methods: {
     test() {
-      console.log("onload works")
     },
     connectToShadow(id) {
-      console.log("shadow connection established")
       let xhr = new XMLHttpRequest();
       let that = this;
 
@@ -92,7 +90,6 @@ export default {
             that.messages.push(JSON.parse(obj));
           }
           that.messages.reverse();
-          console.log(that.messages)
         };
         xhr.send();
       }, 1000);
@@ -101,7 +98,6 @@ export default {
       this.$http
         .get(`devices/${id}/shadow`)
         .then(response => {
-          console.log(response.body)
           this.initialState = response.body;
         })
         .catch(e => {
