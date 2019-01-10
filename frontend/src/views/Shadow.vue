@@ -55,6 +55,7 @@
 import { APIMixins } from "../mixins/APIMixins";
 import DeviceInfo from "../components/DeviceInfo.vue";
 import Update from "../components/Update.vue";
+import Vue from "vue";
 
 export default {
   mixins: [APIMixins],
@@ -77,7 +78,7 @@ export default {
       setTimeout(() => {
         xhr.open(
           "GET",
-          `http://localhost:8081/devices/${id}/shadow/reported`,
+          Vue.http.options.root +  `/devices/${id}/shadow/reported`,
           true
         );
         xhr.onprogress = function() {
