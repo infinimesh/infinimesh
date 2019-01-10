@@ -13,8 +13,7 @@ import (
 )
 
 var (
-	dgraphURL   = "localhost:9080"
-	grpcAddress = ":8082"
+	dgraphURL = "localhost:9080"
 )
 
 func TestStuff(t *testing.T) {
