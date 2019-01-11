@@ -17,6 +17,7 @@ var (
 )
 
 func TestStuff(t *testing.T) {
+	t.Skip("Only for local testing")
 	conn, _ := grpc.Dial(dgraphURL, grpc.WithInsecure())
 	defer conn.Close()
 
