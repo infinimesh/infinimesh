@@ -19,8 +19,6 @@ type dGraphRepo struct {
 	dg *dgo.Dgraph
 }
 
-const ContextKeyAccount = "infinimesh/pkg/node/account"
-
 func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 	return &dGraphRepo{dg: dg}
 }

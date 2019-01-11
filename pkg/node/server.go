@@ -14,6 +14,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const ContextKeyAccount = "infinimesh/pkg/node/account"
+
 type Server struct {
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
