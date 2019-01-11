@@ -4,6 +4,7 @@ import Devices from "./views/Devices.vue";
 import RegisterDevice from "./views/RegisterDevice.vue";
 import UnRegisterDevice from "./views/UnRegisterDevice.vue";
 import Shadow from "./views/Shadow.vue";
+import DeviceManagement from "./views/DeviceManagement.vue";
 
 Vue.use(Router);
 
@@ -22,9 +23,14 @@ export default new Router({
       //   import(/* webpackChunkName: "Home" */ "./views/Home.vue"),
     },
     {
+      path: "/devices/mamange",
+      name: "Manage devices",
+      component: DeviceManagement
+    },
+    {
       path: "/devices/show/:id",
       component: Shadow,
-      name: Shadow
+      name: "Shadow"
     },
     {
       path: "/devices/register",

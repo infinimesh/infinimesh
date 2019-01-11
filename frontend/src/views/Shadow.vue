@@ -117,7 +117,7 @@ export default {
 };
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
   #scrollableCard {
   height: 400px;
   overflow-y: auto;

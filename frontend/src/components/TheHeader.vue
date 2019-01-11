@@ -52,7 +52,7 @@
 export default {
   data() {
     return {
-      links: ["View devices", "Register device"]
+      links: ["View devices", "Manage devices", "Register device"]
     };
   }
 };
