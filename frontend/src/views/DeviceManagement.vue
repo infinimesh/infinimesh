@@ -15,7 +15,7 @@ export default {
     return {
       counter: 0,
       tree: [],
-      tree: [
+      exampleTree: [
           {
             id: 1,
             name: 'Applications',
@@ -90,8 +90,8 @@ export default {
       },
       easyObj: {
         topLevel: {
-          one: 1,
-          two: 2
+          one: "prop one",
+          two: "prop two"
         }
       }
     }
@@ -102,55 +102,95 @@ export default {
     }
   },
   methods: {
-    constructTreeView(obj) {
-      console.log("object at beginning of function", obj)
-      let newObj = {};
-      console.log("newObj at beginning of function", newObj)
-      console.log("start construct tree")
-      console.log("loop number", this.counter)
+    addChildren(tree) {
+      if (tree.hasOwnProperty("children")) {
+        this.addChildren(tree.children)
+      }
+      else {
+        tree.children = [];
+        return tree;
+      }
+    },
+    iterateThroughObject(obj) {
+      console.log("iteration", this.counter);
+      this.counter++;
 
       if (this.isObject(obj)) {
         let key;
-        console.log("in object part")
+        console.log("obj found");
+        this.addChildren(this.tree);
 
-        //counter is only there atm to prevent an infinite regression
-        this.counter++;
-        if (this.counter > 3) {
-          return;
-        }
-        else {
-          for (key in obj) {
-            obj.children = [];
-            console.log("key", key)
-            console.log("value for key", obj[key])
-            obj.children.push(obj[key]);
-            console.log("obj.children after push", obj.children)
-            //copy object
-            newObj = JSON.parse(JSON.stringify(obj.children))
-            console.log("newObj", newObj, "obj", obj)
-            obj = {};
-            return this.constructTreeView(newObj);
-          }
+        for (key in obj) {
+          console.log(obj[key]);
+          this.iterateThroughObject(obj[key])
         }
       }
       else if (this.isArray(obj)) {
-        console.log("in array part")
+        let element;
+        console.log("array found");
+        this.addChildren(this.tree);
 
-        obj.children = [];
-        this.counter++;
-        if (this.counter > 3) {
-          return;
+        for (element of obj) {
+          console.log(element)
+          this.iterateThroughObject(element)
         }
-        obj.children = obj;
-        newObj = JSON.parse(JSON.stringify(obj.children))
-        console.log(obj)
-        obj = {};
-        return this.constructTreeView(newObj);
       }
       else {
-        console.log("done", obj);
+        console.log("No object or array found", obj);
+        console.log("final tree", this.tree);
+        return;
       }
     },
+    // constructTreeView(obj) {
+    //   console.log("object at beginning of function", obj)
+    //   let newObj = {};
+    //   console.log("newObj at beginning of function", newObj)
+    //   console.log("start construct tree")
+    //   console.log("loop number", this.counter)
+    //
+    //   if (this.isObject(obj)) {
+    //     let key;
+    //     console.log("in object part")
+    //
+    //     //counter is only there atm to prevent an infinite regression
+    //     this.counter++;
+    //     if (this.counter > 3) {
+    //       return;
+    //     }
+    //     else {
+    //       for (key in obj) {
+    //         obj.children = [];
+    //         console.log("key", key)
+    //         console.log("value for key", obj[key])
+    //         obj.children.push(obj[key]);
+    //         console.log("obj.children after push", obj.children)
+    //         //copy object
+    //         newObj = JSON.parse(JSON.stringify(obj.children))
+    //         console.log("newObj", newObj, "obj", obj)
+    //         obj = {};
+    //         this.tree =
+    //         return this.constructTreeView(newObj);
+    //       }
+    //     }
+    //   }
+    //   else if (this.isArray(obj)) {
+    //     console.log("in array part")
+    //
+    //     obj.children = [];
+    //     this.counter++;
+    //     if (this.counter > 3) {
+    //       return;
+    //     }
+    //     obj.children = obj;
+    //     newObj = JSON.parse(JSON.stringify(obj.children))
+    //     console.log(obj)
+    //     obj = {};
+    //     return this.constructTreeView(newObj);
+    //   }
+    //   else {
+    //     console.log("done", obj);
+    //   }
+    // },
     isArray(a) {
     return (!!a) && (a.constructor === Array);
     },
@@ -160,7 +200,7 @@ export default {
   },
   mounted() {
     console.log(this.objectTree);
-    this.constructTreeView(this.easyObj);
+    this.iterateThroughObject(this.simpleTree);
   }
 }
 </script>
