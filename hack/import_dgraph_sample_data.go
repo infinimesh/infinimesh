@@ -41,12 +41,8 @@ func main() {
 	err := dg.Alter(context.Background(), &api.Operation{
 		Schema: `
   name: string @index(exact) .
-  device_id: string @index(exact) .
-  email: string @index(exact) .
   action: string @index(term) .
-  uuid: string @index(exact) .
   type: string @index(exact) .
-  permission: string @index(term) .
   access.to: uid @reverse .`,
 	})
 	if err != nil {
