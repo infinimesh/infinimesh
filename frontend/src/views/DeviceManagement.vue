@@ -2,9 +2,52 @@
   <v-container>
     <h1 class="mb-3">Device Management</h1>
     <v-card>
-      <v-treeview
-        :items="tree"
-      ></v-treeview>
+      <v-layout
+        row wrap
+      >
+        <v-flex>
+          <v-card>
+            <v-card-title primary-title>
+              <h2>Device hierarchy</h2>
+            </v-card-title>
+            <v-treeview
+              v-model="tree"
+              :items="items"
+              activatable
+              active-class="grey lighten-4 indigo--text"
+              selected-color="indigo"
+              open-on-click
+              selectable
+              expand-icon="mdi-chevron-down"
+              on-icon="mdi-bookmark"
+              off-icon="mdi-bookmark-outline"
+              indeterminate-icon="mdi-bookmark-minus"
+            >
+          </v-treeview>
+          </v-card>
+        </v-flex>
+        <v-flex>
+          <v-card>
+            <v-card-text>
+              {{ tree[0] }}
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                @click="newLevel"
+              >
+                Include new level
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
+        <v-flex>
+          <v-card>
+            <v-card-text>
+              {{ items }}
+            </v-card-text>
+          </v-card>
+        </v-flex>
+      </v-layout>
     </v-card>
   </v-container>
 </template>
@@ -14,193 +57,105 @@ export default {
   data() {
     return {
       counter: 0,
+      items: [],
       tree: [],
-      exampleTree: [
-          {
-            id: 1,
-            name: 'Applications',
-            children: [
-              { id: 2, name: 'Calendar' },
-              { id: 3, name: 'Chrome' },
-              { id: 4, name: 'Webstorm' }
-            ]
+      data: {
+        "objects": [{
+            "uid": "0x1119d",
+            "name": "Johannes' Home",
+            "objects": [{
+                "uid": "0x1119e",
+                "name": "First Floor",
+                "objects": [{
+                  "uid": "0x1119f",
+                  "name": "Living Room",
+                  "devices": [{
+                    "uid": "0x111a0",
+                    "name": "PC"
+                  }]
+                }]
+              },
+              {
+                "uid": "0x111a3",
+                "name": "Second Floor"
+              }
+            ],
+            "devices": [{
+              "uid": "0x111a4",
+              "name": "le lamp"
+            }]
           },
           {
-            id: 5,
-            name: 'Languages',
-            children: [
-              { id: 6, name: 'English' },
-              { id: 7, name: 'French' },
-              { id: 8, name: 'Spannish' }
-            ]
+            "uid": "0x111a5",
+            "name": "Enclosing Room",
+            "devices": [{
+              "uid": "0x111a6",
+              "name": "Enclosing-room-device"
+            }]
           }
-
         ],
-      realTree: `
-      {
-       "objects": {
-         "0x11181": {
-           "uid": "0x11181",
-           "name": "Johannes' Home",
-           "objects": {
-             "0x11182": {
-               "uid": "0x11182",
-               "name": "First Floor",
-               "objects": {
-                 "0x11183": {
-                   "uid": "0x11183",
-                   "name": "Living Room",
-                   "devices": [
-                     {
-                       "uid": "0x11184",
-                       "name": "PC"
-                     }
-                   ]
-                 }
-               }
-             },
-             "0x11187": {
-               "uid": "0x11187",
-               "name": "Second Floor"
-             }
-           },
-           "devices": [
-             {
-               "uid": "0x11188",
-               "name": "le lamp"
-             }
-           ]
-         }
-       }
-      }
-      `,
-      simpleTree: {
-        objects: {
-          0x11183: {
-            uid: "0x11183",
-            name: "Living Room",
-            devices: [
-              {
-                uid: "0x11184",
-                name: "PC"
-              }
-            ]
-          }
-        }
-      },
-      easyObj: {
-        topLevel: {
-          one: "prop one",
-          two: "prop two"
-        }
+        "devices": [{
+          "uid": "0x111a2",
+          "name": "some device"
+        }]
       }
     }
   },
   computed: {
-    objectTree() {
-      return JSON.parse(this.realTree)
-    }
+    // objectTree() {
+    //   return JSON.parse(this.realTree)
+    // }
   },
   methods: {
-    addChildren(tree) {
-      if (tree.hasOwnProperty("children")) {
-        this.addChildren(tree.children)
-      }
-      else {
-        tree.children = [];
-        return tree;
-      }
+    newLevel() {
+      console.log("include new level")
     },
-    iterateThroughObject(obj) {
-      console.log("iteration", this.counter);
-      this.counter++;
-
-      if (this.isObject(obj)) {
-        let key;
-        console.log("obj found");
-        this.addChildren(this.tree);
-
-        for (key in obj) {
-          console.log(obj[key]);
-          this.iterateThroughObject(obj[key])
+    addChildDevice(input, id) {
+      for (let element of input) {
+        if (element.id===id) {
+          element.children.push({id: "testId", name: "testDevice"});
+          return;
+        }
+        else if (element.children) {
+          this.addChildDevice(element.children, id);
         }
       }
-      else if (this.isArray(obj)) {
-        let element;
-        console.log("array found");
-        this.addChildren(this.tree);
+    },
+    transformObject(input) {
+      let res = {};
 
-        for (element of obj) {
-          console.log(element)
-          this.iterateThroughObject(element)
+      res.id = input.uid;
+      res.name = input.name;
+      res.children = [];
+      if (input.devices) {
+        for (let device of input.devices) {
+          res.children.push(this.transformObject(device));
         }
       }
-      else {
-        console.log("No object or array found", obj);
-        console.log("final tree", this.tree);
-        return;
+      if (input.objects) {
+        for (let object of input.objects) {
+          res.children.push(this.transformObject(object));
+        }
       }
+      return res;
     },
-    // constructTreeView(obj) {
-    //   console.log("object at beginning of function", obj)
-    //   let newObj = {};
-    //   console.log("newObj at beginning of function", newObj)
-    //   console.log("start construct tree")
-    //   console.log("loop number", this.counter)
-    //
-    //   if (this.isObject(obj)) {
-    //     let key;
-    //     console.log("in object part")
-    //
-    //     //counter is only there atm to prevent an infinite regression
-    //     this.counter++;
-    //     if (this.counter > 3) {
-    //       return;
-    //     }
-    //     else {
-    //       for (key in obj) {
-    //         obj.children = [];
-    //         console.log("key", key)
-    //         console.log("value for key", obj[key])
-    //         obj.children.push(obj[key]);
-    //         console.log("obj.children after push", obj.children)
-    //         //copy object
-    //         newObj = JSON.parse(JSON.stringify(obj.children))
-    //         console.log("newObj", newObj, "obj", obj)
-    //         obj = {};
-    //         this.tree =
-    //         return this.constructTreeView(newObj);
-    //       }
-    //     }
-    //   }
-    //   else if (this.isArray(obj)) {
-    //     console.log("in array part")
-    //
-    //     obj.children = [];
-    //     this.counter++;
-    //     if (this.counter > 3) {
-    //       return;
-    //     }
-    //     obj.children = obj;
-    //     newObj = JSON.parse(JSON.stringify(obj.children))
-    //     console.log(obj)
-    //     obj = {};
-    //     return this.constructTreeView(newObj);
-    //   }
-    //   else {
-    //     console.log("done", obj);
-    //   }
-    // },
-    isArray(a) {
-    return (!!a) && (a.constructor === Array);
-    },
-    isObject(a) {
-    return (!!a) && (a.constructor === Object);
+   transform(input) {
+      let res = [];
+
+      for (let value of input.objects) {
+        let el = this.transformObject(value);
+        res.push(el)
+      }
+      for (let value of input.devices) {
+        let el = this.transformObject(value);
+        res.push(el)
+      }
+      return res;
     }
   },
   mounted() {
-    console.log(this.objectTree);
-    this.iterateThroughObject(this.simpleTree);
+    this.items = this.transform(this.data);
+    console.log(this.addChildDevice(this.items, "0x111a4"));
   }
 }
 </script>
