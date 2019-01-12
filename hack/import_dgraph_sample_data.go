@@ -1,48 +1,79 @@
-package node
+package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"testing"
+
+	"flag"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/stretchr/testify/require"
+	"github.com/infinimesh/infinimesh/pkg/node"
 	"google.golang.org/grpc"
 )
 
 var (
-	dgraphURL = "localhost:9080"
+	dgraphURL string
+	drop      bool
 )
 
-func TestStuff(t *testing.T) {
-	t.Skip("Only for local testing")
+func init() {
+	flag.BoolVar(&drop, "drop", false, "Drop all data in dgraph before import")
+	flag.StringVar(&dgraphURL, "host", "localhost:9080", "dgraph host and port")
+}
+
+func main() {
+	flag.Parse()
+
 	conn, _ := grpc.Dial(dgraphURL, grpc.WithInsecure())
 	defer conn.Close()
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	r := &Object{
-		Node: Node{
+	if drop {
+		err := dg.Alter(context.Background(), &api.Operation{DropAll: true})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Dropped data")
+	}
+	err := dg.Alter(context.Background(), &api.Operation{
+		Schema: `
+  name: string @index(exact) .
+  device_id: string @index(exact) .
+  email: string @index(exact) .
+  action: string @index(term) .
+  uuid: string @index(exact) .
+  type: string @index(exact) .
+  permission: string @index(term) .
+  access.to: uid @reverse .`,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Imported schema")
+
+	r := &node.Object{
+		Node: node.Node{
 			UID:  "_:home",
 			Type: "object",
 		},
 		Name: "Johannes' Home",
-		Contains: &Object{
-			Node: Node{
+		Contains: &node.Object{
+			Node: node.Node{
 				UID:  "_:first-floor",
 				Type: "object",
 			},
 			Name: "First Floor",
-			Contains: &Object{
-				Node: Node{
+			Contains: &node.Object{
+				Node: node.Node{
 					UID:  "_:living-room",
 					Type: "object",
 				},
 				Name: "Living Room",
-				ContainsDevice: &Device{
-					Node: Node{
+				ContainsDevice: &node.Device{
+					Node: node.Node{
 						UID:  "_:PC",
 						Type: "device",
 					},
@@ -55,18 +86,20 @@ func TestStuff(t *testing.T) {
 	bytes, _ := json.Marshal(&r)
 
 	a, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(a.GetUids())
 
-	u := &Account{
-		Node: Node{
+	u := &node.Account{
+		Node: node.Node{
 			UID:  "_:user",
 			Type: "user",
 		},
 		Name: "joe",
-		AccessTo: &Object{
-			Node: Node{
+		AccessTo: &node.Object{
+			Node: node.Node{
 				UID: a.GetUids()["home"],
 			},
 			AccessToInherit:    true,
@@ -76,17 +109,19 @@ func TestStuff(t *testing.T) {
 
 	bytes, _ = json.Marshal(&u)
 	a1, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(a1.GetUids())
 
 	// Direct access
-	u2 := &Account{
-		Node: Node{
+	u2 := &node.Account{
+		Node: node.Node{
 			UID: a1.GetUids()["user"],
 		},
-		AccessToDevice: &Device{
-			Node: Node{
+		AccessToDevice: &node.Device{
+			Node: node.Node{
 				UID:  "_:device2",
 				Type: "device",
 			},
@@ -97,14 +132,16 @@ func TestStuff(t *testing.T) {
 
 	bytes, _ = json.Marshal(&u2)
 	_, err = dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
-	r2 := &Object{
-		Node: Node{
+	r2 := &node.Object{
+		Node: node.Node{
 			UID: a.GetUids()["home"],
 		},
-		Contains: &Object{
-			Node: Node{
+		Contains: &node.Object{
+			Node: node.Node{
 				UID:  "_:second-floor",
 				Type: "object",
 			},
@@ -114,16 +151,18 @@ func TestStuff(t *testing.T) {
 
 	bytes, _ = json.Marshal(&r2)
 	a2, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(a2.GetUids())
 
-	r3 := &Object{
-		Node: Node{
+	r3 := &node.Object{
+		Node: node.Node{
 			UID: a.GetUids()["home"],
 		},
-		ContainsDevice: &Device{
-			Node: Node{
+		ContainsDevice: &node.Device{
+			Node: node.Node{
 				UID:  "_:lamp1",
 				Type: "device",
 			},
@@ -133,23 +172,25 @@ func TestStuff(t *testing.T) {
 
 	bytes, _ = json.Marshal(&r3)
 	a3, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(a3.GetUids())
 
 	// Direct access
-	u4 := &Account{
-		Node: Node{
+	u4 := &node.Account{
+		Node: node.Node{
 			UID: a1.GetUids()["user"],
 		},
-		AccessTo: &Object{
-			Node: Node{
+		AccessTo: &node.Object{
+			Node: node.Node{
 				UID:  "_:enclosingroom",
 				Type: "object",
 			},
 			Name: "Enclosing Room",
-			ContainsDevice: &Device{
-				Node: Node{
+			ContainsDevice: &node.Device{
+				Node: node.Node{
 					UID:  "_:enclosedobject",
 					Type: "device",
 				},
@@ -160,8 +201,9 @@ func TestStuff(t *testing.T) {
 
 	bytes, _ = json.Marshal(&u4)
 	a6, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
-	require.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(a6.GetUids())
-
 }
