@@ -91,7 +91,7 @@ func main() {
 	u := &node.Account{
 		Node: node.Node{
 			UID:  "_:user",
-			Type: "user",
+			Type: "account",
 		},
 		Name: "joe",
 		AccessTo: &node.Object{

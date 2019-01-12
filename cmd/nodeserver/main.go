@@ -66,14 +66,22 @@ func main() {
 		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(exampleAuthFunc)),
 	)
 
-	serverHandler := &node.Server{
-		Repo:   node.NewDGraphRepo(dg),
+	repo := node.NewDGraphRepo(dg)
+
+	objectController := &node.ObjectController{
+		Repo:   repo,
 		Dgraph: dg,
 		Log:    log.Named("server"),
 	}
 
-	nodepb.RegisterObjectServiceServer(srv, serverHandler)
-	nodepb.RegisterAccountServer(srv, serverHandler)
+	accountController := &node.AccountController{
+		Repo:   repo,
+		Dgraph: dg,
+		Log:    log.Named("accountController"),
+	}
+
+	nodepb.RegisterObjectServiceServer(srv, objectController)
+	nodepb.RegisterAccountServiceServer(srv, accountController)
 	reflection.Register(srv)
 
 	signals := make(chan os.Signal, 1)

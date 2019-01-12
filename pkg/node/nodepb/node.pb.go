@@ -145,84 +145,6 @@ func (m *IsAuthorizedResponse) GetDecision() *wrappers.BoolValue {
 	return nil
 }
 
-type LoginRequest struct {
-	ClientID             string   `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
-	ClientSecret         string   `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *LoginRequest) Reset()         { *m = LoginRequest{} }
-func (m *LoginRequest) String() string { return proto.CompactTextString(m) }
-func (*LoginRequest) ProtoMessage()    {}
-func (*LoginRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{2}
-}
-
-func (m *LoginRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_LoginRequest.Unmarshal(m, b)
-}
-func (m *LoginRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_LoginRequest.Marshal(b, m, deterministic)
-}
-func (m *LoginRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LoginRequest.Merge(m, src)
-}
-func (m *LoginRequest) XXX_Size() int {
-	return xxx_messageInfo_LoginRequest.Size(m)
-}
-func (m *LoginRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_LoginRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LoginRequest proto.InternalMessageInfo
-
-func (m *LoginRequest) GetClientID() string {
-	if m != nil {
-		return m.ClientID
-	}
-	return ""
-}
-
-func (m *LoginRequest) GetClientSecret() string {
-	if m != nil {
-		return m.ClientSecret
-	}
-	return ""
-}
-
-type LoginResponse struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *LoginResponse) Reset()         { *m = LoginResponse{} }
-func (m *LoginResponse) String() string { return proto.CompactTextString(m) }
-func (*LoginResponse) ProtoMessage()    {}
-func (*LoginResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{3}
-}
-
-func (m *LoginResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_LoginResponse.Unmarshal(m, b)
-}
-func (m *LoginResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_LoginResponse.Marshal(b, m, deterministic)
-}
-func (m *LoginResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LoginResponse.Merge(m, src)
-}
-func (m *LoginResponse) XXX_Size() int {
-	return xxx_messageInfo_LoginResponse.Size(m)
-}
-func (m *LoginResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_LoginResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LoginResponse proto.InternalMessageInfo
-
 type CreateAccountRequest struct {
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -234,7 +156,7 @@ func (m *CreateAccountRequest) Reset()         { *m = CreateAccountRequest{} }
 func (m *CreateAccountRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateAccountRequest) ProtoMessage()    {}
 func (*CreateAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{4}
+	return fileDescriptor_af4ee7a0c648c985, []int{2}
 }
 
 func (m *CreateAccountRequest) XXX_Unmarshal(b []byte) error {
@@ -273,7 +195,7 @@ func (m *CreateAccountResponse) Reset()         { *m = CreateAccountResponse{} }
 func (m *CreateAccountResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateAccountResponse) ProtoMessage()    {}
 func (*CreateAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{5}
+	return fileDescriptor_af4ee7a0c648c985, []int{3}
 }
 
 func (m *CreateAccountResponse) XXX_Unmarshal(b []byte) error {
@@ -315,7 +237,7 @@ func (m *AuthorizeRequest) Reset()         { *m = AuthorizeRequest{} }
 func (m *AuthorizeRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthorizeRequest) ProtoMessage()    {}
 func (*AuthorizeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{6}
+	return fileDescriptor_af4ee7a0c648c985, []int{4}
 }
 
 func (m *AuthorizeRequest) XXX_Unmarshal(b []byte) error {
@@ -374,7 +296,7 @@ func (m *AuthorizeResponse) Reset()         { *m = AuthorizeResponse{} }
 func (m *AuthorizeResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthorizeResponse) ProtoMessage()    {}
 func (*AuthorizeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{7}
+	return fileDescriptor_af4ee7a0c648c985, []int{5}
 }
 
 func (m *AuthorizeResponse) XXX_Unmarshal(b []byte) error {
@@ -395,57 +317,7 @@ func (m *AuthorizeResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AuthorizeResponse proto.InternalMessageInfo
 
-type Context struct {
-	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	Root                 bool     `protobuf:"varint,2,opt,name=root,proto3" json:"root,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Context) Reset()         { *m = Context{} }
-func (m *Context) String() string { return proto.CompactTextString(m) }
-func (*Context) ProtoMessage()    {}
-func (*Context) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{8}
-}
-
-func (m *Context) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Context.Unmarshal(m, b)
-}
-func (m *Context) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Context.Marshal(b, m, deterministic)
-}
-func (m *Context) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Context.Merge(m, src)
-}
-func (m *Context) XXX_Size() int {
-	return xxx_messageInfo_Context.Size(m)
-}
-func (m *Context) XXX_DiscardUnknown() {
-	xxx_messageInfo_Context.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Context proto.InternalMessageInfo
-
-func (m *Context) GetAccount() string {
-	if m != nil {
-		return m.Account
-	}
-	return ""
-}
-
-func (m *Context) GetRoot() bool {
-	if m != nil {
-		return m.Root
-	}
-	return false
-}
-
-// TODO maybe path-based; path as string instead of parent id? id = uuid, i.e.
-// caller can give it? currently DB assigns it
 type CreateObjectRequest struct {
-	Context              *Context `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
 	Parent               string   `protobuf:"bytes,2,opt,name=parent,proto3" json:"parent,omitempty"`
 	Name                 string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -457,7 +329,7 @@ func (m *CreateObjectRequest) Reset()         { *m = CreateObjectRequest{} }
 func (m *CreateObjectRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateObjectRequest) ProtoMessage()    {}
 func (*CreateObjectRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{9}
+	return fileDescriptor_af4ee7a0c648c985, []int{6}
 }
 
 func (m *CreateObjectRequest) XXX_Unmarshal(b []byte) error {
@@ -477,13 +349,6 @@ func (m *CreateObjectRequest) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_CreateObjectRequest proto.InternalMessageInfo
-
-func (m *CreateObjectRequest) GetContext() *Context {
-	if m != nil {
-		return m.Context
-	}
-	return nil
-}
 
 func (m *CreateObjectRequest) GetParent() string {
 	if m != nil {
@@ -510,7 +375,7 @@ func (m *CreateObjectResponse) Reset()         { *m = CreateObjectResponse{} }
 func (m *CreateObjectResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateObjectResponse) ProtoMessage()    {}
 func (*CreateObjectResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{10}
+	return fileDescriptor_af4ee7a0c648c985, []int{7}
 }
 
 func (m *CreateObjectResponse) XXX_Unmarshal(b []byte) error {
@@ -539,18 +404,20 @@ func (m *CreateObjectResponse) GetUid() string {
 }
 
 type Object struct {
-	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Name                 string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Uid                  string    `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	Name                 string    `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Objects              []*Object `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
+	Devices              []*Device `protobuf:"bytes,4,rep,name=devices,proto3" json:"devices,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *Object) Reset()         { *m = Object{} }
 func (m *Object) String() string { return proto.CompactTextString(m) }
 func (*Object) ProtoMessage()    {}
 func (*Object) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{11}
+	return fileDescriptor_af4ee7a0c648c985, []int{8}
 }
 
 func (m *Object) XXX_Unmarshal(b []byte) error {
@@ -585,6 +452,20 @@ func (m *Object) GetName() string {
 	return ""
 }
 
+func (m *Object) GetObjects() []*Object {
+	if m != nil {
+		return m.Objects
+	}
+	return nil
+}
+
+func (m *Object) GetDevices() []*Device {
+	if m != nil {
+		return m.Devices
+	}
+	return nil
+}
+
 type Device struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
@@ -597,7 +478,7 @@ func (m *Device) Reset()         { *m = Device{} }
 func (m *Device) String() string { return proto.CompactTextString(m) }
 func (*Device) ProtoMessage()    {}
 func (*Device) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{12}
+	return fileDescriptor_af4ee7a0c648c985, []int{9}
 }
 
 func (m *Device) XXX_Unmarshal(b []byte) error {
@@ -643,7 +524,7 @@ func (m *ListObjectsRequest) Reset()         { *m = ListObjectsRequest{} }
 func (m *ListObjectsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListObjectsRequest) ProtoMessage()    {}
 func (*ListObjectsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{13}
+	return fileDescriptor_af4ee7a0c648c985, []int{10}
 }
 
 func (m *ListObjectsRequest) XXX_Unmarshal(b []byte) error {
@@ -672,18 +553,18 @@ func (m *ListObjectsRequest) GetAccount() string {
 }
 
 type ListObjectsResponse struct {
-	Objects              []*ObjectList `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
-	Devices              []*Device     `protobuf:"bytes,2,rep,name=devices,proto3" json:"devices,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+	Objects              []*Object `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	Devices              []*Device `protobuf:"bytes,2,rep,name=devices,proto3" json:"devices,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *ListObjectsResponse) Reset()         { *m = ListObjectsResponse{} }
 func (m *ListObjectsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListObjectsResponse) ProtoMessage()    {}
 func (*ListObjectsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{14}
+	return fileDescriptor_af4ee7a0c648c985, []int{11}
 }
 
 func (m *ListObjectsResponse) XXX_Unmarshal(b []byte) error {
@@ -704,7 +585,7 @@ func (m *ListObjectsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ListObjectsResponse proto.InternalMessageInfo
 
-func (m *ListObjectsResponse) GetObjects() []*ObjectList {
+func (m *ListObjectsResponse) GetObjects() []*Object {
 	if m != nil {
 		return m.Objects
 	}
@@ -718,134 +599,152 @@ func (m *ListObjectsResponse) GetDevices() []*Device {
 	return nil
 }
 
-type ObjectList struct {
-	Uid                  string        `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Name                 string        `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Objects              []*ObjectList `protobuf:"bytes,3,rep,name=objects,proto3" json:"objects,omitempty"`
-	Devices              []*Device     `protobuf:"bytes,4,rep,name=devices,proto3" json:"devices,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+type GetAccountRequest struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ObjectList) Reset()         { *m = ObjectList{} }
-func (m *ObjectList) String() string { return proto.CompactTextString(m) }
-func (*ObjectList) ProtoMessage()    {}
-func (*ObjectList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{15}
+func (m *GetAccountRequest) Reset()         { *m = GetAccountRequest{} }
+func (m *GetAccountRequest) String() string { return proto.CompactTextString(m) }
+func (*GetAccountRequest) ProtoMessage()    {}
+func (*GetAccountRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_af4ee7a0c648c985, []int{12}
 }
 
-func (m *ObjectList) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ObjectList.Unmarshal(m, b)
+func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAccountRequest.Unmarshal(m, b)
 }
-func (m *ObjectList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ObjectList.Marshal(b, m, deterministic)
+func (m *GetAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAccountRequest.Marshal(b, m, deterministic)
 }
-func (m *ObjectList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ObjectList.Merge(m, src)
+func (m *GetAccountRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAccountRequest.Merge(m, src)
 }
-func (m *ObjectList) XXX_Size() int {
-	return xxx_messageInfo_ObjectList.Size(m)
+func (m *GetAccountRequest) XXX_Size() int {
+	return xxx_messageInfo_GetAccountRequest.Size(m)
 }
-func (m *ObjectList) XXX_DiscardUnknown() {
-	xxx_messageInfo_ObjectList.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ObjectList proto.InternalMessageInfo
-
-func (m *ObjectList) GetUid() string {
-	if m != nil {
-		return m.Uid
-	}
-	return ""
+func (m *GetAccountRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAccountRequest.DiscardUnknown(m)
 }
 
-func (m *ObjectList) GetName() string {
+var xxx_messageInfo_GetAccountRequest proto.InternalMessageInfo
+
+func (m *GetAccountRequest) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *ObjectList) GetObjects() []*ObjectList {
-	if m != nil {
-		return m.Objects
-	}
-	return nil
+type Account struct {
+	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ObjectList) GetDevices() []*Device {
+func (m *Account) Reset()         { *m = Account{} }
+func (m *Account) String() string { return proto.CompactTextString(m) }
+func (*Account) ProtoMessage()    {}
+func (*Account) Descriptor() ([]byte, []int) {
+	return fileDescriptor_af4ee7a0c648c985, []int{13}
+}
+
+func (m *Account) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Account.Unmarshal(m, b)
+}
+func (m *Account) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Account.Marshal(b, m, deterministic)
+}
+func (m *Account) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Account.Merge(m, src)
+}
+func (m *Account) XXX_Size() int {
+	return xxx_messageInfo_Account.Size(m)
+}
+func (m *Account) XXX_DiscardUnknown() {
+	xxx_messageInfo_Account.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Account proto.InternalMessageInfo
+
+func (m *Account) GetUid() string {
 	if m != nil {
-		return m.Devices
+		return m.Uid
 	}
-	return nil
+	return ""
+}
+
+func (m *Account) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
 }
 
 func init() {
 	proto.RegisterEnum("infinimesh.node.Action", Action_name, Action_value)
 	proto.RegisterType((*IsAuthorizedRequest)(nil), "infinimesh.node.IsAuthorizedRequest")
 	proto.RegisterType((*IsAuthorizedResponse)(nil), "infinimesh.node.IsAuthorizedResponse")
-	proto.RegisterType((*LoginRequest)(nil), "infinimesh.node.LoginRequest")
-	proto.RegisterType((*LoginResponse)(nil), "infinimesh.node.LoginResponse")
 	proto.RegisterType((*CreateAccountRequest)(nil), "infinimesh.node.CreateAccountRequest")
 	proto.RegisterType((*CreateAccountResponse)(nil), "infinimesh.node.CreateAccountResponse")
 	proto.RegisterType((*AuthorizeRequest)(nil), "infinimesh.node.AuthorizeRequest")
 	proto.RegisterType((*AuthorizeResponse)(nil), "infinimesh.node.AuthorizeResponse")
-	proto.RegisterType((*Context)(nil), "infinimesh.node.Context")
 	proto.RegisterType((*CreateObjectRequest)(nil), "infinimesh.node.CreateObjectRequest")
 	proto.RegisterType((*CreateObjectResponse)(nil), "infinimesh.node.CreateObjectResponse")
 	proto.RegisterType((*Object)(nil), "infinimesh.node.Object")
 	proto.RegisterType((*Device)(nil), "infinimesh.node.Device")
 	proto.RegisterType((*ListObjectsRequest)(nil), "infinimesh.node.ListObjectsRequest")
 	proto.RegisterType((*ListObjectsResponse)(nil), "infinimesh.node.ListObjectsResponse")
-	proto.RegisterType((*ObjectList)(nil), "infinimesh.node.ObjectList")
+	proto.RegisterType((*GetAccountRequest)(nil), "infinimesh.node.GetAccountRequest")
+	proto.RegisterType((*Account)(nil), "infinimesh.node.Account")
 }
 
 func init() { proto.RegisterFile("pkg/node/nodepb/node.proto", fileDescriptor_af4ee7a0c648c985) }
 
 var fileDescriptor_af4ee7a0c648c985 = []byte{
-	// 653 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x55, 0xcb, 0x6e, 0xd3, 0x4c,
-	0x14, 0xfe, 0x9d, 0xe4, 0xb7, 0x9d, 0xd3, 0x94, 0x86, 0x49, 0xa1, 0x96, 0x91, 0x50, 0x18, 0x5a,
-	0x08, 0x5d, 0x38, 0xc2, 0x08, 0x58, 0xa7, 0x97, 0x45, 0xa5, 0x92, 0x4a, 0x53, 0x04, 0x08, 0x24,
-	0x24, 0xc7, 0x99, 0xa6, 0x03, 0xa9, 0xc7, 0xf8, 0x02, 0x88, 0x0d, 0xef, 0x81, 0x78, 0x10, 0x1e,
-	0x0f, 0xd9, 0x33, 0xe3, 0xda, 0x75, 0x9a, 0x54, 0x6c, 0x92, 0xb9, 0x7c, 0xe7, 0xf2, 0x7d, 0x67,
-	0xce, 0x31, 0xd8, 0xe1, 0xe7, 0xd9, 0x30, 0xe0, 0x53, 0x9a, 0xff, 0x84, 0x93, 0xfc, 0xcf, 0x09,
-	0x23, 0x9e, 0x70, 0xb4, 0xc1, 0x82, 0x33, 0x16, 0xb0, 0x0b, 0x1a, 0x9f, 0x3b, 0xd9, 0xb1, 0x7d,
-	0x7f, 0xc6, 0xf9, 0x6c, 0x4e, 0x87, 0xf9, 0xf5, 0x24, 0x3d, 0x1b, 0x7e, 0x8b, 0xbc, 0x30, 0xa4,
-	0x51, 0x2c, 0x0c, 0x70, 0x02, 0xbd, 0xa3, 0x78, 0x94, 0x26, 0xe7, 0x3c, 0x62, 0x3f, 0xe8, 0x94,
-	0xd0, 0x2f, 0x29, 0x8d, 0x13, 0x84, 0xa0, 0x95, 0x99, 0x5b, 0x5a, 0x5f, 0x1b, 0xb4, 0x49, 0xbe,
-	0x46, 0x16, 0x18, 0x9e, 0xef, 0xf3, 0x34, 0x48, 0xac, 0x46, 0x7e, 0xac, 0xb6, 0x68, 0x08, 0xba,
-	0xe7, 0x27, 0x8c, 0x07, 0x56, 0xb3, 0xaf, 0x0d, 0x6e, 0xb9, 0x5b, 0xce, 0x95, 0x34, 0x9c, 0x51,
-	0x7e, 0x4d, 0x24, 0x0c, 0x8f, 0x61, 0xb3, 0x1a, 0x35, 0x0e, 0x79, 0x10, 0x53, 0xf4, 0x02, 0xcc,
-	0x29, 0xf5, 0x59, 0x9c, 0xb9, 0xca, 0x42, 0xaf, 0xb9, 0xb6, 0x23, 0x08, 0x38, 0x8a, 0x80, 0xb3,
-	0xc7, 0xf9, 0xfc, 0x8d, 0x37, 0x4f, 0x29, 0x29, 0xb0, 0x78, 0x0c, 0x9d, 0x63, 0x3e, 0x63, 0x81,
-	0x4a, 0xdf, 0x06, 0xd3, 0x9f, 0x33, 0x1a, 0x24, 0x47, 0x07, 0x92, 0x42, 0xb1, 0x47, 0x18, 0x3a,
-	0x62, 0x7d, 0x4a, 0xfd, 0x88, 0x2a, 0x2e, 0x95, 0x33, 0xbc, 0x01, 0xeb, 0xd2, 0x9f, 0x48, 0x0c,
-	0xef, 0xc2, 0xe6, 0x7e, 0x44, 0xbd, 0x84, 0x8e, 0x04, 0xe5, 0xb2, 0x4e, 0xde, 0xc5, 0xa5, 0x4e,
-	0xde, 0x05, 0xc5, 0x4f, 0xe0, 0xce, 0x15, 0xac, 0x64, 0xd7, 0x85, 0x66, 0xca, 0xa6, 0x12, 0x9b,
-	0x2d, 0x71, 0x04, 0xdd, 0x42, 0x05, 0xe5, 0xb2, 0x24, 0xb3, 0x56, 0x95, 0x59, 0x15, 0xa5, 0x51,
-	0x2a, 0xca, 0xdd, 0x8a, 0xf4, 0x6d, 0xa5, 0x70, 0xe6, 0x85, 0x05, 0xe7, 0x34, 0x62, 0x89, 0xd5,
-	0xea, 0x6b, 0x03, 0x93, 0xa8, 0x2d, 0xee, 0xc1, 0xed, 0x52, 0x4c, 0xc9, 0xef, 0x25, 0x18, 0xfb,
-	0x3c, 0x48, 0xe8, 0xf7, 0x15, 0xf1, 0x23, 0xce, 0x85, 0x62, 0x26, 0xc9, 0xd7, 0x38, 0x85, 0x9e,
-	0x20, 0x7b, 0x32, 0xf9, 0x44, 0xfd, 0x42, 0x17, 0x17, 0x0c, 0x5f, 0xf8, 0x93, 0x75, 0xb4, 0x6a,
-	0x4f, 0x42, 0xc6, 0x23, 0x0a, 0x98, 0x51, 0x09, 0xbd, 0x88, 0x16, 0xcf, 0x4b, 0xee, 0x0a, 0x8d,
-	0x9b, 0x25, 0x8d, 0x07, 0xaa, 0x1e, 0x2a, 0xec, 0xb5, 0x12, 0x3b, 0xa0, 0x0b, 0x4c, 0xfd, 0x6e,
-	0xa1, 0x67, 0x07, 0xf4, 0x03, 0xfa, 0x95, 0xf9, 0x74, 0x09, 0xbe, 0x51, 0xc1, 0xa3, 0x63, 0x16,
-	0x27, 0x22, 0x46, 0xbc, 0xb2, 0x88, 0xf8, 0x27, 0xf4, 0x2a, 0x78, 0x99, 0xf8, 0x73, 0x30, 0xb8,
-	0x38, 0xb2, 0xb4, 0x7e, 0x73, 0xb0, 0xe6, 0xde, 0xab, 0x09, 0x26, 0x4c, 0x32, 0x63, 0xa2, 0xb0,
-	0xe8, 0x29, 0x18, 0xd3, 0x3c, 0xdb, 0xd8, 0x6a, 0xe4, 0x66, 0xf5, 0xd6, 0x13, 0x6c, 0x88, 0xc2,
-	0xe1, 0xdf, 0x1a, 0xc0, 0xa5, 0xab, 0x9b, 0xb1, 0x2c, 0xa7, 0xd7, 0xfc, 0xb7, 0xf4, 0x5a, 0x37,
-	0x4b, 0x6f, 0xf7, 0x31, 0xe8, 0x62, 0x58, 0x20, 0x13, 0x5a, 0xe3, 0x93, 0xf1, 0x61, 0xf7, 0xbf,
-	0x6c, 0x45, 0x0e, 0x47, 0x07, 0x5d, 0x0d, 0xb5, 0xe1, 0xff, 0xb7, 0xe4, 0xe8, 0xf5, 0x61, 0xb7,
-	0xe1, 0xfe, 0x6a, 0x80, 0x21, 0x3b, 0x0c, 0x7d, 0x84, 0xf5, 0x4a, 0xcb, 0xa1, 0x9d, 0xfa, 0x73,
-	0x5b, 0xd0, 0xbe, 0xf6, 0xa3, 0x55, 0x30, 0x59, 0x9d, 0x0f, 0xd0, 0x29, 0xcf, 0x2b, 0xb4, 0x5d,
-	0xb3, 0x5b, 0x30, 0x44, 0xed, 0x9d, 0x15, 0x28, 0xe9, 0x9c, 0x40, 0xbb, 0x38, 0x45, 0x0f, 0xea,
-	0xa3, 0xf3, 0xca, 0x80, 0xb0, 0xf1, 0x32, 0x88, 0xf0, 0xe9, 0xfe, 0xd1, 0x60, 0x5d, 0x14, 0xe4,
-	0x94, 0x46, 0xf9, 0x6b, 0x7e, 0x05, 0x9d, 0x72, 0xc7, 0x2c, 0xa0, 0xb0, 0xa0, 0x8f, 0xed, 0xad,
-	0x6b, 0xca, 0x8c, 0xde, 0xc1, 0x5a, 0xe9, 0x19, 0xa3, 0x87, 0x35, 0x5c, 0xbd, 0x29, 0xec, 0xed,
-	0xe5, 0x20, 0x91, 0xfa, 0x9e, 0xf9, 0x5e, 0x17, 0xdf, 0xb5, 0x89, 0x9e, 0xcf, 0xfc, 0x67, 0x7f,
-	0x03, 0x00, 0x00, 0xff, 0xff, 0x7b, 0xe0, 0xc9, 0x16, 0xf1, 0x06, 0x00, 0x00,
+	// 599 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x55, 0xdd, 0x6e, 0xd3, 0x30,
+	0x14, 0x26, 0x69, 0xc9, 0xda, 0xd3, 0x6d, 0x74, 0xee, 0x18, 0x51, 0x2e, 0x50, 0x31, 0x1b, 0x2b,
+	0xbb, 0x48, 0x45, 0x91, 0xb8, 0xef, 0x58, 0x85, 0x86, 0xa0, 0x93, 0x02, 0x02, 0x04, 0x12, 0x52,
+	0x9a, 0x7a, 0xad, 0xa1, 0x8d, 0x43, 0x9c, 0x80, 0x04, 0xaf, 0xc1, 0xc3, 0xf0, 0x52, 0xbc, 0x03,
+	0x4a, 0x6c, 0xa7, 0x69, 0x93, 0xae, 0xe5, 0xa6, 0xf5, 0xcf, 0x77, 0xce, 0xf9, 0xbe, 0xcf, 0xf6,
+	0x09, 0x58, 0xc1, 0xd7, 0x49, 0xd7, 0x67, 0x63, 0x92, 0xfe, 0x04, 0xa3, 0xf4, 0xcf, 0x0e, 0x42,
+	0x16, 0x31, 0x74, 0x87, 0xfa, 0xd7, 0xd4, 0xa7, 0x73, 0xc2, 0xa7, 0x76, 0xb2, 0x6c, 0xdd, 0x9f,
+	0x30, 0x36, 0x99, 0x91, 0x6e, 0xba, 0x3d, 0x8a, 0xaf, 0xbb, 0x3f, 0x42, 0x37, 0x08, 0x48, 0xc8,
+	0x45, 0x00, 0x8e, 0xa0, 0x75, 0xc9, 0xfb, 0x71, 0x34, 0x65, 0x21, 0xfd, 0x49, 0xc6, 0x0e, 0xf9,
+	0x16, 0x13, 0x1e, 0x21, 0x04, 0xd5, 0x24, 0xdc, 0xd4, 0xda, 0x5a, 0xa7, 0xee, 0xa4, 0x63, 0x64,
+	0xc2, 0x8e, 0xeb, 0x79, 0x2c, 0xf6, 0x23, 0x53, 0x4f, 0x97, 0xd5, 0x14, 0x75, 0xc1, 0x70, 0xbd,
+	0x88, 0x32, 0xdf, 0xac, 0xb4, 0xb5, 0xce, 0x7e, 0xef, 0x9e, 0xbd, 0x42, 0xc3, 0xee, 0xa7, 0xdb,
+	0x8e, 0x84, 0xe1, 0x21, 0x1c, 0x2e, 0x57, 0xe5, 0x01, 0xf3, 0x39, 0x41, 0xcf, 0xa0, 0x36, 0x26,
+	0x1e, 0xe5, 0x49, 0xaa, 0xa4, 0x74, 0xa3, 0x67, 0xd9, 0x42, 0x80, 0xad, 0x04, 0xd8, 0xe7, 0x8c,
+	0xcd, 0xde, 0xb9, 0xb3, 0x98, 0x38, 0x19, 0x16, 0x9f, 0xc1, 0xe1, 0xf3, 0x90, 0xb8, 0x11, 0xe9,
+	0x0b, 0x46, 0x79, 0x19, 0xee, 0x7c, 0x21, 0xc3, 0x9d, 0x13, 0xfc, 0x18, 0xee, 0xae, 0x60, 0x65,
+	0xf1, 0x26, 0x54, 0x62, 0x3a, 0x96, 0xd8, 0x64, 0x88, 0x43, 0x68, 0x66, 0x24, 0x55, 0xca, 0x9c,
+	0x0b, 0xda, 0xb2, 0x0b, 0xca, 0x33, 0x3d, 0xe7, 0xd9, 0xd1, 0x92, 0x33, 0x75, 0x65, 0x40, 0x92,
+	0x85, 0xfa, 0x53, 0x12, 0xd2, 0xc8, 0xac, 0xb6, 0xb5, 0x4e, 0xcd, 0x51, 0x53, 0xdc, 0x82, 0x83,
+	0x5c, 0x4d, 0x41, 0x0d, 0xf7, 0xa1, 0x25, 0x38, 0x5f, 0x8d, 0xbe, 0x10, 0x2f, 0x93, 0x77, 0x04,
+	0x46, 0xe0, 0x86, 0x24, 0x3b, 0x10, 0x39, 0xcb, 0x64, 0x57, 0x72, 0xb2, 0x3b, 0xca, 0x22, 0x95,
+	0x62, 0xad, 0xea, 0xdf, 0x1a, 0x18, 0x02, 0x54, 0xdc, 0xcc, 0x52, 0xeb, 0x8b, 0xd4, 0xe8, 0x09,
+	0xec, 0xb0, 0x14, 0xcf, 0xcd, 0x4a, 0xbb, 0xd2, 0x69, 0x94, 0x9c, 0xbf, 0x2c, 0xaa, 0x70, 0x49,
+	0xc8, 0x98, 0x7c, 0xa7, 0x1e, 0xe1, 0x66, 0x75, 0x4d, 0xc8, 0x45, 0xba, 0xef, 0x28, 0x1c, 0xb6,
+	0xc1, 0x10, 0x4b, 0xdb, 0xb1, 0xc2, 0x36, 0xa0, 0x57, 0x94, 0x47, 0xa2, 0x32, 0xdf, 0x78, 0x7c,
+	0xf8, 0x17, 0xb4, 0x96, 0xf0, 0xd2, 0x9f, 0x9c, 0x38, 0xed, 0xff, 0xc5, 0xe9, 0x5b, 0x8a, 0x3b,
+	0x85, 0x83, 0x17, 0x24, 0xda, 0xe2, 0xf6, 0x76, 0x61, 0x47, 0xa2, 0xb6, 0xb3, 0xe1, 0xec, 0x14,
+	0x0c, 0xf1, 0xf8, 0x50, 0x0d, 0xaa, 0xc3, 0xab, 0xe1, 0xa0, 0x79, 0x2b, 0x19, 0x39, 0x83, 0xfe,
+	0x45, 0x53, 0x43, 0x75, 0xb8, 0xfd, 0xde, 0xb9, 0x7c, 0x3b, 0x68, 0xea, 0xbd, 0xbf, 0x3a, 0xec,
+	0xcb, 0xd4, 0x6f, 0x48, 0x98, 0x1a, 0xfd, 0x19, 0xf6, 0x96, 0x9e, 0x0a, 0x3a, 0x29, 0x08, 0x29,
+	0x7b, 0x76, 0xd6, 0xa3, 0x4d, 0x30, 0xe9, 0xed, 0x4b, 0x80, 0x85, 0x6a, 0x84, 0x0b, 0x51, 0x05,
+	0x4b, 0x2c, 0xb3, 0xa4, 0xb3, 0x88, 0xe8, 0x4f, 0xb0, 0x9b, 0x6f, 0x29, 0xe8, 0xb8, 0x80, 0x2c,
+	0xe9, 0x73, 0xd6, 0xc9, 0x06, 0x94, 0x24, 0xea, 0x40, 0x3d, 0x5b, 0x45, 0x0f, 0x8a, 0x1c, 0x56,
+	0x9a, 0x84, 0x85, 0x6f, 0x82, 0x88, 0x9c, 0xbd, 0x3f, 0x1a, 0xec, 0x89, 0x9b, 0xa3, 0xec, 0x7e,
+	0x0d, 0xbb, 0xf9, 0x27, 0x5a, 0x22, 0xa1, 0xa4, 0x09, 0x58, 0xeb, 0xee, 0x23, 0xfa, 0x00, 0x8d,
+	0xdc, 0x85, 0x46, 0x0f, 0x0b, 0xb8, 0xe2, 0xf3, 0xb0, 0x8e, 0x6f, 0x06, 0x09, 0xea, 0xe7, 0xb5,
+	0x8f, 0x86, 0xf8, 0xf4, 0x8c, 0x8c, 0xb4, 0x2d, 0x3f, 0xfd, 0x17, 0x00, 0x00, 0xff, 0xff, 0xd9,
+	0x1e, 0x42, 0xde, 0x94, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -856,130 +755,163 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// AccountClient is the client API for Account service.
+// AccountServiceClient is the client API for AccountService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type AccountClient interface {
+type AccountServiceClient interface {
 	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
+	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*Account, error)
 	IsAuthorized(ctx context.Context, in *IsAuthorizedRequest, opts ...grpc.CallOption) (*IsAuthorizedResponse, error)
 	Authorize(ctx context.Context, in *AuthorizeRequest, opts ...grpc.CallOption) (*AuthorizeResponse, error)
 }
 
-type accountClient struct {
+type accountServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewAccountClient(cc *grpc.ClientConn) AccountClient {
-	return &accountClient{cc}
+func NewAccountServiceClient(cc *grpc.ClientConn) AccountServiceClient {
+	return &accountServiceClient{cc}
 }
 
-func (c *accountClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
+func (c *accountServiceClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
 	out := new(CreateAccountResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.Account/CreateAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountService/CreateAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountClient) IsAuthorized(ctx context.Context, in *IsAuthorizedRequest, opts ...grpc.CallOption) (*IsAuthorizedResponse, error) {
+func (c *accountServiceClient) GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*Account, error) {
+	out := new(Account)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountService/GetAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) IsAuthorized(ctx context.Context, in *IsAuthorizedRequest, opts ...grpc.CallOption) (*IsAuthorizedResponse, error) {
 	out := new(IsAuthorizedResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.Account/IsAuthorized", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountService/IsAuthorized", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountClient) Authorize(ctx context.Context, in *AuthorizeRequest, opts ...grpc.CallOption) (*AuthorizeResponse, error) {
+func (c *accountServiceClient) Authorize(ctx context.Context, in *AuthorizeRequest, opts ...grpc.CallOption) (*AuthorizeResponse, error) {
 	out := new(AuthorizeResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.Account/Authorize", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountService/Authorize", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AccountServer is the server API for Account service.
-type AccountServer interface {
+// AccountServiceServer is the server API for AccountService service.
+type AccountServiceServer interface {
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	GetAccount(context.Context, *GetAccountRequest) (*Account, error)
 	IsAuthorized(context.Context, *IsAuthorizedRequest) (*IsAuthorizedResponse, error)
 	Authorize(context.Context, *AuthorizeRequest) (*AuthorizeResponse, error)
 }
 
-func RegisterAccountServer(s *grpc.Server, srv AccountServer) {
-	s.RegisterService(&_Account_serviceDesc, srv)
+func RegisterAccountServiceServer(s *grpc.Server, srv AccountServiceServer) {
+	s.RegisterService(&_AccountService_serviceDesc, srv)
 }
 
-func _Account_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccountService_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).CreateAccount(ctx, in)
+		return srv.(AccountServiceServer).CreateAccount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.node.Account/CreateAccount",
+		FullMethod: "/infinimesh.node.AccountService/CreateAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).CreateAccount(ctx, req.(*CreateAccountRequest))
+		return srv.(AccountServiceServer).CreateAccount(ctx, req.(*CreateAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Account_IsAuthorized_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccountService_GetAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).GetAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountService/GetAccount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).GetAccount(ctx, req.(*GetAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_IsAuthorized_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IsAuthorizedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).IsAuthorized(ctx, in)
+		return srv.(AccountServiceServer).IsAuthorized(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.node.Account/IsAuthorized",
+		FullMethod: "/infinimesh.node.AccountService/IsAuthorized",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).IsAuthorized(ctx, req.(*IsAuthorizedRequest))
+		return srv.(AccountServiceServer).IsAuthorized(ctx, req.(*IsAuthorizedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Account_Authorize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AccountService_Authorize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AuthorizeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServer).Authorize(ctx, in)
+		return srv.(AccountServiceServer).Authorize(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.node.Account/Authorize",
+		FullMethod: "/infinimesh.node.AccountService/Authorize",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServer).Authorize(ctx, req.(*AuthorizeRequest))
+		return srv.(AccountServiceServer).Authorize(ctx, req.(*AuthorizeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Account_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "infinimesh.node.Account",
-	HandlerType: (*AccountServer)(nil),
+var _AccountService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "infinimesh.node.AccountService",
+	HandlerType: (*AccountServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateAccount",
-			Handler:    _Account_CreateAccount_Handler,
+			Handler:    _AccountService_CreateAccount_Handler,
+		},
+		{
+			MethodName: "GetAccount",
+			Handler:    _AccountService_GetAccount_Handler,
 		},
 		{
 			MethodName: "IsAuthorized",
-			Handler:    _Account_IsAuthorized_Handler,
+			Handler:    _AccountService_IsAuthorized_Handler,
 		},
 		{
 			MethodName: "Authorize",
-			Handler:    _Account_Authorize_Handler,
+			Handler:    _AccountService_Authorize_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

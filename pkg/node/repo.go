@@ -13,6 +13,7 @@ type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
 	ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
+	GetAccount(ctx context.Context, name string) (account *Account, err error)
 }
 
 type dGraphRepo struct {
@@ -21,6 +22,37 @@ type dGraphRepo struct {
 
 func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 	return &dGraphRepo{dg: dg}
+}
+
+func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *Account, err error) {
+	txn := s.dg.NewReadOnlyTxn()
+	const q = `query accounts($account: string) {
+  accounts(func: eq(name, $account)) @filter(eq(type, "account"))  {
+    uid
+    name
+    type
+  }
+}
+`
+	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$account": name})
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Account []*Account `json:"accounts"`
+	}
+
+	err = json.Unmarshal(response.Json, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Account) == 0 {
+		return nil, errors.New("Account not found")
+	}
+
+	return result.Account[0], nil
 }
 
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id string, err error) {
