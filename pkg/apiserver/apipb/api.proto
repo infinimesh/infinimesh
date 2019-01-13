@@ -106,9 +106,9 @@ message TokenResponse {
 
 
 service Account {
-  rpc Token(TokenRequest) returns (TokenResponse);
+  rpc Token(TokenRequest) returns (TokenResponse) {
+    option (google.api.http) = {
+      get : "/token"
+    };
+  };
 }
-
-// service Objects {
-//   rpc CreateObject(infinimesh.node.CreateObjectRequest) returns (infinimesh.node.Object);
-// }

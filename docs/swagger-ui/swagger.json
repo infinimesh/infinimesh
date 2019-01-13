@@ -248,6 +248,36 @@
           "Shadows"
         ]
       }
+    },
+    "/token": {
+      "get": {
+        "operationId": "Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiTokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Account"
+        ]
+      }
     }
   },
   "definitions": {
