@@ -11,17 +11,17 @@
               <h2>Device hierarchy</h2>
             </v-card-title>
             <v-treeview
-              v-model="tree"
               :items="items"
+              :value="testValue"
               activatable
               active-class="grey lighten-4 indigo--text"
               selected-color="indigo"
               open-on-click
               selectable
               expand-icon="mdi-chevron-down"
-              on-icon="mdi-bookmark"
-              off-icon="mdi-bookmark-outline"
-              indeterminate-icon="mdi-bookmark-minus"
+              on-icon="mdi-checkbox-marked"
+              off-icon="mdi-checkbox-blank-outline"
+              indeterminate-icon="mdi-checkbox-blank-outline"
             >
           </v-treeview>
           </v-card>
@@ -29,14 +29,22 @@
         <v-flex>
           <v-card>
             <v-card-text>
-              {{ tree[0] }}
+              {{ topNode }}
             </v-card-text>
             <v-card-actions>
+              <v-text-field
+                label="Device name"
+                clearable
+                v-model="device.name"
+              ></v-text-field>
               <v-btn
-                @click="newLevel"
+                @click="addNewLevel()"
               >
                 Include new level
               </v-btn>
+              <v-btn color="primary"
+                @click="selectTopNode"
+              >Select top node</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -56,9 +64,14 @@
 export default {
   data() {
     return {
-      counter: 0,
+      testValue: ["0x1119d"],
+      device: {
+        name: "",
+        id: "",
+        children: []
+      },
       items: [],
-      tree: [],
+      deviceTree: [],
       data: {
         "objects": [{
             "uid": "0x1119d",
@@ -102,22 +115,42 @@ export default {
     }
   },
   computed: {
+    topNode() {
+      return this.deviceTree[0];
+    }
     // objectTree() {
     //   return JSON.parse(this.realTree)
     // }
   },
   methods: {
-    newLevel() {
-      console.log("include new level")
+    selectTopNode() {
+      return this.deviceTree[0];
     },
-    addChildDevice(input, id) {
+    addNewLevel() {
+      this.device.id = Math.random().toString();
+      let newDevice = JSON.parse(JSON.stringify(this.device));
+      this.addChildDevice(this.items, this.topNode, newDevice);
+      this.device.name = "";
+      this.device.id = "";
+      this.device.children = [];
+    },
+    addChildDevice(input, id, device) {
       for (let element of input) {
         if (element.id===id) {
-          element.children.push({id: "testId", name: "testDevice"});
-          return;
+          let newArr = element.children;
+          newArr.push(device);
+          element.children = newArr;
+          return console.log("return");
         }
-        else if (element.children) {
-          this.addChildDevice(element.children, id);
+        else {
+          if (element.children) {
+            this.addChildDevice(element.children, id, device);
+          }
+          // little bug here: the function never enters the else loop below
+          else {
+            console.log("not found")
+            return;
+          }
         }
       }
     },
@@ -155,7 +188,6 @@ export default {
   },
   mounted() {
     this.items = this.transform(this.data);
-    console.log(this.addChildDevice(this.items, "0x111a4"));
   }
 }
 </script>
