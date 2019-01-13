@@ -12,16 +12,25 @@
             </v-card-title>
             <v-treeview
               :items="items"
+              :value="testValue"
               activatable
-              :active.sync = "active"
               active-class="grey lighten-4 indigo--text"
               selected-color="indigo"
+              open-on-click
+              selectable
+              expand-icon="mdi-chevron-down"
+              on-icon="mdi-checkbox-marked"
+              off-icon="mdi-checkbox-blank-outline"
+              indeterminate-icon="mdi-checkbox-blank-outline"
             >
           </v-treeview>
           </v-card>
         </v-flex>
         <v-flex>
           <v-card>
+            <v-card-text>
+              {{ topNode }}
+            </v-card-text>
             <v-card-actions>
               <v-text-field
                 label="Device name"
@@ -52,7 +61,7 @@
 export default {
   data() {
     return {
-      active: [],
+      testValue: ["0x111a0"],
       device: {
         name: "",
         id: "",
@@ -114,12 +123,22 @@ export default {
       }
     };
   },
-  computed: {},
+  computed: {
+    topNode() {
+      return this.deviceTree[0];
+    }
+    // objectTree() {
+    //   return JSON.parse(this.realTree)
+    // }
+  },
   methods: {
+    selectTopNode() {
+      return this.deviceTree[0];
+    },
     addNewLevel() {
       this.device.id = Math.random().toString();
       let newDevice = JSON.parse(JSON.stringify(this.device));
-      this.addChildDevice(this.items, this.active[0], newDevice);
+      this.addChildDevice(this.items, this.topNode, newDevice);
       this.device.name = "";
       this.device.id = "";
       this.device.children = [];
@@ -130,6 +149,7 @@ export default {
           let newArr = element.children;
           newArr.push(device);
           element.children = newArr;
+          return console.log("return");
         } else {
           if (element.children) {
             this.addChildDevice(element.children, id, device);
