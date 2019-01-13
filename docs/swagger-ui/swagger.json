@@ -251,6 +251,14 @@
     }
   },
   "definitions": {
+    "apiTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
     "deviceregistryCertificate": {
       "type": "object",
       "properties": {

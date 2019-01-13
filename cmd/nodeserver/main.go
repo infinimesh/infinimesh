@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net"
 	"syscall"
 
@@ -10,7 +9,6 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -48,23 +46,7 @@ func main() {
 		log.Fatal("Failed to listen", zap.String("address", grpcAddress), zap.Error(err))
 	}
 
-	exampleAuthFunc := func(ctx context.Context) (context.Context, error) {
-		token, err := grpc_auth.AuthFromMD(ctx, "bearer")
-		if err != nil {
-			return nil, err
-		}
-
-		log.Info("Extracted bearer token", zap.String("token", token))
-
-		// TODO parse JWT
-
-		newCtx := context.WithValue(ctx, node.ContextKeyAccount, "0xeabb")
-		return newCtx, nil
-	}
-
-	srv := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(exampleAuthFunc)),
-	)
+	srv := grpc.NewServer()
 
 	repo := node.NewDGraphRepo(dg)
 
