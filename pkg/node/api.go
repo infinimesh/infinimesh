@@ -7,10 +7,19 @@ type Node struct {
 
 type Account struct {
 	Node
-	Name           string  `json:"name,omitempty"`
-	IsRoot         bool    `json:"isRoot"`
-	AccessTo       *Object `json:"access.to,omitempty"`
-	AccessToDevice *Device `json:"access.to.device,omitempty"`
+	Name           string              `json:"name,omitempty"`
+	IsRoot         bool                `json:"isRoot"`
+	AccessTo       *Object             `json:"access.to,omitempty"`
+	AccessToDevice *Device             `json:"access.to.device,omitempty"`
+	HasCredentials *UsernameCredential `json:"has.credentials,omitempty"`
+}
+
+type UsernameCredential struct {
+	Node
+	Username string     `json:"username"`
+	Password string     `json:"password"`
+	CheckPwd bool       `json:"checkpwd(password),omitempty"`
+	Account  []*Account `json:"~has.credentials,omitempty"`
 }
 
 type Object struct {

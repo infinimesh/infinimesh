@@ -33,6 +33,13 @@ produces : "application/json";
 }
 ;
 
+message TokenRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message TokenResponse { string token = 1; }
+
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
       returns (infinimesh.deviceregistry.CreateResponse) {
@@ -46,10 +53,7 @@ service Devices {
     option (google.api.http) = {
       patch : "/devices/{device.id}"
       body : "device"
-      additional_bindings {
-        put : "/devices/{device.id}"
-        body : "device"
-      }
+      additional_bindings {put : "/devices/{device.id}" body : "device"}
     };
   };
   rpc Get(infinimesh.deviceregistry.GetRequest)
@@ -94,16 +98,6 @@ service Shadows {
     };
   }
 }
-
-message TokenRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message TokenResponse {
-  string token = 1;
-}
-
 
 service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {

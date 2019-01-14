@@ -41,9 +41,12 @@ func main() {
 	err := dg.Alter(context.Background(), &api.Operation{
 		Schema: `
   name: string @index(exact) .
+  username: string @index(exact) .
   action: string @index(term) .
   type: string @index(exact) .
-  access.to: uid @reverse .`,
+  access.to: uid @reverse .
+  has.credentials: uid @reverse .
+  password: password .`,
 	})
 	if err != nil {
 		panic(err)
@@ -100,6 +103,14 @@ func main() {
 			},
 			AccessToInherit:    true,
 			AccessToPermission: "WRITE",
+		},
+		HasCredentials: &node.UsernameCredential{
+			Node: node.Node{
+				UID:  "_:creds",
+				Type: "credentials",
+			},
+			Username: "joe",
+			Password: "test123",
 		},
 	}
 

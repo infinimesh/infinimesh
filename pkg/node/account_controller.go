@@ -47,12 +47,20 @@ func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.C
 	}
 
 	if len(result.Exists) == 0 {
+
+		// h := sha256.New()
+		// h.Write([]byte(request.Password))
+
 		js, err := json.Marshal(&Account{
 			Node: Node{
 				Type: "account",
 				UID:  "_:user",
 			},
 			Name: request.GetName(),
+			HasCredentials: &UsernameCredential{
+				Username: request.GetName(),
+				Password: request.GetPassword(),
+			},
 		})
 		if err != nil {
 			return nil, err
@@ -148,4 +156,51 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 		Uid:  account.UID,
 		Name: account.Name,
 	}, nil
+}
+
+func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.AuthenticateRequest) (response *nodepb.AuthenticateResponse, err error) {
+
+	txn := s.Dgraph.NewReadOnlyTxn()
+
+	const q = `query authenticate($username: string, $password: string){
+  login(func: eq(username, $username)) @filter(eq(type, "credentials")) {
+    uid
+    checkpwd(password, $password)
+    ~has.credentials {
+      uid
+      type
+    }
+  }
+}
+`
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$username": request.GetUsername(), "$password": request.GetPassword()})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	var result struct {
+		Login []*UsernameCredential `json:"login"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if len(result.Login) > 0 {
+		login := result.Login[0]
+		if login.CheckPwd {
+			// Success
+			return &nodepb.AuthenticateResponse{
+				Success: result.Login[0].CheckPwd,
+				Account: &nodepb.Account{
+					Uid: result.Login[0].UID,
+				},
+			}, nil
+		}
+	}
+
+	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
+
 }
