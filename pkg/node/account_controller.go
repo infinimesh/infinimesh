@@ -192,12 +192,14 @@ func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.Au
 		login := result.Login[0]
 		if login.CheckPwd {
 			// Success
-			return &nodepb.AuthenticateResponse{
-				Success: result.Login[0].CheckPwd,
-				Account: &nodepb.Account{
-					Uid: result.Login[0].UID,
-				},
-			}, nil
+			if len(login.Account) > 0 {
+				return &nodepb.AuthenticateResponse{
+					Success: result.Login[0].CheckPwd,
+					Account: &nodepb.Account{
+						Uid: login.Account[0].UID,
+					},
+				}, nil
+			}
 		}
 	}
 

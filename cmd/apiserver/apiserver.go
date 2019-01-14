@@ -12,7 +12,6 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
@@ -82,7 +81,7 @@ func main() {
 			log.Info("Validated token", zap.Any("claims", claims))
 
 			if accountID, ok := claims[accountIDClaim]; ok {
-				newCtx := context.WithValue(ctx, node.ContextKeyAccount, accountID)
+				newCtx := context.WithValue(ctx, "account_id", accountID)
 				return newCtx, nil
 
 			} else {
@@ -114,10 +113,12 @@ func main() {
 		panic(err)
 	}
 	nodeClient := nodepb.NewAccountServiceClient(nodeConn)
+	objectClient := nodepb.NewObjectServiceClient(nodeConn)
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient})
 	apipb.RegisterShadowsServer(srv, &shadowAPI{client: shadowClient})
 	apipb.RegisterAccountServer(srv, &accountAPI{client: nodeClient, signingSecret: jwtSigningSecret})
+	apipb.RegisterObjectServiceServer(srv, &objectAPI{client: objectClient})
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		panic(err)

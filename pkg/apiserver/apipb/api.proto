@@ -6,6 +6,7 @@ option go_package = "apipb";
 
 import "pkg/registry/registrypb/device_registry.proto";
 import "pkg/shadow/shadowpb/shadow.proto";
+import "pkg/node/nodepb/node.proto";
 import "protoc-gen-swagger/options/annotations.proto";
 import "google/api/annotations.proto";
 
@@ -103,6 +104,21 @@ service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       get : "/token"
+    };
+  };
+}
+
+message ListObjectsRequest{} // Don't use infinimesh.node.ListObjectsRequest,
+                             // because it allows the caller to set the account
+                             // id. however, here we don't allow this. the
+                             // account id will be derived from the JWT token,
+                             // and the user can not choose it.
+
+service ObjectService {
+  rpc ListObjects(ListObjectsRequest)
+      returns (infinimesh.node.ListObjectsResponse) {
+    option (google.api.http) = {
+      get : "/objects"
     };
   };
 }
