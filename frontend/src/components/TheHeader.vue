@@ -65,7 +65,6 @@
         </v-list-tile>
       </v-list>
     </v-menu>
-    </v-btn>
   </v-toolbar>
 </v-card>
 </template>

@@ -10,7 +10,6 @@ import LoginUser from "./views/LoginUser.vue";
 import RegisterUser from "./views/RegisterUser.vue";
 import LogoutUser from "./views/LogoutUser.vue";
 
-
 Vue.use(Router);
 
 export default new Router({
