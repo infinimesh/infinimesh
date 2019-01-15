@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package infinimesh.node;
+option go_package = "nodepb";
+
+import "google/protobuf/wrappers.proto";
+
+// Account
+
+message IsAuthorizedRequest {
+  string node = 1;
+  string account = 2;
+  Action action = 3;
+}
+
+message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
+
+message CreateAccountRequest {
+  string name = 1;
+  string password = 2;
+}
+message CreateAccountResponse { string uid = 1; }
+
+enum Action {
+  NONE = 0;
+  READ = 1;
+  WRITE = 2;
+}
+
+message AuthorizeRequest {
+  string account = 1;
+  string node = 2;
+  string action = 3;
+  bool inherit = 4;
+}
+message AuthorizeResponse {}
+
+// Object
+
+message CreateObjectRequest {
+  string parent = 2;
+  string name = 3;
+}
+
+message CreateObjectResponse { string uid = 1; }
+
+message Object {
+  string uid = 1;
+  string name = 2;
+  repeated Object objects = 3;
+  repeated Device devices = 4;
+}
+
+message Device {
+  string uid = 1;
+  string name = 2;
+}
+
+message ListObjectsRequest { string account = 1; }
+message ListObjectsResponse {
+  repeated Object objects = 1;
+  repeated Device devices = 2;
+}
+
+message GetAccountRequest { string name = 1; }
+
+message Account {
+  string uid = 1;
+  string name = 2;
+}
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  bool success = 1;
+  Account account = 2;
+}
+
+service AccountService {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc GetAccount(GetAccountRequest) returns (Account);
+
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+}
+
+service ObjectService {
+  rpc CreateObject(CreateObjectRequest) returns (Object);
+  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
+}

@@ -8,6 +8,7 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 | ------------- |---------------|
 | API Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver-rest/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver-rest) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver) |
 | Controlplane-UI | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/controlplane-ui/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/controlplane-ui) |
+| Node Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/nodeserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/nodeserver) |
 | Device Registry | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/device-registry/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/device-registry) |
 | Telemetry Router | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/telemetry-router/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/telemetry-router) |
 | MQTT-Bridge | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/mqtt-bridge/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/mqtt-bridge) |
@@ -15,3 +16,8 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 
 ## API Documentation
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+
+## Graph Database, Objects and Accounts
+Load test data into the database via `go run hack/import_dgraph_sample_data.go`
+Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/token`
+Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`

@@ -12,7 +12,8 @@ import (
 	"github.com/cskr/pubsub"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/struct"
+	structpb "github.com/golang/protobuf/ptypes/struct"
+
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 

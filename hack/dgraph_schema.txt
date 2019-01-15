@@ -1,0 +1,43 @@
+curl -X POST localhost:8084/alter -d '{"drop_all": true}'  && curl localhost:8084/alter -XPOST -d $'                                                          
+name: string @index(exact) .
+  device_id: string @index(exact) .
+  type: string @index(exact) .
+  permission: string @index(term) .
+  access.to: uid @reverse .
+  contains: uid @reverse .
+' | jq
+
+
+{
+  var(func: uid(0xeaa3)) @cascade {
+    access.to @filter(eq(type, "object")) @facets(eq(inherit, true)) @facets(permission,inherit) {
+      OBJS as uid
+      name
+      type: type
+    }
+  }
+      
+   rec(func: uid(OBJS)) @recurse @normalize  {
+    contains @filter(eq(type,"object")) {
+      uid
+      type
+    }
+    contains.device @filter(eq(name,"PC")) {
+      uid
+      type
+    }
+		uid
+    name
+    type
+  }
+    
+ target(func: uid(BLEH)) {
+#  uid
+#    type : type
+#    contains @filter(eq(type,"device") AND uid(0xea9a)) {
+#      uid : uid
+#      name
+#      type
+#    }
+#}
+}

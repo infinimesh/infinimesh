@@ -6,6 +6,7 @@ option go_package = "apipb";
 
 import "pkg/registry/registrypb/device_registry.proto";
 import "pkg/shadow/shadowpb/shadow.proto";
+import "pkg/node/nodepb/node.proto";
 import "protoc-gen-swagger/options/annotations.proto";
 import "google/api/annotations.proto";
 
@@ -33,6 +34,13 @@ produces : "application/json";
 }
 ;
 
+message TokenRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message TokenResponse { string token = 1; }
+
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
       returns (infinimesh.deviceregistry.CreateResponse) {
@@ -46,10 +54,7 @@ service Devices {
     option (google.api.http) = {
       patch : "/devices/{device.id}"
       body : "device"
-      additional_bindings {
-        put : "/devices/{device.id}"
-        body : "device"
-      }
+      additional_bindings {put : "/devices/{device.id}" body : "device"}
     };
   };
   rpc Get(infinimesh.deviceregistry.GetRequest)
@@ -93,4 +98,28 @@ service Shadows {
       get : "/devices/{id}/shadow/reported"
     };
   }
+}
+
+service Account {
+  rpc Token(TokenRequest) returns (TokenResponse) {
+    option (google.api.http) = {
+      post : "/token"
+      body: "*"
+    };
+  };
+}
+
+message ListObjectsRequest{} // Don't use infinimesh.node.ListObjectsRequest,
+                             // because it allows the caller to set the account
+                             // id. however, here we don't allow this. the
+                             // account id will be derived from the JWT token,
+                             // and the user can not choose it.
+
+service ObjectService {
+  rpc ListObjects(ListObjectsRequest)
+      returns (infinimesh.node.ListObjectsResponse) {
+    option (google.api.http) = {
+      get : "/objects"
+    };
+  };
 }

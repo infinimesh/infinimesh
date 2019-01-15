@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/armon/go-radix"
+	radix "github.com/armon/go-radix"
 )
 
 type Router struct {

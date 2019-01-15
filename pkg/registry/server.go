@@ -11,10 +11,11 @@ import (
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/google/uuid"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )

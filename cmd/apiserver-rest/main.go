@@ -6,10 +6,11 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+
+	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 )
 
 var (
@@ -46,6 +47,17 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
+	err = apipb.RegisterAccountHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
+	if err != nil {
+		return err
+	}
+
+	err = apipb.RegisterObjectServiceHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
+	if err != nil {
+		return err
+	}
+
 	corsMiddleware := cors.AllowAll().Handler(mux)
 	return http.ListenAndServe(":8081", corsMiddleware)
 }

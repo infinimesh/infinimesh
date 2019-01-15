@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -48,6 +48,8 @@ services:
     restart: unless-stopped
   device-registry:
     image: quay.io/infinimesh/device-registry:latest
+    ports:
+      - "8070:8080"
     depends_on:
       - database
     environment:
@@ -62,6 +64,8 @@ services:
     restart: unless-stopped
   shadow-api:
     image: quay.io/infinimesh/shadow-api:latest
+    ports:
+      - "8096:8096"
     depends_on:
       - kafka
     environment:
@@ -83,6 +87,8 @@ services:
       - "8080:8080"
     depends_on:
       - device-registry
+      - shadow-api
+      - nodeserver
     restart: unless-stopped
   apiserver-rest:
     image: quay.io/infinimesh/apiserver-rest:latest
@@ -101,4 +107,51 @@ services:
       - "8090:80"
     depends_on:
       - apiserver-rest
+  nodeserver:
+    image: quay.io/infinimesh/nodeserver:latest
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      - DGRAPH_HOST=server:9080
+  # dgraph
+  zero:
+    image: dgraph/dgraph:v1.0.12-rc1
+    volumes:
+      - type: volume
+        source: dgraph
+        target: /dgraph
+        volume:
+          nocopy: true
+    ports:
+      - 5080:5080
+      - 6080:6080
+    restart: on-failure
+    command: dgraph zero --my=zero:5080
+  server:
+    image: dgraph/dgraph:v1.0.12-rc1
+    volumes:
+      - type: volume
+        source: dgraph
+        target: /dgraph
+        volume:
+          nocopy: true
+    ports:
+      - 8084:8080
+      - 9080:9080
+    restart: on-failure
+    command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
+  ratel:
+    image: dgraph/dgraph:v1.0.12-rc1
+    volumes:
+      - type: volume
+        source: dgraph
+        target: /dgraph
+        volume:
+          nocopy: true
+    ports:
+      - 8000:8000
+    command: dgraph-ratel
 
+volumes:
+  dgraph:

@@ -52,7 +52,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/deviceregistryDevice"
+              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
             }
           }
         ],
@@ -84,7 +84,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/deviceregistryDevice"
+              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
             }
           }
         ],
@@ -114,7 +114,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/deviceregistryDevice"
+              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
             }
           }
         ],
@@ -248,9 +248,70 @@
           "Shadows"
         ]
       }
+    },
+    "/objects": {
+      "get": {
+        "operationId": "ListObjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeListObjectsResponse"
+            }
+          }
+        },
+        "tags": [
+          "ObjectService"
+        ]
+      }
+    },
+    "/token": {
+      "post": {
+        "operationId": "Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiTokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Account"
+        ]
+      }
     }
   },
   "definitions": {
+    "apiTokenRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "apiTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
     "deviceregistryCertificate": {
       "type": "object",
       "properties": {
@@ -278,7 +339,21 @@
     "deviceregistryDeleteResponse": {
       "type": "object"
     },
-    "deviceregistryDevice": {
+    "deviceregistryListResponse": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+          }
+        }
+      }
+    },
+    "deviceregistryUpdateResponse": {
+      "type": "object"
+    },
+    "infinimeshdeviceregistryDevice": {
       "type": "object",
       "properties": {
         "id": {
@@ -299,25 +374,22 @@
         }
       }
     },
-    "deviceregistryListResponse": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/deviceregistryDevice"
-          }
-        }
-      }
-    },
-    "deviceregistryUpdateResponse": {
-      "type": "object"
-    },
     "infinimeshdeviceregistryGetResponse": {
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
+          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+        }
+      }
+    },
+    "infinimeshnodeDevice": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -326,6 +398,46 @@
       "properties": {
         "shadow": {
           "$ref": "#/definitions/shadowShadow"
+        }
+      }
+    },
+    "nodeListObjectsResponse": {
+      "type": "object",
+      "properties": {
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodeObject"
+          }
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/infinimeshnodeDevice"
+          }
+        }
+      }
+    },
+    "nodeObject": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodeObject"
+          }
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/infinimeshnodeDevice"
+          }
         }
       }
     },

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/birdayz/conjungo"
-	"github.com/evanphx/json-patch"
+	jsonpatch "github.com/evanphx/json-patch"
 )
 
 func init() {
