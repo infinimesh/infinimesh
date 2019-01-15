@@ -9,18 +9,27 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/node"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/infinimesh/infinimesh/pkg/log"
+	"github.com/infinimesh/infinimesh/pkg/node"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 var (
-	dgraphURL   = "localhost:9080"
-	grpcAddress = ":8082"
+	dgraphURL   string
+	port = ":8082"
 )
+
+func init() {
+	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
+	viper.AutomaticEnv()
+
+	dgraphURL = viper.GetString("DGRAPH_HOST")
+}
 
 func main() {
 	log, err := log.NewProdOrDev()
@@ -41,9 +50,9 @@ func main() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	lis, err := net.Listen("tcp", grpcAddress)
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatal("Failed to listen", zap.String("address", grpcAddress), zap.Error(err))
+		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
 	}
 
 	srv := grpc.NewServer()
@@ -70,7 +79,7 @@ func main() {
 	signal.Notify(signals, syscall.SIGINT)
 
 	go func() {
-		log.Info("Starting gRPC server", zap.String("address", grpcAddress))
+		log.Info("Starting gRPC server", zap.String("address", port))
 		if err := srv.Serve(lis); err != nil {
 			log.Fatal("Failed to serve gRPC", zap.Error(err))
 		}

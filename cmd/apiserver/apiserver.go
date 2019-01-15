@@ -8,17 +8,18 @@ import (
 
 	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	jwt "github.com/dgrijalva/jwt-go"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 const accountIDClaim = "account_id"
@@ -34,7 +35,7 @@ var (
 func init() {
 	viper.SetDefault("REGISTRY_HOST", "device-registry:8080")
 	viper.SetDefault("SHADOW_HOST", "shadow-api:8096")
-	viper.SetDefault("NODE_HOST", "nodeserver:8096")
+	viper.SetDefault("NODE_HOST", "nodeserver:8082")
 	viper.SetDefault("PORT", 8080)
 	viper.AutomaticEnv()
 

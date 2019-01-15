@@ -266,7 +266,7 @@
       }
     },
     "/token": {
-      "get": {
+      "post": {
         "operationId": "Token",
         "responses": {
           "200": {
@@ -278,16 +278,12 @@
         },
         "parameters": [
           {
-            "name": "username",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiTokenRequest"
+            }
           }
         ],
         "tags": [
@@ -297,6 +293,17 @@
     }
   },
   "definitions": {
+    "apiTokenRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
     "apiTokenResponse": {
       "type": "object",
       "properties": {

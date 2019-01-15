@@ -48,6 +48,8 @@ services:
     restart: unless-stopped
   device-registry:
     image: quay.io/infinimesh/device-registry:latest
+    ports:
+      - "8070:8080"
     depends_on:
       - database
     environment:
@@ -62,6 +64,8 @@ services:
     restart: unless-stopped
   shadow-api:
     image: quay.io/infinimesh/shadow-api:latest
+    ports:
+      - "8096:8096"
     depends_on:
       - kafka
     environment:
@@ -83,6 +87,8 @@ services:
       - "8080:8080"
     depends_on:
       - device-registry
+      - shadow-api
+      - nodeserver
     restart: unless-stopped
   apiserver-rest:
     image: quay.io/infinimesh/apiserver-rest:latest
@@ -101,13 +107,13 @@ services:
       - "8090:80"
     depends_on:
       - apiserver-rest
-  authserver:
-    image: quay.io/infinimesh/authserver:latest
-    ports:
-      - "8088:8082"
+  nodeserver:
+    image: quay.io/infinimesh/nodeserver:latest
     restart: unless-stopped
-
-
+    depends_on:
+      - server
+    environment:
+      - DGRAPH_HOST=server:9080
   # dgraph
   zero:
     image: dgraph/dgraph:v1.0.12-rc1
