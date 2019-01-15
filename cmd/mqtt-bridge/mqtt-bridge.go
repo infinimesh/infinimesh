@@ -14,11 +14,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
 )
 
 var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error {

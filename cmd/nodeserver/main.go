@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	dgraphURL   string
-	port = ":8082"
+	dgraphURL string
+	port      = ":8082"
 )
 
 func init() {

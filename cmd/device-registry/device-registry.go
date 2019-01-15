@@ -4,11 +4,12 @@ import (
 	"log"
 	"net"
 
-	"github.com/infinimesh/infinimesh/pkg/registry"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/infinimesh/infinimesh/pkg/registry"
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
 const port = ":8080"

@@ -5,15 +5,17 @@ package apipb
 
 import (
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/golang/protobuf/proto"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
-	nodepb "github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	registrypb "github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	context "golang.org/x/net/context"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
-	math "math"
+
+	nodepb "github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	registrypb "github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

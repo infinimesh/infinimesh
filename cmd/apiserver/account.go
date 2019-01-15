@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	jwt "github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 type accountAPI struct {

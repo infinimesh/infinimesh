@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 type objectAPI struct {

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 
 	sarama "github.com/Shopify/sarama"
+
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 )
 

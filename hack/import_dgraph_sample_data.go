@@ -9,8 +9,9 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/infinimesh/infinimesh/pkg/node"
 	"google.golang.org/grpc"
+
+	"github.com/infinimesh/infinimesh/pkg/node"
 )
 
 var (

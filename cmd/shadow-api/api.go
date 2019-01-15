@@ -11,12 +11,13 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/julienschmidt/httprouter"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
 var (

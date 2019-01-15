@@ -9,9 +9,10 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
+	"github.com/spf13/viper"
+
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/router"
-	"github.com/spf13/viper"
 )
 
 type handler struct {

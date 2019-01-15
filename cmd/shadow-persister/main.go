@@ -11,9 +11,10 @@ import (
 	"encoding/json"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/spf13/viper"
+
+	"github.com/infinimesh/infinimesh/pkg/shadow"
 )
 
 const (

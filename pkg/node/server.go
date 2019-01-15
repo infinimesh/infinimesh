@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 
 	"github.com/dgraph-io/dgo"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 type ObjectController struct {

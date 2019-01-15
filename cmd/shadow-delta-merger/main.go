@@ -9,8 +9,9 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/spf13/viper"
+
+	"github.com/infinimesh/infinimesh/pkg/shadow"
 )
 
 var (
