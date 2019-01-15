@@ -119,7 +119,8 @@ export default {
     addNewLevel() {
       this.device.id = Math.random().toString();
       let newDevice = JSON.parse(JSON.stringify(this.device));
-      this.addChildDevice(this.items, this.active[0], newDevice);
+      // this.addChildDevice(this.items, this.active[0], newDevice);
+      this.addSiblingDevice(this.items, this.active[0], newDevice);
       this.device.name = "";
       this.device.id = "";
       this.device.children = [];
@@ -139,6 +140,24 @@ export default {
             console.log("not found");
             return;
           }
+        }
+      }
+    },
+    addSiblingDevice(input, id, device) {
+      for (let element of input) {
+        if (element.id === id) {
+          input.splice(input.indexOf(element), 0, device);
+          return;
+        } else {
+          if (element.children) {
+            this.addSiblingDevice(element.children, id, device);
+          }
+          // little bug here: the function never enters the else loop below
+          else {
+            console.log("not found");
+            return;
+          }
+          console.log("returns")
         }
       }
     },
