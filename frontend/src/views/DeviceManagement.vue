@@ -60,6 +60,9 @@ export default {
       },
       items: [],
       deviceTree: [],
+      counter: 0,
+      parentNode: {},
+      parentNodeId: "",
       data: {
         objects: [
           {
@@ -119,13 +122,14 @@ export default {
     addNewLevel() {
       this.device.id = Math.random().toString();
       let newDevice = JSON.parse(JSON.stringify(this.device));
-      // this.addChildDevice(this.items, this.active[0], newDevice);
-      this.addSiblingDevice(this.items, this.active[0], newDevice);
+      // this.addChildNode(this.items, this.active[0], newDevice);
+      // this.addSiblingNode(this.items, this.active[0], newDevice);
+      this.attachToNewParentNode(this.items, this.active[0], newDevice);
       this.device.name = "";
       this.device.id = "";
       this.device.children = [];
     },
-    addChildDevice(input, id, device) {
+    addChildNode(input, id, device) {
       for (let element of input) {
         if (element.id === id) {
           let newArr = element.children;
@@ -133,7 +137,7 @@ export default {
           element.children = newArr;
         } else {
           if (element.children) {
-            this.addChildDevice(element.children, id, device);
+            this.addChildNode(element.children, id, device);
           }
           // little bug here: the function never enters the else loop below
           else {
@@ -143,14 +147,14 @@ export default {
         }
       }
     },
-    addSiblingDevice(input, id, device) {
+    addSiblingNode(input, id, device) {
       for (let element of input) {
         if (element.id === id) {
           input.splice(input.indexOf(element), 0, device);
           return;
         } else {
           if (element.children) {
-            this.addSiblingDevice(element.children, id, device);
+            this.addSiblingNode(element.children, id, device);
           }
           // little bug here: the function never enters the else loop below
           else {
@@ -158,6 +162,30 @@ export default {
             return;
           }
           console.log("returns");
+        }
+      }
+    },
+    attachToNewParentNode(input, id, device) {
+      for (let element of input) {
+        if (element.id === id && this.counter === 0) {
+          device.children = input;
+          this.items = [ device ];
+          return;
+        }
+        else if (element.id === id) {
+          device.children = input;
+          this.parentNode = [ device ];
+          // probably: tree itself gets modified in loop
+          this.addChildNode(this.items, input.id, this.parentNode);
+          return;
+        }
+        else if (element.children) {
+          this.parentNode = input;
+          this.counter++;
+          this.attachToNewParentNode(element.children, id, device);
+        }
+        else {
+          return "Not found";
         }
       }
     },
