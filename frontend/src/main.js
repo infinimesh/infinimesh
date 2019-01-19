@@ -23,6 +23,17 @@ if (Vue.http.options.root.startsWith("$")) {
   Vue.http.options.root = "http://localhost:8081";
 }
 
+Vue.http.interceptors.push(function(request) {
+
+  if (request.url === "token") {
+    console.log("bye")
+    return;
+  }
+  // modify headers
+  request.headers.set('Authorization', `Bearer ${localStorage.token}`);
+
+});
+
 new Vue({
   router,
   store,

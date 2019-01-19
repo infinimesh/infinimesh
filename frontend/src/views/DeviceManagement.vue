@@ -130,6 +130,7 @@ export default {
       this.device.children = [];
     },
     addChildNode(input, id, device) {
+      console.log("input", input, "id", id, "device", device)
       for (let element of input) {
         if (element.id === id) {
           let newArr = element.children;
@@ -173,14 +174,12 @@ export default {
           return;
         }
         else if (element.id === id) {
-          device.children = input;
-          this.parentNode = [ device ];
-          // probably: tree itself gets modified in loop
-          this.addChildNode(this.items, input.id, this.parentNode);
-          return;
+          input.splice(input.indexOf(element), 1);
+          device.children.push(JSON.parse(JSON.stringify(element)));
+          return this.addSiblingNode(this.items, this.parentNodeId, device);
         }
         else if (element.children) {
-          this.parentNode = input;
+          this.parentNodeId = element.id;
           this.counter++;
           this.attachToNewParentNode(element.children, id, device);
         }
@@ -223,6 +222,10 @@ export default {
   },
   mounted() {
     this.items = this.transform(this.data);
+    this.$http.get("objects")
+    .then((response) => {
+      console.log(response)
+    })
   }
 };
 </script>
