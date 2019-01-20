@@ -82,12 +82,10 @@ func main() {
 			log.Info("Validated token", zap.Any("claims", claims))
 
 			if accountID, ok := claims[accountIDClaim]; ok {
-				newCtx := context.WithValue(ctx, "account_id", accountID)
+				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
 				return newCtx, nil
-
-			} else {
-				log.Info("Token does not contain account id field", zap.Any("token", token))
 			}
+			log.Info("Token does not contain account id field", zap.Any("token", token))
 		}
 
 		return ctx, errors.New("Failed to validate token")
