@@ -6,7 +6,10 @@
         row wrap
       >
         <v-flex>
-          <v-card>
+          <v-card
+          max-width="400"
+          flat
+          >
             <v-card-title primary-title>
               <h2>Device hierarchy</h2>
             </v-card-title>
@@ -17,21 +20,53 @@
               active-class="grey lighten-4 indigo--text"
               selected-color="indigo"
             >
+            <v-icon
+              v-if="active"
+              slot="append"
+              slot-scope="{ item, active }"
+              :color="active ? 'primary' : ''"
+              @click.stop="showNodePanel=true"
+            >
+              add
+            </v-icon>
           </v-treeview>
           </v-card>
         </v-flex>
-        <v-flex>
-          <v-card>
-            <v-card-actions>
+        <v-flex
+          v-if="showNodePanel"
+        >
+          <v-card
+            class="ma-2"
+            flat
+          >
+            <v-card-text>
               <v-text-field
-                label="Device name"
+                label="Name of new node"
                 clearable
-                v-model="device.name"
+                v-model="node.name"
               ></v-text-field>
+              <v-radio-group
+                v-model="nodeAdderFunction">
+                <v-radio
+                  v-for="(label, i) in radioLabels"
+                  :key="i"
+                  :label="label"
+                  :value="label"
+                ></v-radio>
+              </v-radio-group>
+            </v-card-text>
+              <v-card-actions>
               <v-btn
-                @click="addNewLevel()"
+                round
+                @click="addNewNode()"
+                class="mr-3"
               >
                 Include new level
+              </v-btn>
+              <v-btn
+                round
+              >
+                Revert
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -39,7 +74,7 @@
         <v-flex>
           <v-card>
             <v-card-text>
-              {{ items }}
+              {{ data }}
             </v-card-text>
           </v-card>
         </v-flex>
@@ -53,16 +88,18 @@ export default {
   data() {
     return {
       active: [],
-      device: {
+      node: {
         name: "",
         id: "",
         children: []
       },
       items: [],
+      nodeAdderFunction:"",
+      radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
       deviceTree: [],
       counter: 0,
       parentNode: {},
-      parentNodeId: "",
+      showNodePanel: false,
       data: {
         objects: [
           {
@@ -103,7 +140,7 @@ export default {
             devices: [
               {
                 uid: "0x111a6",
-                name: "Enclosing-room-device"
+                name: "Enclosing-room-node"
               }
             ]
           }
@@ -111,7 +148,7 @@ export default {
         devices: [
           {
             uid: "0x111a2",
-            name: "some device"
+            name: "some node"
           }
         ]
       }
@@ -119,26 +156,34 @@ export default {
   },
   computed: {},
   methods: {
-    addNewLevel() {
-      this.device.id = Math.random().toString();
-      let newDevice = JSON.parse(JSON.stringify(this.device));
-      // this.addChildNode(this.items, this.active[0], newDevice);
-      // this.addSiblingNode(this.items, this.active[0], newDevice);
-      this.attachToNewParentNode(this.items, this.active[0], newDevice);
-      this.device.name = "";
-      this.device.id = "";
-      this.device.children = [];
+    addNewNode() {
+      this.node.id = Math.random().toString();
+      let newDevice = JSON.parse(JSON.stringify(this.node));
+      switch (this.nodeAdderFunction) {
+        case "Add child":
+        this.addChildNode(this.items, this.active[0], newDevice);
+        break;
+        case "Add sibling":
+        this.addSiblingNode(this.items, this.active[0], newDevice);
+        break;
+        case "Attach to new parent":
+        this.attachToNewParentNode(this.items, this.active[0], newDevice);
+        break;
+      }
+      this.node.name = "";
+      this.node.id = "";
+      this.node.children = [];
     },
-    addChildNode(input, id, device) {
-      console.log("input", input, "id", id, "device", device)
+    addChildNode(input, id, node) {
+      console.log("input", input, "id", id, "node", node)
       for (let element of input) {
         if (element.id === id) {
           let newArr = element.children;
-          newArr.push(device);
+          newArr.push(node);
           element.children = newArr;
         } else {
           if (element.children) {
-            this.addChildNode(element.children, id, device);
+            this.addChildNode(element.children, id, node);
           }
           // little bug here: the function never enters the else loop below
           else {
@@ -148,14 +193,14 @@ export default {
         }
       }
     },
-    addSiblingNode(input, id, device) {
+    addSiblingNode(input, id, node) {
       for (let element of input) {
         if (element.id === id) {
-          input.splice(input.indexOf(element), 0, device);
+          input.splice(input.indexOf(element) + 1, 0, node);
           return;
         } else {
           if (element.children) {
-            this.addSiblingNode(element.children, id, device);
+            this.addSiblingNode(element.children, id, node);
           }
           // little bug here: the function never enters the else loop below
           else {
@@ -166,22 +211,23 @@ export default {
         }
       }
     },
-    attachToNewParentNode(input, id, device) {
+    attachToNewParentNode(input, id, node) {
+      console.log(this.counter)
       for (let element of input) {
+        this.parentNodeId = element.id;
         if (element.id === id && this.counter === 0) {
-          device.children = input;
-          this.items = [ device ];
+          node.children = input;
+          this.items = [ node ];
           return;
         }
         else if (element.id === id) {
           input.splice(input.indexOf(element), 1);
-          device.children.push(JSON.parse(JSON.stringify(element)));
-          return this.addSiblingNode(this.items, this.parentNodeId, device);
+          node.children.push(JSON.parse(JSON.stringify(element)));
+          return this.addSiblingNode(this.items, this.parentNodeId, node);
         }
         else if (element.children) {
-          this.parentNodeId = element.id;
           this.counter++;
-          this.attachToNewParentNode(element.children, id, device);
+          this.attachToNewParentNode(element.children, id, node);
         }
         else {
           return "Not found";
@@ -195,8 +241,8 @@ export default {
       res.name = input.name;
       res.children = [];
       if (input.devices) {
-        for (let device of input.devices) {
-          res.children.push(this.transformObject(device));
+        for (let node of input.devices) {
+          res.children.push(this.transformObject(node));
         }
       }
       if (input.objects) {
@@ -222,6 +268,9 @@ export default {
   },
   mounted() {
     this.items = this.transform(this.data);
+    var proxy = ObservableSlim.create(test, true, function(changes) {
+	console.log(JSON.stringify(changes));
+});
     this.$http.get("objects")
     .then((response) => {
       console.log(response)
