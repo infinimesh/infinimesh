@@ -17,7 +17,6 @@ type accountAPI struct {
 }
 
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
-	// TODO check password :D
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
 		return nil, err
