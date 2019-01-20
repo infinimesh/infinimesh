@@ -34,17 +34,18 @@ export default {
   },
   methods: {
     login() {
-      this.$http.post("token", {
-        username: this.userName,
-        password: this.password
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          localStorage.token = response.body.token;
-          console.log(localStorage);
-        }
-      })
-      .catch((e) => console.log(e))
+      this.$http
+        .post("token", {
+          username: this.userName,
+          password: this.password
+        })
+        .then(response => {
+          if (response.status === 200) {
+            localStorage.token = response.body.token;
+            console.log(localStorage);
+          }
+        })
+        .catch(e => console.log(e));
     }
   },
   mounted() {

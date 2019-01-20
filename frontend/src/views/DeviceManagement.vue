@@ -71,13 +71,6 @@
             </v-card-actions>
           </v-card>
         </v-flex>
-        <v-flex>
-          <v-card>
-            <v-card-text>
-              {{ data }}
-            </v-card-text>
-          </v-card>
-        </v-flex>
       </v-layout>
     </v-card>
   </v-container>
@@ -94,64 +87,9 @@ export default {
         children: []
       },
       items: [],
-      nodeAdderFunction:"",
+      nodeAdderFunction: "",
       radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
-      deviceTree: [],
-      counter: 0,
-      parentNode: {},
-      showNodePanel: false,
-      data: {
-        objects: [
-          {
-            uid: "0x1119d",
-            name: "Johannes' Home",
-            objects: [
-              {
-                uid: "0x1119e",
-                name: "First Floor",
-                objects: [
-                  {
-                    uid: "0x1119f",
-                    name: "Living Room",
-                    devices: [
-                      {
-                        uid: "0x111a0",
-                        name: "PC"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                uid: "0x111a3",
-                name: "Second Floor"
-              }
-            ],
-            devices: [
-              {
-                uid: "0x111a4",
-                name: "le lamp"
-              }
-            ]
-          },
-          {
-            uid: "0x111a5",
-            name: "Enclosing Room",
-            devices: [
-              {
-                uid: "0x111a6",
-                name: "Enclosing-room-node"
-              }
-            ]
-          }
-        ],
-        devices: [
-          {
-            uid: "0x111a2",
-            name: "some node"
-          }
-        ]
-      }
+      showNodePanel: false
     };
   },
   computed: {},
@@ -161,21 +99,21 @@ export default {
       let newDevice = JSON.parse(JSON.stringify(this.node));
       switch (this.nodeAdderFunction) {
         case "Add child":
-        this.addChildNode(this.items, this.active[0], newDevice);
-        break;
+          this.addChildNode(this.items, this.active[0], newDevice);
+          break;
         case "Add sibling":
-        this.addSiblingNode(this.items, this.active[0], newDevice);
-        break;
+          this.addSiblingNode(this.items, this.active[0], newDevice);
+          break;
         case "Attach to new parent":
-        this.attachToNewParentNode(this.items, this.active[0], newDevice);
-        break;
+          this.attachToNewParentNode(this.items, this.active[0], newDevice);
+          break;
       }
       this.node.name = "";
       this.node.id = "";
       this.node.children = [];
     },
     addChildNode(input, id, node) {
-      console.log("input", input, "id", id, "node", node)
+      console.log("input", input, "id", id, "node", node);
       for (let element of input) {
         if (element.id === id) {
           let newArr = element.children;
@@ -197,7 +135,7 @@ export default {
       for (let element of input) {
         if (element.id === id) {
           input.splice(input.indexOf(element) + 1, 0, node);
-          return;
+          return node.id;
         } else {
           if (element.children) {
             this.addSiblingNode(element.children, id, node);
@@ -212,25 +150,17 @@ export default {
       }
     },
     attachToNewParentNode(input, id, node) {
-      console.log(this.counter)
       for (let element of input) {
-        this.parentNodeId = element.id;
-        if (element.id === id && this.counter === 0) {
-          node.children = input;
-          this.items = [ node ];
-          return;
-        }
-        else if (element.id === id) {
+        if (element.id === id) {
+          node.children.push(element);
+          let newNode = JSON.parse(JSON.stringify(node));
+          this.addSiblingNode(this.items, id, newNode);
           input.splice(input.indexOf(element), 1);
-          node.children.push(JSON.parse(JSON.stringify(element)));
-          return this.addSiblingNode(this.items, this.parentNodeId, node);
-        }
-        else if (element.children) {
-          this.counter++;
+          return;
+        } else if (element.children) {
           this.attachToNewParentNode(element.children, id, node);
-        }
-        else {
-          return "Not found";
+        } else {
+          return "Error";
         }
       }
     },
@@ -267,14 +197,9 @@ export default {
     }
   },
   mounted() {
-    this.items = this.transform(this.data);
-    var proxy = ObservableSlim.create(test, true, function(changes) {
-	console.log(JSON.stringify(changes));
-});
-    this.$http.get("objects")
-    .then((response) => {
-      console.log(response)
-    })
+    this.$http.get("objects").then(response => {
+      this.items = this.transform(response.body);
+    });
   }
 };
 </script>

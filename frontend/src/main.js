@@ -24,14 +24,12 @@ if (Vue.http.options.root.startsWith("$")) {
 }
 
 Vue.http.interceptors.push(function(request) {
-
   if (request.url === "token") {
-    console.log("bye")
+    console.log("bye");
     return;
   }
   // modify headers
-  request.headers.set('Authorization', `Bearer ${localStorage.token}`);
-
+  request.headers.set("Authorization", `Bearer ${localStorage.token}`);
 });
 
 new Vue({
