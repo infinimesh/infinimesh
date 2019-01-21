@@ -27,7 +27,8 @@ export default new Vuex.Store({
         pem_data: "",
         algorithm: ""
       }
-    }
+    },
+    nodeTree: {}
   },
   getters: {
     getDevice: state => id => {
@@ -55,6 +56,13 @@ export default new Vuex.Store({
           }
         }
         return state.devices;
+      } else {
+        return undefined;
+      }
+    },
+    getNodeTree: state => {
+      if (state.nodeTree) {
+        return state.nodeTree;
       } else {
         return undefined;
       }
@@ -88,6 +96,9 @@ export default new Vuex.Store({
       } else {
         return "Device Id doesn't exist";
       }
+    },
+    setNodeTree: (state, tree) => {
+      state.nodeTree = tree;
     }
   },
   actions: {
@@ -102,6 +113,9 @@ export default new Vuex.Store({
     unRegisterDevice: ({ commit }, id) => {
       commit("unRegisterDevice", id);
       return id;
+    },
+    setNodeTree: ({ commit }, tree) => {
+      commit("setNodeTree", tree);
     }
   }
 });

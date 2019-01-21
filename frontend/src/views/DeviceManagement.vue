@@ -54,6 +54,12 @@
                   :value="label"
                 ></v-radio>
               </v-radio-group>
+              <v-alert
+                :value="revertAlert"
+                type="warning"
+              >
+                Further reverts not possible
+              </v-alert>
             </v-card-text>
               <v-card-actions>
               <v-btn
@@ -65,6 +71,7 @@
               </v-btn>
               <v-btn
                 round
+                @click="revert"
               >
                 Revert
               </v-btn>
@@ -87,14 +94,19 @@ export default {
         children: []
       },
       items: [],
+      nodeHistory: [],
       nodeAdderFunction: "",
       radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
-      showNodePanel: false
+      showNodePanel: false,
+      revertAlert: false
     };
   },
   computed: {},
   methods: {
     addNewNode() {
+      if (this.nodeHistory.length <= 5) {
+        this.nodeHistory.push(this.items.slice());
+      }
       this.node.id = Math.random().toString();
       let newDevice = JSON.parse(JSON.stringify(this.node));
       switch (this.nodeAdderFunction) {
@@ -113,7 +125,6 @@ export default {
       this.node.children = [];
     },
     addChildNode(input, id, node) {
-      console.log("input", input, "id", id, "node", node);
       for (let element of input) {
         if (element.id === id) {
           let newArr = element.children;
@@ -125,7 +136,6 @@ export default {
           }
           // little bug here: the function never enters the else loop below
           else {
-            console.log("not found");
             return;
           }
         }
@@ -142,7 +152,6 @@ export default {
           }
           // little bug here: the function never enters the else loop below
           else {
-            console.log("not found");
             return;
           }
           console.log("returns");
@@ -194,6 +203,16 @@ export default {
         res.push(el);
       }
       return res;
+    },
+    revert() {
+      if (this.nodeHistory.length) {
+        this.items = this.nodeHistory[this.nodeHistory.length - 1].slice();
+        this.nodeHistory.pop();
+        return;
+      } else {
+        this.revertAlert = true;
+        return;
+      }
     }
   },
   mounted() {

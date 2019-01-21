@@ -61,6 +61,7 @@
           >
           <v-list-tile-title
             v-text="page"
+            @click="logout"
           ></v-list-tile-title>
         </v-list-tile>
       </v-list>
@@ -76,6 +77,11 @@ export default {
       deviceLinks: ["View devices", "Manage devices", "Register device"],
       accountLinks: ["Logout"]
     };
+  },
+  methods: {
+    logout() {
+      localStorage.token = "";
+    }
   }
 };
 </script>
