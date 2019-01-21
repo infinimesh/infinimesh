@@ -35,6 +35,29 @@ message AuthorizeRequest {
 }
 message AuthorizeResponse {}
 
+message GetAccountRequest { string name = 1; }
+
+message Account {
+  string uid = 1;
+  string name = 2;
+}
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  bool success = 1;
+  Account account = 2;
+}
+
+message DeleteObjectRequest{
+  string uid = 1;
+}
+
+message DeleteObjectResponse{}
+
 // Object
 
 message CreateObjectRequest {
@@ -62,23 +85,6 @@ message ListObjectsResponse {
   repeated Device devices = 2;
 }
 
-message GetAccountRequest { string name = 1; }
-
-message Account {
-  string uid = 1;
-  string name = 2;
-}
-
-message AuthenticateRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message AuthenticateResponse {
-  bool success = 1;
-  Account account = 2;
-}
-
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
@@ -91,4 +97,5 @@ service AccountService {
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
+  rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
 }

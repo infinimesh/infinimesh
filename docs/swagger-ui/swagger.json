@@ -263,6 +263,44 @@
         "tags": [
           "ObjectService"
         ]
+      },
+      "post": {
+        "operationId": "CreateObject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeCreateObjectResponse"
+            }
+          }
+        },
+        "tags": [
+          "ObjectService"
+        ]
+      }
+    },
+    "/objects/{uid}": {
+      "delete": {
+        "operationId": "DeleteObject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ObjectService"
+        ]
       }
     },
     "/token": {
@@ -400,6 +438,17 @@
           "$ref": "#/definitions/shadowShadow"
         }
       }
+    },
+    "nodeCreateObjectResponse": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        }
+      }
+    },
+    "nodeDeleteObjectResponse": {
+      "type": "object"
     },
     "nodeListObjectsResponse": {
       "type": "object",

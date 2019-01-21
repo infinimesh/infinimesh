@@ -104,22 +104,35 @@ service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       post : "/token"
-      body: "*"
+      body : "*"
     };
   };
 }
 
-message ListObjectsRequest{} // Don't use infinimesh.node.ListObjectsRequest,
-                             // because it allows the caller to set the account
-                             // id. however, here we don't allow this. the
-                             // account id will be derived from the JWT token,
-                             // and the user can not choose it.
+message ListObjectsRequest {} // Don't use infinimesh.node.ListObjectsRequest,
+                              // because it allows the caller to set the account
+                              // id. however, here we don't allow this. the
+                              // account id will be derived from the JWT token,
+                              // and the user can not choose it.
 
 service ObjectService {
   rpc ListObjects(ListObjectsRequest)
       returns (infinimesh.node.ListObjectsResponse) {
     option (google.api.http) = {
       get : "/objects"
+    };
+  };
+  rpc CreateObject(infinimesh.node.CreateObjectRequest)
+      returns (infinimesh.node.CreateObjectResponse) {
+    option (google.api.http) = {
+      post : "/objects"
+    };
+  }
+
+  rpc DeleteObject(infinimesh.node.DeleteObjectRequest)
+      returns (infinimesh.node.DeleteObjectResponse) {
+    option (google.api.http) = {
+      delete : "/objects/{uid}"
     };
   };
 }

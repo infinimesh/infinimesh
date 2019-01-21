@@ -72,6 +72,10 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 	return &nodepb.Object{Uid: id}, nil
 }
 
+func (s *ObjectController) DeleteObject(context.Context, *nodepb.DeleteObjectRequest) (*nodepb.DeleteObjectResponse, error) {
+	return nil, nil
+}
+
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
 	directDevices, directObjects, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
 	if err != nil {
