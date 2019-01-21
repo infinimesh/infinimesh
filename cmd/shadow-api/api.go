@@ -131,11 +131,9 @@ func main() {
 
 		shadowpb.RegisterShadowsServer(srv, serverHandler)
 		reflection.Register(srv)
-		fmt.Println("serve")
 		if err := srv.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
-		fmt.Println("nach serve")
 	}()
 
 	r := httprouter.New()
