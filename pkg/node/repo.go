@@ -85,6 +85,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id 
 		return "", err
 	}
 
+	// TODO check if parent node is of correct type (node)
 	a, err := s.dg.NewTxn().Mutate(ctx, &api.Mutation{
 		SetJson:   js,
 		CommitNow: true,
@@ -94,7 +95,6 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id 
 	}
 
 	return a.GetUids()["new"], nil
-
 }
 
 func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error) {

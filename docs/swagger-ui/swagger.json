@@ -270,7 +270,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeCreateObjectResponse"
+              "$ref": "#/definitions/nodeObject"
             }
           }
         },
@@ -436,14 +436,6 @@
       "properties": {
         "shadow": {
           "$ref": "#/definitions/shadowShadow"
-        }
-      }
-    },
-    "nodeCreateObjectResponse": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
         }
       }
     },

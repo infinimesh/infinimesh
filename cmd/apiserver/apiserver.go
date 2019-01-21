@@ -111,13 +111,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	nodeClient := nodepb.NewAccountServiceClient(nodeConn)
+	accountClient := nodepb.NewAccountServiceClient(nodeConn)
 	objectClient := nodepb.NewObjectServiceClient(nodeConn)
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient})
 	apipb.RegisterShadowsServer(srv, &shadowAPI{client: shadowClient})
-	apipb.RegisterAccountServer(srv, &accountAPI{client: nodeClient, signingSecret: jwtSigningSecret})
-	apipb.RegisterObjectServiceServer(srv, &objectAPI{client: objectClient})
+	apipb.RegisterAccountServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
+	apipb.RegisterObjectServiceServer(srv, &objectAPI{objectClient: objectClient, accountClient: accountClient})
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		panic(err)

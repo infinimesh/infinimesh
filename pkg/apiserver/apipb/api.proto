@@ -123,7 +123,7 @@ service ObjectService {
     };
   };
   rpc CreateObject(infinimesh.node.CreateObjectRequest)
-      returns (infinimesh.node.CreateObjectResponse) {
+      returns (infinimesh.node.Object) {
     option (google.api.http) = {
       post : "/objects"
     };

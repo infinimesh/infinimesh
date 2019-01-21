@@ -65,8 +65,6 @@ message CreateObjectRequest {
   string name = 3;
 }
 
-message CreateObjectResponse { string uid = 1; }
-
 message Object {
   string uid = 1;
   string name = 2;
