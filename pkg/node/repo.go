@@ -12,6 +12,7 @@ import (
 type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
+	DeleteObject(ctx context.Context, uid, parent string) (err error)
 	ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
 	GetAccount(ctx context.Context, name string) (account *Account, err error)
 }
@@ -53,6 +54,22 @@ func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *Acco
 	}
 
 	return result.Account[0], nil
+}
+
+func (s *dGraphRepo) DeleteObject(ctx context.Context, uid, parent string) (err error) {
+	txn := s.dg.NewTxn()
+
+	m := &api.Mutation{
+		Del: []*api.NQuad{
+			&api.NQuad{Subject: parent, Predicate: "access.to", ObjectId: uid},
+			&api.NQuad{Subject: parent, Predicate: "access.to.device", ObjectId: uid},
+			&api.NQuad{Subject: parent, Predicate: "contains", ObjectId: uid},
+			&api.NQuad{Subject: uid},
+		},
+		CommitNow: true,
+	}
+	_, err = txn.Mutate(ctx, m)
+	return err
 }
 
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id string, err error) {

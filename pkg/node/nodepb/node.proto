@@ -54,6 +54,7 @@ message AuthenticateResponse {
 
 message DeleteObjectRequest{
   string uid = 1;
+  string parent_uid = 2;
 }
 
 message DeleteObjectResponse{}

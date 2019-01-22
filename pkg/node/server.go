@@ -72,8 +72,12 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 	return &nodepb.Object{Uid: id}, nil
 }
 
-func (s *ObjectController) DeleteObject(context.Context, *nodepb.DeleteObjectRequest) (*nodepb.DeleteObjectResponse, error) {
-	return nil, nil
+func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
+	err = s.Repo.DeleteObject(ctx, request.GetUid(), request.GetParentUid())
+	if err != nil {
+		return nil, err
+	}
+	return &nodepb.DeleteObjectResponse{}, nil
 }
 
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {

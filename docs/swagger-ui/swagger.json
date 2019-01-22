@@ -296,6 +296,12 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "parent_uid",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
