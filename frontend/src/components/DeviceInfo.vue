@@ -13,13 +13,13 @@
         align-end
         justify-end
       >
-          <v-icon
-            style="cursor: pointer"
-            @click="$emit('edit')"
-            class="ma-3"
-          >
-            edit
-          </v-icon>
+        <v-icon
+          style="cursor: pointer"
+          @click="$emit('edit')"
+          class="ma-3"
+        >
+          edit
+        </v-icon>
       </v-layout>
         <v-card-text
         >

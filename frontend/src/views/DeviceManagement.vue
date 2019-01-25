@@ -7,8 +7,8 @@
       >
         <v-flex>
           <v-card
-          max-width="400"
-          flat
+            flat
+            class="ma-2"
           >
             <v-card-title primary-title>
               <h2>Device hierarchy</h2>
@@ -32,50 +32,72 @@
           </v-treeview>
           </v-card>
         </v-flex>
-        <v-flex
+        <v-spacer
+          v-if="!showNodePanel"
+        ></v-spacer>
+        <v-divider
           v-if="showNodePanel"
+          vertical
+        ></v-divider>
+        <v-flex
         >
           <v-card
             class="ma-2"
             flat
           >
-            <v-card-text>
-              <v-text-field
-                label="Name of new node"
-                clearable
-                v-model="node.name"
-              ></v-text-field>
-              <v-radio-group
-                v-model="nodeAdderFunction">
-                <v-radio
-                  v-for="(label, i) in radioLabels"
-                  :key="i"
-                  :label="label"
-                  :value="label"
-                ></v-radio>
-              </v-radio-group>
-              <v-alert
-                :value="revertAlert"
-                type="warning"
+            <div
+              v-if="showNodePanel"
+            >
+              <v-layout
+                align-end
+                justify-end
               >
-                Further reverts not possible
-              </v-alert>
-            </v-card-text>
-              <v-card-actions>
-              <v-btn
-                round
-                @click="addNewNode()"
-                class="mr-3"
-              >
-                Include new level
-              </v-btn>
-              <v-btn
-                round
-                @click="revert"
-              >
-                Revert
-              </v-btn>
-            </v-card-actions>
+                <v-icon
+                  style="cursor: pointer"
+                  @click="showNodePanel = false"
+                  class="ma-3"
+                >
+                  close
+                </v-icon>
+              </v-layout>
+              <v-card-text>
+                <v-text-field
+                  label="Name of new node"
+                  clearable
+                  v-model="node.name"
+                ></v-text-field>
+                <v-radio-group
+                  v-model="nodeAdderFunction">
+                  <v-radio
+                    v-for="(label, i) in radioLabels"
+                    :key="i"
+                    :label="label"
+                    :value="label"
+                  ></v-radio>
+                </v-radio-group>
+                <v-alert
+                  :value="revertAlert"
+                  type="warning"
+                >
+                  Further reverts not possible
+                </v-alert>
+              </v-card-text>
+                <v-card-actions>
+                <v-btn
+                  round
+                  @click="addNewNode()"
+                  class="mr-3"
+                >
+                  Include new level
+                </v-btn>
+                <v-btn
+                  round
+                  @click="revert"
+                >
+                  Revert
+                </v-btn>
+              </v-card-actions>
+            </div>
           </v-card>
         </v-flex>
       </v-layout>
@@ -95,30 +117,30 @@ export default {
       },
       items: [],
       nodeHistory: [],
-      nodeAdderFunction: "",
+      nodeAdderFunction:"",
       radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
       showNodePanel: false,
       revertAlert: false
     };
   },
-  computed: {},
   methods: {
     addNewNode() {
       if (this.nodeHistory.length <= 5) {
-        this.nodeHistory.push(this.items.slice());
+        this.nodeHistory.push(JSON.parse(JSON.stringify(this.items)));
+         console.log(JSON.stringify(this.nodeHistory, null, 2))
       }
       this.node.id = Math.random().toString();
-      let newDevice = JSON.parse(JSON.stringify(this.node));
+      let newNode = JSON.parse(JSON.stringify(this.node));
       switch (this.nodeAdderFunction) {
         case "Add child":
-          this.addChildNode(this.items, this.active[0], newDevice);
-          break;
+        this.addChildNode(this.items, this.active[0], newNode);
+        break;
         case "Add sibling":
-          this.addSiblingNode(this.items, this.active[0], newDevice);
-          break;
+        this.addSiblingNode(this.items, this.active[0], newNode);
+        break;
         case "Attach to new parent":
-          this.attachToNewParentNode(this.items, this.active[0], newDevice);
-          break;
+        this.attachToNewParentNode(this.items, this.active[0], newNode);
+        break;
       }
       this.node.name = "";
       this.node.id = "";
@@ -166,9 +188,11 @@ export default {
           this.addSiblingNode(this.items, id, newNode);
           input.splice(input.indexOf(element), 1);
           return;
-        } else if (element.children) {
+        }
+        else if (element.children) {
           this.attachToNewParentNode(element.children, id, node);
-        } else {
+        }
+        else {
           return "Error";
         }
       }
@@ -206,19 +230,20 @@ export default {
     },
     revert() {
       if (this.nodeHistory.length) {
-        this.items = this.nodeHistory[this.nodeHistory.length - 1].slice();
-        this.nodeHistory.pop();
+        this.items = this.nodeHistory.pop();
         return;
-      } else {
+      }
+      else {
         this.revertAlert = true;
         return;
       }
     }
   },
   mounted() {
-    this.$http.get("objects").then(response => {
+    this.$http.get("objects")
+    .then((response) => {
       this.items = this.transform(response.body);
-    });
+    })
   }
 };
 </script>
