@@ -147,23 +147,10 @@ export default {
   methods: {
     navigateTo(id) {
       this.$router.push("devices/show/" + id);
-    },
-    storeRemoteDevices() {
-      this.$http
-        .get("devices")
-        .then(response => {
-          let device = {};
-          for (device of response.body.devices) {
-            this.$store.dispatch("addDevice", device);
-          }
-        })
-        .catch(e => {
-          console.log(e);
-        });
     }
   },
-  beforeMount() {
-    this.storeRemoteDevices();
+  created() {
+    this.$store.dispatch("fetchDevices");
   }
 };
 </script>

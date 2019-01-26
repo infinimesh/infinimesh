@@ -1,24 +1,18 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import VueResource from "vue-resource";
 
 Vue.use(Vuex);
+Vue.use(VueResource);
 
 export default new Vuex.Store({
   state: {
-    devices: [
-      {
-        enabled: false,
-        id: "25",
-        tags: ["test", "bbc"],
-        certificate: "abc"
-      },
-      {
-        enabled: true,
-        id: "6",
-        tags: ["test"],
-        certificate: "abdd"
-      }
-    ],
+    apiDataPending: false,
+    apiDataFailure: {
+      status: false,
+      error: ""
+    },
+    devices: [],
     model: {
       enabled: undefined,
       id: "",
@@ -69,12 +63,15 @@ export default new Vuex.Store({
     }
   },
   mutations: {
-    addDevice: (state, device) => {
-      let deviceExists;
-      deviceExists = state.devices.find(item => item.id === device.id);
-      if (!deviceExists) {
-        state.devices.push(device);
-      }
+    apiRequestPending: (state, status) => {
+      state.apiDataPending = status;
+    },
+    apiDataFailure: (state, error) => {
+      state.apiDataFailure.status = true;
+      state.apiDataFailure.error = error;
+    },
+    storeDevices: (state, devices) => {
+      state.devices = devices;
     },
     updateDevice: (state, properties) => {
       let deviceIndex;
@@ -102,6 +99,19 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    fetchDevices(store) {
+      store.commit("apiRequestPending", true);
+      return Vue.http
+        .get("devices")
+        .then(response => {
+          store.commit("apiRequestPending", false);
+          store.commit("storeDevices", response.body.devices);
+        })
+        .catch(error => {
+          store.commit("apiRequestPending", false);
+          store.commit("apiDataFailure", error);
+        });
+    },
     addDevice: ({ commit }, device) => {
       commit("addDevice", device);
       return device;
