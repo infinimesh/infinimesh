@@ -1,6 +1,4 @@
-<template
-  v-on:onload="test"
->
+<template>
   <v-container>
     <h1 class="mb-3">{{ device.id }} - Device overview</h1>
     <v-card>
@@ -117,7 +115,7 @@ export default {
 };
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
   #scrollableCard {
   height: 400px;
   overflow-y: auto;

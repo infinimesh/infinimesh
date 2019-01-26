@@ -27,23 +27,45 @@
       </v-toolbar-title>
       <v-list>
         <v-list-tile
-          v-for="page in links"
+          v-for="page in deviceLinks"
           :key="page"
           :to="{ name: page }"
           exact
           >
-          <v-list-tile-title v-text="page"></v-list-tile-title>
+          <v-list-tile-title
+            v-text="page"
+          ></v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-menu>
-    <v-btn icon>
-      <v-icon
-      large
-      color="white"
+    <v-menu
+      :nudge-width="100"
+      offset-y
+    >
+      <v-toolbar-title
+      slot="activator"
       >
-      account_circle
-      </v-icon>
-    </v-btn>
+        <v-icon
+        large
+        color="white"
+        >
+        account_circle
+        </v-icon>
+      </v-toolbar-title>
+      <v-list>
+        <v-list-tile
+          v-for="page in accountLinks"
+          :key="page"
+          :to="{ name: page }"
+          exact
+          >
+          <v-list-tile-title
+            v-text="page"
+            @click="logout"
+          ></v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
   </v-toolbar>
 </v-card>
 </template>
@@ -52,8 +74,14 @@
 export default {
   data() {
     return {
-      links: ["View devices", "Register device"]
+      deviceLinks: ["View devices", "Manage devices", "Register device"],
+      accountLinks: ["Logout"]
     };
+  },
+  methods: {
+    logout() {
+      localStorage.token = "";
+    }
   }
 };
 </script>

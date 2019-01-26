@@ -10,6 +10,7 @@
             label="Device Id"
             v-model="id"
             :rules="idRules"
+            :key="idKey"
           ></v-text-field>
         </v-card>
         <v-card
@@ -137,6 +138,7 @@ export default {
     return {
       checkbox: true,
       id: "",
+      idKey: 0,
       idRules: [
         v => !!v || "Id is required",
         v => !v.match(/\s/) || "No whitespace allowed",
@@ -198,6 +200,8 @@ export default {
     },
     resetForm() {
       this.id = "";
+      //force re-render of component
+      this.idKey++;
       this.tags = [];
       this.enabled = false;
     }
