@@ -98,7 +98,8 @@ export default {
       this.$http
         .get(`devices/${id}/shadow`)
         .then(response => {
-          this.shadow.initialTimestamp = response.body.shadow.reported.timestamp;
+          this.shadow.initialTimestamp =
+            response.body.shadow.reported.timestamp;
           this.shadow.initialState = response.body.shadow.reported.data;
         })
         .catch(e => {
