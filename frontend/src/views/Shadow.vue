@@ -28,9 +28,9 @@
               </v-card-text>
             </v-card>
             <v-card-text>
-              <strong>Initial timestamp</strong>: {{ initialState.shadow.reported.timestamp }}
+              <strong>Initial timestamp</strong>: {{ shadow.initialTimestamp }}
               <v-spacer></v-spacer>
-              <strong>Initial data</strong>: {{ initialState.shadow.reported.data }}
+              <strong>Initial data</strong>: {{ shadow.initialState }}
             </v-card-text>
           </v-card>
             </div>
@@ -60,14 +60,16 @@ export default {
   data() {
     return {
       device: {},
+      shadow: {
+        initialState: "No data received",
+        initialTimestamp: "N/A"
+      },
       activeComp: DeviceInfo,
       id: this.$route.params.id,
-      initialState: "",
       messages: []
     };
   },
   methods: {
-    test() {},
     connectToShadow(id) {
       let xhr = new XMLHttpRequest();
       let that = this;
@@ -96,7 +98,9 @@ export default {
       this.$http
         .get(`devices/${id}/shadow`)
         .then(response => {
-          this.initialState = response.body;
+          this.shadow.initialTimestamp =
+            response.body.shadow.reported.timestamp;
+          this.shadow.initialState = response.body.shadow.reported.data;
         })
         .catch(e => {
           console.log(e);
