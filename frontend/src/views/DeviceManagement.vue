@@ -76,10 +76,10 @@
                   ></v-radio>
                 </v-radio-group>
                 <v-alert
-                  :value="revertAlert"
+                  :value="alert.value"
                   type="warning"
                 >
-                  Further reverts not possible
+                  {{ alert.message }}
                 </v-alert>
               </v-card-text>
                 <v-card-actions>
@@ -120,17 +120,21 @@ export default {
       nodeAdderFunction:"",
       radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
       showNodePanel: false,
-      revertAlert: false
+      alert: {
+        value: false,
+        message: ""
+      }
     };
   },
   methods: {
     addNewNode() {
-      if (this.nodeHistory.length <= 5) {
-        this.nodeHistory.push(JSON.parse(JSON.stringify(this.items)));
-         console.log(JSON.stringify(this.nodeHistory, null, 2))
+      this.alert.value = false;
+      if (this.checkIfName()) {
+        setTimeout(() => this.alert.value = false, 2000);
+        return;
       }
-      this.node.id = Math.random().toString();
-      let newNode = JSON.parse(JSON.stringify(this.node));
+      this.extendNodeHistory();
+      let newNode = this.setNode();
       switch (this.nodeAdderFunction) {
         case "Add child":
         this.addChildNode(this.items, this.active[0], newNode);
@@ -142,6 +146,26 @@ export default {
         this.attachToNewParentNode(this.items, this.active[0], newNode);
         break;
       }
+      this.clearNode();
+    },
+    checkIfName() {
+      if (!this.node.name) {
+        this.alert.message = "Node must have a name";
+        this.alert.value = true;
+        return true;
+      }
+    },
+    extendNodeHistory() {
+      if (this.nodeHistory.length <= 5) {
+        this.nodeHistory.push(JSON.parse(JSON.stringify(this.items)));
+      }
+    },
+    setNode() {
+      this.node.id = Math.random().toString();
+      let newNode = JSON.parse(JSON.stringify(this.node));
+      return newNode;
+    },
+    clearNode() {
       this.node.name = "";
       this.node.id = "";
       this.node.children = [];
@@ -152,14 +176,10 @@ export default {
           let newArr = element.children;
           newArr.push(node);
           element.children = newArr;
-        } else {
-          if (element.children) {
-            this.addChildNode(element.children, id, node);
-          }
-          // little bug here: the function never enters the else loop below
-          else {
-            return;
-          }
+          return node.id;
+        }
+        else if (element.children) {
+          this.addChildNode(element.children, id, node);
         }
       }
     },
@@ -168,15 +188,9 @@ export default {
         if (element.id === id) {
           input.splice(input.indexOf(element) + 1, 0, node);
           return node.id;
-        } else {
-          if (element.children) {
-            this.addSiblingNode(element.children, id, node);
-          }
-          // little bug here: the function never enters the else loop below
-          else {
-            return;
-          }
-          console.log("returns");
+        }
+        else if (element.children) {
+          this.addSiblingNode(element.children, id, node);
         }
       }
     },
@@ -187,13 +201,10 @@ export default {
           let newNode = JSON.parse(JSON.stringify(node));
           this.addSiblingNode(this.items, id, newNode);
           input.splice(input.indexOf(element), 1);
-          return;
+          return node.id;
         }
         else if (element.children) {
           this.attachToNewParentNode(element.children, id, node);
-        }
-        else {
-          return "Error";
         }
       }
     },
@@ -231,15 +242,15 @@ export default {
     revert() {
       if (this.nodeHistory.length) {
         this.items = this.nodeHistory.pop();
-        return;
       }
       else {
-        this.revertAlert = true;
-        return;
+        this.alert.message = "Further reverts not possible";
+        this.alert.value = true;
+        setTimeout(() => this.alert.value = false, 2000);
       }
     }
   },
-  mounted() {
+  created() {
     this.$http.get("objects")
     .then((response) => {
       this.items = this.transform(response.body);
