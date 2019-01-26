@@ -117,7 +117,7 @@ export default {
       },
       items: [],
       nodeHistory: [],
-      nodeAdderFunction:"",
+      nodeAdderFunction: "",
       radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
       showNodePanel: false,
       alert: {
@@ -130,21 +130,21 @@ export default {
     addNewNode() {
       this.alert.value = false;
       if (this.checkIfName()) {
-        setTimeout(() => this.alert.value = false, 2000);
+        setTimeout(() => (this.alert.value = false), 2000);
         return;
       }
       this.extendNodeHistory();
       let newNode = this.setNode();
       switch (this.nodeAdderFunction) {
         case "Add child":
-        this.addChildNode(this.items, this.active[0], newNode);
-        break;
+          this.addChildNode(this.items, this.active[0], newNode);
+          break;
         case "Add sibling":
-        this.addSiblingNode(this.items, this.active[0], newNode);
-        break;
+          this.addSiblingNode(this.items, this.active[0], newNode);
+          break;
         case "Attach to new parent":
-        this.attachToNewParentNode(this.items, this.active[0], newNode);
-        break;
+          this.attachToNewParentNode(this.items, this.active[0], newNode);
+          break;
       }
       this.clearNode();
     },
@@ -177,8 +177,7 @@ export default {
           newArr.push(node);
           element.children = newArr;
           return node.id;
-        }
-        else if (element.children) {
+        } else if (element.children) {
           this.addChildNode(element.children, id, node);
         }
       }
@@ -188,8 +187,7 @@ export default {
         if (element.id === id) {
           input.splice(input.indexOf(element) + 1, 0, node);
           return node.id;
-        }
-        else if (element.children) {
+        } else if (element.children) {
           this.addSiblingNode(element.children, id, node);
         }
       }
@@ -202,8 +200,7 @@ export default {
           this.addSiblingNode(this.items, id, newNode);
           input.splice(input.indexOf(element), 1);
           return node.id;
-        }
-        else if (element.children) {
+        } else if (element.children) {
           this.attachToNewParentNode(element.children, id, node);
         }
       }
@@ -242,19 +239,17 @@ export default {
     revert() {
       if (this.nodeHistory.length) {
         this.items = this.nodeHistory.pop();
-      }
-      else {
+      } else {
         this.alert.message = "Further reverts not possible";
         this.alert.value = true;
-        setTimeout(() => this.alert.value = false, 2000);
+        setTimeout(() => (this.alert.value = false), 2000);
       }
     }
   },
   created() {
-    this.$http.get("objects")
-    .then((response) => {
+    this.$http.get("objects").then(response => {
       this.items = this.transform(response.body);
-    })
+    });
   }
 };
 </script>

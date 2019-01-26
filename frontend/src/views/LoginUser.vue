@@ -43,20 +43,21 @@ export default {
   },
   methods: {
     login() {
-      this.$http.post("token", {
-        username: this.userName,
-        password: this.password
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          localStorage.token = response.body.token;
-          this.$router.push("/devices");
-        }
-      })
-      .catch((e) => {
-        console.log(e)
-        this.loginError = true;
-      })
+      this.$http
+        .post("token", {
+          username: this.userName,
+          password: this.password
+        })
+        .then(response => {
+          if (response.status === 200) {
+            localStorage.token = response.body.token;
+            this.$router.push("/devices");
+          }
+        })
+        .catch(e => {
+          console.log(e);
+          this.loginError = true;
+        });
     }
   }
 };
