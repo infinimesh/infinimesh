@@ -18,7 +18,7 @@
             >
             <v-card>
             <v-card
-              v-for="(response, index) in messages"
+              v-for="(response, index) in shadowMessages"
               :key="index"
             >
               <v-card-text>
@@ -53,10 +53,8 @@
 import { APIMixins } from "../mixins/APIMixins";
 import DeviceInfo from "../components/DeviceInfo.vue";
 import Update from "../components/Update.vue";
-import Vue from "vue";
 
 export default {
-  mixins: [APIMixins],
   data() {
     return {
       device: {},
@@ -64,70 +62,41 @@ export default {
         initialState: {
           data: "No data received",
           timestamp: "N/A"
-        },
-        messages: []
+        }
       },
       activeComp: DeviceInfo,
       id: this.$route.params.id,
       messages: []
     };
   },
+  computed: {
+    shadowMessages() {
+      return this.$store.getters.getShadowMessages;
+    }
+  },
   methods: {
-    connectToShadow(id) {
-      let xhr = new XMLHttpRequest();
-      let that = this;
-
-      setTimeout(() => {
-        xhr.open(
-          "GET",
-          Vue.http.options.root + `/devices/${id}/shadow/reported`,
-          true
-        );
-        xhr.onprogress = function() {
-          let jsonObjects = [];
-          let obj = "";
-          that.messages = [];
-
-          jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
-          for (obj of jsonObjects) {
-            that.messages.push(JSON.parse(obj));
-          }
-          that.messages.reverse();
-        };
-        xhr.send();
-      }, 1000);
-    },
-    getInitialShadow(id) {
-      this.$http
-        .get(`devices/${id}/shadow`)
-        .then(response => {
-          this.shadow.initialTimestamp =
-            response.body.shadow.reported.timestamp;
-          this.shadow.initialState = response.body.shadow.reported.data;
+    getInitialShadow() {
+      this.$store
+        .dispatch("fetchInitialShadow", this.id)
+        .then(() => {
+          this.shadow.initialState = this.$store.getters.getInitialShadow;
         })
-        .catch(e => {
-          console.log(e);
-        });
+        .catch(e => console.log(e));
+    },
+    getDevice() {
+      this.$store
+        .dispatch("fetchDevices")
+        .then(() => {
+          this.device = this.$store.getters.getDevice(this.id);
+          this.checkbox = this.$store.getters.getDevice(this.id).enabled;
+        })
+        .catch(e => console.log(e));
     }
   },
   created() {
-    this.$store
-      .dispatch("fetchDevices")
-      .then(() => {
-        this.device = this.$store.getters.getDevice(this.id);
-        this.checkbox = this.$store.getters.getDevice(this.id).enabled;
-      })
-      .catch(e => console.log(e));
-
-    this.$store
-      .dispatch("fetchInitialShadow", this.id)
-      .then(() => {
-        this.shadow.initialState = this.$store.getters.getInitialShadow;
-      })
-      .catch(e => console.log(e));
-  },
-  mounted() {
-    this.connectToShadow(this.id);
+    this.getDevice();
+    this.getInitialShadow();
+    this.$store.dispatch("connectToShadow", this.id);
   },
   components: {
     DeviceInfo,

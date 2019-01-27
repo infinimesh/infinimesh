@@ -48,6 +48,9 @@ export default new Vuex.Store({
     getInitialShadow: state => {
       return state.shadow.initialState;
     },
+    getShadowMessages: state => {
+      return state.shadow.messages;
+    },
     getAllDevices: state => {
       if (state.devices) {
         let device;
@@ -86,6 +89,9 @@ export default new Vuex.Store({
     storeShadow: (state, apiResponse) => {
       state.shadow.initialState.data = apiResponse.data;
       state.shadow.initialState.timestamp = apiResponse.timestamp;
+    },
+    addShadowMessages: (state, messages) => {
+      state.shadow.messages = messages;
     },
     updateDevice: (state, properties) => {
       let deviceIndex;
@@ -146,6 +152,29 @@ export default new Vuex.Store({
             reject(error);
           });
       });
+    },
+    connectToShadow: ({ commit }, id) => {
+      let xhr = new XMLHttpRequest();
+
+      setTimeout(() => {
+        xhr.open(
+          "GET",
+          Vue.http.options.root + `/devices/${id}/shadow/reported`,
+          true
+        );
+        xhr.onprogress = function() {
+          let jsonObjects = [];
+          let obj = "";
+          let messages = [];
+
+          jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
+          for (obj of jsonObjects) {
+            messages.splice(0, 0, JSON.parse(obj));
+          }
+          commit("addShadowMessages", messages);
+        };
+        xhr.send();
+      }, 1000);
     },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);
