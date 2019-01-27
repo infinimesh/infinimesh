@@ -29,6 +29,15 @@
             >
               add
             </v-icon>
+            <v-icon
+              v-if="active"
+              slot="prepend"
+              slot-scope="{ item, active }"
+              :color="active ? 'primary' : ''"
+              @click.stop="showNodePanel=true"
+            >
+              close
+            </v-icon>
           </v-treeview>
           </v-card>
         </v-flex>
@@ -210,14 +219,17 @@ export default {
 
       res.id = input.uid;
       res.name = input.name;
+      res.type = input.type;
       res.children = [];
       if (input.devices) {
-        for (let node of input.devices) {
-          res.children.push(this.transformObject(node));
+        for (let device of input.devices) {
+          device.type = "device";
+          res.children.push(this.transformObject(device));
         }
       }
       if (input.objects) {
         for (let object of input.objects) {
+          object.type = "node";
           res.children.push(this.transformObject(object));
         }
       }
@@ -227,11 +239,15 @@ export default {
       let res = [];
 
       for (let value of input.objects) {
+        value.type = "node";
         let el = this.transformObject(value);
+        el.type = "node";
         res.push(el);
       }
       for (let value of input.devices) {
+        value.type = "device";
         let el = this.transformObject(value);
+        el.type = "device";
         res.push(el);
       }
       return res;
