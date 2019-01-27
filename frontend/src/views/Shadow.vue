@@ -28,9 +28,9 @@
               </v-card-text>
             </v-card>
             <v-card-text>
-              <strong>Initial timestamp</strong>: {{ shadow.initialTimestamp }}
+              <strong>Initial timestamp</strong>: {{ shadow.initialState.timestamp }}
               <v-spacer></v-spacer>
-              <strong>Initial data</strong>: {{ shadow.initialState }}
+              <strong>Initial data</strong>: {{ shadow.initialState.data }}
             </v-card-text>
           </v-card>
             </div>
@@ -61,8 +61,11 @@ export default {
     return {
       device: {},
       shadow: {
-        initialState: "No data received",
-        initialTimestamp: "N/A"
+        initialState: {
+          data: "No data received",
+          timestamp: "N/A"
+        },
+        messages: []
       },
       activeComp: DeviceInfo,
       id: this.$route.params.id,
@@ -107,9 +110,23 @@ export default {
         });
     }
   },
+  created() {
+    this.$store
+      .dispatch("fetchDevices")
+      .then(() => {
+        this.device = this.$store.getters.getDevice(this.id);
+        this.checkbox = this.$store.getters.getDevice(this.id).enabled;
+      })
+      .catch(e => console.log(e));
+
+    this.$store
+      .dispatch("fetchInitialShadow", this.id)
+      .then(() => {
+        this.shadow.initialState = this.$store.getters.getInitialShadow;
+      })
+      .catch(e => console.log(e));
+  },
   mounted() {
-    this.getRemoteDevice();
-    this.getInitialShadow(this.id);
     this.connectToShadow(this.id);
   },
   components: {

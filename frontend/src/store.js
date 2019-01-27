@@ -13,6 +13,13 @@ export default new Vuex.Store({
       error: ""
     },
     devices: [],
+    shadow: {
+      initialState: {
+        data: "No data received",
+        timestamp: "N/A"
+      },
+      messages: []
+    },
     model: {
       enabled: undefined,
       id: "",
@@ -37,6 +44,9 @@ export default new Vuex.Store({
       } else {
         return undefined;
       }
+    },
+    getInitialShadow: state => {
+      return state.shadow.initialState;
     },
     getAllDevices: state => {
       if (state.devices) {
@@ -72,6 +82,10 @@ export default new Vuex.Store({
     },
     storeDevices: (state, devices) => {
       state.devices = devices;
+    },
+    storeShadow: (state, apiResponse) => {
+      state.shadow.initialState.data = apiResponse.data;
+      state.shadow.initialState.timestamp = apiResponse.timestamp;
     },
     updateDevice: (state, properties) => {
       let deviceIndex;
@@ -112,6 +126,23 @@ export default new Vuex.Store({
           .catch(error => {
             store.commit("apiRequestPending", false);
             store.commit("apiDataFailure", error);
+            reject(error);
+          });
+      });
+    },
+    fetchInitialShadow: ({ commit }, id) => {
+      return new Promise((resolve, reject) => {
+        commit("apiRequestPending", true);
+        return Vue.http
+          .get(`devices/${id}/shadow`)
+          .then(response => {
+            commit("apiRequestPending", false);
+            commit("storeShadow", response.body.shadow.reported);
+            resolve();
+          })
+          .catch(error => {
+            commit("apiRequestPending", false);
+            commit("apiDataFailure", error);
             reject(error);
           });
       });
