@@ -160,12 +160,13 @@ export default {
     this.enabled = false;
   },
   created() {
-    this.$store.dispatch("fetchDevices")
-    .then(() => {
-      this.device = this.$store.getters.getDevice(this.id);
-      this.checkbox = this.$store.getters.getDevice(this.id).enabled;
-    })
-    .catch((e) => console.log(e));
+    this.$store
+      .dispatch("fetchDevices")
+      .then(() => {
+        this.device = this.$store.getters.getDevice(this.id);
+        this.checkbox = this.$store.getters.getDevice(this.id).enabled;
+      })
+      .catch(e => console.log(e));
   }
 };
 </script>

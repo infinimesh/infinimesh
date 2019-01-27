@@ -114,7 +114,7 @@ export default new Vuex.Store({
             store.commit("apiDataFailure", error);
             reject(error);
           });
-      })
+      });
     },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);

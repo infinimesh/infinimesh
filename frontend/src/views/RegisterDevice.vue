@@ -92,7 +92,7 @@
         </v-alert>
         <v-alert
          :value="messageFailure.value"
-         type="error"e
+         type="error"
          icon="error"
         >
           {{ messageFailure.value }}: {{ messageFailure.error }}
