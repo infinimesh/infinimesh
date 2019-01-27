@@ -100,21 +100,21 @@ export default new Vuex.Store({
   },
   actions: {
     fetchDevices(store) {
-      store.commit("apiRequestPending", true);
-      return Vue.http
-        .get("devices")
-        .then(response => {
-          store.commit("apiRequestPending", false);
-          store.commit("storeDevices", response.body.devices);
-        })
-        .catch(error => {
-          store.commit("apiRequestPending", false);
-          store.commit("apiDataFailure", error);
-        });
-    },
-    addDevice: ({ commit }, device) => {
-      commit("addDevice", device);
-      return device;
+      return new Promise((resolve, reject) => {
+        store.commit("apiRequestPending", true);
+        return Vue.http
+          .get("devices")
+          .then(response => {
+            store.commit("apiRequestPending", false);
+            store.commit("storeDevices", response.body.devices);
+            resolve();
+          })
+          .catch(error => {
+            store.commit("apiRequestPending", false);
+            store.commit("apiDataFailure", error);
+            reject(error);
+          });
+      })
     },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);

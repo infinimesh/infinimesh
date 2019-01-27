@@ -53,20 +53,26 @@
 </template>
 
 <script>
-import { APIMixins } from "../mixins/APIMixins";
-
 export default {
-  mixins: [APIMixins],
   data() {
     return {
-      device: {},
+      device: {
+        enabled: false,
+        id: "",
+        tags: []
+      },
       checkbox: false,
       id: this.$route.params.id,
       headers: ["Active", "Id", "Name", "Location", "Tags"]
     };
   },
-  mounted() {
-    this.getRemoteDevice();
+  created() {
+    this.$store.dispatch("fetchDevices")
+    .then(() => {
+      this.device = this.$store.getters.getDevice(this.id);
+      this.checkbox = this.$store.getters.getDevice(this.id).enabled;
+    })
+    .catch((e) => console.log(e));
   }
 };
 </script>

@@ -92,7 +92,7 @@
         </v-alert>
         <v-alert
          :value="messageFailure.value"
-         type="error"
+         type="error"e
          icon="error"
         >
           {{ messageFailure.value }}: {{ messageFailure.error }}
@@ -130,10 +130,8 @@
 
 <script>
 import UploadButton from "vuetify-upload-button";
-import { storeRemoteDevices } from "../mixins/APIMixins";
 
 export default {
-  mixins: [storeRemoteDevices],
   data() {
     return {
       checkbox: true,
@@ -209,8 +207,8 @@ export default {
   components: {
     UploadButton
   },
-  beforeMount() {
-    this.storeRemoteDevices();
+  created() {
+    this.$store.dispatch("fetchDevices");
   }
 };
 </script>
