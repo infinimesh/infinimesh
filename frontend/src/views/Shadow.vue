@@ -50,7 +50,6 @@
 </template>
 
 <script>
-import { APIMixins } from "../mixins/APIMixins";
 import DeviceInfo from "../components/DeviceInfo.vue";
 import Update from "../components/Update.vue";
 
