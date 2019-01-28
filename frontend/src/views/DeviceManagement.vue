@@ -20,25 +20,34 @@
               active-class="grey lighten-4 indigo--text"
               selected-color="indigo"
             >
-            <v-icon
-              v-if="active"
-              slot="append"
-              slot-scope="{ item, active }"
-              :color="active ? 'primary' : ''"
-              @click.stop="showNodePanel=true"
-            >
-              add
-            </v-icon>
-            <template
-              slot="prepend"
-              slot-scope="{ item }"
-              v-if = "item.type === 'device'"
-            >
-              <v-icon>
-                smartphone
-              </v-icon>
-            </template>
-          </v-treeview>
+              <template
+                v-if="active"
+                slot="append"
+                slot-scope="{ item, active }"
+              >
+                <v-icon
+                  :color="active ? 'primary' : ''"
+                  @click.stop="showNodePanel=true"
+                >
+                  add
+                </v-icon>
+                <v-icon
+                  :color="active ? 'primary' : ''"
+                  @click.stop="deleteBranch"
+                >
+                  delete
+                </v-icon>
+              </template>
+              <template
+                slot="prepend"
+                slot-scope="{ item }"
+                v-if = "item.type === 'device'"
+              >
+                <v-icon>
+                  smartphone
+                </v-icon>
+              </template>
+            </v-treeview>
           </v-card>
         </v-flex>
         <v-spacer
@@ -74,6 +83,11 @@
                   label="Name of new node"
                   clearable
                   v-model="node.name"
+                ></v-text-field>
+                <v-text-field
+                  label="Type of new node"
+                  clearable
+                  v-model="node.type"
                 ></v-text-field>
                 <v-radio-group
                   v-model="nodeAdderFunction">
@@ -122,6 +136,7 @@ export default {
       node: {
         name: "",
         id: "",
+        type: "",
         children: []
       },
       items: [],
@@ -156,6 +171,9 @@ export default {
           break;
       }
       this.clearNode();
+    },
+    deleteBranch() {
+      console.log("Delete Branch");
     },
     checkIfName() {
       if (!this.node.name) {
