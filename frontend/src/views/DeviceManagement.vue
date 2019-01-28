@@ -29,15 +29,15 @@
             >
               add
             </v-icon>
-            <v-icon
-              v-if="active"
+            <template
               slot="prepend"
-              slot-scope="{ item, active }"
-              :color="active ? 'primary' : ''"
-              @click.stop="showNodePanel=true"
+              slot-scope="{ item }"
+              v-if = "item.type === 'device'"
             >
-              close
-            </v-icon>
+              <v-icon>
+                smartphone
+              </v-icon>
+            </template>
           </v-treeview>
           </v-card>
         </v-flex>
