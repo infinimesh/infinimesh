@@ -50,8 +50,19 @@ func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObje
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
-	_ = account
-	//TODO
 
-	return nil, nil
+	resp, err := o.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.GetUid(),
+		Account: account,
+		Action:  nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !resp.Decision.GetValue() {
+		return nil, status.Error(codes.PermissionDenied, "No permission to access resource")
+	}
+
+	return o.objectClient.DeleteObject(ctx, request)
 }
