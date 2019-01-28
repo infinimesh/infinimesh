@@ -46,6 +46,7 @@ func main() {
   action: string @index(term) .
   type: string @index(exact) .
   access.to: uid @reverse .
+  contains: uid @reverse .
   has.credentials: uid @reverse .
   password: password .`,
 	})
