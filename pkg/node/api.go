@@ -28,6 +28,7 @@ type Object struct {
 	AccessToPermission string  `json:"access.to|permission,omitempty"`
 	AccessToInherit    bool    `json:"access.to|inherit"`
 	Contains           *Object `json:"contains"`
+	ContainedIn        *Object `json:"~contains"`
 	ContainsDevice     *Device `json:"contains.device"`
 }
 
@@ -35,7 +36,9 @@ type ObjectList struct {
 	Node
 	Name           string       `json:"name,omitempty"`
 	Contains       []ObjectList `json:"contains"`
+	ContainedIn    []ObjectList `json:"~contains"`
 	ContainsDevice []Device     `json:"contains.device"`
+	AccessedBy     []Account    `json:"~access.to"`
 }
 
 type Device struct {

@@ -12,7 +12,7 @@ import (
 type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
-	DeleteObject(ctx context.Context, uid, parent string) (err error)
+	DeleteObject(ctx context.Context, uid string) (err error)
 	ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
 	GetAccount(ctx context.Context, name string) (account *Account, err error)
 }
@@ -27,7 +27,8 @@ func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 
 func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *Account, err error) {
 	txn := s.dg.NewReadOnlyTxn()
-	const q = `query accounts($account: string) {
+	const q = `
+query accounts($account: string) {
   accounts(func: eq(name, $account)) @filter(eq(type, "account"))  {
     uid
     name
@@ -56,20 +57,121 @@ func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *Acco
 	return result.Account[0], nil
 }
 
-func (s *dGraphRepo) DeleteObject(ctx context.Context, uid, parent string) (err error) {
+func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	txn := s.dg.NewTxn()
 
-	m := &api.Mutation{
-		Del: []*api.NQuad{
-			&api.NQuad{Subject: parent, Predicate: "access.to", ObjectId: uid},
-			&api.NQuad{Subject: parent, Predicate: "access.to.device", ObjectId: uid},
-			&api.NQuad{Subject: parent, Predicate: "contains", ObjectId: uid},
-			&api.NQuad{Subject: uid},
-		},
-		CommitNow: true,
+	// Find target node
+	const q = `
+	query deleteObject($root: string){
+	  object(func: uid($root)) {
+	    uid
+	    name
+	    contains {
+	      uid
+	    }
+	    ~contains { # Parent
+	      uid
+	    name
+	    }
+            ~access.to {
+              uid
+              name
+            }
+	  }
 	}
-	_, err = txn.Mutate(ctx, m)
-	return err
+	`
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$root": uid,
+	})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Objects []*ObjectList `json:"object"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	mu := &api.Mutation{}
+
+	if len(result.Objects) == 0 {
+		return errors.New("unexpected response from DB: 0 objects founds")
+	}
+
+	// Detect parent by ~contains edge
+	toDelete := result.Objects[0]
+	if len(toDelete.ContainedIn) > 0 {
+		parent := toDelete.ContainedIn[0]
+		mu.Del = append(mu.Del, &api.NQuad{
+			Subject:   parent.UID,
+			Predicate: "contains",
+			ObjectId:  toDelete.UID,
+		})
+
+	}
+
+	// Detect parent by ~access.to edge
+	if len(toDelete.AccessedBy) > 0 {
+		parent := toDelete.AccessedBy[0]
+		mu.Del = append(mu.Del, &api.NQuad{
+			Subject:   parent.UID,
+			Predicate: "access.to",
+			ObjectId:  toDelete.UID,
+		})
+
+	}
+
+	// Find and delete all edges & nodes below this node, including this
+	// node
+	const qChilds = `query children($root: string){
+			  object(func: uid($root)) @recurse {
+			    uid
+			    contains {
+			    }
+                            contains.device {
+                            }
+			  }
+			}`
+
+	res, err := txn.QueryWithVars(ctx, qChilds, map[string]string{
+		"$root": toDelete.UID,
+	})
+	if err != nil {
+		return err
+	}
+
+	var resultChildren struct {
+		Object []ObjectList
+	}
+
+	err = json.Unmarshal(res.Json, &resultChildren)
+	if err != nil {
+		return err
+	}
+
+	addDeletesRecursively(mu, resultChildren.Object)
+
+	_, err = txn.Mutate(ctx, mu)
+	if err != nil {
+		return err
+	}
+
+	return txn.Commit(ctx)
+}
+
+func addDeletesRecursively(mu *api.Mutation, items []ObjectList) {
+	for _, item := range items {
+		dgo.DeleteEdges(mu, item.UID, "_STAR_ALL")
+		for _, device := range item.ContainsDevice {
+			dgo.DeleteEdges(mu, device.UID, "_STAR_ALL")
+		}
+		addDeletesRecursively(mu, item.Contains)
+	}
 }
 
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent string) (id string, err error) {

@@ -73,7 +73,7 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 }
 
 func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
-	err = s.Repo.DeleteObject(ctx, request.GetUid(), request.GetParentUid())
+	err = s.Repo.DeleteObject(ctx, request.GetUid())
 	if err != nil {
 		return nil, err
 	}
