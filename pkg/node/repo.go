@@ -303,13 +303,13 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 
 	const qDirect = `query direct_access($device_id: string, $user_id: string){
                          direct(func: uid($user_id)) @normalize @cascade {
-                           access.to  @filter(uid($device_id) AND eq(type, "device")) @facets(permission,inherit) {
+                           access.to  @filter(uid($device_id)) @facets(permission,inherit) {
                              type: type
                            }
                          }
                          direct_via_one_object(func: uid($user_id)) @normalize @cascade {
                            access.to @filter(eq(type, "object")) @facets(permission,inherit) {
-                             contains @filter(uid($device_id) AND eq(type, "device")) {
+                             contains @filter(uid($device_id)) {
                                uid
                                type: type
                              }
