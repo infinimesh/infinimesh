@@ -274,6 +274,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeCreateObjectRequest"
+            }
+          }
+        ],
         "tags": [
           "ObjectService"
         ]
@@ -436,6 +446,17 @@
       "properties": {
         "shadow": {
           "$ref": "#/definitions/shadowShadow"
+        }
+      }
+    },
+    "nodeCreateObjectRequest": {
+      "type": "object",
+      "properties": {
+        "parent": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },

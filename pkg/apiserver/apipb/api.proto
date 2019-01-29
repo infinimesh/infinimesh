@@ -41,6 +41,7 @@ message TokenRequest {
 
 message TokenResponse { string token = 1; }
 
+// Device
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
       returns (infinimesh.deviceregistry.CreateResponse) {
@@ -77,6 +78,7 @@ service Devices {
   };
 }
 
+// Shadow
 service Shadows {
   rpc Get(infinimesh.shadow.GetRequest)
       returns (infinimesh.shadow.GetResponse) {
@@ -100,6 +102,7 @@ service Shadows {
   }
 }
 
+// Account
 service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
@@ -115,6 +118,7 @@ message ListObjectsRequest {} // Don't use infinimesh.node.ListObjectsRequest,
                               // account id will be derived from the JWT token,
                               // and the user can not choose it.
 
+// Object
 service ObjectService {
   rpc ListObjects(ListObjectsRequest)
       returns (infinimesh.node.ListObjectsResponse) {
@@ -126,6 +130,7 @@ service ObjectService {
       returns (infinimesh.node.Object) {
     option (google.api.http) = {
       post : "/objects"
+      body: "*"
     };
   }
 
