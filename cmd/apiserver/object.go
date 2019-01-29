@@ -15,7 +15,7 @@ type objectAPI struct {
 	accountClient nodepb.AccountServiceClient
 }
 
-func (o *objectAPI) CreateObject(ctx context.Context, request *nodepb.CreateObjectRequest) (response *nodepb.Object, err error) {
+func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjectRequest) (response *nodepb.Object, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
@@ -34,7 +34,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *nodepb.CreateObje
 		return nil, status.Error(codes.PermissionDenied, "No permission to access resource")
 	}
 
-	return o.objectClient.CreateObject(ctx, request)
+	return o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{Parent: request.Parent, Name: request.Name})
 }
 
 func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {

@@ -118,6 +118,18 @@ message ListObjectsRequest {} // Don't use infinimesh.node.ListObjectsRequest,
                               // account id will be derived from the JWT token,
                               // and the user can not choose it.
 
+message CreateObjectRequest {
+  // Hide parent because we use it as path param and is not part of the body.
+    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_schema) = {
+      example : {
+        value : '{ "name" : "name of child" }'
+      }
+    };
+
+  string parent = 1;
+  string name = 2;
+}
+
 // Object
 service ObjectService {
   rpc ListObjects(ListObjectsRequest)
@@ -126,11 +138,11 @@ service ObjectService {
       get : "/objects"
     };
   };
-  rpc CreateObject(infinimesh.node.CreateObjectRequest)
+  rpc CreateObject(infinimesh.api.CreateObjectRequest)
       returns (infinimesh.node.Object) {
     option (google.api.http) = {
-      post : "/objects"
-      body: "*"
+      post : "/objects/{parent}/children"
+      body : "*"
     };
   }
 
