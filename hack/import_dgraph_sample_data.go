@@ -197,7 +197,8 @@ func main() {
 				UID:  "_:enclosingroom",
 				Type: "object",
 			},
-			Name: "Enclosing Room",
+			AccessToPermission: "WRITE",
+			Name:               "Enclosing Room",
 			ContainsDevice: &node.Device{
 				Node: node.Node{
 					UID:  "_:enclosedobject",

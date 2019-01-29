@@ -307,9 +307,22 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
                              type: type
                            }
                          }
+                         direct_device(func: uid($user_id)) @normalize @cascade {
+                           access.to.device  @filter(uid($device_id)) @facets(permission,inherit) {
+                             type: type
+                           }
+                         }
                          direct_via_one_object(func: uid($user_id)) @normalize @cascade {
                            access.to @filter(eq(type, "object")) @facets(permission,inherit) {
                              contains @filter(uid($device_id)) {
+                               uid
+                               type: type
+                             }
+                           }
+                         }
+                         direct_device_via_one_object(func: uid($user_id)) @normalize @cascade {
+                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
+                             contains.device @filter(uid($device_id)) {
                                uid
                                type: type
                              }
@@ -323,8 +336,10 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	}
 
 	var permissions struct {
-		Direct          []Object `json:"direct"`
-		DirectViaObject []Object `json:"direct_via_one_object"`
+		Direct                []Object `json:"direct"`
+		DirectDevice          []Device `json:"direct_device"`
+		DirectViaObject       []Object `json:"direct_via_one_object"`
+		DirectDeviceViaObject []Object `json:"direct_device_via_one_object"`
 	}
 
 	err = json.Unmarshal(res.Json, &permissions)
@@ -338,8 +353,20 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 		}
 	}
 
+	if len(permissions.DirectDevice) > 0 {
+		if isPermissionSufficient(action, permissions.DirectDevice[0].AccessToDevicePermission) {
+			return true, nil
+		}
+	}
+
 	if len(permissions.DirectViaObject) > 0 {
 		if isPermissionSufficient(action, permissions.DirectViaObject[0].AccessToPermission) {
+			return true, nil
+		}
+	}
+
+	if len(permissions.DirectDeviceViaObject) > 0 {
+		if isPermissionSufficient(action, permissions.DirectDeviceViaObject[0].AccessToPermission) {
 			return true, nil
 		}
 	}
