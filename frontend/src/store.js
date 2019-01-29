@@ -20,6 +20,7 @@ export default new Vuex.Store({
       },
       messages: []
     },
+    nodeTree: {},
     model: {
       enabled: undefined,
       id: "",
@@ -28,8 +29,7 @@ export default new Vuex.Store({
         pem_data: "",
         algorithm: ""
       }
-    },
-    nodeTree: {}
+    }
   },
   getters: {
     getDevice: state => id => {
@@ -93,6 +93,12 @@ export default new Vuex.Store({
     addShadowMessages: (state, messages) => {
       state.shadow.messages = messages;
     },
+    storeNodeTree: (state, tree) => {
+      state.nodeTree = transform(tree);
+    },
+    addChildNode: (state, payload) => {
+      addNode(state.nodeTree, payload.id, payload.node);
+    },
     updateDevice: (state, properties) => {
       let deviceIndex;
       let property;
@@ -113,9 +119,6 @@ export default new Vuex.Store({
       } else {
         return "Device Id doesn't exist";
       }
-    },
-    setNodeTree: (state, tree) => {
-      state.nodeTree = tree;
     }
   },
   actions: {
@@ -176,6 +179,26 @@ export default new Vuex.Store({
         xhr.send();
       }, 1000);
     },
+    fetchNodeTree: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        commit("apiRequestPending", true);
+        return Vue.http
+          .get("objects")
+          .then(response => {
+            commit("apiRequestPending", false);
+            commit("storeNodeTree", response.body);
+            resolve();
+          })
+          .catch(error => {
+            commit("apiRequestPending", false);
+            commit("apiDataFailure", error);
+            reject(error);
+          });
+      });
+    },
+    addChildNode: ({ commit }, payload) => {
+      commit("addChildNode", payload);
+    },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);
       return properties;
@@ -183,9 +206,59 @@ export default new Vuex.Store({
     unRegisterDevice: ({ commit }, id) => {
       commit("unRegisterDevice", id);
       return id;
-    },
-    setNodeTree: ({ commit }, tree) => {
-      commit("setNodeTree", tree);
     }
   }
 });
+
+const transformObject = input => {
+  let res = {};
+
+  res.id = input.uid;
+  res.name = input.name;
+  res.type = input.type;
+  res.children = [];
+  if (input.devices) {
+    for (let device of input.devices) {
+      device.type = "device";
+      res.children.push(transformObject(device));
+    }
+  }
+  if (input.objects) {
+    for (let object of input.objects) {
+      object.type = "node";
+      res.children.push(transformObject(object));
+    }
+  }
+  return res;
+};
+
+const transform = input => {
+  let res = [];
+
+  for (let value of input.objects) {
+    value.type = "node";
+    let el = transformObject(value);
+    el.type = "node";
+    res.push(el);
+  }
+  for (let value of input.devices) {
+    value.type = "device";
+    let el = transformObject(value);
+    el.type = "device";
+    res.push(el);
+  }
+  return res;
+};
+
+const addNode = (input, id, node) => {
+  for (let element of input) {
+    if (element.id === id) {
+      let newArr = element.children;
+      newArr.push(node);
+      element.children = newArr;
+      return node.id;
+    } else if (element.children) {
+      addNode(element.children, id, node);
+    }
+  }
+};
