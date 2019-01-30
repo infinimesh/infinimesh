@@ -69,7 +69,7 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &nodepb.Object{Uid: id}, nil
+	return &nodepb.Object{Uid: id, Name: request.GetName()}, nil
 }
 
 func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
