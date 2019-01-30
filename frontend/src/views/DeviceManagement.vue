@@ -28,13 +28,13 @@
                 <v-icon
                   v-if="item.type === 'node'"
                   :color="active ? 'primary' : ''"
-                  @click.stop="showNodePanel=true"
+                  @click.stop="activeComp = 'addNode'"
                 >
                   add
                 </v-icon>
                 <v-icon
                   :color="active ? 'primary' : ''"
-                  @click.stop="deleteBranch"
+                  @click.stop="activeComp = 'deleteNode'"
                 >
                   delete
                 </v-icon>
@@ -52,10 +52,10 @@
           </v-card>
         </v-flex>
         <v-spacer
-          v-if="!showNodePanel"
+          v-if="!activeComp"
         ></v-spacer>
         <v-divider
-          v-if="showNodePanel"
+          v-if="activeComp"
           vertical
         ></v-divider>
         <v-flex
@@ -65,7 +65,7 @@
             flat
           >
             <div
-              v-if="showNodePanel"
+              v-if="activeComp"
             >
               <v-layout
                 align-end
@@ -73,39 +73,65 @@
               >
                 <v-icon
                   style="cursor: pointer"
-                  @click="showNodePanel = false"
+                  @click="activeComp = ''"
                   class="ma-3"
                 >
                   close
                 </v-icon>
               </v-layout>
-              <v-card-text>
-                <v-text-field
-                  label="Name of new node"
-                  clearable
-                  v-model="node.name"
-                ></v-text-field>
-                <v-text-field
-                  label="Type of new node"
-                  clearable
-                  v-model="node.type"
-                ></v-text-field>
+              <div
+                v-if="activeComp === 'addNode'"
+              >
+                <v-card-text>
+                  <v-text-field
+                    label="Name of new node"
+                    clearable
+                    v-model="node.name"
+                  ></v-text-field>
+                  <v-text-field
+                    label="Type of new node"
+                    clearable
+                    v-model="node.type"
+                  ></v-text-field>
+                  <v-alert
+                    :value="alert.value"
+                    type="warning"
+                  >
+                    {{ alert.message }}
+                  </v-alert>
+                </v-card-text>
+                  <v-card-actions>
+                  <v-btn
+                    round
+                    @click="addNewNode()"
+                    class="mr-3"
+                  >
+                    Include new level
+                  </v-btn>
+                </v-card-actions>
+              </div>
+              <div
+                v-if="activeComp === 'deleteNode'"
+              >
+                <v-card-title primary-title>
+                  Are you sure you want to delete this node?
+                </v-card-title>
                 <v-alert
                   :value="alert.value"
                   type="warning"
                 >
                   {{ alert.message }}
                 </v-alert>
-              </v-card-text>
                 <v-card-actions>
-                <v-btn
-                  round
-                  @click="addNewNode()"
-                  class="mr-3"
-                >
-                  Include new level
-                </v-btn>
-              </v-card-actions>
+                  <v-btn
+                    round
+                    @click="deleteNode()"
+                    class="mr-3"
+                  >
+                    Confirm
+                  </v-btn>
+                </v-card-actions>
+              </div>
             </div>
           </v-card>
         </v-flex>
@@ -125,9 +151,7 @@ export default {
         type: "",
         children: []
       },
-      nodeAdderFunction: "",
-      radioLabels: ["Add child", "Add sibling", "Attach to new parent"],
-      showNodePanel: false,
+      activeComp: "",
       alert: {
         value: false,
         message: ""
@@ -147,14 +171,15 @@ export default {
         return;
       }
       let payload = {
-        id: this.active[0],
-        node: this.setNode()
+        parent: this.active[0],
+        name: this.setNode().name
       };
       this.$store.dispatch("addChildNode", payload);
       this.clearNode();
     },
-    deleteBranch() {
-      console.log("Delete Branch");
+    deleteNode() {
+      console.log("delete node");
+      this.$store.dispatch("deleteNode", this.active[0]);
     },
     checkIfName() {
       if (!this.node.name) {
@@ -173,29 +198,6 @@ export default {
       this.node.id = "";
       this.node.type = "";
       this.node.children = [];
-    },
-    addSiblingNode(input, id, node) {
-      for (let element of input) {
-        if (element.id === id) {
-          input.splice(input.indexOf(element) + 1, 0, node);
-          return node.id;
-        } else if (element.children) {
-          this.addSiblingNode(element.children, id, node);
-        }
-      }
-    },
-    attachToNewParentNode(input, id, node) {
-      for (let element of input) {
-        if (element.id === id) {
-          node.children.push(element);
-          let newNode = JSON.parse(JSON.stringify(node));
-          this.addSiblingNode(this.items, id, newNode);
-          input.splice(input.indexOf(element), 1);
-          return node.id;
-        } else if (element.children) {
-          this.attachToNewParentNode(element.children, id, node);
-        }
-      }
     }
   },
   created() {

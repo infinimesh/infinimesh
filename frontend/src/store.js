@@ -99,6 +99,9 @@ export default new Vuex.Store({
     addChildNode: (state, payload) => {
       addNode(state.nodeTree, payload.id, payload.node);
     },
+    deleteNode: (state, id) => {
+      deleteNode(state.nodeTree, id);
+    },
     updateDevice: (state, properties) => {
       let deviceIndex;
       let property;
@@ -197,7 +200,38 @@ export default new Vuex.Store({
       });
     },
     addChildNode: ({ commit }, payload) => {
-      commit("addChildNode", payload);
+      return new Promise((resolve, reject) => {
+        commit("apiRequestPending", true);
+        return Vue.http
+          .post(`objects/${payload.parent}/children`, {
+            name: payload.name
+          })
+          .then(response => {
+            if (response.status === 200) {
+              commit("apiRequestPending", false);
+              let node = {
+                name: payload.name,
+                id: response.body.uid,
+                type: "node",
+                children: []
+              };
+              let obj = {
+                id: payload.parent,
+                node
+              };
+              commit("addChildNode", obj);
+              resolve();
+            }
+          })
+          .catch(error => {
+            commit("apiRequestPending", false);
+            commit("apiDataFailure", error);
+            reject(error);
+          });
+      });
+    },
+    deleteNode: ({ commit }, id) => {
+      commit("deleteNode", id);
     },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);
@@ -233,21 +267,24 @@ const transformObject = input => {
 };
 
 const transform = input => {
-  let res = [];
-
-  for (let value of input.objects) {
-    value.type = "node";
-    let el = transformObject(value);
-    el.type = "node";
-    res.push(el);
+  if (isEmpty(input)) {
+    return;
+  } else {
+    let res = [];
+    for (let value of input.objects) {
+      value.type = "node";
+      let el = transformObject(value);
+      el.type = "node";
+      res.push(el);
+    }
+    for (let value of input.devices) {
+      value.type = "device";
+      let el = transformObject(value);
+      el.type = "device";
+      res.push(el);
+    }
+    return res;
   }
-  for (let value of input.devices) {
-    value.type = "device";
-    let el = transformObject(value);
-    el.type = "device";
-    res.push(el);
-  }
-  return res;
 };
 
 const addNode = (input, id, node) => {
@@ -261,4 +298,22 @@ const addNode = (input, id, node) => {
       addNode(element.children, id, node);
     }
   }
+};
+
+const deleteNode = (input, id) => {
+  for (let element of input) {
+    if (element.id === id) {
+      console.log("input", input.indexOf(element));
+      input.splice(input.indexOf(element), 1);
+    } else if (element.children) {
+      deleteNode(element.children, id);
+    }
+  }
+};
+
+const isEmpty = obj => {
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) return false;
+  }
+  return true;
 };
