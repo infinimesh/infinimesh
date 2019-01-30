@@ -24,7 +24,7 @@ require (
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/uuid v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
-	github.com/grpc-ecosystem/grpc-gateway v1.6.2
+	github.com/grpc-ecosystem/grpc-gateway v1.7.0
 	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect

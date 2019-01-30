@@ -36,7 +36,7 @@ func run() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithDisablePathLengthFallback())
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := apipb.RegisterDevicesHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
