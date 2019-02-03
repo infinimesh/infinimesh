@@ -40,7 +40,7 @@ func main() {
 		fmt.Println("Dropped data")
 	}
 
-	node.ImportSchema(dg)
+	_ = node.ImportSchema(dg)
 	fmt.Println("Imported schema")
 
 	r := &node.Object{
