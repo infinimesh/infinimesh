@@ -19,8 +19,7 @@ type ObjectController struct {
 	Repo Repo
 }
 
-func checkExists(ctx context.Context, log *zap.Logger, txn *dgo.Txn, uid, _type string) bool {
-	log = log.Named("checkExists")
+func checkExists(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
 	q := `query object($_uid: string, $type: string) {
                 object(func: uid($_uid)) @filter(eq(type, $type)) {
                   uid
@@ -35,7 +34,6 @@ func checkExists(ctx context.Context, log *zap.Logger, txn *dgo.Txn, uid, _type 
 		"$_uid": uid,
 	})
 	if err != nil {
-		log.Error("Query failed", zap.Error(err))
 		return false
 	}
 
@@ -45,7 +43,6 @@ func checkExists(ctx context.Context, log *zap.Logger, txn *dgo.Txn, uid, _type 
 
 	err = json.Unmarshal(resp.Json, &result)
 	if err != nil {
-		log.Error("Failed to unmarshal response from dgraph", zap.Error(err))
 		return false
 	}
 

@@ -42,9 +42,28 @@ jobs:
       - run:
           name: build
           command: cd frontend && npm run build
+  tests:
+    docker:
+     - image: circleci/golang:1.11 
+       environment:
+         GO111MODULE: "on"
+    working_directory: /go/src/github.com/infinimesh/infinimesh
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: compose
+          command: docker-compose -f e2e/docker-compose.yaml up -d --quiet-pull
+      - run:
+          name: compose
+          command: docker cp ./ testrunner:/project
+      - run:
+          name: compose3
+          command: docker exec -it testrunner bash -c 'cd /project && go test -mod=vendor ./...'
 workflows:
   version: 2
   all:
     jobs:
       - build
       - build-frontend
+      - tests

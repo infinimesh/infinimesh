@@ -11,11 +11,14 @@ import (
 )
 
 type Repo interface {
+	CreateAccount(ctx context.Context, username, password string) (uid string, err error)
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
+	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
+	GetAccount(ctx context.Context, name string) (account *Account, err error)
+
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)
 	ListForAccount(ctx context.Context, account string) (directDevices []Device, directObjects []ObjectList, inheritedObjects []ObjectList, err error)
-	GetAccount(ctx context.Context, name string) (account *Account, err error)
 }
 
 type dGraphRepo struct {
@@ -24,6 +27,102 @@ type dGraphRepo struct {
 
 func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 	return &dGraphRepo{dg: dg}
+}
+
+func (s *dGraphRepo) CreateAccount(ctx context.Context, username, password string) (uid string, err error) {
+	txn := s.dg.NewTxn()
+
+	q := `query userExists($name: string) {
+                exists(func: eq(name, $name)) @filter(eq(type, "account")) {
+                  uid
+                }
+              }
+             `
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$name": username})
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return "", err
+	}
+
+	if len(result.Exists) == 0 {
+		js, err := json.Marshal(&Account{
+			Node: Node{
+				Type: "account",
+				UID:  "_:user",
+			},
+			Name: username,
+			HasCredentials: &UsernameCredential{
+				Username: username,
+				Password: password,
+			},
+		})
+		if err != nil {
+			return "", err
+		}
+		m := &api.Mutation{SetJson: js}
+		a, err := txn.Mutate(ctx, m)
+		if err != nil {
+			return "", err
+		}
+
+		err = txn.Commit(ctx)
+		if err != nil {
+			return "", errors.New("Failed to commit")
+		}
+		userUID := a.GetUids()["user"]
+		return userUID, nil
+
+	}
+	return "", errors.New("User exists already")
+}
+
+func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string, inherit bool) (err error) {
+	txn := s.dg.NewTxn()
+
+	if ok := checkExists(ctx, txn, account, "account"); !ok {
+		return errors.New("account does not exist")
+	}
+
+	if ok := checkExists(ctx, txn, node, "object"); !ok {
+		if ok := checkExists(ctx, txn, node, "device"); !ok {
+			return errors.New("resource does not exist")
+		}
+	}
+
+	in := Account{
+		Node: Node{
+			UID: account,
+		},
+		AccessTo: &Object{
+			Node: Node{
+				UID: node,
+			},
+			AccessToPermission: action,
+			AccessToInherit:    inherit,
+		},
+	}
+
+	js, err := json.Marshal(&in)
+	if err != nil {
+		return err
+	}
+
+	_, err = txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return errors.New("Failed to mutate")
+	}
+	return nil
 }
 
 func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *Account, err error) {

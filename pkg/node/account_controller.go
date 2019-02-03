@@ -24,65 +24,14 @@ type AccountController struct {
 
 func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.CreateAccountRequest) (response *nodepb.CreateAccountResponse, err error) {
 	log := s.Log.Named("CreateAccount")
-
-	txn := s.Dgraph.NewTxn()
-
-	q := `query userExists($name: string) {
-                exists(func: eq(name, $name)) @filter(eq(type, "account")) {
-                  uid
-                }
-              }
-             `
-
-	var result struct {
-		Exists []map[string]interface{} `json:"exists"`
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$name": request.GetName()})
+	uid, err := s.Repo.CreateAccount(ctx, request.GetName(), request.GetPassword())
 	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(resp.Json, &result)
-	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "Failed to create user")
 	}
 
-	if len(result.Exists) == 0 {
+	log.Info("Successfully created account", zap.String("username", request.GetName()), zap.String("password", request.GetPassword()), zap.String("uid", uid))
 
-		// h := sha256.New()
-		// h.Write([]byte(request.Password))
-
-		js, err := json.Marshal(&Account{
-			Node: Node{
-				Type: "account",
-				UID:  "_:user",
-			},
-			Name: request.GetName(),
-			HasCredentials: &UsernameCredential{
-				Username: request.GetName(),
-				Password: request.GetPassword(),
-			},
-		})
-		if err != nil {
-			return nil, err
-		}
-		m := &api.Mutation{SetJson: js}
-		a, err := txn.Mutate(ctx, m)
-		if err != nil {
-			return nil, err
-		}
-
-		err = txn.Commit(ctx)
-		if err != nil {
-			log.Error("Failed to commit txn", zap.Error(err))
-			return nil, errors.New("Failed to commit")
-		}
-		userUID := a.GetUids()["user"]
-		log.Info("Created user", zap.String("name", request.GetName()), zap.String("uid", userUID))
-		return &nodepb.CreateAccountResponse{Uid: userUID}, nil
-
-	}
-	return nil, errors.New("User exists already")
+	return &nodepb.CreateAccountResponse{Uid: uid}, nil
 }
 
 func (s *AccountController) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest) (response *nodepb.AuthorizeResponse, err error) {
@@ -90,12 +39,12 @@ func (s *AccountController) Authorize(ctx context.Context, request *nodepb.Autho
 
 	txn := s.Dgraph.NewTxn()
 
-	if ok := checkExists(ctx, log, txn, request.GetAccount(), "user"); !ok {
+	if ok := checkExists(ctx, txn, request.GetAccount(), "user"); !ok {
 		return nil, errors.New("Entity does not exist")
 	}
 
-	if ok := checkExists(ctx, log, txn, request.GetNode(), "object"); !ok {
-		if ok := checkExists(ctx, log, txn, request.GetNode(), "device"); !ok {
+	if ok := checkExists(ctx, txn, request.GetNode(), "object"); !ok {
+		if ok := checkExists(ctx, txn, request.GetNode(), "device"); !ok {
 			return nil, errors.New("resource does not exist")
 		}
 	}
