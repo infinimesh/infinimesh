@@ -217,7 +217,6 @@ func main() {
 
 	fmt.Println(a6.GetUids())
 
-	fmt.Println("Use", a.GetUids()["first-floor"])
 	uAgain := &node.Account{
 		Node: node.Node{
 			UID: a1.GetUids()["user"],
@@ -232,11 +231,8 @@ func main() {
 	}
 
 	bytes, _ = json.Marshal(&uAgain)
-	aAgain, err := dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
+	_, err = dg.NewTxn().Mutate(context.Background(), &api.Mutation{SetJson: bytes, CommitNow: true})
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(aAgain.GetUids())
-
 }
