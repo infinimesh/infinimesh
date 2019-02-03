@@ -59,7 +59,7 @@ jobs:
           command: docker cp ./ testrunner:/project
       - run:
           name: compose3
-          command: docker exec -it testrunner bash -c 'cd /project && go test -mod=vendor ./...'
+          command: docker exec -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && go test -mod=vendor ./...'
 workflows:
   version: 2
   all:

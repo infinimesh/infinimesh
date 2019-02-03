@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"os"
+
 	randomdata "github.com/Pallinder/go-randomdata"
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -14,7 +16,11 @@ import (
 var repo Repo
 
 func init() {
-	conn, err := grpc.Dial("server:9080", grpc.WithInsecure())
+	dgURL := os.Getenv("DGRAPH_URL")
+	if dgURL == "" {
+		dgURL = "localhost:9080"
+	}
+	conn, err := grpc.Dial(dgURL, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
