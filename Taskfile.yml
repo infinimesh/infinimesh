@@ -52,6 +52,16 @@ tasks:
           docker pull quay.io/infinimesh/$f:latest &
         done
         wait
+  start-dev:
+    silent: true
+    deps:
+      - docker-pull-images
+    cmds:
+      - docker-compose down
+      - docker-compose up -d
+      - go run hack/import_dgraph_sample_data.go -drop
+      - |
+        curl -s -d '{"username" : "joe", "password" : "test123"}' localhost:8081/token
   default:
     cmds:
       - task: build
