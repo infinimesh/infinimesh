@@ -18,11 +18,13 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	// defer conn.Close()
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 	repo = &dGraphRepo{dg: dg}
-	importSchema(dg)
+	err = importSchema(dg)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TestAuthorize(t *testing.T) {
