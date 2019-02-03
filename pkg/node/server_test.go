@@ -24,8 +24,26 @@ func TestDelete(t *testing.T) {
 
 	repo := &dGraphRepo{dg: dg}
 
-	err = repo.DeleteObject(context.Background(), "0x4f7c")
+	err = repo.DeleteObject(context.Background(), "0xc376")
 
 	require.NoError(t, err)
 
+}
+
+func TestList(t *testing.T) {
+	t.SkipNow()
+	conn, err := grpc.Dial(dgraphURL, grpc.WithInsecure())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
+
+	repo := &dGraphRepo{dg: dg}
+
+	_, _, in, err := repo.ListForAccount(context.Background(), "0xc381")
+	require.NoError(t, err)
+
+	_ = in
 }

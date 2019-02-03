@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -279,14 +280,84 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 		return nil, nil, nil, err
 	}
 
+	var roots []ObjectList
+
+	// Access grants
+	for _, accessObject := range result.Inherited {
+
+		var isRoot = true
+		for _, other := range result.Inherited {
+			if other.UID != accessObject.UID {
+				if isSub := isSubtreeOf(&accessObject, &other); isSub {
+					isRoot = false
+				}
+
+			}
+		}
+
+		if isRoot {
+			fmt.Println(accessObject.Name, " is root")
+			roots = append(roots, accessObject)
+		}
+
+	}
+
 	if len(result.Direct) > 0 {
 		directDevices = result.Direct[0].AccessToDevice
 		directObjects = result.Direct[0].AccessTo
 	}
 
-	inheritedObjects = result.Inherited
+	inheritedObjects = roots
 
 	return
+}
+
+func isSubtreeOf(tree, other *ObjectList) bool {
+	if tree.UID == other.UID {
+		return true
+	}
+
+	// We assume that it's sufficient to check if the root is contained in
+	// the other tree. If this is the case, the subtree is being merged into
+	// the detected enclosing tree
+	for i := range other.Contains {
+		otherChild := &other.Contains[i]
+		if sub := isSubtreeOf(tree, otherChild); sub {
+			// we're part of the other tree -> merge into the other
+			// (so data which is maybe only in this tree, but not
+			// the target) and flag ourself as subree
+			mergeInto(tree, otherChild)
+			return true
+
+		}
+	}
+	return false
+}
+
+func mergeInto(source, target *ObjectList) {
+	targetDevices := make(map[string]*Device)
+	for _, device := range target.ContainsDevice {
+		targetDevices[device.UID] = &device
+	}
+
+	targetMap := make(map[string]*ObjectList)
+	for _, targetNode := range target.Contains {
+		targetMap[target.UID] = &targetNode
+	}
+
+	for _, sourceDevice := range source.ContainsDevice {
+		if _, exists := targetDevices[sourceDevice.UID]; !exists {
+			target.ContainsDevice = append(target.ContainsDevice, sourceDevice)
+		}
+	}
+
+	for _, sourceNode := range source.Contains {
+		if _, exists := targetMap[sourceNode.UID]; exists {
+			mergeInto(&sourceNode, targetMap[sourceNode.UID])
+		} else {
+			target.Contains = append(target.Contains, sourceNode)
+		}
+	}
 }
 
 func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
