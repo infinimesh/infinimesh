@@ -21,7 +21,7 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 	repo = &dGraphRepo{dg: dg}
-	err = importSchema(dg)
+	err = ImportSchema(dg)
 	if err != nil {
 		panic(err)
 	}

@@ -39,20 +39,8 @@ func main() {
 		}
 		fmt.Println("Dropped data")
 	}
-	err := dg.Alter(context.Background(), &api.Operation{
-		Schema: `
-  name: string @index(exact) .
-  username: string @index(exact) .
-  action: string @index(term) .
-  type: string @index(exact) .
-  access.to: uid @reverse .
-  contains: uid @reverse .
-  has.credentials: uid @reverse .
-  password: password .`,
-	})
-	if err != nil {
-		panic(err)
-	}
+
+	node.ImportSchema(dg)
 	fmt.Println("Imported schema")
 
 	r := &node.Object{

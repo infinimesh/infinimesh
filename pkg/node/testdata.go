@@ -9,7 +9,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/tools"
 )
 
-func importSchema(dg *dgo.Dgraph) error {
+func ImportSchema(dg *dgo.Dgraph) error {
 	return dg.Alter(context.Background(), &api.Operation{
 		Schema: `
   name: string @index(exact) .
