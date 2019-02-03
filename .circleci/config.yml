@@ -24,9 +24,6 @@ jobs:
       - run:
           name: Run build
           command: task build
-      - run:
-          name: Run tests
-          command: task test
   build-frontend:
     docker:
       - image: circleci/node:10.14.2
@@ -55,10 +52,10 @@ jobs:
           name: compose
           command: docker-compose -f e2e/docker-compose.yaml up -d --quiet-pull
       - run:
-          name: compose
+          name: copy repo into docker
           command: docker cp ./ testrunner:/project
       - run:
-          name: compose3
+          name: run tests
           command: docker exec -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && go test -mod=vendor ./...'
 workflows:
   version: 2
