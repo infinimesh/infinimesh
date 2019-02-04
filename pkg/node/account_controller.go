@@ -2,11 +2,8 @@ package node
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 
 	"github.com/dgraph-io/dgo"
-	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -35,47 +32,9 @@ func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.C
 }
 
 func (s *AccountController) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest) (response *nodepb.AuthorizeResponse, err error) {
-	log := s.Log.Named("Authorize")
-
-	txn := s.Dgraph.NewTxn()
-
-	if ok := checkExists(ctx, txn, request.GetAccount(), "user"); !ok {
-		return nil, errors.New("Entity does not exist")
-	}
-
-	if ok := checkExists(ctx, txn, request.GetNode(), "object"); !ok {
-		if ok := checkExists(ctx, txn, request.GetNode(), "device"); !ok {
-			return nil, errors.New("resource does not exist")
-		}
-	}
-
-	in := Account{
-		Node: Node{
-			UID: request.GetAccount(),
-		},
-		AccessTo: &Object{
-			Node: Node{
-				UID: request.GetNode(),
-			},
-			AccessToPermission: request.GetAction(),
-			AccessToInherit:    request.GetInherit(),
-		},
-	}
-
-	js, err := json.Marshal(&in)
+	err = s.Repo.Authorize(ctx, request.GetAccount(), request.GetNode(), request.GetAction(), request.GetInherit())
 	if err != nil {
-		return nil, err
-	}
-
-	log.Debug("Run mutation", zap.Any("json", &in))
-
-	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson:   js,
-		CommitNow: true,
-	})
-	if err != nil {
-		log.Info("Mutate fail", zap.Error(err))
-		return nil, errors.New("Failed to mutate")
+		return nil, status.Error(codes.Internal, "Failed to authorize")
 	}
 
 	return &nodepb.AuthorizeResponse{}, nil
@@ -110,49 +69,10 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 
 func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.AuthenticateRequest) (response *nodepb.AuthenticateResponse, err error) {
 
-	txn := s.Dgraph.NewReadOnlyTxn()
+	ok, uid, err := s.Repo.Authenticate(ctx, request.GetUsername(), request.GetPassword())
+	if !ok || (err != nil) {
 
-	const q = `query authenticate($username: string, $password: string){
-  login(func: eq(username, $username)) @filter(eq(type, "credentials")) {
-    uid
-    checkpwd(password, $password)
-    ~has.credentials {
-      uid
-      type
-    }
-  }
-}
-`
-
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$username": request.GetUsername(), "$password": request.GetPassword()})
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 	}
-
-	var result struct {
-		Login []*UsernameCredential `json:"login"`
-	}
-
-	err = json.Unmarshal(resp.Json, &result)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if len(result.Login) > 0 {
-		login := result.Login[0]
-		if login.CheckPwd {
-			// Success
-			if len(login.Account) > 0 {
-				return &nodepb.AuthenticateResponse{
-					Success: result.Login[0].CheckPwd,
-					Account: &nodepb.Account{
-						Uid: login.Account[0].UID,
-					},
-				}, nil
-			}
-		}
-	}
-
-	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
-
+	return &nodepb.AuthenticateResponse{Success: ok, Account: &nodepb.Account{Uid: uid}}, nil
 }

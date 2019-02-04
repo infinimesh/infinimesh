@@ -15,6 +15,7 @@ type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
 	GetAccount(ctx context.Context, name string) (account *Account, err error)
+	Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error)
 
 	CreateObject(ctx context.Context, name, parent string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)
@@ -27,6 +28,47 @@ type dGraphRepo struct {
 
 func NewDGraphRepo(dg *dgo.Dgraph) Repo {
 	return &dGraphRepo{dg: dg}
+}
+
+func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error) {
+	txn := s.dg.NewReadOnlyTxn()
+
+	const q = `query authenticate($username: string, $password: string){
+  login(func: eq(username, $username)) @filter(eq(type, "credentials")) {
+    uid
+    checkpwd(password, $password)
+    ~has.credentials {
+      uid
+      type
+    }
+  }
+}
+`
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$username": username, "$password": password})
+	if err != nil {
+		return false, "", err
+	}
+
+	var result struct {
+		Login []*UsernameCredential `json:"login"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return false, "", err
+	}
+
+	if len(result.Login) > 0 {
+		login := result.Login[0]
+		if login.CheckPwd {
+			// Success
+			if len(login.Account) > 0 {
+				return result.Login[0].CheckPwd, login.Account[0].UID, nil
+			}
+		}
+	}
+	return false, "", errors.New("Invalid credentials")
 }
 
 func (s *dGraphRepo) CreateAccount(ctx context.Context, username, password string) (uid string, err error) {
