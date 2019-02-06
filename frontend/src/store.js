@@ -267,21 +267,23 @@ const transformObject = input => {
 };
 
 const transform = input => {
+  let res = [];
   if (isEmpty(input)) {
-    return;
+    return res;
   } else {
-    let res = [];
     for (let value of input.objects) {
       value.type = "node";
       let el = transformObject(value);
       el.type = "node";
       res.push(el);
     }
-    for (let value of input.devices) {
-      value.type = "device";
-      let el = transformObject(value);
-      el.type = "device";
-      res.push(el);
+    if (input.devices) {
+      for (let value of input.devices) {
+        value.type = "device";
+        let el = transformObject(value);
+        el.type = "device";
+        res.push(el);
+      }
     }
     return res;
   }
