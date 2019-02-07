@@ -61,8 +61,10 @@ message DeleteObjectResponse{}
 // Object
 
 message CreateObjectRequest {
+  string name = 1;
   string parent = 2;
-  string name = 3;
+  string kind = 3;
+  string namespace = 4;
 }
 
 message Object {
@@ -83,6 +85,16 @@ message ListObjectsResponse {
   repeated Device devices = 2;
 }
 
+message CreateNamespaceRequest {
+  string name = 1;
+}
+message CreateNamespaceResponse{}
+message GetNamespaceRequest{}
+message GetNamespaceResponse{}
+message ListNamespacesRequest{}
+message ListNamespacesResponse{}
+
+
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
@@ -96,4 +108,10 @@ service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
   rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
+}
+
+service NamespaceService {
+  rpc CreateNamespace(CreateNamespaceRequest) returns (CreateNamespaceResponse);
+  rpc GetNamespace(GetNamespaceRequest) returns (GetNamespaceResponse);
+  rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
 }

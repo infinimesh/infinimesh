@@ -16,6 +16,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node"
+	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
@@ -57,7 +58,7 @@ func main() {
 
 	srv := grpc.NewServer()
 
-	repo := node.NewDGraphRepo(dg)
+	repo := dgraph.NewDGraphRepo(dg)
 
 	objectController := &node.ObjectController{
 		Repo:   repo,
@@ -71,8 +72,13 @@ func main() {
 		Log:    log.Named("accountController"),
 	}
 
+	namespaceController := &node.NamespaceController{
+		Repo: repo,
+	}
+
 	nodepb.RegisterObjectServiceServer(srv, objectController)
 	nodepb.RegisterAccountServiceServer(srv, accountController)
+	nodepb.RegisterNamespaceServiceServer(srv, namespaceController)
 	reflection.Register(srv)
 
 	signals := make(chan os.Signal, 1)

@@ -61,10 +61,7 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
-	return &nodepb.Account{
-		Uid:  account.UID,
-		Name: account.Name,
-	}, nil
+	return account, nil
 }
 
 func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.AuthenticateRequest) (response *nodepb.AuthenticateResponse, err error) {

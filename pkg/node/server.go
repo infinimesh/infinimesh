@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/dgraph-io/dgo"
 	"go.uber.org/zap"
@@ -19,49 +18,8 @@ type ObjectController struct {
 	Repo Repo
 }
 
-func checkExists(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
-	q := `query object($_uid: string, $type: string) {
-                object(func: uid($_uid)) @filter(eq(type, $type)) {
-                  uid
-                }
-              }
-             `
-	{
-
-	}
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$type": _type,
-		"$_uid": uid,
-	})
-	if err != nil {
-		return false
-	}
-
-	var result struct {
-		Object []map[string]interface{} `json:"object"`
-	}
-
-	err = json.Unmarshal(resp.Json, &result)
-	if err != nil {
-		return false
-	}
-
-	return len(result.Object) > 0
-}
-
-func isPermissionSufficient(required, actual string) bool {
-	switch required {
-	case "WRITE":
-		return actual == "WRITE"
-	case "READ":
-		return actual == "WRITE" || actual == "READ"
-	default:
-		return false
-	}
-}
-
 func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.CreateObjectRequest) (response *nodepb.Object, err error) {
-	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent())
+	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespace())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -86,17 +44,14 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 	objects := make([]*nodepb.Object, 0)
 
 	for _, internalObject := range inheritedObjects {
-		object := mapObject(internalObject)
-		objects = append(objects, object)
+		// object := mapObject(internalObject)
+		objects = append(objects, internalObject)
 	}
 
 	var devices []*nodepb.Device
 	if len(directDevices) > 0 {
 		for _, directDevice := range directDevices {
-			devices = append(devices, &nodepb.Device{
-				Uid:  directDevice.UID,
-				Name: directDevice.Name,
-			})
+			devices = append(devices, directDevice)
 		}
 	}
 
@@ -112,7 +67,8 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 		}
 
 		if !found {
-			objects = append(objects, mapObject(directObject))
+			// objects = append(objects, mapObject(directObject))
+			objects = append(objects, directObject)
 		}
 
 	}
@@ -121,32 +77,4 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 		Objects: objects,
 		Devices: devices,
 	}, nil
-}
-
-func mapObject(o ObjectList) *nodepb.Object {
-	objects := make([]*nodepb.Object, 0)
-	if len(o.Contains) > 0 {
-		for _, v := range o.Contains {
-			object := mapObject(v)
-			objects = append(objects, object)
-
-		}
-	}
-
-	var devices []*nodepb.Device
-	for _, device := range o.ContainsDevice {
-		devices = append(devices, &nodepb.Device{
-			Uid:  device.UID,
-			Name: device.Name,
-		})
-	}
-
-	res := &nodepb.Object{
-		Uid:     o.UID,
-		Name:    o.Name,
-		Objects: objects,
-		Devices: devices,
-	}
-
-	return res
 }
