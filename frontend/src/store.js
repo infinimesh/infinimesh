@@ -235,7 +235,7 @@ export default new Vuex.Store({
         commit("apiRequestPending", true);
         return Vue.http
           .delete(`objects/${id}`)
-          .then(response => {
+          .then(() => {
             commit("apiRequestPending", false);
             commit("deleteNode", id);
             resolve();

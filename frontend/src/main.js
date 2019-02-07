@@ -4,8 +4,8 @@ import VueResource from "vue-resource";
 import "material-design-icons-iconfont/dist/material-design-icons.css";
 import "@mdi/font/css/materialdesignicons.css";
 import "./plugins/vuetify";
-import VueDragTree from 'vue-drag-tree'
-import 'vue-drag-tree/dist/vue-drag-tree.min.css'
+import VueDragTree from "vue-drag-tree";
+import "vue-drag-tree/dist/vue-drag-tree.min.css";
 
 import App from "./App.vue";
 import router from "./router";
@@ -19,7 +19,7 @@ Vue.use(Vuetify, {
 
 Vue.use(VueResource);
 
-Vue.use(VueDragTree)
+Vue.use(VueDragTree);
 
 Vue.http.options.root = "$APISERVER_URL";
 
