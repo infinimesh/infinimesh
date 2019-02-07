@@ -200,7 +200,7 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch("fetchNodeTree");
+    this.$store.dispatch("fetchNodeTree").catch(e => console.log(e));
   }
 };
 </script>

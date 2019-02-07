@@ -193,6 +193,7 @@ export default new Vuex.Store({
             resolve();
           })
           .catch(error => {
+            console.log("error");
             commit("apiRequestPending", false);
             commit("apiDataFailure", error);
             reject(error);

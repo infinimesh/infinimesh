@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="mb-3">Please log in</h1>
+    <h1 class="mb-3">{{ headline }}</h1>
     <v-card>
       <v-card-text>
         <v-text-field
@@ -38,7 +38,8 @@ export default {
       userName: "joe",
       password: "test123",
       loginError: false,
-      errorMessage: "Login error"
+      errorMessage: "Login error",
+      headline: "Please log in"
     };
   },
   methods: {
@@ -51,6 +52,7 @@ export default {
         .then(response => {
           if (response.status === 200) {
             localStorage.token = response.body.token;
+            localStorage.loginError = false;
             this.$router.push("/devices");
           }
         })
@@ -58,6 +60,11 @@ export default {
           console.log(e);
           this.loginError = true;
         });
+    }
+  },
+  created() {
+    if (localStorage.loginError) {
+      this.headline = "You must first log in to use the application";
     }
   }
 };
