@@ -178,7 +178,6 @@ export default {
       this.clearNode();
     },
     deleteNode() {
-      console.log("delete node");
       this.$store.dispatch("deleteNode", this.active[0]);
     },
     checkIfName() {

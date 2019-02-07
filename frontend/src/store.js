@@ -231,7 +231,21 @@ export default new Vuex.Store({
       });
     },
     deleteNode: ({ commit }, id) => {
-      commit("deleteNode", id);
+      return new Promise((resolve, reject) => {
+        commit("apiRequestPending", true);
+        return Vue.http
+          .delete(`objects/${id}`)
+          .then(response => {
+            commit("apiRequestPending", false);
+            commit("deleteNode", id);
+            resolve();
+          })
+          .catch(error => {
+            commit("apiRequestPending", false);
+            commit("apiDataFailure", error);
+            reject(error);
+          });
+      });
     },
     updateDevice: ({ commit }, properties) => {
       commit("updateDevice", properties);
@@ -305,7 +319,6 @@ const addNode = (input, id, node) => {
 const deleteNode = (input, id) => {
   for (let element of input) {
     if (element.id === id) {
-      console.log("input", input.indexOf(element));
       input.splice(input.indexOf(element), 1);
     } else if (element.children) {
       deleteNode(element.children, id);
