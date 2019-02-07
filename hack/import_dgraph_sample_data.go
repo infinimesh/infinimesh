@@ -10,7 +10,6 @@ import (
 	"github.com/dgraph-io/dgo/protos/api"
 	"google.golang.org/grpc"
 
-	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 )
 
@@ -42,9 +41,9 @@ func main() {
 		fmt.Println("Dropped data")
 	}
 
-	_ = node.ImportSchema(dg)
+	_ = dgraph.ImportSchema(dg)
 	fmt.Println("Imported schema")
 
-	_ = node.ImportStandardSet(repo)
+	_ = dgraph.ImportStandardSet(repo)
 
 }
