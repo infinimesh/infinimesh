@@ -1,6 +1,6 @@
 #!/bin/bash
-
-grpcurl -d '{
+export TOKEN=$(curl -s -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/token | jq -r ".token")
+grpcurl -H "authorization: bearer $TOKEN" -d '{
   "device": {
     "id": "testdevice4",
     "certificate": {
