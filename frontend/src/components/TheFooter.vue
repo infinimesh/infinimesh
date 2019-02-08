@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div
+    class="mt-5"
+  >
     <v-footer
       height="auto"
       color="primary lighten-1"

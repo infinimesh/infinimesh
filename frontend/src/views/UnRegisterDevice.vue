@@ -11,31 +11,52 @@
             This will prevent clients from further communication with this device.
           </v-card-text>
           <v-card-actions>
-            <v-btn
-            round color="primary"
-            dark
-            @click="unRegisterDevice(id)"
+            <div>
+              <v-alert
+              :value="messageSuccess.value"
+              type="success"
+              icon="check_circle"
+              >
+              {{ messageSuccess.message }}
+              </v-alert>
+              <v-alert
+               :value="messageFailure.value"
+               type="error"
+               icon="error"
+               >
+               {{ messageFailure.value }}: {{ messageFailure.error }}
+               </v-alert>
+            </div>
+            <v-layout
+              row
+              wrap
             >
-            Unregister device
-            </v-btn>
+              <div>
+                <v-btn
+                  round
+                  class="mr-5"
+                  to="/devices"
+                >
+                  <v-icon
+                    left
+                  >
+                    chevron_left
+                  </v-icon>
+                  Return
+                </v-btn>
+              </div>
+              <div>
+                <v-btn
+                  round color="primary"
+                  dark
+                  @click="unRegisterDevice(id)"
+                  >
+                  Unregister device
+                </v-btn>
+              </div>
+            </v-layout>
           </v-card-actions>
         </v-card>
-        <div>
-          <v-alert
-          :value="messageSuccess.value"
-          type="success"
-          icon="check_circle"
-          >
-          {{ messageSuccess.message }}
-          </v-alert>
-          <v-alert
-           :value="messageFailure.value"
-           type="error"
-           icon="error"
-           >
-           {{ messageFailure.value }}: {{ messageFailure.error }}
-           </v-alert>
-        </div>
       </v-flex>
     </v-layout>
   </v-container>

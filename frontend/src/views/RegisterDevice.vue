@@ -1,41 +1,36 @@
 <template>
   <v-container>
     <v-layout column wrap md9 lg6 xl4>
-      <h1 class="mb-3">Register new device</h1>
-      <v-flex>
-        <v-card
-          class="pa-3"
+      <v-card>
+        <v-card-title>
+          <h1>
+            Register new device
+          </h1>
+        </v-card-title>
+        <v-form
+          class="pa-3 pt-4"
         >
           <v-text-field
             label="Device Id"
+            box
+            clearable
             v-model="id"
             :rules="idRules"
             :key="idKey"
           ></v-text-field>
-        </v-card>
-        <v-card
-          class="mt-2 pa-3"
-        >
-          <v-checkbox
-            label="Device enabled"
-            v-model="checkbox"
-            clearable
-          ></v-checkbox>
-        </v-card>
-        <v-card
-          class="mt-2 pa-3"
-        >
           <v-text-field
-            v-model="tag"
             label="Device tags"
+            box
             clearable
+            v-model="tag"
             v-on:keyup.enter="addTag($event)"
           >
           </v-text-field>
           <v-chip
-           v-for="(tag, i) in tags"
-           :key="i"
-           small
+            class="mb-3"
+            v-for="(tag, i) in tags"
+            :key="i"
+            small
           >
              {{ tag }}
             <v-icon
@@ -47,30 +42,35 @@
               cancel
             </v-icon>
          </v-chip>
-        </v-card>
-        <v-card
-        class="mt-2 pa-3"
-        >
+         <v-divider
+          class="mb-4"
+          v-if="tags.length"
+         ></v-divider>
           <v-layout row wrap>
             <v-flex>
-              <v-textarea
-               v-model="certificate.pem_data"
-               auto-grow
-               clearable
-               label="Certificate"
-               rows="1"
-               >
-              </v-textarea>
+              <div
+                id="scrollableField"
+                class="pr-2"
+              >
+                <v-textarea
+                  clearable
+                  auto-grow
+                  v-model="certificate.pem_data"
+                  label="Certificate"
+                  rows="1"
+                 >
+                </v-textarea>
+              </div>
             </v-flex>
             <v-flex
              class="ml-3"
             >
-             <upload-button
-               round
-               color="secondary lighten-2"
-               class="white--text"
-               :fileChangedCallback="fileChanged"
-             >
+              <upload-button
+                round
+                color="secondary lighten-2"
+                class="white--text"
+                :fileChangedCallback="fileChanged"
+              >
                <template slot="icon">
                  <v-icon
                    class="ml-2"
@@ -82,23 +82,32 @@
              </upload-button>
             </v-flex>
           </v-layout>
-        </v-card>
-        <v-alert
-          :value="messageSuccess.value"
-          type="success"
-          icon="check_circle"
-        >
-          {{ messageSuccess.message }}
-        </v-alert>
-        <v-alert
-         :value="messageFailure.value"
-         type="error"
-         icon="error"
-        >
-          {{ messageFailure.value }}: {{ messageFailure.error }}
-        </v-alert>
-        <v-layout row wrap>
-          <div>
+          <v-checkbox
+            class="mt-5"
+            label="Device enabled"
+            v-model="checkbox"
+          >
+          </v-checkbox>
+          <v-alert
+            :value="messageSuccess.value"
+            type="success"
+            icon="check_circle"
+          >
+            {{ messageSuccess.message }}
+          </v-alert>
+          <v-alert
+           :value="messageFailure.value"
+           type="error"
+           icon="error"
+          >
+            {{ messageFailure.value }}: {{ messageFailure.error }}
+          </v-alert>
+        </v-form>
+        <v-card-actions>
+          <v-layout
+            row
+            wrap
+          >
             <v-btn
               round
               class="mr-5"
@@ -111,19 +120,17 @@
               </v-icon>
               Return
             </v-btn>
-          </div>
-          <div>
            <v-btn
              round
              color="primary"
              dark
              @click="register()"
            >
-             Register device
+             Register
            </v-btn>
-         </div>
-       </v-layout>
-      </v-flex>
+         </v-layout>
+        </v-card-actions>
+      </v-card>
     </v-layout>
   </v-container>
 </template>
@@ -213,5 +220,9 @@ export default {
 };
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
+  #scrollableField {
+  height: 150px;
+  overflow-y: auto;
+  }
 </style>
