@@ -42,18 +42,10 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 	}
 
 	objects := make([]*nodepb.Object, 0)
-
-	for _, internalObject := range inheritedObjects {
-		// object := mapObject(internalObject)
-		objects = append(objects, internalObject)
-	}
+	objects = append(objects, inheritedObjects...)
 
 	var devices []*nodepb.Device
-	if len(directDevices) > 0 {
-		for _, directDevice := range directDevices {
-			devices = append(devices, directDevice)
-		}
-	}
+	devices = append(devices, directDevices...)
 
 	// Add direct objects and their devices to the result set, if they are not contained yet
 	// Rather inefficient if there's many inherited objects/the slice is long.
@@ -67,7 +59,6 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 		}
 
 		if !found {
-			// objects = append(objects, mapObject(directObject))
 			objects = append(objects, directObject)
 		}
 
