@@ -55,6 +55,7 @@
                 <v-textarea
                   clearable
                   auto-grow
+                  box
                   v-model="certificate.pem_data"
                   label="Certificate"
                   rows="1"

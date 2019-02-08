@@ -100,7 +100,6 @@
       <v-card-actions>
         <v-btn
           color="primary lighten-1"
-          left
           round
           :to="{ name: 'Register device' }"
         >
