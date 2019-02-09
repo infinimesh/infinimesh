@@ -9,6 +9,7 @@
         </v-card-title>
         <v-form
           class="pa-3 pt-4"
+          v-model="form"
         >
           <v-text-field
             label="Device Id"
@@ -109,25 +110,20 @@
             row
             wrap
           >
-            <v-btn
-              round
-              class="mr-5"
-              to="/devices"
-            >
-              <v-icon
-                left
-              >
-                chevron_left
-              </v-icon>
-              Return
-            </v-btn>
            <v-btn
              round
              color="primary"
-             dark
+             class="mr-4"
+             :disabled="!form"
              @click="register()"
            >
              Register
+           </v-btn>
+           <v-btn
+             round
+             to="/devices"
+           >
+             Return
            </v-btn>
          </v-layout>
         </v-card-actions>
@@ -145,9 +141,12 @@ export default {
       checkbox: true,
       id: "",
       idKey: 0,
+      form: false,
       idRules: [
         v => !!v || "Id is required",
-        v => !v.match(/\s/) || "No whitespace allowed",
+        v =>
+          !v.match(/(?=\W)(?=[^-_])/g) ||
+          "Only alphanumerical characters and - _ allowed",
         v =>
           !this.$store.getters.getDevice(v) || "This device Id already exists"
       ],
