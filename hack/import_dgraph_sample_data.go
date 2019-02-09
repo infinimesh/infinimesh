@@ -44,6 +44,9 @@ func main() {
 	_ = dgraph.ImportSchema(dg)
 	fmt.Println("Imported schema")
 
-	_ = dgraph.ImportStandardSet(repo)
+	err := dgraph.ImportStandardSet(repo)
+	if err != nil {
+		panic(err)
+	}
 
 }

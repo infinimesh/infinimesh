@@ -11,6 +11,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/infinimesh/infinimesh/pkg/tools"
 )
 
 func isPermissionSufficient(required, actual string) bool {
@@ -33,17 +34,13 @@ func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
 }
 
 func checkExists(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
-	q := `query object($_uid: string, $type: string) {
-                object(func: uid($_uid)) @filter(eq(type, $type)) {
+	q := `query object($_uid: string) {
+                object(func: uid($_uid)) {
                   uid
                 }
               }
              `
-	{
-
-	}
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$type": _type,
 		"$_uid": uid,
 	})
 	if err != nil {
@@ -188,6 +185,9 @@ func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string
 			},
 		},
 	}
+
+	fmt.Println("axx")
+	tools.PrettyPrint(in)
 
 	js, err := json.Marshal(&in)
 	if err != nil {
@@ -363,7 +363,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, names
 		newObject = &ObjectList{
 			Node: Node{
 				UID:  "_:new",
-				Type: "object",
+				Type: kind,
 			},
 			Name: name,
 		}
@@ -376,7 +376,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, names
 				&ObjectList{
 					Node: Node{
 						UID:  "_:new",
-						Type: "object",
+						Type: kind,
 					},
 					Name: name,
 				},
@@ -423,18 +423,6 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
                    direct(func: uid($account)) {
                    # Via enclosing object
                      access.to @facets(eq(inherit,false)) {
-                       uid
-                       name
-                       type
-                       contains.device @filter(eq(type, "device")) {
-                         uid
-                         name
-                         type
-                       }
-                     }
-
-                     # Via direct permission on device
-                     access.to.device @filter(eq(type, "device")) {
                        uid
                        name
                        type
@@ -574,22 +562,9 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
                              type: type
                            }
                          }
-                         direct_device(func: uid($user_id)) @normalize @cascade {
-                           access.to.device  @filter(uid($device_id)) @facets(permission,inherit) {
-                             type: type
-                           }
-                         }
                          direct_via_one_object(func: uid($user_id)) @normalize @cascade {
-                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
+                           access.to @facets(permission,inherit) {
                              contains @filter(uid($device_id)) {
-                               uid
-                               type: type
-                             }
-                           }
-                         }
-                         direct_device_via_one_object(func: uid($user_id)) @normalize @cascade {
-                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
-                             contains.device @filter(uid($device_id)) {
                                uid
                                type: type
                              }
@@ -628,15 +603,13 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
                          shortest(from: $user_id, to: $device_id) {
                            access.to @facets(eq(inherit, true) AND eq(permission,"WRITE")) @filter(eq(type, "object"))
                            contains @filter(eq(type, "object"))
-                           contains.device @filter(eq(type, "device"))
                          }
                        }`
 
 	const qRecursiveRead = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
                            access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ"))) @filter(eq(type, "object"))
-                           contains @filter(eq(type, "object"))
-                           contains.device @filter(eq(type, "device"))
+                           contains
                          }
                        }`
 
