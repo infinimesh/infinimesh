@@ -1,7 +1,9 @@
 <template>
   <v-container>
-    <h1 class="mb-3">Device Management</h1>
     <v-card>
+      <v-card-title>
+        <h1 class="mb-3">Device Management</h1>
+      </v-card-title>
       <v-layout
         row wrap
       >
@@ -10,54 +12,65 @@
             flat
             class="ma-2"
           >
-            <v-card-title primary-title>
-              <h2>Device hierarchy</h2>
-            </v-card-title>
-            <v-treeview
-              :items="nodeTree"
-              activatable
-              :active.sync = "active"
-              active-class="grey lighten-4 indigo--text"
-              selected-color="indigo"
-            >
-              <template
-                v-if="active"
-                slot="append"
-                slot-scope="{ item, active }"
+            <v-sheet class="pa-3 primary lighten-2">
+              <v-text-field
+                v-model="search"
+                label="Search device registry"
+                dark
+                flat
+                solo-inverted
+                hide-details
+                clearable
+                clear-icon="mdi-close-circle-outline"
+              ></v-text-field>
+            </v-sheet>
+            <v-card-text>
+              <v-treeview
+                :items="nodeTree"
+                :search="search"
+                activatable
+                :active.sync = "active"
+                active-class="grey lighten-4 indigo--text"
+                selected-color="indigo"
               >
-                <v-icon
-                  v-if="item.type === 'node'"
-                  :color="active ? 'primary' : ''"
-                  @click.stop="activeComp = 'addNode'"
+                <template
+                  v-if="active"
+                  slot="append"
+                  slot-scope="{ item, active }"
                 >
-                  add
-                </v-icon>
-                <v-icon
-                  :color="active ? 'primary' : ''"
-                  @click.stop="activeComp = 'deleteNode'"
+                  <v-icon
+                    v-if="item.type === 'node'"
+                    :color="active ? 'primary' : ''"
+                    @click.stop="activeComp = 'addNode'"
+                  >
+                    add
+                  </v-icon>
+                  <v-icon
+                    :color="active ? 'primary' : ''"
+                    @click.stop="activeComp = 'deleteNode'"
+                  >
+                    delete
+                  </v-icon>
+                </template>
+                <template
+                  slot="prepend"
+                  slot-scope="{ item }"
+                  v-if = "item.type === 'device'"
                 >
-                  delete
-                </v-icon>
-              </template>
-              <template
-                slot="prepend"
-                slot-scope="{ item }"
-                v-if = "item.type === 'device'"
-              >
-                <v-icon>
-                  smartphone
-                </v-icon>
-              </template>
-            </v-treeview>
+                  <v-icon>
+                    smartphone
+                  </v-icon>
+                </template>
+              </v-treeview>
+            </v-card-text>
           </v-card>
         </v-flex>
+        <v-divider
+          vertical
+        ></v-divider>
         <v-spacer
           v-if="!activeComp"
         ></v-spacer>
-        <v-divider
-          v-if="activeComp"
-          vertical
-        ></v-divider>
         <v-flex
         >
           <v-card
@@ -144,6 +157,7 @@
 export default {
   data() {
     return {
+      search: null,
       active: [],
       node: {
         name: "",
