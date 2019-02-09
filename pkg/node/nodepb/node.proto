@@ -71,7 +71,6 @@ message Object {
   string uid = 1;
   string name = 2;
   repeated Object objects = 3;
-  repeated Device devices = 4;
 }
 
 message Device {
@@ -80,9 +79,9 @@ message Device {
 }
 
 message ListObjectsRequest { string account = 1; }
+
 message ListObjectsResponse {
   repeated Object objects = 1;
-  repeated Device devices = 2;
 }
 
 message CreateNamespaceRequest {

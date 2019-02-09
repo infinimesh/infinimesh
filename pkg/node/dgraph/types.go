@@ -10,7 +10,6 @@ type Account struct {
 	Name           string              `json:"name,omitempty"`
 	IsRoot         bool                `json:"isRoot"`
 	AccessTo       *Object             `json:"access.to,omitempty"`
-	AccessToDevice *Device             `json:"access.to.device,omitempty"`
 	HasCredentials *UsernameCredential `json:"has.credentials,omitempty"`
 }
 
@@ -29,20 +28,12 @@ type Object struct {
 	AccessToInherit    bool    `json:"access.to|inherit"`
 	Contains           *Object `json:"contains"`
 	ContainedIn        *Object `json:"~contains"` // !! Should only be used for delete
-	ContainsDevice     *Device `json:"contains.device"`
 }
 
 type ObjectList struct {
 	Node
-	Name           string       `json:"name,omitempty"`
-	Contains       []ObjectList `json:"contains"`
-	ContainedIn    []ObjectList `json:"~contains"`
-	ContainsDevice []Device     `json:"contains.device"`
-	AccessedBy     []Account    `json:"~access.to"`
-}
-
-type Device struct {
-	Node
-	Name                     string `json:"name,omitempty"`
-	AccessToDevicePermission string `json:"access.to.device|permission,omitempty"`
+	Name        string       `json:"name,omitempty"`
+	Contains    []ObjectList `json:"contains"`
+	ContainedIn []ObjectList `json:"~contains"`
+	AccessedBy  []Account    `json:"~access.to"`
 }

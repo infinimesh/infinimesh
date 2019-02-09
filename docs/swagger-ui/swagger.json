@@ -452,17 +452,6 @@
         }
       }
     },
-    "infinimeshnodeDevice": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
     "infinimeshshadowGetResponse": {
       "type": "object",
       "properties": {
@@ -482,12 +471,6 @@
           "items": {
             "$ref": "#/definitions/nodeObject"
           }
-        },
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeDevice"
-          }
         }
       }
     },
@@ -504,12 +487,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/nodeObject"
-          }
-        },
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeDevice"
           }
         }
       }

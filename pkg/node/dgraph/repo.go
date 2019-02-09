@@ -348,8 +348,8 @@ func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 func addDeletesRecursively(mu *api.Mutation, items []ObjectList) {
 	for _, item := range items {
 		dgo.DeleteEdges(mu, item.UID, "_STAR_ALL")
-		for _, device := range item.ContainsDevice {
-			dgo.DeleteEdges(mu, device.UID, "_STAR_ALL")
+		for _, object := range item.Contains {
+			dgo.DeleteEdges(mu, object.UID, "_STAR_ALL")
 		}
 		addDeletesRecursively(mu, item.Contains)
 	}
@@ -441,8 +441,7 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 	var result struct {
 		Inherited []ObjectList `json:"inherited"`
 		Direct    []struct {
-			AccessTo       []ObjectList `json:"access.to"`
-			AccessToDevice []Device     `json:"access.to.device"`
+			AccessTo []ObjectList `json:"access.to"`
 		} `json:"direct"`
 	}
 
@@ -483,13 +482,6 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 	}
 
 	if len(result.Direct) > 0 {
-		for _, directDevice := range result.Direct[0].AccessToDevice {
-			directDevices = append(directDevices, &nodepb.Device{
-				Uid:  directDevice.UID,
-				Name: directDevice.Name,
-			})
-		}
-
 		for _, directObject := range result.Direct[0].AccessTo {
 			directObjects = append(directObjects, mapObject(directObject))
 		}
@@ -514,19 +506,10 @@ func mapObject(o ObjectList) *nodepb.Object {
 		}
 	}
 
-	var devices []*nodepb.Device
-	for _, device := range o.ContainsDevice {
-		devices = append(devices, &nodepb.Device{
-			Uid:  device.UID,
-			Name: device.Name,
-		})
-	}
-
 	res := &nodepb.Object{
 		Uid:     o.UID,
 		Name:    o.Name,
 		Objects: objects,
-		Devices: devices,
 	}
 
 	return res
@@ -555,20 +538,9 @@ func isSubtreeOf(tree, other *ObjectList) bool {
 }
 
 func mergeInto(source, target *ObjectList) {
-	targetDevices := make(map[string]*Device)
-	for _, device := range target.ContainsDevice {
-		targetDevices[device.UID] = &device
-	}
-
 	targetMap := make(map[string]*ObjectList)
 	for _, targetNode := range target.Contains {
 		targetMap[target.UID] = &targetNode
-	}
-
-	for _, sourceDevice := range source.ContainsDevice {
-		if _, exists := targetDevices[sourceDevice.UID]; !exists {
-			target.ContainsDevice = append(target.ContainsDevice, sourceDevice)
-		}
 	}
 
 	for _, sourceNode := range source.Contains {
@@ -627,10 +599,8 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	}
 
 	var permissions struct {
-		Direct                []Object `json:"direct"`
-		DirectDevice          []Device `json:"direct_device"`
-		DirectViaObject       []Object `json:"direct_via_one_object"`
-		DirectDeviceViaObject []Object `json:"direct_device_via_one_object"`
+		Direct          []Object `json:"direct"`
+		DirectViaObject []Object `json:"direct_via_one_object"`
 	}
 
 	err = json.Unmarshal(res.Json, &permissions)
@@ -644,20 +614,8 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 		}
 	}
 
-	if len(permissions.DirectDevice) > 0 {
-		if isPermissionSufficient(action, permissions.DirectDevice[0].AccessToDevicePermission) {
-			return true, nil
-		}
-	}
-
 	if len(permissions.DirectViaObject) > 0 {
 		if isPermissionSufficient(action, permissions.DirectViaObject[0].AccessToPermission) {
-			return true, nil
-		}
-	}
-
-	if len(permissions.DirectDeviceViaObject) > 0 {
-		if isPermissionSufficient(action, permissions.DirectDeviceViaObject[0].AccessToPermission) {
 			return true, nil
 		}
 	}

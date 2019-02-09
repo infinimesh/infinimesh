@@ -66,6 +66,5 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 
 	return &nodepb.ListObjectsResponse{
 		Objects: objects,
-		Devices: devices,
 	}, nil
 }
