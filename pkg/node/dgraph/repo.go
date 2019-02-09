@@ -178,12 +178,14 @@ func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string
 		Node: Node{
 			UID: account,
 		},
-		AccessTo: &Object{
-			Node: Node{
-				UID: node,
+		AccessTo: []*ObjectList{
+			&ObjectList{
+				Node: Node{
+					UID: node,
+				},
+				AccessToPermission: action,
+				AccessToInherit:    inherit,
 			},
-			AccessToPermission: action,
-			AccessToInherit:    inherit,
 		},
 	}
 
@@ -327,7 +329,7 @@ func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	}
 
 	var resultChildren struct {
-		Object []ObjectList
+		Object []*ObjectList
 	}
 
 	err = json.Unmarshal(res.Json, &resultChildren)
@@ -345,7 +347,7 @@ func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	return txn.Commit(ctx)
 }
 
-func addDeletesRecursively(mu *api.Mutation, items []ObjectList) {
+func addDeletesRecursively(mu *api.Mutation, items []*ObjectList) {
 	for _, item := range items {
 		dgo.DeleteEdges(mu, item.UID, "_STAR_ALL")
 		for _, object := range item.Contains {
@@ -356,9 +358,9 @@ func addDeletesRecursively(mu *api.Mutation, items []ObjectList) {
 }
 
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, namespace string) (id string, err error) {
-	var newObject *Object
+	var newObject *ObjectList
 	if parent == "" {
-		newObject = &Object{
+		newObject = &ObjectList{
 			Node: Node{
 				UID:  "_:new",
 				Type: "object",
@@ -366,16 +368,18 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, names
 			Name: name,
 		}
 	} else {
-		newObject = &Object{
+		newObject = &ObjectList{
 			Node: Node{
 				UID: parent,
 			},
-			Contains: &Object{
-				Node: Node{
-					UID:  "_:new",
-					Type: "object",
+			Contains: []*ObjectList{
+				&ObjectList{
+					Node: Node{
+						UID:  "_:new",
+						Type: "object",
+					},
+					Name: name,
 				},
-				Name: name,
 			},
 		}
 	}
@@ -483,20 +487,20 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
 	if len(result.Direct) > 0 {
 		for _, directObject := range result.Direct[0].AccessTo {
-			directObjects = append(directObjects, mapObject(directObject))
+			directObjects = append(directObjects, mapObject(&directObject))
 		}
 	}
 
 	// inheritedObjects = roots
 
 	for _, root := range roots {
-		inheritedObjects = append(inheritedObjects, mapObject(root))
+		inheritedObjects = append(inheritedObjects, mapObject(&root))
 	}
 
 	return
 }
 
-func mapObject(o ObjectList) *nodepb.Object {
+func mapObject(o *ObjectList) *nodepb.Object {
 	objects := make([]*nodepb.Object, 0)
 	if len(o.Contains) > 0 {
 		for _, v := range o.Contains {
@@ -524,7 +528,7 @@ func isSubtreeOf(tree, other *ObjectList) bool {
 	// the other tree. If this is the case, the subtree is being merged into
 	// the detected enclosing tree
 	for i := range other.Contains {
-		otherChild := &other.Contains[i]
+		otherChild := other.Contains[i]
 		if sub := isSubtreeOf(tree, otherChild); sub {
 			// we're part of the other tree -> merge into the other
 			// (so data which is maybe only in this tree, but not
@@ -540,12 +544,12 @@ func isSubtreeOf(tree, other *ObjectList) bool {
 func mergeInto(source, target *ObjectList) {
 	targetMap := make(map[string]*ObjectList)
 	for _, targetNode := range target.Contains {
-		targetMap[target.UID] = &targetNode
+		targetMap[target.UID] = targetNode
 	}
 
 	for _, sourceNode := range source.Contains {
 		if _, exists := targetMap[sourceNode.UID]; exists {
-			mergeInto(&sourceNode, targetMap[sourceNode.UID])
+			mergeInto(sourceNode, targetMap[sourceNode.UID])
 		} else {
 			target.Contains = append(target.Contains, sourceNode)
 		}
@@ -599,8 +603,8 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	}
 
 	var permissions struct {
-		Direct          []Object `json:"direct"`
-		DirectViaObject []Object `json:"direct_via_one_object"`
+		Direct          []ObjectList `json:"direct"`
+		DirectViaObject []ObjectList `json:"direct_via_one_object"`
 	}
 
 	err = json.Unmarshal(res.Json, &permissions)

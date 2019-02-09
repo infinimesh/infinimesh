@@ -73,11 +73,6 @@ message Object {
   repeated Object objects = 3;
 }
 
-message Device {
-  string uid = 1;
-  string name = 2;
-}
-
 message ListObjectsRequest { string account = 1; }
 
 message ListObjectsResponse {
