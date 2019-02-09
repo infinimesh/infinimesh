@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
@@ -602,7 +603,7 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	const qRecursiveWrite = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
                            access.to @facets(eq(inherit, true) AND eq(permission,"WRITE"))
-                           contains @filter(eq(type, "object"))
+                           contains
                          }
                        }`
 
