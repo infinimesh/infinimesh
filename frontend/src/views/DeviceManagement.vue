@@ -4,6 +4,7 @@
       <v-card-title>
         <h1 class="mb-3">Device Management</h1>
       </v-card-title>
+      <v-divider></v-divider>
       <v-layout
         row wrap
       >

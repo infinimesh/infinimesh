@@ -1,16 +1,18 @@
 <template>
   <v-container>
-    <h1 class="mb-3">{{ device.id }} - Device overview</h1>
     <v-card>
+      <v-card-title>
+        <h1 class="mb-3">Shadow - {{ device.id }}</h1>
+      </v-card-title>
+      <v-divider></v-divider>
       <v-layout row wrap>
         <v-flex>
           <v-card
             flat
             class="pb-3"
+            min-width="400px"
           >
-            <v-card-title
-            primary-title
-            >
+            <v-card-title>
               <h2>Reported state</h2>
             </v-card-title>
             <div
