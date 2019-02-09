@@ -15,7 +15,11 @@
       </span>
     </v-toolbar-title>
     <v-spacer></v-spacer>
-    <v-menu :nudge-width="100" offset-y>
+    <v-menu
+      :nudge-width="100"
+      offset-y
+      left
+    >
       <v-toolbar-title slot="activator">
         <span
         color="white"
@@ -41,9 +45,10 @@
     <v-menu
       :nudge-width="100"
       offset-y
+      left
     >
       <v-toolbar-title
-      slot="activator"
+        slot="activator"
       >
         <v-icon
         large
