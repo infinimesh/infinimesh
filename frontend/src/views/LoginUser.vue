@@ -1,33 +1,50 @@
 <template>
   <v-container>
-    <h1 class="mb-3">{{ headline }}</h1>
-    <v-card>
-      <v-card-text>
-        <v-text-field
-          label="Username"
-          v-model="userName"
-        ></v-text-field>
-        <v-text-field
-          label="Password"
-          v-model="password"
-        ></v-text-field>
-      </v-card-text>
-      <v-alert
-       v-model="loginError"
-       type="error"
-       icon="error"
+    <v-layout
+      row
+      wrap
+      justify-center
+      align-center
+    >
+      <v-card
+        min-width="50%"
       >
-        {{ errorMessage }}
-      </v-alert>
-      <v-card-actions>
-        <v-btn
-        color="primary"
-        @click="login"
+        <v-card-title>
+          <h1 class="mb-3">Login</h1>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            label="Username"
+            v-model="userName"
+          ></v-text-field>
+          <v-text-field
+            label="Password"
+            v-model="password"
+          ></v-text-field>
+          <p
+            v-if="notLoggedIn"
+            style="color: red"
+          >
+            Login required
+          </p>
+        </v-card-text>
+        <v-alert
+         v-model="loginError"
+         type="error"
+         icon="error"
         >
-          Login
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+          {{ errorMessage }}
+        </v-alert>
+        <v-card-actions>
+          <v-btn
+          color="primary"
+          @click="login"
+          >
+            Login
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-layout>
   </v-container>
 </template>
 
@@ -37,6 +54,7 @@ export default {
     return {
       userName: "joe",
       password: "test123",
+      notLoggedIn: false,
       loginError: false,
       errorMessage: "Login error",
       headline: "Please log in"
@@ -52,7 +70,7 @@ export default {
         .then(response => {
           if (response.status === 200) {
             localStorage.token = response.body.token;
-            localStorage.loginError = false;
+            localStorage.loginError = "";
             this.$router.push("/devices");
           }
         })
@@ -64,7 +82,7 @@ export default {
   },
   created() {
     if (localStorage.loginError) {
-      this.headline = "You must first log in to use the application";
+      this.notLoggedIn = true;
     }
   }
 };

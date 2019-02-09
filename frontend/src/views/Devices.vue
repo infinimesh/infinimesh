@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title>
         <h1>
-          Your devices
+          Device registry
         </h1>
       </v-card-title>
       <v-card-text>
@@ -11,16 +11,27 @@
           flat
         >
           <v-card-title>
-          <v-text-field
-             v-model="search"
-             append-icon="search"
-             label="Search"
-             single-line
-             hide-details
-          >
-          </v-text-field>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
+            <v-layout row wrap>
+              <v-text-field
+                 v-model="search"
+                 append-icon="search"
+                 label="Search"
+                 single-line
+                 hide-details
+              >
+              </v-text-field>
+              <v-spacer></v-spacer>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary lighten-1"
+                round
+                :to="{ name: 'Register device' }"
+              >
+                <v-icon>
+                  add
+                </v-icon>
+              </v-btn>
+            </v-layout>
           </v-card-title>
           <v-data-table
            :headers="headers"
@@ -97,17 +108,6 @@
         </v-data-table>
       </v-card>
       </v-card-text>
-      <v-card-actions>
-        <v-btn
-          color="primary lighten-1"
-          round
-          :to="{ name: 'Register device' }"
-        >
-          <v-icon>
-            add
-          </v-icon>
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-container>
 </template>
