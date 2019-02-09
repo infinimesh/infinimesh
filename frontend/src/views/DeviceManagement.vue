@@ -11,6 +11,7 @@
           <v-card
             flat
             class="ma-2"
+            color="grey lighten-4"
           >
             <v-sheet class="pa-3 primary lighten-2">
               <v-text-field
