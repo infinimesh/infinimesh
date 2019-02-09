@@ -601,14 +601,14 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 
 	const qRecursiveWrite = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
-                           access.to @facets(eq(inherit, true) AND eq(permission,"WRITE")) @filter(eq(type, "object"))
+                           access.to @facets(eq(inherit, true) AND eq(permission,"WRITE"))
                            contains @filter(eq(type, "object"))
                          }
                        }`
 
 	const qRecursiveRead = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
-                           access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ"))) @filter(eq(type, "object"))
+                           access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ")))
                            contains
                          }
                        }`
