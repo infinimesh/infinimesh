@@ -33,80 +33,89 @@
               </v-btn>
             </v-layout>
           </v-card-title>
-          <v-data-table
-           :headers="headers"
-           :items="devices"
-           :search="search"
-           item-key="name"
-          >
-            <template slot="items" slot-scope="props">
-              <tr>
-                <td
-                  class="text-xs-left"
+          <v-card-text>
+            <v-layout row wrap>
+              <v-flex
+                id="scrollableCard"
+              >
+                <v-data-table
+                 :headers="headers"
+                 :items="devices"
+                 :search="search"
+                 item-key="name"
+                 hide-actions
                 >
-                <v-icon
-                  v-if="props.item.enabled"
-                  color="green"
-                >
-                  check_circle
-               </v-icon>
-               <v-icon
-                 v-else
-                 color="grey"
-               >
-                block
-              </v-icon>
-                </td>
-                <td
-                  class="text-xs-left"
-                  style="cursor: pointer"
-                  @click="navigateTo(props.item.id)"
-                >
-                  {{ props.item.id }}
-                </td>
-                <td
-                  class="text-xs-left"
-                >
-                  <v-chip
-                    v-for="tag in props.item.tags"
-                    :key="tag"
-                  >
-                    {{ tag }}
-                  </v-chip>
-                </td>
-                <td
-                  class="text-xs-center"
-                >
-                <v-menu offset-y>
-                  <v-btn
-                    slot="activator"
-                    color="primary"
-                    flat
-                  >
-                    <v-icon>
-                      more_vert
+                  <template slot="items" slot-scope="props">
+                    <tr>
+                      <td
+                        class="text-xs-left"
+                      >
+                      <v-icon
+                        v-if="props.item.enabled"
+                        color="green"
+                      >
+                        check_circle
+                     </v-icon>
+                     <v-icon
+                       v-else
+                       color="grey"
+                     >
+                      block
                     </v-icon>
-                  </v-btn>
-                  <v-list>
-                    <v-list-tile
-                      v-for="option in options"
-                      :key="option"
-                      :to="{name: option, params: { id: props.item.id }}"
-                    >
-                      <v-list-tile-title>
-                        {{ option }}
-                      </v-list-tile-title>
-                    </v-list-tile>
-                  </v-list>
-                </v-menu>
-              </td>
-            </tr>
-          </template>
-          <v-alert slot="no-results" :value="true" color="error" icon="warning">
-            Your search for "{{ search }}" found no results.
-          </v-alert>
-        </v-data-table>
-      </v-card>
+                      </td>
+                      <td
+                        class="text-xs-left"
+                        style="cursor: pointer"
+                        @click="navigateTo(props.item.id)"
+                      >
+                        {{ props.item.id }}
+                      </td>
+                      <td
+                        class="text-xs-left"
+                      >
+                        <v-chip
+                          v-for="tag in props.item.tags"
+                          :key="tag"
+                        >
+                          {{ tag }}
+                        </v-chip>
+                      </td>
+                      <td
+                        class="text-xs-center"
+                      >
+                      <v-menu offset-y>
+                        <v-btn
+                          slot="activator"
+                          color="primary"
+                          flat
+                        >
+                          <v-icon>
+                            more_vert
+                          </v-icon>
+                        </v-btn>
+                        <v-list>
+                          <v-list-tile
+                            v-for="option in options"
+                            :key="option"
+                            :to="{name: option, params: { id: props.item.id }}"
+                          >
+                            <v-list-tile-title>
+                              {{ option }}
+                            </v-list-tile-title>
+                          </v-list-tile>
+                        </v-list>
+                      </v-menu>
+                    </td>
+                  </tr>
+                </template>
+                <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                  Your search for "{{ search }}" found no results.
+                </v-alert>
+              </v-data-table>
+              </v-flex>
+            </v-layout>
+          </v-card-text>
+          </v-card>
       </v-card-text>
     </v-card>
   </v-container>
@@ -163,5 +172,9 @@ export default {
 };
 </script>
 
-<style>
+<style lang="css" scoped>
+  #scrollableCard {
+  max-height: 500px;
+  overflow-y: auto;
+  }
 </style>
