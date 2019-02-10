@@ -33,14 +33,18 @@ export default new Vuex.Store({
   },
   getters: {
     getDevice: state => id => {
-      let device;
-      let key;
-      device = state.devices.find(device => device.id === id);
-      if (device) {
-        for (key in state.model) {
-          if (!device[key]) device[key] = state.model[key];
+      if (id) {
+        let device;
+        let key;
+        device = state.devices.find(device => device.id === id);
+        if (device) {
+          for (key in state.model) {
+            if (!device[key]) device[key] = state.model[key];
+          }
+          return device;
+        } else {
+          return undefined;
         }
-        return device;
       } else {
         return undefined;
       }
@@ -193,7 +197,6 @@ export default new Vuex.Store({
             resolve();
           })
           .catch(error => {
-            console.log("error");
             commit("apiRequestPending", false);
             commit("apiDataFailure", error);
             reject(error);

@@ -10,23 +10,21 @@
           <v-card-text>
             This will prevent clients from further communication with this device.
           </v-card-text>
+          <v-alert
+          :value="messageSuccess.value"
+          type="success"
+          icon="check_circle"
+          >
+          {{ messageSuccess.message }}
+          </v-alert>
+          <v-alert
+           :value="messageFailure.value"
+           type="error"
+           icon="error"
+           >
+           {{ messageFailure.value }}: {{ messageFailure.error }}
+           </v-alert>
           <v-card-actions>
-            <div>
-              <v-alert
-              :value="messageSuccess.value"
-              type="success"
-              icon="check_circle"
-              >
-              {{ messageSuccess.message }}
-              </v-alert>
-              <v-alert
-               :value="messageFailure.value"
-               type="error"
-               icon="error"
-               >
-               {{ messageFailure.value }}: {{ messageFailure.error }}
-               </v-alert>
-            </div>
             <v-layout
               row
               wrap

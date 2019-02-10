@@ -90,21 +90,21 @@
             v-model="checkbox"
           >
           </v-checkbox>
-          <v-alert
-            :value="messageSuccess.value"
-            type="success"
-            icon="check_circle"
-          >
-            {{ messageSuccess.message }}
-          </v-alert>
-          <v-alert
-           :value="messageFailure.value"
-           type="error"
-           icon="error"
-          >
-            {{ messageFailure.value }}: {{ messageFailure.error }}
-          </v-alert>
         </v-form>
+        <v-alert
+          :value="messageSuccess.value"
+          type="success"
+          icon="check_circle"
+        >
+          {{ messageSuccess.message }}
+        </v-alert>
+        <v-alert
+         :value="messageFailure.value"
+         type="error"
+         icon="error"
+        >
+          {{ messageFailure.value }}: {{ messageFailure.error }}
+        </v-alert>
         <v-card-actions>
           <v-layout
             row
