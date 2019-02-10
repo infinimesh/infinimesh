@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
@@ -358,6 +357,127 @@ func addDeletesRecursively(mu *api.Mutation, items []*ObjectList) {
 	}
 }
 
+func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
+	ns := &Namespace{
+		Node: Node{
+			Type: "namespace",
+			UID:  "_:namespace",
+		},
+		Name: name,
+	}
+
+	txn := s.dg.NewTxn()
+	js, err := json.Marshal(&ns)
+	if err != nil {
+		return "", err
+	}
+
+	assigned, err := txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return assigned.GetUids()["namespace"], nil
+}
+
+func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
+	const q = `query getNamespaces($namespace: string) {
+                     namespaces(func: uid($namespace)) @filter(eq(type, "namespace"))  {
+	               uid
+                       name
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespaceID})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	if len(resultSet.Namespaces) > 0 {
+		return &nodepb.Namespace{
+			Id:   resultSet.Namespaces[0].UID,
+			Name: resultSet.Namespaces[0].Name,
+		}, nil
+	}
+
+	return nil, errors.New("Namespace not found")
+}
+
+func (s *dGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
+	const q = `{
+                     namespaces(func: eq(type, "namespace")) {
+  	               uid
+                       name
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, namespace := range resultSet.Namespaces {
+		namespaces = append(namespaces, &nodepb.Namespace{
+			Id:   namespace.UID,
+			Name: namespace.Name,
+		})
+	}
+
+	return namespaces, nil
+}
+
+func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
+	const q = `query listNamespaces($account: string) {
+                     namespaces(func: uid($account)) @normalize @cascade  {
+                       access.to @filter(eq(type, "namespace")) {
+                         uid : uid
+                         name : name
+                       }
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, namespace := range resultSet.Namespaces {
+		namespaces = append(namespaces, &nodepb.Namespace{
+			Id:   namespace.UID,
+			Name: namespace.Name,
+		})
+	}
+
+	return namespaces, nil
+}
+
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, namespace string) (id string, err error) {
 	var newObject *ObjectList
 	if parent == "" {
@@ -402,7 +522,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, names
 	return a.GetUids()["new"], nil
 }
 
-func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []*nodepb.Device, directObjects []*nodepb.Object, inheritedObjects []*nodepb.Object, err error) {
+func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
 	const q = `query list($account: string) {
@@ -444,12 +564,12 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
 	res, err := txn.QueryWithVars(ctx, q, params)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	err = json.Unmarshal(res.Json, &result)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	var roots []ObjectList
@@ -474,19 +594,17 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
 	}
 
-	if len(result.Direct) > 0 {
-		for _, directObject := range result.Direct[0].AccessTo {
-			directObjects = append(directObjects, mapObject(&directObject))
-		}
-	}
-
-	// inheritedObjects = roots
+	// if len(result.Direct) > 0 {
+	// 	for _, directObject := range result.Direct[0].AccessTo {
+	// 		directObjects = append(directObjects, mapObject(&directObject))
+	// 	}
+	// }
 
 	for _, root := range roots {
 		inheritedObjects = append(inheritedObjects, mapObject(&root))
 	}
 
-	return
+	return inheritedObjects, nil
 }
 
 func mapObject(o *ObjectList) *nodepb.Object {

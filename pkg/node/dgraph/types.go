@@ -5,6 +5,11 @@ type Node struct {
 	UID  string `json:"uid,omitempty"`
 }
 
+type Namespace struct {
+	Node
+	Name string `json:"name"`
+}
+
 type Account struct {
 	Node
 	Name           string              `json:"name,omitempty"`
