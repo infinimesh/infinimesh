@@ -91,7 +91,7 @@ func ImportStandardSet(repo node.Repo) error {
 
 	result := repo.Authorize(context.Background(), user, apartment1Right, "WRITE", true)
 
-	_, _, nested, err := repo.ListForAccount(context.Background(), user)
+	nested, err := repo.ListForAccount(context.Background(), user)
 	if err != nil {
 		return nil
 	}

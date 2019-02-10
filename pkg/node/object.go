@@ -36,36 +36,12 @@ func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.Del
 }
 
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	directDevices, directObjects, inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
+	inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	objects := make([]*nodepb.Object, 0)
-	objects = append(objects, inheritedObjects...)
-
-	var devices []*nodepb.Device
-	devices = append(devices, directDevices...)
-
-	// Add direct objects and their devices to the result set, if they are not contained yet
-	// Rather inefficient if there's many inherited objects/the slice is long.
-	for _, directObject := range directObjects {
-
-		var found bool
-		for _, inheritedObject := range inheritedObjects {
-			if inheritedObject.Name == directObject.Name {
-				found = true
-			}
-		}
-
-		if !found {
-			objects = append(objects, directObject)
-		}
-
-	}
-
 	return &nodepb.ListObjectsResponse{
-		Objects: objects,
-		Devices: devices,
+		Objects: inheritedObjects,
 	}, nil
 }

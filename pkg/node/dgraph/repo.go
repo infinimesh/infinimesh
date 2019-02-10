@@ -11,6 +11,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/infinimesh/infinimesh/pkg/tools"
 )
 
 func isPermissionSufficient(required, actual string) bool {
@@ -33,17 +34,13 @@ func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
 }
 
 func checkExists(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
-	q := `query object($_uid: string, $type: string) {
-                object(func: uid($_uid)) @filter(eq(type, $type)) {
+	q := `query object($_uid: string) {
+                object(func: uid($_uid)) {
                   uid
                 }
               }
              `
-	{
-
-	}
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$type": _type,
 		"$_uid": uid,
 	})
 	if err != nil {
@@ -178,14 +175,19 @@ func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string
 		Node: Node{
 			UID: account,
 		},
-		AccessTo: &Object{
-			Node: Node{
-				UID: node,
+		AccessTo: []*ObjectList{
+			&ObjectList{
+				Node: Node{
+					UID: node,
+				},
+				AccessToPermission: action,
+				AccessToInherit:    inherit,
 			},
-			AccessToPermission: action,
-			AccessToInherit:    inherit,
 		},
 	}
+
+	fmt.Println("axx")
+	tools.PrettyPrint(in)
 
 	js, err := json.Marshal(&in)
 	if err != nil {
@@ -327,7 +329,7 @@ func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	}
 
 	var resultChildren struct {
-		Object []ObjectList
+		Object []*ObjectList
 	}
 
 	err = json.Unmarshal(res.Json, &resultChildren)
@@ -345,37 +347,160 @@ func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	return txn.Commit(ctx)
 }
 
-func addDeletesRecursively(mu *api.Mutation, items []ObjectList) {
+func addDeletesRecursively(mu *api.Mutation, items []*ObjectList) {
 	for _, item := range items {
 		dgo.DeleteEdges(mu, item.UID, "_STAR_ALL")
-		for _, device := range item.ContainsDevice {
-			dgo.DeleteEdges(mu, device.UID, "_STAR_ALL")
+		for _, object := range item.Contains {
+			dgo.DeleteEdges(mu, object.UID, "_STAR_ALL")
 		}
 		addDeletesRecursively(mu, item.Contains)
 	}
 }
 
+func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
+	ns := &Namespace{
+		Node: Node{
+			Type: "namespace",
+			UID:  "_:namespace",
+		},
+		Name: name,
+	}
+
+	txn := s.dg.NewTxn()
+	js, err := json.Marshal(&ns)
+	if err != nil {
+		return "", err
+	}
+
+	assigned, err := txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return assigned.GetUids()["namespace"], nil
+}
+
+func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
+	const q = `query getNamespaces($namespace: string) {
+                     namespaces(func: uid($namespace)) @filter(eq(type, "namespace"))  {
+	               uid
+                       name
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespaceID})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	if len(resultSet.Namespaces) > 0 {
+		return &nodepb.Namespace{
+			Id:   resultSet.Namespaces[0].UID,
+			Name: resultSet.Namespaces[0].Name,
+		}, nil
+	}
+
+	return nil, errors.New("Namespace not found")
+}
+
+func (s *dGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
+	const q = `{
+                     namespaces(func: eq(type, "namespace")) {
+  	               uid
+                       name
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, namespace := range resultSet.Namespaces {
+		namespaces = append(namespaces, &nodepb.Namespace{
+			Id:   namespace.UID,
+			Name: namespace.Name,
+		})
+	}
+
+	return namespaces, nil
+}
+
+func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
+	const q = `query listNamespaces($account: string) {
+                     namespaces(func: uid($account)) @normalize @cascade  {
+                       access.to @filter(eq(type, "namespace")) {
+                         uid : uid
+                         name : name
+                       }
+	             }
+                   }`
+
+	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, namespace := range resultSet.Namespaces {
+		namespaces = append(namespaces, &nodepb.Namespace{
+			Id:   namespace.UID,
+			Name: namespace.Name,
+		})
+	}
+
+	return namespaces, nil
+}
+
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, namespace string) (id string, err error) {
-	var newObject *Object
+	var newObject *ObjectList
 	if parent == "" {
-		newObject = &Object{
+		newObject = &ObjectList{
 			Node: Node{
 				UID:  "_:new",
-				Type: "object",
+				Type: kind,
 			},
 			Name: name,
 		}
 	} else {
-		newObject = &Object{
+		newObject = &ObjectList{
 			Node: Node{
 				UID: parent,
 			},
-			Contains: &Object{
-				Node: Node{
-					UID:  "_:new",
-					Type: "object",
+			Contains: []*ObjectList{
+				&ObjectList{
+					Node: Node{
+						UID:  "_:new",
+						Type: kind,
+					},
+					Name: name,
 				},
-				Name: name,
 			},
 		}
 	}
@@ -397,7 +522,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parent, kind, names
 	return a.GetUids()["new"], nil
 }
 
-func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (directDevices []*nodepb.Device, directObjects []*nodepb.Object, inheritedObjects []*nodepb.Object, err error) {
+func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
 	const q = `query list($account: string) {
@@ -422,18 +547,6 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
                        uid
                        name
                        type
-                       contains.device @filter(eq(type, "device")) {
-                         uid
-                         name
-                         type
-                       }
-                     }
-
-                     # Via direct permission on device
-                     access.to.device @filter(eq(type, "device")) {
-                       uid
-                       name
-                       type
                      }
                    }
                   }`
@@ -441,8 +554,7 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 	var result struct {
 		Inherited []ObjectList `json:"inherited"`
 		Direct    []struct {
-			AccessTo       []ObjectList `json:"access.to"`
-			AccessToDevice []Device     `json:"access.to.device"`
+			AccessTo []ObjectList `json:"access.to"`
 		} `json:"direct"`
 	}
 
@@ -452,12 +564,12 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
 	res, err := txn.QueryWithVars(ctx, q, params)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	err = json.Unmarshal(res.Json, &result)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	var roots []ObjectList
@@ -482,29 +594,20 @@ func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (direct
 
 	}
 
-	if len(result.Direct) > 0 {
-		for _, directDevice := range result.Direct[0].AccessToDevice {
-			directDevices = append(directDevices, &nodepb.Device{
-				Uid:  directDevice.UID,
-				Name: directDevice.Name,
-			})
-		}
-
-		for _, directObject := range result.Direct[0].AccessTo {
-			directObjects = append(directObjects, mapObject(directObject))
-		}
-	}
-
-	// inheritedObjects = roots
+	// if len(result.Direct) > 0 {
+	// 	for _, directObject := range result.Direct[0].AccessTo {
+	// 		directObjects = append(directObjects, mapObject(&directObject))
+	// 	}
+	// }
 
 	for _, root := range roots {
-		inheritedObjects = append(inheritedObjects, mapObject(root))
+		inheritedObjects = append(inheritedObjects, mapObject(&root))
 	}
 
-	return
+	return inheritedObjects, nil
 }
 
-func mapObject(o ObjectList) *nodepb.Object {
+func mapObject(o *ObjectList) *nodepb.Object {
 	objects := make([]*nodepb.Object, 0)
 	if len(o.Contains) > 0 {
 		for _, v := range o.Contains {
@@ -514,19 +617,10 @@ func mapObject(o ObjectList) *nodepb.Object {
 		}
 	}
 
-	var devices []*nodepb.Device
-	for _, device := range o.ContainsDevice {
-		devices = append(devices, &nodepb.Device{
-			Uid:  device.UID,
-			Name: device.Name,
-		})
-	}
-
 	res := &nodepb.Object{
 		Uid:     o.UID,
 		Name:    o.Name,
 		Objects: objects,
-		Devices: devices,
 	}
 
 	return res
@@ -541,7 +635,7 @@ func isSubtreeOf(tree, other *ObjectList) bool {
 	// the other tree. If this is the case, the subtree is being merged into
 	// the detected enclosing tree
 	for i := range other.Contains {
-		otherChild := &other.Contains[i]
+		otherChild := other.Contains[i]
 		if sub := isSubtreeOf(tree, otherChild); sub {
 			// we're part of the other tree -> merge into the other
 			// (so data which is maybe only in this tree, but not
@@ -555,25 +649,14 @@ func isSubtreeOf(tree, other *ObjectList) bool {
 }
 
 func mergeInto(source, target *ObjectList) {
-	targetDevices := make(map[string]*Device)
-	for _, device := range target.ContainsDevice {
-		targetDevices[device.UID] = &device
-	}
-
 	targetMap := make(map[string]*ObjectList)
 	for _, targetNode := range target.Contains {
-		targetMap[target.UID] = &targetNode
-	}
-
-	for _, sourceDevice := range source.ContainsDevice {
-		if _, exists := targetDevices[sourceDevice.UID]; !exists {
-			target.ContainsDevice = append(target.ContainsDevice, sourceDevice)
-		}
+		targetMap[target.UID] = targetNode
 	}
 
 	for _, sourceNode := range source.Contains {
 		if _, exists := targetMap[sourceNode.UID]; exists {
-			mergeInto(&sourceNode, targetMap[sourceNode.UID])
+			mergeInto(sourceNode, targetMap[sourceNode.UID])
 		} else {
 			target.Contains = append(target.Contains, sourceNode)
 		}
@@ -598,22 +681,9 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
                              type: type
                            }
                          }
-                         direct_device(func: uid($user_id)) @normalize @cascade {
-                           access.to.device  @filter(uid($device_id)) @facets(permission,inherit) {
-                             type: type
-                           }
-                         }
                          direct_via_one_object(func: uid($user_id)) @normalize @cascade {
-                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
+                           access.to @facets(permission,inherit) {
                              contains @filter(uid($device_id)) {
-                               uid
-                               type: type
-                             }
-                           }
-                         }
-                         direct_device_via_one_object(func: uid($user_id)) @normalize @cascade {
-                           access.to @filter(eq(type, "object")) @facets(permission,inherit) {
-                             contains.device @filter(uid($device_id)) {
                                uid
                                type: type
                              }
@@ -627,10 +697,8 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	}
 
 	var permissions struct {
-		Direct                []Object `json:"direct"`
-		DirectDevice          []Device `json:"direct_device"`
-		DirectViaObject       []Object `json:"direct_via_one_object"`
-		DirectDeviceViaObject []Object `json:"direct_device_via_one_object"`
+		Direct          []ObjectList `json:"direct"`
+		DirectViaObject []ObjectList `json:"direct_via_one_object"`
 	}
 
 	err = json.Unmarshal(res.Json, &permissions)
@@ -644,37 +712,23 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 		}
 	}
 
-	if len(permissions.DirectDevice) > 0 {
-		if isPermissionSufficient(action, permissions.DirectDevice[0].AccessToDevicePermission) {
-			return true, nil
-		}
-	}
-
 	if len(permissions.DirectViaObject) > 0 {
 		if isPermissionSufficient(action, permissions.DirectViaObject[0].AccessToPermission) {
 			return true, nil
 		}
 	}
 
-	if len(permissions.DirectDeviceViaObject) > 0 {
-		if isPermissionSufficient(action, permissions.DirectDeviceViaObject[0].AccessToPermission) {
-			return true, nil
-		}
-	}
-
 	const qRecursiveWrite = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
-                           access.to @facets(eq(inherit, true) AND eq(permission,"WRITE")) @filter(eq(type, "object"))
-                           contains @filter(eq(type, "object"))
-                           contains.device @filter(eq(type, "device"))
+                           access.to @facets(eq(inherit, true) AND eq(permission,"WRITE"))
+                           contains
                          }
                        }`
 
 	const qRecursiveRead = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
-                           access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ"))) @filter(eq(type, "object"))
-                           contains @filter(eq(type, "object"))
-                           contains.device @filter(eq(type, "device"))
+                           access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ")))
+                           contains
                          }
                        }`
 

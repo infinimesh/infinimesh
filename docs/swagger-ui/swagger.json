@@ -52,7 +52,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+              "$ref": "#/definitions/deviceregistryDevice"
             }
           }
         ],
@@ -84,7 +84,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+              "$ref": "#/definitions/deviceregistryDevice"
             }
           }
         ],
@@ -114,7 +114,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+              "$ref": "#/definitions/deviceregistryDevice"
             }
           }
         ],
@@ -395,13 +395,34 @@
     "deviceregistryDeleteResponse": {
       "type": "object"
     },
+    "deviceregistryDevice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "certificate": {
+          "$ref": "#/definitions/deviceregistryCertificate"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "deviceregistryListResponse": {
       "type": "object",
       "properties": {
         "devices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+            "$ref": "#/definitions/deviceregistryDevice"
           }
         }
       }
@@ -423,43 +444,11 @@
         }
       }
     },
-    "infinimeshdeviceregistryDevice": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "certificate": {
-          "$ref": "#/definitions/deviceregistryCertificate"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "infinimeshdeviceregistryGetResponse": {
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-        }
-      }
-    },
-    "infinimeshnodeDevice": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
+          "$ref": "#/definitions/deviceregistryDevice"
         }
       }
     },
@@ -482,12 +471,6 @@
           "items": {
             "$ref": "#/definitions/nodeObject"
           }
-        },
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeDevice"
-          }
         }
       }
     },
@@ -504,12 +487,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/nodeObject"
-          }
-        },
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeDevice"
           }
         }
       }

@@ -15,5 +15,10 @@ type Repo interface {
 
 	CreateObject(ctx context.Context, name, parent, kind, namespace string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)
-	ListForAccount(ctx context.Context, account string) (directDevices []*nodepb.Device, directObjects []*nodepb.Object, inheritedObjects []*nodepb.Object, err error)
+	ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error)
+
+	CreateNamespace(ctx context.Context, name string) (id string, err error)
+	GetNamespace(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error)
+	ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error)
+	ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error)
 }
