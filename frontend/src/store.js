@@ -33,7 +33,7 @@ export default new Vuex.Store({
   },
   getters: {
     getDevice: state => id => {
-      if (id) {
+      if (state.devices.length) {
         let device;
         let key;
         device = state.devices.find(device => device.id === id);
@@ -43,10 +43,10 @@ export default new Vuex.Store({
           }
           return device;
         } else {
-          return undefined;
+          return null;
         }
       } else {
-        return undefined;
+        return null;
       }
     },
     getInitialShadow: state => {
@@ -88,7 +88,9 @@ export default new Vuex.Store({
       state.apiDataFailure.error = error;
     },
     storeDevices: (state, devices) => {
-      state.devices = devices;
+      if (devices) {
+        state.devices = devices;
+      }
     },
     storeShadow: (state, apiResponse) => {
       state.shadow.initialState.data = apiResponse.data;
