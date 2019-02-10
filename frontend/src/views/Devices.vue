@@ -123,6 +123,7 @@
           </v-card-text>
           </v-card>
       </v-card-text>
+      <v-divider />
     </v-card>
   </v-container>
 </template>
