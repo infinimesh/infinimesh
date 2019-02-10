@@ -1,16 +1,16 @@
 <template>
   <v-app>
-    <Header></Header>
+    <Header />
     <v-layout
       row
       wrap
     >
-        <Sidebar />
+      <Sidebar />
       <v-flex>
-        <router-view></router-view>
+        <router-view />
       </v-flex>
     </v-layout>
-    <Footer></Footer>
+    <Footer />
   </v-app>
 </template>
 

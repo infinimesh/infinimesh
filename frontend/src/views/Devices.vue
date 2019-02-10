@@ -1,6 +1,12 @@
 <template>
-  <v-container xs12>
-    <v-card>
+  <v-container
+    fluid
+    class="pa-0 ma-0"
+  >
+    <v-card
+      flat
+      :min-height="windowHeight"
+    >
       <v-card-title>
         <h1>
           Device registry
@@ -125,6 +131,7 @@
 export default {
   data() {
     return {
+      windowHeight: 800,
       selected: true,
       search: "",
       headers: [
@@ -167,6 +174,7 @@ export default {
     }
   },
   created() {
+    this.windowHeight = window.innerHeight - 112;
     this.$store.dispatch("fetchDevices");
   }
 };
