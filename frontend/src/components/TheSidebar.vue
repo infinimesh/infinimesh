@@ -5,12 +5,15 @@
     >
       <v-list>
         <div
-          v-for="page in pages"
-          :key="page"
+          v-for="(page, i) of pages"
+          :key="i"
         >
-          <v-list-tile>
+          <v-list-tile
+            :to="{ name: page[1] }"
+            exact
+          >
             <v-list-tile-action />
-            <v-list-tile-title>{{ page }}</v-list-tile-title>
+            <v-list-tile-title>{{ page[0] }}</v-list-tile-title>
           </v-list-tile>
           <v-divider></v-divider>
         </div>
@@ -21,7 +24,13 @@
 <script>
 export default {
   data: () => ({
-    pages: ["Devices", "Assets", "Accounts", "Monitoring", "Integrations"]
+    pages: [
+      ["Devices", "View devices"],
+      ["Assets", "Manage devices"],
+      ["Monitoring", "View devices"],
+      ["Integrations", "View devices"],
+      ["Accounts", "View devices"]
+    ]
   })
 };
 </script>

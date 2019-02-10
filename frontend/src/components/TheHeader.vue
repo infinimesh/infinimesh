@@ -20,33 +20,6 @@
       offset-y
       left
     >
-      <v-toolbar-title slot="activator">
-        <span
-        color="white"
-        >Devices</span>
-        <v-icon
-        dark
-        class="mr-5"
-        >arrow_drop_down</v-icon>
-      </v-toolbar-title>
-      <v-list>
-        <v-list-tile
-          v-for="page in deviceLinks"
-          :key="page"
-          :to="{ name: page }"
-          exact
-          >
-          <v-list-tile-title
-            v-text="page"
-          ></v-list-tile-title>
-        </v-list-tile>
-      </v-list>
-    </v-menu>
-    <v-menu
-      :nudge-width="100"
-      offset-y
-      left
-    >
       <v-toolbar-title
         slot="activator"
       >
@@ -57,7 +30,9 @@
         account_circle
         </v-icon>
       </v-toolbar-title>
-      <v-list>
+      <v-list
+        dense
+      >
         <v-list-tile
           v-for="page in accountLinks"
           :key="page"
@@ -79,7 +54,6 @@
 export default {
   data() {
     return {
-      deviceLinks: ["View devices", "Manage devices", "Register device"],
       accountLinks: ["Logout"]
     };
   },
