@@ -13,7 +13,11 @@
             exact
           >
             <v-list-tile-action />
-            <v-list-tile-title>{{ page[0] }}</v-list-tile-title>
+            <v-list-tile-title
+              class="subheading"
+            >
+              {{ page[0] }}
+            </v-list-tile-title>
           </v-list-tile>
           <v-divider></v-divider>
         </div>

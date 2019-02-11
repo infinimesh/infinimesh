@@ -7,7 +7,17 @@
     >
       <Sidebar />
       <v-flex>
-        <router-view />
+        <v-container
+          fluid
+          class="pa-0 ma-0"
+        >
+          <v-card
+            flat
+            :min-height="windowHeight"
+          >
+            <router-view />
+          </v-card>
+        </v-container>
       </v-flex>
     </v-layout>
     <Footer />
@@ -28,8 +38,11 @@ export default {
   },
   data() {
     return {
-      //
+      windowHeight: 800
     };
+  },
+  created() {
+    this.windowHeight = window.innerHeight - 112;
   }
 };
 </script>

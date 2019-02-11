@@ -1,19 +1,20 @@
 <template>
-  <v-container>
-    <v-layout column wrap md9 lg6 xl4>
-      <v-card>
-        <v-card-title>
-          <h1>
-            Register new device
-          </h1>
-        </v-card-title>
-        <v-form
-          class="pa-3 pt-4"
-          v-model="form"
+  <v-layout column wrap md9 lg6 xl4>
+    <v-card>
+      <v-card-title>
+        <h1>
+          Register new device
+        </h1>
+      </v-card-title>
+      <v-form
+        class="pa-3 pt-4"
+        v-model="form"
+      >
+        <div
+          style="max-width: 900px"
         >
           <v-text-field
             label="Device Id"
-            box
             clearable
             v-model="id"
             :rules="idRules"
@@ -21,7 +22,6 @@
           ></v-text-field>
           <v-text-field
             label="Device tags"
-            box
             clearable
             v-model="tag"
             v-on:keyup.enter="addTag($event)"
@@ -43,93 +43,93 @@
               cancel
             </v-icon>
          </v-chip>
-         <v-divider
-          class="mb-4"
-          v-if="tags.length"
-         ></v-divider>
-          <v-layout row wrap>
-            <v-flex>
-              <div
-                id="scrollableField"
-                class="pr-2"
-              >
-                <v-textarea
-                  clearable
-                  auto-grow
-                  box
-                  v-model="certificate.pem_data"
-                  label="Certificate"
-                  rows="1"
-                 >
-                </v-textarea>
-              </div>
-            </v-flex>
-            <v-flex
-             class="ml-3"
+        </div>
+       <v-divider
+        class="mb-4"
+        v-if="tags.length"
+       ></v-divider>
+        <v-layout row wrap>
+          <v-flex>
+            <div
+              id="scrollableField"
+              class="pr-2"
             >
-              <upload-button
-                round
-                color="secondary lighten-2"
-                class="white--text"
-                :fileChangedCallback="fileChanged"
-              >
-               <template slot="icon">
-                 <v-icon
-                   class="ml-2"
-                   style="color: white"
-                 >
-                   cloud_upload
-                 </v-icon>
-               </template>
-             </upload-button>
-            </v-flex>
-          </v-layout>
-          <v-checkbox
-            class="mt-5"
-            label="Device enabled"
-            v-model="checkbox"
+              <v-textarea
+                clearable
+                auto-grow
+                box
+                v-model="certificate.pem_data"
+                label="Certificate"
+                rows="1"
+               >
+              </v-textarea>
+            </div>
+          </v-flex>
+          <v-flex
+           class="ml-3"
           >
-          </v-checkbox>
-        </v-form>
-        <v-alert
-          :value="messageSuccess.value"
-          type="success"
-          icon="check_circle"
+            <upload-button
+              round
+              color="secondary lighten-2"
+              class="white--text"
+              :fileChangedCallback="fileChanged"
+            >
+             <template slot="icon">
+               <v-icon
+                 class="ml-2"
+                 style="color: white"
+               >
+                 cloud_upload
+               </v-icon>
+             </template>
+           </upload-button>
+          </v-flex>
+        </v-layout>
+        <v-checkbox
+          class="mt-5"
+          label="Device enabled"
+          v-model="checkbox"
         >
-          {{ messageSuccess.message }}
-        </v-alert>
-        <v-alert
-         :value="messageFailure.value"
-         type="error"
-         icon="error"
+        </v-checkbox>
+      </v-form>
+      <v-alert
+        :value="messageSuccess.value"
+        type="success"
+        icon="check_circle"
+      >
+        {{ messageSuccess.message }}
+      </v-alert>
+      <v-alert
+       :value="messageFailure.value"
+       type="error"
+       icon="error"
+      >
+        {{ messageFailure.value }}: {{ messageFailure.error }}
+      </v-alert>
+      <v-card-actions>
+        <v-layout
+          row
+          wrap
         >
-          {{ messageFailure.value }}: {{ messageFailure.error }}
-        </v-alert>
-        <v-card-actions>
-          <v-layout
-            row
-            wrap
-          >
-           <v-btn
-             round
-             color="primary"
-             class="mr-4"
-             :disabled="!form"
-             @click="register()"
-           >
-             Register
-           </v-btn>
-           <v-btn
-             round
-             to="/devices"
-           >
-             Return
-           </v-btn>
-         </v-layout>
-        </v-card-actions>
-      </v-card>
-    </v-layout>
-  </v-container>
+         <v-btn
+           round
+           color="primary"
+           class="mr-4"
+           :disabled="!form"
+           @click="register()"
+         >
+           Register
+         </v-btn>
+         <v-btn
+           round
+           to="/devices"
+         >
+           Return
+         </v-btn>
+       </v-layout>
+      </v-card-actions>
+    </v-card>
+  </v-layout>
 </template>
 
 <script>

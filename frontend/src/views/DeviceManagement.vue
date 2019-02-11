@@ -1,6 +1,5 @@
 <template>
-  <v-container>
-    <v-card>
+    <div>
       <v-card-title>
         <h1 class="mb-3">Device Management</h1>
       </v-card-title>
@@ -151,8 +150,7 @@
           </v-card>
         </v-flex>
       </v-layout>
-    </v-card>
-  </v-container>
+    </div>
 </template>
 
 <script>

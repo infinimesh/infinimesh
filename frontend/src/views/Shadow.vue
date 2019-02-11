@@ -1,27 +1,28 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-card-title>
-        <h1 class="mb-3">Shadow - {{ device.id }}</h1>
-      </v-card-title>
-      <v-divider></v-divider>
-      <v-layout row wrap>
-        <v-flex>
-          <v-card
-            flat
-            class="pb-3"
-            min-width="400px"
+  <div>
+    <v-card-title>
+      <h1 class="mb-3">Shadow - {{ device.id }}</h1>
+    </v-card-title>
+    <v-divider></v-divider>
+    <v-layout row wrap>
+      <v-flex>
+        <v-card
+          flat
+          class="pb-3"
+        >
+          <v-card-title>
+            <h2>Reported state</h2>
+          </v-card-title>
+          <div
+            id="scrollableCard"
           >
-            <v-card-title>
-              <h2>Reported state</h2>
-            </v-card-title>
-            <div
-              id="scrollableCard"
+            <v-card
+              flat
             >
-            <v-card>
             <v-card
               v-for="(response, index) in shadowMessages"
               :key="index"
+              flat
             >
               <v-card-text>
                 <strong>Timestamp</strong>: {{ response.result.reportedDelta.timestamp }}
@@ -35,20 +36,19 @@
               <strong>Initial data</strong>: {{ shadow.initialState.data }}
             </v-card-text>
           </v-card>
-            </div>
-          </v-card>
-        </v-flex>
-        <v-divider
-          vertical
-        ></v-divider>
-        <component
-          :is="activeComp"
-          @edit="activeComp='Update'"
-          @close="activeComp='DeviceInfo'"
-        ></component>
-      </v-layout>
-    </v-card>
-  </v-container>
+        </div>
+        </v-card>
+      </v-flex>
+      <v-divider
+        vertical
+      ></v-divider>
+      <component
+        :is="activeComp"
+        @edit="activeComp='Update'"
+        @close="activeComp='DeviceInfo'"
+      ></component>
+    </v-layout>
+  </div>
 </template>
 
 <script>
