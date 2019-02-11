@@ -48,6 +48,7 @@
                   <tr>
                     <td
                       class="text-xs-left"
+                      style="width: 10px"
                     >
                     <v-icon
                       v-if="props.item.enabled"
@@ -124,7 +125,6 @@
 export default {
   data() {
     return {
-      windowHeight: 800,
       selected: true,
       search: "",
       headers: [
@@ -167,7 +167,6 @@ export default {
     }
   },
   created() {
-    this.windowHeight = window.innerHeight - 112;
     this.$store.dispatch("fetchDevices");
   }
 };
