@@ -20,6 +20,9 @@
           <v-text-field
             label="Password"
             v-model="password"
+            :append-icon="show1 ? 'visibility_off' : 'visibility'"
+            :type="show ? 'text' : 'password'"
+            @click:append="show = !show"
           ></v-text-field>
           <p
             v-if="notLoggedIn"
@@ -52,6 +55,7 @@
 export default {
   data() {
     return {
+      show: false,
       userName: "joe",
       password: "test123",
       notLoggedIn: false,
