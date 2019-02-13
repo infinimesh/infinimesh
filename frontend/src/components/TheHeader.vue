@@ -56,7 +56,7 @@
 export default {
   data() {
     return {
-      accountLinks: ["Login", "Logout"]
+      accountLinks: ["Logout"]
     };
   },
   methods: {
