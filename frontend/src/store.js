@@ -123,10 +123,8 @@ export default new Vuex.Store({
     unRegisterDevice: (state, id) => {
       let deviceIndex;
       deviceIndex = state.devices.findIndex(device => device.id === id);
-      if (deviceIndex) {
+      if (deviceIndex !== -1) {
         state.devices.splice(deviceIndex, 1);
-      } else {
-        return "Device Id doesn't exist";
       }
     }
   },
