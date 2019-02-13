@@ -3,7 +3,6 @@
     <Header />
     <v-layout
       row
-      wrap
     >
       <Sidebar
         v-if="showSidebar"
