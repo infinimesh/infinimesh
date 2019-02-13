@@ -48,6 +48,7 @@ export default {
     this.showSidebar = localStorage.token;
   },
   created() {
+    this.showSidebar = localStorage.token;
     this.windowHeight = window.innerHeight - 112;
   }
 };

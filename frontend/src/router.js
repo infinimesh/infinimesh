@@ -5,7 +5,6 @@ import RegisterDevice from "./views/RegisterDevice.vue";
 import UnRegisterDevice from "./views/UnRegisterDevice.vue";
 import Shadow from "./views/Shadow.vue";
 import DeviceManagement from "./views/DeviceManagement.vue";
-import Welcome from "./views/Welcome.vue";
 import LoginUser from "./views/LoginUser.vue";
 import RegisterUser from "./views/RegisterUser.vue";
 import LogoutUser from "./views/LogoutUser.vue";
@@ -16,11 +15,6 @@ const router = new Router({
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
-    {
-      path: "/",
-      name: "Welcome",
-      component: Welcome
-    },
     {
       path: "/devices",
       name: "View devices",
