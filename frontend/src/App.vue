@@ -40,16 +40,20 @@ export default {
   },
   data() {
     return {
-      showSidebar: false,
-      windowHeight: 800
+      showSidebar: false
     };
+  },
+  computed: {
+    // bug: this is not reactive to window.innerHeight
+    windowHeight() {
+      return window.innerHeight - 128;
+    }
   },
   updated() {
     this.showSidebar = localStorage.token;
   },
   created() {
     this.showSidebar = localStorage.token;
-    this.windowHeight = window.innerHeight - 112;
   }
 };
 </script>

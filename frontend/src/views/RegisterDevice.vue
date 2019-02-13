@@ -1,6 +1,8 @@
 <template>
   <v-layout column wrap md9 lg6 xl4>
-    <v-card>
+    <v-card
+      flat
+    >
       <v-card-title>
         <h1>
           Register new device
@@ -131,6 +133,7 @@
        </v-layout>
       </v-card-actions>
     </v-card>
+    <v-divider />
   </v-layout>
 </template>
 
