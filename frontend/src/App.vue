@@ -5,7 +5,9 @@
       row
       wrap
     >
-      <Sidebar />
+      <Sidebar
+        v-if="showSidebar"
+      ></Sidebar>
       <v-flex>
         <v-container
           fluid
@@ -38,8 +40,12 @@ export default {
   },
   data() {
     return {
+      showSidebar: false,
       windowHeight: 800
     };
+  },
+  updated() {
+    this.showSidebar = localStorage.token;
   },
   created() {
     this.windowHeight = window.innerHeight - 112;
