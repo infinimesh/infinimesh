@@ -1,4 +1,4 @@
 /mqtt-bridge
 *.swagger.json
 node_modules
-apiserver
+/apiserver
