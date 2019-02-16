@@ -26,6 +26,7 @@ require (
 	github.com/google/uuid v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
@@ -33,10 +34,12 @@ require (
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.0.0
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/rs/cors v1.6.0
+	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1
 	github.com/stretchr/testify v1.2.2
 	github.com/yosssi/gmq v0.0.1
@@ -47,4 +50,5 @@ require (
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 	google.golang.org/grpc v1.16.0
+	gopkg.in/yaml.v2 v2.2.1
 )

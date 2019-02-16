@@ -65,6 +65,8 @@ github.com/hashicorp/hcl/hcl/scanner
 github.com/hashicorp/hcl/hcl/strconv
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
 # github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 github.com/infinimesh/mqtt-go/packet
 # github.com/jinzhu/gorm v1.9.2
@@ -82,6 +84,8 @@ github.com/lib/pq/hstore
 github.com/lib/pq/oid
 # github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
+# github.com/mitchellh/go-homedir v1.1.0
+github.com/mitchellh/go-homedir
 # github.com/mitchellh/mapstructure v1.0.0
 github.com/mitchellh/mapstructure
 # github.com/pelletier/go-toml v1.2.0
@@ -104,6 +108,8 @@ github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.2.0
 github.com/spf13/cast
+# github.com/spf13/cobra v0.0.3
+github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.0.0
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.2
@@ -155,6 +161,7 @@ google.golang.org/grpc
 google.golang.org/grpc/codes
 google.golang.org/grpc/reflection
 google.golang.org/grpc/status
+google.golang.org/grpc/metadata
 google.golang.org/grpc/grpclog
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
@@ -169,7 +176,6 @@ google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
-google.golang.org/grpc/metadata
 google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
