@@ -33,7 +33,7 @@ export default {
       ["Assets", "Manage devices"],
       ["Monitoring", "View devices"],
       ["Integrations", "View devices"],
-      ["Accounts", "View devices"]
+      ["Accounts", "Account Management"]
     ]
   })
 };

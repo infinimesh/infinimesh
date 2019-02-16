@@ -8,6 +8,7 @@ import DeviceManagement from "./views/DeviceManagement.vue";
 import LoginUser from "./views/LoginUser.vue";
 import RegisterUser from "./views/RegisterUser.vue";
 import LogoutUser from "./views/LogoutUser.vue";
+import AccountManagement from "./views/AccountManagement.vue";
 
 Vue.use(Router);
 
@@ -59,6 +60,11 @@ const router = new Router({
       path: "/user/logout",
       name: "Logout",
       component: LogoutUser
+    },
+    {
+      path: "/accounts",
+      name: "Account Management",
+      component: AccountManagement
     },
     {
       path: "*",
