@@ -37,7 +37,7 @@ func init() {
 
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
-	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password")
+	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password", false)
 	require.NoError(t, err)
 
 	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")

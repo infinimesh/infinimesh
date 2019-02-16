@@ -2,102 +2,94 @@ syntax = "proto3";
 
 package infinimesh.api;
 
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  host: "api.infinimesh.io"
+  info: {
+    title: "Infinimesh IoT Platform"
+    description: "Cloud Native IoT Platform"
+    version: "0.0.1"
+    contact: {
+      name: "Infinimesh"
+      url: "http://infinimesh.io"
+      email: "joe@infinimesh.io"
+    }
+  }
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+};
 option go_package = "apipb";
+option java_multiple_files = true;
+option java_outer_classname = "ApiProto";
+option java_package = "com.infinimesh.api";
 
+import "google/api/annotations.proto";
+import "pkg/node/nodepb/namespace.proto";
+import "pkg/node/nodepb/node.proto";
 import "pkg/registry/registrypb/device_registry.proto";
 import "pkg/shadow/shadowpb/shadow.proto";
-import "pkg/node/nodepb/node.proto";
 import "protoc-gen-swagger/options/annotations.proto";
-import "google/api/annotations.proto";
-
-option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
-  host : "api.infinimesh.io";
-info : {
-title:
-  "Infinimesh IoT Platform";
-description:
-  "Cloud Native IoT Platform";
-version:
-  "0.0.1";
-contact : {
-name:
-  "Infinimesh";
-url:
-  "http://infinimesh.io";
-email:
-  "joe@infinimesh.io";
-};
-};
-schemes : HTTPS;
-consumes : "application/json";
-produces : "application/json";
-}
-;
 
 message TokenRequest {
   string username = 1;
   string password = 2;
 }
 
-message TokenResponse { string token = 1; }
+message TokenResponse {
+  string token = 1;
+}
 
 // Device
 service Devices {
-  rpc Create(infinimesh.deviceregistry.CreateRequest)
-      returns (infinimesh.deviceregistry.CreateResponse) {
+  rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
-      post : "/devices"
-      body : "device"
-    };
-  };
-  rpc Update(infinimesh.deviceregistry.UpdateRequest)
-      returns (infinimesh.deviceregistry.UpdateResponse) {
-    option (google.api.http) = {
-      patch : "/devices/{device.id}"
-      body : "device"
-      additional_bindings {put : "/devices/{device.id}" body : "device"}
-    };
-  };
-  rpc Get(infinimesh.deviceregistry.GetRequest)
-      returns (infinimesh.deviceregistry.GetResponse) {
-    option (google.api.http) = {
-      get : "/devices/{id}"
-    };
-  };
-  rpc List(infinimesh.deviceregistry.ListDevicesRequest)
-      returns (infinimesh.deviceregistry.ListResponse) {
-    option (google.api.http) = {
-      get : "/devices"
+      post: "/devices"
+      body: "device"
     };
   }
-  rpc Delete(infinimesh.deviceregistry.DeleteRequest)
-      returns (infinimesh.deviceregistry.DeleteResponse) {
+  rpc Update(infinimesh.deviceregistry.UpdateRequest) returns (infinimesh.deviceregistry.UpdateResponse) {
     option (google.api.http) = {
-      delete : "/devices/{id}"
+      patch: "/devices/{device.id}"
+      body: "device"
+      additional_bindings: {
+        put: "/devices/{device.id}"
+        body: "device"
+      }
     };
-  };
+  }
+  rpc Get(infinimesh.deviceregistry.GetRequest) returns (infinimesh.deviceregistry.GetResponse) {
+    option (google.api.http) = {
+      get: "/devices/{id}"
+    };
+  }
+  rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse) {
+    option (google.api.http) = {
+      get: "/devices"
+    };
+  }
+  rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
+    option (google.api.http) = {
+      delete: "/devices/{id}"
+    };
+  }
 }
 
 // Shadow
 service Shadows {
-  rpc Get(infinimesh.shadow.GetRequest)
-      returns (infinimesh.shadow.GetResponse) {
+  rpc Get(infinimesh.shadow.GetRequest) returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get : "/devices/{id}/shadow"
-    };
-  };
-  rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
-      returns (infinimesh.shadow.PatchDesiredStateResponse) {
-    option (google.api.http) = {
-      post : "/devices/{id}/shadow/desired"
-      body : "data"
+      get: "/devices/{id}/shadow"
     };
   }
-  rpc StreamReportedStateChanges(
-      infinimesh.shadow.StreamReportedStateChangesRequest)
-      returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
+  rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest) returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
-      get : "/devices/{id}/shadow/reported"
+      post: "/devices/{id}/shadow/desired"
+      body: "data"
+    };
+  }
+  rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest) returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
+    option (google.api.http) = {
+      get: "/devices/{id}/shadow/reported"
     };
   }
 }
@@ -106,50 +98,52 @@ service Shadows {
 service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
-      post : "/token"
-      body : "*"
+      post: "/token"
+      body: "*"
     };
-  };
+  }
 }
 
-message ListObjectsRequest {} // Don't use infinimesh.node.ListObjectsRequest,
-                              // because it allows the caller to set the account
-                              // id. however, here we don't allow this. the
-                              // account id will be derived from the JWT token,
-                              // and the user can not choose it.
+message ListObjectsRequest {}
+
+// Don't use infinimesh.node.ListObjectsRequest,
+// because it allows the caller to set the account
+// id. however, here we don't allow this. the
+// account id will be derived from the JWT token,
+// and the user can not choose it.
 
 message CreateObjectRequest {
   // Hide parent because we use it as path param and is not part of the body.
-    option (grpc.gateway.protoc_gen_swagger.options.openapiv2_schema) = {
-      example : {
-        value : '{ "name" : "name of child" }'
-      }
-    };
-
+  option (grpc.gateway.protoc_gen_swagger.options.openapiv2_schema) = {
+    example: {
+      value: '{"name":"name of child"}'
+    }
+  };
   string parent = 1;
   string name = 2;
 }
 
 // Object
 service ObjectService {
-  rpc ListObjects(ListObjectsRequest)
-      returns (infinimesh.node.ListObjectsResponse) {
+  rpc ListObjects(ListObjectsRequest) returns (infinimesh.node.ListObjectsResponse) {
     option (google.api.http) = {
-      get : "/objects"
-    };
-  };
-  rpc CreateObject(infinimesh.api.CreateObjectRequest)
-      returns (infinimesh.node.Object) {
-    option (google.api.http) = {
-      post : "/objects/{parent}/children"
-      body : "*"
+      get: "/objects"
     };
   }
-
-  rpc DeleteObject(infinimesh.node.DeleteObjectRequest)
-      returns (infinimesh.node.DeleteObjectResponse) {
+  rpc CreateObject(infinimesh.api.CreateObjectRequest) returns (infinimesh.node.Object) {
     option (google.api.http) = {
-      delete : "/objects/{uid}"
+      post: "/objects/{parent}/children"
+      body: "*"
     };
-  };
+  }
+  rpc DeleteObject(infinimesh.node.DeleteObjectRequest) returns (infinimesh.node.DeleteObjectResponse) {
+    option (google.api.http) = {
+      delete: "/objects/{uid}"
+    };
+  }
+}
+
+service NamespaceService {
+  rpc ListNamespaces(infinimesh.node.ListNamespacesRequest) returns (infinimesh.node.ListNamespacesResponse);
+  rpc CreateNamespace(infinimesh.node.CreateNamespaceRequest) returns (infinimesh.node.CreateNamespaceResponse);
 }

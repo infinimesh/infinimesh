@@ -51,6 +51,84 @@ func (Action) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_af4ee7a0c648c985, []int{0}
 }
 
+type IsRootRequest struct {
+	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *IsRootRequest) Reset()         { *m = IsRootRequest{} }
+func (m *IsRootRequest) String() string { return proto.CompactTextString(m) }
+func (*IsRootRequest) ProtoMessage()    {}
+func (*IsRootRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_af4ee7a0c648c985, []int{0}
+}
+
+func (m *IsRootRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsRootRequest.Unmarshal(m, b)
+}
+func (m *IsRootRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsRootRequest.Marshal(b, m, deterministic)
+}
+func (m *IsRootRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsRootRequest.Merge(m, src)
+}
+func (m *IsRootRequest) XXX_Size() int {
+	return xxx_messageInfo_IsRootRequest.Size(m)
+}
+func (m *IsRootRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsRootRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsRootRequest proto.InternalMessageInfo
+
+func (m *IsRootRequest) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+type IsRootResponse struct {
+	IsRoot               bool     `protobuf:"varint,1,opt,name=is_root,json=isRoot,proto3" json:"is_root,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *IsRootResponse) Reset()         { *m = IsRootResponse{} }
+func (m *IsRootResponse) String() string { return proto.CompactTextString(m) }
+func (*IsRootResponse) ProtoMessage()    {}
+func (*IsRootResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_af4ee7a0c648c985, []int{1}
+}
+
+func (m *IsRootResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsRootResponse.Unmarshal(m, b)
+}
+func (m *IsRootResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsRootResponse.Marshal(b, m, deterministic)
+}
+func (m *IsRootResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsRootResponse.Merge(m, src)
+}
+func (m *IsRootResponse) XXX_Size() int {
+	return xxx_messageInfo_IsRootResponse.Size(m)
+}
+func (m *IsRootResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsRootResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsRootResponse proto.InternalMessageInfo
+
+func (m *IsRootResponse) GetIsRoot() bool {
+	if m != nil {
+		return m.IsRoot
+	}
+	return false
+}
+
 type IsAuthorizedRequest struct {
 	Node                 string   `protobuf:"bytes,1,opt,name=node,proto3" json:"node,omitempty"`
 	Account              string   `protobuf:"bytes,2,opt,name=account,proto3" json:"account,omitempty"`
@@ -64,7 +142,7 @@ func (m *IsAuthorizedRequest) Reset()         { *m = IsAuthorizedRequest{} }
 func (m *IsAuthorizedRequest) String() string { return proto.CompactTextString(m) }
 func (*IsAuthorizedRequest) ProtoMessage()    {}
 func (*IsAuthorizedRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{0}
+	return fileDescriptor_af4ee7a0c648c985, []int{2}
 }
 
 func (m *IsAuthorizedRequest) XXX_Unmarshal(b []byte) error {
@@ -117,7 +195,7 @@ func (m *IsAuthorizedResponse) Reset()         { *m = IsAuthorizedResponse{} }
 func (m *IsAuthorizedResponse) String() string { return proto.CompactTextString(m) }
 func (*IsAuthorizedResponse) ProtoMessage()    {}
 func (*IsAuthorizedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{1}
+	return fileDescriptor_af4ee7a0c648c985, []int{3}
 }
 
 func (m *IsAuthorizedResponse) XXX_Unmarshal(b []byte) error {
@@ -148,6 +226,7 @@ func (m *IsAuthorizedResponse) GetDecision() *wrappers.BoolValue {
 type CreateAccountRequest struct {
 	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	IsRoot               bool     `protobuf:"varint,3,opt,name=is_root,json=isRoot,proto3" json:"is_root,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -157,7 +236,7 @@ func (m *CreateAccountRequest) Reset()         { *m = CreateAccountRequest{} }
 func (m *CreateAccountRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateAccountRequest) ProtoMessage()    {}
 func (*CreateAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{2}
+	return fileDescriptor_af4ee7a0c648c985, []int{4}
 }
 
 func (m *CreateAccountRequest) XXX_Unmarshal(b []byte) error {
@@ -192,6 +271,13 @@ func (m *CreateAccountRequest) GetPassword() string {
 	return ""
 }
 
+func (m *CreateAccountRequest) GetIsRoot() bool {
+	if m != nil {
+		return m.IsRoot
+	}
+	return false
+}
+
 type CreateAccountResponse struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -203,7 +289,7 @@ func (m *CreateAccountResponse) Reset()         { *m = CreateAccountResponse{} }
 func (m *CreateAccountResponse) String() string { return proto.CompactTextString(m) }
 func (*CreateAccountResponse) ProtoMessage()    {}
 func (*CreateAccountResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{3}
+	return fileDescriptor_af4ee7a0c648c985, []int{5}
 }
 
 func (m *CreateAccountResponse) XXX_Unmarshal(b []byte) error {
@@ -245,7 +331,7 @@ func (m *AuthorizeRequest) Reset()         { *m = AuthorizeRequest{} }
 func (m *AuthorizeRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthorizeRequest) ProtoMessage()    {}
 func (*AuthorizeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{4}
+	return fileDescriptor_af4ee7a0c648c985, []int{6}
 }
 
 func (m *AuthorizeRequest) XXX_Unmarshal(b []byte) error {
@@ -304,7 +390,7 @@ func (m *AuthorizeResponse) Reset()         { *m = AuthorizeResponse{} }
 func (m *AuthorizeResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthorizeResponse) ProtoMessage()    {}
 func (*AuthorizeResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{5}
+	return fileDescriptor_af4ee7a0c648c985, []int{7}
 }
 
 func (m *AuthorizeResponse) XXX_Unmarshal(b []byte) error {
@@ -336,7 +422,7 @@ func (m *GetAccountRequest) Reset()         { *m = GetAccountRequest{} }
 func (m *GetAccountRequest) String() string { return proto.CompactTextString(m) }
 func (*GetAccountRequest) ProtoMessage()    {}
 func (*GetAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{6}
+	return fileDescriptor_af4ee7a0c648c985, []int{8}
 }
 
 func (m *GetAccountRequest) XXX_Unmarshal(b []byte) error {
@@ -367,6 +453,7 @@ func (m *GetAccountRequest) GetName() string {
 type Account struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	IsRoot               bool     `protobuf:"varint,3,opt,name=is_root,json=isRoot,proto3" json:"is_root,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -376,7 +463,7 @@ func (m *Account) Reset()         { *m = Account{} }
 func (m *Account) String() string { return proto.CompactTextString(m) }
 func (*Account) ProtoMessage()    {}
 func (*Account) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{7}
+	return fileDescriptor_af4ee7a0c648c985, []int{9}
 }
 
 func (m *Account) XXX_Unmarshal(b []byte) error {
@@ -411,6 +498,13 @@ func (m *Account) GetName() string {
 	return ""
 }
 
+func (m *Account) GetIsRoot() bool {
+	if m != nil {
+		return m.IsRoot
+	}
+	return false
+}
+
 type AuthenticateRequest struct {
 	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
@@ -423,7 +517,7 @@ func (m *AuthenticateRequest) Reset()         { *m = AuthenticateRequest{} }
 func (m *AuthenticateRequest) String() string { return proto.CompactTextString(m) }
 func (*AuthenticateRequest) ProtoMessage()    {}
 func (*AuthenticateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{8}
+	return fileDescriptor_af4ee7a0c648c985, []int{10}
 }
 
 func (m *AuthenticateRequest) XXX_Unmarshal(b []byte) error {
@@ -470,7 +564,7 @@ func (m *AuthenticateResponse) Reset()         { *m = AuthenticateResponse{} }
 func (m *AuthenticateResponse) String() string { return proto.CompactTextString(m) }
 func (*AuthenticateResponse) ProtoMessage()    {}
 func (*AuthenticateResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{9}
+	return fileDescriptor_af4ee7a0c648c985, []int{11}
 }
 
 func (m *AuthenticateResponse) XXX_Unmarshal(b []byte) error {
@@ -516,7 +610,7 @@ func (m *DeleteObjectRequest) Reset()         { *m = DeleteObjectRequest{} }
 func (m *DeleteObjectRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteObjectRequest) ProtoMessage()    {}
 func (*DeleteObjectRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{10}
+	return fileDescriptor_af4ee7a0c648c985, []int{12}
 }
 
 func (m *DeleteObjectRequest) XXX_Unmarshal(b []byte) error {
@@ -554,7 +648,7 @@ func (m *DeleteObjectResponse) Reset()         { *m = DeleteObjectResponse{} }
 func (m *DeleteObjectResponse) String() string { return proto.CompactTextString(m) }
 func (*DeleteObjectResponse) ProtoMessage()    {}
 func (*DeleteObjectResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{11}
+	return fileDescriptor_af4ee7a0c648c985, []int{13}
 }
 
 func (m *DeleteObjectResponse) XXX_Unmarshal(b []byte) error {
@@ -589,7 +683,7 @@ func (m *CreateObjectRequest) Reset()         { *m = CreateObjectRequest{} }
 func (m *CreateObjectRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateObjectRequest) ProtoMessage()    {}
 func (*CreateObjectRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{12}
+	return fileDescriptor_af4ee7a0c648c985, []int{14}
 }
 
 func (m *CreateObjectRequest) XXX_Unmarshal(b []byte) error {
@@ -641,6 +735,7 @@ func (m *CreateObjectRequest) GetNamespace() string {
 type Object struct {
 	Uid                  string    `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Name                 string    `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Kind                 string    `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
 	Objects              []*Object `protobuf:"bytes,4,rep,name=objects,proto3" json:"objects,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
@@ -651,7 +746,7 @@ func (m *Object) Reset()         { *m = Object{} }
 func (m *Object) String() string { return proto.CompactTextString(m) }
 func (*Object) ProtoMessage()    {}
 func (*Object) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{13}
+	return fileDescriptor_af4ee7a0c648c985, []int{15}
 }
 
 func (m *Object) XXX_Unmarshal(b []byte) error {
@@ -686,6 +781,13 @@ func (m *Object) GetName() string {
 	return ""
 }
 
+func (m *Object) GetKind() string {
+	if m != nil {
+		return m.Kind
+	}
+	return ""
+}
+
 func (m *Object) GetObjects() []*Object {
 	if m != nil {
 		return m.Objects
@@ -695,6 +797,7 @@ func (m *Object) GetObjects() []*Object {
 
 type ListObjectsRequest struct {
 	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Namespace            string   `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -704,7 +807,7 @@ func (m *ListObjectsRequest) Reset()         { *m = ListObjectsRequest{} }
 func (m *ListObjectsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListObjectsRequest) ProtoMessage()    {}
 func (*ListObjectsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{14}
+	return fileDescriptor_af4ee7a0c648c985, []int{16}
 }
 
 func (m *ListObjectsRequest) XXX_Unmarshal(b []byte) error {
@@ -732,6 +835,13 @@ func (m *ListObjectsRequest) GetAccount() string {
 	return ""
 }
 
+func (m *ListObjectsRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
 type ListObjectsResponse struct {
 	Objects              []*Object `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
@@ -743,7 +853,7 @@ func (m *ListObjectsResponse) Reset()         { *m = ListObjectsResponse{} }
 func (m *ListObjectsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListObjectsResponse) ProtoMessage()    {}
 func (*ListObjectsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{15}
+	return fileDescriptor_af4ee7a0c648c985, []int{17}
 }
 
 func (m *ListObjectsResponse) XXX_Unmarshal(b []byte) error {
@@ -771,320 +881,10 @@ func (m *ListObjectsResponse) GetObjects() []*Object {
 	return nil
 }
 
-type CreateNamespaceRequest struct {
-	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CreateNamespaceRequest) Reset()         { *m = CreateNamespaceRequest{} }
-func (m *CreateNamespaceRequest) String() string { return proto.CompactTextString(m) }
-func (*CreateNamespaceRequest) ProtoMessage()    {}
-func (*CreateNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{16}
-}
-
-func (m *CreateNamespaceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CreateNamespaceRequest.Unmarshal(m, b)
-}
-func (m *CreateNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CreateNamespaceRequest.Marshal(b, m, deterministic)
-}
-func (m *CreateNamespaceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateNamespaceRequest.Merge(m, src)
-}
-func (m *CreateNamespaceRequest) XXX_Size() int {
-	return xxx_messageInfo_CreateNamespaceRequest.Size(m)
-}
-func (m *CreateNamespaceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateNamespaceRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CreateNamespaceRequest proto.InternalMessageInfo
-
-func (m *CreateNamespaceRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-type CreateNamespaceResponse struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CreateNamespaceResponse) Reset()         { *m = CreateNamespaceResponse{} }
-func (m *CreateNamespaceResponse) String() string { return proto.CompactTextString(m) }
-func (*CreateNamespaceResponse) ProtoMessage()    {}
-func (*CreateNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{17}
-}
-
-func (m *CreateNamespaceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CreateNamespaceResponse.Unmarshal(m, b)
-}
-func (m *CreateNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CreateNamespaceResponse.Marshal(b, m, deterministic)
-}
-func (m *CreateNamespaceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateNamespaceResponse.Merge(m, src)
-}
-func (m *CreateNamespaceResponse) XXX_Size() int {
-	return xxx_messageInfo_CreateNamespaceResponse.Size(m)
-}
-func (m *CreateNamespaceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateNamespaceResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CreateNamespaceResponse proto.InternalMessageInfo
-
-func (m *CreateNamespaceResponse) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-type GetNamespaceRequest struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GetNamespaceRequest) Reset()         { *m = GetNamespaceRequest{} }
-func (m *GetNamespaceRequest) String() string { return proto.CompactTextString(m) }
-func (*GetNamespaceRequest) ProtoMessage()    {}
-func (*GetNamespaceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{18}
-}
-
-func (m *GetNamespaceRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetNamespaceRequest.Unmarshal(m, b)
-}
-func (m *GetNamespaceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetNamespaceRequest.Marshal(b, m, deterministic)
-}
-func (m *GetNamespaceRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNamespaceRequest.Merge(m, src)
-}
-func (m *GetNamespaceRequest) XXX_Size() int {
-	return xxx_messageInfo_GetNamespaceRequest.Size(m)
-}
-func (m *GetNamespaceRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNamespaceRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNamespaceRequest proto.InternalMessageInfo
-
-func (m *GetNamespaceRequest) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-type GetNamespaceResponse struct {
-	Namespace            *Namespace `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
-	XXX_unrecognized     []byte     `json:"-"`
-	XXX_sizecache        int32      `json:"-"`
-}
-
-func (m *GetNamespaceResponse) Reset()         { *m = GetNamespaceResponse{} }
-func (m *GetNamespaceResponse) String() string { return proto.CompactTextString(m) }
-func (*GetNamespaceResponse) ProtoMessage()    {}
-func (*GetNamespaceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{19}
-}
-
-func (m *GetNamespaceResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetNamespaceResponse.Unmarshal(m, b)
-}
-func (m *GetNamespaceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetNamespaceResponse.Marshal(b, m, deterministic)
-}
-func (m *GetNamespaceResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetNamespaceResponse.Merge(m, src)
-}
-func (m *GetNamespaceResponse) XXX_Size() int {
-	return xxx_messageInfo_GetNamespaceResponse.Size(m)
-}
-func (m *GetNamespaceResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetNamespaceResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetNamespaceResponse proto.InternalMessageInfo
-
-func (m *GetNamespaceResponse) GetNamespace() *Namespace {
-	if m != nil {
-		return m.Namespace
-	}
-	return nil
-}
-
-type ListNamespacesForAccountRequest struct {
-	Account              string   `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ListNamespacesForAccountRequest) Reset()         { *m = ListNamespacesForAccountRequest{} }
-func (m *ListNamespacesForAccountRequest) String() string { return proto.CompactTextString(m) }
-func (*ListNamespacesForAccountRequest) ProtoMessage()    {}
-func (*ListNamespacesForAccountRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{20}
-}
-
-func (m *ListNamespacesForAccountRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ListNamespacesForAccountRequest.Unmarshal(m, b)
-}
-func (m *ListNamespacesForAccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ListNamespacesForAccountRequest.Marshal(b, m, deterministic)
-}
-func (m *ListNamespacesForAccountRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListNamespacesForAccountRequest.Merge(m, src)
-}
-func (m *ListNamespacesForAccountRequest) XXX_Size() int {
-	return xxx_messageInfo_ListNamespacesForAccountRequest.Size(m)
-}
-func (m *ListNamespacesForAccountRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListNamespacesForAccountRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ListNamespacesForAccountRequest proto.InternalMessageInfo
-
-func (m *ListNamespacesForAccountRequest) GetAccount() string {
-	if m != nil {
-		return m.Account
-	}
-	return ""
-}
-
-type ListNamespacesRequest struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ListNamespacesRequest) Reset()         { *m = ListNamespacesRequest{} }
-func (m *ListNamespacesRequest) String() string { return proto.CompactTextString(m) }
-func (*ListNamespacesRequest) ProtoMessage()    {}
-func (*ListNamespacesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{21}
-}
-
-func (m *ListNamespacesRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ListNamespacesRequest.Unmarshal(m, b)
-}
-func (m *ListNamespacesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ListNamespacesRequest.Marshal(b, m, deterministic)
-}
-func (m *ListNamespacesRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListNamespacesRequest.Merge(m, src)
-}
-func (m *ListNamespacesRequest) XXX_Size() int {
-	return xxx_messageInfo_ListNamespacesRequest.Size(m)
-}
-func (m *ListNamespacesRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListNamespacesRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ListNamespacesRequest proto.InternalMessageInfo
-
-type ListNamespacesResponse struct {
-	Namespaces           []*Namespace `protobuf:"bytes,1,rep,name=namespaces,proto3" json:"namespaces,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
-	XXX_unrecognized     []byte       `json:"-"`
-	XXX_sizecache        int32        `json:"-"`
-}
-
-func (m *ListNamespacesResponse) Reset()         { *m = ListNamespacesResponse{} }
-func (m *ListNamespacesResponse) String() string { return proto.CompactTextString(m) }
-func (*ListNamespacesResponse) ProtoMessage()    {}
-func (*ListNamespacesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{22}
-}
-
-func (m *ListNamespacesResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ListNamespacesResponse.Unmarshal(m, b)
-}
-func (m *ListNamespacesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ListNamespacesResponse.Marshal(b, m, deterministic)
-}
-func (m *ListNamespacesResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ListNamespacesResponse.Merge(m, src)
-}
-func (m *ListNamespacesResponse) XXX_Size() int {
-	return xxx_messageInfo_ListNamespacesResponse.Size(m)
-}
-func (m *ListNamespacesResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_ListNamespacesResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ListNamespacesResponse proto.InternalMessageInfo
-
-func (m *ListNamespacesResponse) GetNamespaces() []*Namespace {
-	if m != nil {
-		return m.Namespaces
-	}
-	return nil
-}
-
-type Namespace struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Namespace) Reset()         { *m = Namespace{} }
-func (m *Namespace) String() string { return proto.CompactTextString(m) }
-func (*Namespace) ProtoMessage()    {}
-func (*Namespace) Descriptor() ([]byte, []int) {
-	return fileDescriptor_af4ee7a0c648c985, []int{23}
-}
-
-func (m *Namespace) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Namespace.Unmarshal(m, b)
-}
-func (m *Namespace) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Namespace.Marshal(b, m, deterministic)
-}
-func (m *Namespace) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Namespace.Merge(m, src)
-}
-func (m *Namespace) XXX_Size() int {
-	return xxx_messageInfo_Namespace.Size(m)
-}
-func (m *Namespace) XXX_DiscardUnknown() {
-	xxx_messageInfo_Namespace.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Namespace proto.InternalMessageInfo
-
-func (m *Namespace) GetId() string {
-	if m != nil {
-		return m.Id
-	}
-	return ""
-}
-
-func (m *Namespace) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
 func init() {
 	proto.RegisterEnum("infinimesh.node.Action", Action_name, Action_value)
+	proto.RegisterType((*IsRootRequest)(nil), "infinimesh.node.IsRootRequest")
+	proto.RegisterType((*IsRootResponse)(nil), "infinimesh.node.IsRootResponse")
 	proto.RegisterType((*IsAuthorizedRequest)(nil), "infinimesh.node.IsAuthorizedRequest")
 	proto.RegisterType((*IsAuthorizedResponse)(nil), "infinimesh.node.IsAuthorizedResponse")
 	proto.RegisterType((*CreateAccountRequest)(nil), "infinimesh.node.CreateAccountRequest")
@@ -1101,75 +901,61 @@ func init() {
 	proto.RegisterType((*Object)(nil), "infinimesh.node.Object")
 	proto.RegisterType((*ListObjectsRequest)(nil), "infinimesh.node.ListObjectsRequest")
 	proto.RegisterType((*ListObjectsResponse)(nil), "infinimesh.node.ListObjectsResponse")
-	proto.RegisterType((*CreateNamespaceRequest)(nil), "infinimesh.node.CreateNamespaceRequest")
-	proto.RegisterType((*CreateNamespaceResponse)(nil), "infinimesh.node.CreateNamespaceResponse")
-	proto.RegisterType((*GetNamespaceRequest)(nil), "infinimesh.node.GetNamespaceRequest")
-	proto.RegisterType((*GetNamespaceResponse)(nil), "infinimesh.node.GetNamespaceResponse")
-	proto.RegisterType((*ListNamespacesForAccountRequest)(nil), "infinimesh.node.ListNamespacesForAccountRequest")
-	proto.RegisterType((*ListNamespacesRequest)(nil), "infinimesh.node.ListNamespacesRequest")
-	proto.RegisterType((*ListNamespacesResponse)(nil), "infinimesh.node.ListNamespacesResponse")
-	proto.RegisterType((*Namespace)(nil), "infinimesh.node.Namespace")
 }
 
 func init() { proto.RegisterFile("pkg/node/nodepb/node.proto", fileDescriptor_af4ee7a0c648c985) }
 
 var fileDescriptor_af4ee7a0c648c985 = []byte{
-	// 870 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x56, 0xeb, 0x4e, 0xdb, 0x48,
-	0x18, 0xdd, 0x5c, 0x36, 0x97, 0x2f, 0x10, 0xc2, 0x24, 0x04, 0xcb, 0x5a, 0xed, 0x66, 0x67, 0x81,
-	0x84, 0xd5, 0xca, 0xd9, 0xa6, 0x52, 0x55, 0xb5, 0xbf, 0x42, 0xb9, 0x94, 0xaa, 0x84, 0xca, 0x45,
-	0x6d, 0x55, 0xa4, 0x4a, 0x8e, 0x3d, 0x80, 0x4b, 0xb0, 0x5d, 0x8f, 0x5d, 0xa4, 0xbe, 0x47, 0x9f,
-	0xa3, 0xef, 0xd1, 0xa7, 0xaa, 0x6c, 0x8f, 0x9d, 0xb1, 0x3d, 0x49, 0xf8, 0x03, 0x9e, 0x99, 0xf3,
-	0x5d, 0xce, 0x99, 0x99, 0x33, 0x01, 0xd9, 0xb9, 0xbd, 0x1e, 0x5a, 0xb6, 0x41, 0xc2, 0x3f, 0xce,
-	0x34, 0xfc, 0xa7, 0x38, 0xae, 0xed, 0xd9, 0x68, 0xc3, 0xb4, 0xae, 0x4c, 0xcb, 0xbc, 0x23, 0xf4,
-	0x46, 0x09, 0xa6, 0xe5, 0x3f, 0xaf, 0x6d, 0xfb, 0x7a, 0x46, 0x86, 0xe1, 0xf2, 0xd4, 0xbf, 0x1a,
-	0xde, 0xbb, 0x9a, 0xe3, 0x10, 0x97, 0x46, 0x01, 0xd8, 0x83, 0xf6, 0x29, 0x1d, 0xfb, 0xde, 0x8d,
-	0xed, 0x9a, 0xdf, 0x88, 0xa1, 0x92, 0x2f, 0x3e, 0xa1, 0x1e, 0x42, 0x50, 0x0e, 0xc2, 0xa5, 0x42,
-	0xaf, 0x30, 0xa8, 0xab, 0xe1, 0x37, 0x92, 0xa0, 0xaa, 0xe9, 0xba, 0xed, 0x5b, 0x9e, 0x54, 0x0c,
-	0xa7, 0xe3, 0x21, 0x1a, 0x42, 0x45, 0xd3, 0x3d, 0xd3, 0xb6, 0xa4, 0x52, 0xaf, 0x30, 0x68, 0x8e,
-	0xb6, 0x95, 0x4c, 0x1b, 0xca, 0x38, 0x5c, 0x56, 0x19, 0x0c, 0x4f, 0xa0, 0x93, 0xae, 0x4a, 0x1d,
-	0xdb, 0xa2, 0x04, 0x3d, 0x81, 0x9a, 0x41, 0x74, 0x93, 0x06, 0xa9, 0x82, 0xd2, 0x8d, 0x91, 0xac,
-	0x44, 0x04, 0x94, 0x98, 0x80, 0x72, 0x60, 0xdb, 0xb3, 0x77, 0xda, 0xcc, 0x27, 0x6a, 0x82, 0xc5,
-	0xc7, 0xd0, 0x79, 0xe1, 0x12, 0xcd, 0x23, 0xe3, 0xa8, 0x23, 0x9e, 0x86, 0x76, 0x37, 0xa7, 0xa1,
-	0xdd, 0x11, 0x24, 0x43, 0xcd, 0xd1, 0x28, 0xbd, 0xb7, 0x5d, 0x83, 0xf1, 0x48, 0xc6, 0x78, 0x1f,
-	0xb6, 0x32, 0x79, 0x58, 0x63, 0x2d, 0x28, 0xf9, 0xa6, 0xc1, 0xf2, 0x04, 0x9f, 0xd8, 0x85, 0x56,
-	0x42, 0x20, 0x2e, 0xc7, 0x29, 0x54, 0x48, 0x2b, 0x14, 0xeb, 0x59, 0xe4, 0xf4, 0xec, 0xa6, 0x54,
-	0xab, 0xc7, 0xe2, 0x04, 0x59, 0x4c, 0xeb, 0x86, 0xb8, 0xa6, 0x27, 0x95, 0x7b, 0x85, 0x41, 0x4d,
-	0x8d, 0x87, 0xb8, 0x0d, 0x9b, 0x5c, 0xcd, 0xa8, 0x35, 0xdc, 0x87, 0xcd, 0x13, 0xe2, 0xad, 0x26,
-	0x8e, 0x87, 0x50, 0x65, 0xa8, 0x3c, 0x9d, 0x24, 0xa0, 0xc8, 0x05, 0x9c, 0x41, 0x3b, 0x28, 0x47,
-	0x2c, 0xcf, 0xd4, 0x35, 0x2f, 0x61, 0x29, 0x43, 0xcd, 0xa7, 0xc4, 0xe5, 0xf2, 0x27, 0xe3, 0xa5,
-	0xe2, 0x1a, 0xd0, 0x49, 0xa7, 0x63, 0xda, 0x4a, 0x50, 0xa5, 0xbe, 0xae, 0x13, 0x4a, 0xc3, 0x74,
-	0x35, 0x35, 0x1e, 0xa2, 0x51, 0xfa, 0xc4, 0x35, 0x46, 0x92, 0xe0, 0x60, 0x45, 0xbc, 0x63, 0x20,
-	0xee, 0x43, 0xfb, 0x90, 0xcc, 0x88, 0x47, 0xce, 0xa7, 0x9f, 0x89, 0x9e, 0x08, 0x92, 0xdf, 0xc0,
-	0x2e, 0x74, 0xd2, 0x40, 0xa6, 0x27, 0x85, 0x76, 0x74, 0x06, 0xd2, 0x09, 0x44, 0x47, 0xa9, 0x0b,
-	0x15, 0x47, 0x73, 0x49, 0x72, 0x21, 0xd8, 0x28, 0xc0, 0xde, 0x9a, 0x96, 0xc1, 0xf6, 0x35, 0xfc,
-	0x46, 0x7f, 0x40, 0x3d, 0x88, 0xa1, 0x8e, 0xa6, 0x93, 0x70, 0x5f, 0xeb, 0xea, 0x7c, 0x02, 0x6b,
-	0x50, 0x89, 0xca, 0x3d, 0x6c, 0x6b, 0xd0, 0x23, 0xa8, 0xda, 0x21, 0x9e, 0x4a, 0xe5, 0x5e, 0x69,
-	0xd0, 0x10, 0x5c, 0x39, 0xd6, 0x7e, 0x8c, 0xc3, 0x0a, 0xa0, 0xd7, 0x26, 0xf5, 0xa2, 0x69, 0xba,
-	0xf2, 0xc8, 0xe2, 0x97, 0xd0, 0x4e, 0xe1, 0xd9, 0x6e, 0x71, 0x95, 0x0b, 0x0f, 0xac, 0xfc, 0x1f,
-	0x74, 0x23, 0x45, 0x27, 0x31, 0xdf, 0x65, 0xc7, 0x74, 0x1f, 0xb6, 0x73, 0x68, 0x56, 0xbb, 0x09,
-	0xc5, 0x44, 0x9a, 0xa2, 0x69, 0xe0, 0x5d, 0x68, 0x9f, 0x10, 0x2f, 0x97, 0x35, 0x0b, 0x7b, 0x03,
-	0x9d, 0x34, 0x8c, 0xa5, 0x7b, 0xca, 0x6f, 0x49, 0x6c, 0x37, 0x59, 0x32, 0xf3, 0x30, 0x6e, 0xbb,
-	0x9e, 0xc3, 0x5f, 0x81, 0x36, 0xc9, 0x1a, 0x3d, 0xb6, 0xdd, 0xcc, 0x0d, 0x5c, 0x2c, 0xec, 0x36,
-	0x6c, 0xa5, 0x83, 0x59, 0x08, 0xbe, 0x80, 0x6e, 0x76, 0x81, 0x75, 0xfa, 0x0c, 0x20, 0x29, 0x1e,
-	0xeb, 0xbe, 0xac, 0x55, 0x0e, 0x8d, 0x87, 0x50, 0x4f, 0x16, 0xb2, 0xd2, 0x88, 0xce, 0xd6, 0xbf,
-	0x7d, 0xa8, 0x44, 0x76, 0x8d, 0x6a, 0x50, 0x9e, 0x9c, 0x4f, 0x8e, 0x5a, 0xbf, 0x05, 0x5f, 0xea,
-	0xd1, 0xf8, 0xb0, 0x55, 0x40, 0x75, 0xf8, 0xfd, 0xbd, 0x7a, 0x7a, 0x71, 0xd4, 0x2a, 0x8e, 0x7e,
-	0x96, 0xa0, 0xc9, 0x58, 0xbf, 0x25, 0xee, 0x57, 0x53, 0x27, 0xe8, 0x13, 0xac, 0xa7, 0x0c, 0x14,
-	0xed, 0xe6, 0xba, 0x14, 0x19, 0xb5, 0xbc, 0xb7, 0x0a, 0xc6, 0x84, 0x78, 0x05, 0x30, 0x37, 0x3b,
-	0x84, 0x73, 0x51, 0x39, 0x27, 0x94, 0x17, 0x5a, 0x06, 0xba, 0x84, 0x35, 0xde, 0x8f, 0xd0, 0x4e,
-	0x1e, 0x99, 0x77, 0x3f, 0x79, 0x77, 0x05, 0x8a, 0x35, 0x7a, 0x09, 0x6b, 0xfc, 0x0b, 0x27, 0x48,
-	0x2e, 0x78, 0x76, 0x05, 0xc9, 0x85, 0xcf, 0xa4, 0x0a, 0xf5, 0x64, 0x16, 0xfd, 0x2d, 0x6c, 0x88,
-	0x7f, 0x97, 0x64, 0xbc, 0x0c, 0x12, 0xe5, 0x1c, 0x7d, 0x2f, 0xc2, 0x7a, 0x74, 0x71, 0xe3, 0xbd,
-	0x3c, 0x83, 0x35, 0xde, 0x08, 0x05, 0x14, 0x04, 0x3e, 0x29, 0x2f, 0xb2, 0x03, 0xf4, 0x01, 0x1a,
-	0x9c, 0x9f, 0xa0, 0x7f, 0x72, 0xb8, 0xbc, 0x3b, 0xc9, 0x3b, 0xcb, 0x41, 0x73, 0xad, 0x79, 0x27,
-	0x17, 0x34, 0x2a, 0x78, 0x11, 0x04, 0x5a, 0x8b, 0x9e, 0x83, 0xd1, 0x8f, 0x12, 0xb4, 0x92, 0xfb,
-	0x13, 0x4b, 0x63, 0xc0, 0x46, 0xc6, 0xa3, 0x50, 0x7f, 0x81, 0x3a, 0x59, 0x77, 0x92, 0x07, 0xab,
-	0x81, 0x73, 0x5e, 0xbc, 0x6f, 0x09, 0x78, 0x09, 0xdc, 0x4f, 0xc0, 0x4b, 0x68, 0x7e, 0x1a, 0x34,
-	0xd3, 0x66, 0x83, 0xf6, 0x84, 0x62, 0xe7, 0x6c, 0x4a, 0xee, 0xaf, 0xc4, 0xb1, 0x12, 0x3e, 0x48,
-	0x8b, 0x5c, 0x12, 0xfd, 0xbf, 0x22, 0x49, 0xce, 0x50, 0x1f, 0x5c, 0xf6, 0xa0, 0xf6, 0xb1, 0x12,
-	0xfd, 0x30, 0x9e, 0x56, 0xc2, 0x1f, 0x8d, 0x8f, 0x7f, 0x05, 0x00, 0x00, 0xff, 0xff, 0x76, 0x0e,
-	0xdc, 0xa3, 0x32, 0x0b, 0x00, 0x00,
+	// 769 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x56, 0x6d, 0x4f, 0xdb, 0x3a,
+	0x14, 0xbe, 0x7d, 0xb9, 0x69, 0x7b, 0x0a, 0xdc, 0xe2, 0xf6, 0x42, 0x15, 0x5d, 0x71, 0x59, 0x06,
+	0xe3, 0xe5, 0x43, 0xaa, 0x75, 0xd2, 0xbe, 0x97, 0x81, 0x46, 0x27, 0x28, 0x28, 0x9b, 0xb6, 0x69,
+	0x48, 0x43, 0x69, 0x62, 0xc0, 0xa3, 0x8d, 0xb3, 0x38, 0x19, 0xd2, 0xfe, 0x07, 0xff, 0x77, 0x4a,
+	0xec, 0xa4, 0x4e, 0xe3, 0x52, 0xbe, 0x80, 0xed, 0x3c, 0x3e, 0xe7, 0x39, 0xcf, 0x79, 0x71, 0x41,
+	0xf7, 0xef, 0x6f, 0x7b, 0x1e, 0x75, 0x71, 0xf2, 0xc7, 0x1f, 0x27, 0xff, 0x4c, 0x3f, 0xa0, 0x21,
+	0x45, 0xff, 0x10, 0xef, 0x86, 0x78, 0x64, 0x8a, 0xd9, 0x9d, 0x19, 0x1f, 0xeb, 0x5b, 0xb7, 0x94,
+	0xde, 0x4e, 0x70, 0x2f, 0xf9, 0x3c, 0x8e, 0x6e, 0x7a, 0x0f, 0x81, 0xed, 0xfb, 0x38, 0x60, 0xfc,
+	0x82, 0x71, 0x00, 0xab, 0x43, 0x66, 0x51, 0x1a, 0x5a, 0xf8, 0x67, 0x84, 0x59, 0x88, 0xba, 0x50,
+	0xb3, 0x1d, 0x87, 0x46, 0x5e, 0xd8, 0x2d, 0x6d, 0x97, 0xf6, 0x1b, 0x56, 0xba, 0x35, 0x0e, 0x60,
+	0x2d, 0x85, 0x32, 0x9f, 0x7a, 0x0c, 0xa3, 0x4d, 0xa8, 0x11, 0x76, 0x1d, 0x50, 0xca, 0xb1, 0x75,
+	0x4b, 0x23, 0x09, 0xc0, 0x08, 0xa1, 0x3d, 0x64, 0x83, 0x28, 0xbc, 0xa3, 0x01, 0xf9, 0x8d, 0xdd,
+	0xd4, 0x36, 0x82, 0x6a, 0x4c, 0x4a, 0x18, 0x4e, 0xd6, 0xb2, 0xbf, 0x72, 0xce, 0x1f, 0xea, 0x81,
+	0x66, 0x3b, 0x21, 0xa1, 0x5e, 0xb7, 0xb2, 0x5d, 0xda, 0x5f, 0xeb, 0x6f, 0x9a, 0x73, 0xc1, 0x99,
+	0x83, 0xe4, 0xb3, 0x25, 0x60, 0xc6, 0x08, 0x3a, 0x79, 0xaf, 0x82, 0xe6, 0x5b, 0xa8, 0xbb, 0xd8,
+	0x21, 0x2c, 0x36, 0x15, 0xbb, 0x6e, 0xf6, 0x75, 0x93, 0xcb, 0x62, 0xa6, 0xb2, 0x98, 0x47, 0x94,
+	0x4e, 0x3e, 0xdb, 0x93, 0x08, 0x5b, 0x19, 0xd6, 0xb8, 0x86, 0xce, 0xbb, 0x00, 0xdb, 0x21, 0x1e,
+	0x70, 0x46, 0x72, 0x18, 0xf6, 0x74, 0x16, 0x86, 0x3d, 0xc5, 0x48, 0x87, 0xba, 0x6f, 0x33, 0xf6,
+	0x40, 0x03, 0x57, 0xc4, 0x91, 0xed, 0x65, 0x99, 0x2a, 0x39, 0x99, 0x0e, 0xe0, 0xdf, 0x39, 0x07,
+	0x82, 0x71, 0x0b, 0x2a, 0x11, 0x71, 0x85, 0x83, 0x78, 0x69, 0x04, 0xd0, 0xca, 0x22, 0x5b, 0x9a,
+	0xaa, 0x4c, 0xe8, 0xb2, 0x24, 0xf4, 0x46, 0x4e, 0xce, 0x46, 0xaa, 0x5a, 0x6c, 0x85, 0x78, 0x77,
+	0x38, 0x20, 0x61, 0xb7, 0x9a, 0xb0, 0x4b, 0xb7, 0x46, 0x1b, 0xd6, 0x25, 0x9f, 0x9c, 0x9a, 0xb1,
+	0x07, 0xeb, 0xef, 0x71, 0xb8, 0x5c, 0x11, 0xe3, 0x14, 0x6a, 0x02, 0x55, 0x0c, 0x27, 0xbb, 0x50,
+	0x96, 0x24, 0x5c, 0x28, 0xd3, 0x39, 0xb4, 0x63, 0x1e, 0xd8, 0x0b, 0x89, 0x63, 0x87, 0x59, 0xf8,
+	0x3a, 0xd4, 0x23, 0x86, 0x03, 0xc9, 0x71, 0xb6, 0x7f, 0x2a, 0x1d, 0x86, 0x0b, 0x9d, 0xbc, 0x39,
+	0x21, 0x7a, 0x17, 0x6a, 0x2c, 0x72, 0x1c, 0xcc, 0x98, 0xa8, 0xe6, 0x74, 0x8b, 0xfa, 0xf9, 0x1a,
+	0x6d, 0xf6, 0xbb, 0x8a, 0x52, 0xe4, 0x82, 0x64, 0xdd, 0xb2, 0x07, 0xed, 0x63, 0x3c, 0xc1, 0x21,
+	0xbe, 0x18, 0xff, 0xc0, 0x4e, 0xa6, 0x54, 0x31, 0xb3, 0x1b, 0xd0, 0xc9, 0x03, 0x85, 0xd0, 0x0c,
+	0xda, 0xbc, 0x38, 0xf2, 0x06, 0x54, 0xc5, 0xb7, 0x01, 0x9a, 0x6f, 0x07, 0x38, 0x6b, 0x21, 0xb1,
+	0x8b, 0xb1, 0xf7, 0xc4, 0x73, 0x45, 0xc2, 0x93, 0x35, 0xfa, 0x0f, 0x1a, 0xf1, 0x1d, 0xe6, 0xdb,
+	0x0e, 0x4e, 0x12, 0xde, 0xb0, 0x66, 0x07, 0x46, 0x04, 0x1a, 0x77, 0xf7, 0xcc, 0x9c, 0xa9, 0x3c,
+	0xbc, 0x86, 0x1a, 0x4d, 0x6c, 0xb0, 0x6e, 0x75, 0xbb, 0xb2, 0xdf, 0x54, 0x34, 0xae, 0x08, 0x29,
+	0xc5, 0x19, 0x67, 0x80, 0xce, 0x08, 0x0b, 0xf9, 0x31, 0x5b, 0x5e, 0xdf, 0xb9, 0x20, 0xca, 0xf3,
+	0x41, 0x9c, 0x42, 0x3b, 0x67, 0x4d, 0xe4, 0x57, 0xe2, 0x55, 0x7a, 0x1e, 0xaf, 0xc3, 0x3d, 0xd0,
+	0xf8, 0x8c, 0x41, 0x75, 0xa8, 0x8e, 0x2e, 0x46, 0x27, 0xad, 0xbf, 0xe2, 0x95, 0x75, 0x32, 0x38,
+	0x6e, 0x95, 0x50, 0x03, 0xfe, 0xfe, 0x62, 0x0d, 0x3f, 0x9d, 0xb4, 0xca, 0xfd, 0xc7, 0x2a, 0xac,
+	0x89, 0x12, 0xf8, 0x88, 0x83, 0x5f, 0xc4, 0xc1, 0xe8, 0x3b, 0xac, 0xe6, 0x9a, 0x1b, 0xed, 0x16,
+	0xdc, 0xa9, 0xa6, 0x8b, 0xfe, 0x6a, 0x19, 0x4c, 0x84, 0xf3, 0x01, 0x60, 0xd6, 0x88, 0xc8, 0x28,
+	0xdc, 0x2a, 0x74, 0xa9, 0xbe, 0xb0, 0x6a, 0xd1, 0x15, 0xac, 0xc8, 0x2d, 0x81, 0x76, 0x8a, 0xc8,
+	0x62, 0x03, 0xea, 0xbb, 0x4b, 0x50, 0x82, 0xe8, 0x15, 0xac, 0xc8, 0x63, 0x59, 0x61, 0x5c, 0xf1,
+	0x56, 0x28, 0x8c, 0x2b, 0x67, 0xbb, 0x05, 0x8d, 0xec, 0x14, 0xbd, 0x50, 0x12, 0x92, 0x67, 0xa6,
+	0x6e, 0x3c, 0x05, 0x11, 0x36, 0x87, 0xa0, 0xf1, 0x87, 0x0e, 0x6d, 0x29, 0x48, 0x48, 0x8f, 0xa5,
+	0xfe, 0xff, 0xc2, 0xef, 0xdc, 0x54, 0xff, 0xb1, 0x0c, 0xab, 0xbc, 0xa8, 0xd2, 0xb2, 0x38, 0x87,
+	0x15, 0xb9, 0xad, 0x15, 0x6a, 0x28, 0xba, 0x5e, 0x5f, 0x54, 0xaa, 0xe8, 0x2b, 0x34, 0xa5, 0x5a,
+	0x47, 0x2f, 0x0b, 0xb8, 0x62, 0x5f, 0xe9, 0x3b, 0x4f, 0x83, 0x66, 0x69, 0x93, 0xe7, 0x92, 0x82,
+	0xa8, 0x62, 0xbe, 0x29, 0xd2, 0xa6, 0x1a, 0x6e, 0x47, 0x87, 0xd0, 0x76, 0xe8, 0x74, 0x1e, 0x7b,
+	0xd4, 0x18, 0x51, 0x17, 0x5f, 0xc6, 0x6f, 0xf2, 0x65, 0xe9, 0x9b, 0xc6, 0x7f, 0xde, 0x8c, 0xb5,
+	0xe4, 0x91, 0x7e, 0xf3, 0x27, 0x00, 0x00, 0xff, 0xff, 0xe1, 0xd9, 0x33, 0x90, 0xf8, 0x08, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1189,6 +975,7 @@ type AccountServiceClient interface {
 	Authenticate(ctx context.Context, in *AuthenticateRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error)
 	IsAuthorized(ctx context.Context, in *IsAuthorizedRequest, opts ...grpc.CallOption) (*IsAuthorizedResponse, error)
 	Authorize(ctx context.Context, in *AuthorizeRequest, opts ...grpc.CallOption) (*AuthorizeResponse, error)
+	IsRoot(ctx context.Context, in *IsRootRequest, opts ...grpc.CallOption) (*IsRootResponse, error)
 }
 
 type accountServiceClient struct {
@@ -1244,6 +1031,15 @@ func (c *accountServiceClient) Authorize(ctx context.Context, in *AuthorizeReque
 	return out, nil
 }
 
+func (c *accountServiceClient) IsRoot(ctx context.Context, in *IsRootRequest, opts ...grpc.CallOption) (*IsRootResponse, error) {
+	out := new(IsRootResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountService/IsRoot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 type AccountServiceServer interface {
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
@@ -1251,6 +1047,7 @@ type AccountServiceServer interface {
 	Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error)
 	IsAuthorized(context.Context, *IsAuthorizedRequest) (*IsAuthorizedResponse, error)
 	Authorize(context.Context, *AuthorizeRequest) (*AuthorizeResponse, error)
+	IsRoot(context.Context, *IsRootRequest) (*IsRootResponse, error)
 }
 
 func RegisterAccountServiceServer(s *grpc.Server, srv AccountServiceServer) {
@@ -1347,6 +1144,24 @@ func _AccountService_Authorize_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_IsRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsRootRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).IsRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountService/IsRoot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).IsRoot(ctx, req.(*IsRootRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AccountService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "infinimesh.node.AccountService",
 	HandlerType: (*AccountServiceServer)(nil),
@@ -1370,6 +1185,10 @@ var _AccountService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authorize",
 			Handler:    _AccountService_Authorize_Handler,
+		},
+		{
+			MethodName: "IsRoot",
+			Handler:    _AccountService_IsRoot_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1500,169 +1319,6 @@ var _ObjectService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteObject",
 			Handler:    _ObjectService_DeleteObject_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "pkg/node/nodepb/node.proto",
-}
-
-// NamespaceServiceClient is the client API for NamespaceService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type NamespaceServiceClient interface {
-	CreateNamespace(ctx context.Context, in *CreateNamespaceRequest, opts ...grpc.CallOption) (*CreateNamespaceResponse, error)
-	GetNamespace(ctx context.Context, in *GetNamespaceRequest, opts ...grpc.CallOption) (*GetNamespaceResponse, error)
-	ListNamespaces(ctx context.Context, in *ListNamespacesRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error)
-	ListNamespacesForAccount(ctx context.Context, in *ListNamespacesForAccountRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error)
-}
-
-type namespaceServiceClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewNamespaceServiceClient(cc *grpc.ClientConn) NamespaceServiceClient {
-	return &namespaceServiceClient{cc}
-}
-
-func (c *namespaceServiceClient) CreateNamespace(ctx context.Context, in *CreateNamespaceRequest, opts ...grpc.CallOption) (*CreateNamespaceResponse, error) {
-	out := new(CreateNamespaceResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespaceService/CreateNamespace", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *namespaceServiceClient) GetNamespace(ctx context.Context, in *GetNamespaceRequest, opts ...grpc.CallOption) (*GetNamespaceResponse, error) {
-	out := new(GetNamespaceResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespaceService/GetNamespace", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *namespaceServiceClient) ListNamespaces(ctx context.Context, in *ListNamespacesRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error) {
-	out := new(ListNamespacesResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespaceService/ListNamespaces", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *namespaceServiceClient) ListNamespacesForAccount(ctx context.Context, in *ListNamespacesForAccountRequest, opts ...grpc.CallOption) (*ListNamespacesResponse, error) {
-	out := new(ListNamespacesResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespaceService/ListNamespacesForAccount", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// NamespaceServiceServer is the server API for NamespaceService service.
-type NamespaceServiceServer interface {
-	CreateNamespace(context.Context, *CreateNamespaceRequest) (*CreateNamespaceResponse, error)
-	GetNamespace(context.Context, *GetNamespaceRequest) (*GetNamespaceResponse, error)
-	ListNamespaces(context.Context, *ListNamespacesRequest) (*ListNamespacesResponse, error)
-	ListNamespacesForAccount(context.Context, *ListNamespacesForAccountRequest) (*ListNamespacesResponse, error)
-}
-
-func RegisterNamespaceServiceServer(s *grpc.Server, srv NamespaceServiceServer) {
-	s.RegisterService(&_NamespaceService_serviceDesc, srv)
-}
-
-func _NamespaceService_CreateNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateNamespaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NamespaceServiceServer).CreateNamespace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.NamespaceService/CreateNamespace",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NamespaceServiceServer).CreateNamespace(ctx, req.(*CreateNamespaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NamespaceService_GetNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNamespaceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NamespaceServiceServer).GetNamespace(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.NamespaceService/GetNamespace",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NamespaceServiceServer).GetNamespace(ctx, req.(*GetNamespaceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NamespaceService_ListNamespaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNamespacesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NamespaceServiceServer).ListNamespaces(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.NamespaceService/ListNamespaces",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NamespaceServiceServer).ListNamespaces(ctx, req.(*ListNamespacesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NamespaceService_ListNamespacesForAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListNamespacesForAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NamespaceServiceServer).ListNamespacesForAccount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.NamespaceService/ListNamespacesForAccount",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NamespaceServiceServer).ListNamespacesForAccount(ctx, req.(*ListNamespacesForAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _NamespaceService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "infinimesh.node.NamespaceService",
-	HandlerType: (*NamespaceServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "CreateNamespace",
-			Handler:    _NamespaceService_CreateNamespace_Handler,
-		},
-		{
-			MethodName: "GetNamespace",
-			Handler:    _NamespaceService_GetNamespace_Handler,
-		},
-		{
-			MethodName: "ListNamespaces",
-			Handler:    _NamespaceService_ListNamespaces_Handler,
-		},
-		{
-			MethodName: "ListNamespacesForAccount",
-			Handler:    _NamespaceService_ListNamespacesForAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

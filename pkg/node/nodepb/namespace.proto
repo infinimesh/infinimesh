@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package infinimesh.node;
+
+option go_package = "nodepb";
+option java_multiple_files = true;
+option java_outer_classname = "NamespaceProto";
+option java_package = "com.infinimesh.node";
+
+message Namespace {
+  string id = 1;
+  string name = 2;
+}
+
+message CreateNamespaceRequest {
+  string name = 1;
+}
+
+message CreateNamespaceResponse {
+  string id = 1;
+}
+
+message GetNamespaceRequest {
+  string id = 1;
+}
+
+message GetNamespaceResponse {
+  Namespace namespace = 1;
+}
+
+message ListNamespacesRequest {}
+
+message ListNamespacesForAccountRequest {
+  string account = 1;
+}
+
+message ListNamespacesResponse {
+  repeated Namespace namespaces = 1;
+}
+
+service NamespaceService {
+  rpc CreateNamespace(CreateNamespaceRequest) returns (CreateNamespaceResponse);
+  rpc GetNamespace(GetNamespaceRequest) returns (GetNamespaceResponse);
+  rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
+  rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
+}

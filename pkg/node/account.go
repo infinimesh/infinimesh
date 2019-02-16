@@ -19,9 +19,18 @@ type AccountController struct {
 	Repo Repo
 }
 
+func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
+	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "Could not find account")
+	}
+
+	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
+}
+
 func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.CreateAccountRequest) (response *nodepb.CreateAccountResponse, err error) {
 	log := s.Log.Named("CreateAccount")
-	uid, err := s.Repo.CreateAccount(ctx, request.GetName(), request.GetPassword())
+	uid, err := s.Repo.CreateAccount(ctx, request.GetName(), request.GetPassword(), request.GetIsRoot())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create user")
 	}

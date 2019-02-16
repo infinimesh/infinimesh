@@ -460,8 +460,27 @@
         }
       }
     },
+    "nodeCreateNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
     "nodeDeleteObjectResponse": {
       "type": "object"
+    },
+    "nodeListNamespacesResponse": {
+      "type": "object",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodeNamespace"
+          }
+        }
+      }
     },
     "nodeListObjectsResponse": {
       "type": "object",
@@ -474,6 +493,17 @@
         }
       }
     },
+    "nodeNamespace": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "nodeObject": {
       "type": "object",
       "properties": {
@@ -481,6 +511,9 @@
           "type": "string"
         },
         "name": {
+          "type": "string"
+        },
+        "kind": {
           "type": "string"
         },
         "objects": {
