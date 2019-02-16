@@ -58,7 +58,7 @@ func checkType(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
 	return len(result.Object) > 0
 }
 
-func checkExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint: deadcode,unused
+func checkExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) {
                   uid

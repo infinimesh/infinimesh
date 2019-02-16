@@ -12,7 +12,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
-func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //nolint: deadcode,unused
+func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) @filter(eq(type, $type)) {
                   uid
