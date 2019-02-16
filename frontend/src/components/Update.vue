@@ -1,9 +1,5 @@
 <template>
-  <v-card
-    flat
-    class="ml-3"
-    max-width="600px"
-  >
+  <div>
     <v-card-title
       primary-title
     >
@@ -86,7 +82,7 @@
          </div>
      </v-layout>
     </v-card-actions>
-  </v-card>
+  </div>
 </template>
 
 <script>

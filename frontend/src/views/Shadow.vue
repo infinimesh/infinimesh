@@ -9,6 +9,7 @@
         <v-card
           flat
           class="pb-3"
+          width="50%"
         >
           <v-card-title>
             <h2>Reported state</h2>
@@ -42,11 +43,38 @@
       <v-divider
         vertical
       ></v-divider>
-      <component
-        :is="activeComp"
-        @edit="activeComp='Update'"
-        @close="activeComp='DeviceInfo'"
-      ></component>
+      <v-card
+        flat
+        width="50%"
+      >
+        <v-layout
+          row
+        >
+          <v-flex>
+            <component
+              :is="activeComp"
+            ></component>
+          </v-flex>
+          <v-flex
+            max-width="30px"
+          >
+            <v-toolbar
+              card
+              color="white"
+            >
+              <v-spacer />
+              <v-btn
+                fab
+                small
+                @click="isEditing = !isEditing"
+              >
+              <v-icon v-if="isEditing">mdi-close</v-icon>
+              <v-icon v-else>mdi-pencil</v-icon>
+              </v-btn>
+            </v-toolbar>
+          </v-flex>
+        </v-layout>
+    </v-card>
     </v-layout>
   </div>
 </template>
@@ -65,7 +93,7 @@ export default {
           timestamp: "N/A"
         }
       },
-      activeComp: DeviceInfo,
+      isEditing: false,
       id: this.$route.params.id,
       messages: []
     };
@@ -73,6 +101,9 @@ export default {
   computed: {
     shadowMessages() {
       return this.$store.getters.getShadowMessages;
+    },
+    activeComp() {
+      return this.isEditing ? "Update" : "DeviceInfo";
     }
   },
   methods: {
