@@ -4,21 +4,36 @@
     <h1 class="mb-3">Account Management</h1>
   </v-card-title>
   <v-card-text>
-    <v-autocomplete
-      v-model="model"
-      :items="items"
-      :loading="isLoading"
-      :search-input.sync="search"
-      color="white"
-      hide-no-data
-      hide-selected
-      item-text="Description"
-      item-value="API"
-      label="Registered accounts"
-      placeholder="Start typing to Search"
-      prepend-icon="mdi-database-search"
-      return-object
-    ></v-autocomplete>
+    <v-layout
+      row
+      wrap
+    >
+      <v-autocomplete
+        v-model="model"
+        :items="items"
+        :loading="isLoading"
+        :search-input.sync="search"
+        color="white"
+        hide-no-data
+        hide-selected
+        item-text="Description"
+        item-value="API"
+        label="Registered accounts"
+        placeholder="Start typing to Search"
+        prepend-icon="mdi-database-search"
+        return-object
+      ></v-autocomplete>
+      <v-spacer></v-spacer>
+      <v-btn
+        color="primary lighten-1"
+        round
+        @click="isEditing = true"
+      >
+        <v-icon>
+          add
+        </v-icon>
+      </v-btn>
+    </v-layout>
   </v-card-text>
   <v-divider></v-divider>
   <v-card-text>
@@ -40,7 +55,7 @@
     </v-expand-transition>
     <v-expand-transition>
       <v-card
-        v-if="isEditing && model"
+        v-if="isEditing"
         flat
       >
         <v-card-text>
@@ -54,24 +69,19 @@
   </v-card-text>
   <v-card-actions>
     <v-btn
-      v-if="isEditing && model"
-      class="mr-4"
-      color="primary"
+      :disabled="!isEditing && !model"
+      @click="isEditing = true"
+      round
     >
-      Update
-    </v-btn>
-    <v-btn
-      :disabled="!model"
-      @click="isEditing = !isEditing"
-    >
-      {{ (isEditing) ? "Close" : "Edit"}}
+      {{ (isEditing) ? "Update" : "Edit"}}
     </v-btn>
     <v-spacer></v-spacer>
     <v-btn
-      :disabled="!model"
-      @click="model = null"
+      :disabled="!model && !isEditing"
+      @click="model = null; isEditing = false"
+      round
     >
-      Clear
+      Close
       <v-icon right>mdi-close-circle</v-icon>
     </v-btn>
   </v-card-actions>
@@ -111,7 +121,6 @@ export default {
       });
     }
   },
-
   watch: {
     search() {
       // Items have already been loaded
