@@ -20,9 +20,10 @@
           <v-text-field
             label="Password"
             v-model="password"
-            :append-icon="show1 ? 'visibility_off' : 'visibility'"
+            :append-icon="show ? 'visibility_off' : 'visibility'"
             :type="show ? 'text' : 'password'"
             @click:append="show = !show"
+            @keyup.enter="login"
           ></v-text-field>
           <p
             v-if="notLoggedIn"
@@ -40,8 +41,8 @@
         </v-alert>
         <v-card-actions>
           <v-btn
-          color="primary"
-          @click="login"
+            color="primary"
+            @click="login"
           >
             Login
           </v-btn>

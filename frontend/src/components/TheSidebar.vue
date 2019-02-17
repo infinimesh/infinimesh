@@ -14,7 +14,7 @@
           >
             <v-list-tile-action />
             <v-list-tile-title
-              class="subheading"
+              class="body-2"
             >
               {{ page[0] }}
             </v-list-tile-title>

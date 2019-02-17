@@ -21,27 +21,54 @@
     ></v-autocomplete>
   </v-card-text>
   <v-divider></v-divider>
-  <v-expand-transition>
-    <v-list
-      v-if="model"
-      class="grey lighten-4 indigo--text"
-    >
-      <v-list-tile
-        v-for="(field, i) in fields"
-        :key="i"
+  <v-card-text>
+    <v-expand-transition>
+      <v-list
+        v-if="model"
+        class="grey lighten-4 indigo--text"
       >
-        <v-list-tile-content>
-          <v-list-tile-title v-text="field.value"></v-list-tile-title>
-          <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
-    </v-list>
-  </v-expand-transition>
+        <v-list-tile
+          v-for="(field, i) in fields"
+          :key="i"
+        >
+          <v-list-tile-content>
+            <v-list-tile-title v-text="field.value"></v-list-tile-title>
+            <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-expand-transition>
+    <v-expand-transition>
+      <v-card
+        v-if="isEditing && model"
+        flat
+      >
+        <v-card-text>
+          <v-text-field
+            label="Account data"
+            clearable
+          ></v-text-field>
+        </v-card-text>
+      </v-card>
+    </v-expand-transition>
+  </v-card-text>
   <v-card-actions>
+    <v-btn
+      v-if="isEditing && model"
+      class="mr-4"
+      color="primary"
+    >
+      Update
+    </v-btn>
+    <v-btn
+      :disabled="!model"
+      @click="isEditing = !isEditing"
+    >
+      {{ (isEditing) ? "Close" : "Edit"}}
+    </v-btn>
     <v-spacer></v-spacer>
     <v-btn
       :disabled="!model"
-      color="grey"
       @click="model = null"
     >
       Clear
@@ -58,7 +85,8 @@ export default {
     entries: [],
     isLoading: false,
     model: null,
-    search: null
+    search: null,
+    isEditing: false
   }),
 
   computed: {
