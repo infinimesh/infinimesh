@@ -15,6 +15,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"encoding/base64"
+
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -45,6 +47,18 @@ func init() {
 	port = viper.GetInt("PORT")
 
 	jwtSigningSecret = []byte("super secret key")
+
+	b64SignSecret := viper.GetString("JWT_SIGNING_KEY")
+	if b64SignSecret == "" {
+		panic("Invalid signing secret")
+	}
+
+	s, err := base64.StdEncoding.DecodeString(b64SignSecret)
+	if err != nil {
+		panic("Failed to base64 decode sign secret")
+	}
+
+	jwtSigningSecret = s
 }
 
 func main() {

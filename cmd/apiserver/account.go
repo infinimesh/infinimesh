@@ -12,7 +12,7 @@ import (
 )
 
 type accountAPI struct {
-	signingSecret []byte // TODO use asymmetric crypto.
+	signingSecret []byte
 	client        nodepb.AccountServiceClient
 }
 
