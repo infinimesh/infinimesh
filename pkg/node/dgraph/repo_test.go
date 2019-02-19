@@ -37,13 +37,13 @@ func init() {
 
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
-	ns, err := repo.CreateNamespace(ctx, "default")
+	_, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
 	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password", false)
 	require.NoError(t, err)
 
-	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", ns)
+	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
 	require.NoError(t, err)
 
 	err = repo.Authorize(ctx, account, node, "READ", true)
