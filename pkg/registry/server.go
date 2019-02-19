@@ -15,16 +15,20 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 type Server struct {
-	db *gorm.DB
+	db           *gorm.DB
+	objectClient nodepb.ObjectServiceClient
 }
 
-func NewServer(addr string) *Server {
+func NewServer(addr string, objectClient nodepb.ObjectServiceClient) *Server {
 	db, err := gorm.Open("postgres", addr)
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +39,8 @@ func NewServer(addr string) *Server {
 	db.AutoMigrate(&Device{})
 
 	return &Server{
-		db: db,
+		db:           db,
+		objectClient: objectClient,
 	}
 }
 
@@ -97,6 +102,18 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}).Error; err != nil {
 		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
 	}
+
+	resp, err := s.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
+		Name:      request.GetDevice().GetId(),
+		Kind:      node.KindDevice,
+		Namespace: request.GetNamespace(),
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
+	}
+
+	fmt.Println("Created node ", resp.GetUid())
+
 	return &registrypb.CreateResponse{
 		Fingerprint: fp,
 	}, nil
@@ -105,7 +122,6 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	update := make(map[string]interface{})
 	for _, field := range request.FieldMask.GetPaths() {
-		fmt.Println("Field", field)
 		switch field {
 		case "Enabled":
 			update["enabled"] = request.Device.Enabled.GetValue()
@@ -193,6 +209,7 @@ func toProto(device *Device) *registrypb.Device {
 }
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+	// TODO Delete from nodeserver
 	var device Device
 	if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
 		return nil, err

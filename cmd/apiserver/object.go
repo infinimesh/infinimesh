@@ -42,6 +42,9 @@ func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsR
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
+
+	// TODO ensure that root sees all, and others dont
+
 	// This request automatically runs in the scope of the user, no need to call IsAuthorized
 	return o.objectClient.ListObjects(ctx, &nodepb.ListObjectsRequest{Account: account})
 }

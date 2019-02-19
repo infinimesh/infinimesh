@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -8,25 +9,40 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
-const port = ":8080"
-
-var dbAddr string
+var (
+	dbAddr   string
+	nodeHost string
+	port     string
+)
 
 func init() {
 	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
+	viper.SetDefault("NODE_HOST", "nodeserver:8082")
+	viper.SetDefault("PORT", "8080")
+
 	viper.AutomaticEnv()
 
 	dbAddr = viper.GetString("DB_ADDR")
+	nodeHost = viper.GetString("NODE_HOST")
+	port = viper.GetString("PORT")
 }
 
 func main() {
-	server := registry.NewServer(dbAddr)
+	nodeConn, err := grpc.Dial(nodeHost, grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
 
-	lis, err := net.Listen("tcp", port)
+	objectClient := nodepb.NewObjectServiceClient(nodeConn)
+
+	server := registry.NewServer(dbAddr, objectClient)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

@@ -16,9 +16,12 @@ import (
 var (
 	namespaceClient apipb.NamespaceServiceClient
 	accountClient   apipb.AccountClient
+	deviceClient    apipb.DevicesClient
 	ctx             context.Context
 
 	noHeaderFlag bool
+
+	namespaceFlag string
 )
 
 var rootCmd = &cobra.Command{
@@ -34,6 +37,7 @@ func init() {
 
 	namespaceClient = apipb.NewNamespaceServiceClient(conn)
 	accountClient = apipb.NewAccountClient(conn)
+	deviceClient = apipb.NewDevicesClient(conn)
 
 	// Load cfg
 	if cfg, err := ReadConfig(); err == nil {

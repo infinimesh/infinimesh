@@ -1,6 +1,7 @@
 #!/bin/bash
-export TOKEN=$(curl -s -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/token | jq -r ".token")
+export TOKEN=$(grpcurl -d '{"username" : "joe", "password" : "test123"}' -plaintext localhost:8080 infinimesh.api.Account/Token | jq '.token' -r)
 grpcurl -H "authorization: bearer $TOKEN" -d '{
+  "namespace" : "joe/default",
   "device": {
     "id": "testdevice4",
     "certificate": {
