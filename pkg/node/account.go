@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/infinimesh/infinimesh/pkg/tools"
 )
 
 type AccountController struct {
@@ -20,7 +22,10 @@ type AccountController struct {
 }
 
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
+	fmt.Println("is root")
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
+	tools.PrettyPrint(account)
+	fmt.Println(account.GetIsRoot())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Could not find account")
 	}
@@ -40,6 +45,16 @@ func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.C
 	return &nodepb.CreateAccountResponse{Uid: uid}, nil
 }
 
+func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nodepb.AuthorizeNamespaceRequest) (response *nodepb.AuthorizeNamespaceResponse, err error) {
+	err = s.Repo.AuthorizeNamespace(ctx, request.GetAccount(), request.GetNamespace(), request.GetAction())
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to authorize")
+	}
+
+	return &nodepb.AuthorizeNamespaceResponse{}, nil
+}
+
 func (s *AccountController) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest) (response *nodepb.AuthorizeResponse, err error) {
 	err = s.Repo.Authorize(ctx, request.GetAccount(), request.GetNode(), request.GetAction(), request.GetInherit())
 	if err != nil {
@@ -53,6 +68,9 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: request.GetAccount(),
 	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Authorization check failed")
+	}
 
 	if root.GetIsRoot() {
 		return &nodepb.IsAuthorizedNamespaceResponse{

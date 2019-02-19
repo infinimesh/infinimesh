@@ -11,13 +11,9 @@ import "google/protobuf/wrappers.proto";
 
 // Account
 
-message IsRootRequest {
-  string account = 1;
-}
+message IsRootRequest { string account = 1; }
 
-message IsRootResponse {
-  bool is_root = 1;
-}
+message IsRootResponse { bool is_root = 1; }
 
 message IsAuthorizedNamespaceRequest {
   string namespace = 1;
@@ -35,9 +31,7 @@ message IsAuthorizedRequest {
   Action action = 3;
 }
 
-message IsAuthorizedResponse {
-  google.protobuf.BoolValue decision = 1;
-}
+message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
 
 message CreateAccountRequest {
   string name = 1;
@@ -45,9 +39,7 @@ message CreateAccountRequest {
   bool is_root = 3;
 }
 
-message CreateAccountResponse {
-  string uid = 1;
-}
+message CreateAccountResponse { string uid = 1; }
 
 enum Action {
   NONE = 0;
@@ -64,9 +56,7 @@ message AuthorizeRequest {
 
 message AuthorizeResponse {}
 
-message GetAccountRequest {
-  string name = 1;
-}
+message GetAccountRequest { string name = 1; }
 
 message Account {
   string uid = 1;
@@ -112,17 +102,26 @@ message ListObjectsRequest {
   string namespace = 2;
 }
 
-message ListObjectsResponse {
-  repeated Object objects = 1;
+message ListObjectsResponse { repeated Object objects = 1; }
+
+message AuthorizeNamespaceRequest {
+  string account = 1;
+  string namespace = 2;
+  Action action = 3;
 }
+
+message AuthorizeNamespaceResponse {}
 
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
-  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest) returns (IsAuthorizedNamespaceResponse);
+  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest)
+      returns (IsAuthorizedNamespaceResponse);
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+  rpc AuthorizeNamespace(AuthorizeNamespaceRequest)
+      returns (AuthorizeNamespaceResponse);
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
 }
 

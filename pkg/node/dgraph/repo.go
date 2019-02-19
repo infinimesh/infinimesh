@@ -85,6 +85,50 @@ func checkExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	return len(result.Object) > 0
 }
 
+func (s *dGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error) {
+	txn := s.dg.NewTxn()
+
+	if ok := checkType(ctx, txn, account, "account"); !ok {
+		return errors.New("invalid account")
+	}
+
+	// TODO use internal method that runs within txn
+	ns, err := s.GetNamespace(ctx, namespace)
+	if err != nil {
+		return err
+	}
+
+	in := Account{
+		Node: Node{
+			UID: account,
+		},
+	}
+
+	in.AccessToNamespace = []*Namespace{
+		&Namespace{
+			Node: Node{
+				UID: ns.GetId(),
+			},
+			AccessToPermission: action.String(),
+		},
+	}
+
+	js, err := json.Marshal(&in)
+	if err != nil {
+		return err
+	}
+
+	_, err = txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return errors.New("Failed to mutate")
+	}
+	return nil
+
+}
+
 func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 

@@ -14,12 +14,28 @@ func init() {
 	listNamespacesCmd.Flags().BoolVar(&noHeaderFlag, "no-headers", false, "Hide table headers")
 	namespaceCmd.AddCommand(describeNamespace)
 	namespaceCmd.AddCommand(listNamespacesCmd)
+	namespaceCmd.AddCommand(createNamespaceCmd)
 	rootCmd.AddCommand(namespaceCmd)
 
 }
 
 var namespaceCmd = &cobra.Command{
-	Use: "namespace",
+	Use:     "namespace",
+	Aliases: []string{"ns", "namespaces"},
+}
+
+var createNamespaceCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create a namespace",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		_, err := namespaceClient.CreateNamespace(ctx, &nodepb.CreateNamespaceRequest{Name: args[0]})
+		if err != nil {
+			fmt.Println("grpc: failed to create namespace", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Created namespace %v.\n", args[0])
+	},
 }
 
 var listNamespacesCmd = &cobra.Command{

@@ -19,7 +19,7 @@ type Account struct {
 	Node
 	Name string `json:"name,omitempty"`
 
-	IsRoot bool `json:"isRoot"`
+	IsRoot bool `json:"isRoot,omitempty"`
 
 	AccessTo          []*Object    `json:"access.to,omitempty"`
 	AccessToNamespace []*Namespace `json:"access.to.namespace,omitempty"`

@@ -8,6 +8,7 @@ import (
 	"github.com/dgraph-io/dgo/protos/api"
 
 	"github.com/infinimesh/infinimesh/pkg/node"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 func ImportSchema(dg *dgo.Dgraph) error {
@@ -27,7 +28,8 @@ func ImportSchema(dg *dgo.Dgraph) error {
 }
 
 func ImportStandardSet(repo node.Repo) error {
-	ns, err := repo.CreateNamespace(context.Background(), "joe/default")
+	ns := "joe/default"
+	_, err := repo.CreateNamespace(context.Background(), ns)
 	if err != nil {
 		return err
 	}
@@ -100,11 +102,14 @@ func ImportStandardSet(repo node.Repo) error {
 	fmt.Println("User: ", user)
 
 	result := repo.Authorize(context.Background(), user, apartment1Right, "WRITE", true)
-	_ = repo.Authorize(context.Background(), user, ns, "WRITE", true)
+	err = repo.AuthorizeNamespace(context.Background(), user, ns, nodepb.Action_WRITE)
+	if err != nil {
+		return err
+	}
 
 	_, err = repo.ListForAccount(context.Background(), user)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	admin, err := repo.CreateAccount(context.Background(), "admin", "admin123", true)

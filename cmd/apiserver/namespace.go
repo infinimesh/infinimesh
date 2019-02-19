@@ -46,7 +46,24 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 	}
 
 	if resp.GetIsRoot() {
-		return n.client.CreateNamespace(ctx, request)
+		// TODO this is not atomic and if the application crashes
+		// between both calls, we'll have a problem. Maybe move it to
+		// one operation into the repo, and do within a txn.
+		_, err = n.client.CreateNamespace(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err := n.accountClient.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
+			Account:   account,
+			Namespace: request.GetName(),
+			Action:    nodepb.Action_WRITE,
+		})
+		if err != nil {
+			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
+		}
+		return &nodepb.CreateNamespaceResponse{}, nil
+
 	}
 	return nil, status.Error(codes.PermissionDenied, "Account is not root")
 }

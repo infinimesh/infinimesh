@@ -157,7 +157,12 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
 	txn := s.dg.NewTxn()
 
-	if ok := checkType(ctx, txn, namespaceID, "namespace"); !ok {
+	// if ok := checkType(ctx, txn, namespaceID, "namespace"); !ok {
+	// 	return "", errors.New("Invalid namespace")
+	// }
+
+	namespace, err := s.GetNamespace(ctx, namespaceID)
+	if err != nil {
 		return "", errors.New("Invalid namespace")
 	}
 
@@ -203,7 +208,7 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	newUID := a.GetUids()["new"]
 
 	ns := &api.NQuad{
-		Subject:   namespaceID,
+		Subject:   namespace.GetId(),
 		Predicate: "owns",
 		ObjectId:  newUID,
 	}
@@ -228,9 +233,13 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
+	// Two options:
+	// 1) via namespace -> access.to.namespace -> owns/children
+	// 2) direct via access.to -> object
+
 	const q = `query list($account: string) {
                    var(func: uid($account)) {
-                     access.to @facets(eq(inherit,true)) {
+                     access.to.namespace @facets(eq(inherit,true)) {
                        OBJS as uid
                        name
                      }

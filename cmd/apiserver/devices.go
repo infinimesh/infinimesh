@@ -3,14 +3,35 @@ package main
 import (
 	"context"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
 type deviceAPI struct {
-	client registrypb.DevicesClient
+	client        registrypb.DevicesClient
+	accountClient nodepb.AccountServiceClient
 }
 
 func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateRequest) (response *registrypb.CreateResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Namespace: request.GetNamespace(),
+		Account:   account,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+	}
+	if !resp.GetDecision().GetValue() {
+		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+	}
 	return d.client.Create(ctx, request)
 }
 
