@@ -21,19 +21,103 @@
     "application/json"
   ],
   "paths": {
-    "/devices": {
+    "/namespace/{namespace}/namespaces/{namespace}/{id}/shadow/reported": {
       "get": {
-        "operationId": "List",
+        "operationId": "StreamReportedStateChanges",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "$ref": "#/x-stream-definitions/shadowStreamReportedStateChangesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shadows"
+        ]
+      }
+    },
+    "/namespaces": {
+      "get": {
+        "operationId": "ListNamespaces",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/deviceregistryListResponse"
+              "$ref": "#/definitions/nodeListNamespacesResponse"
             }
           }
         },
         "tags": [
-          "Devices"
+          "NamespaceService"
+        ]
+      },
+      "post": {
+        "operationId": "CreateNamespace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeCreateNamespaceResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeCreateNamespaceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "NamespaceService"
+        ]
+      }
+    },
+    "/namespaces/{namespace}": {
+      "get": {
+        "operationId": "GetNamespace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeGetNamespaceResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespaceService"
         ]
       },
       "post": {
@@ -48,6 +132,12 @@
         },
         "parameters": [
           {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "required": true,
@@ -61,7 +151,99 @@
         ]
       }
     },
-    "/devices/{device.id}": {
+    "/namespaces/{namespace}/objects": {
+      "get": {
+        "operationId": "ListObjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeListObjectsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ObjectService"
+        ]
+      }
+    },
+    "/namespaces/{namespace}/objects/{parent}/children": {
+      "post": {
+        "operationId": "CreateObject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeObject"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "parent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/infinimeshapiCreateObjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ObjectService"
+        ]
+      }
+    },
+    "/namespaces/{namespace}/objects/{uid}": {
+      "delete": {
+        "operationId": "DeleteObject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteObjectResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ObjectService"
+        ]
+      }
+    },
+    "/namespaces/{namespace}/{device.id}": {
       "put": {
         "operationId": "Update2",
         "responses": {
@@ -73,6 +255,12 @@
           }
         },
         "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "device.id",
             "in": "path",
@@ -104,6 +292,12 @@
         },
         "parameters": [
           {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "device.id",
             "in": "path",
             "required": true,
@@ -123,7 +317,7 @@
         ]
       }
     },
-    "/devices/{id}": {
+    "/namespaces/{namespace}/{id}": {
       "get": {
         "operationId": "Get",
         "responses": {
@@ -135,6 +329,12 @@
           }
         },
         "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "path",
@@ -158,6 +358,12 @@
         },
         "parameters": [
           {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "id",
             "in": "path",
             "required": true,
@@ -169,7 +375,7 @@
         ]
       }
     },
-    "/devices/{id}/shadow": {
+    "/namespaces/{namespace}/{id}/shadow": {
       "get": {
         "operationId": "Get",
         "responses": {
@@ -182,6 +388,12 @@
         },
         "parameters": [
           {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "id",
             "in": "path",
             "required": true,
@@ -193,7 +405,7 @@
         ]
       }
     },
-    "/devices/{id}/shadow/desired": {
+    "/namespaces/{namespace}/{id}/shadow/desired": {
       "post": {
         "operationId": "PatchDesiredState",
         "responses": {
@@ -205,6 +417,12 @@
           }
         },
         "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "id",
             "in": "path",
@@ -222,102 +440,6 @@
         ],
         "tags": [
           "Shadows"
-        ]
-      }
-    },
-    "/devices/{id}/shadow/reported": {
-      "get": {
-        "operationId": "StreamReportedStateChanges",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "$ref": "#/x-stream-definitions/shadowStreamReportedStateChangesResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Shadows"
-        ]
-      }
-    },
-    "/objects": {
-      "get": {
-        "operationId": "ListObjects",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeListObjectsResponse"
-            }
-          }
-        },
-        "tags": [
-          "ObjectService"
-        ]
-      }
-    },
-    "/objects/{parent}/children": {
-      "post": {
-        "operationId": "CreateObject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeObject"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "parent",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshapiCreateObjectRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ObjectService"
-        ]
-      }
-    },
-    "/objects/{uid}": {
-      "delete": {
-        "operationId": "DeleteObject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteObjectResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "ObjectService"
         ]
       }
     },
@@ -441,6 +563,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "namespace": {
+          "type": "string"
         }
       }
     },
@@ -460,6 +585,14 @@
         }
       }
     },
+    "nodeCreateNamespaceRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "nodeCreateNamespaceResponse": {
       "type": "object",
       "properties": {
@@ -470,6 +603,14 @@
     },
     "nodeDeleteObjectResponse": {
       "type": "object"
+    },
+    "nodeGetNamespaceResponse": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/definitions/nodeNamespace"
+        }
+      }
     },
     "nodeListNamespacesResponse": {
       "type": "object",

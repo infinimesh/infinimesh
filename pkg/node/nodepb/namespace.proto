@@ -21,7 +21,7 @@ message CreateNamespaceResponse {
 }
 
 message GetNamespaceRequest {
-  string id = 1;
+  string namespace = 1; // name
 }
 
 message GetNamespaceResponse {

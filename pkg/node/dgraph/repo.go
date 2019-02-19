@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -309,7 +310,7 @@ func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 
 func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
-                     namespaces(func: uid($namespace)) @filter(eq(type, "namespace"))  {
+                     namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
 	               uid
                        name
 	             }
@@ -400,6 +401,47 @@ func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	}
 
 	return namespaces, nil
+}
+
+func (s *dGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
+	params := map[string]string{
+		"$namespace": namespace,
+		"$user_id":   account,
+	}
+
+	fmt.Println("pars", params)
+
+	txn := s.dg.NewReadOnlyTxn()
+
+	const q = `query access($namespace: string, $user_id: string){
+  access(func: uid($user_id)) @cascade {
+    name
+    uid
+    access.to.namespace @filter(eq(name, "$namespace")) {
+      uid
+      name
+      type
+    }
+  }
+}
+`
+
+	res, err := txn.QueryWithVars(ctx, q, params)
+	if err != nil {
+		return false, err
+	}
+	var access struct {
+		Access []Object `json:"access"`
+	}
+
+	err = json.Unmarshal(res.Json, &access)
+	if err != nil {
+		return false, err
+	}
+
+	fmt.Println("acc", len(access.Access) > 0)
+
+	return len(access.Access) > 0, nil
 }
 
 func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {

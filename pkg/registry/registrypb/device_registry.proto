@@ -16,6 +16,7 @@ message Device {
 
 message CreateRequest {
   Device device = 1;
+  string namespace = 2;
 }
 
 message Certificate {
@@ -38,13 +39,16 @@ message GetByFingerprintResponse {
 
 message GetRequest {
   string id = 1;
+  string namespace = 2;
 }
 
 message GetResponse {
   Device device = 1;
 }
 
-message ListDevicesRequest {}
+message ListDevicesRequest {
+  string namespace = 1;
+}
 
 message ListResponse {
   repeated Device devices = 1;
@@ -52,6 +56,7 @@ message ListResponse {
 
 message DeleteRequest {
   string id = 1;
+  string namespace = 2;
 }
 
 message DeleteResponse {}
@@ -59,6 +64,7 @@ message DeleteResponse {}
 message UpdateRequest {
   google.protobuf.FieldMask fieldMask = 1;
   Device device = 2;
+  string namespace = 3;
 }
 
 message UpdateResponse{}

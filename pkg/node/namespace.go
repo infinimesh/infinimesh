@@ -45,7 +45,7 @@ func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, requ
 }
 
 func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.GetNamespaceResponse, err error) {
-	namespaces, err := n.Repo.GetNamespace(ctx, request.GetId())
+	namespaces, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed get namespace")
 	}

@@ -49,6 +49,25 @@ func (s *AccountController) Authorize(ctx context.Context, request *nodepb.Autho
 	return &nodepb.AuthorizeResponse{}, nil
 }
 
+func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *nodepb.IsAuthorizedNamespaceRequest) (response *nodepb.IsAuthorizedNamespaceResponse, err error) {
+	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: request.GetAccount(),
+	})
+
+	if root.GetIsRoot() {
+		return &nodepb.IsAuthorizedNamespaceResponse{
+			Decision: &wrappers.BoolValue{Value: true},
+		}, nil
+	}
+
+	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespace(), request.GetAccount(), request.GetAction())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
+}
+
 func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.IsAuthorizedRequest) (response *nodepb.IsAuthorizedResponse, err error) {
 	log := s.Log.Named("Authorize").With(
 		zap.String("request.account", request.GetAccount()),

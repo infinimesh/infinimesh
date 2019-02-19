@@ -19,6 +19,16 @@ message IsRootResponse {
   bool is_root = 1;
 }
 
+message IsAuthorizedNamespaceRequest {
+  string namespace = 1;
+  string account = 2;
+  Action Action = 3;
+}
+
+message IsAuthorizedNamespaceResponse {
+  google.protobuf.BoolValue decision = 1;
+}
+
 message IsAuthorizedRequest {
   string node = 1;
   string account = 2;
@@ -76,6 +86,7 @@ message AuthenticateResponse {
 
 message DeleteObjectRequest {
   string uid = 1;
+  string namespace = 2;
 }
 
 message DeleteObjectResponse {}
@@ -110,6 +121,7 @@ service AccountService {
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
+  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest) returns (IsAuthorizedNamespaceResponse);
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
 }

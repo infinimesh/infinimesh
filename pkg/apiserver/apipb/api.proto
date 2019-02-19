@@ -39,62 +39,59 @@ message TokenResponse {
   string token = 1;
 }
 
-// Device
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest) returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
-      post: "/devices"
+      post: "/namespaces/{namespace}"
       body: "device"
     };
   }
   rpc Update(infinimesh.deviceregistry.UpdateRequest) returns (infinimesh.deviceregistry.UpdateResponse) {
     option (google.api.http) = {
-      patch: "/devices/{device.id}"
+      patch: "/namespaces/{namespace}/{device.id}"
       body: "device"
       additional_bindings: {
-        put: "/devices/{device.id}"
+        put: "/namespaces/{namespace}/{device.id}"
         body: "device"
       }
     };
   }
   rpc Get(infinimesh.deviceregistry.GetRequest) returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}"
+      get: "/namespaces/{namespace}/{id}"
     };
   }
   rpc List(infinimesh.deviceregistry.ListDevicesRequest) returns (infinimesh.deviceregistry.ListResponse) {
     option (google.api.http) = {
-      get: "/devices"
+      get: "/namespaces/{namespace}"
     };
   }
   rpc Delete(infinimesh.deviceregistry.DeleteRequest) returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete: "/devices/{id}"
+      delete: "/namespaces/{namespace}/{id}"
     };
   }
 }
 
-// Shadow
 service Shadows {
   rpc Get(infinimesh.shadow.GetRequest) returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}/shadow"
+      get: "/namespaces/{namespace}/{id}/shadow"
     };
   }
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest) returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
-      post: "/devices/{id}/shadow/desired"
+      post: "/namespaces/{namespace}/{id}/shadow/desired"
       body: "data"
     };
   }
   rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest) returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}/shadow/reported"
+      get: "/namespace/{namespace}/namespaces/{namespace}/{id}/shadow/reported"
     };
   }
 }
 
-// Account
 service Account {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
@@ -104,13 +101,10 @@ service Account {
   }
 }
 
-message ListObjectsRequest {}
-
-// Don't use infinimesh.node.ListObjectsRequest,
-// because it allows the caller to set the account
-// id. however, here we don't allow this. the
-// account id will be derived from the JWT token,
-// and the user can not choose it.
+// TODO how to list direct access grants
+message ListObjectsRequest {
+  string namespace = 1;
+}
 
 message CreateObjectRequest {
   // Hide parent because we use it as path param and is not part of the body.
@@ -121,29 +115,45 @@ message CreateObjectRequest {
   };
   string parent = 1;
   string name = 2;
+  string namespace = 3;
 }
 
 // Object
 service ObjectService {
   rpc ListObjects(ListObjectsRequest) returns (infinimesh.node.ListObjectsResponse) {
     option (google.api.http) = {
-      get: "/objects"
+      get: "/namespaces/{namespace}/objects"
     };
   }
   rpc CreateObject(infinimesh.api.CreateObjectRequest) returns (infinimesh.node.Object) {
     option (google.api.http) = {
-      post: "/objects/{parent}/children"
+      post: "/namespaces/{namespace}/objects/{parent}/children"
       body: "*"
     };
   }
   rpc DeleteObject(infinimesh.node.DeleteObjectRequest) returns (infinimesh.node.DeleteObjectResponse) {
     option (google.api.http) = {
-      delete: "/objects/{uid}"
+      delete: "/namespaces/{namespace}/objects/{uid}"
     };
   }
 }
 
 service NamespaceService {
-  rpc ListNamespaces(infinimesh.node.ListNamespacesRequest) returns (infinimesh.node.ListNamespacesResponse);
-  rpc CreateNamespace(infinimesh.node.CreateNamespaceRequest) returns (infinimesh.node.CreateNamespaceResponse);
+  rpc CreateNamespace(infinimesh.node.CreateNamespaceRequest) returns (infinimesh.node.CreateNamespaceResponse) {
+    option (google.api.http) = {
+      post: "/namespaces"
+      body: "*"
+    };
+  };
+
+  rpc GetNamespace(infinimesh.node.GetNamespaceRequest) returns (infinimesh.node.GetNamespaceResponse) {
+    option (google.api.http) = {
+      get: "/namespaces/{namespace}"
+    };
+  };
+  rpc ListNamespaces(infinimesh.node.ListNamespacesRequest) returns (infinimesh.node.ListNamespacesResponse) {
+    option (google.api.http) = {
+      get: "/namespaces"
+    };
+  };
 }

@@ -11,21 +11,27 @@ import (
 )
 
 func init() {
-	namespacesCmd.Flags().BoolVar(&noHeaderFlag, "no-headers", false, "Hide table headers")
-	rootCmd.AddCommand(namespacesCmd)
+	listNamespacesCmd.Flags().BoolVar(&noHeaderFlag, "no-headers", false, "Hide table headers")
+	namespaceCmd.AddCommand(describeNamespace)
+	namespaceCmd.AddCommand(listNamespacesCmd)
+	rootCmd.AddCommand(namespaceCmd)
 
 }
 
-var namespacesCmd = &cobra.Command{
-	Use:     "namespaces",
-	Short:   "List namespaces",
-	Aliases: []string{"ns"},
+var namespaceCmd = &cobra.Command{
+	Use: "namespace",
+}
+
+var listNamespacesCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List namespaces",
 	Run: func(cmd *cobra.Command, args []string) {
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 
 		response, err := namespaceClient.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
 		if err != nil {
 			fmt.Println("grpc: failed to fetch data", err)
+			os.Exit(1)
 		}
 		_ = response
 		if !noHeaderFlag {
@@ -35,6 +41,34 @@ var namespacesCmd = &cobra.Command{
 		for _, ns := range response.Namespaces {
 			fmt.Fprintf(w, "%v\t%v\n", ns.GetName(), ns.GetId())
 		}
+
+		defer w.Flush()
+	},
+}
+
+var describeNamespace = &cobra.Command{
+	Use:     "describe",
+	Short:   "Describe namespace",
+	Aliases: []string{"desc"},
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("desc")
+		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
+
+		response, err := namespaceClient.GetNamespace(ctx, &nodepb.GetNamespaceRequest{Namespace: args[0]})
+		if err != nil {
+			fmt.Println("grpc: failed to fetch data", err)
+			os.Exit(1)
+		}
+		fmt.Println(response.GetNamespace())
+		// _ = response
+		// if !noHeaderFlag {
+		// 	fmt.Fprintf(w, "NAME\tID\t\n")
+		// }
+
+		// for _, ns := range response.Namespaces {
+		// 	fmt.Fprintf(w, "%v\t%v\n", ns.GetName(), ns.GetId())
+		// }
 
 		defer w.Flush()
 	},

@@ -50,3 +50,24 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 	}
 	return nil, status.Error(codes.PermissionDenied, "Account is not root")
 }
+
+func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.GetNamespaceResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   account,
+		Namespace: request.GetNamespace(),
+		Action:    nodepb.Action_READ,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		return n.client.GetNamespace(ctx, request)
+	}
+	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+}

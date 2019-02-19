@@ -16,6 +16,7 @@ type Repo interface {
 	GetAccount(ctx context.Context, accountID string) (account *nodepb.Account, err error)
 
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
+	IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
 	Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error)
 
