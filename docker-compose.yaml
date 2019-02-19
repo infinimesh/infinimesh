@@ -84,7 +84,7 @@ services:
   apiserver:
     image: quay.io/infinimesh/apiserver:latest
     environment:
-      - JWT_SIGNING_KEY="c3VwZXIgc2VjcmV0IGtleQo="
+      - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=
     depends_on:
       - device-registry
       - shadow-api
