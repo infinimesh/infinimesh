@@ -46,7 +46,7 @@ func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsR
 	// TODO ensure that root sees all, and others dont
 
 	// This request automatically runs in the scope of the user, no need to call IsAuthorized
-	return o.objectClient.ListObjects(ctx, &nodepb.ListObjectsRequest{Account: account})
+	return o.objectClient.ListObjects(ctx, &nodepb.ListObjectsRequest{Account: account, Namespace: request.GetNamespace()})
 }
 
 func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {

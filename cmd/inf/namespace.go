@@ -43,6 +43,7 @@ var listNamespacesCmd = &cobra.Command{
 	Short: "List namespaces",
 	Run: func(cmd *cobra.Command, args []string) {
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
+		defer w.Flush()
 
 		response, err := namespaceClient.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
 		if err != nil {
@@ -57,8 +58,6 @@ var listNamespacesCmd = &cobra.Command{
 		for _, ns := range response.Namespaces {
 			fmt.Fprintf(w, "%v\t%v\n", ns.GetName(), ns.GetId())
 		}
-
-		defer w.Flush()
 	},
 }
 
