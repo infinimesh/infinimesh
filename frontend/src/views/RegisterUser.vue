@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="mb-3">Register new user</h1>
+    <h1 class="mb-3">Register a new user</h1>
     <v-card>
     </v-card>
   </v-container>

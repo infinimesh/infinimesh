@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card-title>
-      <h1 class="mb-3">Shadow - {{ device.id }}</h1>
+      <h1 class="mb-3">View and modify the Shadow of {{ device.id }}</h1>
     </v-card-title>
     <v-divider></v-divider>
     <v-layout row wrap>

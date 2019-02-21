@@ -1,7 +1,7 @@
 <template>
     <div>
       <v-card-title>
-        <h1 class="mb-3">Device Management</h1>
+        <h1 class="mb-3">Display, manage, modify and organize your devices</h1>
       </v-card-title>
       <v-divider></v-divider>
       <v-layout

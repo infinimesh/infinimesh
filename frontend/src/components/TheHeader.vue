@@ -12,7 +12,7 @@
       class="headline text-uppercase white--text"
     >
       <img
-        src="http://dev53.onlinetestingserver.com/project-html/infinimesh/images/logo_03.png"
+        src="../../images/infinimesh_small_bw.png"
         alt="Infinimesh"
         @click="$router.push('/devices')"
         style="cursor: pointer"

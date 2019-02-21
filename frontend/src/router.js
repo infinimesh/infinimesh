@@ -18,7 +18,7 @@ const router = new Router({
   routes: [
     {
       path: "/devices",
-      name: "View devices",
+      name: "devices",
       component: Devices
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
@@ -28,7 +28,7 @@ const router = new Router({
     },
     {
       path: "/devices/manage",
-      name: "Manage devices",
+      name: "organize",
       component: DeviceManagement
     },
     {
@@ -63,7 +63,7 @@ const router = new Router({
     },
     {
       path: "/accounts",
-      name: "Account Management",
+      name: "accounts",
       component: AccountManagement
     },
     {

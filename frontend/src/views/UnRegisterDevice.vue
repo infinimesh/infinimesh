@@ -1,7 +1,7 @@
 <template>
   <v-container xs12>
     <v-layout column wrap>
-      <h1 class="mb-3">Unregister device</h1>
+      <h1 class="mb-3">Unregister a device</h1>
       <v-flex>
         <v-card>
           <v-card-title primary-title>

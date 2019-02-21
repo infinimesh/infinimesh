@@ -4,9 +4,7 @@
       flat
     >
       <v-card-title>
-        <h1>
-          Register new device
-        </h1>
+        <h1>Register your new device</h1>
       </v-card-title>
       <v-form
         class="pa-3 pt-4"

@@ -1,9 +1,7 @@
 <template>
   <div>
     <v-card-title>
-      <h1>
-        Device registry
-      </h1>
+      <h1>Register, edit, enable or disable your devices</h1>
     </v-card-title>
     <v-card-text>
       <v-card
