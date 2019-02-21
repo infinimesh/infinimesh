@@ -54,17 +54,10 @@
       </v-list>
     </v-expand-transition>
     <v-expand-transition>
-      <v-card
-        v-if="isEditing"
-        flat
+      <new-user
+       v-if="isEditing"
       >
-        <v-card-text>
-          <v-text-field
-            label="Account data"
-            clearable
-          ></v-text-field>
-        </v-card-text>
-      </v-card>
+      </new-user>
     </v-expand-transition>
   </v-card-text>
   <v-card-actions>
@@ -72,10 +65,10 @@
       :disabled="!isEditing && !model"
       @click="isEditing = true"
       round
+      class="mr-4"
     >
-      {{ (isEditing) ? "Update" : "Edit"}}
+      {{ (isEditing) ? "Save" : "Edit"}}
     </v-btn>
-    <v-spacer></v-spacer>
     <v-btn
       :disabled="!model && !isEditing"
       @click="model = null; isEditing = false"
@@ -89,6 +82,8 @@
 </template>
 
 <script>
+import NewUser from "../components/NewUser.vue";
+
 export default {
   data: () => ({
     descriptionLimit: 60,
@@ -98,7 +93,6 @@ export default {
     search: null,
     isEditing: false
   }),
-
   computed: {
     fields() {
       if (!this.model) return [];
@@ -144,6 +138,9 @@ export default {
         })
         .finally(() => (this.isLoading = false));
     }
+  },
+  components: {
+    NewUser
   }
 };
 </script>
