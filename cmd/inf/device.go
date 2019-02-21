@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/spf13/cobra"
 
 	"encoding/base64"
 
+	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
 func init() {
 	createDeviceCmd.Flags().StringVarP(&namespaceFlag, "namespace", "n", "", "Namespace")
+	lsDeviceCmd.Flags().StringVarP(&namespaceFlag, "namespace", "n", "", "Namespace")
+	devicesCmd.AddCommand(lsDeviceCmd)
 	devicesCmd.AddCommand(createDeviceCmd)
 	rootCmd.AddCommand(devicesCmd)
 }
@@ -20,6 +25,32 @@ func init() {
 var devicesCmd = &cobra.Command{
 	Use:     "device",
 	Aliases: []string{"devices", "dev"},
+}
+
+var lsDeviceCmd = &cobra.Command{
+	Use: "ls",
+	Run: func(cmd *cobra.Command, args []string) {
+		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
+		defer w.Flush()
+
+		fmt.Println("ns", namespaceFlag)
+		response, err := objectClient.ListObjects(ctx, &apipb.ListObjectsRequest{
+			Namespace: namespaceFlag,
+		})
+		if err != nil {
+			fmt.Println("grpc: failed to fetch data", err)
+			os.Exit(1)
+		}
+
+		if !noHeaderFlag {
+			fmt.Fprintf(w, "NAME\tID\t\n")
+		}
+
+		for _, object := range response.GetObjects() {
+			fmt.Fprintf(w, "%v\t%v\n", object.GetName(), object.GetUid())
+		}
+
+	},
 }
 
 var createDeviceCmd = &cobra.Command{

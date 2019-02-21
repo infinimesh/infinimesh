@@ -36,12 +36,12 @@ func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.Del
 }
 
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	inheritedObjects, err := s.Repo.ListForAccount(ctx, request.GetAccount())
+	objects, err := s.Repo.ListInNamespaceForAccount(ctx, request.GetAccount(), request.GetNamespace(), false)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &nodepb.ListObjectsResponse{
-		Objects: inheritedObjects,
+		Objects: objects,
 	}, nil
 }

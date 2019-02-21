@@ -230,6 +230,62 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	return a.GetUids()["new"], nil
 }
 
+// TODO what about root=true ?
+// TODO direct grants are not considered yet
+func (s *dGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
+	txn := s.dg.NewReadOnlyTxn()
+
+	var depth int
+	if recurse {
+		depth = 10
+	} else {
+		depth = 1
+	}
+
+	q := fmt.Sprintf(`query list($account: string, $namespace: string){
+                     var(func: uid($account)) {
+                       access.to.namespace @filter(eq(name,$namespace)){
+                         owns {
+                           OBJs as uid
+                         } @filter(not(has(~children)))
+                       }
+                     }
+
+                     nodes(func: uid(OBJs)) @recurse(depth: %v) {
+                       children{} #@filter(not(has(~children)))
+                       uid
+                       name
+                       kind
+                     }
+                   }`, depth)
+
+	vars := map[string]string{
+		"$account":   accountID,
+		"$namespace": namespaceName,
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	var res struct {
+		Nodes []Object `json:"nodes"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, object := range res.Nodes {
+		objects = append(objects, mapObject(&object))
+	}
+
+	return objects, nil
+}
+
+// for --all-namespaces
 func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
@@ -331,6 +387,7 @@ func mapObject(o *Object) *nodepb.Object {
 	res := &nodepb.Object{
 		Uid:     o.UID,
 		Name:    o.Name,
+		Kind:    o.Kind,
 		Objects: objects,
 	}
 

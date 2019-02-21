@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/infinimesh/infinimesh/pkg/node"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 var repo node.Repo
@@ -52,4 +53,29 @@ func TestAuthorize(t *testing.T) {
 	decision, err := repo.IsAuthorized(ctx, node, account, "READ")
 	require.NoError(t, err)
 	require.True(t, decision)
+}
+
+func TestListInNamespaceForAccount(t *testing.T) {
+	ctx := context.Background()
+
+	nsName := randomdata.SillyName()
+
+	// Setup
+	_, err := repo.CreateNamespace(ctx, nsName)
+	require.NoError(t, err)
+
+	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password", false)
+	require.NoError(t, err)
+
+	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName)
+	require.NoError(t, err)
+
+	err = repo.AuthorizeNamespace(ctx, account, nsName, nodepb.Action_WRITE)
+	require.NoError(t, err)
+
+	objs, err := repo.ListInNamespaceForAccount(ctx, account, nsName, true)
+	require.NoError(t, err)
+
+	// Assert
+	require.Contains(t, objs, &nodepb.Object{Uid: newObj, Name: "sample-node", Kind: "asset", Objects: []*nodepb.Object{}})
 }
