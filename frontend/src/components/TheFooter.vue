@@ -28,13 +28,10 @@
 
 <script>
 export default {
-  data() {
-    return {
-      links: ["HOME", "ABOUT US", "CONTACT US"]
-    };
-  }
+  data: () => ({
+    links: ["Home", "Contact"]
+  })
 };
 </script>
-
 <style>
 </style>

@@ -24,6 +24,7 @@
             :type="show ? 'text' : 'password'"
             @click:append="show = !show"
             @keyup.enter="login"
+	    @keyup.enter.native="onEnter"	
           ></v-text-field>
           <p
             v-if="notLoggedIn"

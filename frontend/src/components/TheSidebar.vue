@@ -29,11 +29,11 @@
 export default {
   data: () => ({
     pages: [
-      ["Devices", "devices"],
-      ["Organize", "organize"],
-      ["Monitoring", "monitoring"],
-      ["Integrations", "integrations"],
-      ["Accounts", "accounts"]
+      ["Devices", "Devices"],
+      ["Device Management", "Device Management"],
+      ["Device Monitoring", "Device Monitoring"],
+      ["Integrations", "Integrations"],
+      ["Account Management", "Account Management"]
     ]
   })
 };
