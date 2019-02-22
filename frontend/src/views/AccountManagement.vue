@@ -46,13 +46,20 @@
     </v-card-text>
     <v-card-actions>
       <v-btn
+<<<<<<< HEAD
         :disabled="!isEditing && !model"
         @click="isEditing = true"
         round
         class="mr-4"
+=======
+        color="primary lighten-1"
+        round
+        @click="creatingUser = true"
+>>>>>>> add validation / improve UX for user mgmt
       >
         {{ isEditing ? "Save" : "Edit" }}
       </v-btn>
+<<<<<<< HEAD
       <v-btn
         :disabled="!model && !isEditing"
         @click="
@@ -66,6 +73,64 @@
       </v-btn>
     </v-card-actions>
   </div>
+=======
+    </v-layout>
+  </v-card-text>
+  <v-divider></v-divider>
+  <v-card-text>
+    <v-expand-transition>
+      <v-list
+        v-if="model"
+        class="grey lighten-4 indigo--text"
+      >
+        <v-list-tile
+          v-for="(field, i) in fields"
+          :key="i"
+        >
+          <v-list-tile-content>
+            <v-list-tile-title v-text="field.value"></v-list-tile-title>
+            <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-expand-transition>
+    <v-expand-transition>
+      <new-user
+       v-if="creatingUser"
+       @formValid="formValid=$event"
+      >
+      </new-user>
+    </v-expand-transition>
+  </v-card-text>
+  <v-card-actions>
+    <v-btn
+      v-if="!editingUser && model"
+      @click="editingUser = true"
+      round
+      class="mr-4"
+    >
+      Edit
+    </v-btn>
+    <v-btn
+      v-if="editingUser || creatingUser"
+      :disabled="!formValid"
+      @click="save"
+      round
+      class="mr-4"
+    >
+      Save
+    </v-btn>
+    <v-btn
+      v-if="model || creatingUser"
+      @click="model = null; editingUser = false; creatingUser = false"
+      round
+    >
+      Close
+      <v-icon right>mdi-close-circle</v-icon>
+    </v-btn>
+  </v-card-actions>
+</div>
+>>>>>>> add validation / improve UX for user mgmt
 </template>
 
 <script>
@@ -78,7 +143,9 @@ export default {
     isLoading: false,
     model: null,
     search: null,
-    isEditing: false
+    editingUser: false,
+    creatingUser: false,
+    formValid: false
   }),
   computed: {
     fields() {
@@ -124,6 +191,11 @@ export default {
           console.log(err);
         })
         .finally(() => (this.isLoading = false));
+    }
+  },
+  methods: {
+    save() {
+      console.log("save user");
     }
   },
   components: {
