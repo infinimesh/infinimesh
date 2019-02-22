@@ -8,47 +8,31 @@
             Are you sure you want to unregister device with Id: {{ id }}
           </v-card-title>
           <v-card-text>
-            This will prevent clients from further communication with this device.
+            This will prevent clients from further communication with this
+            device.
           </v-card-text>
           <v-alert
-          :value="messageSuccess.value"
-          type="success"
-          icon="check_circle"
+            :value="messageSuccess.value"
+            type="success"
+            icon="check_circle"
           >
-          {{ messageSuccess.message }}
+            {{ messageSuccess.message }}
           </v-alert>
-          <v-alert
-           :value="messageFailure.value"
-           type="error"
-           icon="error"
-           >
-           {{ messageFailure.value }}: {{ messageFailure.error }}
-           </v-alert>
+          <v-alert :value="messageFailure.value" type="error" icon="error">
+            {{ messageFailure.value }}: {{ messageFailure.error }}
+          </v-alert>
           <v-card-actions>
-            <v-layout
-              row
-              wrap
-            >
+            <v-layout row wrap>
               <div>
-                <v-btn
-                  round
-                  class="mr-5"
-                  to="/devices"
-                >
-                  <v-icon
-                    left
-                  >
+                <v-btn round class="mr-5" to="/devices">
+                  <v-icon left>
                     chevron_left
                   </v-icon>
                   Return
                 </v-btn>
               </div>
               <div>
-                <v-btn
-                  round color="primary"
-                  dark
-                  @click="unRegisterDevice(id)"
-                  >
+                <v-btn round color="primary" dark @click="unRegisterDevice(id)">
                   Unregister device
                 </v-btn>
               </div>
@@ -100,5 +84,4 @@ export default {
 };
 </script>
 
-<style lang="css">
-</style>
+<style lang="css"></style>

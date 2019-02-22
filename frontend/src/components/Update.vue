@@ -1,8 +1,6 @@
 <template>
   <div>
-    <v-card-title
-      primary-title
-    >
+    <v-card-title primary-title>
       <h2>Update device information</h2>
     </v-card-title>
     <v-card-text>
@@ -14,12 +12,8 @@
         v-on:keyup.enter="addTag($event)"
       >
       </v-text-field>
-      <v-chip
-       v-for="(tag, i) in device.tags"
-       :key="i"
-       small
-      >
-         {{ tag }}
+      <v-chip v-for="(tag, i) in device.tags" :key="i" small>
+        {{ tag }}
         <v-icon
           class="ml-1"
           small
@@ -29,58 +23,31 @@
           cancel
         </v-icon>
       </v-chip>
-      <v-checkbox
-       label="Device enabled"
-       v-model="checkbox"
-       class="mt-5"
-      >
+      <v-checkbox label="Device enabled" v-model="checkbox" class="mt-5">
       </v-checkbox>
     </v-card-text>
-    <v-alert
-      :value="messageSuccess.value"
-      type="success"
-      icon="check_circle"
-    >
+    <v-alert :value="messageSuccess.value" type="success" icon="check_circle">
       {{ messageSuccess.message }}
     </v-alert>
-    <v-alert
-     :value="messageFailure.value"
-     type="error"
-     icon="error"
-    >
+    <v-alert :value="messageFailure.value" type="error" icon="error">
       {{ messageFailure.value }}: {{ messageFailure.error }}
     </v-alert>
     <v-card-actions>
-      <v-layout
-        row
-        wrap
-      >
+      <v-layout row wrap>
         <div>
-          <v-btn
-            round
-            class="mr-4 mb-3"
-            @click="$emit('close')"
-            small
-          >
-            <v-icon
-              left
-            >
+          <v-btn round class="mr-4 mb-3" @click="$emit('close')" small>
+            <v-icon left>
               close
             </v-icon>
             Abort
           </v-btn>
         </div>
         <div>
-         <v-btn
-           round
-           small
-           class="mb-3"
-           @click="updateDevice()"
-         >
-           Update device
-         </v-btn>
-         </div>
-     </v-layout>
+          <v-btn round small class="mb-3" @click="updateDevice()">
+            Update device
+          </v-btn>
+        </div>
+      </v-layout>
     </v-card-actions>
   </div>
 </template>
@@ -159,5 +126,4 @@ export default {
 };
 </script>
 
-<style lang="css">
-</style>
+<style lang="css"></style>

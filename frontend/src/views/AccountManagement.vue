@@ -1,84 +1,71 @@
 <template>
   <div>
-  <v-card-title>
-    <h1 class="mb-3">Account Management</h1>
-  </v-card-title>
-  <v-card-text>
-    <v-layout
-      row
-      wrap
-    >
-      <v-autocomplete
-        v-model="model"
-        :items="items"
-        :loading="isLoading"
-        :search-input.sync="search"
-        color="white"
-        hide-no-data
-        hide-selected
-        item-text="Description"
-        item-value="API"
-        label="Registered accounts"
-        placeholder="Start typing to Search"
-        prepend-icon="mdi-database-search"
-        return-object
-      ></v-autocomplete>
-      <v-spacer></v-spacer>
+    <v-card-title>
+      <h1 class="mb-3">Account Management</h1>
+    </v-card-title>
+    <v-card-text>
+      <v-layout row wrap>
+        <v-autocomplete
+          v-model="model"
+          :items="items"
+          :loading="isLoading"
+          :search-input.sync="search"
+          color="white"
+          hide-no-data
+          hide-selected
+          item-text="Description"
+          item-value="API"
+          label="Registered accounts"
+          placeholder="Start typing to Search"
+          prepend-icon="mdi-database-search"
+          return-object
+        ></v-autocomplete>
+        <v-spacer></v-spacer>
+        <v-btn color="primary lighten-1" round @click="isEditing = true">
+          <v-icon>
+            add
+          </v-icon>
+        </v-btn>
+      </v-layout>
+    </v-card-text>
+    <v-divider></v-divider>
+    <v-card-text>
+      <v-expand-transition>
+        <v-list v-if="model" class="grey lighten-4 indigo--text">
+          <v-list-tile v-for="(field, i) in fields" :key="i">
+            <v-list-tile-content>
+              <v-list-tile-title v-text="field.value"></v-list-tile-title>
+              <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-expand-transition>
+      <v-expand-transition>
+        <new-user v-if="isEditing"> </new-user>
+      </v-expand-transition>
+    </v-card-text>
+    <v-card-actions>
       <v-btn
-        color="primary lighten-1"
-        round
+        :disabled="!isEditing && !model"
         @click="isEditing = true"
+        round
+        class="mr-4"
       >
-        <v-icon>
-          add
-        </v-icon>
+        {{ isEditing ? "Save" : "Edit" }}
       </v-btn>
-    </v-layout>
-  </v-card-text>
-  <v-divider></v-divider>
-  <v-card-text>
-    <v-expand-transition>
-      <v-list
-        v-if="model"
-        class="grey lighten-4 indigo--text"
+      <v-btn
+        :disabled="!model && !isEditing"
+        @click="
+          model = null;
+          isEditing = false;
+        "
+        round
       >
-        <v-list-tile
-          v-for="(field, i) in fields"
-          :key="i"
-        >
-          <v-list-tile-content>
-            <v-list-tile-title v-text="field.value"></v-list-tile-title>
-            <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-expand-transition>
-    <v-expand-transition>
-      <new-user
-       v-if="isEditing"
-      >
-      </new-user>
-    </v-expand-transition>
-  </v-card-text>
-  <v-card-actions>
-    <v-btn
-      :disabled="!isEditing && !model"
-      @click="isEditing = true"
-      round
-      class="mr-4"
-    >
-      {{ (isEditing) ? "Save" : "Edit"}}
-    </v-btn>
-    <v-btn
-      :disabled="!model && !isEditing"
-      @click="model = null; isEditing = false"
-      round
-    >
-      Close
-      <v-icon right>mdi-close-circle</v-icon>
-    </v-btn>
-  </v-card-actions>
-</div>
+        Close
+        <v-icon right>mdi-close-circle</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </div>
 </template>
 
 <script>
@@ -145,5 +132,4 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
-</style>
+<style lang="css" scoped></style>

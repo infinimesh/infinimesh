@@ -1,34 +1,17 @@
 <template>
-  <v-layout
-    row wrap
-  >
-    <v-card-title
-      primary-title
-    >
+  <v-layout row wrap>
+    <v-card-title primary-title>
       <h2>Device information</h2>
     </v-card-title>
-    <v-card-text
-    >
-      <v-icon
-        v-if="device.enabled"
-        color="green"
-        class="mr-2"
-      >
+    <v-card-text>
+      <v-icon v-if="device.enabled" color="green" class="mr-2">
         check_circle
       </v-icon>
-      <v-icon
-        v-else
-        color="grey"
-        class="mr-2"
-      >
+      <v-icon v-else color="grey" class="mr-2">
         block
       </v-icon>
-      {{ (device.enabled) ? "Device enabled" : "Device disabled" }}
-      <v-chip
-       v-for="(tag, i) in device.tags"
-       :key="i"
-       small
-      >
+      {{ device.enabled ? "Device enabled" : "Device disabled" }}
+      <v-chip v-for="(tag, i) in device.tags" :key="i" small>
         {{ tag }}
       </v-chip>
     </v-card-text>
@@ -61,5 +44,4 @@ export default {
 };
 </script>
 
-<style lang="css">
-</style>
+<style lang="css"></style>

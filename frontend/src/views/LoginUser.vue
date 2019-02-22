@@ -1,22 +1,12 @@
 <template>
   <v-container>
-    <v-layout
-      row
-      wrap
-      justify-center
-      align-center
-    >
-      <v-card
-        min-width="50%"
-      >
+    <v-layout row wrap justify-center align-center>
+      <v-card min-width="50%">
         <v-card-title>
           <h1 class="mb-3">Login</h1>
         </v-card-title>
         <v-card-text>
-          <v-text-field
-            label="Username"
-            v-model="userName"
-          ></v-text-field>
+          <v-text-field label="Username" v-model="userName"></v-text-field>
           <v-text-field
             label="Password"
             v-model="password"
@@ -24,27 +14,17 @@
             :type="show ? 'text' : 'password'"
             @click:append="show = !show"
             @keyup.enter="login"
-	    @keyup.enter.native="onEnter"	
+            @keyup.enter.native="onEnter"
           ></v-text-field>
-          <p
-            v-if="notLoggedIn"
-            style="color: red"
-          >
+          <p v-if="notLoggedIn" style="color: red">
             Login required
           </p>
         </v-card-text>
-        <v-alert
-         v-model="loginError"
-         type="error"
-         icon="error"
-        >
+        <v-alert v-model="loginError" type="error" icon="error">
           {{ errorMessage }}
         </v-alert>
         <v-card-actions>
-          <v-btn
-            color="primary"
-            @click="login"
-          >
+          <v-btn color="primary" @click="login">
             Login
           </v-btn>
         </v-card-actions>
@@ -94,5 +74,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -6,75 +6,52 @@
     <v-divider></v-divider>
     <v-layout row wrap>
       <v-flex>
-        <v-card
-          flat
-          class="pb-3"
-          width="50%"
-        >
+        <v-card flat class="pb-3" width="50%">
           <v-card-title>
             <h2>Reported state</h2>
           </v-card-title>
-          <div
-            id="scrollableCard"
-          >
-            <v-card
-              flat
-            >
-            <v-card
-              v-for="(response, index) in shadowMessages"
-              :key="index"
-              flat
-            >
+          <div id="scrollableCard">
+            <v-card flat>
+              <v-card
+                v-for="(response, index) in shadowMessages"
+                :key="index"
+                flat
+              >
+                <v-card-text>
+                  <strong>Timestamp</strong>:
+                  {{ response.result.reportedDelta.timestamp }}
+                  <v-spacer></v-spacer>
+                  <strong>Data</strong>:
+                  {{ response.result.reportedDelta.data }}
+                </v-card-text>
+              </v-card>
               <v-card-text>
-                <strong>Timestamp</strong>: {{ response.result.reportedDelta.timestamp }}
+                <strong>Initial timestamp</strong>:
+                {{ shadow.initialState.timestamp }}
                 <v-spacer></v-spacer>
-                <strong>Data</strong>: {{ response.result.reportedDelta.data }}
+                <strong>Initial data</strong>: {{ shadow.initialState.data }}
               </v-card-text>
             </v-card>
-            <v-card-text>
-              <strong>Initial timestamp</strong>: {{ shadow.initialState.timestamp }}
-              <v-spacer></v-spacer>
-              <strong>Initial data</strong>: {{ shadow.initialState.data }}
-            </v-card-text>
-          </v-card>
-        </div>
+          </div>
         </v-card>
       </v-flex>
-      <v-divider
-        vertical
-      ></v-divider>
-      <v-card
-        flat
-        width="50%"
-      >
-        <v-layout
-          row
-        >
+      <v-divider vertical></v-divider>
+      <v-card flat width="50%">
+        <v-layout row>
           <v-flex>
-            <component
-              :is="activeComp"
-            ></component>
+            <component :is="activeComp"></component>
           </v-flex>
-          <v-flex
-            max-width="30px"
-          >
-            <v-toolbar
-              card
-              color="white"
-            >
+          <v-flex max-width="30px">
+            <v-toolbar card color="white">
               <v-spacer />
-              <v-btn
-                fab
-                small
-                @click="isEditing = !isEditing"
-              >
-              <v-icon v-if="isEditing">mdi-close</v-icon>
-              <v-icon v-else>mdi-pencil</v-icon>
+              <v-btn fab small @click="isEditing = !isEditing">
+                <v-icon v-if="isEditing">mdi-close</v-icon>
+                <v-icon v-else>mdi-pencil</v-icon>
               </v-btn>
             </v-toolbar>
           </v-flex>
         </v-layout>
-    </v-card>
+      </v-card>
     </v-layout>
   </div>
 </template>
@@ -138,8 +115,8 @@ export default {
 </script>
 
 <style lang="css" scoped>
-  #scrollableCard {
-  height: 400px;
-  overflow-y: auto;
-  }
+#scrollableCard {
+height: 400px;
+overflow-y: auto;
+}
 </style>

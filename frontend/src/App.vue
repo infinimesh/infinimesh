@@ -1,21 +1,11 @@
 <template>
   <v-app>
     <Header />
-    <v-layout
-      row
-    >
-      <Sidebar
-        v-if="showSidebar"
-      ></Sidebar>
+    <v-layout row>
+      <Sidebar v-if="showSidebar"></Sidebar>
       <v-flex>
-        <v-container
-          fluid
-          class="pa-0 ma-0"
-        >
-          <v-card
-            flat
-            :min-height="windowHeight"
-          >
+        <v-container fluid class="pa-0 ma-0">
+          <v-card flat :min-height="windowHeight">
             <router-view />
           </v-card>
         </v-container>

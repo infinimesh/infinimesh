@@ -1,18 +1,11 @@
 <template>
   <v-layout column wrap md9 lg6 xl4>
-    <v-card
-      flat
-    >
+    <v-card flat>
       <v-card-title>
         <h1>Register your new device</h1>
       </v-card-title>
-      <v-form
-        class="pa-3 pt-4"
-        v-model="form"
-      >
-        <div
-          style="max-width: 900px"
-        >
+      <v-form class="pa-3 pt-4" v-model="form">
+        <div style="max-width: 900px">
           <v-text-field
             label="Device Id"
             clearable
@@ -28,13 +21,8 @@
             v-on:keyup.enter="addTag($event)"
           >
           </v-text-field>
-          <v-chip
-            class="mb-3"
-            v-for="(tag, i) in tags"
-            :key="i"
-            small
-          >
-             {{ tag }}
+          <v-chip class="mb-3" v-for="(tag, i) in tags" :key="i" small>
+            {{ tag }}
             <v-icon
               class="ml-1"
               small
@@ -43,18 +31,12 @@
             >
               cancel
             </v-icon>
-         </v-chip>
+          </v-chip>
         </div>
-       <v-divider
-        class="mb-4"
-        v-if="tags.length"
-       ></v-divider>
+        <v-divider class="mb-4" v-if="tags.length"></v-divider>
         <v-layout row wrap>
           <v-flex>
-            <div
-              id="scrollableField"
-              class="pr-2"
-            >
+            <div id="scrollableField" class="pr-2">
               <v-textarea
                 class="mt-2"
                 clearable
@@ -63,72 +45,49 @@
                 v-model="certificate.pem_data"
                 label="Certificate"
                 rows="1"
-               >
+              >
               </v-textarea>
             </div>
           </v-flex>
-          <v-flex
-           class="ml-3"
-          >
+          <v-flex class="ml-3">
             <upload-button
               round
               color="secondary lighten-2"
               class="white--text"
               :fileChangedCallback="fileChanged"
             >
-             <template slot="icon">
-               <v-icon
-                 class="ml-2"
-                 style="color: white"
-               >
-                 cloud_upload
-               </v-icon>
-             </template>
-           </upload-button>
+              <template slot="icon">
+                <v-icon class="ml-2" style="color: white">
+                  cloud_upload
+                </v-icon>
+              </template>
+            </upload-button>
           </v-flex>
         </v-layout>
-        <v-checkbox
-          class="mt-5"
-          label="Device enabled"
-          v-model="checkbox"
-        >
+        <v-checkbox class="mt-5" label="Device enabled" v-model="checkbox">
         </v-checkbox>
       </v-form>
-      <v-alert
-        :value="messageSuccess.value"
-        type="success"
-        icon="check_circle"
-      >
+      <v-alert :value="messageSuccess.value" type="success" icon="check_circle">
         {{ messageSuccess.message }}
       </v-alert>
-      <v-alert
-       :value="messageFailure.value"
-       type="error"
-       icon="error"
-      >
+      <v-alert :value="messageFailure.value" type="error" icon="error">
         {{ messageFailure.value }}: {{ messageFailure.error }}
       </v-alert>
       <v-card-actions>
-        <v-layout
-          row
-          wrap
-        >
-         <v-btn
-           round
-           color="primary"
-           class="mr-4"
-           :disabled="!form"
-           @click="register()"
-         >
-           Register
-         </v-btn>
-         <v-btn
-           round
-           to="/devices"
-         >
-           Return
-         </v-btn>
-       </v-layout>
+        <v-layout row wrap>
+          <v-btn
+            round
+            color="primary"
+            class="mr-4"
+            :disabled="!form"
+            @click="register()"
+          >
+            Register
+          </v-btn>
+          <v-btn round to="/devices">
+            Return
+          </v-btn>
+        </v-layout>
       </v-card-actions>
     </v-card>
     <v-divider />
@@ -229,8 +188,8 @@ export default {
 </script>
 
 <style lang="css" scoped>
-  #scrollableField {
-  height: 150px;
-  overflow-y: auto;
-  }
+#scrollableField {
+height: 150px;
+overflow-y: auto;
+}
 </style>

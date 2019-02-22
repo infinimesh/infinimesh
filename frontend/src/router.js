@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
+import VueChartkick from "vue-chartkick";
+import Chart from "chart.js";
 import Devices from "./views/Devices.vue";
 import RegisterDevice from "./views/RegisterDevice.vue";
 import UnRegisterDevice from "./views/UnRegisterDevice.vue";
@@ -9,8 +11,9 @@ import LoginUser from "./views/LoginUser.vue";
 import RegisterUser from "./views/RegisterUser.vue";
 import LogoutUser from "./views/LogoutUser.vue";
 import AccountManagement from "./views/AccountManagement.vue";
+import HomeDashboard from "./views/HomeDashboard.vue";
 
-Vue.use(Router);
+Vue.use(Router, VueChartkick, { adapter: Chart });
 
 const router = new Router({
   mode: "history",
@@ -65,6 +68,11 @@ const router = new Router({
       path: "/accounts",
       name: "Account Management",
       component: AccountManagement
+    },
+    {
+      path: "/dashboard",
+      name: "Dashboard",
+      component: HomeDashboard
     },
     {
       path: "*",
