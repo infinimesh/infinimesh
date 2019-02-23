@@ -21,7 +21,11 @@
           return-object
         ></v-autocomplete>
         <v-spacer></v-spacer>
-        <v-btn color="primary lighten-1" round @click="isEditing = true">
+        <v-btn
+          color="primary lighten-1"
+          round
+          @click="creatingUser = true"
+        >
           <v-icon>
             add
           </v-icon>
@@ -29,54 +33,6 @@
       </v-layout>
     </v-card-text>
     <v-divider></v-divider>
-    <v-card-text>
-      <v-expand-transition>
-        <v-list v-if="model" class="grey lighten-4 indigo--text">
-          <v-list-tile v-for="(field, i) in fields" :key="i">
-            <v-list-tile-content>
-              <v-list-tile-title v-text="field.value"></v-list-tile-title>
-              <v-list-tile-sub-title v-text="field.key"></v-list-tile-sub-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </v-expand-transition>
-      <v-expand-transition>
-        <new-user v-if="isEditing"> </new-user>
-      </v-expand-transition>
-    </v-card-text>
-    <v-card-actions>
-      <v-btn
-<<<<<<< HEAD
-        :disabled="!isEditing && !model"
-        @click="isEditing = true"
-        round
-        class="mr-4"
-=======
-        color="primary lighten-1"
-        round
-        @click="creatingUser = true"
->>>>>>> add validation / improve UX for user mgmt
-      >
-        {{ isEditing ? "Save" : "Edit" }}
-      </v-btn>
-<<<<<<< HEAD
-      <v-btn
-        :disabled="!model && !isEditing"
-        @click="
-          model = null;
-          isEditing = false;
-        "
-        round
-      >
-        Close
-        <v-icon right>mdi-close-circle</v-icon>
-      </v-btn>
-    </v-card-actions>
-  </div>
-=======
-    </v-layout>
-  </v-card-text>
-  <v-divider></v-divider>
   <v-card-text>
     <v-expand-transition>
       <v-list
@@ -130,7 +86,6 @@
     </v-btn>
   </v-card-actions>
 </div>
->>>>>>> add validation / improve UX for user mgmt
 </template>
 
 <script>

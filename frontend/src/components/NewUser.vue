@@ -1,8 +1,4 @@
 <template>
-<<<<<<< HEAD
-  <v-card flat width="50%">
-    <v-form v-model="form">
-=======
   <v-card
     flat
     width="50%"
@@ -14,53 +10,26 @@
       label="Username"
       v-model="user.name"
       :rules="rules.nameRules"
-      box
       clearable
     ></v-text-field>
     <v-layout
       row
       wrap
     >
->>>>>>> add validation / improve UX for user mgmt
       <v-text-field
-        label="Username"
-        v-model="user.name"
-        box
-<<<<<<< HEAD
-        clearable
-      ></v-text-field>
-      <v-layout row wrap>
-        <v-text-field
-          label="Password"
-          v-model="user.passwordOne"
-          box
-          class="mr-4"
-          :append-icon="show ? 'visibility_off' : 'visibility'"
-          :type="show ? 'text' : 'password'"
-          @click:append="show = !show"
-        ></v-text-field>
-        <v-text-field
-          label="Confirm password"
-          v-model="user.passwordTwo"
-          box
-          :rules="pwdRules"
-          :append-icon="show ? 'visibility_off' : 'visibility'"
-          :type="show ? 'text' : 'password'"
-          @click:append="show = !show"
-        ></v-text-field>
-      </v-layout>
-    </v-form>
-=======
-        class="mr-4"
+        style="width: 40%"
+        label="Password"
+        v-model="user.passwordOne"
         :rules="rules.pwdOneRules"
         :append-icon="show ? 'visibility_off' : 'visibility'"
         :type="show ? 'text' : 'password'"
         @click:append="show = !show"
       ></v-text-field>
       <v-text-field
+        style="width: 40%"
         label="Confirm password"
+        class="ml-4"
         v-model="user.passwordTwo"
-        box
         :rules="rules.pwdTwoRules"
         :append-icon="show ? 'visibility_off' : 'visibility'"
         :type="show ? 'text' : 'password'"
@@ -68,7 +37,6 @@
       ></v-text-field>
     </v-layout>
   </v-form>
->>>>>>> add validation / improve UX for user mgmt
   </v-card>
 </template>
 
@@ -98,7 +66,7 @@ export default {
             v.match(
               /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{10,})/g
             ) ||
-            "Min length 10 char. Must have: 1 uppercase and 1 lowercase letter, 1 numeric char, 1 special char"
+            "Min length 10 char. Must have: 1 uppercase and 1 lowercase letter, 1 numeric char, 1 special char."
         ],
         pwdTwoRules: [
           v => (!!v && v) === this.user.passwordOne || "Passwords do not match"
@@ -114,4 +82,5 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
