@@ -65,3 +65,20 @@ func (a *accountAPI) AuthFuncOverride(ctx context.Context, fullMethodName string
 	}
 	return ctx, nil
 }
+
+func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: account,
+	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.ListAccounts(ctx, request)
+		return res, err
+	}
+
+	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+
+}

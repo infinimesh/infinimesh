@@ -21,6 +21,22 @@
     "application/json"
   ],
   "paths": {
+    "/accounts/users": {
+      "get": {
+        "operationId": "ListAccounts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeListAccountsResponse"
+            }
+          }
+        },
+        "tags": [
+          "Account"
+        ]
+      }
+    },
     "/accounts/users/{name}": {
       "post": {
         "operationId": "CreateUserAccount",
@@ -617,6 +633,21 @@
         }
       }
     },
+    "nodeAccount": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "is_root": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
     "nodeCreateNamespaceRequest": {
       "type": "object",
       "properties": {
@@ -664,6 +695,17 @@
       "properties": {
         "namespace": {
           "$ref": "#/definitions/nodeNamespace"
+        }
+      }
+    },
+    "nodeListAccountsResponse": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodeAccount"
+          }
         }
       }
     },

@@ -113,6 +113,12 @@ service Account {
       body : "*";
   };
 };
+  rpc ListAccounts(infinimesh.node.ListAccountsRequest)
+      returns (infinimesh.node.ListAccountsResponse) {
+    option (google.api.http) = {
+      get : "/accounts/users"
+    };
+  };
 }
 
 // TODO how to list direct access grants

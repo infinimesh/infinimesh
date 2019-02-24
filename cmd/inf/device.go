@@ -34,7 +34,6 @@ var lsDeviceCmd = &cobra.Command{
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 		defer w.Flush()
 
-		fmt.Println("ns", namespaceFlag)
 		response, err := objectClient.ListObjects(ctx, &apipb.ListObjectsRequest{
 			Namespace: namespaceFlag,
 		})

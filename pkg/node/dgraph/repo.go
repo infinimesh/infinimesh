@@ -170,6 +170,40 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 	return false, "", errors.New("Invalid credentials")
 }
 
+func (s *dGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
+	txn := s.dg.NewReadOnlyTxn()
+
+	const q = `query accounts{
+                     accounts(func: eq(type, "account")) {
+                       uid
+                       name
+                     }
+                   }`
+
+	res, err := txn.Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Accounts []*Account `json:"accounts"`
+	}
+
+	if err := json.Unmarshal(res.Json, &result); err != nil {
+		return nil, err
+	}
+
+	for _, account := range result.Accounts {
+		accounts = append(accounts, &nodepb.Account{
+			Uid:    account.UID,
+			Name:   account.Name,
+			IsRoot: account.IsRoot,
+		})
+	}
+
+	return accounts, nil
+}
+
 func (s *dGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
 	defaultNs, err := s.CreateNamespace(ctx, username)
 	if err != nil {

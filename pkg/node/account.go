@@ -106,11 +106,21 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 }
 
 func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.AuthenticateRequest) (response *nodepb.AuthenticateResponse, err error) {
-
 	ok, uid, err := s.Repo.Authenticate(ctx, request.GetUsername(), request.GetPassword())
 	if !ok || (err != nil) {
 
-		return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
+		return &nodepb.AuthenticateResponse{}, status.Error(codes.Unauthenticated, "Invalid credentials")
 	}
 	return &nodepb.AuthenticateResponse{Success: ok, Account: &nodepb.Account{Uid: uid}}, nil
+}
+
+func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
+	accounts, err := s.Repo.ListAccounts(ctx)
+	if err != nil {
+		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list accounts")
+	}
+
+	return &nodepb.ListAccountsResponse{
+		Accounts: accounts,
+	}, nil
 }

@@ -110,11 +110,18 @@ message AuthorizeNamespaceRequest {
   Action action = 3;
 }
 
+message ListAccountsRequest {}
+message ListAccountsResponse{
+  repeated Account accounts = 1;
+}
+
 message AuthorizeNamespaceResponse {}
 
 service AccountService {
   rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
   rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest)

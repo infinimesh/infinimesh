@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
@@ -14,6 +15,7 @@ import (
 func init() {
 	accountCmd.AddCommand(accountLoginCmd)
 	accountCmd.AddCommand(accountCreateCmd)
+	accountCmd.AddCommand(accountListCmd)
 	rootCmd.AddCommand(accountCmd)
 }
 
@@ -57,5 +59,31 @@ var accountCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		fmt.Printf("Created user %v with id %v.\n", args[0], response.GetUid())
+	},
+}
+
+var accountListCmd = &cobra.Command{
+	Use:     "list",
+	Short:   "List user accounts",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
+		defer w.Flush()
+
+		response, err := accountClient.ListAccounts(ctx, &nodepb.ListAccountsRequest{})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to list accounts: %v\n", err)
+			os.Exit(1)
+		}
+
+		if !noHeaderFlag {
+			fmt.Fprintf(w, "NAME\tID\t\n")
+		}
+
+		for _, account := range response.GetAccounts() {
+			fmt.Fprintf(w, "%v\t%v\n", account.GetName(), account.GetUid())
+		}
+
 	},
 }
