@@ -21,6 +21,32 @@
     "application/json"
   ],
   "paths": {
+    "/accounts/token": {
+      "post": {
+        "operationId": "Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiTokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
     "/accounts/users": {
       "get": {
         "operationId": "ListAccounts",
@@ -480,32 +506,6 @@
         ],
         "tags": [
           "Shadows"
-        ]
-      }
-    },
-    "/token": {
-      "post": {
-        "operationId": "Token",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiTokenResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiTokenRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Accounts"
         ]
       }
     }

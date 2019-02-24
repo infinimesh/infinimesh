@@ -49,7 +49,7 @@ export default {
   methods: {
     login() {
       this.$http
-        .post("token", {
+        .post("accounts/token", {
           username: this.userName,
           password: this.password
         })

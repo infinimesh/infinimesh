@@ -28,8 +28,7 @@ if (Vue.http.options.root.startsWith("$")) {
 }
 
 Vue.http.interceptors.push(function(request) {
-  if (request.url === "token") {
-    console.log("bye");
+  if (request.url === "accounts/token") {
     return;
   }
   // modify headers
