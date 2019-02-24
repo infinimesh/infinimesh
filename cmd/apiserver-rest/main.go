@@ -58,6 +58,11 @@ func run() error {
 		return err
 	}
 
+	err = apipb.RegisterNamespacesHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
+	if err != nil {
+		return err
+	}
+
 	corsMiddleware := cors.AllowAll().Handler(mux)
 	return http.ListenAndServe(":8081", corsMiddleware)
 }
