@@ -94,7 +94,7 @@ service Shadows {
       infinimesh.shadow.StreamReportedStateChangesRequest)
       returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
-      get : "/namespace/{namespace}/namespaces/{namespace}/{id}/shadow/reported"
+      get : "/namespaces/{namespace}/namespaces/{namespace}/{id}/shadow/reported"
     };
   }
 }
