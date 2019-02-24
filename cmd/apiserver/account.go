@@ -60,7 +60,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 }
 
 func (a *accountAPI) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
-	if fullMethodName != "/infinimesh.api.Account/Token" {
+	if fullMethodName != "/infinimesh.api.Accounts/Token" {
 		return jwtAuth(ctx)
 	}
 	return ctx, nil
