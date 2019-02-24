@@ -109,7 +109,7 @@ service Account {
   rpc CreateUserAccount(infinimesh.node.CreateUserAccountRequest)
       returns (infinimesh.node.CreateUserAccountResponse) {
     option (google.api.http) = {
-      post : "/accounts/users/{name}"
+      post : "/accounts/users"
       body : "*";
   };
 };
