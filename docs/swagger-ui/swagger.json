@@ -35,9 +35,7 @@
         "tags": [
           "Account"
         ]
-      }
-    },
-    "/accounts/users/{name}": {
+      },
       "post": {
         "operationId": "CreateUserAccount",
         "responses": {
@@ -49,12 +47,6 @@
           }
         },
         "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "body",
             "in": "body",

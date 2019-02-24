@@ -456,24 +456,6 @@ func request_Account_CreateUserAccount_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["name"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
-	}
-
-	protoReq.Name, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
-	}
-
 	msg, err := client.CreateUserAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -1062,7 +1044,7 @@ func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 var (
 	pattern_Account_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"token"}, ""))
 
-	pattern_Account_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"accounts", "users", "name"}, ""))
+	pattern_Account_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
 
 	pattern_Account_ListAccounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
 )
