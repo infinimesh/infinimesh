@@ -16,16 +16,8 @@ message CreateNamespaceRequest {
   string name = 1;
 }
 
-message CreateNamespaceResponse {
-  string id = 1;
-}
-
 message GetNamespaceRequest {
   string namespace = 1; // name
-}
-
-message GetNamespaceResponse {
-  Namespace namespace = 1;
 }
 
 message ListNamespacesRequest {}
@@ -38,9 +30,9 @@ message ListNamespacesResponse {
   repeated Namespace namespaces = 1;
 }
 
-service NamespaceService {
-  rpc CreateNamespace(CreateNamespaceRequest) returns (CreateNamespaceResponse);
-  rpc GetNamespace(GetNamespaceRequest) returns (GetNamespaceResponse);
+service Namespaces {
+  rpc CreateNamespace(CreateNamespaceRequest) returns (Namespace);
+  rpc GetNamespace(GetNamespaceRequest) returns (Namespace);
   rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
   rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
 }

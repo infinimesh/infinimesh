@@ -581,7 +581,7 @@ func request_ObjectService_DeleteObject_0(ctx context.Context, marshaler runtime
 
 }
 
-func request_NamespaceService_CreateNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespaceServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Namespaces_CreateNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.CreateNamespaceRequest
 	var metadata runtime.ServerMetadata
 
@@ -598,7 +598,7 @@ func request_NamespaceService_CreateNamespace_0(ctx context.Context, marshaler r
 
 }
 
-func request_NamespaceService_GetNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespaceServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Namespaces_GetNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.GetNamespaceRequest
 	var metadata runtime.ServerMetadata
 
@@ -625,7 +625,7 @@ func request_NamespaceService_GetNamespace_0(ctx context.Context, marshaler runt
 
 }
 
-func request_NamespaceService_ListNamespaces_0(ctx context.Context, marshaler runtime.Marshaler, client NamespaceServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Namespaces_ListNamespaces_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.ListNamespacesRequest
 	var metadata runtime.ServerMetadata
 
@@ -1174,9 +1174,9 @@ var (
 	forward_ObjectService_DeleteObject_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterNamespaceServiceHandlerFromEndpoint is same as RegisterNamespaceServiceHandler but
+// RegisterNamespacesHandlerFromEndpoint is same as RegisterNamespacesHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterNamespaceServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterNamespacesHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -1196,23 +1196,23 @@ func RegisterNamespaceServiceHandlerFromEndpoint(ctx context.Context, mux *runti
 		}()
 	}()
 
-	return RegisterNamespaceServiceHandler(ctx, mux, conn)
+	return RegisterNamespacesHandler(ctx, mux, conn)
 }
 
-// RegisterNamespaceServiceHandler registers the http handlers for service NamespaceService to "mux".
+// RegisterNamespacesHandler registers the http handlers for service Namespaces to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterNamespaceServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterNamespaceServiceHandlerClient(ctx, mux, NewNamespaceServiceClient(conn))
+func RegisterNamespacesHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterNamespacesHandlerClient(ctx, mux, NewNamespacesClient(conn))
 }
 
-// RegisterNamespaceServiceHandlerClient registers the http handlers for service NamespaceService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "NamespaceServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "NamespaceServiceClient"
+// RegisterNamespacesHandlerClient registers the http handlers for service Namespaces
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "NamespacesClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "NamespacesClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "NamespaceServiceClient" to call the correct interceptors.
-func RegisterNamespaceServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client NamespaceServiceClient) error {
+// "NamespacesClient" to call the correct interceptors.
+func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux, client NamespacesClient) error {
 
-	mux.Handle("POST", pattern_NamespaceService_CreateNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Namespaces_CreateNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1221,18 +1221,18 @@ func RegisterNamespaceServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespaceService_CreateNamespace_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Namespaces_CreateNamespace_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_NamespaceService_CreateNamespace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Namespaces_CreateNamespace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_NamespaceService_GetNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Namespaces_GetNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1241,18 +1241,18 @@ func RegisterNamespaceServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespaceService_GetNamespace_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Namespaces_GetNamespace_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_NamespaceService_GetNamespace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Namespaces_GetNamespace_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_NamespaceService_ListNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Namespaces_ListNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1261,14 +1261,14 @@ func RegisterNamespaceServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespaceService_ListNamespaces_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Namespaces_ListNamespaces_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_NamespaceService_ListNamespaces_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Namespaces_ListNamespaces_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1276,17 +1276,17 @@ func RegisterNamespaceServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 }
 
 var (
-	pattern_NamespaceService_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
+	pattern_Namespaces_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
 
-	pattern_NamespaceService_GetNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace"}, ""))
+	pattern_Namespaces_GetNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace"}, ""))
 
-	pattern_NamespaceService_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
+	pattern_Namespaces_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
 )
 
 var (
-	forward_NamespaceService_CreateNamespace_0 = runtime.ForwardResponseMessage
+	forward_Namespaces_CreateNamespace_0 = runtime.ForwardResponseMessage
 
-	forward_NamespaceService_GetNamespace_0 = runtime.ForwardResponseMessage
+	forward_Namespaces_GetNamespace_0 = runtime.ForwardResponseMessage
 
-	forward_NamespaceService_ListNamespaces_0 = runtime.ForwardResponseMessage
+	forward_Namespaces_ListNamespaces_0 = runtime.ForwardResponseMessage
 )

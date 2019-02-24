@@ -109,7 +109,7 @@
           }
         },
         "tags": [
-          "NamespaceService"
+          "Namespaces"
         ]
       },
       "post": {
@@ -118,7 +118,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeCreateNamespaceResponse"
+              "$ref": "#/definitions/nodeNamespace"
             }
           }
         },
@@ -133,7 +133,7 @@
           }
         ],
         "tags": [
-          "NamespaceService"
+          "Namespaces"
         ]
       }
     },
@@ -144,7 +144,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeGetNamespaceResponse"
+              "$ref": "#/definitions/nodeNamespace"
             }
           }
         },
@@ -157,7 +157,7 @@
           }
         ],
         "tags": [
-          "NamespaceService"
+          "Namespaces"
         ]
       },
       "post": {
@@ -648,14 +648,6 @@
         }
       }
     },
-    "nodeCreateNamespaceResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        }
-      }
-    },
     "nodeCreateUserAccountRequest": {
       "type": "object",
       "properties": {
@@ -681,14 +673,6 @@
     },
     "nodeDeleteObjectResponse": {
       "type": "object"
-    },
-    "nodeGetNamespaceResponse": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "$ref": "#/definitions/nodeNamespace"
-        }
-      }
     },
     "nodeListAccountsResponse": {
       "type": "object",

@@ -10,7 +10,7 @@ import (
 )
 
 type namespaceAPI struct {
-	client        nodepb.NamespaceServiceClient
+	client        nodepb.NamespacesClient
 	accountClient nodepb.AccountServiceClient
 }
 
@@ -34,7 +34,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 	}
 }
 
-func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.CreateNamespaceResponse, err error) {
+func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
@@ -62,13 +62,13 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 		if err != nil {
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
-		return &nodepb.CreateNamespaceResponse{}, nil
+		return &nodepb.Namespace{}, nil
 
 	}
 	return nil, status.Error(codes.PermissionDenied, "Account is not root")
 }
 
-func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.GetNamespaceResponse, err error) {
+func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")

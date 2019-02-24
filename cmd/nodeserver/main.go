@@ -78,7 +78,7 @@ func main() {
 
 	nodepb.RegisterObjectServiceServer(srv, objectController)
 	nodepb.RegisterAccountServiceServer(srv, accountController)
-	nodepb.RegisterNamespaceServiceServer(srv, namespaceController)
+	nodepb.RegisterNamespacesServer(srv, namespaceController)
 	reflection.Register(srv)
 
 	signals := make(chan os.Signal, 1)

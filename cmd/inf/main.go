@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	namespaceClient apipb.NamespaceServiceClient
+	namespaceClient apipb.NamespacesClient
 	objectClient    apipb.ObjectServiceClient
 	accountClient   apipb.AccountClient
 	deviceClient    apipb.DevicesClient
@@ -36,7 +36,7 @@ func init() {
 		panic(err)
 	}
 
-	namespaceClient = apipb.NewNamespaceServiceClient(conn)
+	namespaceClient = apipb.NewNamespacesClient(conn)
 	accountClient = apipb.NewAccountClient(conn)
 	deviceClient = apipb.NewDevicesClient(conn)
 	objectClient = apipb.NewObjectServiceClient(conn)

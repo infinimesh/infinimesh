@@ -133,13 +133,13 @@ func main() {
 	accountClient := nodepb.NewAccountServiceClient(nodeConn)
 	objectClient := nodepb.NewObjectServiceClient(nodeConn)
 
-	namespaceClient := nodepb.NewNamespaceServiceClient(nodeConn)
+	namespaceClient := nodepb.NewNamespacesClient(nodeConn)
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient, accountClient: accountClient})
 	apipb.RegisterShadowsServer(srv, &shadowAPI{client: shadowClient})
 	apipb.RegisterAccountServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
 	apipb.RegisterObjectServiceServer(srv, &objectAPI{objectClient: objectClient, accountClient: accountClient})
-	apipb.RegisterNamespaceServiceServer(srv, &namespaceAPI{client: namespaceClient, accountClient: accountClient})
+	apipb.RegisterNamespacesServer(srv, &namespaceAPI{client: namespaceClient, accountClient: accountClient})
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		panic(err)

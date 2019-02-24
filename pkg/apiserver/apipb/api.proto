@@ -157,9 +157,9 @@ service ObjectService {
   }
 }
 
-service NamespaceService {
+service Namespaces {
   rpc CreateNamespace(infinimesh.node.CreateNamespaceRequest)
-      returns (infinimesh.node.CreateNamespaceResponse) {
+      returns (infinimesh.node.Namespace) {
     option (google.api.http) = {
       post : "/namespaces"
       body : "*"
@@ -167,7 +167,7 @@ service NamespaceService {
   };
 
   rpc GetNamespace(infinimesh.node.GetNamespaceRequest)
-      returns (infinimesh.node.GetNamespaceResponse) {
+      returns (infinimesh.node.Namespace) {
     option (google.api.http) = {
       get : "/namespaces/{namespace}"
     };

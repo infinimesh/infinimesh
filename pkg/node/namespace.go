@@ -13,13 +13,16 @@ type NamespaceController struct {
 	Repo Repo
 }
 
-func (n *NamespaceController) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.CreateNamespaceResponse, err error) {
+func (n *NamespaceController) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
 	id, err := n.Repo.CreateNamespace(ctx, request.GetName())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create namespace")
 	}
 
-	return &nodepb.CreateNamespaceResponse{Id: id}, nil
+	return &nodepb.Namespace{
+		Id:   id,
+		Name: request.GetName(),
+	}, nil
 }
 
 func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
@@ -44,13 +47,11 @@ func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, requ
 	}, nil
 }
 
-func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.GetNamespaceResponse, err error) {
-	namespaces, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
+func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
+	namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed get namespace")
 	}
 
-	return &nodepb.GetNamespaceResponse{
-		Namespace: namespaces,
-	}, nil
+	return namespace, nil
 }

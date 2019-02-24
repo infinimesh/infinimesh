@@ -76,7 +76,7 @@ var describeNamespace = &cobra.Command{
 			fmt.Println("grpc: failed to fetch data", err)
 			os.Exit(1)
 		}
-		fmt.Println(response.GetNamespace())
+		fmt.Println(response)
 		// _ = response
 		// if !noHeaderFlag {
 		// 	fmt.Fprintf(w, "NAME\tID\t\n")
