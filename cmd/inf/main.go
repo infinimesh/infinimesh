@@ -16,7 +16,7 @@ import (
 var (
 	namespaceClient apipb.NamespacesClient
 	objectClient    apipb.ObjectsClient
-	accountClient   apipb.AccountClient
+	accountClient   apipb.AccountsClient
 	deviceClient    apipb.DevicesClient
 	ctx             context.Context
 
@@ -37,7 +37,7 @@ func init() {
 	}
 
 	namespaceClient = apipb.NewNamespacesClient(conn)
-	accountClient = apipb.NewAccountClient(conn)
+	accountClient = apipb.NewAccountsClient(conn)
 	deviceClient = apipb.NewDevicesClient(conn)
 	objectClient = apipb.NewObjectsClient(conn)
 

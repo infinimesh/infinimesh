@@ -137,7 +137,7 @@ func main() {
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient, accountClient: accountClient})
 	apipb.RegisterShadowsServer(srv, &shadowAPI{client: shadowClient})
-	apipb.RegisterAccountServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
+	apipb.RegisterAccountsServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
 	apipb.RegisterObjectsServer(srv, &objectAPI{objectClient: objectClient, accountClient: accountClient})
 	apipb.RegisterNamespacesServer(srv, &namespaceAPI{client: namespaceClient, accountClient: accountClient})
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))

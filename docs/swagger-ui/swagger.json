@@ -33,7 +33,7 @@
           }
         },
         "tags": [
-          "Account"
+          "Accounts"
         ]
       },
       "post": {
@@ -57,7 +57,7 @@
           }
         ],
         "tags": [
-          "Account"
+          "Accounts"
         ]
       }
     },
@@ -505,7 +505,7 @@
           }
         ],
         "tags": [
-          "Account"
+          "Accounts"
         ]
       }
     }

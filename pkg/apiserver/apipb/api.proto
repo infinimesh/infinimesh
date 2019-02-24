@@ -99,7 +99,7 @@ service Shadows {
   }
 }
 
-service Account {
+service Accounts {
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       post : "/token"

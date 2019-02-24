@@ -427,7 +427,7 @@ func request_Shadows_StreamReportedStateChanges_0(ctx context.Context, marshaler
 
 }
 
-func request_Account_Token_0(ctx context.Context, marshaler runtime.Marshaler, client AccountClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Accounts_Token_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TokenRequest
 	var metadata runtime.ServerMetadata
 
@@ -444,7 +444,7 @@ func request_Account_Token_0(ctx context.Context, marshaler runtime.Marshaler, c
 
 }
 
-func request_Account_CreateUserAccount_0(ctx context.Context, marshaler runtime.Marshaler, client AccountClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Accounts_CreateUserAccount_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.CreateUserAccountRequest
 	var metadata runtime.ServerMetadata
 
@@ -461,7 +461,7 @@ func request_Account_CreateUserAccount_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_Account_ListAccounts_0(ctx context.Context, marshaler runtime.Marshaler, client AccountClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Accounts_ListAccounts_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.ListAccountsRequest
 	var metadata runtime.ServerMetadata
 
@@ -940,9 +940,9 @@ var (
 	forward_Shadows_StreamReportedStateChanges_0 = runtime.ForwardResponseStream
 )
 
-// RegisterAccountHandlerFromEndpoint is same as RegisterAccountHandler but
+// RegisterAccountsHandlerFromEndpoint is same as RegisterAccountsHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterAccountHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterAccountsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -962,23 +962,23 @@ func RegisterAccountHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeM
 		}()
 	}()
 
-	return RegisterAccountHandler(ctx, mux, conn)
+	return RegisterAccountsHandler(ctx, mux, conn)
 }
 
-// RegisterAccountHandler registers the http handlers for service Account to "mux".
+// RegisterAccountsHandler registers the http handlers for service Accounts to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterAccountHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterAccountHandlerClient(ctx, mux, NewAccountClient(conn))
+func RegisterAccountsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterAccountsHandlerClient(ctx, mux, NewAccountsClient(conn))
 }
 
-// RegisterAccountHandlerClient registers the http handlers for service Account
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "AccountClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "AccountClient"
+// RegisterAccountsHandlerClient registers the http handlers for service Accounts
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "AccountsClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "AccountsClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "AccountClient" to call the correct interceptors.
-func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, client AccountClient) error {
+// "AccountsClient" to call the correct interceptors.
+func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, client AccountsClient) error {
 
-	mux.Handle("POST", pattern_Account_Token_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Accounts_Token_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -987,18 +987,18 @@ func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Account_Token_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Accounts_Token_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Account_Token_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Accounts_Token_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_Account_CreateUserAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Accounts_CreateUserAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1007,18 +1007,18 @@ func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Account_CreateUserAccount_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Accounts_CreateUserAccount_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Account_CreateUserAccount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Accounts_CreateUserAccount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Account_ListAccounts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Accounts_ListAccounts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1027,14 +1027,14 @@ func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Account_ListAccounts_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Accounts_ListAccounts_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Account_ListAccounts_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Accounts_ListAccounts_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1042,19 +1042,19 @@ func RegisterAccountHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Account_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"token"}, ""))
+	pattern_Accounts_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"token"}, ""))
 
-	pattern_Account_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
+	pattern_Accounts_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
 
-	pattern_Account_ListAccounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
+	pattern_Accounts_ListAccounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
 )
 
 var (
-	forward_Account_Token_0 = runtime.ForwardResponseMessage
+	forward_Accounts_Token_0 = runtime.ForwardResponseMessage
 
-	forward_Account_CreateUserAccount_0 = runtime.ForwardResponseMessage
+	forward_Accounts_CreateUserAccount_0 = runtime.ForwardResponseMessage
 
-	forward_Account_ListAccounts_0 = runtime.ForwardResponseMessage
+	forward_Accounts_ListAccounts_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterObjectsHandlerFromEndpoint is same as RegisterObjectsHandler but
