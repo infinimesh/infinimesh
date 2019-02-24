@@ -53,7 +53,7 @@ func run() error {
 		return err
 	}
 
-	err = apipb.RegisterObjectServiceHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
+	err = apipb.RegisterObjectsHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
 		return err
 	}

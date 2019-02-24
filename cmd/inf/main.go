@@ -15,7 +15,7 @@ import (
 
 var (
 	namespaceClient apipb.NamespacesClient
-	objectClient    apipb.ObjectServiceClient
+	objectClient    apipb.ObjectsClient
 	accountClient   apipb.AccountClient
 	deviceClient    apipb.DevicesClient
 	ctx             context.Context
@@ -39,7 +39,7 @@ func init() {
 	namespaceClient = apipb.NewNamespacesClient(conn)
 	accountClient = apipb.NewAccountClient(conn)
 	deviceClient = apipb.NewDevicesClient(conn)
-	objectClient = apipb.NewObjectServiceClient(conn)
+	objectClient = apipb.NewObjectsClient(conn)
 
 	// Load cfg
 	if cfg, err := ReadConfig(); err == nil {

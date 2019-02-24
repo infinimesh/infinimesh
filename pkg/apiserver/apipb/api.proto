@@ -135,7 +135,7 @@ message CreateObjectRequest {
 }
 
 // Object
-service ObjectService {
+service Objects {
   rpc ListObjects(ListObjectsRequest)
       returns (infinimesh.node.ListObjectsResponse) {
     option (google.api.http) = {

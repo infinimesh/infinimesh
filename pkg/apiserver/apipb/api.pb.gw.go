@@ -470,7 +470,7 @@ func request_Account_ListAccounts_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func request_ObjectService_ListObjects_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Objects_ListObjects_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListObjectsRequest
 	var metadata runtime.ServerMetadata
 
@@ -497,7 +497,7 @@ func request_ObjectService_ListObjects_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_ObjectService_CreateObject_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Objects_CreateObject_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq CreateObjectRequest
 	var metadata runtime.ServerMetadata
 
@@ -543,7 +543,7 @@ func request_ObjectService_CreateObject_0(ctx context.Context, marshaler runtime
 
 }
 
-func request_ObjectService_DeleteObject_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Objects_DeleteObject_0(ctx context.Context, marshaler runtime.Marshaler, client ObjectsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.DeleteObjectRequest
 	var metadata runtime.ServerMetadata
 
@@ -1057,9 +1057,9 @@ var (
 	forward_Account_ListAccounts_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterObjectServiceHandlerFromEndpoint is same as RegisterObjectServiceHandler but
+// RegisterObjectsHandlerFromEndpoint is same as RegisterObjectsHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterObjectServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterObjectsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -1079,23 +1079,23 @@ func RegisterObjectServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.
 		}()
 	}()
 
-	return RegisterObjectServiceHandler(ctx, mux, conn)
+	return RegisterObjectsHandler(ctx, mux, conn)
 }
 
-// RegisterObjectServiceHandler registers the http handlers for service ObjectService to "mux".
+// RegisterObjectsHandler registers the http handlers for service Objects to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterObjectServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterObjectServiceHandlerClient(ctx, mux, NewObjectServiceClient(conn))
+func RegisterObjectsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterObjectsHandlerClient(ctx, mux, NewObjectsClient(conn))
 }
 
-// RegisterObjectServiceHandlerClient registers the http handlers for service ObjectService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ObjectServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ObjectServiceClient"
+// RegisterObjectsHandlerClient registers the http handlers for service Objects
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ObjectsClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ObjectsClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "ObjectServiceClient" to call the correct interceptors.
-func RegisterObjectServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ObjectServiceClient) error {
+// "ObjectsClient" to call the correct interceptors.
+func RegisterObjectsHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ObjectsClient) error {
 
-	mux.Handle("GET", pattern_ObjectService_ListObjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Objects_ListObjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1104,18 +1104,18 @@ func RegisterObjectServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ObjectService_ListObjects_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Objects_ListObjects_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ObjectService_ListObjects_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Objects_ListObjects_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_ObjectService_CreateObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Objects_CreateObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1124,18 +1124,18 @@ func RegisterObjectServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ObjectService_CreateObject_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Objects_CreateObject_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ObjectService_CreateObject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Objects_CreateObject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_ObjectService_DeleteObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_Objects_DeleteObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -1144,14 +1144,14 @@ func RegisterObjectServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ObjectService_DeleteObject_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Objects_DeleteObject_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ObjectService_DeleteObject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Objects_DeleteObject_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1159,19 +1159,19 @@ func RegisterObjectServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_ObjectService_ListObjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "namespace", "objects"}, ""))
+	pattern_Objects_ListObjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "namespace", "objects"}, ""))
 
-	pattern_ObjectService_CreateObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"namespaces", "namespace", "objects", "parent", "children"}, ""))
+	pattern_Objects_CreateObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"namespaces", "namespace", "objects", "parent", "children"}, ""))
 
-	pattern_ObjectService_DeleteObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "objects", "uid"}, ""))
+	pattern_Objects_DeleteObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "objects", "uid"}, ""))
 )
 
 var (
-	forward_ObjectService_ListObjects_0 = runtime.ForwardResponseMessage
+	forward_Objects_ListObjects_0 = runtime.ForwardResponseMessage
 
-	forward_ObjectService_CreateObject_0 = runtime.ForwardResponseMessage
+	forward_Objects_CreateObject_0 = runtime.ForwardResponseMessage
 
-	forward_ObjectService_DeleteObject_0 = runtime.ForwardResponseMessage
+	forward_Objects_DeleteObject_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterNamespacesHandlerFromEndpoint is same as RegisterNamespacesHandler but
