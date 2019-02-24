@@ -28,6 +28,26 @@
               active-class="grey lighten-4 indigo--text"
               selected-color="indigo"
             >
+              <template slot="label" slot-scope="{ item }">
+                <drag-drop-slot
+                  :class="['tree-item', (over && over.id === item.id ? over.mode : '')]"
+                  style="cursor: pointer"
+                  :key="item.id"
+                  :item="item"
+                  @drag="drag"
+                  @enter="enter"
+                  @leave="leave"
+                  @hover="hover"
+                  @drop="drop"
+                >
+                  <v-icon>
+                    drag_indicator
+                  </v-icon>
+                  <span>
+                    {{ item.name }}
+                  </span>
+                </drag-drop-slot>
+              </template>
               <template
                 v-if="active"
                 slot="append"
@@ -117,9 +137,17 @@
 </template>
 
 <script>
+import { DragDropContext } from "vue-react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
+import DragDropSlot from "../components/DragDropSlot.vue";
+
 export default {
+  mixins: [DragDropContext(HTML5Backend)],
   data() {
     return {
+      over: {},
+      dragging: {},
+      expanded: [],
       search: null,
       active: [],
       node: {
@@ -174,10 +202,73 @@ export default {
       this.node.id = "";
       this.node.type = "";
       this.node.children = [];
+    },
+    drag(dragging) {
+      this.dragging = dragging;
+    },
+    enter(target) {
+      // dragging used to be argument.check whether code is missing here
+      this.expanded.push(target.id);
+    },
+    leave() {
+      // dragging, target used to be arguments. check whether code is missing here
+      this.over = null;
+    },
+    hover(dragging, target) {
+      let parent = this.findParent(dragging.id, this.nodeTree);
+      if (target.id !== parent.id) {
+        this.over = { id: target.id, mode: "append" };
+      }
+    },
+    drop(dragging, target) {
+      let parent = this.findParent(dragging.id, this.nodeTree);
+      if (dragging.id !== target.id && target.id !== parent.id) {
+        let items = JSON.parse(JSON.stringify(this.nodeTree));
+        // get dragging item (local copy!)
+        let item = this.findItem(dragging.id, items);
+        // remove from parent
+        let draggingParent = this.findParent(item.id, items);
+        let draggingIdx = draggingParent.children.findIndex(
+          sibling => sibling === item
+        );
+        draggingParent.children.splice(draggingIdx, 1);
+
+        // find target (local copy!)
+        target = this.findItem(target.id, items);
+        // add to target (local copy!)
+        target.children.push(item);
+
+        // sort
+        if (this.config.options.ddAppendOnly) {
+          target.children.sort((a, b) =>
+            a["text"].localeCompare(b["text"], undefined, {
+              sensitivity: "base"
+            })
+          );
+        }
+
+        // expand target
+        if (this.expanded.indexOf(target.id) === -1) {
+          this.expanded.push(target.id);
+        }
+      }
+      this.over = null;
+    },
+    findParent(input, id) {
+      for (let element of input) {
+        if (element.id === id) {
+          return element;
+        } else if (element.children) {
+          this.findParent(element.children, id);
+        }
+      }
     }
   },
   created() {
     this.$store.dispatch("fetchNodeTree").catch(e => console.log(e));
+  },
+  components: {
+    DragDropSlot
   }
 };
 </script>

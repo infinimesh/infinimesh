@@ -1,15 +1,19 @@
 <template>
   <div>
     <drag-drop-slot>
+      <span>Drag me</span>
     </drag-drop-slot>
   </div>
 
 </template>
 
 <script>
+import { DragDropContext } from "vue-react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
 import DragDropSlot from "../components/DragDropSlot.vue";
 
 export default {
+  mixins: [DragDropContext(HTML5Backend)],
   components: {
     DragDropSlot
   }
