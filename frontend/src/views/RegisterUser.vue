@@ -1,4 +1,27 @@
 <template>
+  <div>
+    <drag-drop-slot>
+    </drag-drop-slot>
+  </div>
+
+</template>
+
+<script>
+import DragDropSlot from "../components/DragDropSlot.vue";
+
+export default {
+  components: {
+    DragDropSlot
+  }
+};
+</script>
+
+<style lang="css" scoped>
+</style>
+
+
+
+<!-- <template>
   <v-container>
     <h1 class="mb-3">For now the tree drag and drop test page</h1>
     <v-card>
@@ -6,12 +29,12 @@
         <v-treeview
           :items="items"
         >
-        <!-- <template slot="label" slot-scope="{ item }">
+        <template slot="label" slot-scope="{ item }">
           <drag-drop-slot :class="['tree-item', (over && over.id === item.id ? over.mode : '')]" :key="item.id" :item="item" @drag="drag" @enter="enter" @leave="leave" @hover="hover" @drop="drop">
             <v-icon>add</v-icon>
             <span>{{ item.name }}</span>
           </drag-drop-slot>
-        </template> -->
+        </template>
         </v-treeview>
       </v-card-text>
     </v-card>
@@ -19,7 +42,7 @@
 </template>
 
 <script>
-// import DragDropSlot from "../components/DragDropSlot.vue";
+import DragDropSlot from "../components/DragDropSlot.vue";
 
 export default {
   data() {
@@ -152,10 +175,10 @@ export default {
     }
   },
   components: {
-    // DragDropSlot
+    DragDropSlot
   }
 };
 </script>
 
 <style scoped>
-</style>
+</style> -->

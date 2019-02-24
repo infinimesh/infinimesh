@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "chart.js": "^2.7.3",
+    "react-dnd-html5-backend": "^7.0.2",
     "vue": "^2.5.17",
     "vue-chartjs": "^3.4.0",
     "vue-chartkick": "^0.5.0",
