@@ -94,7 +94,7 @@ func ImportStandardSet(repo node.Repo) error {
 		return err
 	}
 
-	user, err := repo.CreateAccount(context.Background(), "joe", "test123", false)
+	user, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func ImportStandardSet(repo node.Repo) error {
 		return err
 	}
 
-	admin, err := repo.CreateAccount(context.Background(), "admin", "admin123", true)
+	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true)
 	if err != nil {
 		return err
 	}

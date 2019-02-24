@@ -33,13 +33,13 @@ message IsAuthorizedRequest {
 
 message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
 
-message CreateAccountRequest {
+message CreateUserAccountRequest {
   string name = 1;
   string password = 2;
   bool is_root = 3;
 }
 
-message CreateAccountResponse { string uid = 1; }
+message CreateUserAccountResponse { string uid = 1; }
 
 enum Action {
   NONE = 0;
@@ -113,7 +113,7 @@ message AuthorizeNamespaceRequest {
 message AuthorizeNamespaceResponse {}
 
 service AccountService {
-  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);

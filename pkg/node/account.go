@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -11,7 +10,6 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/tools"
 )
 
 type AccountController struct {
@@ -22,10 +20,7 @@ type AccountController struct {
 }
 
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
-	fmt.Println("is root")
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
-	tools.PrettyPrint(account)
-	fmt.Println(account.GetIsRoot())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Could not find account")
 	}
@@ -33,16 +28,16 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
-func (s *AccountController) CreateAccount(ctx context.Context, request *nodepb.CreateAccountRequest) (response *nodepb.CreateAccountResponse, err error) {
-	log := s.Log.Named("CreateAccount")
-	uid, err := s.Repo.CreateAccount(ctx, request.GetName(), request.GetPassword(), request.GetIsRoot())
+func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
+	log := s.Log.Named("CreateUserAccount")
+	uid, err := s.Repo.CreateUserAccount(ctx, request.GetName(), request.GetPassword(), request.GetIsRoot())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create user")
 	}
 
 	log.Info("Successfully created account", zap.String("username", request.GetName()), zap.String("password", request.GetPassword()), zap.String("uid", uid))
 
-	return &nodepb.CreateAccountResponse{Uid: uid}, nil
+	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
 func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nodepb.AuthorizeNamespaceRequest) (response *nodepb.AuthorizeNamespaceResponse, err error) {

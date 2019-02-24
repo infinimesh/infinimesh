@@ -39,8 +39,9 @@ var createNamespaceCmd = &cobra.Command{
 }
 
 var listNamespacesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List namespaces",
+	Use:     "list",
+	Short:   "List namespaces",
+	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 		defer w.Flush()

@@ -170,7 +170,11 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 	return false, "", errors.New("Invalid credentials")
 }
 
-func (s *dGraphRepo) CreateAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
+func (s *dGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
+	defaultNs, err := s.CreateNamespace(ctx, username)
+	if err != nil {
+		return "", err
+	}
 	txn := s.dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -207,6 +211,13 @@ func (s *dGraphRepo) CreateAccount(ctx context.Context, username, password strin
 				},
 				Username: username,
 				Password: password,
+			},
+			AccessToNamespace: []*Namespace{
+				&Namespace{
+					Node: Node{
+						UID: defaultNs,
+					},
+				},
 			},
 		})
 		if err != nil {

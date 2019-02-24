@@ -43,6 +43,25 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 }
 
+func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: account,
+	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.CreateUserAccount(ctx, request)
+		return res, err
+	}
+
+	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+}
+
 func (a *accountAPI) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	if fullMethodName != "/infinimesh.api.Account/Token" {
+		return jwtAuth(ctx)
+	}
 	return ctx, nil
 }

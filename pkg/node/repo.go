@@ -12,7 +12,7 @@ const (
 )
 
 type Repo interface {
-	CreateAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error)
+	CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error)
 	GetAccount(ctx context.Context, accountID string) (account *nodepb.Account, err error)
 
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)

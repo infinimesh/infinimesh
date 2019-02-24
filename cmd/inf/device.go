@@ -28,7 +28,8 @@ var devicesCmd = &cobra.Command{
 }
 
 var lsDeviceCmd = &cobra.Command{
-	Use: "ls",
+	Use:     "list",
+	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 		defer w.Flush()

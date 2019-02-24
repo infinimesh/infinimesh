@@ -8,10 +8,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 func init() {
 	accountCmd.AddCommand(accountLoginCmd)
+	accountCmd.AddCommand(accountCreateCmd)
 	rootCmd.AddCommand(accountCmd)
 }
 
@@ -39,4 +41,21 @@ var accountLoginCmd = &cobra.Command{
 		fmt.Println("Logged in successfully.")
 	},
 	Args: cobra.ExactArgs(2),
+}
+
+var accountCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create user account",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		response, err := accountClient.CreateUserAccount(ctx, &nodepb.CreateUserAccountRequest{
+			Name:     args[0],
+			Password: args[1],
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to create user: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Created user %v with id %v.\n", args[0], response.GetUid())
+	},
 }

@@ -41,7 +41,7 @@ func TestAuthorize(t *testing.T) {
 	_, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
-	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password", false)
+	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false)
 	require.NoError(t, err)
 
 	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
@@ -64,7 +64,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	_, err := repo.CreateNamespace(ctx, nsName)
 	require.NoError(t, err)
 
-	account, err := repo.CreateAccount(ctx, randomdata.SillyName(), "password", false)
+	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false)
 	require.NoError(t, err)
 
 	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName)

@@ -21,6 +21,38 @@
     "application/json"
   ],
   "paths": {
+    "/accounts/users/{name}": {
+      "post": {
+        "operationId": "CreateUserAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeCreateUserAccountResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeCreateUserAccountRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Account"
+        ]
+      }
+    },
     "/namespace/{namespace}/namespaces/{namespace}/{id}/shadow/reported": {
       "get": {
         "operationId": "StreamReportedStateChanges",
@@ -597,6 +629,29 @@
       "type": "object",
       "properties": {
         "id": {
+          "type": "string"
+        }
+      }
+    },
+    "nodeCreateUserAccountRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "is_root": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "nodeCreateUserAccountResponse": {
+      "type": "object",
+      "properties": {
+        "uid": {
           "type": "string"
         }
       }

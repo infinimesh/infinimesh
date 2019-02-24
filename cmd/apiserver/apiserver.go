@@ -18,7 +18,7 @@ import (
 	"encoding/base64"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/log"
+	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
@@ -32,7 +32,44 @@ var (
 	nodeHost         string
 	jwtSigningSecret []byte
 	port             int
+
+	log *zap.Logger
 )
+
+var jwtAuth = func(ctx context.Context) (context.Context, error) {
+	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug("Extracted bearer token", zap.String("token", tokenString))
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+		}
+		return jwtSigningSecret, nil
+	})
+	if err != nil {
+		return ctx, err
+	}
+
+	if !token.Valid {
+		return ctx, errors.New("Invalid token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		log.Info("Validated token", zap.Any("claims", claims))
+
+		if accountID, ok := claims[accountIDClaim]; ok {
+			newCtx := context.WithValue(ctx, accountIDClaim, accountID)
+			return newCtx, nil
+		}
+		log.Info("Token does not contain account id field", zap.Any("token", token))
+	}
+
+	return ctx, errors.New("Failed to validate token")
+}
 
 func init() {
 	viper.SetDefault("REGISTRY_HOST", "device-registry:8080")
@@ -59,51 +96,19 @@ func init() {
 	}
 
 	jwtSigningSecret = s
-}
 
-func main() {
-	log, err := log.NewProdOrDev()
+	logger, err := inflog.NewProdOrDev()
 	if err != nil {
 		panic(err)
 	}
+	log = logger
+
+}
+
+func main() {
 	defer func() {
 		_ = log.Sync()
 	}()
-
-	jwtAuth := func(ctx context.Context) (context.Context, error) {
-		tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
-		if err != nil {
-			return nil, err
-		}
-
-		log.Debug("Extracted bearer token", zap.String("token", tokenString))
-
-		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
-			}
-			return jwtSigningSecret, nil
-		})
-		if err != nil {
-			return ctx, err
-		}
-
-		if !token.Valid {
-			return ctx, errors.New("Invalid token")
-		}
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			log.Info("Validated token", zap.Any("claims", claims))
-
-			if accountID, ok := claims[accountIDClaim]; ok {
-				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
-				return newCtx, nil
-			}
-			log.Info("Token does not contain account id field", zap.Any("token", token))
-		}
-
-		return ctx, errors.New("Failed to validate token")
-	}
 
 	srv := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(jwtAuth)),
