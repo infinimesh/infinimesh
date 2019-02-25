@@ -24,7 +24,10 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
-const accountIDClaim = "account_id"
+const (
+	accountIDClaim        = "account_id"
+	defaultNamespaceClaim = "default_ns"
+)
 
 var (
 	registryHost     string

@@ -10,7 +10,8 @@ import (
 
 // TODO: manage multiple installations
 type Config struct {
-	Token string `yaml:"token,omitempty"`
+	Token            string `yaml:"token,omitempty"`
+	DefaultNamespace string `yaml:"defaultNamespace,omitempty"`
 }
 
 func (c *Config) Write() error {

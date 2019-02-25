@@ -23,6 +23,8 @@ var (
 	noHeaderFlag bool
 
 	namespaceFlag string
+
+	config *Config
 )
 
 var rootCmd = &cobra.Command{
@@ -44,11 +46,22 @@ func init() {
 	// Load cfg
 	if cfg, err := ReadConfig(); err == nil {
 		ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "bearer "+cfg.Token)
+		config = cfg
 
 	} else {
 		ctx = context.Background()
 	}
 
+}
+
+func getNamespace() string {
+	if namespaceFlag != "" {
+		return namespaceFlag
+	}
+	if config != nil && config.DefaultNamespace != "" {
+		return config.DefaultNamespace
+	}
+	return ""
 }
 
 func main() {

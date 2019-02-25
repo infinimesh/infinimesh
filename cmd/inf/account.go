@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -34,7 +37,22 @@ var accountLoginCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		cfg := &Config{Token: response.Token}
+		cfg := &Config{
+			Token: response.Token,
+		}
+
+		tokenPayload, _ := base64.RawURLEncoding.DecodeString(strings.Split(response.GetToken(), ".")[1])
+
+		var tokenData struct {
+			AccountID string `json:"account_id"`
+			DefaultNS string `json:"default_ns"`
+		}
+
+		err = json.Unmarshal([]byte(tokenPayload), &tokenData)
+		if err == nil {
+			cfg.DefaultNamespace = tokenData.DefaultNS
+		}
+
 		err = cfg.Write()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write config: %v\n", err)

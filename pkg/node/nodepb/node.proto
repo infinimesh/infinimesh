@@ -72,6 +72,7 @@ message AuthenticateRequest {
 message AuthenticateResponse {
   bool success = 1;
   Account account = 2;
+  string default_namespace = 3;
 }
 
 message DeleteObjectRequest {
@@ -135,5 +136,6 @@ service AccountService {
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
+  //  GetObject?
   rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
 }

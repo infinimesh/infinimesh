@@ -24,6 +24,8 @@ type Account struct {
 	AccessTo          []*Object    `json:"access.to,omitempty"`
 	AccessToNamespace []*Namespace `json:"access.to.namespace,omitempty"`
 
+	DefaultNamespace []*Namespace `json:"default.namespace"`
+
 	HasCredentials *UsernameCredential `json:"has.credentials,omitempty"`
 }
 

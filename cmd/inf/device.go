@@ -35,7 +35,7 @@ var lsDeviceCmd = &cobra.Command{
 		defer w.Flush()
 
 		response, err := objectClient.ListObjects(ctx, &apipb.ListObjectsRequest{
-			Namespace: namespaceFlag,
+			Namespace: getNamespace(),
 		})
 		if err != nil {
 			fmt.Println("grpc: failed to fetch data", err)
@@ -86,7 +86,7 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 -----END CERTIFICATE-----`,
 				},
 			},
-			Namespace: namespaceFlag,
+			Namespace: getNamespace(),
 		})
 		if err != nil {
 			panic(err)

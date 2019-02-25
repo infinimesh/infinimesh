@@ -20,7 +20,7 @@ type Repo interface {
 	IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
 	AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error)
-	Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error)
+	Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error)
 
 	CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)

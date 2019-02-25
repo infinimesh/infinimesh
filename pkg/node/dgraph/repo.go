@@ -129,7 +129,7 @@ func (s *dGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace 
 
 }
 
-func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, err error) {
+func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error) {
 	txn := s.dg.NewReadOnlyTxn()
 
 	const q = `query authenticate($username: string, $password: string){
@@ -139,6 +139,10 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
     ~has.credentials {
       uid
       type
+      default.namespace{
+        uid
+        name
+      }
     }
   }
 }
@@ -146,7 +150,7 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$username": username, "$password": password})
 	if err != nil {
-		return false, "", err
+		return false, "", "", err
 	}
 
 	var result struct {
@@ -155,7 +159,7 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 
 	err = json.Unmarshal(resp.Json, &result)
 	if err != nil {
-		return false, "", err
+		return false, "", "", err
 	}
 
 	if len(result.Login) > 0 {
@@ -163,11 +167,14 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 		if login.CheckPwd {
 			// Success
 			if len(login.Account) > 0 {
-				return result.Login[0].CheckPwd, login.Account[0].UID, nil
+				if len(login.Account[0].DefaultNamespace) > 0 {
+					defaultNamespace = login.Account[0].DefaultNamespace[0].Name
+				}
+				return result.Login[0].CheckPwd, login.Account[0].UID, defaultNamespace, nil
 			}
 		}
 	}
-	return false, "", errors.New("Invalid credentials")
+	return false, "", "", errors.New("Invalid credentials")
 }
 
 func (s *dGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
@@ -247,6 +254,13 @@ func (s *dGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 				Password: password,
 			},
 			AccessToNamespace: []*Namespace{
+				&Namespace{
+					Node: Node{
+						UID: defaultNs,
+					},
+				},
+			},
+			DefaultNamespace: []*Namespace{
 				&Namespace{
 					Node: Node{
 						UID: defaultNs,
