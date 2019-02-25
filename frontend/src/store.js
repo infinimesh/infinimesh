@@ -21,6 +21,7 @@ export default new Vuex.Store({
       messages: []
     },
     nodeTree: {},
+    accounts: [],
     model: {
       enabled: undefined,
       id: "",
@@ -32,6 +33,9 @@ export default new Vuex.Store({
     }
   },
   getters: {
+    getAccounts: state => {
+      return state.accounts;
+    },
     getDevice: state => id => {
       if (state.devices.length) {
         let device;
@@ -80,6 +84,9 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    storeAccounts: (state, accounts) => {
+      state.accounts = accounts;
+    },
     apiRequestPending: (state, status) => {
       state.apiDataPending = status;
     },
@@ -129,6 +136,21 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    fetchAccounts: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        return Vue.http
+          .get("accounts/users")
+          .then(res => res.json())
+          .then(res => {
+            console.log(res);
+            commit("storeAccounts", res.accounts);
+            resolve();
+          })
+          .catch(err => {
+            reject(err);
+          });
+      });
+    },
     fetchDevices(store) {
       return new Promise((resolve, reject) => {
         store.commit("apiRequestPending", true);

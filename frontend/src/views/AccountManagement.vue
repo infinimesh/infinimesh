@@ -7,14 +7,13 @@
       <v-layout row wrap>
         <v-autocomplete
           v-model="model"
-          :items="items"
+          :items="accounts"
           :loading="isLoading"
           :search-input.sync="search"
           color="white"
           hide-no-data
           hide-selected
-          item-text="Description"
-          item-value="API"
+          item-text="name"
           label="Registered accounts"
           placeholder="Start typing to Search"
           prepend-icon="mdi-database-search"
@@ -24,7 +23,7 @@
         <v-btn
           color="primary lighten-1"
           round
-          @click="creatingUser = true"
+          @click="creatingUser = true; editingUser = false; model = false"
         >
           <v-icon>
             add
@@ -53,15 +52,21 @@
     <v-expand-transition>
       <new-user
        v-if="creatingUser"
-       @formValid="formValid=$event"
+       @newUser="newUser=$event"
       >
       </new-user>
     </v-expand-transition>
+    <v-alert :value="saving.value" type="success" icon="check_circle">
+      {{ saving.message }}
+    </v-alert>
+    <v-alert :value="saving.value" type="error" icon="error">
+      {{ saving.message }}
+    </v-alert>
   </v-card-text>
   <v-card-actions>
     <v-btn
       v-if="!editingUser && model"
-      @click="editingUser = true"
+      @click="editingUser = true; creatingUser = false"
       round
       class="mr-4"
     >
@@ -69,7 +74,7 @@
     </v-btn>
     <v-btn
       v-if="editingUser || creatingUser"
-      :disabled="!formValid"
+      :disabled="!newUser.passwordTwo"
       @click="save"
       round
       class="mr-4"
@@ -94,13 +99,16 @@ import NewUser from "../components/NewUser.vue";
 export default {
   data: () => ({
     descriptionLimit: 60,
-    entries: [],
     isLoading: false,
     model: null,
     search: null,
     editingUser: false,
     creatingUser: false,
-    formValid: false
+    newUser: {},
+    saving: {
+      value: false,
+      message: ""
+    }
   }),
   computed: {
     fields() {
@@ -113,21 +121,19 @@ export default {
         };
       });
     },
-    items() {
-      return this.entries.map(entry => {
-        const Description =
-          entry.Description.length > this.descriptionLimit
-            ? entry.Description.slice(0, this.descriptionLimit) + "..."
-            : entry.Description;
+    accounts() {
+      let accounts = this.$store.getters.getAccounts;
 
-        return Object.assign({}, entry, { Description });
+      return accounts.map(account => {
+        let name = account.name;
+        return Object.assign({}, account, { name });
       });
     }
   },
   watch: {
     search() {
       // Items have already been loaded
-      if (this.items.length > 0) return;
+      if (this.accounts.length > 0) return;
 
       // Items have already been requested
       if (this.isLoading) return;
@@ -135,22 +141,35 @@ export default {
       this.isLoading = true;
 
       // Lazily load input items
-      fetch("https://api.publicapis.org/entries")
-        .then(res => res.json())
-        .then(res => {
-          const { count, entries } = res;
-          this.count = count;
-          this.entries = entries;
-        })
-        .catch(err => {
-          console.log(err);
-        })
+      this.$store
+        .dispatch("fetchAccounts")
         .finally(() => (this.isLoading = false));
     }
   },
   methods: {
     save() {
-      console.log("save user");
+      this.isLoading = true;
+
+      this.$http
+        .post("http://localhost:8081/accounts/users", {
+          name: this.newUser.name,
+          password: this.newUser.passwordOne,
+          is_root: false
+        })
+        .then(res => console.log(res))
+        .catch(err => {
+          console.log(err);
+          this.saving.value = true;
+          this.saving.message = "Failure to create new account";
+          setTimeout(() => (this.saving.value = false), 2000);
+        })
+        .finally(() => {
+          this.isLoading = false;
+          this.creatingUser = false;
+          this.saving.value = true;
+          this.saving.message = "Account created";
+          setTimeout(() => (this.saving.value = false), 2000);
+        });
     }
   },
   components: {

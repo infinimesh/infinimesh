@@ -76,7 +76,7 @@ export default {
   },
   watch: {
     form() {
-      this.$emit("formValid", this.form);
+      this.$emit("newUser", this.user);
     }
   }
 };
