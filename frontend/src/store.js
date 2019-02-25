@@ -33,6 +33,12 @@ export default new Vuex.Store({
     }
   },
   getters: {
+    getNamespace: state => {
+      return state.namespace;
+    },
+    getNamespaces: state => {
+      return state.namespaces;
+    },
     getAccounts: state => {
       return state.accounts;
     },
@@ -84,6 +90,13 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    setNamespace: (state, namespace) => {
+      console.log("set ns to ", namespace);
+      state.namespace = namespace;
+    },
+    storeNamespaces: (state, namespaces) => {
+      state.namespaces = namespaces;
+    },
     storeAccounts: (state, accounts) => {
       state.accounts = accounts;
     },
@@ -136,6 +149,28 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    setNamespace: ({commit}, namespace) => {
+      commit("setNamespace", namespace);
+    },
+    fetchNamespaces: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        return Vue.http
+          .get("namespaces")
+          .then(res => res.json())
+          .then(res => {
+            console.log(res);
+
+            if (res.namespaces.length > 0) {
+              commit("setNamespace", res.namespaces[0].name);
+            }
+            commit("storeNamespaces", res.namespaces);
+            resolve();
+          })
+          .catch(err => {
+            reject(err);
+          });
+      });
+    },
     fetchAccounts: ({ commit }) => {
       return new Promise((resolve, reject) => {
         return Vue.http
@@ -151,11 +186,12 @@ export default new Vuex.Store({
           });
       });
     },
-    fetchDevices(store) {
+    fetchDevices(store, namespace) {
+      console.log("Fetch devices, with ns", namespace);
       return new Promise((resolve, reject) => {
         store.commit("apiRequestPending", true);
         return Vue.http
-          .get("devices")
+          .get(`namespaces/${namespace}/devices`)
           .then(response => {
             store.commit("apiRequestPending", false);
             store.commit("storeDevices", response.body.devices);
