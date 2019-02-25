@@ -41,17 +41,17 @@ service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
       returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}"
+      post : "/namespaces/{namespace}/devices"
       body : "device"
     };
   }
   rpc Update(infinimesh.deviceregistry.UpdateRequest)
       returns (infinimesh.deviceregistry.UpdateResponse) {
     option (google.api.http) = {
-      patch : "/namespaces/{namespace}/{device.id}"
+      patch : "/namespaces/{namespace}/devices/{device.id}"
       body : "device"
       additional_bindings : {
-        put : "/namespaces/{namespace}/{device.id}"
+        put : "/namespaces/{namespace}/devices/{device.id}"
         body : "device"
       }
     };
@@ -59,19 +59,19 @@ service Devices {
   rpc Get(infinimesh.deviceregistry.GetRequest)
       returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/{id}"
+      get : "/namespaces/{namespace}/devices/{id}"
     };
   }
   rpc List(infinimesh.deviceregistry.ListDevicesRequest)
       returns (infinimesh.deviceregistry.ListResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}"
+      get : "/namespaces/{namespace}/devices"
     };
   }
   rpc Delete(infinimesh.deviceregistry.DeleteRequest)
       returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete : "/namespaces/{namespace}/{id}"
+      delete : "/namespaces/{namespace}/devices/{id}"
     };
   }
 }
@@ -80,13 +80,13 @@ service Shadows {
   rpc Get(infinimesh.shadow.GetRequest)
       returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/{id}/shadow"
+      get : "/namespaces/{namespace}/devices/{id}/shadow"
     };
   }
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
       returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}/{id}/shadow/desired"
+      post : "/namespaces/{namespace}/devices/{id}/shadow/desired"
       body : "data"
     };
   }

@@ -82,6 +82,8 @@ services:
       - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
     restart: unless-stopped
   apiserver:
+    ports:
+      - "8080:8080"
     image: quay.io/infinimesh/apiserver:latest
     environment:
       - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=
