@@ -34,6 +34,7 @@ export default new Vuex.Store({
   },
   getters: {
     getNamespace: state => {
+      console.log("get ns", state.namespace);
       return state.namespace;
     },
     getNamespaces: state => {
@@ -91,10 +92,13 @@ export default new Vuex.Store({
   },
   mutations: {
     setNamespace: (state, namespace) => {
-      console.log("set ns to ", namespace);
+      console.log("Set ns", namespace);
       state.namespace = namespace;
     },
     storeNamespaces: (state, namespaces) => {
+      if (!state.namespaces && namespaces.length > 0) {
+        state.namespace = namespaces[0].name;
+      }
       state.namespaces = namespaces;
     },
     storeAccounts: (state, accounts) => {
@@ -158,11 +162,6 @@ export default new Vuex.Store({
           .get("namespaces")
           .then(res => res.json())
           .then(res => {
-            console.log(res);
-
-            if (res.namespaces.length > 0) {
-              commit("setNamespace", res.namespaces[0].name);
-            }
             commit("storeNamespaces", res.namespaces);
             resolve();
           })
@@ -187,7 +186,7 @@ export default new Vuex.Store({
       });
     },
     fetchDevices(store, namespace) {
-      console.log("Fetch devices, with ns", namespace);
+      console.log("Fetch devices");
       return new Promise((resolve, reject) => {
         store.commit("apiRequestPending", true);
         return Vue.http

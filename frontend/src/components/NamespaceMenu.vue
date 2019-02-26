@@ -1,5 +1,5 @@
 <template>
-  <v-select :items="namespaces" label="Namespace" v-model="selected" item-text="name" item-value="name">
+  <v-select v-on:change="onChanged" :items="namespaces" label="Namespace" v-model="selected" item-text="name" item-value="name">
   </v-select>
 </template>
 
@@ -19,6 +19,7 @@
       this.$store
         .dispatch("fetchNamespaces")
         .then(() => {
+          console.log("Got ns, ns menu");
           let namespaces = this.$store.getters.getNamespaces;
   
           this.namespaces = namespaces.map(namespace => {
@@ -27,6 +28,13 @@
         })
         .catch(e => console.log(e));
     },
+    methods: {
+      onChanged(a) {
+        console.log("changed", a);
+          this.$store.dispatch("setNamespace", a);
+          console.log(a);
+      }
+    }
   };
 </script>
 

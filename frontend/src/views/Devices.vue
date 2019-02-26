@@ -23,51 +23,51 @@
             <v-flex id="scrollableCard">
               <v-data-table :headers="headers" :items="devices" :search="search" item-key="name" hide-actions>
                 <template slot="items" slot-scope="props">
-                        <tr>
-                          <td class="text-xs-left" style="width: 10px">
-                            <v-icon v-if="props.item.enabled" color="green">
-                              check_circle
-                            </v-icon>
-                            <v-icon v-else color="grey">
-                              block
-                            </v-icon>
-                          </td>
-                          <td
-                            class="text-xs-left"
-                            style="cursor: pointer"
-                            @click="navigateTo(props.item.id)"
-                          >
-                            {{ props.item.id }}
-                          </td>
-                          <td class="text-xs-left">
-                            <v-chip v-for="tag in props.item.tags" :key="tag">
-                              {{ tag }}
-                            </v-chip>
-                          </td>
-                          <td class="text-xs-center">
-                            <v-menu offset-y>
-                              <v-btn slot="activator" color="primary" flat>
-                                <v-icon>
-                                  more_vert
-                                </v-icon>
-                              </v-btn>
-                              <v-list>
-                                <v-list-tile
-                                  v-for="option in options"
-                                  :key="option"
-                                  :to="{
-                                    name: option,
-                                    params: { id: props.item.id }
-                                  }"
-                                >
-                                  <v-list-tile-title>
-                                    {{ option }}
-                                  </v-list-tile-title>
-                                </v-list-tile>
-                              </v-list>
-                            </v-menu>
-                          </td>
-                        </tr>
+                          <tr>
+                            <td class="text-xs-left" style="width: 10px">
+                              <v-icon v-if="props.item.enabled" color="green">
+                                check_circle
+                              </v-icon>
+                              <v-icon v-else color="grey">
+                                block
+                              </v-icon>
+                            </td>
+                            <td
+                              class="text-xs-left"
+                              style="cursor: pointer"
+                              @click="navigateTo(props.item.id)"
+                            >
+                              {{ props.item.id }}
+                            </td>
+                            <td class="text-xs-left">
+                              <v-chip v-for="tag in props.item.tags" :key="tag">
+                                {{ tag }}
+                              </v-chip>
+                            </td>
+                            <td class="text-xs-center">
+                              <v-menu offset-y>
+                                <v-btn slot="activator" color="primary" flat>
+                                  <v-icon>
+                                    more_vert
+                                  </v-icon>
+                                </v-btn>
+                                <v-list>
+                                  <v-list-tile
+                                    v-for="option in options"
+                                    :key="option"
+                                    :to="{
+                                      name: option,
+                                      params: { id: props.item.id }
+                                    }"
+                                  >
+                                    <v-list-tile-title>
+                                      {{ option }}
+                                    </v-list-tile-title>
+                                  </v-list-tile>
+                                </v-list>
+                              </v-menu>
+                            </td>
+                          </tr>
 </template>
                 <v-alert
                   slot="no-results"
@@ -135,12 +135,12 @@
       }
     },
     created() {
-      this.$store
-        .dispatch("fetchNamespaces")
-        .then(() => {
-      this.$store.dispatch("fetchDevices", this.$store.getters.getNamespace);
-        })
-        .catch(e => console.log(e))
+       this.$store
+         .dispatch("fetchNamespaces")
+         .then(() => {
+         this.$store.dispatch("fetchDevices", this.$store.getters.getNamespace);
+         })
+         .catch(e => console.log(e))
     }
   };
 </script>
