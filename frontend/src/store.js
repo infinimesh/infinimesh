@@ -142,7 +142,6 @@ export default new Vuex.Store({
           .get("accounts/users")
           .then(res => res.json())
           .then(res => {
-            console.log(res);
             commit("storeAccounts", res.accounts);
             resolve();
           })

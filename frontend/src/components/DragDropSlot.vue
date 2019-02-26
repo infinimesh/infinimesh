@@ -35,6 +35,7 @@ export default {
       },
       beginDrag() {
         this.$emit("drag", this.item);
+        console.log("item dragged", JSON.stringify(this.item.id));
         return this.item;
       },
       endDrag() {

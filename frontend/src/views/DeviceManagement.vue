@@ -21,7 +21,7 @@
           </v-sheet>
           <v-card-text>
             <v-treeview
-              :items="nodeTree"
+              :items="testTree"
               :search="search"
               activatable
               :active.sync="active"
@@ -37,7 +37,6 @@
                   @drag="drag"
                   @enter="enter"
                   @leave="leave"
-                  @hover="hover"
                   @drop="drop"
                 >
                   <v-icon>
@@ -160,7 +159,53 @@ export default {
       alert: {
         value: false,
         message: ""
-      }
+      },
+      testTree: [
+        {
+          id: 1,
+          name: "Applications :",
+          children: [
+            { id: 2, name: "Calendar : app" },
+            { id: 3, name: "Chrome : app" },
+            { id: 4, name: "Webstorm : app" }
+          ]
+        },
+        {
+          id: 5,
+          name: "Documents :",
+          children: [
+            {
+              id: 6,
+              name: "vuetify :",
+              children: [
+                {
+                  id: 7,
+                  name: "src :",
+                  children: [
+                    { id: 8, name: "index : ts" },
+                    { id: 9, name: "bootstrap : ts" }
+                  ]
+                }
+              ]
+            },
+            {
+              id: 10,
+              name: "material2 :",
+              children: [
+                {
+                  id: 11,
+                  name: "src :",
+                  children: [
+                    { id: 12, name: "v-btn : ts" },
+                    { id: 13, name: "v-card : ts" },
+                    { id: 14, name: "v-window : ts" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     };
   },
   computed: {
@@ -214,38 +259,29 @@ export default {
       // dragging, target used to be arguments. check whether code is missing here
       this.over = null;
     },
-    hover(dragging, target) {
-      let parent = this.findParent(dragging.id, this.nodeTree);
-      if (target.id !== parent.id) {
-        this.over = { id: target.id, mode: "append" };
-      }
-    },
+    // hover(dragging, target) {
+    //   let parent = this.findParent(dragging.id, this.testTree);
+    //   if (target.id !== parent.id) {
+    //     this.over = { id: target.id, mode: "append" };
+    //   }
+    // },
     drop(dragging, target) {
-      let parent = this.findParent(dragging.id, this.nodeTree);
-      if (dragging.id !== target.id && target.id !== parent.id) {
-        let items = JSON.parse(JSON.stringify(this.nodeTree));
-        // get dragging item (local copy!)
-        let item = this.findItem(dragging.id, items);
+      console.log("dragging at moment dropped", JSON.stringify(dragging.id));
+      let parent = this.findParent(dragging.id, this.testTree, null);
+      console.log("parent of dragged", parent);
+      if (dragging.id !== target.id) {
+        // get dragging item (in place local copy!)
+        let item = this.findItem(dragging.id, this.testTree);
         // remove from parent
-        let draggingParent = this.findParent(item.id, items);
-        let draggingIdx = draggingParent.children.findIndex(
-          sibling => sibling === item
-        );
-        draggingParent.children.splice(draggingIdx, 1);
+        // let draggingParent = this.findParent(item.id, items, null);
+        // console.log("draggingParent", draggingParent);
+        // let draggingIdx = draggingParent.children.findIndex(
+        //   sibling => sibling === item
+        // );
+        // draggingParent.children.splice(draggingIdx, 1);
 
-        // find target (local copy!)
-        target = this.findItem(target.id, items);
         // add to target (local copy!)
         target.children.push(item);
-
-        // sort
-        if (this.config.options.ddAppendOnly) {
-          target.children.sort((a, b) =>
-            a["text"].localeCompare(b["text"], undefined, {
-              sensitivity: "base"
-            })
-          );
-        }
 
         // expand target
         if (this.expanded.indexOf(target.id) === -1) {
@@ -254,12 +290,28 @@ export default {
       }
       this.over = null;
     },
-    findParent(input, id) {
-      for (let element of input) {
+    findParent(id, items, parent) {
+      let par = parent;
+      for (let element of items) {
+        if (element.id === id && !par) {
+          return items;
+        } else if (element.id === id) {
+          console.log("parent of nested element", JSON.stringify(par));
+          return par;
+        }
+        if (element.children) {
+          par = element;
+          this.findParent(id, element.children, par);
+        }
+      }
+    },
+    findItem(id, items) {
+      for (let element of items) {
         if (element.id === id) {
           return element;
-        } else if (element.children) {
-          this.findParent(element.children, id);
+        }
+        if (element.children) {
+          this.findItem(id, element.children);
         }
       }
     }
