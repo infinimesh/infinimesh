@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <Header />
+    <NamespaceMenu></NamespaceMenu>
     <v-layout row>
       <Sidebar v-if="showSidebar"></Sidebar>
       <v-flex>
@@ -18,6 +19,7 @@
 <script>
 import Footer from "./components/TheFooter.vue";
 import Header from "./components/TheHeader.vue";
+import NamespaceMenu from "./components/NamespaceMenu.vue";
 import Sidebar from "./components/TheSidebar.vue";
 
 export default {
@@ -25,7 +27,8 @@ export default {
   components: {
     Footer,
     Header,
-    Sidebar
+    Sidebar,
+    NamespaceMenu
   },
   data() {
     return {
