@@ -12,6 +12,8 @@ export default new Vuex.Store({
       status: false,
       error: ""
     },
+    Selectednamespace: "",
+    namespaces: [],
     devices: [],
     shadow: {
       initialState: {
@@ -34,8 +36,8 @@ export default new Vuex.Store({
   },
   getters: {
     getNamespace: state => {
-      console.log("get ns", state.namespace);
-      return state.namespace;
+      console.log("get ns", state.selectedNamespace);
+      return state.selectedNamespace;
     },
     getNamespaces: state => {
       return state.namespaces;
@@ -93,11 +95,11 @@ export default new Vuex.Store({
   mutations: {
     setNamespace: (state, namespace) => {
       console.log("Set ns", namespace);
-      state.namespace = namespace;
+      state.selectedNamespace = namespace;
     },
     storeNamespaces: (state, namespaces) => {
-      if (!state.namespaces && namespaces.length > 0) {
-        state.namespace = namespaces[0].name;
+      if (!state.namespaces.length) {
+        state.selectedNamespace = namespaces[0].name;
       }
       state.namespaces = namespaces;
     },

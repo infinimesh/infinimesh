@@ -7,8 +7,8 @@
   import {
     mapGetters
   } from 'vuex'
-  
-  
+
+
   export default {
     data: () => ({
       selected: "hanswurst",
@@ -21,7 +21,7 @@
         .then(() => {
           console.log("Got ns, ns menu");
           let namespaces = this.$store.getters.getNamespaces;
-  
+          console.log("namespaces", namespaces)
           this.namespaces = namespaces.map(namespace => {
             return namespace.name;
           });
@@ -39,5 +39,5 @@
 </script>
 
 <style lang="css" scoped>
-  
+
 </style>

@@ -91,11 +91,13 @@
   import {
     mapGetters
   } from 'vuex'
+
   export default {
     data() {
       return {
         selected: true,
         search: "",
+        namespace: "",
         headers: [{
             text: "Active",
             align: "left",
@@ -127,7 +129,8 @@
       },
       devices() {
         return this.$store.getters.getAllDevices;
-      }
+      },
+      ...mapGetters(['getNamespace'])
     },
     methods: {
       navigateTo(id) {
@@ -135,12 +138,7 @@
       }
     },
     created() {
-       this.$store
-         .dispatch("fetchNamespaces")
-         .then(() => {
-         this.$store.dispatch("fetchDevices", this.$store.getters.getNamespace);
-         })
-         .catch(e => console.log(e))
+      console.log("namespace", this.getNamespace)
     }
   };
 </script>

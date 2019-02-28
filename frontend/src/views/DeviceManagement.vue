@@ -291,17 +291,17 @@ export default {
       this.over = null;
     },
     findParent(id, items, parent) {
-      let par = parent;
       for (let element of items) {
-        if (element.id === id && !par) {
-          return items;
-        } else if (element.id === id) {
-          console.log("parent of nested element", JSON.stringify(par));
-          return par;
+        if (element.id === id) {
+          if (!parent) {
+            return items;
+          } else {
+            console.log("parent of nested element", JSON.stringify(parent));
+            return parent;
+          }
         }
         if (element.children) {
-          par = element;
-          this.findParent(id, element.children, par);
+          return this.findParent(id, element.children, element);
         }
       }
     },

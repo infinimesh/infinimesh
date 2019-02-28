@@ -20,7 +20,7 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: "/devices",
+      path: `/namespaces/devices`,
       name: "Devices",
       component: Devices
       // route level code-splitting
