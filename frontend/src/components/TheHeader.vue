@@ -9,6 +9,7 @@
           style="cursor: pointer"
         />
       </v-toolbar-title>
+      <namespace-menu />
       <v-spacer></v-spacer>
       <v-menu :nudge-width="100" offset-y left>
         <v-toolbar-title slot="activator">
@@ -35,6 +36,8 @@
 </template>
 
 <script>
+import NamespaceMenu from "./NamespaceMenu.vue";
+
 export default {
   data() {
     return {
@@ -45,6 +48,9 @@ export default {
     logout() {
       localStorage.token = "";
     }
+  },
+  components: {
+    NamespaceMenu
   }
 };
 </script>

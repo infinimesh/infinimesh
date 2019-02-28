@@ -144,6 +144,7 @@ export default {
   mixins: [DragDropContext(HTML5Backend)],
   data() {
     return {
+      namespace: this.$route.params.namespace,
       over: {},
       dragging: {},
       expanded: [],

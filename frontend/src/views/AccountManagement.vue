@@ -54,90 +54,90 @@
 </template>
 
 <script>
-  import NewUser from "../components/NewUser.vue";
-  
-  export default {
-    data: () => ({
-      descriptionLimit: 60,
-      isLoading: false,
-      model: null,
-      search: null,
-      editingUser: false,
-      creatingUser: false,
-      newUser: {},
-      saving: {
-        value: false,
-        message: ""
-      }
-    }),
-    computed: {
-      fields() {
-        if (!this.model) return [];
-  
-        return Object.keys(this.model).map(key => {
-          return {
-            key,
-            value: this.model[key] || "n/a"
-          };
-        });
-      },
-      accounts() {
-        let accounts = this.$store.getters.getAccounts;
-  
-        return accounts.map(account => {
-          let name = account.name;
-          return Object.assign({}, account, {
-            name
-          });
-        });
-      }
-    },
-    watch: {
-      search() {
-        // Items have already been loaded
-        if (this.accounts.length > 0) return;
-  
-        // Items have already been requested
-        if (this.isLoading) return;
-  
-        this.isLoading = true;
-  
-        // Lazily load input items
-        this.$store
-          .dispatch("fetchAccounts")
-          .finally(() => (this.isLoading = false));
-      }
-    },
-    methods: {
-      save() {
-        this.isLoading = true;
-  
-        this.$http
-          .post("http://localhost:8081/accounts/users", {
-            name: this.newUser.name,
-            password: this.newUser.passwordOne,
-            is_root: false
-          })
-          .then(res => console.log(res))
-          .catch(err => {
-            console.log(err);
-            this.saving.value = true;
-            this.saving.message = "Failure to create new account";
-            setTimeout(() => (this.saving.value = false), 2000);
-          })
-          .finally(() => {
-            this.isLoading = false;
-            this.creatingUser = false;
-            this.saving.value = true;
-            this.saving.message = "Account created";
-            setTimeout(() => (this.saving.value = false), 2000);
-          });
-      }
-    },
-    components: {
-      NewUser
+import NewUser from "../components/NewUser.vue";
+
+export default {
+  data: () => ({
+    descriptionLimit: 60,
+    isLoading: false,
+    model: null,
+    search: null,
+    editingUser: false,
+    creatingUser: false,
+    newUser: {},
+    saving: {
+      value: false,
+      message: ""
     }
-  };
+  }),
+  computed: {
+    fields() {
+      if (!this.model) return [];
+
+      return Object.keys(this.model).map(key => {
+        return {
+          key,
+          value: this.model[key] || "n/a"
+        };
+      });
+    },
+    accounts() {
+      let accounts = this.$store.getters.getAccounts;
+
+      return accounts.map(account => {
+        let name = account.name;
+        return Object.assign({}, account, {
+          name
+        });
+      });
+    }
+  },
+  watch: {
+    search() {
+      // Items have already been loaded
+      if (this.accounts.length > 0) return;
+
+      // Items have already been requested
+      if (this.isLoading) return;
+
+      this.isLoading = true;
+
+      // Lazily load input items
+      this.$store
+        .dispatch("fetchAccounts")
+        .finally(() => (this.isLoading = false));
+    }
+  },
+  methods: {
+    save() {
+      this.isLoading = true;
+
+      this.$http
+        .post("http://localhost:8081/accounts/users", {
+          name: this.newUser.name,
+          password: this.newUser.passwordOne,
+          is_root: false
+        })
+        .then(res => console.log(res))
+        .catch(err => {
+          console.log(err);
+          this.saving.value = true;
+          this.saving.message = "Failure to create new account";
+          setTimeout(() => (this.saving.value = false), 2000);
+        })
+        .finally(() => {
+          this.isLoading = false;
+          this.creatingUser = false;
+          this.saving.value = true;
+          this.saving.message = "Account created";
+          setTimeout(() => (this.saving.value = false), 2000);
+        });
+    }
+  },
+  components: {
+    NewUser
+  }
+};
 </script>
 
 <style lang="css" scoped>

@@ -88,59 +88,58 @@
 </template>
 
 <script>
-  import {
-    mapGetters
-  } from 'vuex'
+import { mapGetters } from "vuex";
 
-  export default {
-    data() {
-      return {
-        selected: true,
-        search: "",
-        namespace: "",
-        headers: [{
-            text: "Active",
-            align: "left",
-            value: "enabled"
-          },
-          {
-            text: "Id",
-            align: "left",
-            value: "id"
-          },
-          {
-            text: "Tags",
-            align: "left",
-            value: "tags"
-          },
-          {
-            text: "Further actions",
-            align: "center"
-          }
-        ],
-        options: ["Unregister Device"]
-      };
+export default {
+  data() {
+    return {
+      selected: true,
+      search: "",
+      namespace: this.$route.params.namespace,
+      headers: [
+        {
+          text: "Active",
+          align: "left",
+          value: "enabled"
+        },
+        {
+          text: "Id",
+          align: "left",
+          value: "id"
+        },
+        {
+          text: "Tags",
+          align: "left",
+          value: "tags"
+        },
+        {
+          text: "Further actions",
+          align: "center"
+        }
+      ],
+      options: ["Unregister Device"]
+    };
+  },
+  computed: {
+    pages() {
+      return this.pagination.rowsPerPage
+        ? Math.ceil(this.items.length / this.pagination.rowsPerPage)
+        : 0;
     },
-    computed: {
-      pages() {
-        return this.pagination.rowsPerPage ?
-          Math.ceil(this.items.length / this.pagination.rowsPerPage) :
-          0;
-      },
-      devices() {
-        return this.$store.getters.getAllDevices;
-      },
-      ...mapGetters(['getNamespace'])
+    devices() {
+      return this.$store.getters.getAllDevices;
     },
-    methods: {
-      navigateTo(id) {
-        this.$router.push("devices/show/" + id);
-      }
-    },
-    created() {
-      console.log("namespace", this.getNamespace)
+    ...mapGetters(["getNamespace"])
+  },
+  methods: {
+    navigateTo(id) {
+      this.$router.push("devices/show/" + id);
     }
-  };
+  },
+  created() {
+    console.log("namespace called in route", this.namespace);
+  }
+};
 </script>
 
 <style lang="css" scoped>

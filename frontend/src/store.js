@@ -12,7 +12,7 @@ export default new Vuex.Store({
       status: false,
       error: ""
     },
-    Selectednamespace: "",
+    selectedNamespace: "",
     namespaces: [],
     devices: [],
     shadow: {
@@ -98,9 +98,6 @@ export default new Vuex.Store({
       state.selectedNamespace = namespace;
     },
     storeNamespaces: (state, namespaces) => {
-      if (!state.namespaces.length) {
-        state.selectedNamespace = namespaces[0].name;
-      }
       state.namespaces = namespaces;
     },
     storeAccounts: (state, accounts) => {
@@ -155,7 +152,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setNamespace: ({commit}, namespace) => {
+    setNamespace: ({ commit }, namespace) => {
       commit("setNamespace", namespace);
     },
     fetchNamespaces: ({ commit }) => {
@@ -165,6 +162,7 @@ export default new Vuex.Store({
           .then(res => res.json())
           .then(res => {
             commit("storeNamespaces", res.namespaces);
+            commit("setNamespace", res.namespaces[1].name);
             resolve();
           })
           .catch(err => {

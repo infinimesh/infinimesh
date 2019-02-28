@@ -20,7 +20,7 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: `/namespaces/devices`,
+      path: `/namespaces/:namespace/devices`,
       name: "Devices",
       component: Devices
       // route level code-splitting
@@ -30,7 +30,7 @@ const router = new Router({
       //   import(/* webpackChunkName: "Home" */ "./views/Home.vue"),
     },
     {
-      path: "/devices/manage",
+      path: "/namespaces/:namespace/devices/manage",
       name: "Device Management",
       component: DeviceManagement
     },
@@ -76,7 +76,7 @@ const router = new Router({
     },
     {
       path: "*",
-      redirect: "/devices"
+      redirect: "/namespaces/:namespace/devices"
     }
   ]
 });
