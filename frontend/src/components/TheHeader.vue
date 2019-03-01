@@ -1,16 +1,16 @@
 <template>
   <v-card color="grey lighten-4" flat>
-    <v-toolbar color="primary lighten-1" dark height="80px">
-      <v-toolbar-title class="headline text-uppercase white--text">
+    <v-toolbar color="primary lighten-1" dark height="60px">
+      <!-- <v-toolbar-title class="headline text-uppercase white--text"> -->
 	<img
           src="../../images/infinimesh_small_bw.png"
           alt="Infinimesh"
           @click="$router.push('/devices')"
           style="cursor: pointer"
         /> &nbsp;&nbsp;&nbsp; 
-      </v-toolbar-title>
+      <!-- </v-toolbar-title> -->
       <namespace-menu />
-      <v-spacer class="headline text-uppercase white--text" p style="text-align:right">&nbsp;&nbsp;&nbsp; -- Development -- &nbsp;&nbsp;&nbsp;</v-spacer>
+      <!-- <v-spacer class="headline text-uppercase white--text" p style="text-align:right">&nbsp;&nbsp;&nbsp; -- Development -- &nbsp;&nbsp;&nbsp;</v-spacer> -->
       <v-menu :nudge-width="100" offset-y left>
         <v-toolbar-title slot="activator">
           <v-icon large color="white">

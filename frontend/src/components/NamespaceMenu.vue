@@ -1,5 +1,5 @@
 <template>
-  <v-select v-on:change="onChanged" :items="namespaces" label="Namespace" v-model="selected" item-text="name" item-value="name">
+  <v-select solo v-on:change="onChanged" :items="namespaces" label="Namespace" v-model="selected" item-text="name" item-value="name">
   </v-select>
 </template>
 
