@@ -17,6 +17,9 @@ import (
 
 	"encoding/base64"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -42,14 +45,14 @@ var (
 var jwtAuth = func(ctx context.Context) (context.Context, error) {
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	log.Debug("Extracted bearer token", zap.String("token", tokenString))
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+			return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Unexpected signing method: %v", t.Header["alg"]))
 		}
 		return jwtSigningSecret, nil
 	})
@@ -71,7 +74,7 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 		log.Info("Token does not contain account id field", zap.Any("token", token))
 	}
 
-	return ctx, errors.New("Failed to validate token")
+	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
 }
 
 func init() {
