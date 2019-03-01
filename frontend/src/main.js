@@ -20,16 +20,6 @@ Vue.use(Vuetify, {
   iconfont: "mdi"
 });
 
-Vue.use(VueAnalytics, {
-  id: "UA-119169777-2",
-  router,
-  debug: {
-    enabled: !isProd,
-    sendHitTask: !isProd
-    //remove ! for real prod
-  }
-});
-
 Vue.use(VueResource);
 
 Vue.use(VueDragTree);
@@ -38,6 +28,18 @@ Vue.http.options.root = "$APISERVER_URL";
 
 if (Vue.http.options.root.startsWith("$")) {
   Vue.http.options.root = "http://localhost:8081";
+}
+
+if (Vue.http.options.root === "https://api.infinimesh.io") {
+  Vue.use(VueAnalytics, {
+    id: "UA-119169777-2",
+    router,
+    debug: {
+      enabled: !isProd,
+      sendHitTask: !isProd
+      //remove ! for real prod
+    }
+  });
 }
 
 Vue.http.interceptors.push(function(request) {
