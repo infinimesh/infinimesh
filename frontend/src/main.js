@@ -30,7 +30,9 @@ if (Vue.http.options.root.startsWith("$")) {
   Vue.http.options.root = "http://localhost:8081";
 }
 
+console.log(Vue.http.options.root);
 if (Vue.http.options.root === "https://api.infinimesh.io") {
+  console.log("Enable analytics");
   Vue.use(VueAnalytics, {
     id: "UA-119169777-2",
     router,
