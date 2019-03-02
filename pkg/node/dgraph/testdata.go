@@ -28,11 +28,45 @@ func ImportSchema(dg *dgo.Dgraph) error {
 }
 
 func ImportStandardSet(repo node.Repo) error {
-	ns := "joe/default"
-	_, err := repo.CreateNamespace(context.Background(), ns)
+	// careful,  currently when referencing a namespace, the name of it has to be used, not the id (0x...)
+	sharedNs := "shared-project"
+	_, err := repo.CreateNamespace(context.Background(), sharedNs)
 	if err != nil {
 		return err
 	}
+
+	ns := "joe"
+	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false)
+	if err != nil {
+		return err
+	}
+	fmt.Println("User joe: ", joe)
+
+	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("User hanswurst: ", hanswurst)
+
+	// Authorize both users on a shared project
+	{
+		err = repo.AuthorizeNamespace(context.Background(), joe, sharedNs, nodepb.Action_WRITE)
+		if err != nil {
+			return err
+		}
+
+		err = repo.AuthorizeNamespace(context.Background(), hanswurst, sharedNs, nodepb.Action_WRITE)
+		if err != nil {
+			return err
+		}
+	}
+
+	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Admin: ", admin)
 
 	building, err := repo.CreateObject(context.Background(), "Angerstr 14", "", node.KindAsset, ns)
 	if err != nil {
@@ -94,29 +128,9 @@ func ImportStandardSet(repo node.Repo) error {
 		return err
 	}
 
-	user, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false)
-	if err != nil {
-		return err
-	}
+	fmt.Println("User: ", joe)
 
-	fmt.Println("User: ", user)
+	// result := repo.Authorize(context.Background(), joe, apartment1Right, "WRITE", true)
 
-	result := repo.Authorize(context.Background(), user, apartment1Right, "WRITE", true)
-	err = repo.AuthorizeNamespace(context.Background(), user, ns, nodepb.Action_WRITE)
-	if err != nil {
-		return err
-	}
-
-	_, err = repo.ListForAccount(context.Background(), user)
-	if err != nil {
-		return err
-	}
-
-	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Admin: ", admin)
-
-	return result
+	return err
 }

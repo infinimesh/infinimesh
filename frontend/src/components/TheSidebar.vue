@@ -17,7 +17,6 @@
         <v-divider></v-divider>
       </div>
     </v-list>
-    <span>namespace {{namespace}}</span>
   </v-navigation-drawer>
 </template>
 
@@ -27,11 +26,8 @@ import { mapGetters } from "vuex";
 export default {
   data: () => ({
     pages: [
-      ["Devices", "Devices"],
-      ["Device Management", "Device Management"],
-      ["Device Monitoring", "Device Monitoring"],
-      ["Dashboard", "Dashboard"],
-      ["Integrations", "Integrations"],
+      ["Device Registry", "Devices"],
+      ["Nodes", "Device Management"],
       ["Account Management", "Account Management"]
     ]
   }),

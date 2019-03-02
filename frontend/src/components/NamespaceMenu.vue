@@ -1,5 +1,5 @@
 <template>
-  <v-select solo v-on:change="onChanged" :items="namespaces" label="Namespace" v-model="selected" item-text="name" item-value="name">
+  <v-select persistent-hint return-object label="Project" class="custom"  v-on:change="onChanged" :items="namespaces" v-model="selected" item-text="name" item-value="name" >
   </v-select>
 </template>
 
@@ -11,23 +11,22 @@ export default {
     return {
       selected: "hanswurst",
       currentRoute: this.$route.name,
-      namespaces: []
+      namespaces: ["abc","def"]
     };
   },
   computed: {
     ...mapGetters({ namespace: "getNamespace" })
   },
   created() {
-    console.log("BF");
     this.$store
       .dispatch("fetchNamespaces")
       .then(() => {
-        console.log("Got ns, ns menu");
         let namespaces = this.$store.getters.getNamespaces;
-        console.log("namespaces", namespaces);
         this.namespaces = namespaces.map(namespace => {
           return namespace.name;
         });
+        this.selected = this.$store.getters.getNamespace;
+        console.log("set selected ns to", this.selected);
       })
       .catch(e => console.log(e));
   },
