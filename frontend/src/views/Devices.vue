@@ -67,211 +67,214 @@
 
 
 <script>
-  import {
-    mapGetters
-  } from "vuex";
-  
-  import Vue from "vue";
-  
-  export default {
-    data() {
-      return {
-        crumb: [
-      {
-        text: 'Dashboard',
-        disabled: false,
-        href: 'breadcrumbs_dashboard'
-      },
-      {
-        text: 'Link 1',
-        disabled: false,
-        href: 'breadcrumbs_link_1'
-      },
-      {
-        text: 'Link 2',
-        disabled: true,
-        href: 'breadcrumbs_link_2'
-      }
-    ],
-        desserts: [{
-          name: 'Frozen Yogurt',
+import { mapGetters } from "vuex";
+
+import Vue from "vue";
+
+export default {
+  data() {
+    return {
+      crumb: [
+        {
+          text: "Dashboard",
+          disabled: false,
+          href: "breadcrumbs_dashboard"
+        },
+        {
+          text: "Link 1",
+          disabled: false,
+          href: "breadcrumbs_link_1"
+        },
+        {
+          text: "Link 2",
+          disabled: true,
+          href: "breadcrumbs_link_2"
+        }
+      ],
+      desserts: [
+        {
+          name: "Frozen Yogurt",
           calories: 159,
           fat: 6.0,
           carbs: 24,
           protein: 4.0,
-          iron: '1%'
-        }],
-        devicez: [{
-          name: "x"
-        }],
-        selected: true,
-        search: "",
-        headers: [{
-            text: "Active",
-            align: "left",
-            value: "enabled"
-          },
-          {
-            text: "Id",
-            align: "left",
-            value: "id"
-          },
-          {
-            text: "Tags",
-            align: "left",
-            value: "tags"
-          },
-          {
-            text: "Further actions",
-            align: "center"
-          }
-        ],
-        options: ["Unregister Device"]
-      };
-    },
-  
-    asyncComputed: {
-      devices: {
-        default () {
-          return [];
-        },
-        get() {
-          return new Promise((resolve, reject) => {
-            return Vue.http
-              .get(`namespaces/${this.namespace}/devices`)
-              .then(res => {
-                resolve(res.body.devices);
-              })
-              .catch(err => {
-                reject(err);
-              });
-  
-            // resolve([{
-            // "name": "c"
-            // }]);
-          })
+          iron: "1%"
         }
-        //         // if (!this.namespace) {
-        //         //   resolve([])
-        //         // }
-        //         //   return Vue.http
-        //         //   .get(`namespaces/joe/devices`)
-        //         //     .then(res => res.json())
-        //         //     .then(res => {
-        //         //       // commit("storeNamespaces", res.namespaces);
-        //         //       // commit("setNamespace", res.namespaces[1].name);
-        //         //       resolve(res.devices);
-        //         //     })
-        //         //     .catch(err => {
-        //         //       reject(err);
-        //         //     });
-        //         // });
-        // Vue.http
-        //           .get(`namespaces/${this.namespace}/devices`)
-        //           .then(response => {
-        //             response.body.devices;
-        //             console.log("got it", response.body.devices)
-        //             // this.bla = response.body.devices;
-        //           })
-        //           .catch(error => {
-        //             console.log(error);
-        //           });
-        //         }
-  
-        // }
-      }
-    },
-    computed: {
-      pages() {
-        return this.pagination.rowsPerPage ?
-          Math.ceil(this.items.length / this.pagination.rowsPerPage) :
-          0;
+      ],
+      devicez: [
+        {
+          name: "x"
+        }
+      ],
+      selected: true,
+      search: "",
+      headers: [
+        {
+          text: "Active",
+          align: "left",
+          value: "enabled"
+        },
+        {
+          text: "Id",
+          align: "left",
+          value: "id"
+        },
+        {
+          text: "Tags",
+          align: "left",
+          value: "tags"
+        },
+        {
+          text: "Further actions",
+          align: "center"
+        }
+      ],
+      options: ["Unregister Device"]
+    };
+  },
+
+  asyncComputed: {
+    devices: {
+      default() {
+        return [];
       },
-      // devices: {
-      //   get: function() {
-  
-      // // let abc = await this.fetch()
-      //     return [{"name": "d"}];
-      //   }
-      // },
-      // return [];
-      // console.log("xxx");
-      // let abc = await this.fetch()
-      // return function() {
-      //   console.log("got" + abc);
-      //   return abc;
-      // }
-      // },
-      // set: function(chipsValues) {
-      //   Vue.http
-      //     .get(`namespaces/${this.namespace}/devices`)
-      //     .then(response => {
-      //       console.log(response.body.devices)
-      //       return response.body.devices;
-      //     })
-      //     .catch(error => {
-      //       console.log(error);
-      //     }).get();
-  
-      //   console.log("set");
-      //   // this.obj.values = chipsValues.map(val => {
-      //   //   return {
-      //   //     'name': val
-      //   //   }
-      //   // })
-      //   if (!this.namespace) {
-      //     return;
-      //   }
-      //   this.$store.dispatch("fetchDevices", this.namespace);
-  
-      // }
-      // console.log("call");
-      // // return this.$store.getters.getAllDevices;
-      // if (!this.namespace) {
-      //   return;
-      // }
-      // this.$store.dispatch("fetchDevices", this.namespace);
-      // return this.$store.getters.getAllDevices;
-      // // Vue.http
-      //   .get(`namespaces/${this.namespace}/devices`)
-      //   .then(response => {
-      //     console.log(response.body.devices)
-      //     this.abc = response.body.devices;
-      //   })
-      //   .catch(error => {
-      //     console.log(error);
-      //   });
-      //   return [{
-      //     id: "abc"
-      //   }];
-      // },
-      ...mapGetters({
-        namespace: "getNamespace"
-      })
-    },
-    methods: {
-      async fetch() {
-  
+      get() {
         return new Promise((resolve, reject) => {
           return Vue.http
             .get(`namespaces/${this.namespace}/devices`)
-            .then(response => {
-              console.log(response.body.devices)
-              return response.body.devices;
+            .then(res => {
+              resolve(res.body.devices);
             })
-            .catch(error => {
-              console.log(error);
-            }).get();
-        })
-      },
-      navigateTo(id) {
-        this.$router.push("devices/show/" + id);
+            .catch(err => {
+              reject(err);
+            });
+
+          // resolve([{
+          // "name": "c"
+          // }]);
+        });
       }
-    },
-    created() {
-      console.log("namespace called in route", this.namespace);
+      //         // if (!this.namespace) {
+      //         //   resolve([])
+      //         // }
+      //         //   return Vue.http
+      //         //   .get(`namespaces/joe/devices`)
+      //         //     .then(res => res.json())
+      //         //     .then(res => {
+      //         //       // commit("storeNamespaces", res.namespaces);
+      //         //       // commit("setNamespace", res.namespaces[1].name);
+      //         //       resolve(res.devices);
+      //         //     })
+      //         //     .catch(err => {
+      //         //       reject(err);
+      //         //     });
+      //         // });
+      // Vue.http
+      //           .get(`namespaces/${this.namespace}/devices`)
+      //           .then(response => {
+      //             response.body.devices;
+      //             console.log("got it", response.body.devices)
+      //             // this.bla = response.body.devices;
+      //           })
+      //           .catch(error => {
+      //             console.log(error);
+      //           });
+      //         }
+
+      // }
     }
-  };
+  },
+  computed: {
+    pages() {
+      return this.pagination.rowsPerPage
+        ? Math.ceil(this.items.length / this.pagination.rowsPerPage)
+        : 0;
+    },
+    // devices: {
+    //   get: function() {
+
+    // // let abc = await this.fetch()
+    //     return [{"name": "d"}];
+    //   }
+    // },
+    // return [];
+    // console.log("xxx");
+    // let abc = await this.fetch()
+    // return function() {
+    //   console.log("got" + abc);
+    //   return abc;
+    // }
+    // },
+    // set: function(chipsValues) {
+    //   Vue.http
+    //     .get(`namespaces/${this.namespace}/devices`)
+    //     .then(response => {
+    //       console.log(response.body.devices)
+    //       return response.body.devices;
+    //     })
+    //     .catch(error => {
+    //       console.log(error);
+    //     }).get();
+
+    //   console.log("set");
+    //   // this.obj.values = chipsValues.map(val => {
+    //   //   return {
+    //   //     'name': val
+    //   //   }
+    //   // })
+    //   if (!this.namespace) {
+    //     return;
+    //   }
+    //   this.$store.dispatch("fetchDevices", this.namespace);
+
+    // }
+    // console.log("call");
+    // // return this.$store.getters.getAllDevices;
+    // if (!this.namespace) {
+    //   return;
+    // }
+    // this.$store.dispatch("fetchDevices", this.namespace);
+    // return this.$store.getters.getAllDevices;
+    // // Vue.http
+    //   .get(`namespaces/${this.namespace}/devices`)
+    //   .then(response => {
+    //     console.log(response.body.devices)
+    //     this.abc = response.body.devices;
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
+    //   return [{
+    //     id: "abc"
+    //   }];
+    // },
+    ...mapGetters({
+      namespace: "getNamespace"
+    })
+  },
+  methods: {
+    async fetch() {
+      return new Promise((resolve, reject) => {
+        return Vue.http
+          .get(`namespaces/${this.namespace}/devices`)
+          .then(response => {
+            console.log(response.body.devices);
+            return response.body.devices;
+          })
+          .catch(error => {
+            console.log(error);
+          })
+          .get();
+      });
+    },
+    navigateTo(id) {
+      this.$router.push("devices/show/" + id);
+    }
+  },
+  created() {
+    console.log("namespace called in route", this.namespace);
+  }
+};
 </script>
 
 <style lang="css" scoped>

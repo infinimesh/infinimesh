@@ -11,7 +11,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import VueAnalytics from "vue-analytics";
-import AsyncComputed from 'vue-async-computed';
+import AsyncComputed from "vue-async-computed";
 
 Vue.config.productionTip = false;
 
@@ -19,8 +19,8 @@ const isProd = process.env.NODE_ENV == "production";
 
 Vue.use(Vuetify, {
   theme: {
-    primary: '#673ab7',
-    secondary: '#9c27b0',
+    primary: "#673ab7",
+    secondary: "#9c27b0"
   },
   iconfont: "mdi"
 });

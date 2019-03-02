@@ -20,14 +20,14 @@ import Footer from "./components/TheFooter.vue";
 import Header from "./components/TheHeader.vue";
 import NamespaceMenu from "./components/NamespaceMenu.vue";
 import Sidebar from "./components/TheSidebar.vue";
-import '@/assets/styles.css';
+import "@/assets/styles.css";
 
 export default {
   name: "App",
   components: {
     Footer,
     Header,
-    Sidebar,
+    Sidebar
   },
   data() {
     return {

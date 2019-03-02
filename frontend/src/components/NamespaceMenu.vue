@@ -11,7 +11,7 @@ export default {
     return {
       selected: "hanswurst",
       currentRoute: this.$route.name,
-      namespaces: ["abc","def"]
+      namespaces: ["abc", "def"]
     };
   },
   computed: {
