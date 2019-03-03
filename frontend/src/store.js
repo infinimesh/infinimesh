@@ -143,7 +143,7 @@ export default new Vuex.Store({
         }
       }
     },
-    unRegisterDevice: (state, id) => {
+    deleteDevice: (state, id) => {
       let deviceIndex;
       deviceIndex = state.devices.findIndex(device => device.id === id);
       if (deviceIndex !== -1) {
@@ -311,7 +311,7 @@ export default new Vuex.Store({
       commit("updateDevice", properties);
       return properties;
     },
-    unRegisterDevice: ({ commit }, id) => {
+    deleteDevice: ({ commit }, id) => {
       commit("unRegisterDevice", id);
       return id;
     }

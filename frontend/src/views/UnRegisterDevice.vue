@@ -60,6 +60,9 @@ export default {
       }
     };
   },
+  computed: {
+    ...mapGetters({namespace: "getNamespace"})
+  },
   methods: {
     unRegisterDevice(id) {
       this.$store.dispatch("unRegisterDevice", id);

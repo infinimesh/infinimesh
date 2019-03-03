@@ -20,22 +20,17 @@ const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: `/namespaces/:namespace/devices`,
+      path: `/devices`,
       name: "Devices",
       component: Devices
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      // component: () =>
-      //   import(/* webpackChunkName: "Home" */ "./views/Home.vue"),
     },
     {
-      path: "/namespaces/:namespace/devices/manage",
+      path: "/devices/manage",
       name: "Device Management",
       component: DeviceManagement
     },
     {
-      path: "/devices/show/:id",
+      path: "/devices/:id",
       name: "Device Shadow",
       component: Shadow
     },
@@ -45,8 +40,8 @@ const router = new Router({
       component: RegisterDevice
     },
     {
-      path: "/devices/:id/unregister",
-      name: "Unregister Device",
+      path: "/namespaces/:namespace/devices/:id/delete",
+      name: "Delete Device",
       component: UnRegisterDevice
     },
     {
