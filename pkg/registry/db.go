@@ -1,14 +1,21 @@
 package registry
 
-import "github.com/lib/pq"
+import (
+	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+)
 
 type Device struct {
-	ID                              []byte         `gorm:"primary_key"`
-	Name                            string         `gorm:"NOT NULL;unique_index:device_name_namespace_uq"`
-	Tags                            pq.StringArray `gorm:"type:varchar(100)[]"`
-	Enabled                         bool
-	Certificate                     string `gorm:"unique_index"`
-	CertificateType                 string
-	CertificateFingerprint          []byte `gorm:"unique_index"`
-	CertificateFingerprintAlgorithm string
+	dgraph.Object
+	Tags    []string `json:"tags,omitempty"`
+	Enabled bool     `json:"enabled,omitempty"`
+
+	Certificates []*X509Cert `json:"certificates"`
+}
+
+type X509Cert struct {
+	dgraph.Node
+	PemData              string `json:"pem_data,omitempty"`
+	Algorithm            string `json:"algorithm,omitempty"`
+	Fingerprint          []byte `json:"fingerprint,omitempty"`
+	FingerprintAlgorithm string `json:"fingerprint.algorithm,omitempty"`
 }

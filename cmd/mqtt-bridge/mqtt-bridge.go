@@ -34,8 +34,14 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 			continue
 		}
 
+		if len(reply.Devices) == 0 {
+			return errors.New("Invalid device")
+		}
+
+		result := reply.Devices[0] // FIXME silly Workaround
+
 		// TODO verify with configured CACert.
-		fmt.Printf("Verified client with fingerprint device for fingerprint: %v\n", reply.Id)
+		fmt.Printf("Verified client with fingerprint device for fingerprint: %v\n", result.Name)
 		return nil
 	}
 	return errors.New("Could not verify fingerprint")
@@ -161,17 +167,18 @@ func main() {
 		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
 			Fingerprint: getFingerprint(rawcert),
 		})
-		if err != nil {
+		if err != nil || len(reply.Devices) == 0 { //FIXME change logic so the client can send his id, and we track here which IDs are possible, but he can choose which identity he wants to use (in most cases it's only once, unless a device has multiple certs from multiple devices)
 			_ = conn.Close()
 			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
 			continue
 		}
-		fmt.Printf("Client connected, device name according to registry: %v\n", reply.GetId())
+		response := reply.Devices[0] // FIXME
+		fmt.Printf("Client connected, device name according to registry: %v\n", response.Name)
 
 		backChannel := ps.Sub()
 
-		go handleConn(conn, reply.GetId(), backChannel)
-		go handleBackChannel(conn, reply.GetId(), backChannel)
+		go handleConn(conn, response.Name, backChannel)
+		go handleBackChannel(conn, response.Name, backChannel)
 	}
 
 }

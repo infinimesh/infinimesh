@@ -39,8 +39,8 @@ func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //no
 	return len(result.Object) > 0
 }
 
-func (s *dGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
-	txn := s.dg.NewTxn()
+func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
+	txn := s.Dg.NewTxn()
 
 	// Find target node
 	const q = `
@@ -154,8 +154,8 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	}
 }
 
-func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
-	txn := s.dg.NewTxn()
+func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
+	txn := s.Dg.NewTxn()
 
 	// if ok := checkType(ctx, txn, namespaceID, "namespace"); !ok {
 	// 	return "", errors.New("Invalid namespace")
@@ -232,8 +232,8 @@ func (s *dGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 
 // TODO what about root=true ?
 // TODO direct grants are not considered yet
-func (s *dGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
-	txn := s.dg.NewReadOnlyTxn()
+func (s *DGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
 
 	var depth int
 	if recurse {
@@ -285,9 +285,9 @@ func (s *dGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, n
 	return objects, nil
 }
 
-// for --all-namespaces
-func (s *dGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
-	txn := s.dg.NewReadOnlyTxn()
+// for --all-namespaces. TODO
+func (s *DGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
 
 	// Two options:
 	// 1) via namespace -> access.to.namespace -> owns/children

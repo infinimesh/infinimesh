@@ -24,12 +24,12 @@ func isPermissionSufficient(required, actual string) bool {
 	}
 }
 
-type dGraphRepo struct {
-	dg *dgo.Dgraph
+type DGraphRepo struct {
+	Dg *dgo.Dgraph
 }
 
 func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
-	return &dGraphRepo{dg: dg}
+	return &DGraphRepo{Dg: dg}
 }
 
 func checkType(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
@@ -59,7 +59,59 @@ func checkType(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
 	return len(result.Object) > 0
 }
 
-func checkExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
+func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent string) bool { //nolint
+	var q string
+	if parent == "" {
+		q = `query object($name: string, $namespace: string, $parent: uid){
+  object(func: eq(name, $name)) @cascade {
+    uid
+    name
+    ~owns @filter(eq(name, $namespace)) {
+      name
+    }
+  }
+}
+`
+	} else {
+		q = `query exists($name: string, $namespace: string, $parent: uid){
+  exists(func: eq(name, $name)) @cascade {
+    uid
+    name
+    ~owns @filter(eq(name, $namespace)) {
+      name
+    }
+    ~children @filter(uid($parent)) {
+      uid
+      name
+    }
+  }
+}
+`
+
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$parent":    parent,
+		"$name":      name,
+		"$namespace": namespace,
+	})
+	if err != nil {
+		return false
+	}
+
+	var result struct {
+		Object []map[string]interface{} `json:"object"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return false
+	}
+
+	return len(result.Object) > 0
+}
+
+func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) {
                   uid
@@ -85,8 +137,8 @@ func checkExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	return len(result.Object) > 0
 }
 
-func (s *dGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error) {
-	txn := s.dg.NewTxn()
+func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error) {
+	txn := s.Dg.NewTxn()
 
 	if ok := checkType(ctx, txn, account, "account"); !ok {
 		return errors.New("invalid account")
@@ -129,8 +181,8 @@ func (s *dGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace 
 
 }
 
-func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error) {
-	txn := s.dg.NewReadOnlyTxn()
+func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query authenticate($username: string, $password: string){
   login(func: eq(username, $username)) @filter(eq(type, "credentials")) {
@@ -177,8 +229,8 @@ func (s *dGraphRepo) Authenticate(ctx context.Context, username, password string
 	return false, "", "", errors.New("Invalid credentials")
 }
 
-func (s *dGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
-	txn := s.dg.NewReadOnlyTxn()
+func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query accounts{
                      accounts(func: eq(type, "account")) {
@@ -211,12 +263,12 @@ func (s *dGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 	return accounts, nil
 }
 
-func (s *dGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
+func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
 	defaultNs, err := s.CreateNamespace(ctx, username)
 	if err != nil {
 		return "", err
 	}
-	txn := s.dg.NewTxn()
+	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
                 exists(func: eq(name, $name)) @filter(eq(type, "account")) {
@@ -288,8 +340,8 @@ func (s *dGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 	return "", errors.New("User exists already")
 }
 
-func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string, inherit bool) (err error) {
-	txn := s.dg.NewTxn()
+func (s *DGraphRepo) Authorize(ctx context.Context, account, node, action string, inherit bool) (err error) {
+	txn := s.Dg.NewTxn()
 
 	if ok := checkType(ctx, txn, account, "account"); !ok {
 		return errors.New("invalid account")
@@ -349,8 +401,8 @@ func (s *dGraphRepo) Authorize(ctx context.Context, account, node, action string
 	return nil
 }
 
-func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *nodepb.Account, err error) {
-	txn := s.dg.NewReadOnlyTxn()
+func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *nodepb.Account, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
 	const q = `query accounts($account: string) {
                      accounts(func: uid($account)) @filter(eq(type, "account"))  {
                        uid
@@ -385,7 +437,7 @@ func (s *dGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}, err
 }
 
-func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
+func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
 	ns := &Namespace{
 		Node: Node{
 			Type: "namespace",
@@ -394,7 +446,7 @@ func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 		Name: name,
 	}
 
-	txn := s.dg.NewTxn()
+	txn := s.Dg.NewTxn()
 	js, err := json.Marshal(&ns)
 	if err != nil {
 		return "", err
@@ -411,7 +463,7 @@ func (s *dGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 	return assigned.GetUids()["namespace"], nil
 }
 
-func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
+func (s *DGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
                      namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
 	               uid
@@ -419,7 +471,7 @@ func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (name
 	             }
                    }`
 
-	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespaceID})
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespaceID})
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +494,7 @@ func (s *dGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (name
 	return nil, errors.New("Namespace not found")
 }
 
-func (s *dGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
+func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
   	               uid
@@ -450,7 +502,7 @@ func (s *dGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	             }
                    }`
 
-	res, err := s.dg.NewReadOnlyTxn().Query(ctx, q)
+	res, err := s.Dg.NewReadOnlyTxn().Query(ctx, q)
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +525,7 @@ func (s *dGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
-func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
+func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
                      namespaces(func: uid($account)) @normalize @cascade  {
                        access.to.namespace @filter(eq(type, "namespace")) {
@@ -483,7 +535,7 @@ func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	             }
                    }`
 
-	res, err := s.dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
 	if err != nil {
 		return nil, err
 	}
@@ -506,7 +558,7 @@ func (s *dGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
-func (s *dGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
+func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
 	params := map[string]string{
 		"$namespace": namespace,
 		"$user_id":   account,
@@ -514,7 +566,7 @@ func (s *dGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 
 	fmt.Println("pars", params)
 
-	txn := s.dg.NewReadOnlyTxn()
+	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query access($namespace: string, $user_id: string){
   access(func: uid($user_id)) @cascade {
@@ -547,7 +599,7 @@ func (s *dGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 	return len(access.Access) > 0, nil
 }
 
-func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
+func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
 	if node == account {
 		return true, nil
 	}
@@ -557,7 +609,7 @@ func (s *dGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 		"$user_id":   account,
 	}
 
-	txn := s.dg.NewReadOnlyTxn()
+	txn := s.Dg.NewReadOnlyTxn()
 
 	const qDirect = `query direct_access($device_id: string, $user_id: string){
                          direct(func: uid($user_id)) @normalize @cascade {

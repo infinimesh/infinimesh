@@ -59,7 +59,7 @@ var createDeviceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := deviceClient.Create(ctx, &registrypb.CreateRequest{
 			Device: &registrypb.Device{
-				Id:      args[0],
+				Name:    args[0],
 				Enabled: &wrappers.BoolValue{Value: true},
 				Certificate: &registrypb.Certificate{
 					// TODO cert, don't hardcode ;)

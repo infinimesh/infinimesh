@@ -4,43 +4,40 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"log"
 
-	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/golang/protobuf/ptypes/wrappers"
+
 	"github.com/infinimesh/infinimesh/pkg/node"
+	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/dgraph-io/dgo"
+	"github.com/dgraph-io/dgo/protos/api"
+
+	"encoding/base64"
 )
 
 type Server struct {
-	db           *gorm.DB
-	objectClient nodepb.ObjectServiceClient
+	dgo *dgo.Dgraph
+
+	repo node.Repo
 }
 
-func NewServer(addr string, objectClient nodepb.ObjectServiceClient) *Server {
-	db, err := gorm.Open("postgres", addr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.LogMode(false)
-	db.SingularTable(true)
-	db.AutoMigrate(&Device{})
-
+func NewServer(dg *dgo.Dgraph) *Server {
 	return &Server{
-		db:           db,
-		objectClient: objectClient,
+		dgo: dg,
+		repo: &dgraph.DGraphRepo{
+			Dg: dg,
+		},
 	}
 }
 
@@ -67,6 +64,17 @@ func sha256Sum(c []byte) []byte {
 }
 
 func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
+	txn := s.dgo.NewTxn()
+	defer txn.Discard(ctx) // nolint
+	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Namespace, ""); exists {
+		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
+	} // TODO allow setting parent
+
+	ns, err := s.repo.GetNamespace(ctx, request.Namespace)
+	if err != nil {
+		return nil, status.Error(codes.FailedPrecondition, "Invalid namespace")
+	}
+
 	if request.Device.Certificate == nil {
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
 	}
@@ -76,43 +84,60 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
 	}
 
-	u, err := uuid.NewRandom()
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-	uuidBytes, err := u.MarshalBinary()
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
-	}
-
 	var enabled bool
 	if request.Device.Enabled != nil {
 		enabled = request.Device.Enabled.GetValue()
 	}
 
-	if err := s.db.Create(&Device{
-		ID:                              uuidBytes,
-		Tags:                            request.Device.Tags,
-		Name:                            request.Device.Id,
-		Enabled:                         enabled,
-		Certificate:                     request.Device.Certificate.PemData,
-		CertificateType:                 request.Device.Certificate.Algorithm,
-		CertificateFingerprintAlgorithm: "sha256",
-		CertificateFingerprint:          fp,
-	}).Error; err != nil {
-		return nil, status.Error(codes.FailedPrecondition, fmt.Sprintf("Failed to create device: %v", err))
+	d := &Device{
+		Object: dgraph.Object{
+			Node: dgraph.Node{
+				UID:  "_:new",
+				Type: "object",
+			},
+			Name: request.Device.Name,
+			Kind: node.KindDevice,
+		},
+		Enabled: enabled,
+		Certificates: []*X509Cert{
+			&X509Cert{
+				PemData:              request.Device.Certificate.PemData,
+				Algorithm:            request.Device.Certificate.Algorithm,
+				Fingerprint:          fp,
+				FingerprintAlgorithm: "sha256",
+			},
+		},
 	}
 
-	resp, err := s.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
-		Name:      request.GetDevice().GetId(),
-		Kind:      node.KindDevice,
-		Namespace: request.GetNamespace(),
+	js, err := json.Marshal(d)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to create device")
+	}
+	mutRes, err := txn.Mutate(ctx, &api.Mutation{
+		SetJson: js,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
 	}
 
-	fmt.Println("Created node ", resp.GetUid())
+	newUID := mutRes.GetUids()["new"]
+	fmt.Println(newUID)
+
+	nsMut := &api.NQuad{
+		Subject:   ns.GetId(),
+		Predicate: "owns",
+		ObjectId:  newUID,
+	}
+
+	_, err = txn.Mutate(ctx, &api.Mutation{
+		Set: []*api.NQuad{
+			nsMut,
+		},
+		CommitNow: true,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
+	}
 
 	return &registrypb.CreateResponse{
 		Fingerprint: fp,
@@ -120,103 +145,291 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 }
 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
-	update := make(map[string]interface{})
+	d := &Device{
+		Object: dgraph.Object{
+			Node: dgraph.Node{
+				UID: request.Device.Id,
+			},
+		},
+	}
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
 		case "Enabled":
-			update["enabled"] = request.Device.Enabled.GetValue()
+			d.Enabled = request.Device.Enabled.GetValue()
 		case "Tags":
-			update["tags"] = request.Device.Tags
-		case "Certificate.Algorithm":
-			update["certificate_fingerprint_algorithm"] = request.Device.Certificate.Algorithm
-		case "Certificate.PemData":
-			update["certificate"] = request.Device.Certificate.PemData
+			d.Tags = request.Device.Tags
+			//TODO
+			// case "Certificate.Algorithm":
+			// 	update["certificate_fingerprint_algorithm"] = request.Device.Certificate.Algorithm
+			// case "Certificate.PemData":
+			// 	update["certificate"] = request.Device.Certificate.PemData
 		}
 
 	}
 
-	if _, ok := update["certificate"]; ok {
-		// recalc fingerprint
-		fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
-		if err != nil {
-			return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
-		}
-
-		update["certificate_fingerprint"] = fp
-		update["certificate_fingerprint_algorithm"] = "sha256"
+	txn := s.dgo.NewTxn()
+	js, err := json.Marshal(&d)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
 
-	fmt.Println("Updating", update)
-
-	var device Device
-	if err := s.db.First(&device, "name = ?", request.Device.GetId()).Error; err != nil {
-		return nil, err
+	_, err = txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
 
-	if err := s.db.Model(&device).Updates(update).Error; err != nil {
-		return nil, err
-	}
+	// TODO
+	// Updating cert currently not implemented
+
+	// if _, ok := update["certificate"]; ok {
+	// 	// recalc fingerprint
+	// 	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
+	// 	if err != nil {
+	// 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
+	// 	}
+
+	// 	update["certificate_fingerprint"] = fp
+	// 	update["certificate_fingerprint_algorithm"] = "sha256"
+	// }
+
+	// var device Device
+	// if err := s.db.First(&device, "id = ?", request.Device.GetId()).Error; err != nil {
+	// 	return nil, err
+	// }
+
+	// if err := s.db.Model(&device).Updates(update).Error; err != nil {
+	// 	return nil, err
+	// }
 
 	return &registrypb.UpdateResponse{}, nil
 }
 
 func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetByFingerprintRequest) (*registrypb.GetByFingerprintResponse, error) {
-	device := &Device{}
-	if err := s.db.Take(device, &Device{CertificateFingerprint: request.Fingerprint}).Error; err != nil {
-		return &registrypb.GetByFingerprintResponse{}, status.Error(codes.FailedPrecondition, err.Error())
+	txn := s.dgo.NewReadOnlyTxn()
+
+	const q = `query devices($fingerprint: string){
+  devices(func: eq(fingerprint, "0r1H1PStHl9AY1WQlQVBxNqmq2FjkhlvBN9D9hDbOks=")) @normalize {
+    ~certificates {
+      uid : uid
+      name : name
+      ~owns {
+        namespace: name
+      }
+    }
+  }
+}
+  `
+
+	vars := map[string]string{
+		"$fingerprint": base64.StdEncoding.EncodeToString(request.Fingerprint),
 	}
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	var res struct {
+		Devices []struct {
+			Uid       string `json:"uid"`
+			Name      string `json:"name"`
+			Namespace string `json:"namespace"`
+		} `json:"devices"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	// FIXME dedupe, we could have multiple entries possibly?
+	var devices []*registrypb.DeviceForFingerprint
+	for _, device := range res.Devices {
+		devices = append(devices, &registrypb.DeviceForFingerprint{
+			Id:        device.Uid,
+			Name:      device.Name,
+			Namespace: device.Namespace,
+		})
+	}
+
 	return &registrypb.GetByFingerprintResponse{
-		Id: device.Name,
+		Devices: devices,
 	}, nil
 }
 
 func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
-	var device Device
-	if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
-		return nil, err
+	txn := s.dgo.NewReadOnlyTxn()
+
+	const q = `query devices($name: string, $namespace: string){
+                     devices(func: eq(name, $name)) @cascade {
+                       uid
+                       name
+                       ~owns {
+                       } @filter(eq(name, $namespace))
+                       certificates {
+                         pem_data
+                         algorithm
+                         fingerprint
+                         fingerprint.algorithm
+                       }
+                     }
+                   }`
+
+	vars := map[string]string{
+		"$name":      request.Id, // TODO rename id to name OR to device_id
+		"$namespace": request.Namespace,
 	}
-	return &registrypb.GetResponse{
-		Device: toProto(&device),
-	}, nil
-}
-func (s *Server) List(context.Context, *registrypb.ListDevicesRequest) (*registrypb.ListResponse, error) {
-	var devices []*Device
-	if err := s.db.Find(&devices).Error; err != nil {
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
 		return nil, err
 	}
 
-	var protoDevices []*registrypb.Device
-	for _, device := range devices {
-		protoDevices = append(protoDevices, toProto(device))
+	var res struct {
+		Devices []*Device `json:"devices"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(res.Devices) == 0 {
+		return &registrypb.GetResponse{}, status.Error(codes.NotFound, "Device not found")
+	}
+
+	return &registrypb.GetResponse{
+		Device: toProto(res.Devices[0]),
+	}, nil
+}
+
+func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	txn := s.dgo.NewReadOnlyTxn()
+
+	const q = `query list($account: string, $namespace: string){
+                     var(func: eq(name,$namespace)) @filter(eq(type, "namespace")) {
+                       owns {
+                         OBJs as uid
+                       } @filter(eq(kind, "device"))
+                     }
+
+                     nodes(func: uid(OBJs)) @recurse {
+                       children{} 
+                       uid
+                       name
+                       kind
+                     }
+                   }`
+
+	vars := map[string]string{
+		"$account":   request.Account,
+		"$namespace": request.Namespace,
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	var res struct {
+		Nodes []Device `json:"nodes"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	var devices []*registrypb.Device
+	for _, device := range res.Nodes {
+		devices = append(devices, toProto(&device))
 	}
 
 	return &registrypb.ListResponse{
-		Devices: protoDevices,
+		Devices: devices,
 	}, nil
 }
 
+func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	txn := s.dgo.NewReadOnlyTxn()
+
+	const q = `query list($account: string, $namespace: string){
+                     var(func: uid($account)) {
+                       access.to.namespace @filter(eq(name,$namespace)){
+                         owns {
+                           OBJs as uid
+                         } @filter(not(has(~children)) AND eq(kind, "device"))
+                       }
+                     }
+
+                     nodes(func: uid(OBJs)) @recurse {
+                       children{} 
+                       uid
+                       name
+                       kind
+                     }
+                   }`
+
+	vars := map[string]string{
+		"$account":   request.Account,
+		"$namespace": request.Namespace,
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	var res struct {
+		Nodes []Device `json:"nodes"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	var devices []*registrypb.Device
+	for _, device := range res.Nodes {
+		devices = append(devices, toProto(&device))
+	}
+
+	return &registrypb.ListResponse{
+		Devices: devices,
+	}, nil
+}
+
+// TODO make registrypb.Device have multiple certs, ... we also ignore valid_to for now
 func toProto(device *Device) *registrypb.Device {
-	return &registrypb.Device{
-		Id:      device.Name,
+	res := &registrypb.Device{
+		Id:      device.UID,
+		Name:    device.Name,
 		Enabled: &wrappers.BoolValue{Value: device.Enabled},
 		Tags:    device.Tags,
-		Certificate: &registrypb.Certificate{
-			PemData:   device.Certificate,
-			Algorithm: "",        // TODO
-			ValidTo:   uint64(0), // TODO
-		},
+		// TODO cert etc
 	}
+
+	if len(device.Certificates) > 0 {
+		res.Certificate = &registrypb.Certificate{
+			PemData:   device.Certificates[0].PemData,
+			Algorithm: device.Certificates[0].Algorithm,
+		}
+	}
+	return res
 }
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
-	// TODO Delete from nodeserver
-	var device Device
-	if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
-		return nil, err
-	}
+	// // TODO Delete from nodeserver
+	// var device Device
+	// if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
+	// 	return nil, err
+	// }
 
-	if err := s.db.Delete(device).Error; err != nil {
-		return nil, err
-	}
+	// if err := s.db.Delete(device).Error; err != nil {
+	// 	return nil, err
+	// }
 	return &registrypb.DeleteResponse{}, nil
 }

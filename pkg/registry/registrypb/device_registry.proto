@@ -9,6 +9,7 @@ import "google/protobuf/wrappers.proto";
 
 message Device {
   string id = 1;
+  string name = 2;
   google.protobuf.BoolValue enabled = 3;
   Certificate certificate = 4;
   repeated string tags = 5;
@@ -33,8 +34,14 @@ message GetByFingerprintRequest {
   bytes fingerprint = 1;
 }
 
-message GetByFingerprintResponse {
+message DeviceForFingerprint {
   string id = 1;
+  string name = 2;
+  string namespace = 3;
+}
+
+message GetByFingerprintResponse {
+  repeated DeviceForFingerprint devices = 1;
 }
 
 message GetRequest {
@@ -48,6 +55,7 @@ message GetResponse {
 
 message ListDevicesRequest {
   string namespace = 1;
+  string account = 2;
 }
 
 message ListResponse {
@@ -76,5 +84,6 @@ service Devices {
   rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc List(ListDevicesRequest) returns (ListResponse);
+  rpc ListForAccount(ListDevicesRequest) returns (ListResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
 }
