@@ -83,7 +83,7 @@ func (d *deviceAPI) List(ctx context.Context, request *registrypb.ListDevicesReq
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	return d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Account, Account: account})
+	return d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace, Account: account})
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
 	return &registrypb.DeleteResponse{}, status.Error(codes.Unimplemented, "Delete currently not implemented, but will be soon-ish")
