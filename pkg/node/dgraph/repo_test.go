@@ -58,7 +58,7 @@ func TestAuthorize(t *testing.T) {
 func TestListInNamespaceForAccount(t *testing.T) {
 	ctx := context.Background()
 
-	nsName := randomdata.SillyName()
+	nsName := "sample-test"
 
 	// Setup
 	_, err := repo.CreateNamespace(ctx, nsName)

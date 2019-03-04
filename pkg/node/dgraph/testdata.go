@@ -12,7 +12,10 @@ import (
 )
 
 func ImportSchema(dg *dgo.Dgraph) error {
-	_ = dg.Alter(context.Background(), &api.Operation{DropAll: true})
+	err := dg.Alter(context.Background(), &api.Operation{DropAll: true})
+	if err != nil {
+		return err
+	}
 	return dg.Alter(context.Background(), &api.Operation{
 		Schema: `
   name: string @index(exact) .
