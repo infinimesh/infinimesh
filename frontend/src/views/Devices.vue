@@ -46,7 +46,7 @@
                       style="cursor: pointer"
                       @click="navigateTo(props.item.id)"
                     >
-                      {{ props.item.id }}
+                      {{ props.item.name }}
                     </td>
                     <td v-if="props.item.tags" class="text-xs-left">
                       <v-chip v-for="tag in props.item.tags" :key="tag">{{
