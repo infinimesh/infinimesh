@@ -12,6 +12,7 @@ import (
 )
 
 func ImportSchema(dg *dgo.Dgraph) error {
+	fmt.Println("i")
 	err := dg.Alter(context.Background(), &api.Operation{DropAll: true})
 	if err != nil {
 		return err

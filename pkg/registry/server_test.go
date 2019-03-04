@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 
+	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
@@ -33,10 +34,8 @@ func init() {
 	}
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
-	err = dgraph.ImportSchema(dg)
-	if err != nil {
-		panic(err)
-	}
+
+	node.ImportDB.Do(func() { dgraph.ImportSchema(dg) })
 	user, admin, err := dgraph.ImportStandardSet(dgraph.NewDGraphRepo(dg))
 	if err != nil {
 		panic(err)
