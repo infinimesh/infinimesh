@@ -38,8 +38,8 @@ export default {
   data() {
     return {
       show: false,
-      userName: "joe",
-      password: "test123",
+      userName: "",
+      password: "",
       notLoggedIn: false,
       loginError: false,
       errorMessage: "Login error",
