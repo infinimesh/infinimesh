@@ -35,7 +35,7 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	node.ImportDB.Do(func() { dgraph.ImportSchema(dg) })
+	node.ImportDB.Do(func() { _ = dgraph.ImportSchema(dg) })
 	user, admin, err := dgraph.ImportStandardSet(dgraph.NewDGraphRepo(dg))
 	if err != nil {
 		panic(err)
