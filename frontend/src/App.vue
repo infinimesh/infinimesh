@@ -18,7 +18,6 @@
 <script>
 import Footer from "./components/TheFooter.vue";
 import Header from "./components/TheHeader.vue";
-import NamespaceMenu from "./components/NamespaceMenu.vue";
 import Sidebar from "./components/TheSidebar.vue";
 import "@/assets/styles.css";
 
