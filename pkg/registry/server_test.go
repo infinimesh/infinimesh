@@ -19,9 +19,8 @@ import (
 )
 
 var (
-	server  *Server
-	userID  string
-	adminID string
+	server *Server
+	userID string
 )
 
 func init() {
