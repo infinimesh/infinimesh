@@ -12,7 +12,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 
-	"github.com/infinimesh/infinimesh/pkg/node"
+	randomdata "github.com/Pallinder/go-randomdata"
+
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
@@ -35,13 +36,13 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	node.ImportDB.Do(func() { _ = dgraph.ImportSchema(dg) })
-	user, admin, err := dgraph.ImportStandardSet(dgraph.NewDGraphRepo(dg))
+	repo := dgraph.NewDGraphRepo(dg)
+	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false)
 	if err != nil {
 		panic(err)
 	}
+
 	userID = user
-	adminID = admin
 
 	server = NewServer(dg)
 }

@@ -30,7 +30,6 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 	repo = NewDGraphRepo(dg)
-	node.ImportDB.Do(func() { _ = ImportSchema(dg) })
 }
 
 func TestAuthorize(t *testing.T) {
