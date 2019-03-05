@@ -67,7 +67,7 @@ func request_Devices_Create_0(ctx context.Context, marshaler runtime.Marshaler, 
 }
 
 var (
-	filter_Devices_Update_0 = &utilities.DoubleArray{Encoding: map[string]int{"device": 0, "namespace": 1, "id": 2}, Base: []int{1, 2, 3, 1, 0, 0, 0}, Check: []int{0, 1, 1, 2, 4, 2, 3}}
+	filter_Devices_Update_0 = &utilities.DoubleArray{Encoding: map[string]int{"device": 0, "namespace": 1, "name": 2}, Base: []int{1, 2, 3, 1, 0, 0, 0}, Check: []int{0, 1, 1, 2, 4, 2, 3}}
 )
 
 func request_Devices_Update_0(ctx context.Context, marshaler runtime.Marshaler, client DevicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -109,15 +109,15 @@ func request_Devices_Update_0(ctx context.Context, marshaler runtime.Marshaler, 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
 
-	val, ok = pathParams["device.id"]
+	val, ok = pathParams["device.name"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device.name")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "device.id", val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "device.name", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.name", err)
 	}
 
 	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Devices_Update_0); err != nil {
@@ -130,7 +130,7 @@ func request_Devices_Update_0(ctx context.Context, marshaler runtime.Marshaler, 
 }
 
 var (
-	filter_Devices_Update_1 = &utilities.DoubleArray{Encoding: map[string]int{"device": 0, "namespace": 1, "id": 2}, Base: []int{1, 2, 3, 1, 0, 0, 0}, Check: []int{0, 1, 1, 2, 4, 2, 3}}
+	filter_Devices_Update_1 = &utilities.DoubleArray{Encoding: map[string]int{"device": 0, "namespace": 1, "name": 2}, Base: []int{1, 2, 3, 1, 0, 0, 0}, Check: []int{0, 1, 1, 2, 4, 2, 3}}
 )
 
 func request_Devices_Update_1(ctx context.Context, marshaler runtime.Marshaler, client DevicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -163,15 +163,15 @@ func request_Devices_Update_1(ctx context.Context, marshaler runtime.Marshaler, 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
 
-	val, ok = pathParams["device.id"]
+	val, ok = pathParams["device.name"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "device.name")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "device.id", val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "device.name", val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.name", err)
 	}
 
 	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Devices_Update_1); err != nil {
@@ -806,9 +806,9 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 var (
 	pattern_Devices_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "namespace", "devices"}, ""))
 
-	pattern_Devices_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "devices", "device.id"}, ""))
+	pattern_Devices_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "devices", "device.name"}, ""))
 
-	pattern_Devices_Update_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "devices", "device.id"}, ""))
+	pattern_Devices_Update_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "devices", "device.name"}, ""))
 
 	pattern_Devices_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "devices", "id"}, ""))
 

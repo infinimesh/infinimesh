@@ -18,6 +18,7 @@ func ImportSchema(dg *dgo.Dgraph) error {
 	}
 	return dg.Alter(context.Background(), &api.Operation{
 		Schema: `
+  tags: [string] .
   name: string @index(exact) .
   username: string @index(exact) .
   action: string @index(term) .

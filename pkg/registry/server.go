@@ -68,7 +68,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	defer txn.Discard(ctx) // nolint
 	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Namespace, ""); exists {
 		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
-	} // TODO allow setting parent
+	}
 
 	ns, err := s.repo.GetNamespace(ctx, request.Namespace)
 	if err != nil {
@@ -99,10 +99,11 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 			Kind: node.KindDevice,
 		},
 		Enabled: enabled,
+		Tags:    request.Device.Tags,
 		Certificates: []*X509Cert{
 			&X509Cert{
 				PemData:              request.Device.Certificate.PemData,
-				Algorithm:            request.Device.Certificate.Algorithm,
+				Algorithm:            "RSA",
 				Fingerprint:          fp,
 				FingerprintAlgorithm: "sha256",
 			},
@@ -113,6 +114,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create device")
 	}
+
 	mutRes, err := txn.Mutate(ctx, &api.Mutation{
 		SetJson: js,
 	})
@@ -121,7 +123,6 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}
 
 	newUID := mutRes.GetUids()["new"]
-	fmt.Println(newUID)
 
 	nsMut := &api.NQuad{
 		Subject:   ns.GetId(),
@@ -144,30 +145,55 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}, nil
 }
 
+// TODO tags can currently only be added due to the non-idempotent behavior of dgraph with list types
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
+	txn := s.dgo.NewTxn()
+
+	const q = `query devices($name: string, $namespace: string){
+                     devices(func: eq(name, $name)) {
+                       uid
+                       ~owns {} @filter(eq(name, $namespace))
+                     }
+                   }`
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$name":      request.Device.Name,
+		"$namespace": request.Namespace,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
+	}
+
+	var result struct {
+		Devices []dgraph.Node `json:"devices"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
+	}
+
+	if len(result.Devices) != 1 {
+		return nil, status.Error(codes.NotFound, "Device not found")
+	}
+
 	d := &Device{
 		Object: dgraph.Object{
 			Node: dgraph.Node{
-				UID: request.Device.Id,
+				UID: result.Devices[0].UID,
 			},
 		},
 	}
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
+		// Certificates can't be updated at this time
 		case "Enabled":
 			d.Enabled = request.Device.Enabled.GetValue()
 		case "Tags":
 			d.Tags = request.Device.Tags
-			//TODO
-			// case "Certificate.Algorithm":
-			// 	update["certificate_fingerprint_algorithm"] = request.Device.Certificate.Algorithm
-			// case "Certificate.PemData":
-			// 	update["certificate"] = request.Device.Certificate.PemData
 		}
-
 	}
 
-	txn := s.dgo.NewTxn()
 	js, err := json.Marshal(&d)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
@@ -180,29 +206,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
-
-	// TODO
-	// Updating cert currently not implemented
-
-	// if _, ok := update["certificate"]; ok {
-	// 	// recalc fingerprint
-	// 	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
-	// 	if err != nil {
-	// 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
-	// 	}
-
-	// 	update["certificate_fingerprint"] = fp
-	// 	update["certificate_fingerprint_algorithm"] = "sha256"
-	// }
-
-	// var device Device
-	// if err := s.db.First(&device, "id = ?", request.Device.GetId()).Error; err != nil {
-	// 	return nil, err
-	// }
-
-	// if err := s.db.Model(&device).Updates(update).Error; err != nil {
-	// 	return nil, err
-	// }
 
 	return &registrypb.UpdateResponse{}, nil
 }
@@ -264,19 +267,24 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 	txn := s.dgo.NewReadOnlyTxn()
 
 	const q = `query devices($name: string, $namespace: string){
-                     devices(func: eq(name, $name)) @cascade {
-                       uid
-                       name
-                       ~owns {
-                       } @filter(eq(name, $namespace))
-                       certificates {
-                         pem_data
-                         algorithm
-                         fingerprint
-                         fingerprint.algorithm
-                       }
-                     }
-                   }`
+  uids as var(func: eq(name, $name)) @cascade {
+    uid
+    ~owns {} @filter(eq(name, $namespace))
+  }
+
+  devices(func: uid(uids)) {
+    uid
+    name
+    tags
+    enabled
+    certificates {
+      pem_data
+      algorithm
+      fingerprint
+      fingerprint.algorithm
+    }
+  }
+}`
 
 	vars := map[string]string{
 		"$name":      request.Id, // TODO rename id to name OR to device_id
@@ -317,10 +325,12 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
                      }
 
                      nodes(func: uid(OBJs)) @recurse {
-                       children{} 
+                       children{}
                        uid
                        name
                        kind
+                       enabled
+                       tags
                      }
                    }`
 
@@ -370,6 +380,8 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
                        uid
                        name
                        kind
+                       enabled
+                       tags
                      }
                    }`
 
@@ -414,14 +426,19 @@ func toProto(device *Device) *registrypb.Device {
 
 	if len(device.Certificates) > 0 {
 		res.Certificate = &registrypb.Certificate{
-			PemData:   device.Certificates[0].PemData,
-			Algorithm: device.Certificates[0].Algorithm,
+			PemData:              device.Certificates[0].PemData,
+			Algorithm:            device.Certificates[0].Algorithm,
+			FingerprintAlgorithm: device.Certificates[0].FingerprintAlgorithm,
+			Fingerprint:          device.Certificates[0].Fingerprint,
 		}
 	}
 	return res
 }
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+	txn := s.dgo.NewTxn()
+	_, _ = txn.Mutate(context.Background(), &api.Mutation{})
+
 	// // TODO Delete from nodeserver
 	// var device Device
 	// if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {

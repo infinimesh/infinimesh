@@ -23,7 +23,8 @@ message CreateRequest {
 message Certificate {
   string pem_data = 1;
   string algorithm = 2;
-  uint64 valid_to = 3;
+  bytes fingerprint = 3;
+  string fingerprintAlgorithm = 4;
 }
 
 message CreateResponse {

@@ -7,9 +7,9 @@ import (
 type Device struct {
 	dgraph.Object
 	Tags    []string `json:"tags,omitempty"`
-	Enabled bool     `json:"enabled,omitempty"`
+	Enabled bool     `json:"enabled"`
 
-	Certificates []*X509Cert `json:"certificates"`
+	Certificates []*X509Cert `json:"certificates,omitempty"`
 }
 
 type X509Cert struct {

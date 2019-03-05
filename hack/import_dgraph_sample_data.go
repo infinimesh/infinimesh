@@ -12,17 +12,22 @@ import (
 	"github.com/dgraph-io/dgo/protos/api"
 	"google.golang.org/grpc"
 
+	"os"
+
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 )
 
 var (
-	dgraphURL string
+	dgraphURL = "localhost:9080"
 	drop      bool
 )
 
 func init() {
 	flag.BoolVar(&drop, "drop", false, "Drop all data in dgraph before import")
-	flag.StringVar(&dgraphURL, "host", "localhost:9080", "dgraph host and port")
+	envURL := os.Getenv("DGRAPH_URL")
+	if envURL != "" {
+		dgraphURL = envURL
+	}
 }
 
 func main() {

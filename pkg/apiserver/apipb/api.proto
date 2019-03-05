@@ -48,10 +48,10 @@ service Devices {
   rpc Update(infinimesh.deviceregistry.UpdateRequest)
       returns (infinimesh.deviceregistry.UpdateResponse) {
     option (google.api.http) = {
-      patch : "/namespaces/{namespace}/devices/{device.id}"
+      patch : "/namespaces/{namespace}/devices/{device.name}"
       body : "device"
       additional_bindings : {
-        put : "/namespaces/{namespace}/devices/{device.id}"
+        put : "/namespaces/{namespace}/devices/{device.name}"
         body : "device"
       }
     };

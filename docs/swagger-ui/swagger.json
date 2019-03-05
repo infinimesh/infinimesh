@@ -211,7 +211,7 @@
         ]
       }
     },
-    "/namespaces/{namespace}/devices/{device.id}": {
+    "/namespaces/{namespace}/devices/{device.name}": {
       "put": {
         "operationId": "Update2",
         "responses": {
@@ -230,7 +230,7 @@
             "type": "string"
           },
           {
-            "name": "device.id",
+            "name": "device.name",
             "in": "path",
             "required": true,
             "type": "string"
@@ -266,7 +266,7 @@
             "type": "string"
           },
           {
-            "name": "device.id",
+            "name": "device.name",
             "in": "path",
             "required": true,
             "type": "string"
@@ -569,9 +569,12 @@
         "algorithm": {
           "type": "string"
         },
-        "valid_to": {
+        "fingerprint": {
           "type": "string",
-          "format": "uint64"
+          "format": "byte"
+        },
+        "fingerprintAlgorithm": {
+          "type": "string"
         }
       }
     },

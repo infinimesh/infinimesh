@@ -9,6 +9,7 @@ require (
 	github.com/avast/retry-go v2.2.0+incompatible
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 	github.com/cskr/pubsub v1.0.1
+	github.com/davecgh/go-spew v1.1.1
 	github.com/denisenkom/go-mssqldb v0.0.0-20181014144952-4e0d7dc8888f // indirect
 	github.com/dgraph-io/dgo v0.0.0-20181226155115-a20f509ade83
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
