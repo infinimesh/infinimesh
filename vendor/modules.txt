@@ -4,6 +4,8 @@ github.com/Pallinder/go-randomdata
 github.com/Shopify/sarama
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
+# github.com/avast/retry-go v2.2.0+incompatible
+github.com/avast/retry-go
 # github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 github.com/birdayz/conjungo
 # github.com/cskr/pubsub v1.0.1
@@ -29,8 +31,8 @@ github.com/fsnotify/fsnotify
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 github.com/golang/glog
 # github.com/golang/protobuf v1.2.0
-github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/wrappers
+github.com/golang/protobuf/proto
 github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/struct
@@ -43,8 +45,6 @@ github.com/golang/protobuf/protoc-gen-go/generator/internal/remap
 github.com/golang/protobuf/protoc-gen-go/plugin
 # github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
 github.com/golang/snappy
-# github.com/google/uuid v1.1.0
-github.com/google/uuid
 # github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 github.com/grpc-ecosystem/go-grpc-middleware/auth
 github.com/grpc-ecosystem/go-grpc-middleware
