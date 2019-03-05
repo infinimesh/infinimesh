@@ -56,7 +56,7 @@ jobs:
           command: docker cp ./ testrunner:/project
       - run:
           name: run tests
-          command: docker exec -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && CGO_ENABLED=0 go run hack/import_dgraph_sample_data.go -drop && go test -mod=vendor ./...'
+          command: docker exec -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && CGO_ENABLED=0 go run -mod=vendor hack/import_dgraph_sample_data.go -drop && go test -mod=vendor ./...'
 workflows:
   version: 2
   all:
