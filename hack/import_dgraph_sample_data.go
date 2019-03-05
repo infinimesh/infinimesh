@@ -28,7 +28,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	retry.Do(func() error {
+	err := retry.Do(func() error {
 		conn, _ := grpc.Dial(dgraphURL, grpc.WithInsecure())
 		defer conn.Close()
 
@@ -54,4 +54,7 @@ func main() {
 		return nil
 	}, retry.Delay(time.Second*2), retry.Attempts(40))
 
+	if err != nil {
+		panic(err)
+	}
 }
