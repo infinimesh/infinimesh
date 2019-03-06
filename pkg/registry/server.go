@@ -103,7 +103,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		Certificates: []*X509Cert{
 			&X509Cert{
 				PemData:              request.Device.Certificate.PemData,
-				Algorithm:            "RSA",
+				Algorithm:            request.Device.Certificate.Algorithm,
 				Fingerprint:          fp,
 				FingerprintAlgorithm: "sha256",
 			},
