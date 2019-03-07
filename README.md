@@ -18,6 +18,11 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
 
 ## Development
+### Generating proto files
+```
+npm i -g merge-yaml-cli 
+npm i -g api-spec-converter
+```
 Load test data into the database via `go run hack/import_dgraph_sample_data.go`
 
 Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/token`

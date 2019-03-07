@@ -11,7 +11,9 @@ tasks:
     desc: Generate protobuf files
     cmds:
       - prototool generate
-      - cp pkg/apiserver/apipb/api.swagger.json docs/swagger-ui/swagger.json
+      - api-spec-converter --from=swagger_2 --to=openapi_3 --syntax=yaml --order=alpha pkg/apiserver/apipb/api.swagger.json > docs/swagger-ui/openapi_base.yaml
+      - combine-yaml -i docs/swagger-ui/mixin.yaml docs/swagger-ui/openapi_base.yaml -o docs/swagger-ui/openapi.yaml
+      - rm docs/swagger-ui/openapi_base.yaml
   lint:
     desc: Run linter
     cmds:
