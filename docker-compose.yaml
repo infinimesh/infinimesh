@@ -53,6 +53,7 @@ services:
     depends_on:
       - database
     environment:
+      - DGRAPH_HOST=server:9080
       - DB_ADDR=postgresql://root@database:26257/postgres?sslmode=disable
     restart: unless-stopped
   shadow-delta-merger:
