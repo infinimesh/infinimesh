@@ -173,12 +173,12 @@ func main() {
 			continue
 		}
 		response := reply.Devices[0] // FIXME
-		fmt.Printf("Client connected, device name according to registry: %v\n", response.Name)
+		fmt.Printf("Client connected, id: %v, name: %v\n", response.Id, response.Name)
 
 		backChannel := ps.Sub()
 
-		go handleConn(conn, response.Name, backChannel)
-		go handleBackChannel(conn, response.Name, backChannel)
+		go handleConn(conn, response.Id, backChannel)
+		go handleBackChannel(conn, response.Id, backChannel)
 	}
 
 }
