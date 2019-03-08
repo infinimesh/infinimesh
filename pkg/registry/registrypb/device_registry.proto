@@ -28,7 +28,7 @@ message Certificate {
 }
 
 message CreateResponse {
-  bytes fingerprint = 1;
+  Device device = 1;
 }
 
 message GetByFingerprintRequest {

@@ -140,8 +140,17 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
 	}
 
+	request.Device.Certificate.Fingerprint = fp
+	request.Device.Certificate.FingerprintAlgorithm = "sha256"
+
 	return &registrypb.CreateResponse{
-		Fingerprint: fp,
+		Device: &registrypb.Device{
+			Id:          newUID,
+			Name:        request.Device.Name,
+			Enabled:     request.Device.Enabled,
+			Tags:        request.Device.Tags,
+			Certificate: request.Device.Certificate,
+		},
 	}, nil
 }
 
@@ -434,6 +443,7 @@ func toProto(device *Device) *registrypb.Device {
 	return res
 }
 
+// TODO check if exists
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}

@@ -33,9 +33,8 @@ components:
       type: object
     deviceregistryCreateResponse:
       properties:
-        fingerprint:
-          format: byte
-          type: string
+        device:
+          $ref: '#/components/schemas/deviceregistryDevice'
       type: object
     deviceregistryDeleteResponse:
       type: object

@@ -77,16 +77,13 @@ func TestListForAccount(t *testing.T) {
 	require.EqualValues(t, 2, found, "Devices with both parent or no parent have to be returned")
 }
 
-func TestCreateGet(t *testing.T) {
-	// Create
-	request := &registrypb.CreateRequest{
-		Namespace: "joe",
-		Device: &registrypb.Device{
-			Name:    "test-devicex",
-			Enabled: &wrappers.BoolValue{Value: true},
-			Tags:    []string{"a", "b", "c"},
-			Certificate: &registrypb.Certificate{
-				PemData: `-----BEGIN CERTIFICATE-----
+func sampleDevice(name string) *registrypb.Device {
+	return &registrypb.Device{
+		Name:    "test-devicex",
+		Enabled: &wrappers.BoolValue{Value: true},
+		Tags:    []string{"a", "b", "c"},
+		Certificate: &registrypb.Certificate{
+			PemData: `-----BEGIN CERTIFICATE-----
 MIIDiDCCAnCgAwIBAgIJAMNNOKhM9eyOMA0GCSqGSIb3DQEBCwUAMFkxCzAJBgNV
 BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
 aWRnaXRzIFB0eSBMdGQxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xODA4MDYyMTU4
@@ -107,9 +104,16 @@ OmWrBAp4qqOaEKWpg0N9fZICb7g4klONQOryAaZYcbeCBwXyg0baCZLXfJzatn41
 Xkrr0nVweXiEEk5BosN20FyFZBekpby11th2M1XksArLTWQ41IL1TfWKJALDZgPL
 AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 -----END CERTIFICATE-----`,
-				Algorithm: "def",
-			},
+			Algorithm: "def",
 		},
+	}
+}
+
+func TestCreateGet(t *testing.T) {
+	// Create
+	request := &registrypb.CreateRequest{
+		Namespace: "joe",
+		Device:    sampleDevice("test-devicex"),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
@@ -132,6 +136,21 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 	})
 	require.NoError(t, err)
 	require.Contains(t, respFP.Devices, &registrypb.DeviceForFingerprint{Id: respGet.Device.Id, Name: respGet.Device.Name, Namespace: "joe"})
+}
+
+func TestDelete(t *testing.T) {
+	// request := &registrypb.CreateRequest{
+	// 	Namespace: "joe",
+	// 	Device:    sampleDevice("test-devicex"),
+	// }
+	// response, err := server.Create(context.Background(), request)
+	// require.NoError(t, err)
+	// require.NotEmpty(t, response.Fingerprint)
+
+	// server.Delete(ctx, &registrypb.DeleteRequest{
+	// 	Id: response.
+	// })
+
 }
 
 //TODO test update/patch; also with cert

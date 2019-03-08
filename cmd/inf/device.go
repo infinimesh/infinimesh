@@ -19,6 +19,7 @@ func init() {
 	lsDeviceCmd.Flags().StringVarP(&namespaceFlag, "namespace", "n", "", "Namespace")
 	devicesCmd.AddCommand(lsDeviceCmd)
 	devicesCmd.AddCommand(createDeviceCmd)
+	devicesCmd.AddCommand(deleteDeviceCmd)
 	rootCmd.AddCommand(devicesCmd)
 }
 
@@ -91,6 +92,19 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Created device.\nFingerprint: %v\n", base64.StdEncoding.EncodeToString(resp.GetFingerprint()))
+		fmt.Printf("Created device.\nFingerprint: %v\n", base64.StdEncoding.EncodeToString(resp.Device.Certificate.Fingerprint))
+	},
+}
+
+var deleteDeviceCmd = &cobra.Command{
+	Use:  "delete",
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		_, err := deviceClient.Delete(ctx, &registrypb.DeleteRequest{
+			Id: args[0],
+		})
+		if err != nil {
+			fmt.Println("grpc: failed to delete device", err)
+		}
 	},
 }
