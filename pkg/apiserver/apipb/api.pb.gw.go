@@ -221,12 +221,8 @@ func request_Devices_Get_0(ctx context.Context, marshaler runtime.Marshaler, cli
 
 }
 
-var (
-	filter_Devices_List_0 = &utilities.DoubleArray{Encoding: map[string]int{"namespace": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
 func request_Devices_List_0(ctx context.Context, marshaler runtime.Marshaler, client DevicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq registrypb.ListDevicesRequest
+	var protoReq ListDevicesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -245,10 +241,6 @@ func request_Devices_List_0(ctx context.Context, marshaler runtime.Marshaler, cl
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
-	}
-
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Devices_List_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := client.List(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))

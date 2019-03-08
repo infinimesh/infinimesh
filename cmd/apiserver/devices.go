@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
@@ -77,11 +79,14 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 	return d.client.Get(ctx, request)
 
 }
-func (d *deviceAPI) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	fmt.Println("Call to list")
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
+
+	fmt.Println("acc", account)
 
 	return d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace, Account: account})
 }
