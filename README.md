@@ -29,6 +29,5 @@ Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost
 
 Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
 
-
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_large)
