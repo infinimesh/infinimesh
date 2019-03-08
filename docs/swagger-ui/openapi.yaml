@@ -65,13 +65,11 @@ components:
     deviceregistryUpdateResponse:
       type: object
     infinimeshapiCreateObjectRequest:
-      example:
-        name: name of child
       properties:
-        name:
-          type: string
         namespace:
           type: string
+        object:
+          $ref: '#/components/schemas/nodeObject'
         parent:
           type: string
       type: object
@@ -146,6 +144,8 @@ components:
           type: string
       type: object
     nodeObject:
+      example:
+        uid: '0x01'
       properties:
         kind:
           type: string
@@ -899,34 +899,6 @@ paths:
           description: A successful response.
       tags:
         - Devices
-    put:
-      operationId: Update2
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: device.name
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/deviceregistryDevice'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/deviceregistryUpdateResponse'
-          description: A successful response.
-      tags:
-        - Devices
   '/namespaces/{namespace}/devices/{id}':
     delete:
       operationId: Delete
@@ -1071,17 +1043,11 @@ paths:
           description: A successful response.
       tags:
         - Objects
-  '/namespaces/{namespace}/objects/{parent}/children':
     post:
       operationId: CreateObject
       parameters:
         - in: path
           name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: parent
           required: true
           schema:
             type: string

@@ -24,6 +24,7 @@ option java_outer_classname = "ApiProto";
 option java_package = "com.infinimesh.api";
 
 import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
 import "pkg/node/nodepb/namespace.proto";
 import "pkg/node/nodepb/node.proto";
 import "pkg/registry/registrypb/device_registry.proto";
@@ -54,10 +55,6 @@ service Devices {
     option (google.api.http) = {
       patch : "/namespaces/{namespace}/devices/{device.name}"
       body : "device"
-      additional_bindings : {
-        put : "/namespaces/{namespace}/devices/{device.name}"
-        body : "device"
-      }
     };
   }
   rpc Get(infinimesh.deviceregistry.GetRequest)
@@ -125,17 +122,12 @@ service Accounts {
   };
 }
 
-// TODO how to list direct access grants
 message ListObjectsRequest { string namespace = 1; }
 
 message CreateObjectRequest {
-  // Hide parent because we use it as path param and is not part of the body.
-  option (grpc.gateway.protoc_gen_swagger.options.openapiv2_schema) = {
-    example : {value : '{"name":"name of child"}'}
-  };
-  string parent = 1;
-  string name = 2;
-  string namespace = 3;
+  google.protobuf.StringValue parent = 1;
+  string namespace = 2;
+  infinimesh.node.Object object = 3;
 }
 
 // Object
@@ -149,7 +141,7 @@ service Objects {
   rpc CreateObject(infinimesh.api.CreateObjectRequest)
       returns (infinimesh.node.Object) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}/objects/{parent}/children"
+      post : "/namespaces/{namespace}/objects"
       body : "*"
     };
   }
