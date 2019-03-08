@@ -79,7 +79,7 @@ func TestListForAccount(t *testing.T) {
 
 func sampleDevice(name string) *registrypb.Device {
 	return &registrypb.Device{
-		Name:    "test-devicex",
+		Name:    name,
 		Enabled: &wrappers.BoolValue{Value: true},
 		Tags:    []string{"a", "b", "c"},
 		Certificate: &registrypb.Certificate{
@@ -139,18 +139,26 @@ func TestCreateGet(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	// request := &registrypb.CreateRequest{
-	// 	Namespace: "joe",
-	// 	Device:    sampleDevice("test-devicex"),
-	// }
-	// response, err := server.Create(context.Background(), request)
-	// require.NoError(t, err)
-	// require.NotEmpty(t, response.Fingerprint)
+	request := &registrypb.CreateRequest{
+		Namespace: "joe",
+		Device:    sampleDevice(randomdata.SillyName()),
+	}
+	response, err := server.Create(context.Background(), request)
+	require.NoError(t, err)
+	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
-	// server.Delete(ctx, &registrypb.DeleteRequest{
-	// 	Id: response.
-	// })
+	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+		Id: response.Device.Id,
+	})
 
+	require.NoError(t, err)
+
+	_, err = server.Get(context.Background(), &registrypb.GetRequest{
+		Namespace: "joe",
+		Id:        request.Device.Name,
+	})
+
+	require.Error(t, err)
 }
 
 //TODO test update/patch; also with cert
