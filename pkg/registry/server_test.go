@@ -117,7 +117,7 @@ func TestCreateGet(t *testing.T) {
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
-	require.NotEmpty(t, response.Fingerprint)
+	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
 	// Get
 	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
@@ -132,7 +132,7 @@ func TestCreateGet(t *testing.T) {
 
 	// Get by fingerprint
 	respFP, err := server.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
-		Fingerprint: response.Fingerprint,
+		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
 	require.Contains(t, respFP.Devices, &registrypb.DeviceForFingerprint{Id: respGet.Device.Id, Name: respGet.Device.Name, Namespace: "joe"})
