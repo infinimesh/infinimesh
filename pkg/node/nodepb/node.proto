@@ -101,6 +101,7 @@ message Object {
 message ListObjectsRequest {
   string account = 1;
   string namespace = 2;
+  bool recurse = 3;
 }
 
 message ListObjectsResponse { repeated Object objects = 1; }

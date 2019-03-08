@@ -34,7 +34,7 @@ var lsDeviceCmd = &cobra.Command{
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 		defer w.Flush()
 
-		response, err := objectClient.ListObjects(ctx, &apipb.ListObjectsRequest{
+		response, err := deviceClient.List(ctx, &apipb.ListDevicesRequest{
 			Namespace: getNamespace(),
 		})
 		if err != nil {
@@ -43,11 +43,11 @@ var lsDeviceCmd = &cobra.Command{
 		}
 
 		if !noHeaderFlag {
-			fmt.Fprintf(w, "NAME\tID\t\n")
+			fmt.Fprintf(w, "ID\tNAME\tENABLED\t\n")
 		}
 
-		for _, object := range response.GetObjects() {
-			fmt.Fprintf(w, "%v\t%v\n", object.GetName(), object.GetUid())
+		for _, device := range response.Devices {
+			fmt.Fprintf(w, "%v\t%v\t%v\t\n", device.Name, device.Id, device.Enabled)
 		}
 
 	},

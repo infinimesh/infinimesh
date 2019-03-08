@@ -232,7 +232,7 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 
 // TODO what about root=true ?
 // TODO direct grants are not considered yet
-func (s *DGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
+func (s *DGraphRepo) ListInNamespace(ctx context.Context, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
 	var depth int
@@ -242,16 +242,13 @@ func (s *DGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, n
 		depth = 1
 	}
 
-	q := fmt.Sprintf(`query list($account: string, $namespace: string){
-                     var(func: uid($account)) {
-                       access.to.namespace @filter(eq(name,$namespace)){
-                         owns {
-                           OBJs as uid
-                         } @filter(not(has(~children)))
-                       }
+	q := fmt.Sprintf(`query list($namespace: string){
+                     OBJS as var(func: eq(type, "object"))  @filter(not(has(~children))) {
+                         ~owns  {
+                         }  @filter(eq(name, $namespace))
                      }
 
-                     nodes(func: uid(OBJs)) @recurse(depth: %v) {
+                     nodes(func: uid(OBJS)) @recurse(depth: %v) {
                        children{} #@filter(not(has(~children)))
                        uid
                        name
@@ -260,7 +257,6 @@ func (s *DGraphRepo) ListInNamespaceForAccount(ctx context.Context, accountID, n
                    }`, depth)
 
 	vars := map[string]string{
-		"$account":   accountID,
 		"$namespace": namespaceName,
 	}
 

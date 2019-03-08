@@ -144,8 +144,6 @@ components:
           type: string
       type: object
     nodeObject:
-      example:
-        uid: '0x01'
       properties:
         kind:
           type: string
@@ -1034,6 +1032,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: recurse
+          required: false
+          schema:
+            format: boolean
+            type: boolean
       responses:
         '200':
           content:

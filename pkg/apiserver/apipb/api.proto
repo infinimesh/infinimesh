@@ -122,7 +122,10 @@ service Accounts {
   };
 }
 
-message ListObjectsRequest { string namespace = 1; }
+message ListObjectsRequest {
+  string namespace = 1;
+  bool recurse = 2;
+}
 
 message CreateObjectRequest {
   google.protobuf.StringValue parent = 1;

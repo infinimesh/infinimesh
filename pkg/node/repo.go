@@ -31,5 +31,5 @@ type Repo interface {
 	ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error)
 	ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error)
 
-	ListInNamespaceForAccount(ctx context.Context, accountID, namespaceName string, recurse bool) (objects []*nodepb.Object, err error)
+	ListInNamespace(ctx context.Context, namespaceName string, recurse bool) (objects []*nodepb.Object, err error)
 }

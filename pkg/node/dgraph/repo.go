@@ -559,6 +559,15 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 }
 
 func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
+	acc, err := s.GetAccount(ctx, account)
+	if err != nil {
+		return false, err
+	}
+
+	if acc.IsRoot {
+		return true, nil
+	}
+
 	params := map[string]string{
 		"$namespace": namespace,
 		"$user_id":   account,
