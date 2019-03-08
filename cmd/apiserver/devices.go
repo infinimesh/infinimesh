@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -80,18 +79,23 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 
 }
 func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	fmt.Println("Call to list")
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	fmt.Println("acc", account)
+	isRootResp, err := d.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: account,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if isRootResp.IsRoot {
+		return d.client.List(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
+	}
 
 	resp, err := d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace, Account: account})
-	if err != nil {
-		fmt.Println("err", err)
-	}
 	return resp, err
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
