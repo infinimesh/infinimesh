@@ -99,5 +99,5 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	return resp, err
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
-	return &registrypb.DeleteResponse{}, status.Error(codes.Unimplemented, "Delete currently not implemented, but will be soon-ish")
+	return d.client.Delete(ctx, request)
 }

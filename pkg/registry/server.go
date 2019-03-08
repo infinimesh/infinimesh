@@ -436,16 +436,14 @@ func toProto(device *Device) *registrypb.Device {
 
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
 	txn := s.dgo.NewTxn()
-	_, _ = txn.Mutate(context.Background(), &api.Mutation{})
+	m := &api.Mutation{CommitNow: true}
 
-	// // TODO Delete from nodeserver
-	// var device Device
-	// if err := s.db.First(&device, "name = ?", request.Id).Error; err != nil {
-	// 	return nil, err
-	// }
+	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
 
-	// if err := s.db.Delete(device).Error; err != nil {
-	// 	return nil, err
-	// }
+	_, err = txn.Mutate(context.Background(), m)
+	if err != nil {
+		return nil, err
+	}
+
 	return &registrypb.DeleteResponse{}, nil
 }
