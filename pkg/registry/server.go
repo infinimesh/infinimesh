@@ -317,7 +317,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query list($account: string, $namespace: string){
+	const q = `query list($namespace: string){
                      var(func: eq(name,$namespace)) @filter(eq(type, "namespace")) {
                        owns {
                          OBJs as uid
@@ -335,7 +335,6 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
                    }`
 
 	vars := map[string]string{
-		"$account":   request.Account,
 		"$namespace": request.Namespace,
 	}
 
