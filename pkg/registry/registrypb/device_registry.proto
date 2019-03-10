@@ -47,7 +47,6 @@ message GetByFingerprintResponse {
 
 message GetRequest {
   string id = 1;
-  string namespace = 2;
 }
 
 message GetResponse {
@@ -73,7 +72,6 @@ message DeleteResponse {}
 message UpdateRequest {
   google.protobuf.FieldMask fieldMask = 1;
   Device device = 2;
-  string namespace = 3;
 }
 
 message UpdateResponse{}

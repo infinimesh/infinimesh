@@ -310,6 +310,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 					Node: Node{
 						UID: defaultNs,
 					},
+					AccessToPermission: nodepb.Action_WRITE.String(),
 				},
 			},
 			DefaultNamespace: []*Namespace{
@@ -609,6 +610,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 }
 
 func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
+	fmt.Println("Isa")
 	if node == account {
 		return true, nil
 	}
@@ -666,14 +668,18 @@ func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action str
 	const qRecursiveWrite = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
                            access.to @facets(eq(inherit, true) AND eq(permission,"WRITE"))
-                           contains
+                           access.to.namespace @facets(eq(permission,"WRITE"))
+                           owns
+                           children
                          }
                        }`
 
 	const qRecursiveRead = `query recursive($user_id: string, $device_id: string){
                          shortest(from: $user_id, to: $device_id) {
                            access.to @facets(eq(inherit, true) AND (eq(permission,"WRITE") OR eq(permission, "READ")))
-                           contains
+                           access.to.namespace @facets((eq(permission,"WRITE") OR eq(permission, "READ")))
+                           owns
+                           children
                          }
                        }`
 

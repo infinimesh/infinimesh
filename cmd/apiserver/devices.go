@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,10 +43,10 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespace: request.GetNamespace(),
-		Account:   account,
-		Action:    nodepb.Action_WRITE,
+	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Device.Id,
+		Account: account,
+		Action:  nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
@@ -63,14 +64,16 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespace: request.GetNamespace(),
-		Account:   account,
-		Action:    nodepb.Action_WRITE,
+	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Id,
+		Account: account,
+		Action:  nodepb.Action_READ,
 	})
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
 	}
+
+	fmt.Println("decision", resp.Decision.Value)
 	if !resp.GetDecision().GetValue() {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
 	}

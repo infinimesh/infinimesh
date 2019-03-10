@@ -46,33 +46,33 @@ service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
       returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}/devices"
+      post : "/devices"
       body : "device"
     };
   }
   rpc Update(infinimesh.deviceregistry.UpdateRequest)
       returns (infinimesh.deviceregistry.UpdateResponse) {
     option (google.api.http) = {
-      patch : "/namespaces/{namespace}/devices/{device.name}"
+      patch : "/devices/{device.id}"
       body : "device"
     };
   }
   rpc Get(infinimesh.deviceregistry.GetRequest)
       returns (infinimesh.deviceregistry.GetResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/devices/{id}"
+      get : "/devices/{id}"
     };
   }
   rpc List(ListDevicesRequest)
       returns (infinimesh.deviceregistry.ListResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/devices"
+      get : "/devices"
     };
   }
   rpc Delete(infinimesh.deviceregistry.DeleteRequest)
       returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete : "/namespaces/{namespace}/devices/{id}"
+      delete : "/devices/{id}"
     };
   }
 }
@@ -81,13 +81,13 @@ service Shadows {
   rpc Get(infinimesh.shadow.GetRequest)
       returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/devices/{id}/shadow"
+      get : "/twins/{id}"
     };
   }
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
       returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}/devices/{id}/shadow/desired"
+      patch : "/twins/{id}"
       body : "data"
     };
   }
@@ -95,7 +95,7 @@ service Shadows {
       infinimesh.shadow.StreamReportedStateChangesRequest)
       returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/namespaces/{namespace}/{id}/shadow/reported"
+      get : "/twins/{id}/stream"
     };
   }
 }
@@ -138,20 +138,20 @@ service Objects {
   rpc ListObjects(ListObjectsRequest)
       returns (infinimesh.node.ListObjectsResponse) {
     option (google.api.http) = {
-      get : "/namespaces/{namespace}/objects"
+      get : "/objects"
     };
   }
   rpc CreateObject(infinimesh.api.CreateObjectRequest)
       returns (infinimesh.node.Object) {
     option (google.api.http) = {
-      post : "/namespaces/{namespace}/objects"
+      post : "/objects"
       body : "*"
     };
   }
   rpc DeleteObject(infinimesh.node.DeleteObjectRequest)
       returns (infinimesh.node.DeleteObjectResponse) {
     option (google.api.http) = {
-      delete : "/namespaces/{namespace}/objects/{uid}"
+      delete : "/objects/{uid}"
     };
   }
 }

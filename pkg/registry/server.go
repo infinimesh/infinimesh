@@ -158,16 +158,14 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	txn := s.dgo.NewTxn()
 
-	const q = `query devices($name: string, $namespace: string){
-                     devices(func: eq(name, $name)) {
+	const q = `query devices($id: string)  {
+                     devices(func: uid($id)) @filter(eq(kind, "device")) {
                        uid
-                       ~owns {} @filter(eq(name, $namespace))
                      }
                    }`
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$name":      request.Device.Name,
-		"$namespace": request.Namespace,
+		"$id": request.Device.Id,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
@@ -223,7 +221,7 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 	txn := s.dgo.NewReadOnlyTxn()
 
 	const q = `query devices($fingerprint: string){
-  devices(func: eq(fingerprint, "0r1H1PStHl9AY1WQlQVBxNqmq2FjkhlvBN9D9hDbOks=")) @normalize {
+  devices(func: eq(fingerprint, $fingerprint)) @normalize {
     ~certificates {
       uid : uid
       name : name
@@ -275,13 +273,8 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query devices($name: string, $namespace: string){
-  uids as var(func: eq(name, $name)) @cascade {
-    uid
-    ~owns {} @filter(eq(name, $namespace))
-  }
-
-  devices(func: uid(uids)) {
+	const q = `query devices($id: string){
+  device(func: uid($id)) @filter(eq(kind, "device")) {
     uid
     name
     tags
@@ -296,8 +289,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 }`
 
 	vars := map[string]string{
-		"$name":      request.Id, // TODO rename id to name OR to device_id
-		"$namespace": request.Namespace,
+		"$id": request.Id, // TODO rename id to name OR to device_id
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -306,7 +298,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 	}
 
 	var res struct {
-		Devices []*Device `json:"devices"`
+		Devices []*Device `json:"device"`
 	}
 
 	err = json.Unmarshal(resp.Json, &res)
@@ -374,9 +366,9 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query list($account: string, $namespace: string){
+	var q = `query list($account: string, $namespace: string){
                      var(func: uid($account)) {
-                       access.to.namespace @filter(eq(name,$namespace)){
+                       access.to.namespace %v {
                          owns {
                            OBJs as uid
                          } @filter(not(has(~children)) AND eq(kind, "device"))
@@ -392,6 +384,12 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
                        tags
                      }
                    }`
+
+	if request.Namespace != "" {
+		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))")
+	} else {
+		q = fmt.Sprintf(q, "")
+	}
 
 	vars := map[string]string{
 		"$account":   request.Account,

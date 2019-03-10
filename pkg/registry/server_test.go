@@ -121,8 +121,7 @@ func TestCreateGet(t *testing.T) {
 
 	// Get
 	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
-		Namespace: "joe",
-		Id:        "test-devicex",
+		Id: response.Device.Id,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, respGet.Device)
@@ -154,10 +153,8 @@ func TestDelete(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = server.Get(context.Background(), &registrypb.GetRequest{
-		Namespace: "joe",
-		Id:        request.Device.Name,
+		Id: response.Device.Id,
 	})
-
 	require.Error(t, err)
 }
 

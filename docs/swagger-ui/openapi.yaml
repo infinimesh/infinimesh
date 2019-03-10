@@ -779,6 +779,101 @@ paths:
           description: A successful response.
       tags:
         - Accounts
+  /devices:
+    get:
+      operationId: List
+      parameters:
+        - in: query
+          name: namespace
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryListResponse'
+          description: A successful response.
+      tags:
+        - Devices
+    post:
+      operationId: Create
+      requestBody:
+        $ref: '#/components/requestBodies/deviceregistryDevice'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryCreateResponse'
+          description: A successful response.
+      tags:
+        - Devices
+  '/devices/{device.id}':
+    patch:
+      operationId: Update
+      parameters:
+        - in: path
+          name: device.id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deviceregistryDevice'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryUpdateResponse'
+          description: A successful response.
+      tags:
+        - Devices
+  '/devices/{id}':
+    delete:
+      operationId: Delete
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: namespace
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryDeleteResponse'
+          description: A successful response.
+      tags:
+        - Devices
+    get:
+      operationId: Get
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
+          description: A successful response.
+      tags:
+        - Devices
   /namespaces:
     get:
       operationId: ListNamespaces
@@ -826,88 +921,59 @@ paths:
           description: A successful response.
       tags:
         - Namespaces
-  '/namespaces/{namespace}/devices':
+  /objects:
     get:
-      operationId: List
+      operationId: ListObjects
       parameters:
-        - in: path
+        - in: query
           name: namespace
-          required: true
+          required: false
           schema:
             type: string
+        - in: query
+          name: recurse
+          required: false
+          schema:
+            format: boolean
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryListResponse'
+                $ref: '#/components/schemas/nodeListObjectsResponse'
           description: A successful response.
       tags:
-        - Devices
+        - Objects
     post:
-      operationId: Create
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
+      operationId: CreateObject
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deviceregistryDevice'
+              $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryCreateResponse'
+                $ref: '#/components/schemas/nodeObject'
           description: A successful response.
       tags:
-        - Devices
-  '/namespaces/{namespace}/devices/{device.name}':
-    patch:
-      operationId: Update
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: device.name
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/deviceregistryDevice'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/deviceregistryUpdateResponse'
-          description: A successful response.
-      tags:
-        - Devices
-  '/namespaces/{namespace}/devices/{id}':
+        - Objects
+  '/objects/{uid}':
     delete:
-      operationId: Delete
+      operationId: DeleteObject
       parameters:
         - in: path
-          name: namespace
+          name: uid
           required: true
           schema:
             type: string
-        - in: path
-          name: id
-          required: true
+        - in: query
+          name: namespace
+          required: false
           schema:
             type: string
       responses:
@@ -915,44 +981,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryDeleteResponse'
+                $ref: '#/components/schemas/nodeDeleteObjectResponse'
           description: A successful response.
       tags:
-        - Devices
+        - Objects
+  '/twins/{id}':
     get:
       operationId: Get
       parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
         - in: path
           name: id
           required: true
           schema:
             type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
-          description: A successful response.
-      tags:
-        - Devices
-  '/namespaces/{namespace}/devices/{id}/shadow':
-    get:
-      operationId: Get
-      parameters:
-        - in: path
+        - in: query
           name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: id
-          required: true
+          required: false
           schema:
             type: string
       responses:
@@ -964,15 +1008,9 @@ paths:
           description: A successful response.
       tags:
         - Shadows
-  '/namespaces/{namespace}/devices/{id}/shadow/desired':
-    post:
+    patch:
       operationId: PatchDesiredState
       parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
         - in: path
           name: id
           required: true
@@ -993,23 +1031,18 @@ paths:
           description: A successful response.
       tags:
         - Shadows
-  '/namespaces/{namespace}/namespaces/{namespace}/{id}/shadow/reported':
+  '/twins/{id}/stream':
     get:
       operationId: StreamReportedStateChanges
       parameters:
         - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
           name: id
           required: true
+          schema:
+            type: string
+        - in: query
+          name: namespace
+          required: false
           schema:
             type: string
       responses:
@@ -1022,76 +1055,6 @@ paths:
           description: A successful response.(streaming responses)
       tags:
         - Shadows
-  '/namespaces/{namespace}/objects':
-    get:
-      operationId: ListObjects
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: recurse
-          required: false
-          schema:
-            format: boolean
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/nodeListObjectsResponse'
-          description: A successful response.
-      tags:
-        - Objects
-    post:
-      operationId: CreateObject
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/nodeObject'
-          description: A successful response.
-      tags:
-        - Objects
-  '/namespaces/{namespace}/objects/{uid}':
-    delete:
-      operationId: DeleteObject
-      parameters:
-        - in: path
-          name: namespace
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: uid
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/nodeDeleteObjectResponse'
-          description: A successful response.
-      tags:
-        - Objects
 servers:
   - url: 'http://localhost:8081'
   - url: 'https://api.infinimesh.io/'
