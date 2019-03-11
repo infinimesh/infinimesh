@@ -54,13 +54,11 @@ func TestAuthorize(t *testing.T) {
 func TestListInNamespaceForAccount(t *testing.T) {
 	ctx := context.Background()
 
-	nsName := "sample-test"
+	acc := randomdata.SillyName()
+	nsName := acc
 
 	// Setup
-	_, err := repo.CreateNamespace(ctx, nsName)
-	require.NoError(t, err)
-
-	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false)
 	require.NoError(t, err)
 
 	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName)
@@ -69,7 +67,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	err = repo.AuthorizeNamespace(ctx, account, nsName, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	objs, err := repo.ListInNamespace(ctx, nsName, true)
+	objs, err := repo.ListForAccount(ctx, account, nsName, true)
 	require.NoError(t, err)
 
 	// Assert

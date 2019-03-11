@@ -258,6 +258,7 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
                      uid
                      type
                      name
+                     kind
                    }
 
                    direct(func: uid($account)) {
