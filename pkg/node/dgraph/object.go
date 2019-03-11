@@ -48,13 +48,16 @@ func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	  object(func: uid($root)) {
 	    uid
 	    name
-	    contains {
+	    children {
 	      uid
 	    }
-	    ~contains { # Parent
+	    ~children { # Parent
 	      uid
-	    name
+	      name
 	    }
+            ~owns {
+              uid
+            }
             ~access.to {
               uid
               name
@@ -91,7 +94,16 @@ func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 		parent := toDelete.Parent[0]
 		mu.Del = append(mu.Del, &api.NQuad{
 			Subject:   parent.UID,
-			Predicate: "contains",
+			Predicate: "children",
+			ObjectId:  toDelete.UID,
+		})
+
+	}
+
+	if len(toDelete.OwnedBy) > 0 {
+		mu.Del = append(mu.Del, &api.NQuad{
+			Subject:   toDelete.OwnedBy[0].UID,
+			Predicate: "owns",
 			ObjectId:  toDelete.UID,
 		})
 
@@ -111,12 +123,20 @@ func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	// Find and delete all edges & nodes below this node, including this
 	// node
 	const qChilds = `query children($root: string){
-			  object(func: uid($root)) @recurse {
-			    uid
-			    contains {
+			  var(func: uid($root)) @recurse {
+			    UIDS as uid
+			    children {
 			    }
 			  }
+                          object(func: uid(UIDS)) {
+                            uid
+                            ~owns {
+                              uid
+                            }
+                          }
 			}`
+
+	// TODO owns relation must be deleted
 
 	res, err := txn.QueryWithVars(ctx, qChilds, map[string]string{
 		"$root": toDelete.UID,
@@ -147,9 +167,16 @@ func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	for _, item := range items {
 		dgo.DeleteEdges(mu, item.UID, "_STAR_ALL")
-		for _, object := range item.Children {
-			dgo.DeleteEdges(mu, object.UID, "_STAR_ALL")
+		if len(item.OwnedBy) == 1 {
+			mu.Del = append(mu.Del, &api.NQuad{
+				Subject:   item.OwnedBy[0].UID,
+				Predicate: "owns",
+				ObjectId:  item.UID,
+			})
 		}
+		// for _, object := range item.Children {
+		// 	dgo.DeleteEdges(mu, object.UID, "_STAR_ALL")
+		// }
 		addDeletesRecursively(mu, item.Children)
 	}
 }
