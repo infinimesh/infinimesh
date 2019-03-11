@@ -1,11 +1,4 @@
 components:
-  requestBodies:
-    deviceregistryDevice:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/deviceregistryDevice'
-      required: true
   schemas:
     apiTokenRequest:
       properties:
@@ -29,6 +22,13 @@ components:
         fingerprintAlgorithm:
           type: string
         pem_data:
+          type: string
+      type: object
+    deviceregistryCreateRequest:
+      properties:
+        device:
+          $ref: '#/components/schemas/deviceregistryDevice'
+        namespace:
           type: string
       type: object
     deviceregistryCreateResponse:
@@ -800,7 +800,11 @@ paths:
     post:
       operationId: Create
       requestBody:
-        $ref: '#/components/requestBodies/deviceregistryDevice'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/deviceregistryCreateRequest'
+        required: true
       responses:
         '200':
           content:
@@ -841,11 +845,6 @@ paths:
         - in: path
           name: id
           required: true
-          schema:
-            type: string
-        - in: query
-          name: namespace
-          required: false
           schema:
             type: string
       responses:
@@ -969,11 +968,6 @@ paths:
         - in: path
           name: uid
           required: true
-          schema:
-            type: string
-        - in: query
-          name: namespace
-          required: false
           schema:
             type: string
       responses:

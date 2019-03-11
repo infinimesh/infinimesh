@@ -441,12 +441,15 @@ func toProto(device *Device) *registrypb.Device {
 	return res
 }
 
-// TODO check if exists
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
+	// TODO delete reverse edge
+
 	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
+	dgo.DeleteEdges(m, request.Id, "~owns")
+	dgo.DeleteEdges(m, request.Id, "owns")
 
 	_, err = txn.Mutate(context.Background(), m)
 	if err != nil {

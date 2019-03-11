@@ -77,7 +77,6 @@ message AuthenticateResponse {
 
 message DeleteObjectRequest {
   string uid = 1;
-  string namespace = 2;
 }
 
 message DeleteObjectResponse {}
@@ -137,6 +136,5 @@ service AccountService {
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
-  //  GetObject?
   rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
 }

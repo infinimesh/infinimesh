@@ -47,7 +47,7 @@ service Devices {
       returns (infinimesh.deviceregistry.CreateResponse) {
     option (google.api.http) = {
       post : "/devices"
-      body : "device"
+      body : "*"
     };
   }
   rpc Update(infinimesh.deviceregistry.UpdateRequest)

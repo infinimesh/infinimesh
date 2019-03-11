@@ -36,16 +36,7 @@ func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.Del
 }
 
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	authorized, err := s.Repo.IsAuthorizedNamespace(ctx, request.Namespace, request.Account, nodepb.Action_READ)
-	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
-	}
-
-	if !authorized {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
-	}
-
-	objects, err := s.Repo.ListInNamespace(ctx, request.GetNamespace(), request.Recurse)
+	objects, err := s.Repo.ListForAccount(ctx, request.Account, request.Namespace, request.Recurse)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

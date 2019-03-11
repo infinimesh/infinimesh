@@ -64,7 +64,6 @@ message ListResponse {
 
 message DeleteRequest {
   string id = 1;
-  string namespace = 2;
 }
 
 message DeleteResponse {}

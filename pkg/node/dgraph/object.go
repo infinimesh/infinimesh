@@ -230,10 +230,12 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	return a.GetUids()["new"], nil
 }
 
-// TODO what about root=true ?
-// TODO direct grants are not considered yet
-func (s *DGraphRepo) ListInNamespace(ctx context.Context, namespaceName string, recurse bool) (objects []*nodepb.Object, err error) {
+func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
+
+	// TODO recurse?
+
+	fmt.Println("LIST FOR ACCOUNT")
 
 	var depth int
 	if recurse {
@@ -242,62 +244,16 @@ func (s *DGraphRepo) ListInNamespace(ctx context.Context, namespaceName string, 
 		depth = 1
 	}
 
-	q := fmt.Sprintf(`query list($namespace: string){
-                     OBJS as var(func: eq(type, "object"))  @filter(not(has(~children))) {
-                         ~owns  {
-                         }  @filter(eq(name, $namespace))
-                     }
-
-                     nodes(func: uid(OBJS)) @recurse(depth: %v) {
-                       children{} #@filter(not(has(~children)))
-                       uid
-                       name
-                       kind
-                     }
-                   }`, depth)
-
-	vars := map[string]string{
-		"$namespace": namespaceName,
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, vars)
-	if err != nil {
-		return nil, err
-	}
-
-	var res struct {
-		Nodes []Object `json:"nodes"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, object := range res.Nodes {
-		objects = append(objects, mapObject(&object))
-	}
-
-	return objects, nil
-}
-
-// for --all-namespaces. TODO
-func (s *DGraphRepo) ListForAccount(ctx context.Context, account string) (inheritedObjects []*nodepb.Object, err error) {
-	txn := s.Dg.NewReadOnlyTxn()
-
-	// Two options:
-	// 1) via namespace -> access.to.namespace -> owns/children
-	// 2) direct via access.to -> object
-
-	const q = `query list($account: string) {
-                   var(func: uid($account)) {
-                     access.to.namespace @facets(eq(inherit,true)) {
-                       OBJS as uid
-                       name
+	var q = `query list($account: string, $namespace: string) {
+                   var(func: uid($account)) @cascade {
+                     access.to.namespace %v {
+                       owns {
+                         OBJS as uid
+                       } @filter(not(has(~children)))
                      }
                    }
 
-                   inherited(func: uid(OBJS)) @recurse {
+                   inherited(func: uid(OBJS)) @recurse(depth: %v) {
                      children{} 
                      uid
                      type
@@ -314,6 +270,12 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string) (inheri
                    }
                   }`
 
+	if namespace != "" {
+		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))", depth)
+	} else {
+		q = fmt.Sprintf(q, "", depth)
+	}
+
 	var result struct {
 		Inherited []Object `json:"inherited"`
 		Direct    []struct {
@@ -322,7 +284,8 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string) (inheri
 	}
 
 	params := map[string]string{
-		"$account": account,
+		"$account":   account,
+		"$namespace": namespace,
 	}
 
 	res, err := txn.QueryWithVars(ctx, q, params)
