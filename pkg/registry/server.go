@@ -445,11 +445,56 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
-	// TODO delete reverse edge
+	const q = `query delete($device: string){
+  objects(func: uid($device)) @filter(eq(kind, "device")) {
+    ~owns {
+      uid
+    }
+    ~children {
+      uid
+    }
+  }
+}`
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$device": request.Id})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to delete node "+err.Error())
+	}
+
+	fmt.Println(string(res.Json))
+
+	var result struct {
+		Objects []*dgraph.Object `json:"objects"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Objects) != 1 {
+		return nil, status.Error(codes.NotFound, "Not found")
+	}
+
+	if len(result.Objects[0].OwnedBy) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:   result.Objects[0].OwnedBy[0].UID,
+			Predicate: "owns",
+			ObjectId:  request.Id,
+		})
+	}
+
+	if len(result.Objects[0].Parent) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:   result.Objects[0].Parent[0].UID,
+			Predicate: "children",
+			ObjectId:  request.Id,
+		})
+	}
+
+	// TODO delete reverse edge ~children
 
 	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
-	dgo.DeleteEdges(m, request.Id, "~owns")
-	dgo.DeleteEdges(m, request.Id, "owns")
 
 	_, err = txn.Mutate(context.Background(), m)
 	if err != nil {

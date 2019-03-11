@@ -43,7 +43,7 @@ type Object struct {
 	Name string `json:"name,omitempty"`
 	Kind string `json:"kind,omitempty"`
 
-	OwnedBy *Namespace `json:"~owns,omitempty"`
+	OwnedBy []*Namespace `json:"~owns,omitempty"`
 
 	Children []*Object `json:"children"`
 	Parent   []Node    `json:"~children"` // Namespace or Object
