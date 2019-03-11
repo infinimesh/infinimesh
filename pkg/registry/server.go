@@ -149,6 +149,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 			Name:        request.Device.Name,
 			Enabled:     request.Device.Enabled,
 			Tags:        request.Device.Tags,
+			Namespace:   request.Namespace,
 			Certificate: request.Device.Certificate,
 		},
 	}, nil
@@ -285,11 +286,14 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
       fingerprint
       fingerprint.algorithm
     }
+    ~owns {
+      name
+    }
   }
 }`
 
 	vars := map[string]string{
-		"$id": request.Id, // TODO rename id to name OR to device_id
+		"$id": request.Id,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -366,6 +370,8 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
+	// TODO direct access!
+
 	var q = `query list($account: string, $namespace: string){
                      var(func: uid($account)) {
                        access.to.namespace %v {
@@ -382,6 +388,9 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
                        kind
                        enabled
                        tags
+                       ~owns {
+                         name
+                       }
                      }
                    }`
 
@@ -428,6 +437,10 @@ func toProto(device *Device) *registrypb.Device {
 		Enabled: &wrappers.BoolValue{Value: device.Enabled},
 		Tags:    device.Tags,
 		// TODO cert etc
+	}
+
+	if len(device.OwnedBy) == 1 {
+		res.Namespace = device.OwnedBy[0].Name
 	}
 
 	if len(device.Certificates) > 0 {

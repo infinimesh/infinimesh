@@ -49,6 +49,8 @@ components:
           type: string
         name:
           type: string
+        namespace:
+          type: string
         tags:
           items:
             type: string
