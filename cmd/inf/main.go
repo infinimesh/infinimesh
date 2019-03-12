@@ -55,6 +55,9 @@ func init() {
 }
 
 func getNamespace() string {
+	if allNamespaces {
+		return ""
+	}
 	if namespaceFlag != "" {
 		return namespaceFlag
 	}

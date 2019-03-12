@@ -28,13 +28,11 @@ message Shadow {
 message PatchDesiredStateRequest {
   string id = 1;
   google.protobuf.Value data = 2;
-  string namespace = 3;
 }
 message PatchDesiredStateResponse {}
 
 message StreamReportedStateChangesRequest {
   string id = 1;
-  string namespace = 2;
 }
 
 message StreamReportedStateChangesResponse { VersionedValue reportedDelta = 1; }

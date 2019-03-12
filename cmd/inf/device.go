@@ -14,9 +14,14 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
+var (
+	allNamespaces bool
+)
+
 func init() {
 	createDeviceCmd.Flags().StringVarP(&namespaceFlag, "namespace", "n", "", "Namespace")
 	lsDeviceCmd.Flags().StringVarP(&namespaceFlag, "namespace", "n", "", "Namespace")
+	lsDeviceCmd.Flags().BoolVar(&allNamespaces, "all-namespaces", false, "Show devices in all namespaces")
 	devicesCmd.AddCommand(lsDeviceCmd)
 	devicesCmd.AddCommand(createDeviceCmd)
 	devicesCmd.AddCommand(deleteDeviceCmd)
