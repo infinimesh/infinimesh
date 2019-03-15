@@ -31,8 +31,8 @@ services:
     ports:
       - "8089:8089"
     volumes:
-      - $PWD/hack/server.crt:/server.crt
-      - $PWD/hack/server.key:/server.key
+      - $PWD/hack/server.crt:/cert/tls.crt
+      - $PWD/hack/server.key:/cert/tls.key
     environment:
       - KAFKA_HOST=kafka:29092
       - DEVICE_REGISTRY_URL=device-registry:8080
