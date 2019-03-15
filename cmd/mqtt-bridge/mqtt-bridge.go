@@ -64,6 +64,8 @@ var (
 	kafkaHost             string
 	kafkaTopicTelemetry   string
 	kafkaTopicBackChannel string
+	tlsCertFile           string
+	tlsKeyFile            string
 
 	ps *pubsub.PubSub
 )
@@ -73,12 +75,16 @@ func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "mqtt.messages.incoming")
 	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
+	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
+	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
 	viper.AutomaticEnv()
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
 	kafkaHost = viper.GetString("KAFKA_HOST")
 	kafkaTopicTelemetry = viper.GetString("KAFKA_TOPIC")
 	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
+	tlsCertFile = viper.GetString("TLS_CERT_FILE")
+	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 
 }
 
@@ -116,7 +122,7 @@ func fqTopic(deviceID, subPath string) string {
 }
 
 func main() {
-	serverCert, err := tls.LoadX509KeyPair("server.crt", "server.key")
+	serverCert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
 	if err != nil {
 		log.Println(err)
 		return
