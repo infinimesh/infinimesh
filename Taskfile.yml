@@ -17,7 +17,7 @@ tasks:
   lint:
     desc: Run linter
     cmds:
-      - golangci-lint run
+      - golangci-lint run --tests=false
   build:
     desc: Perform full go build of all binaries
     cmds:
