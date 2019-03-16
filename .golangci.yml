@@ -1,0 +1,5 @@
+run:
+  tests: false
+  skip-dirs:
+    - vendor
+  modules-download-mode: vendor
