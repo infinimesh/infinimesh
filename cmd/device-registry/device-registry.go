@@ -18,9 +18,8 @@ import (
 )
 
 var (
-	dbAddr   string
-	nodeHost string
-	port     string
+	dbAddr string
+	port   string
 
 	dgraphURL string
 )
@@ -28,13 +27,11 @@ var (
 func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("DB_ADDR", "postgresql://root@localhost:26257/postgres?sslmode=disable")
-	viper.SetDefault("NODE_HOST", "nodeserver:8082")
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
 
 	dgraphURL = viper.GetString("DGRAPH_HOST")
 	dbAddr = viper.GetString("DB_ADDR")
-	nodeHost = viper.GetString("NODE_HOST")
 	port = viper.GetString("PORT")
 }
 
