@@ -25,7 +25,7 @@ var (
 	broker        string
 
 	sourceTopic  = "mqtt.messages.incoming"
-	defaultRoute = "public.bridge.dlq"
+	defaultRoute = "mqtt.messages.incoming.dlq"
 	routes       = map[string]string{
 		"shadows/": "shadow.reported-state.delta",
 	}
