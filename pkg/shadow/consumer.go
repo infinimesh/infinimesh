@@ -121,6 +121,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
 	h.m.Unlock()
 	for message := range claim.Messages() {
+		defer sess.MarkMessage(message, "")
 		fmt.Println("Recv message", string(message.Value))
 		key := string(message.Key)
 
@@ -138,7 +139,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 
 		newState, err := applyDelta(old, delta)
 		if err != nil {
-			fmt.Println("Failed to apply new delta", err)
+			fmt.Println("Failed to apply new delta. Ignoring message", err)
 			continue
 		}
 
@@ -187,8 +188,6 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		}
 
 		fmt.Println("Send msg to ", h.MergedTopic, " ", string(stateDocument))
-
-		sess.MarkMessage(message, "")
 	}
 	return nil
 }
