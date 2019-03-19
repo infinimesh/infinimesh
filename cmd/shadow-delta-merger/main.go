@@ -123,6 +123,9 @@ func main() {
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, consumerGroupReported, stopReported, ctx)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, consumerGroupDesired, stopDesired, ctx)
 
+	// TODO consume from desired.delta and write to mqtt.messages.outgoing
+	// TODO adjust code to new topology
+
 	go func() {
 		<-signals
 		stopDesired <- true

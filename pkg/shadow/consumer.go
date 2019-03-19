@@ -153,24 +153,27 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 
 		mergePatch := calculateDelta(old, newState)
 
-		outgoing := mqtt.OutgoingMessage{
-			DeviceID: string(message.Key),
-			SubPath:  "shadow/updates",
-			Data:     []byte(mergePatch),
-		}
+		// TODO workaround so we don't write needless messages in case of reported states
+		if h.MergedTopic == "shadow.desired-state.full" {
+			outgoing := mqtt.OutgoingMessage{
+				DeviceID: string(message.Key),
+				SubPath:  "shadow/updates",
+				Data:     []byte(mergePatch),
+			}
 
-		outBytes, err := json.Marshal(&outgoing)
-		if err != nil {
-			fmt.Printf("Failed to marshal outgoing msg: %v\n", err)
-		}
+			outBytes, err := json.Marshal(&outgoing)
+			if err != nil {
+				fmt.Printf("Failed to marshal outgoing msg: %v\n", err)
+			}
 
-		h.changelogProducer.Input() <- &sarama.ProducerMessage{
-			Topic: "mqtt.messages.outgoing",
-			Key:   sarama.StringEncoder(message.Key),
-			Value: sarama.ByteEncoder(outBytes),
-		}
+			h.changelogProducer.Input() <- &sarama.ProducerMessage{
+				Topic: "mqtt.messages.outgoing",
+				Key:   sarama.StringEncoder(message.Key),
+				Value: sarama.ByteEncoder(outBytes),
+			}
 
-		fmt.Println("Send msg to ", "mqtt.messages.outgoing", " ", string(outBytes))
+			fmt.Println("Send msg to ", "mqtt.messages.outgoing", " ", string(outBytes))
+		}
 
 		deviceState.State = json.RawMessage(newState)
 		deviceState.Version++
