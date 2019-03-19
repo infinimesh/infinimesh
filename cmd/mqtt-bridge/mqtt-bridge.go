@@ -301,6 +301,7 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 }
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) error {
+	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
 	if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
 		return err
 	}
