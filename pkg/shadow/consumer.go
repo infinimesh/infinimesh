@@ -121,6 +121,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
 	h.m.Unlock()
 	for message := range claim.Messages() {
+		fmt.Println("Recv message", string(message.Value))
 		key := string(message.Key)
 
 		var deviceState *FullDeviceStateMessage
@@ -168,6 +169,8 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 			Value: sarama.ByteEncoder(outBytes),
 		}
 
+		fmt.Println("Send msg to ", "mqtt.messages.outgoing", " ", string(outBytes))
+
 		deviceState.State = json.RawMessage(newState)
 		deviceState.Version++
 
@@ -182,6 +185,9 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 			Value:     sarama.StringEncoder(stateDocument),
 			Partition: message.Partition,
 		}
+
+		fmt.Println("Send msg to ", h.MergedTopic, " ", string(stateDocument))
+
 		sess.MarkMessage(message, "")
 	}
 	return nil
