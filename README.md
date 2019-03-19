@@ -9,6 +9,7 @@ Infinimesh Platform is an opinionated Platform to connect IoT devices securely. 
 
 | Docker Image  | Build status  |
 | ------------- |---------------|
+| Kubernetes Operator | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/operator/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/operator) |
 | API Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver-rest/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver-rest) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver) |
 | Controlplane-UI | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/controlplane-ui/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/controlplane-ui) |
 | Node Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/nodeserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/nodeserver) |
