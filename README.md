@@ -32,5 +32,12 @@ Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost
 
 Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
 
+Send sample message via `mosquitto_pub`:
+```
+mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt   --cert hack/server.crt --key hack/server.key -m "blaaa" -t "shadows/testdeviceX" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
+```
+
+The cafile path may vary depending on your operating system.
+
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_large)
