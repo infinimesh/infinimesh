@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	addr   = "postgresql://postgres@localhost:5432/postgres?sslmode=disable"
+	addr   string
 	broker string
 
 	consumerGroup = "persister"
@@ -31,7 +31,7 @@ var (
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("DB_ADDR", "postgresql://postgres@localhost:5432/postgres?sslmode=disable")
+	viper.SetDefault("DB_ADDR", ":6379")
 	viper.AutomaticEnv()
 	broker = viper.GetString("KAFKA_HOST")
 	addr = viper.GetString("DB_ADDR")
@@ -42,7 +42,7 @@ type handler struct {
 }
 
 func main() {
-	repo, err := shadow.NewPostgresRepo(addr)
+	repo, err := shadow.NewRedisRepo(addr)
 	if err != nil {
 		log.Fatal(err)
 	}

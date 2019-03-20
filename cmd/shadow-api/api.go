@@ -40,7 +40,7 @@ type DeviceState json.RawMessage
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.delta")
-	viper.SetDefault("DB_ADDR", "postgresql://postgres@localhost:5432/postgres?sslmode=disable")
+	viper.SetDefault("DB_ADDR", ":6379")
 	viper.AutomaticEnv()
 
 	broker = viper.GetString("KAFKA_HOST")
@@ -49,7 +49,7 @@ func init() {
 }
 
 func main() {
-	repo, err := shadow.NewPostgresRepo(dbAddr)
+	repo, err := shadow.NewRedisRepo(dbAddr)
 	if err != nil {
 		panic(err)
 	}
