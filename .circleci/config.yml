@@ -62,5 +62,4 @@ workflows:
   all:
     jobs:
       - build
-      - build-frontend
       - tests
