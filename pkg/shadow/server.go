@@ -35,14 +35,20 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 		return nil, err
 	}
 
+	// TODO fetch device from registry, 404 if not found
+
 	reportedState, err := s.Repo.GetReported(req.Id)
 	if err != nil {
-		return nil, err
+		reportedState.ID = req.Id
+		reportedState.State = json.RawMessage([]byte("{}"))
+		reportedState.Version = uint64(0)
 	}
 
 	desiredState, err := s.Repo.GetDesired(req.Id)
 	if err != nil {
-		return nil, err
+		desiredState.ID = req.Id
+		desiredState.State = json.RawMessage([]byte("{}"))
+		desiredState.Version = uint64(0)
 	}
 
 	u := &jsonpb.Unmarshaler{}
@@ -69,7 +75,7 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 		}
 	}
 
-	return
+	return response, nil
 }
 
 func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
