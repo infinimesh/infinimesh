@@ -26,6 +26,9 @@ services:
       - 9080:9080
     restart: on-failure
     command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
+  redis:
+    image: redis:latest
+    command: ["redis-server", "--appendonly", "yes"]
   testrunner:
       # This just sleeps, we execute the test command using docker-compose exec.
       container_name: testrunner

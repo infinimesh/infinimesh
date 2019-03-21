@@ -2,16 +2,29 @@ package shadow
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
+var repo Repo
+
+func init() {
+	dbURL := os.Getenv("DB_ADDR")
+	if dbURL == "" {
+		dbURL = ":6379"
+	}
+	r, err := NewRedisRepo(dbURL)
+	if err != nil {
+		panic(err)
+	}
+	repo = r
+}
+
 func TestSetGet(t *testing.T) {
 	key := uuid.New().String()
-	repo, err := NewRedisRepo(":6379")
-	require.NoError(t, err)
 
 	input := DeviceState{
 		ID:      key,
@@ -19,7 +32,7 @@ func TestSetGet(t *testing.T) {
 		State:   json.RawMessage([]byte("50")),
 	}
 
-	err = repo.SetDesired(input)
+	err := repo.SetDesired(input)
 	require.NoError(t, err)
 
 	ds, err := repo.GetDesired(key)
@@ -30,8 +43,6 @@ func TestSetGet(t *testing.T) {
 
 func TestSetGetDesiredAndReported(t *testing.T) {
 	key := uuid.New().String()
-	repo, err := NewRedisRepo(":6379")
-	require.NoError(t, err)
 
 	input := DeviceState{
 		ID:      key,
@@ -39,7 +50,7 @@ func TestSetGetDesiredAndReported(t *testing.T) {
 		State:   json.RawMessage([]byte("50")),
 	}
 
-	err = repo.SetDesired(input)
+	err := repo.SetDesired(input)
 	require.NoError(t, err)
 
 	inputReported := DeviceState{
