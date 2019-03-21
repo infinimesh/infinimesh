@@ -28,7 +28,7 @@ npm i -g api-spec-converter
 ```
 Load test data into the database via `go run hack/import_dgraph_sample_data.go`
 
-Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/token`
+Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/accounts/token`
 
 Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
 
