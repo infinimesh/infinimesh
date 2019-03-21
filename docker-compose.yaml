@@ -19,12 +19,6 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  database:
-    image: postgres:latest
-    ports:
-      - "8093:8080"
-      - "5432:5432"
-    restart: unless-stopped
   mqtt-bridge:
     image: quay.io/infinimesh/mqtt-bridge:latest
     ports:
@@ -49,11 +43,8 @@ services:
     image: quay.io/infinimesh/device-registry:latest
     ports:
       - "8070:8080"
-    depends_on:
-      - database
     environment:
       - DGRAPH_HOST=server:9080
-      - DB_ADDR=postgresql://postgres@database:5432/postgres?sslmode=disable
     restart: unless-stopped
   shadow-delta-merger:
     image: quay.io/infinimesh/shadow-delta-merger:latest
@@ -70,16 +61,15 @@ services:
       - kafka
     environment:
       - KAFKA_HOST=kafka:29092
-      - DB_ADDR=postgresql://postgres@database:5432/postgres?sslmode=disable
+      - "DB_ADDR=redis:6379"
     restart: unless-stopped
   shadow-persister:
     image: quay.io/infinimesh/shadow-persister:latest
     depends_on:
       - kafka
-      - database
     environment:
       - KAFKA_HOST=kafka:29092
-      - DB_ADDR=postgresql://postgres@database:5432/postgres?sslmode=disable
+      - "DB_ADDR=redis:6379"
     restart: unless-stopped
   apiserver:
     ports:
