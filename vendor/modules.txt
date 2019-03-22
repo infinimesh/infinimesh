@@ -2,12 +2,21 @@
 github.com/Pallinder/go-randomdata
 # github.com/Shopify/sarama v1.19.0
 github.com/Shopify/sarama
+# github.com/alecthomas/gometalinter v2.0.11+incompatible
+github.com/alecthomas/gometalinter
+# github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
+github.com/alecthomas/units
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
 # github.com/avast/retry-go v2.2.0+incompatible
 github.com/avast/retry-go
 # github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 github.com/birdayz/conjungo
+# github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
+github.com/chzyer/readline
+# github.com/client9/misspell v0.3.4
+github.com/client9/misspell/cmd/misspell
+github.com/client9/misspell
 # github.com/cskr/pubsub v1.0.1
 github.com/cskr/pubsub
 # github.com/davecgh/go-spew v1.1.1
@@ -30,6 +39,8 @@ github.com/evanphx/json-patch
 github.com/fsnotify/fsnotify
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 github.com/golang/glog
+# github.com/golang/lint v0.0.0-20181026193005-c67002cb31c3
+github.com/golang/lint/golint
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/ptypes/wrappers
 github.com/golang/protobuf/proto
@@ -48,8 +59,12 @@ github.com/golang/snappy
 # github.com/gomodule/redigo v2.0.0+incompatible
 github.com/gomodule/redigo/redis
 github.com/gomodule/redigo/internal
+# github.com/google/shlex v0.0.0-20181106134648-c34317bd91bf
+github.com/google/shlex
 # github.com/google/uuid v1.0.0
 github.com/google/uuid
+# github.com/gordonklaus/ineffassign v0.0.0-20180909121442-1003c8bd00dc
+github.com/gordonklaus/ineffassign
 # github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 github.com/grpc-ecosystem/go-grpc-middleware/auth
 github.com/grpc-ecosystem/go-grpc-middleware
@@ -79,6 +94,9 @@ github.com/jinzhu/gorm/dialects/postgres
 github.com/jinzhu/gorm
 # github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
 github.com/jinzhu/inflection
+# github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a
+github.com/juju/ansiterm
+github.com/juju/ansiterm/tabwriter
 # github.com/julienschmidt/httprouter v1.2.0
 github.com/julienschmidt/httprouter
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
@@ -87,12 +105,27 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/lib/pq
 github.com/lib/pq/hstore
 github.com/lib/pq/oid
+# github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a
+github.com/lunixbochs/vtclean
 # github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
+# github.com/manifoldco/promptui v0.3.2
+github.com/manifoldco/promptui
+github.com/manifoldco/promptui/list
+github.com/manifoldco/promptui/screenbuf
+# github.com/mattn/go-colorable v0.0.9
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.4
+github.com/mattn/go-isatty
 # github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/mapstructure v1.0.0
 github.com/mitchellh/mapstructure
+# github.com/nicksnyder/go-i18n v1.10.0
+github.com/nicksnyder/go-i18n/i18n
+github.com/nicksnyder/go-i18n/i18n/bundle
+github.com/nicksnyder/go-i18n/i18n/language
+github.com/nicksnyder/go-i18n/i18n/translation
 # github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pierrec/lz4 v2.0.5+incompatible
@@ -124,6 +157,8 @@ github.com/spf13/viper
 # github.com/stretchr/testify v1.2.2
 github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
+# github.com/tsenart/deadcode v0.0.0-20160724212837-210d2dc333e9
+github.com/tsenart/deadcode
 # github.com/yosssi/gmq v0.0.1
 github.com/yosssi/gmq/mqtt/client
 github.com/yosssi/gmq/mqtt
@@ -141,6 +176,8 @@ go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 # golang.org/x/crypto v0.0.0-20181127143415-eb0de9b17e85
 golang.org/x/crypto/ssh/terminal
+# golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3
+golang.org/x/lint
 # golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
 golang.org/x/net/context
 golang.org/x/net/trace
@@ -149,7 +186,7 @@ golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/http/httpguts
 golang.org/x/net/idna
-# golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
+# golang.org/x/sys v0.0.0-20181122145206-62eef0e2fa9b
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.0
@@ -157,6 +194,10 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
+# golang.org/x/tools v0.0.0-20181122213734-04b5d21e00f1
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/gcimporter
 # google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/protobuf/field_mask
@@ -166,12 +207,12 @@ google.golang.org/grpc
 google.golang.org/grpc/codes
 google.golang.org/grpc/reflection
 google.golang.org/grpc/status
+google.golang.org/grpc/credentials
 google.golang.org/grpc/metadata
 google.golang.org/grpc/grpclog
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/connectivity
-google.golang.org/grpc/credentials
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/internal
@@ -190,5 +231,7 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/tap
 google.golang.org/grpc/reflection/grpc_reflection_v1alpha
 google.golang.org/grpc/balancer/base
+# gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c
+gopkg.in/alecthomas/kingpin.v3-unstable
 # gopkg.in/yaml.v2 v2.2.1
 gopkg.in/yaml.v2

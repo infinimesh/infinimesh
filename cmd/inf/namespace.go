@@ -22,6 +22,12 @@ func init() {
 var namespaceCmd = &cobra.Command{
 	Use:     "namespace",
 	Aliases: []string{"ns", "namespaces"},
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return connectGRPC()
+	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		return disconnectGRPC()
+	},
 }
 
 var createNamespaceCmd = &cobra.Command{

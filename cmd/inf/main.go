@@ -2,18 +2,23 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 )
 
 var (
+	clientConn      *grpc.ClientConn
 	namespaceClient apipb.NamespacesClient
 	objectClient    apipb.ObjectsClient
 	accountClient   apipb.AccountsClient
@@ -33,19 +38,12 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
-
-	namespaceClient = apipb.NewNamespacesClient(conn)
-	accountClient = apipb.NewAccountsClient(conn)
-	deviceClient = apipb.NewDevicesClient(conn)
-	objectClient = apipb.NewObjectsClient(conn)
-
 	// Load cfg
 	if cfg, err := ReadConfig(); err == nil {
-		ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "bearer "+cfg.Token)
+		cur, err := cfg.GetCurrentContext()
+		if err == nil {
+			ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "bearer "+cur.Token)
+		}
 		config = cfg
 
 	} else {
@@ -67,6 +65,37 @@ func getNamespace() string {
 	return ""
 }
 
+func connectGRPC() error {
+	current, err := config.GetCurrentContext()
+	if err != nil {
+		return errors.New("no context found")
+	}
+	var option grpc.DialOption
+	pool, _ := x509.SystemCertPool()
+	option = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool}))
+
+	if !current.TLS {
+		option = grpc.WithInsecure()
+	}
+
+	conn, err := grpc.Dial(current.Server, option)
+	if err != nil {
+		return err
+	}
+
+	clientConn = conn
+	namespaceClient = apipb.NewNamespacesClient(conn)
+	accountClient = apipb.NewAccountsClient(conn)
+	deviceClient = apipb.NewDevicesClient(conn)
+	objectClient = apipb.NewObjectsClient(conn)
+	return nil
+}
+
+func disconnectGRPC() error {
+	return clientConn.Close()
+}
+
+// What to do if unsuccessful connection / no current state unavailable?
 func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

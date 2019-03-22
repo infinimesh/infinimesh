@@ -25,6 +25,12 @@ func init() {
 var accountCmd = &cobra.Command{
 	Use:   "account",
 	Short: "Manage accounts",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return connectGRPC()
+	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		return disconnectGRPC()
+	},
 }
 
 var accountLoginCmd = &cobra.Command{
@@ -37,9 +43,12 @@ var accountLoginCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		cfg := &Config{
-			Token: response.Token,
+		cfg, err := config.GetCurrentContext()
+		if err != nil {
+			panic(err)
 		}
+
+		cfg.Token = response.Token
 
 		tokenPayload, _ := base64.RawURLEncoding.DecodeString(strings.Split(response.GetToken(), ".")[1])
 
@@ -50,10 +59,10 @@ var accountLoginCmd = &cobra.Command{
 
 		err = json.Unmarshal([]byte(tokenPayload), &tokenData)
 		if err == nil {
-			cfg.DefaultNamespace = tokenData.DefaultNS
+			config.DefaultNamespace = tokenData.DefaultNS
 		}
 
-		err = cfg.Write()
+		err = config.Write()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write config: %v\n", err)
 		}

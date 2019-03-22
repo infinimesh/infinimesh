@@ -5,6 +5,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.1.0
 	github.com/Shopify/sarama v1.19.0
 	github.com/Shopify/toxiproxy v2.1.3+incompatible // indirect
+	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/armon/go-radix v1.0.0
 	github.com/avast/retry-go v2.2.0+incompatible
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
@@ -35,8 +36,10 @@ require (
 	github.com/jinzhu/now v0.0.0-20181116074157-8ec929ed50c3 // indirect
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.0.0 // indirect
+	github.com/manifoldco/promptui v0.3.2
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/nicksnyder/go-i18n v1.10.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
@@ -53,5 +56,6 @@ require (
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
 	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 	google.golang.org/grpc v1.16.0
+	gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c // indirect
 	gopkg.in/yaml.v2 v2.2.1
 )

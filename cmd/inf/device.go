@@ -31,6 +31,12 @@ func init() {
 var devicesCmd = &cobra.Command{
 	Use:     "device",
 	Aliases: []string{"devices", "dev"},
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return connectGRPC()
+	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		return disconnectGRPC()
+	},
 }
 
 var lsDeviceCmd = &cobra.Command{
