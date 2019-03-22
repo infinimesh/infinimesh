@@ -1,22 +1,16 @@
 package main
 
 import (
-	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
 func init() {
-	accountCmd.AddCommand(accountLoginCmd)
 	accountCmd.AddCommand(accountCreateCmd)
 	accountCmd.AddCommand(accountListCmd)
 	rootCmd.AddCommand(accountCmd)
@@ -31,45 +25,6 @@ var accountCmd = &cobra.Command{
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		return disconnectGRPC()
 	},
-}
-
-var accountLoginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login to account",
-	Run: func(cmd *cobra.Command, args []string) {
-		response, err := accountClient.Token(context.Background(), &apipb.TokenRequest{Username: args[0], Password: args[1]})
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Login failed: %v\n", err)
-			os.Exit(1)
-		}
-
-		cfg, err := config.GetCurrentContext()
-		if err != nil {
-			panic(err)
-		}
-
-		cfg.Token = response.Token
-
-		tokenPayload, _ := base64.RawURLEncoding.DecodeString(strings.Split(response.GetToken(), ".")[1])
-
-		var tokenData struct {
-			AccountID string `json:"account_id"`
-			DefaultNS string `json:"default_ns"`
-		}
-
-		err = json.Unmarshal([]byte(tokenPayload), &tokenData)
-		if err == nil {
-			config.DefaultNamespace = tokenData.DefaultNS
-		}
-
-		err = config.Write()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to write config: %v\n", err)
-		}
-
-		fmt.Println("Logged in successfully.")
-	},
-	Args: cobra.ExactArgs(2),
 }
 
 var accountCreateCmd = &cobra.Command{

@@ -39,6 +39,11 @@ func init() {
 	configSetContextCmd.Flags().BoolVar(&tlsFlag, "tls", true, "Enable or disable TLS. Defaults to true.")
 }
 
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Configure infinimesh CLI",
+}
+
 var configSelectContext = &cobra.Command{
 	Use:   "select-context",
 	Short: "Interactively select a context",
@@ -65,11 +70,6 @@ var configSelectContext = &cobra.Command{
 			panic(err)
 		}
 	},
-}
-
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Configure infinimesh CLI",
 }
 
 var configSetContextCmd = &cobra.Command{
