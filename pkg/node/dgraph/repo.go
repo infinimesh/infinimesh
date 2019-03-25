@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -236,6 +235,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
                      accounts(func: eq(type, "account")) {
                        uid
                        name
+                       enabled
                      }
                    }`
 
@@ -254,16 +254,77 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 
 	for _, account := range result.Accounts {
 		accounts = append(accounts, &nodepb.Account{
-			Uid:    account.UID,
-			Name:   account.Name,
-			IsRoot: account.IsRoot,
+			Uid:     account.UID,
+			Name:    account.Name,
+			IsRoot:  account.IsRoot,
+			Enabled: account.Enabled,
 		})
 	}
 
 	return accounts, nil
 }
 
+func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
+	txn := s.Dg.NewTxn()
+
+	q := `query userExists($id: string) {
+                exists(func: uid($id)) @filter(eq(type, "account")) {
+                  uid
+                }
+              }
+             `
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$id": account.Account.Uid})
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Exists) == 0 {
+		return errors.New("Account not found")
+	}
+
+	acc := &Account{
+		Node: Node{
+			Type: "account",
+			UID:  account.Account.Uid,
+		},
+	}
+
+	for _, field := range account.FieldMask.Paths {
+		switch field {
+		case "Enabled":
+			acc.Enabled = account.Account.Enabled
+		}
+	}
+
+	js, err := json.Marshal(acc)
+	if err != nil {
+		return err
+	}
+
+	m := &api.Mutation{SetJson: js}
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	err = txn.Commit(ctx)
+	if err != nil {
+		return errors.New("Failed to commit")
+	}
+	return nil
+}
+
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
+	// TODO move this to the controller
 	defaultNs, err := s.CreateNamespace(ctx, username)
 	if err != nil {
 		return "", err
@@ -410,6 +471,7 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        name
                        type
                        isRoot
+                       enabled
                      }
                    }`
 
@@ -432,9 +494,10 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}
 
 	return &nodepb.Account{
-		Uid:    result.Account[0].UID,
-		Name:   result.Account[0].Name,
-		IsRoot: result.Account[0].IsRoot,
+		Uid:     result.Account[0].UID,
+		Name:    result.Account[0].Name,
+		IsRoot:  result.Account[0].IsRoot,
+		Enabled: result.Account[0].Enabled,
 	}, err
 }
 
@@ -574,8 +637,6 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 		"$user_id":   account,
 	}
 
-	fmt.Println("pars", params)
-
 	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query access($namespace: string, $user_id: string){
@@ -604,13 +665,10 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 		return false, err
 	}
 
-	fmt.Println("acc", len(access.Access) > 0)
-
 	return len(access.Access) > 0, nil
 }
 
 func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
-	fmt.Println("Isa")
 	if node == account {
 		return true, nil
 	}

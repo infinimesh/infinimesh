@@ -8,6 +8,7 @@ option java_outer_classname = "NodeProto";
 option java_package = "com.infinimesh.node";
 
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/field_mask.proto";
 
 // Account
 
@@ -62,6 +63,7 @@ message Account {
   string uid = 1;
   string name = 2;
   bool is_root = 3;
+  bool enabled = 4;
 }
 
 message AuthenticateRequest {
@@ -118,8 +120,14 @@ message ListAccountsResponse{
 
 message AuthorizeNamespaceResponse {}
 
+message UpdateAccountRequest {
+  Account account = 1;
+  google.protobuf.FieldMask fieldMask = 2;
+}
+
 service AccountService {
   rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
+  rpc UpdateAccount(UpdateAccountRequest) returns (Account);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
 

@@ -124,3 +124,11 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Accounts: accounts,
 	}, nil
 }
+
+func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
+	err = s.Repo.UpdateAccount(ctx, request)
+	if err != nil {
+		return &nodepb.Account{}, err
+	}
+	return request.Account, nil
+}

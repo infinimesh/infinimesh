@@ -86,6 +86,9 @@ components:
       type: object
     nodeAccount:
       properties:
+        enabled:
+          format: boolean
+          type: boolean
         is_root:
           format: boolean
           type: boolean
@@ -778,6 +781,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeCreateUserAccountResponse'
+          description: A successful response.
+      tags:
+        - Accounts
+  '/accounts/users/{account.uid}':
+    patch:
+      operationId: UpdateAccount
+      parameters:
+        - in: path
+          name: account.uid
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/nodeAccount'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
       tags:
         - Accounts

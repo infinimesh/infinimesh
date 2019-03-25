@@ -38,9 +38,7 @@ message TokenRequest {
 
 message TokenResponse { string token = 1; }
 
-message ListDevicesRequest {
-  string namespace = 1;
-}
+message ListDevicesRequest { string namespace = 1; }
 
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
@@ -114,12 +112,21 @@ service Accounts {
       body : "*";
   };
 };
-  rpc ListAccounts(infinimesh.node.ListAccountsRequest)
-      returns (infinimesh.node.ListAccountsResponse) {
-    option (google.api.http) = {
-      get : "/accounts/users"
-    };
+
+rpc UpdateAccount(infinimesh.node.UpdateAccountRequest)
+    returns (infinimesh.node.Account) {
+  option (google.api.http) = {
+    patch : "/accounts/users/{account.uid}"
+    body : "account"
   };
+};
+
+rpc ListAccounts(infinimesh.node.ListAccountsRequest)
+    returns (infinimesh.node.ListAccountsResponse) {
+  option (google.api.http) = {
+    get : "/accounts/users"
+  };
+};
 }
 
 message ListObjectsRequest {
