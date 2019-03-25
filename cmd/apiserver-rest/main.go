@@ -36,7 +36,10 @@ func run() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	mux := runtime.NewServeMux(runtime.WithDisablePathLengthFallback())
+	mux := runtime.NewServeMux(
+		runtime.WithDisablePathLengthFallback(),
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
+	)
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := apipb.RegisterDevicesHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)
 	if err != nil {
