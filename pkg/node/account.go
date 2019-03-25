@@ -30,7 +30,7 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 	log := s.Log.Named("CreateUserAccount")
-	uid, err := s.Repo.CreateUserAccount(ctx, request.GetName(), request.GetPassword(), request.GetIsRoot())
+	uid, err := s.Repo.CreateUserAccount(ctx, request.GetName(), request.GetPassword(), request.GetIsRoot(), true)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create user")
 	}

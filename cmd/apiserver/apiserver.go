@@ -39,6 +39,8 @@ var (
 	jwtSigningSecret []byte
 	port             int
 
+	accountClient nodepb.AccountServiceClient
+
 	log *zap.Logger
 )
 
@@ -68,8 +70,21 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 		log.Info("Validated token", zap.Any("claims", claims))
 
 		if accountID, ok := claims[accountIDClaim]; ok {
-			newCtx := context.WithValue(ctx, accountIDClaim, accountID)
-			return newCtx, nil
+
+			if accountIDStr, ok := accountID.(string); ok {
+				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Name: accountIDStr})
+				if err != nil {
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+				}
+
+				if !resp.Enabled {
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
+				}
+
+				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
+				return newCtx, nil
+			}
+
 		}
 		log.Info("Token does not contain account id field", zap.Any("token", token))
 	}
@@ -136,7 +151,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	accountClient := nodepb.NewAccountServiceClient(nodeConn)
+	accountClient = nodepb.NewAccountServiceClient(nodeConn)
 	objectClient := nodepb.NewObjectServiceClient(nodeConn)
 
 	namespaceClient := nodepb.NewNamespacesClient(nodeConn)

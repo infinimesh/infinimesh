@@ -44,13 +44,13 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	}
 
 	ns := "joe"
-	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false)
+	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, true)
 	if err != nil {
 		return "", "", err
 	}
 	fmt.Println("User joe: ", joe)
 
-	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false)
+	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false, true)
 	if err != nil {
 		return "", "", err
 	}
@@ -70,7 +70,7 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 		}
 	}
 
-	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true)
+	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true, true)
 	if err != nil {
 		return "", "", err
 	}

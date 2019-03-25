@@ -7,6 +7,8 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -190,6 +192,7 @@ func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string
     ~has.credentials {
       uid
       type
+      enabled
       default.namespace{
         uid
         name
@@ -218,6 +221,9 @@ func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string
 		if login.CheckPwd {
 			// Success
 			if len(login.Account) > 0 {
+				if !login.Account[0].Enabled {
+					return false, "", "", status.Error(codes.Unauthenticated, "Account is disabled")
+				}
 				if len(login.Account[0].DefaultNamespace) > 0 {
 					defaultNamespace = login.Account[0].DefaultNamespace[0].Name
 				}
@@ -323,7 +329,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	return nil
 }
 
-func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot bool) (uid string, err error) {
+func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
 	defaultNs, err := s.CreateNamespace(ctx, username)
 	if err != nil {
@@ -357,8 +363,9 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 				Type: "account",
 				UID:  "_:user",
 			},
-			Name:   username,
-			IsRoot: isRoot,
+			Name:    username,
+			IsRoot:  isRoot,
+			Enabled: enabled,
 			HasCredentials: &UsernameCredential{
 				Node: Node{
 					Type: "credentials",
@@ -556,116 +563,6 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (name
 	}
 
 	return nil, errors.New("Namespace not found")
-}
-
-func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
-	const q = `{
-                     namespaces(func: eq(type, "namespace")) {
-  	               uid
-                       name
-	             }
-                   }`
-
-	res, err := s.Dg.NewReadOnlyTxn().Query(ctx, q)
-	if err != nil {
-		return nil, err
-	}
-
-	var resultSet struct {
-		Namespaces []*Namespace `json:"namespaces"`
-	}
-
-	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
-		return nil, err
-	}
-
-	for _, namespace := range resultSet.Namespaces {
-		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
-		})
-	}
-
-	return namespaces, nil
-}
-
-func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
-	const q = `query listNamespaces($account: string) {
-                     namespaces(func: uid($account)) @normalize @cascade  {
-                       access.to.namespace @filter(eq(type, "namespace")) {
-                         uid : uid
-                         name : name
-                       }
-	             }
-                   }`
-
-	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
-	if err != nil {
-		return nil, err
-	}
-
-	var resultSet struct {
-		Namespaces []*Namespace `json:"namespaces"`
-	}
-
-	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
-		return nil, err
-	}
-
-	for _, namespace := range resultSet.Namespaces {
-		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
-		})
-	}
-
-	return namespaces, nil
-}
-
-func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
-	acc, err := s.GetAccount(ctx, account)
-	if err != nil {
-		return false, err
-	}
-
-	if acc.IsRoot {
-		return true, nil
-	}
-
-	params := map[string]string{
-		"$namespace": namespace,
-		"$user_id":   account,
-	}
-
-	txn := s.Dg.NewReadOnlyTxn()
-
-	const q = `query access($namespace: string, $user_id: string){
-  access(func: uid($user_id)) @cascade {
-    name
-    uid
-    access.to.namespace @filter(eq(name, "$namespace")) {
-      uid
-      name
-      type
-    }
-  }
-}
-`
-
-	res, err := txn.QueryWithVars(ctx, q, params)
-	if err != nil {
-		return false, err
-	}
-	var access struct {
-		Access []Object `json:"access"`
-	}
-
-	err = json.Unmarshal(res.Json, &access)
-	if err != nil {
-		return false, err
-	}
-
-	return len(access.Access) > 0, nil
 }
 
 func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
