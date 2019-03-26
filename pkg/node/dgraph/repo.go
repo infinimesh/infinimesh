@@ -151,28 +151,21 @@ func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace 
 		return err
 	}
 
-	in := Account{
-		Node: Node{
-			UID: account,
-		},
-	}
-
-	in.AccessToNamespace = []*Namespace{
-		&Namespace{
-			Node: Node{
-				UID: ns.GetId(),
-			},
-			AccessToPermission: action.String(),
-		},
-	}
-
-	js, err := json.Marshal(&in)
-	if err != nil {
-		return err
-	}
-
 	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson:   js,
+		Set: []*api.NQuad{
+			&api.NQuad{
+				Subject:   account,
+				Predicate: "access.to.namespace",
+				ObjectId:  ns.Id,
+				Facets: []*api.Facet{
+					&api.Facet{
+						Key:     "permission",
+						Value:   []byte(action.String()),
+						ValType: api.Facet_STRING,
+					},
+				},
+			},
+		},
 		CommitNow: true,
 	})
 	if err != nil {
@@ -242,6 +235,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
                        uid
                        name
                        enabled
+                       isRoot
                      }
                    }`
 
@@ -392,6 +386,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 		if err != nil {
 			return "", err
 		}
+
 		m := &api.Mutation{SetJson: js}
 		a, err := txn.Mutate(ctx, m)
 		if err != nil {
@@ -406,6 +401,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 		return userUID, nil
 
 	}
+
 	return "", errors.New("User exists already")
 }
 
@@ -427,41 +423,46 @@ func (s *DGraphRepo) Authorize(ctx context.Context, account, node, action string
 		_type = "namespace"
 	}
 
-	in := Account{
-		Node: Node{
-			UID: account,
-		},
-	}
-
+	var nq []*api.NQuad
 	if _type == "namespace" {
-		// ignore inherit flag; access to a namespace is always recursive
-		in.AccessToNamespace = []*Namespace{
-			&Namespace{
-				Node: Node{
-					UID: node,
+		nq = append(nq,
+			&api.NQuad{
+				Subject:   account,
+				Predicate: "access.to.namespace",
+				ObjectId:  node,
+				Facets: []*api.Facet{
+					&api.Facet{
+						Key:     "permission",
+						Value:   []byte(action),
+						ValType: api.Facet_STRING,
+					},
 				},
-				AccessToPermission: action,
 			},
-		}
+		)
 	} else if _type == "object" {
-		in.AccessTo = []*Object{
-			&Object{
-				Node: Node{
-					UID: node,
+		nq = append(nq,
+			&api.NQuad{
+				Subject:   account,
+				Predicate: "access.to",
+				ObjectId:  node,
+				Facets: []*api.Facet{
+					&api.Facet{
+						Key:     "permission",
+						Value:   []byte(action),
+						ValType: api.Facet_STRING,
+					},
+					&api.Facet{
+						Key:     "inherit",
+						Value:   []byte("true"),
+						ValType: api.Facet_BOOL,
+					},
 				},
-				AccessToPermission: action,
-				AccessToInherit:    inherit,
 			},
-		}
-	}
-
-	js, err := json.Marshal(&in)
-	if err != nil {
-		return err
+		)
 	}
 
 	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson:   js,
+		Set:       nq,
 		CommitNow: true,
 	})
 	if err != nil {

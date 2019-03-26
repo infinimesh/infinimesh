@@ -104,11 +104,8 @@ components:
       type: object
     nodeCreateUserAccountRequest:
       properties:
-        is_root:
-          format: boolean
-          type: boolean
-        name:
-          type: string
+        account:
+          $ref: '#/components/schemas/nodeAccount'
         password:
           type: string
       type: object

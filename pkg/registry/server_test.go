@@ -36,7 +36,7 @@ func init() {
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
 	repo := dgraph.NewDGraphRepo(dg)
-	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false)
+	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false, true)
 	if err != nil {
 		panic(err)
 	}

@@ -35,9 +35,8 @@ message IsAuthorizedRequest {
 message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
 
 message CreateUserAccountRequest {
-  string name = 1;
+  Account account = 1;
   string password = 2;
-  bool is_root = 3;
 }
 
 message CreateUserAccountResponse { string uid = 1; }
