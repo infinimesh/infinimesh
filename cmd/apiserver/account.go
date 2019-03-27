@@ -41,8 +41,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			accountIDClaim:        resp.Account.Uid,
-			defaultNamespaceClaim: resp.DefaultNamespace,
+			accountIDClaim: resp.Account.Uid,
 		})
 
 		// Sign and get the complete encoded token as a string using the secret
