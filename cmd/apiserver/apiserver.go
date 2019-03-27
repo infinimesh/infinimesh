@@ -28,8 +28,7 @@ import (
 )
 
 const (
-	accountIDClaim        = "account_id"
-	defaultNamespaceClaim = "default_ns"
+	accountIDClaim = "account_id"
 )
 
 var (
