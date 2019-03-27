@@ -42,6 +42,7 @@ github.com/golang/glog
 # github.com/golang/lint v0.0.0-20181026193005-c67002cb31c3
 github.com/golang/lint/golint
 # github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/ptypes/empty
 github.com/golang/protobuf/ptypes/wrappers
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/jsonpb

@@ -25,6 +25,7 @@ option java_package = "com.infinimesh.api";
 
 import "google/api/annotations.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 import "pkg/node/nodepb/namespace.proto";
 import "pkg/node/nodepb/node.proto";
 import "pkg/registry/registrypb/device_registry.proto";
@@ -99,6 +100,11 @@ service Shadows {
 }
 
 service Accounts {
+  rpc SelfAccount(google.protobuf.Empty) returns (infinimesh.node.Account) {
+    option (google.api.http) = {
+      get : "/account"
+    };
+  };
   rpc Token(TokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       post : "/accounts/token"

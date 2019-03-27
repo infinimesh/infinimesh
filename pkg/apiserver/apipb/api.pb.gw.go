@@ -13,6 +13,7 @@ import (
 	"net/http"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/utilities"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -265,6 +266,15 @@ func request_Shadows_StreamReportedStateChanges_0(ctx context.Context, marshaler
 	}
 	metadata.HeaderMD = header
 	return stream, metadata, nil
+
+}
+
+func request_Accounts_SelfAccount_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq empty.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.SelfAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
 
 }
 
@@ -797,6 +807,26 @@ func RegisterAccountsHandler(ctx context.Context, mux *runtime.ServeMux, conn *g
 // "AccountsClient" to call the correct interceptors.
 func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, client AccountsClient) error {
 
+	mux.Handle("GET", pattern_Accounts_SelfAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Accounts_SelfAccount_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Accounts_SelfAccount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Accounts_Token_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -881,6 +911,8 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
+	pattern_Accounts_SelfAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"account"}, ""))
+
 	pattern_Accounts_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "token"}, ""))
 
 	pattern_Accounts_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"accounts", "users"}, ""))
@@ -891,6 +923,8 @@ var (
 )
 
 var (
+	forward_Accounts_SelfAccount_0 = runtime.ForwardResponseMessage
+
 	forward_Accounts_Token_0 = runtime.ForwardResponseMessage
 
 	forward_Accounts_CreateUserAccount_0 = runtime.ForwardResponseMessage

@@ -734,6 +734,18 @@ info:
   version: 0.0.1
 openapi: 3.0.0
 paths:
+  /account:
+    get:
+      operationId: SelfAccount
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeAccount'
+          description: A successful response.
+      tags:
+        - Accounts
   /accounts/token:
     post:
       operationId: Token
