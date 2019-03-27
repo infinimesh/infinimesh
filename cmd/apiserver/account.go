@@ -25,8 +25,23 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 	}
 
 	return a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
-		Name: account,
+		Id: account,
 	})
+}
+
+func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: account,
+	}); err == nil && res.GetIsRoot() {
+		return a.client.GetAccount(ctx, request)
+	}
+	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+
 }
 
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {

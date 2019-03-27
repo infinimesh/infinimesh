@@ -99,7 +99,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 }
 
 func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
-	account, err := s.Repo.GetAccount(ctx, request.GetName())
+	account, err := s.Repo.GetAccount(ctx, request.Id)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, err.Error())
 	}

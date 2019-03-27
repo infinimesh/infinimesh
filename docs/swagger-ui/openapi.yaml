@@ -748,7 +748,7 @@ paths:
           description: A successful response.
       tags:
         - Accounts
-  /accounts/token:
+  /account/token:
     post:
       operationId: Token
       requestBody:
@@ -766,7 +766,7 @@ paths:
           description: A successful response.
       tags:
         - Accounts
-  /accounts/users:
+  /accounts:
     get:
       operationId: ListAccounts
       responses:
@@ -795,7 +795,7 @@ paths:
           description: A successful response.
       tags:
         - Accounts
-  '/accounts/users/{account.uid}':
+  '/accounts/{account.uid}':
     patch:
       operationId: UpdateAccount
       parameters:
@@ -810,6 +810,24 @@ paths:
             schema:
               $ref: '#/components/schemas/nodeAccount'
         required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeAccount'
+          description: A successful response.
+      tags:
+        - Accounts
+  '/accounts/{id}':
+    get:
+      operationId: GetAccount
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:

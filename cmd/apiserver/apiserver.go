@@ -72,7 +72,7 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 		if accountID, ok := claims[accountIDClaim]; ok {
 
 			if accountIDStr, ok := accountID.(string); ok {
-				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Name: accountIDStr})
+				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
 				if err != nil {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
 				}

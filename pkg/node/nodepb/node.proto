@@ -57,7 +57,7 @@ message AuthorizeRequest {
 
 message AuthorizeResponse {}
 
-message GetAccountRequest { string name = 1; }
+message GetAccountRequest { string id = 1; }
 
 message Account {
   string uid = 1;
