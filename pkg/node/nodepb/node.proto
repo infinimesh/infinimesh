@@ -9,6 +9,7 @@ option java_package = "com.infinimesh.node";
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/field_mask.proto";
+import "pkg/node/nodepb/namespace.proto";
 
 // Account
 
@@ -63,6 +64,7 @@ message Account {
   string name = 2;
   bool is_root = 3;
   bool enabled = 4;
+  Namespace default_namespace = 5;
 }
 
 message AuthenticateRequest {

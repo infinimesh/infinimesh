@@ -197,6 +197,10 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        type
                        isRoot
                        enabled
+                       default.namespace {
+                         name
+                         uid
+                       }
                      }
                    }`
 
@@ -218,10 +222,19 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 		return nil, errors.New("Account not found")
 	}
 
-	return &nodepb.Account{
+	account = &nodepb.Account{
 		Uid:     result.Account[0].UID,
 		Name:    result.Account[0].Name,
 		IsRoot:  result.Account[0].IsRoot,
 		Enabled: result.Account[0].Enabled,
-	}, err
+	}
+
+	if len(result.Account[0].DefaultNamespace) == 1 {
+		account.DefaultNamespace = &nodepb.Namespace{
+			Name: result.Account[0].DefaultNamespace[0].Name,
+			Id:   result.Account[0].DefaultNamespace[0].UID,
+		}
+	}
+
+	return account, err
 }

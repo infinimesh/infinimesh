@@ -86,6 +86,8 @@ components:
       type: object
     nodeAccount:
       properties:
+        default_namespace:
+          $ref: '#/components/schemas/nodeNamespace'
         enabled:
           format: boolean
           type: boolean
