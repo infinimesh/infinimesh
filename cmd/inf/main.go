@@ -1,17 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
+	input "github.com/tcnksm/go-input"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
@@ -111,7 +110,27 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to account",
 	Run: func(cmd *cobra.Command, args []string) {
-		response, err := accountClient.Token(context.Background(), &apipb.TokenRequest{Username: args[0], Password: args[1]})
+		scanner := bufio.NewScanner(os.Stdin)
+
+		fmt.Print("Username: ")
+		scanner.Scan()
+		username := scanner.Text()
+
+		ui := &input.UI{
+			Writer: os.Stdout,
+			Reader: os.Stdin,
+		}
+
+		password, err := ui.Ask("Password", &input.Options{
+			Required:  true,
+			Mask:      true,
+			HideOrder: true,
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to read password: %v\n", err)
+		}
+
+		response, err := accountClient.Token(context.Background(), &apipb.TokenRequest{Username: username, Password: password})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Login failed: %v\n", err)
 			os.Exit(1)
@@ -124,18 +143,6 @@ var loginCmd = &cobra.Command{
 
 		cfg.Token = response.Token
 
-		tokenPayload, _ := base64.RawURLEncoding.DecodeString(strings.Split(response.GetToken(), ".")[1])
-
-		var tokenData struct {
-			AccountID string `json:"account_id"`
-			DefaultNS string `json:"default_ns"`
-		}
-
-		err = json.Unmarshal([]byte(tokenPayload), &tokenData)
-		if err == nil {
-			config.DefaultNamespace = tokenData.DefaultNS
-		}
-
 		err = config.Write()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write config: %v\n", err)
@@ -143,7 +150,7 @@ var loginCmd = &cobra.Command{
 
 		fmt.Println("Logged in successfully.")
 	},
-	Args: cobra.ExactArgs(2),
+	Args: cobra.NoArgs,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return connectGRPC()
 	},
