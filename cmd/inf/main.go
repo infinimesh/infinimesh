@@ -25,6 +25,7 @@ var (
 	objectClient    apipb.ObjectsClient
 	accountClient   apipb.AccountsClient
 	deviceClient    apipb.DevicesClient
+	shadowClient    apipb.ShadowsClient
 	ctx             context.Context
 
 	noHeaderFlag bool
@@ -91,6 +92,7 @@ func connectGRPC() error {
 	accountClient = apipb.NewAccountsClient(conn)
 	deviceClient = apipb.NewDevicesClient(conn)
 	objectClient = apipb.NewObjectsClient(conn)
+	shadowClient = apipb.NewShadowsClient(conn)
 	return nil
 }
 
