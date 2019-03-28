@@ -1,0 +1,19 @@
+<div [class.left]="position === 'normal'"
+     [class.right]="position === 'inverse'"
+     class="header-container">
+  <div class="logo-containter">
+    <a (click)="toggleSidebar()" class="navigation" href="#"><i class="nb-menu"></i></a>
+    <div (click)="goToHome()" class="logo">infinimesh<span>.io</span></div>
+  </div>
+</div>
+
+<div class="header-container">
+  <nb-actions
+    size="medium"
+    [class.right]="position === 'normal'"
+    [class.left]="position === 'inverse'">
+    <nb-action>
+      <nb-user [nbContextMenu]="userMenu" [nbContextMenuTag]="'header-menu'" [name]="user?.name"></nb-user>
+    </nb-action>
+  </nb-actions>
+</div>

@@ -1,0 +1,6 @@
+<nb-card *ngFor="let device of $devices|async">
+  <nb-card-header>{{device.name}}</nb-card-header>
+  <nb-card-body>
+    <p>{{device.id}}</p>
+  </nb-card-body>
+</nb-card>
