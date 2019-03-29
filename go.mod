@@ -18,6 +18,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible
+	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gofrs/uuid v3.1.0+incompatible // indirect
 	github.com/gogo/protobuf v1.2.0 // indirect
@@ -29,6 +30,7 @@ require (
 	github.com/google/uuid v1.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0
+	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
 	github.com/jinzhu/gorm v1.9.2
