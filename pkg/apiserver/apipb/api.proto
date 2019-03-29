@@ -76,17 +76,17 @@ service Devices {
   }
 }
 
-service Shadows {
+service States {
   rpc Get(infinimesh.shadow.GetRequest)
       returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get : "/twins/{id}"
+      get : "/devices/{id}/state"
     };
   }
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
       returns (infinimesh.shadow.PatchDesiredStateResponse) {
     option (google.api.http) = {
-      patch : "/twins/{id}"
+      patch : "/devices/{id}/state"
       body : "data"
     };
   }
@@ -94,7 +94,7 @@ service Shadows {
       infinimesh.shadow.StreamReportedStateChangesRequest)
       returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
-      get : "/twins/{id}/stream"
+      get : "/devices/{id}/state/stream"
     };
   }
 }

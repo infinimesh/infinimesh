@@ -58,7 +58,7 @@ func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 	return s.client.PatchDesiredState(ctx, request)
 }
 
-func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.Shadows_StreamReportedStateChangesServer) (err error) {
+func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.States_StreamReportedStateChangesServer) (err error) {
 	account, ok := srv.Context().Value("account_id").(string)
 	if !ok {
 		return status.Error(codes.Unauthenticated, "Unauthenticated")

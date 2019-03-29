@@ -172,7 +172,7 @@ func request_Devices_Delete_0(ctx context.Context, marshaler runtime.Marshaler, 
 
 }
 
-func request_Shadows_Get_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_States_Get_0(ctx context.Context, marshaler runtime.Marshaler, client StatesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq shadowpb.GetRequest
 	var metadata runtime.ServerMetadata
 
@@ -199,7 +199,7 @@ func request_Shadows_Get_0(ctx context.Context, marshaler runtime.Marshaler, cli
 
 }
 
-func request_Shadows_PatchDesiredState_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_States_PatchDesiredState_0(ctx context.Context, marshaler runtime.Marshaler, client StatesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq shadowpb.PatchDesiredStateRequest
 	var metadata runtime.ServerMetadata
 
@@ -234,7 +234,7 @@ func request_Shadows_PatchDesiredState_0(ctx context.Context, marshaler runtime.
 
 }
 
-func request_Shadows_StreamReportedStateChanges_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowsClient, req *http.Request, pathParams map[string]string) (Shadows_StreamReportedStateChangesClient, runtime.ServerMetadata, error) {
+func request_States_StreamReportedStateChanges_0(ctx context.Context, marshaler runtime.Marshaler, client StatesClient, req *http.Request, pathParams map[string]string) (States_StreamReportedStateChangesClient, runtime.ServerMetadata, error) {
 	var protoReq shadowpb.StreamReportedStateChangesRequest
 	var metadata runtime.ServerMetadata
 
@@ -679,9 +679,9 @@ var (
 	forward_Devices_Delete_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterShadowsHandlerFromEndpoint is same as RegisterShadowsHandler but
+// RegisterStatesHandlerFromEndpoint is same as RegisterStatesHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterShadowsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterStatesHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -701,23 +701,23 @@ func RegisterShadowsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeM
 		}()
 	}()
 
-	return RegisterShadowsHandler(ctx, mux, conn)
+	return RegisterStatesHandler(ctx, mux, conn)
 }
 
-// RegisterShadowsHandler registers the http handlers for service Shadows to "mux".
+// RegisterStatesHandler registers the http handlers for service States to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterShadowsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterShadowsHandlerClient(ctx, mux, NewShadowsClient(conn))
+func RegisterStatesHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterStatesHandlerClient(ctx, mux, NewStatesClient(conn))
 }
 
-// RegisterShadowsHandlerClient registers the http handlers for service Shadows
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ShadowsClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ShadowsClient"
+// RegisterStatesHandlerClient registers the http handlers for service States
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "StatesClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "StatesClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "ShadowsClient" to call the correct interceptors.
-func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ShadowsClient) error {
+// "StatesClient" to call the correct interceptors.
+func RegisterStatesHandlerClient(ctx context.Context, mux *runtime.ServeMux, client StatesClient) error {
 
-	mux.Handle("GET", pattern_Shadows_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_States_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -726,18 +726,18 @@ func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Shadows_Get_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_States_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Shadows_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_States_Get_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("PATCH", pattern_Shadows_PatchDesiredState_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PATCH", pattern_States_PatchDesiredState_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -746,18 +746,18 @@ func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Shadows_PatchDesiredState_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_States_PatchDesiredState_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Shadows_PatchDesiredState_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_States_PatchDesiredState_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_Shadows_StreamReportedStateChanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_States_StreamReportedStateChanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -766,14 +766,14 @@ func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Shadows_StreamReportedStateChanges_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_States_StreamReportedStateChanges_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Shadows_StreamReportedStateChanges_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_States_StreamReportedStateChanges_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -781,19 +781,19 @@ func RegisterShadowsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Shadows_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"twins", "id"}, ""))
+	pattern_States_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_Shadows_PatchDesiredState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"twins", "id"}, ""))
+	pattern_States_PatchDesiredState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_Shadows_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"twins", "id", "stream"}, ""))
+	pattern_States_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"devices", "id", "state", "stream"}, ""))
 )
 
 var (
-	forward_Shadows_Get_0 = runtime.ForwardResponseMessage
+	forward_States_Get_0 = runtime.ForwardResponseMessage
 
-	forward_Shadows_PatchDesiredState_0 = runtime.ForwardResponseMessage
+	forward_States_PatchDesiredState_0 = runtime.ForwardResponseMessage
 
-	forward_Shadows_StreamReportedStateChanges_0 = runtime.ForwardResponseStream
+	forward_States_StreamReportedStateChanges_0 = runtime.ForwardResponseStream
 )
 
 // RegisterAccountsHandlerFromEndpoint is same as RegisterAccountsHandler but

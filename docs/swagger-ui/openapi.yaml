@@ -931,6 +931,66 @@ paths:
           description: A successful response.
       tags:
         - Devices
+  '/devices/{id}/state':
+    get:
+      operationId: Get
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/infinimeshshadowGetResponse'
+          description: A successful response.
+      tags:
+        - States
+    patch:
+      operationId: PatchDesiredState
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/protobufValue'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
+          description: A successful response.
+      tags:
+        - States
+  '/devices/{id}/state/stream':
+    get:
+      operationId: StreamReportedStateChanges
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/x-stream-definitions/shadowStreamReportedStateChangesResponse
+          description: A successful response.(streaming responses)
+      tags:
+        - States
   /namespaces:
     get:
       operationId: ListNamespaces
@@ -1037,66 +1097,6 @@ paths:
           description: A successful response.
       tags:
         - Objects
-  '/twins/{id}':
-    get:
-      operationId: Get
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/infinimeshshadowGetResponse'
-          description: A successful response.
-      tags:
-        - Shadows
-    patch:
-      operationId: PatchDesiredState
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/protobufValue'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
-          description: A successful response.
-      tags:
-        - Shadows
-  '/twins/{id}/stream':
-    get:
-      operationId: StreamReportedStateChanges
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: >-
-                  #/x-stream-definitions/shadowStreamReportedStateChangesResponse
-          description: A successful response.(streaming responses)
-      tags:
-        - Shadows
 servers:
   - url: 'http://localhost:8081'
   - url: 'https://api.infinimesh.io/'
