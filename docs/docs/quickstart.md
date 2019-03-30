@@ -1,10 +1,15 @@
 # Quick start
 ## Install CLI
-Infinimesh features a CLI to interact with out API.
-Install it automatically with out install script:
+Infinimesh features a CLI to interact with our API.
+Install it automatically with our install script:
 ```
 curl https://raw.githubusercontent.com/infinimesh/infinimesh/master/godownloader.sh | BINDIR=$HOME/bin bash
 ```
+Please note Depending on your OS/distribution, it may be necessary to add ~/bin to your PATH.
+```
+export PATH=$HOME/bin:$PATH
+```
+Add this to your `~/.profile` or `~/.zshrc`, depending on your shell.
 After installing, set up the CLI to use our managed SaaS offering by running this command:
 ```
 inf config set-context saas --apiserver grpc.api.infinimesh.io:443 --tls=true
@@ -29,7 +34,7 @@ inf device create my-sample-device --cert-file hack/server.crt -n joe
 ```
 The device is registered and the fingerprint of the certificate is returned. The platform uses this fingerprint to uniquely identify your device.
 ## Send data from the device
-To simulate the device, we use the mosquitto_pub client. You can use *ANY* MQTT client, e.g. eclipse paho.
+To simulate the device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho.
 ```
 mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt --cert sample_1.crt --key sample_1.key -m '{"sample-datapoint" : 1337}' -t "shadows/<YOUR DEVICE ID>" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
 ```
