@@ -64,6 +64,8 @@ tasks:
       - go run hack/import_dgraph_sample_data.go -drop
       - |
         curl -s -d '{"username" : "joe", "password" : "test123"}' localhost:8081/token
+  release:
+    rm -rf dist/ && goreleaser
   default:
     cmds:
       - task: build
