@@ -10,11 +10,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	input "github.com/tcnksm/go-input"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/manifoldco/promptui"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 )
@@ -119,16 +120,20 @@ var loginCmd = &cobra.Command{
 		scanner.Scan()
 		username := scanner.Text()
 
-		ui := &input.UI{
-			Writer: os.Stdout,
-			Reader: os.Stdin,
+		prompt := promptui.Prompt{
+			Label:     "Password",
+			Mask:      '*',
+			Validate:  nil,
+			IsConfirm: false,
+			Templates: &promptui.PromptTemplates{
+				Prompt:  "ABC",
+				Valid:   "Password: ",
+				Invalid: "Password: ",
+				Success: "Password: ",
+			},
 		}
 
-		password, err := ui.Ask("Password", &input.Options{
-			Required:  true,
-			Mask:      true,
-			HideOrder: true,
-		})
+		password, err := prompt.Run()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to read password: %v\n", err)
 		}

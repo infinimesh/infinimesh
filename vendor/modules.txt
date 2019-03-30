@@ -162,8 +162,6 @@ github.com/spf13/viper
 # github.com/stretchr/testify v1.2.2
 github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
-# github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
-github.com/tcnksm/go-input
 # github.com/tsenart/deadcode v0.0.0-20160724212837-210d2dc333e9
 github.com/tsenart/deadcode
 # github.com/yosssi/gmq v0.0.1
