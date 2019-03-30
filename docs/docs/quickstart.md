@@ -30,7 +30,7 @@ openssl req -new -x509 -sha256 -key sample_1.key -out sample_1.crt -days 365
 ```
 Register the device in infinimesh's device registry:
 ```
-inf device create my-sample-device --cert-file hack/server.crt -n joe
+inf device create my-sample-device --cert-file hack/server.crt -n <YOUR USERNAME>
 ```
 The device is registered and the fingerprint of the certificate is returned. The platform uses this fingerprint to uniquely identify your device.
 ## Send data from the device
