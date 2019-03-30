@@ -14,16 +14,16 @@ import (
 
 // TODO: manage multiple installations
 type Config struct {
-	CurrentContext   string     `yaml:"current-context,omitempty"`
-	Contexts         []*Context `yaml:"contexts,omitempty"`
-	DefaultNamespace string     `yaml:"defaultNamespace,omitempty"`
+	CurrentContext string     `yaml:"current-context,omitempty"`
+	Contexts       []*Context `yaml:"contexts,omitempty"`
 }
 
 type Context struct {
-	Name   string `yaml:"name"`
-	Server string `yaml:"server"`
-	TLS    bool   `yaml:"tls"`
-	Token  string `yaml:"token,omitempty"`
+	Name             string `yaml:"name"`
+	Server           string `yaml:"server"`
+	TLS              bool   `yaml:"tls"`
+	Token            string `yaml:"token,omitempty"`
+	DefaultNamespace string `yaml:"defaultNamespace,omitempty"`
 }
 
 var (
@@ -77,6 +77,9 @@ var configSetContextCmd = &cobra.Command{
 	Short: "Set fields in a context",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if config == nil {
+			config = &Config{}
+		}
 		newCtx := &Context{
 			Name:   args[0],
 			Server: apiserverFlag,
@@ -97,6 +100,7 @@ var configSetContextCmd = &cobra.Command{
 			fmt.Printf("Context %v created.\n", args[0])
 		}
 
+		config.CurrentContext = newCtx.Name
 		err := config.Write()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write config file: %v.\n", err)

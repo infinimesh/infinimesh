@@ -41,7 +41,6 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	// Load cfg
 	if cfg, err := ReadConfig(); err == nil {
 		cur, err := cfg.GetCurrentContext()
 		if err == nil {
@@ -63,8 +62,10 @@ func getNamespace() string {
 	if namespaceFlag != "" {
 		return namespaceFlag
 	}
-	if config != nil && config.DefaultNamespace != "" {
-		return config.DefaultNamespace
+	if config != nil {
+		if ctx, err := config.GetCurrentContext(); err == nil {
+			return ctx.DefaultNamespace
+		}
 	}
 	return ""
 }
