@@ -2,3 +2,4 @@
 *.swagger.json
 node_modules
 /apiserver
+dist

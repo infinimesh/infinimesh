@@ -1,0 +1,31 @@
+builds:
+  - env:
+    - CGO_ENABLED=0
+    main: ./cmd/inf
+    binary: inf
+    goarch:
+    - amd64
+    goos:
+    - linux
+    - darwin
+    - windows
+archive:
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+release:
+  github:
+    owner: infinimesh 
+    name: infinimesh
