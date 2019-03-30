@@ -18,7 +18,7 @@ import (
 
 var (
 	allNamespaces bool
-	file          string
+	certFile          string
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 	devicesCmd.AddCommand(deleteDeviceCmd)
 	rootCmd.AddCommand(devicesCmd)
 
-	createDeviceCmd.Flags().StringVarP(&file, "file", "f", "", "Path to X509 certificate file of device")
+	createDeviceCmd.Flags().StringVar(&certFile, "cert-file", "", "Path to X509 certificate file of device")
 }
 
 var devicesCmd = &cobra.Command{
@@ -74,7 +74,7 @@ var createDeviceCmd = &cobra.Command{
 	Use:  "create",
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		pem, err := ioutil.ReadFile(file)
+		pem, err := ioutil.ReadFile(certFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Could not read certificate: %v", err)
 			os.Exit(1)
