@@ -65,7 +65,8 @@ tasks:
       - |
         curl -s -d '{"username" : "joe", "password" : "test123"}' localhost:8081/token
   release:
-    rm -rf dist/ && goreleaser
+    cmds:
+      - rm -rf dist/ && goreleaser
   default:
     cmds:
       - task: build
