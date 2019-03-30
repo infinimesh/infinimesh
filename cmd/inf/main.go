@@ -150,6 +150,7 @@ var loginCmd = &cobra.Command{
 		}
 
 		cfg.Token = response.Token
+		cfg.DefaultNamespace = username
 
 		err = config.Write()
 		if err != nil {
