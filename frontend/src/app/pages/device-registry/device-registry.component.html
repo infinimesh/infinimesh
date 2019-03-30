@@ -1,4 +1,11 @@
-<nb-card *ngFor="let device of $devices|async">
+<nb-actions>
+  <nb-action icon="nb-email"></nb-action>
+</nb-actions>
+<button nbButton>Refresh</button>
+<nb-card *ngIf="(devices$ | async)?.length==0">
+  <nb-card-body>No devices created yet.</nb-card-body>
+</nb-card>
+<nb-card *ngFor="let device of devices$ | async">
   <nb-card-header>{{device.name}}</nb-card-header>
   <nb-card-body>
     <p>{{device.id}}</p>

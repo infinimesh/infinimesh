@@ -9,12 +9,12 @@ import {Observable} from "rxjs";
 })
 export class DeviceRegistryComponent implements OnInit {
 
-  public $devices: Observable<any>;
+  public devices$: Observable<any>;
 
   constructor(private deviceService: DeviceService) {
   }
 
   ngOnInit() {
-    this.$devices = this.deviceService.getAll();
+    this.devices$ = this.deviceService.getAll();
   }
 }

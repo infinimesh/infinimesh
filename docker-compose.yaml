@@ -72,8 +72,8 @@ services:
       - "DB_ADDR=redis:6379"
     restart: unless-stopped
   apiserver:
-          #  ports:
-          #   - "8080:8080"
+    ports:
+      - "8080:8080"
     image: quay.io/infinimesh/apiserver:latest
     environment:
       - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=

@@ -45,12 +45,14 @@
 
     }
 
+    img#logo {
+      height: 35px;
+    }
+
     .logo {
       padding: 0 nb-theme(padding);
       font-size: 1.75rem;
       font-weight: nb-theme(font-weight-bolder);
-      @include nb-ltr(border-left, 1px solid nb-theme(separator));
-      @include nb-rtl(border-right, 1px solid nb-theme(separator));
       white-space: nowrap;
 
       span {
@@ -59,54 +61,9 @@
     }
   }
 
-  ngx-layout-direction-switcher {
-    margin: 0 1.5rem;
-  }
-
-  ngx-theme-switcher {
-    margin: nb-theme(layout-padding);
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-
   @include media-breakpoint-down(xl) {
     ngx-layout-direction-switcher {
       display: none;
-    }
-  }
-
-  .toggle-layout /deep/ a {
-    display: block;
-    text-decoration: none;
-    line-height: 1;
-
-    i {
-      color: nb-theme(color-fg-highlight);
-      font-size: 2.25rem;
-      border-radius: 50%;
-      position: relative;
-      animation-name: pulse-light;
-
-      &::after {
-        content: ' ';
-        // hack to be able to set border-radius
-        background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
-        border-radius: 50%;
-        pointer-events: none;
-
-        position: absolute;
-        top: 52.3%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 13%;
-        height: 13%;
-
-        animation: 3s linear infinite pulse;
-
-        @include nb-for-theme(default) {
-          animation-name: pulse-light;
-        }
-      }
     }
   }
 

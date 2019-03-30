@@ -3,11 +3,18 @@
      class="header-container">
   <div class="logo-containter">
     <a (click)="toggleSidebar()" class="navigation" href="#"><i class="nb-menu"></i></a>
+    <img id="logo" src="/assets/infinimesh_logo.png" alt="infinimesh Logo"/>
     <div (click)="goToHome()" class="logo">infinimesh<span>.io</span></div>
   </div>
 </div>
 
 <div class="header-container">
+  <nb-select placeholder="Select Namespace">
+    <nb-option value="1">Option 1</nb-option>
+    <nb-option value="2">Option 2</nb-option>
+    <nb-option value="3">Option 3</nb-option>
+    <nb-option value="4">Option 4</nb-option>
+  </nb-select>
   <nb-actions
     size="medium"
     [class.right]="position === 'normal'"
