@@ -8,8 +8,6 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/spf13/cobra"
 
-	"encoding/base64"
-
 	"io/ioutil"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -93,7 +91,7 @@ var createDeviceCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Created device.\nFingerprint: %v\n", base64.StdEncoding.EncodeToString(resp.Device.Certificate.Fingerprint))
+		fmt.Printf("Created device [%v].\n", resp.Device.Id)
 	},
 }
 
