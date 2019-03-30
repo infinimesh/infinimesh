@@ -18,7 +18,7 @@ import (
 
 var (
 	allNamespaces bool
-	certFile          string
+	certFile      string
 )
 
 func init() {
@@ -107,5 +107,6 @@ var deleteDeviceCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("grpc: failed to delete device", err)
 		}
+		fmt.Println("Deleted device.")
 	},
 }
