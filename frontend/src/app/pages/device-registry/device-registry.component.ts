@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {DeviceService} from "../../core/data/device.service";
-import {Observable} from "rxjs";
+import {DeviceService} from '../../core/data/device.service';
+import {Observable} from 'rxjs';
+import {NamespaceService} from '../../core/data/namespace.service';
 
 @Component({
   selector: 'device-registry',
@@ -11,10 +12,18 @@ export class DeviceRegistryComponent implements OnInit {
 
   public devices$: Observable<any>;
 
-  constructor(private deviceService: DeviceService) {
+  constructor(private deviceService: DeviceService,
+              private namespaceService: NamespaceService) {
+    this.namespaceService.selectedChange.subscribe(() => this.requestDevices());
   }
 
   ngOnInit() {
-    this.devices$ = this.deviceService.getAll();
+    this.requestDevices();
+  }
+
+  requestDevices() {
+    if (this.namespaceService.getSelected() !== undefined) {
+      this.devices$ = this.deviceService.getAll();
+    }
   }
 }

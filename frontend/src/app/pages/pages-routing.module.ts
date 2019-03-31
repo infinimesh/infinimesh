@@ -19,7 +19,7 @@ const routes: Routes = [{
     },
     {
       path: '',
-      redirectTo: 'dashboard',
+      redirectTo: 'devices', /* default view */
       pathMatch: 'full',
     },
   ],

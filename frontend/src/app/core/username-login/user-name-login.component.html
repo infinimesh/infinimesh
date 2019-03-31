@@ -28,7 +28,7 @@
            pattern=".+"
            placeholder="Username"
            autofocus
-           [status]="username.dirty ? (username.invalid  ? 'danger' : 'success') : ''"
+           [status]="username.dirty ? (username.invalid  ? 'danger' : '') : ''"
            [required]="getConfigValue('forms.validation.email.required')"
            [attr.aria-invalid]="username.invalid && username.touched ? true : null">
     <ng-container *ngIf="username.invalid && username.touched">
@@ -48,7 +48,7 @@
            type="password"
            id="input-password"
            placeholder="Password"
-           [status]="password.dirty ? (password.invalid  ? 'danger' : 'success') : ''"
+           [status]="password.dirty ? (password.invalid  ? 'danger' : '') : ''"
            [required]="getConfigValue('forms.validation.password.required')"
            [minlength]="getConfigValue('forms.validation.password.minLength')"
            [maxlength]="getConfigValue('forms.validation.password.maxLength')"
@@ -73,7 +73,6 @@
 
   <button nbButton
           fullWidth
-          status="success"
           [disabled]="submitted || !form.valid"
           [class.btn-pulse]="submitted">
     Log In

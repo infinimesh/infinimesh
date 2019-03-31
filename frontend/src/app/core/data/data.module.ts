@@ -4,11 +4,15 @@ import {CommonModule} from '@angular/common';
 import {UserService} from './user.service';
 import {UrlProviderService} from "./url-provider.service";
 import {DeviceService} from "./device.service";
+import {ApiUtilService} from "./api-util.service";
+import {NamespaceService} from "./namespace.service";
 
 const SERVICES = [
   UserService,
   DeviceService,
-  UrlProviderService
+  UrlProviderService,
+  ApiUtilService,
+  NamespaceService
 ];
 
 @NgModule({

@@ -1,39 +1,27 @@
 import {Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {NbAuthJWTToken, NbAuthService} from "@nebular/auth";
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {NbAuthJWTToken, NbAuthService} from '@nebular/auth';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
-import {UrlProviderService} from "./url-provider.service";
+import {UrlProviderService} from './url-provider.service';
+import {ApiUtilService} from './api-util.service';
+import {NamespaceService} from './namespace.service';
 
 @Injectable()
 export class DeviceService {
 
-  private apiUrl: string;
-  private httpOptions;
-
   constructor(private http: HttpClient,
-              private authService: NbAuthService,
-              private urlProviderService: UrlProviderService) {
-    this.apiUrl = urlProviderService.getApiServerUrl();
-    this.authService.onTokenChange()
-      .subscribe((token: NbAuthJWTToken) => {
+              private apiUtilService: ApiUtilService,
+              private namespaceService: NamespaceService) {
 
-        if (token.isValid()) {
-          this.httpOptions = {
-            headers: new HttpHeaders({
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token.getValue()
-            })
-          };
-        }
-
-      });
   }
 
   getAll(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/devices?namespace=shared-project`, this.httpOptions)
+    const namespace = this.namespaceService.getSelected();
+    const url = `${this.apiUtilService.getApiUrl()}/devices?namespace=${namespace.name}`;
+    return this.http.get(url, this.apiUtilService.getHttpOptions())
       .map((response: any) => response.devices);
   }
 

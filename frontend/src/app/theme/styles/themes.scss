@@ -6,6 +6,11 @@
 // which themes you what to enable (empty to enable all)
 $nb-enabled-themes: (default, cosmic);
 
+$infinimesh-purple: #673ab7;
+$infinimesh-purple-dark: #4E219E;
+$infinimesh-green: #779A0B;
+$infinimesh-blue: #4aafe3;
+
 $nb-themes: nb-register-theme((
   // app wise variables for each theme
   sidebar-header-gap: 0rem,
@@ -31,23 +36,23 @@ $nb-themes: nb-register-theme((
 
 $nb-themes: nb-register-theme((
   // app wise variables for each theme
-  color-bg: #673ab7,
-  color-bg-active: #4E219E,
+  color-bg: $infinimesh-purple,
+  color-bg-active: $infinimesh-purple-dark,
   color-fg: #a1a1e5,
   color-fg-heading: #ffffff,
   color-fg-text: #d1d1ff,
-  color-fg-highlight: #00f9a6,
+  color-fg-highlight: #4aafe3,
   color-gray: rgba(81, 113, 165, 0.15),
   color-neutral: transparent,
   color-white: #ffffff,
   color-disabled: rgba(255, 255, 255, 0.4),
-  color-primary: #7659ff,
-  color-success: #00d977,
+  color-primary: $infinimesh-blue,
+  color-success: $infinimesh-green,
   color-info: #0088ff,
   color-warning: #ffa100,
   color-danger: #ff386a,
-  link-color: #00f9a6,
-  link-color-hover: #14ffbe,
+  link-color: $infinimesh-blue,
+  link-color-hover: lighten($infinimesh-blue, 10%),
   separator: #342e73,
   shadow: 0 8px 20px 0 rgba(40, 37, 89, 0.6),
   card-header-font-weight: font-weight-bolder,
