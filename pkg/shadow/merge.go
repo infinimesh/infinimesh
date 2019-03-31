@@ -27,10 +27,6 @@ func calculateDelta(old, new string) string {
 }
 
 func applyDelta(full, delta string) (merged string, err error) {
-	if !json.Valid([]byte(full)) {
-		return "", errors.New("full state is invalid JSON")
-	}
-
 	if !json.Valid([]byte(delta)) {
 		return "", errors.New("delta state is invalid JSON")
 	}
