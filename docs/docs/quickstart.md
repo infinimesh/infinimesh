@@ -54,7 +54,7 @@ Client mosqpub|3396-thinkpad received CONNACK (0)
 Client mosqpub|3396-thinkpad sending PUBLISH (d0, q0, r0, m1, 'shadows/0x1', ... (14 bytes))
 Client mosqpub|3396-thinkpad sending DISCONNECT
 ```
-The data has been sent successfully to the platform. To send more as one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp). Here is an JSON example from one of our BACnet tests:
+The data has been sent successfully to the platform. To send more as one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp). Here is a JSON example from one of our BACnet tests:
 ```
 {
 "temperature":72,
