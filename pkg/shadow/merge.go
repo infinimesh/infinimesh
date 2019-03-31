@@ -2,6 +2,7 @@ package shadow
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/birdayz/conjungo"
 	jsonpatch "github.com/evanphx/json-patch"
@@ -26,6 +27,14 @@ func calculateDelta(old, new string) string {
 }
 
 func applyDelta(full, delta string) (merged string, err error) {
+	if !json.Valid([]byte(full)) {
+		return "", errors.New("full state is invalid JSON")
+	}
+
+	if !json.Valid([]byte(delta)) {
+		return "", errors.New("delta state is invalid JSON")
+	}
+
 	var fullJSON map[string]interface{}
 	if full != "" {
 		err := json.Unmarshal([]byte(full), &fullJSON)
