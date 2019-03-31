@@ -7,16 +7,15 @@ import (
 )
 
 func TestRoute(t *testing.T) {
-	routes := map[string]string{
-		"/shadows/":             "shadows",
-		"/shadows/ab/":          "shadow-ab",
-		"/shadows/abc/":         "shadow-abc",
-		"/shadows/abc/specific": "more specific route",
-		"/devices/":             "devices",
-	}
-	router := New("default_or_dlq", routes)
+	dlq := "default_or_dlq"
+	router := New(dlq)
 
-	require.Equal(t, "shadow-abc", router.Route("/shadows/abc/xx"))
-	require.Equal(t, "more specific route", router.Route("/shadows/abc/specific"))
-	require.Equal(t, "default_or_dlq", router.Route("whatever"))
+	require.Equal(t, "shadow.reported-state.delta", router.Route("devices/0x1/state/reported/delta", "0x1"))
+	require.Equal(t, dlq, router.Route("devices/0x1/state/reported/delta", "0x2"))
+	require.Equal(t, dlq, router.Route("/devices/0x1/state/reported/delta", "0x1"))
+	require.Equal(t, dlq, router.Route("", "0x1"))
+	require.Equal(t, dlq, router.Route("/", "0x1"))
+	require.Equal(t, dlq, router.Route("/abc", "0x1"))
+	require.Equal(t, dlq, router.Route("/devices/0x1", "0x1"))
+	require.Equal(t, dlq, router.Route("/devices/0x1/", "0x1"))
 }

@@ -26,9 +26,6 @@ var (
 
 	sourceTopic  = "mqtt.messages.incoming"
 	defaultRoute = "mqtt.messages.incoming.dlq"
-	routes       = map[string]string{
-		"shadows/": "shadow.reported-state.delta",
-	}
 )
 
 func init() {
@@ -71,7 +68,7 @@ func main() {
 
 	handler := &handler{
 		producer: producer,
-		router:   router.New(defaultRoute, routes),
+		router:   router.New(defaultRoute),
 	}
 
 	c := make(chan os.Signal, 1)
@@ -126,7 +123,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
 		}
 
-		target := h.router.Route(msg.SourceTopic)
+		target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 
 		h.producer.Input() <- &sarama.ProducerMessage{
 			Key:   sarama.StringEncoder(msg.SourceDevice),
