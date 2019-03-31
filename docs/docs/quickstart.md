@@ -32,7 +32,7 @@ openssl req -new -x509 -sha256 -key sample_1.key -out sample_1.crt -days 365
 ```
 Register the device in infinimesh's device registry:
 ```
-inf device create my-sample-device --cert-file sample_1.crt -n <YOUR USERNAME>
+inf device create my-sample-device --cert-file sample_1.crt
 ```
 The device is registered and the fingerprint of the certificate is returned. The platform uses this fingerprint to uniquely identify your device. To check your devices and get the UID use the list command:
 ```
