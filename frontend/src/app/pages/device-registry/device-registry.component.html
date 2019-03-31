@@ -1,0 +1,20 @@
+<nb-card *ngIf="!namespaceService.getSelected()">
+  <nb-card-body>No namespaces selected. Please select a namespace first to see your devices.</nb-card-body>
+</nb-card>
+<ng-container *ngIf="devices$ | async as devices">
+  <nb-card *ngIf="devices?.length == 0">
+    <nb-card-body>No devices created yet.</nb-card-body>
+  </nb-card>
+  <div class="row">
+    <div class="col-md-6" *ngFor="let device of devices">
+      <nb-card>
+        <nb-card-header>{{device.name}}</nb-card-header>
+        <nb-card-body>
+          <p>ID: {{device.id}}</p>
+          <p>Tags: {{device.tags}}</p>
+          <p>Enabled: {{device.enabled ? 'Yes' : 'No'}}</p>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</ng-container>
