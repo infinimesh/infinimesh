@@ -92,7 +92,7 @@ github.com/hashicorp/hcl/json/token
 github.com/hokaccha/go-prettyjson
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/infinimesh/mqtt-go v0.0.0-20190331125512-b2b8d1b42be9
+# github.com/infinimesh/mqtt-go v0.0.0-20190331134856-46f3ca3950fb
 github.com/infinimesh/mqtt-go/packet
 # github.com/jinzhu/gorm v1.9.2
 github.com/jinzhu/gorm/dialects/postgres

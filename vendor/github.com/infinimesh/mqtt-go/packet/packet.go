@@ -194,6 +194,8 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPa
 			Payload:        payload,
 		}
 		return packet, nil
+	case PINGREQ:
+		return &PingReqControlPacket{FixedHeader: fh}, nil
 	case DISCONNECT:
 		fmt.Println("Client disconnected")
 		return nil, errors.New("Client disconnected")
