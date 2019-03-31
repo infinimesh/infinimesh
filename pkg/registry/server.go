@@ -377,7 +377,7 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
                        access.to.namespace %v {
                          owns {
                            OBJs as uid
-                         } @filter(not(has(~children)) AND eq(kind, "device"))
+                         } @filter(eq(kind, "device"))
                        }
                      }
 
