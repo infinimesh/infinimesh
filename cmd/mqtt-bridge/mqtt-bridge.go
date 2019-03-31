@@ -279,6 +279,11 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 		}
 
 		switch p := p.(type) {
+		case *packet.PingReqControlPacket:
+			pong := packet.NewPingRespControlPacket()
+			_, err := pong.WriteTo(c)
+			fmt.Println("Failed to write PingResp", err)
+
 		case *packet.PublishControlPacket:
 			err = handlePublish(p, c, deviceID)
 			if err != nil {
@@ -288,7 +293,7 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
-				panic(err)
+				fmt.Println("Failed to write SubAck:", err)
 			}
 
 			// TODO better loop over subscribing topics..
