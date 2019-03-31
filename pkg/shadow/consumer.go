@@ -180,7 +180,8 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 
 		stateDocument, err := json.Marshal(deviceState)
 		if err != nil {
-			panic(err)
+			fmt.Println("Failed to marshal JSON", err)
+			continue
 		}
 
 		h.changelogProducer.Input() <- &sarama.ProducerMessage{
