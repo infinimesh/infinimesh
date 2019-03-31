@@ -54,7 +54,8 @@ Client mosqpub|3396-thinkpad received CONNACK (0)
 Client mosqpub|3396-thinkpad sending PUBLISH (d0, q0, r0, m1, 'shadows/0x1', ... (14 bytes))
 Client mosqpub|3396-thinkpad sending DISCONNECT
 ```
-The data has been sent successfully to the platform.
+The data has been sent successfully to the platform. To send more as one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp)
+ 
 ## Read device data from the platform
 We managed to send data from a device to the platform. Now let's read back the device data from infinimesh!
 You can do this via gRPC or HTTP API. The simplest way is with the CLI.
