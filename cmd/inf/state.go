@@ -14,11 +14,16 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 
+	"strings"
+
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+
+	_struct "github.com/golang/protobuf/ptypes/struct"
 )
 
 func init() {
 	stateCmd.AddCommand(stateGetCmd)
+	stateCmd.AddCommand(stateSetCmd)
 	rootCmd.AddCommand(stateCmd)
 }
 
@@ -29,6 +34,29 @@ var stateCmd = &cobra.Command{
 	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		return disconnectGRPC()
+	},
+}
+
+var stateSetCmd = &cobra.Command{
+	Use:  "set <deviceID> <JSON State>",
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		u := &jsonpb.Unmarshaler{}
+		var state _struct.Value
+		err := u.Unmarshal(strings.NewReader(args[1]), &state)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Invalid state: %v\n", err)
+		}
+
+		_, err = shadowClient.PatchDesiredState(ctx, &shadowpb.PatchDesiredStateRequest{
+			Id:   args[0],
+			Data: &state,
+		})
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to set state: %v", err)
+		}
+		fmt.Println("Successfully set state.")
 	},
 }
 
