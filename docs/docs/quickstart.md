@@ -32,7 +32,12 @@ Register the device in infinimesh's device registry:
 ```
 inf device create my-sample-device --cert-file sample_1.crt -n <YOUR USERNAME>
 ```
-The device is registered and the fingerprint of the certificate is returned. The platform uses this fingerprint to uniquely identify your device.
+The device is registered and the fingerprint of the certificate is returned. The platform uses this fingerprint to uniquely identify your device. To check your devices and get the UID use the list command:
+```
+inf device list
+ID     NAME               ENABLED
+0x9c   my-sample-device   value:true
+```
 ## Send data from the device
 To simulate the device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho.
 ```
