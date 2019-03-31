@@ -70,3 +70,14 @@ func TestCalculateDelta(t *testing.T) {
 	expected := `{"a":{"bla":13}}`
 	require.EqualValues(t, expected, patch)
 }
+
+func TestCalculateDeltaArray(t *testing.T) {
+	full := `{"a":["abc","def"]}`
+	new := `{"a":["fitze","fatze"]}`
+
+	merged, err := applyDelta(full, new)
+	require.NoError(t, err)
+
+	expected := `{"a":["fitze","fatze"]}`
+	require.EqualValues(t, expected, merged)
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/birdayz/conjungo"
 	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/imdario/mergo"
 )
 
 func init() {
@@ -25,21 +26,23 @@ func calculateDelta(old, new string) string {
 }
 
 func applyDelta(full, delta string) (merged string, err error) {
-	var fullJSON interface{}
+	var fullJSON map[string]interface{}
 	if full != "" {
 		err := json.Unmarshal([]byte(full), &fullJSON)
 		if err != nil {
-			return "", err
+			// full must be a primitive, so we just replace it
+			return delta, nil
 		}
 	}
 
-	var deltaJSON interface{}
+	var deltaJSON map[string]interface{}
 	err = json.Unmarshal([]byte(delta), &deltaJSON)
 	if err != nil {
-		return "", err
+		// delta must be a primitive, so we just replace full with the new primitive value
+		return delta, nil
 	}
 
-	err = conjungo.Merge(&fullJSON, deltaJSON, conjungoOpts)
+	err = mergo.MergeWithOverwrite(&fullJSON, &deltaJSON)
 	if err != nil {
 		return "", err
 	}
