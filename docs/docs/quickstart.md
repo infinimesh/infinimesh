@@ -41,7 +41,7 @@ ID     NAME               ENABLED
 0x9c   my-sample-device   value:true
 ```
 ## Send data and receive data from infinimesh
-To simulate a device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho as well as Microsoft Edge on RaspberryPI, Yocto MQTT layers or Ubuntu Core based snaps. We use sometimes MQTTBox (https://chrome.google.com/webstore/detail/mqttbox/kaajoficamnjijhkeomgfljpicifbkaf) for Google Chrome.
+To simulate a device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho as well as Microsoft Edge on RaspberryPI, Yocto MQTT layers or Ubuntu Core based snaps. We use sometimes MQTTBox (http://workswithweb.com/html/mqttbox/installing_apps.html).
 ```
 mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt --cert sample_1.crt --key sample_1.key -m '{"sample-datapoint" : 1337}' -t "shadows/<YOUR DEVICE ID>" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
 ```
