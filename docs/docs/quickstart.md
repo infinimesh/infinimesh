@@ -97,9 +97,7 @@ Reported State:
   Data:
     {
       "c_metric": "ppm",
-      "cmetric": "ppm",
       "co2": 1456,
-      "metric": "ppm",
       "n_metric": "db",
       "noise": 56,
       "s_metric": "lux",
@@ -111,7 +109,6 @@ Reported State:
       ],
       "t_metric": "F",
       "temperature": 72,
-      "tmetric": "F"
     }
 Desired State: <none>
 Configuration: <none>
