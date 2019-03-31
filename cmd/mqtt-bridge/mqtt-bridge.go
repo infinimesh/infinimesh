@@ -118,7 +118,7 @@ func readBackchannelFromKafka() {
 }
 
 func fqTopic(deviceID, subPath string) string {
-	return "/devices/" + deviceID + "/" + subPath
+	return "devices/" + deviceID + "/" + subPath
 }
 
 func main() {
