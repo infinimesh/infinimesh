@@ -43,7 +43,7 @@ ID     NAME               ENABLED
 ## Send and receive data from infinimesh
 To simulate a device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho as well as Microsoft Edge on RaspberryPI, Yocto MQTT layers or Ubuntu Core based snaps. We use sometimes MQTTBox (http://workswithweb.com/html/mqttbox/installing_apps.html).
 ```
-mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt --cert sample_1.crt --key sample_1.key -m '{"abc" : 1337}' -t "shadows/<YOUR DEVICE ID>" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
+mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt --cert sample_1.crt --key sample_1.key -m '{"abc" : 1337}' -t "devices/<YOUR DEVICE ID>/state/reported/delta" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
 ```
 Please note: you will most likely need to adjust the --cafile flag to the path to the CA certificates on your system. This is OS specific.
 
@@ -51,7 +51,7 @@ You will see the following output:
 ```
 Client mosqpub|3396-thinkpad sending CONNECT
 Client mosqpub|3396-thinkpad received CONNACK (0)
-Client mosqpub|3396-thinkpad sending PUBLISH (d0, q0, r0, m1, 'shadows/0x1', ... (14 bytes))
+Client mosqpub|3396-thinkpad sending PUBLISH (d0, q0, r0, m1, 'devices/0x1/state/reported/delta', ... (14 bytes))
 Client mosqpub|3396-thinkpad sending DISCONNECT
 ```
 The data has been sent successfully to the platform. To send more as one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp). Here is a JSON example from one of our BACnet tests:
