@@ -103,7 +103,6 @@ Reported State:
       "n_metric": "db",
       "noise": 56,
       "s_metric": "lux",
-      "sample-datapoint": 1337,
       "spot_enabled": 3,
       "spot_light_brightness": [
         "78",
