@@ -198,7 +198,7 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPa
 		fmt.Println("Client disconnected")
 		return nil, errors.New("Client disconnected")
 	default:
-		return nil, errors.New("Could not determine a specific control packet type")
+		return nil, fmt.Errorf("Unknown control packet type: %v", fh.ControlPacketType)
 	}
 
 }

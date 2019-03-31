@@ -92,7 +92,7 @@ github.com/hashicorp/hcl/json/token
 github.com/hokaccha/go-prettyjson
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
+# github.com/infinimesh/mqtt-go v0.0.0-20190331125512-b2b8d1b42be9
 github.com/infinimesh/mqtt-go/packet
 # github.com/jinzhu/gorm v1.9.2
 github.com/jinzhu/gorm/dialects/postgres
@@ -159,7 +159,7 @@ github.com/spf13/jwalterweatherman
 github.com/spf13/pflag
 # github.com/spf13/viper v1.2.1
 github.com/spf13/viper
-# github.com/stretchr/testify v1.2.2
+# github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
 # github.com/tsenart/deadcode v0.0.0-20160724212837-210d2dc333e9

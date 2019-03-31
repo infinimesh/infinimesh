@@ -32,7 +32,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/infinimesh/mqtt-go v0.0.0-20181119002240-ee8de717d182
+	github.com/infinimesh/mqtt-go v0.0.0-20190331125512-b2b8d1b42be9
 	github.com/jinzhu/gorm v1.9.2
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20181116074157-8ec929ed50c3 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/rs/cors v1.6.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.3.0
 	github.com/yosssi/gmq v0.0.1
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
