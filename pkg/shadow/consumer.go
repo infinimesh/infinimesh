@@ -157,7 +157,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		if h.MergedTopic == "shadow.desired-state.full" {
 			outgoing := mqtt.OutgoingMessage{
 				DeviceID: string(message.Key),
-				SubPath:  "shadow/updates",
+				SubPath:  "state/desired/delta",
 				Data:     []byte(mergePatch),
 			}
 
