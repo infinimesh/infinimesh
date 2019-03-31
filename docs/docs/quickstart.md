@@ -19,7 +19,9 @@ This adds a ```context``` entry to the CLI configuration at `~/.inf/config`. TLS
 Now, you can log in to infinimesh. Run ```inf login``` and enter your username and password. This requests a token from the API server - your username and password is *NOT* stored - we take security very seriously.
 
 ## Creating a device
-To get started, we'll create a device. At this time, Infinimesh supports only X509 certificate authentication for devices. 
+To get started, we'll create a device. Please note, every device _needs_ to have a own certificate. We strongly advice to use human readable names like raspi-building-campus1 for key and certificate generation. It makes the later work much easier. In future we will implement bulk device creation for ODM factory deployments.
+ 
+At this time, Infinimesh supports only X509 certificate authentication for devices. 
 Generate a private key for the device:
 ```
 openssl genrsa -out sample_1.key 4096
