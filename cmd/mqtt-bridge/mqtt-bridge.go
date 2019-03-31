@@ -282,8 +282,9 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 		case *packet.PingReqControlPacket:
 			pong := packet.NewPingRespControlPacket()
 			_, err := pong.WriteTo(c)
-			fmt.Println("Failed to write PingResp", err)
-
+			if err != nil {
+				fmt.Println("Failed to write PingResp", err)
+			}
 		case *packet.PublishControlPacket:
 			err = handlePublish(p, c, deviceID)
 			if err != nil {
