@@ -88,4 +88,35 @@ Reported State:
 Desired State: <none>
 Configuration: <none>
 ```
-In this case, the device sent a datapoint `abc` with the value `1337` at `20:53:41`.
+In this case, the device sent a datapoint `abc` with the value `1337` at `20:53:41`. Remember the BACnet data? That looks like this:
+```
+inf state get 0x9c
+Reported State:
+  Version:    5
+  Timestamp:  2019-03-31 12:47:13.158610661 +0200 DST
+  Data:
+    {
+      "c_metric": "ppm",
+      "cmetric": "ppm",
+      "co2": 1456,
+      "metric": "ppm",
+      "n_metric": "db",
+      "noise": 56,
+      "s_metric": "lux",
+      "sample-datapoint": 1337,
+      "spot_enabled": 3,
+      "spot_light_brightness": [
+        "78",
+        "73",
+        "44"
+      ],
+      "t_metric": "F",
+      "temperature": 72,
+      "tmetric": "F"
+    }
+Desired State: <none>
+Configuration: <none>
+```
+
+Thank you for your time and if you have any questions don't hesitate to get in touch with us!
+
