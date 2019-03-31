@@ -5,7 +5,7 @@ Install it automatically with our install script:
 ```
 curl https://raw.githubusercontent.com/infinimesh/infinimesh/master/godownloader.sh | BINDIR=$HOME/bin bash
 ```
-Please note Depending on your OS/distribution, it may be necessary to add ~/bin to your PATH.
+Please note: Depending on your OS/distribution, it may be necessary to add ~/bin to your PATH.
 ```
 export PATH=$HOME/bin:$PATH
 ```
@@ -16,12 +16,12 @@ inf config set-context saas --apiserver grpc.api.infinimesh.io:443 --tls=true
 ```
 This adds a ```context``` entry to the CLI configuration at `~/.inf/config`. TLS is enforced to guarantee secure communication with the API server.
 
-Now, you can log in to infinimesh. Run ```inf login``` and enter your username and password. This requests a token from the API server - your username and password is *NOT* stored - we take security very seriously.
+Now, you can log into infinimesh. Run ```inf login``` and enter your username and password. This requests a token from the API server - your username and password is *NOT* stored - we take security very seriously.
 
 ## Creating a device
-To get started, we'll create a device. Please note, every device _needs_ to have a own certificate. We strongly advice to use human readable names like raspi-building-campus1 for key and certificate generation. It makes the later work much easier. In future we will implement bulk device creation for ODM factory deployments.
+To get started, we will create a device. Please note, every device _needs_ to have an own certificate. We strongly advice to use human readable names like raspi-building-campus1 for key and certificate generation. It makes the latter work much more easily. Going forward, we will implement bulk device creation for ODM factory deployments.
  
-At this time, Infinimesh supports only X509 certificate authentication for devices. 
+At present, Infinimesh supports only X509 certificate authentication for devices. 
 Generate a private key for the device:
 ```
 openssl genrsa -out sample_1.key 4096
@@ -40,7 +40,7 @@ inf device list
 ID     NAME               ENABLED
 0x9c   my-sample-device   value:true
 ```
-## Send data and receive data from infinimesh
+## Send and receive data from infinimesh
 To simulate a device, we use the mosquitto_pub client. You can use any MQTT client, e.g. eclipse paho as well as Microsoft Edge on RaspberryPI, Yocto MQTT layers or Ubuntu Core based snaps. We use sometimes MQTTBox (http://workswithweb.com/html/mqttbox/installing_apps.html).
 ```
 mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt --cert sample_1.crt --key sample_1.key -m '{"abc" : 1337}' -t "shadows/<YOUR DEVICE ID>" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
@@ -117,5 +117,5 @@ Desired State: <none>
 Configuration: <none>
 ```
 
-Thank you for your time and if you have any questions don't hesitate to get in touch with us!
+Thank you for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR. 
 
