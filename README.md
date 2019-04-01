@@ -31,9 +31,16 @@ npm i -g api-spec-converter
 ```
 Load test data into the database via `go run hack/import_dgraph_sample_data.go`
 
-Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/accounts/token`
+Login: `curl -X POST -d '{"username" : "joe", "password": "test123"}'  localhost:8081/account/token`
 
 Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
+
+Login locally via CLI:
+```
+inf config set-context local --apiserver localhost:8080 --tls=false
+inf login
+```
+Use the users joe / test123 or admin/admin123 for local development.
 
 Send sample message via `mosquitto_pub`:
 ```
