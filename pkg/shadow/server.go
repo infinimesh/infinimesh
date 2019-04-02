@@ -104,30 +104,36 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	events := s.PubSub.Sub(request.Id)
 	defer s.PubSub.Unsub(events)
 	for event := range events {
-
 		var value structpb.Value
-		if raw, ok := event.(json.RawMessage); ok {
+		if raw, ok := event.(*DeltaDeviceStateMessage); ok {
 			var u jsonpb.Unmarshaler
-			err = u.Unmarshal(bytes.NewReader(raw), &value)
+			err = u.Unmarshal(bytes.NewReader(raw.Delta), &value)
 			if err != nil {
 				fmt.Println("Failed to unmarshal jsonpb: ", err)
 				continue
+			}
+
+			ts, err := ptypes.TimestampProto(raw.Timestamp)
+			if err != nil {
+				fmt.Println("Invalid timestamp", err)
+				break
+			}
+
+			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+				ReportedDelta: &shadowpb.VersionedValue{
+					Version:   raw.Version,
+					Data:      &value,
+					Timestamp: ts, // TODO
+				},
+			})
+			if err != nil {
+				break
 			}
 		} else {
 			fmt.Println("Failed type assertion")
 			continue
 		}
 
-		err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
-			ReportedDelta: &shadowpb.VersionedValue{
-				Version:   0,
-				Data:      &value,
-				Timestamp: ptypes.TimestampNow(), // TODO
-			},
-		})
-		if err != nil {
-			break
-		}
 	}
 	return nil
 }

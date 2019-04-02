@@ -39,7 +39,7 @@ type DeviceState json.RawMessage
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.delta")
+	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.delta.computed")
 	viper.SetDefault("DB_ADDR", ":6379")
 	viper.AutomaticEnv()
 
@@ -73,6 +73,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Consuming from " + topic)
 	for _, partition := range partitions {
 		go func(partition int32) {
 			pc, err := consumer.ConsumePartition(topic, partition, sarama.OffsetOldest)
@@ -81,17 +82,17 @@ func main() {
 			}
 
 			for message := range pc.Messages() {
-				rawMessage := json.RawMessage{}
+				deltaMsg := shadow.DeltaDeviceStateMessage{}
 
-				err := json.Unmarshal(message.Value, &rawMessage)
+				err := json.Unmarshal(message.Value, &deltaMsg)
 				if err != nil {
 					fmt.Printf("Invalid message at offset %v, err=%v\n", message.Offset, err)
 					continue
 				}
 
-				ps.Pub(rawMessage, string(message.Key))
+				ps.Pub(&deltaMsg, string(message.Key))
 
-				d := DeviceState(rawMessage)
+				d := DeviceState(deltaMsg.Delta)
 
 				localStateMtx.Lock()
 				localState[string(message.Key)] = &d

@@ -1,8 +1,18 @@
 package shadow
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type FullDeviceStateMessage struct {
-	Version uint64
-	State   json.RawMessage
+	Version   uint64
+	State     json.RawMessage
+	Timestamp time.Time
+}
+
+type DeltaDeviceStateMessage struct {
+	Version   uint64
+	Delta     json.RawMessage
+	Timestamp time.Time
 }

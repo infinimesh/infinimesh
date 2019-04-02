@@ -14,8 +14,9 @@ import (
 )
 
 type StateMerger struct {
-	SourceTopic string
-	MergedTopic string
+	SourceTopic    string // Incoming ticks
+	MergedTopic    string // Full state with version
+	RealDeltaTopic string // Deltas for each full state transition, with version
 
 	m           sync.Mutex
 	localStates map[int32]map[string]*FullDeviceStateMessage // device id to state string
@@ -177,6 +178,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 
 		deviceState.State = json.RawMessage(newState)
 		deviceState.Version++
+		deviceState.Timestamp = time.Now() // TODO support user-provided timestamps
 
 		stateDocument, err := json.Marshal(deviceState)
 		if err != nil {
@@ -192,6 +194,27 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		}
 
 		fmt.Println("Send msg to ", h.MergedTopic, " ", string(stateDocument))
+
+		// Determine actual delta
+		deltaMsg := &DeltaDeviceStateMessage{
+			Version:   deviceState.Version,
+			Delta:     []byte(mergePatch),
+			Timestamp: time.Now(),
+		}
+
+		deltaMsgBytes, err := json.Marshal(&deltaMsg)
+		if err != nil {
+			fmt.Printf("Failed to marshal delta msg: %v\n", err)
+		}
+
+		h.changelogProducer.Input() <- &sarama.ProducerMessage{
+			Topic:     h.RealDeltaTopic,
+			Key:       sarama.StringEncoder(message.Key),
+			Value:     sarama.ByteEncoder(deltaMsgBytes),
+			Partition: message.Partition,
+		}
+
+		fmt.Println("Send msg to ", h.RealDeltaTopic, " ", string(deltaMsgBytes))
 	}
 	return nil
 }

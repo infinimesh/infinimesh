@@ -15,13 +15,15 @@ import (
 )
 
 var (
-	consumerGroupReported = "shadow-reported"
-	consumerGroupDesired  = "shadow-desired"
-	broker                string
-	topicReportedState    = "shadow.reported-state.delta"
-	topicDesiredState     = "shadow.desired-state.delta"
-	mergedTopicReported   = "shadow.reported-state.full"
-	mergedTopicDesired    = "shadow.desired-state.full"
+	consumerGroupReported           = "shadow-reported"
+	consumerGroupDesired            = "shadow-desired"
+	broker                          string
+	topicReportedState              = "shadow.reported-state.delta"
+	topicDesiredState               = "shadow.desired-state.delta"
+	mergedTopicReported             = "shadow.reported-state.full"
+	mergedTopicDesired              = "shadow.desired-state.full"
+	topicComputedDeltaReportedState = "shadow.reported-state.delta.computed"
+	topicComputedDeltaDesiredState  = "shadow.desired-state.delta.computed"
 )
 
 func init() {
@@ -31,7 +33,7 @@ func init() {
 	broker = viper.GetString("KAFKA_HOST")
 }
 
-func runMerger(inputTopic, outputTopic, consumerGroup string, stop chan bool, ctx context.Context) (close io.Closer, done chan bool) {
+func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, stop chan bool, ctx context.Context) (close io.Closer, done chan bool) {
 	done = make(chan bool)
 	consumerGroupClient := sarama.NewConfig()
 	consumerGroupClient.Version = sarama.V1_0_0_0
@@ -85,6 +87,7 @@ func runMerger(inputTopic, outputTopic, consumerGroup string, stop chan bool, ct
 	handler := &shadow.StateMerger{
 		SourceTopic:             inputTopic,
 		MergedTopic:             outputTopic,
+		RealDeltaTopic:          realDeltaTopic,
 		ChangelogProducerClient: producerClient,
 		ChangelogConsumerClient: localStateConsumerClient,
 	}
@@ -120,8 +123,8 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, consumerGroupReported, stopReported, ctx)
-	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, consumerGroupDesired, stopDesired, ctx)
+	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
+	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
 
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
 	// TODO adjust code to new topology
