@@ -6,8 +6,6 @@ github.com/Shopify/sarama
 github.com/alecthomas/gometalinter
 # github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
 github.com/alecthomas/units
-# github.com/armon/go-radix v1.0.0
-github.com/armon/go-radix
 # github.com/avast/retry-go v2.2.0+incompatible
 github.com/avast/retry-go
 # github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
@@ -47,10 +45,10 @@ github.com/golang/lint/golint
 github.com/golang/protobuf/ptypes/empty
 github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/ptypes
+github.com/golang/protobuf/ptypes/struct
 github.com/golang/protobuf/ptypes/timestamp
 github.com/golang/protobuf/ptypes/wrappers
 github.com/golang/protobuf/proto
-github.com/golang/protobuf/ptypes/struct
 github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/protoc-gen-go/generator
 github.com/golang/protobuf/ptypes/any
@@ -68,6 +66,8 @@ github.com/google/shlex
 github.com/google/uuid
 # github.com/gordonklaus/ineffassign v0.0.0-20180909121442-1003c8bd00dc
 github.com/gordonklaus/ineffassign
+# github.com/gorilla/websocket v1.4.0
+github.com/gorilla/websocket
 # github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 github.com/grpc-ecosystem/go-grpc-middleware/auth
 github.com/grpc-ecosystem/go-grpc-middleware
@@ -164,6 +164,8 @@ github.com/spf13/viper
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/require
 github.com/stretchr/testify/assert
+# github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5
+github.com/tmc/grpc-websocket-proxy/wsproxy
 # github.com/tsenart/deadcode v0.0.0-20160724212837-210d2dc333e9
 github.com/tsenart/deadcode
 # github.com/yosssi/gmq v0.0.1

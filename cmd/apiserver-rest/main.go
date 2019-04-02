@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
+	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 	"google.golang.org/grpc"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -67,5 +68,5 @@ func run() error {
 	}
 
 	corsMiddleware := cors.AllowAll().Handler(mux)
-	return http.ListenAndServe(":8081", corsMiddleware)
+	return http.ListenAndServe(":8081", wsproxy.WebsocketProxy(corsMiddleware))
 }
