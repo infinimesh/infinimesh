@@ -17,6 +17,7 @@ type Repo interface {
 	GetDesired(id string) (DeviceState, error)
 }
 
+// TODO maybe use / embed FullDeviceStateMessage here - including Timestamp
 type DeviceState struct {
 	ID      string
 	Version uint64
