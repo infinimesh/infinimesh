@@ -5,10 +5,14 @@ builds:
     binary: inf
     goarch:
     - amd64
+    - arm
+    - arm64
     goos:
     - linux
     - darwin
     - windows
+    goarm:
+    - 5
 archive:
   replacements:
     darwin: Darwin
