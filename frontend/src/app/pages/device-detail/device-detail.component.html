@@ -1,0 +1,24 @@
+<button nbButton size="xsmall" [routerLink]="['devices']"><i class="icon ion-android-arrow-back"></i>All Devices</button>
+<ng-container *ngIf="device$ | async as device">
+  <h1>{{device.name}}</h1>
+  <nb-card>
+    <nb-card-header>Details</nb-card-header>
+    <nb-card-body>
+      <p>ID: {{device.id}}</p>
+      <p>Tags: {{device.tags}}</p>
+      <p>Enabled: {{device.enabled ? 'Yes' : 'No'}}</p>
+    </nb-card-body>
+  </nb-card>
+</ng-container>
+<ng-container *ngIf="state">
+  <nb-card>
+    <nb-card-header>State</nb-card-header>
+    <nb-card-body>
+      <p><strong>Version:</strong> {{state.reported.version}}</p>
+      <p><strong>Updated:</strong> {{state.reported.timestamp}}</p>
+      <p><strong>Reported:</strong></p>
+      <pre>{{JSON.stringify(state.reported.data, null, 2)}}</pre>
+    </nb-card-body>
+  </nb-card>
+</ng-container>
+

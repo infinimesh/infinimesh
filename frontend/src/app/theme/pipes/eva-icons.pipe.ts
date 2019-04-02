@@ -17,7 +17,7 @@ export class EvaIconsPipe implements PipeTransform {
   }
 
   transform(icon: string,
-            options: {
+            options?: {
               height: number;
               width: number;
               fill: string;

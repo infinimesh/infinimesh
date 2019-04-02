@@ -11,6 +11,7 @@ import {HttpParamsOptions} from '@angular/common/http/src/params';
 export class ApiUtilService {
 
   private apiUrl: string;
+  private token: string;
   private httpOptions;
 
   constructor(private authService: NbAuthService,
@@ -20,14 +21,19 @@ export class ApiUtilService {
       .subscribe((token: NbAuthJWTToken) => {
 
         if (token.isValid()) {
+          this.token = token.getValue();
           this.httpOptions = {
             headers: new HttpHeaders({
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token.getValue(),
+              'Authorization': 'Bearer ' + this.token,
             }),
           };
         }
       });
+  }
+
+  public getToken(): string {
+    return this.token;
   }
 
   public getApiUrl(): string {

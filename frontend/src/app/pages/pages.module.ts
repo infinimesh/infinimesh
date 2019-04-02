@@ -6,6 +6,7 @@ import {PagesRoutingModule} from './pages-routing.module';
 import {ThemeModule} from '../theme/theme.module';
 import {MiscellaneousModule} from './miscellaneous/miscellaneous.module';
 import {DeviceRegistryComponent} from './device-registry/device-registry.component';
+import { DeviceDetailComponent } from './device-detail/device-detail.component';
 
 @NgModule({
   imports: [
@@ -16,7 +17,8 @@ import {DeviceRegistryComponent} from './device-registry/device-registry.compone
   ],
   declarations: [
     PagesComponent,
-    DeviceRegistryComponent
+    DeviceRegistryComponent,
+    DeviceDetailComponent
   ],
 })
 export class PagesModule {

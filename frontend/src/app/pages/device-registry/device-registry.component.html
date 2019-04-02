@@ -14,6 +14,10 @@
           <p>Tags: {{device.tags}}</p>
           <p>Enabled: {{device.enabled ? 'Yes' : 'No'}}</p>
         </nb-card-body>
+        <nb-card-footer class="text-right">
+          <button nbButton size="xsmall" [routerLink]="[device.id]">
+            Details <i class="icon ion-android-arrow-forward"></i></button>
+        </nb-card-footer>
       </nb-card>
     </div>
   </div>

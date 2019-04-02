@@ -4,6 +4,7 @@ import {NgModule} from '@angular/core';
 import {PagesComponent} from './pages.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {DeviceRegistryComponent} from "./device-registry/device-registry.component";
+import {DeviceDetailComponent} from "./device-detail/device-detail.component";
 
 const routes: Routes = [{
   path: '',
@@ -16,6 +17,10 @@ const routes: Routes = [{
     {
       path: 'devices',
       component: DeviceRegistryComponent,
+    },
+    {
+      path: 'devices/:deviceId',
+      component: DeviceDetailComponent,
     },
     {
       path: '',

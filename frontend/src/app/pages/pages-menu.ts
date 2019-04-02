@@ -10,6 +10,7 @@ export const MENU_ITEMS: NbMenuItem[] = [
   {
     title: 'Device Registry',
     icon: 'nb-e-commerce',
-    link: '/pages/devices'
+    link: '/pages/devices',
+    pathMatch: '/devices/.*'
   }
 ];
