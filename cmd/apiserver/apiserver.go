@@ -131,6 +131,7 @@ func main() {
 	}()
 
 	srv := grpc.NewServer(
+		grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(jwtAuth)),
 		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(jwtAuth)),
 	)
 
