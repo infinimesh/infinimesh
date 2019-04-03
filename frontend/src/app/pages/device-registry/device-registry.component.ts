@@ -13,7 +13,7 @@ export class DeviceRegistryComponent implements OnInit {
   public devices$: Observable<any>;
 
   constructor(private deviceService: DeviceService,
-              private namespaceService: NamespaceService) {
+              public namespaceService: NamespaceService) {
     this.namespaceService.selectedChange.subscribe(() => this.requestDevices());
   }
 
