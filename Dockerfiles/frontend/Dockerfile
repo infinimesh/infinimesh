@@ -3,7 +3,7 @@ RUN npm install -g @angular/cli && npm install @angular-devkit/build-angular
 
 ADD ./frontend /frontend/
 WORKDIR /frontend
-RUN npm install && ng build
+RUN npm install && ng build --prod
 RUN ls /frontend
 RUN ls /frontend/dist
 
