@@ -2,7 +2,7 @@
 
 # Replace env vars in JavaScript files
 echo "Replacing env vars in JS"
-for file in /usr/share/nginx/html/main.js;
+for file in /usr/share/nginx/html/main.*.js;
 do
     echo "Processing $file ...";
 
