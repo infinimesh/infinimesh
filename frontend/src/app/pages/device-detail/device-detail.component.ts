@@ -27,6 +27,7 @@ export class DeviceDetailComponent implements OnInit, OnDestroy {
           console.log(data);
           this.state.reported.data = data.reportedDelta.data;
           this.state.reported.timestamp = data.reportedDelta.timestamp;
+          this.state.reported.version = data.reportedDelta.version;
         });
       })
     })
