@@ -27,9 +27,11 @@ func TestSetGet(t *testing.T) {
 	key := uuid.New().String()
 
 	input := DeviceState{
-		ID:      key,
-		Version: 1,
-		State:   json.RawMessage([]byte("50")),
+		ID: key,
+		State: FullDeviceStateMessage{
+			Version: 1,
+			State:   json.RawMessage([]byte("50")),
+		},
 	}
 
 	err := repo.SetDesired(input)
@@ -45,18 +47,22 @@ func TestSetGetDesiredAndReported(t *testing.T) {
 	key := uuid.New().String()
 
 	input := DeviceState{
-		ID:      key,
-		Version: 1,
-		State:   json.RawMessage([]byte("50")),
+		ID: key,
+		State: FullDeviceStateMessage{
+			Version: 1,
+			State:   json.RawMessage([]byte("50")),
+		},
 	}
 
 	err := repo.SetDesired(input)
 	require.NoError(t, err)
 
 	inputReported := DeviceState{
-		ID:      key,
-		Version: 1,
-		State:   json.RawMessage([]byte("60")),
+		ID: key,
+		State: FullDeviceStateMessage{
+			Version: 1,
+			State:   json.RawMessage([]byte("60")),
+		},
 	}
 
 	err = repo.SetReported(inputReported)

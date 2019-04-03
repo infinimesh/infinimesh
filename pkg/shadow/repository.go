@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -19,9 +18,8 @@ type Repo interface {
 
 // TODO maybe use / embed FullDeviceStateMessage here - including Timestamp
 type DeviceState struct {
-	ID      string
-	Version uint64
-	State   json.RawMessage
+	ID    string
+	State FullDeviceStateMessage
 }
 
 type DeviceStateDB struct {
@@ -106,81 +104,4 @@ func (r *redisRepo) SetDesired(d DeviceState) (err error) {
 
 func (r *redisRepo) GetDesired(id string) (d DeviceState, err error) {
 	return r.getState("desired", id)
-}
-
-type postgresRepo struct {
-	db *gorm.DB
-}
-
-func NewPostgresRepo(addr string) (Repo, error) {
-	db, err := gorm.Open("postgres", addr)
-	if err != nil {
-		return nil, err
-	}
-
-	db.LogMode(false)
-	db.SingularTable(true)
-	db.AutoMigrate(&DeviceStateDB{})
-
-	return &postgresRepo{
-		db: db,
-	}, nil
-}
-
-func (p *postgresRepo) SetReported(d DeviceState) (err error) {
-	update := DeviceStateDB{
-		ID:              d.ID,
-		ReportedVersion: d.Version,
-		ReportedState:   postgres.Jsonb{d.State}, // nolint
-	}
-	if result := p.db.Model(&update).Updates(update); result.Error != nil {
-		return err
-	} else {
-		if result.RowsAffected == 0 {
-			if err := p.db.Create(&update).Error; err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (p *postgresRepo) GetReported(id string) (DeviceState, error) {
-	var d DeviceStateDB
-	if err := p.db.First(&d, "id = ?", id).Error; err != nil {
-		return DeviceState{}, err
-	}
-	return DeviceState{ID: d.ID,
-		Version: d.ReportedVersion,
-		State:   d.ReportedState.RawMessage,
-	}, nil
-}
-
-func (p *postgresRepo) SetDesired(d DeviceState) (err error) {
-	update := DeviceStateDB{
-		ID:             d.ID,
-		DesiredVersion: d.Version,
-		DesiredState:   postgres.Jsonb{d.State}, // nolint
-	}
-	if result := p.db.Model(&update).Updates(update); result.Error != nil {
-		return err
-	} else {
-		if result.RowsAffected == 0 {
-			if err := p.db.Create(&update).Error; err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (p *postgresRepo) GetDesired(id string) (DeviceState, error) {
-	var d DeviceStateDB
-	if err := p.db.First(&d, "id = ?", id).Error; err != nil {
-		return DeviceState{}, err
-	}
-	return DeviceState{ID: d.ID,
-		Version: d.DesiredVersion,
-		State:   d.DesiredState.RawMessage,
-	}, nil
 }
