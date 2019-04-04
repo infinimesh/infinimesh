@@ -82,6 +82,15 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
+func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.SetPasswordRequest) (response *nodepb.SetPasswordResponse, err error) {
+	err = s.Repo.SetPassword(ctx, request.Username, request.Password)
+	if err != nil {
+		return &nodepb.SetPasswordResponse{}, err
+	}
+
+	return &nodepb.SetPasswordResponse{}, nil
+}
+
 func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.IsAuthorizedRequest) (response *nodepb.IsAuthorizedResponse, err error) {
 	log := s.Log.Named("Authorize").With(
 		zap.String("request.account", request.GetAccount()),

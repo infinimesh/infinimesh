@@ -127,11 +127,20 @@ message UpdateAccountRequest {
   google.protobuf.FieldMask fieldMask = 2;
 }
 
+message SetPasswordRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message SetPasswordResponse{
+}
+
 service AccountService {
   rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
   rpc UpdateAccount(UpdateAccountRequest) returns (Account);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+  rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
 
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
