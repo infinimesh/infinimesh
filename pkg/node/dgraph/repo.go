@@ -230,7 +230,7 @@ func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string
 func (s *DGraphRepo) SetPassword(ctx context.Context, account, password string) error {
 	txn := s.Dg.NewTxn()
 	const q = `query accounts($account: string) {
-                     accounts(func: uid($account)) @filter(eq(type, "account"))  {
+                     accounts(func: eq(name, $account)) @filter(eq(type, "account"))  {
                        uid
                        has.credentials {
                          name @filter(eq(username, $account))
