@@ -89,3 +89,10 @@ func TestChangePassword(t *testing.T) {
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
 	require.True(t, ok)
 }
+
+func TestChangePasswordWithNoUser(t *testing.T) {
+	ctx := context.Background()
+
+	err := repo.SetPassword(ctx, "non-existing-user", "newpassword")
+	require.Error(t, err)
+}
