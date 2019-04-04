@@ -65,6 +65,7 @@ message Account {
   bool is_root = 3;
   bool enabled = 4;
   Namespace default_namespace = 5;
+  string password = 6;
 }
 
 message AuthenticateRequest {

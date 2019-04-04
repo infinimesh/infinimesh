@@ -74,6 +74,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		return errors.New("Account not found")
 	}
 
+	// TODO this may override fields with zero-values
 	acc := &Account{
 		Node: Node{
 			Type: "account",
@@ -143,12 +144,14 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 			Name:    username,
 			IsRoot:  isRoot,
 			Enabled: enabled,
-			HasCredentials: &UsernameCredential{
-				Node: Node{
-					Type: "credentials",
+			HasCredentials: []*UsernameCredential{
+				{
+					Node: Node{
+						Type: "credentials",
+					},
+					Username: username,
+					Password: password,
 				},
-				Username: username,
-				Password: password,
 			},
 			AccessToNamespace: []*Namespace{
 				&Namespace{

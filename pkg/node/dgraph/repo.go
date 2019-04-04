@@ -227,6 +227,55 @@ func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string
 	return false, "", "", errors.New("Invalid credentials")
 }
 
+func (s *DGraphRepo) SetPassword(ctx context.Context, account, password string) error {
+	txn := s.Dg.NewTxn()
+	const q = `query accounts($account: string) {
+                     accounts(func: uid($account)) @filter(eq(type, "account"))  {
+                       uid
+                       has.credentials {
+                         name @filter(eq(username, $account))
+                         uid
+                       }
+                     }
+                   }`
+
+	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$account": account})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Account []*Account `json:"accounts"`
+	}
+
+	err = json.Unmarshal(response.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Account) == 0 {
+		return errors.New("Account not found")
+	}
+
+	if len(result.Account[0].HasCredentials) == 0 {
+		return errors.New("No credentials found")
+	}
+
+	_, err = txn.Mutate(ctx, &api.Mutation{
+		Set: []*api.NQuad{
+			{
+				Subject:     result.Account[0].HasCredentials[0].UID,
+				Predicate:   "password",
+				ObjectValue: &api.Value{Val: &api.Value_StrVal{StrVal: password}},
+			},
+		},
+		CommitNow: true,
+	})
+
+	return err
+
+}
+
 func (s *DGraphRepo) Authorize(ctx context.Context, account, node, action string, inherit bool) (err error) {
 	txn := s.Dg.NewTxn()
 

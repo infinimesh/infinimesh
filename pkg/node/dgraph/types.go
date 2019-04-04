@@ -27,7 +27,7 @@ type Account struct {
 
 	DefaultNamespace []*Namespace `json:"default.namespace"`
 
-	HasCredentials *UsernameCredential `json:"has.credentials,omitempty"`
+	HasCredentials []*UsernameCredential `json:"has.credentials,omitempty"`
 }
 
 type UsernameCredential struct {

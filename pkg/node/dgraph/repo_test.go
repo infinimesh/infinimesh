@@ -73,3 +73,19 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	// Assert
 	require.Contains(t, objs, &nodepb.Object{Uid: newObj, Name: "sample-node", Kind: "asset", Objects: []*nodepb.Object{}})
 }
+
+func TestChangePassword(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Setup
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	require.NoError(t, err)
+
+	err = repo.SetPassword(ctx, account, "newpassword")
+	require.NoError(t, err)
+
+	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
+	require.True(t, ok)
+}
