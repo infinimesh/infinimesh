@@ -98,6 +98,19 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 		zap.String("request.node", request.GetNode()),
 	)
 
+	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: request.GetAccount(),
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Authorization check failed")
+	}
+
+	if root.GetIsRoot() {
+		return &nodepb.IsAuthorizedResponse{
+			Decision: &wrappers.BoolValue{Value: true},
+		}, nil
+	}
+
 	decision, err := s.Repo.IsAuthorized(ctx, request.GetNode(), request.GetAccount(), request.GetAction().String())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
