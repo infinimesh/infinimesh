@@ -22,9 +22,13 @@ import (
 
 var (
 	broker string
-	topic  string
 
 	topicDesiredDelta = "shadow.desired-state.delta"
+
+	topicReportedFull          = "shadow.reported-state.full"
+	topicReportedDeltaComputed = "shadow.reported-state.delta.computed"
+	topicDesiredFull           = "shadow.desired-state.full"
+	topicDesiredDeltaComputed  = "shadow.desired-state.delta.computed"
 
 	localStateMtx sync.Mutex
 	localState    = make(map[string]*DeviceState)
@@ -44,8 +48,51 @@ func init() {
 	viper.AutomaticEnv()
 
 	broker = viper.GetString("KAFKA_HOST")
-	topic = viper.GetString("KAFKA_TOPIC")
 	dbAddr = viper.GetString("DB_ADDR")
+}
+
+func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath string) {
+	partitions, err := consumer.Partitions(topic)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Consuming from " + topic)
+	for _, partition := range partitions {
+		go func(partition int32) {
+			pc, err := consumer.ConsumePartition(topic, partition, sarama.OffsetOldest)
+			if err != nil {
+				panic(err)
+			}
+
+			for message := range pc.Messages() {
+				deltaMsg := shadow.DeviceStateMessage{}
+
+				err := json.Unmarshal(message.Value, &deltaMsg)
+				if err != nil {
+					fmt.Printf("Invalid message on topic"+topic+" at offset %v, err=%v\n", message.Offset, err)
+					continue
+				}
+
+				ps.Pub(&deltaMsg, string(message.Key)+subPath)
+
+				d := DeviceState(deltaMsg.State)
+
+				localStateMtx.Lock()
+				localState[string(message.Key)] = &d
+				localStateMtx.Unlock()
+
+				// notify
+				subMtx.Lock()
+				if sub, ok := subscribers[string(message.Key)]; ok {
+					for subscriber := range sub {
+						subscriber <- &d
+					}
+				}
+				subMtx.Unlock()
+			}
+
+		}(partition)
+	}
 }
 
 func main() {
@@ -69,47 +116,10 @@ func main() {
 
 	ps := pubsub.New(10)
 
-	partitions, err := consumer.Partitions(topic)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Consuming from " + topic)
-	for _, partition := range partitions {
-		go func(partition int32) {
-			pc, err := consumer.ConsumePartition(topic, partition, sarama.OffsetOldest)
-			if err != nil {
-				panic(err)
-			}
-
-			for message := range pc.Messages() {
-				deltaMsg := shadow.FullDeviceStateMessage{}
-
-				err := json.Unmarshal(message.Value, &deltaMsg)
-				if err != nil {
-					fmt.Printf("Invalid message at offset %v, err=%v\n", message.Offset, err)
-					continue
-				}
-
-				ps.Pub(&deltaMsg, string(message.Key))
-
-				d := DeviceState(deltaMsg.State)
-
-				localStateMtx.Lock()
-				localState[string(message.Key)] = &d
-				localStateMtx.Unlock()
-
-				// notify
-				subMtx.Lock()
-				if sub, ok := subscribers[string(message.Key)]; ok {
-					for subscriber := range sub {
-						subscriber <- &d
-					}
-				}
-				subMtx.Unlock()
-			}
-
-		}(partition)
-	}
+	subscribe(consumer, ps, topicReportedFull, "/reported/full")
+	subscribe(consumer, ps, topicReportedDeltaComputed, "/reported/delta")
+	subscribe(consumer, ps, topicDesiredFull, "/desired/full")
+	subscribe(consumer, ps, topicDesiredDeltaComputed, "/desired/delta")
 
 	go func() {
 		lis, err := net.Listen("tcp", ":8096")

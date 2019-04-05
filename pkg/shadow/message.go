@@ -5,14 +5,8 @@ import (
 	"time"
 )
 
-type FullDeviceStateMessage struct {
+type DeviceStateMessage struct {
 	Version   uint64
 	State     json.RawMessage
-	Timestamp time.Time
-}
-
-type DeltaDeviceStateMessage struct {
-	Version   uint64
-	Delta     json.RawMessage
 	Timestamp time.Time
 }

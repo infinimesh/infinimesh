@@ -16,10 +16,10 @@ type Repo interface {
 	GetDesired(id string) (DeviceState, error)
 }
 
-// TODO maybe use / embed FullDeviceStateMessage here - including Timestamp
+// TODO maybe use / embed DeviceStateMessage here - including Timestamp
 type DeviceState struct {
 	ID    string
-	State FullDeviceStateMessage
+	State DeviceStateMessage
 }
 
 type DeviceStateDB struct {

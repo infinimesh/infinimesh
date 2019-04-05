@@ -28,15 +28,17 @@ message PatchDesiredStateRequest {
   string id = 1;
   google.protobuf.Value data = 2;
 }
-message PatchDesiredStateResponse {}
+message PatchDesiredStateResponse {
+}
 
 message StreamReportedStateChangesRequest {
   string id = 1;
+  bool only_delta = 2;
 }
 
 message StreamReportedStateChangesResponse {
-  VersionedValue reportedState = 1;
-  VersionedValue desiredState = 2;
+  VersionedValue reportedState = 2;
+  VersionedValue desiredState = 3;
 }
 
 service Shadows {

@@ -111,7 +111,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 
 		fmt.Println("got msg", string(message.Value))
 
-		var stateFromKafka shadow.FullDeviceStateMessage
+		var stateFromKafka shadow.DeviceStateMessage
 		if err := json.Unmarshal(message.Value, &stateFromKafka); err != nil {
 			fmt.Println("Failed to deserialize message with offset ", message.Offset)
 			continue

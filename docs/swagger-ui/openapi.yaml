@@ -985,6 +985,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: only_delta
+          required: false
+          schema:
+            format: boolean
+            type: boolean
       responses:
         '200':
           content:

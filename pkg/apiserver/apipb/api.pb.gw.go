@@ -234,6 +234,10 @@ func request_States_PatchDesiredState_0(ctx context.Context, marshaler runtime.M
 
 }
 
+var (
+	filter_States_StreamReportedStateChanges_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_States_StreamReportedStateChanges_0(ctx context.Context, marshaler runtime.Marshaler, client StatesClient, req *http.Request, pathParams map[string]string) (States_StreamReportedStateChangesClient, runtime.ServerMetadata, error) {
 	var protoReq shadowpb.StreamReportedStateChangesRequest
 	var metadata runtime.ServerMetadata
@@ -254,6 +258,10 @@ func request_States_StreamReportedStateChanges_0(ctx context.Context, marshaler 
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+	}
+
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_States_StreamReportedStateChanges_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	stream, err := client.StreamReportedStateChanges(ctx, &protoReq)

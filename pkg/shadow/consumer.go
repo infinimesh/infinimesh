@@ -19,7 +19,7 @@ type StateMerger struct {
 	RealDeltaTopic string // Deltas for each full state transition, with version
 
 	m           sync.Mutex
-	localStates map[int32]map[string]*FullDeviceStateMessage // device id to state string
+	localStates map[int32]map[string]*DeviceStateMessage // device id to state string
 
 	ChangelogConsumerClient sarama.Client
 	ChangelogProducerClient sarama.Client
@@ -27,7 +27,7 @@ type StateMerger struct {
 	changelogProducer sarama.AsyncProducer
 }
 
-func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) (localStates map[int32]map[string]*FullDeviceStateMessage, offsets map[int32]int64, err error) {
+func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) (localStates map[int32]map[string]*DeviceStateMessage, offsets map[int32]int64, err error) {
 	consumer, err := sarama.NewConsumerFromClient(client)
 	if err != nil {
 		return nil, nil, err
@@ -36,11 +36,11 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		go consumer.Close()
 	}()
 
-	localStates = make(map[int32]map[string]*FullDeviceStateMessage)
+	localStates = make(map[int32]map[string]*DeviceStateMessage)
 
 	offsets = make(map[int32]int64)
 	for _, partition := range partitions {
-		localStates[partition] = make(map[string]*FullDeviceStateMessage)
+		localStates[partition] = make(map[string]*DeviceStateMessage)
 		offsets[partition] = 0
 		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
 		if err != nil {
@@ -58,7 +58,7 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		}
 
 		for item := range pc.Messages() {
-			var st FullDeviceStateMessage
+			var st DeviceStateMessage
 
 			err := json.Unmarshal(item.Value, &st)
 			if err != nil {
@@ -78,7 +78,7 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 
 func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	fmt.Println("Rebalance, assigned partitions:", s.Claims())
-	c.localStates = make(map[int32]map[string]*FullDeviceStateMessage)
+	c.localStates = make(map[int32]map[string]*DeviceStateMessage)
 
 	//TODO enforce co-partitioning
 
@@ -126,9 +126,9 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		fmt.Println("Recv message", string(message.Value))
 		key := string(message.Key)
 
-		var deviceState *FullDeviceStateMessage
+		var deviceState *DeviceStateMessage
 		if ds, ok := localState[key]; !ok {
-			deviceState = &FullDeviceStateMessage{}
+			deviceState = &DeviceStateMessage{}
 			localState[key] = deviceState
 		} else {
 			deviceState = ds
@@ -196,9 +196,9 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		fmt.Println("Send msg to ", h.MergedTopic, " ", string(stateDocument))
 
 		// Determine actual delta
-		deltaMsg := &DeltaDeviceStateMessage{
+		deltaMsg := &DeviceStateMessage{
 			Version:   deviceState.Version,
-			Delta:     []byte(mergePatch),
+			State:     []byte(mergePatch),
 			Timestamp: time.Now(),
 		}
 
