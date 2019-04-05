@@ -82,7 +82,7 @@ func main() {
 			}
 
 			for message := range pc.Messages() {
-				deltaMsg := shadow.DeltaDeviceStateMessage{}
+				deltaMsg := shadow.FullDeviceStateMessage{}
 
 				err := json.Unmarshal(message.Value, &deltaMsg)
 				if err != nil {
@@ -92,7 +92,7 @@ func main() {
 
 				ps.Pub(&deltaMsg, string(message.Key))
 
-				d := DeviceState(deltaMsg.Delta)
+				d := DeviceState(deltaMsg.State)
 
 				localStateMtx.Lock()
 				localState[string(message.Key)] = &d
