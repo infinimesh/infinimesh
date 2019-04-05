@@ -38,32 +38,14 @@ export class DeviceService {
   streamState(deviceId): Observable<any> {
     return new Observable(observer => {
       const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}/state/stream`;
-
-      let xhr = new XMLHttpRequest();
-      xhr.open(
-        "GET",
-        url,
-        true
-      );
-      xhr.setRequestHeader('Authorization', 'Bearer ' + this.apiUtilService.getToken());
-      xhr.onprogress = () => {
-        let messages = [];
-
-        let jsonObjects = xhr.responseText.replace(/\n$/, "").split(/\n/);
-        jsonObjects.forEach(obj => {
-          try {
-            messages.splice(0, 0, JSON.parse(obj));
-          } catch (e) {
-            // ignore json parsing errors
-          }
-        });
-        observer.next(messages[0]);
-      };
-      xhr.send();
-
+      const wsUrl = url.replace('http', 'ws')
+      const ws = new WebSocket(wsUrl, ["Bearer", this.apiUtilService.getToken()]);
+      ws.onmessage = function (message) {
+        observer.next(JSON.parse(message.data));
+      }
       return {
         unsubscribe() {
-          xhr.abort();
+          ws.close();
         }
       };
     }).map((response: any) => response.result);
