@@ -709,7 +709,9 @@ components:
       type: object
     shadowStreamReportedStateChangesResponse:
       properties:
-        reportedDelta:
+        desiredState:
+          $ref: '#/components/schemas/shadowVersionedValue'
+        reportedState:
           $ref: '#/components/schemas/shadowVersionedValue'
       type: object
     shadowVersionedValue:

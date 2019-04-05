@@ -25,9 +25,9 @@ export class DeviceDetailComponent implements OnInit, OnDestroy {
         this.state = state;
         this.stateSubscription = this.deviceService.streamState(deviceId).subscribe((data) => {
           console.log(data);
-          this.state.reported.data = data.reportedDelta.data;
-          this.state.reported.timestamp = data.reportedDelta.timestamp;
-          this.state.reported.version = data.reportedDelta.version;
+          this.state.reported.data = data.reportedState.data;
+          this.state.reported.timestamp = data.reportedState.timestamp;
+          this.state.reported.version = data.reportedState.version;
         });
       })
     })

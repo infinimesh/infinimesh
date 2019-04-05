@@ -127,7 +127,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 			}
 
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
-				ReportedDelta: &shadowpb.VersionedValue{
+				ReportedState: &shadowpb.VersionedValue{
 					Version:   raw.Version,
 					Data:      &value,
 					Timestamp: ts, // TODO

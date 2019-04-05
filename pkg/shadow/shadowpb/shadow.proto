@@ -34,7 +34,10 @@ message StreamReportedStateChangesRequest {
   string id = 1;
 }
 
-message StreamReportedStateChangesResponse { VersionedValue reportedDelta = 1; }
+message StreamReportedStateChangesResponse {
+  VersionedValue reportedState = 1;
+  VersionedValue desiredState = 2;
+}
 
 service Shadows {
   rpc Get(GetRequest) returns (GetResponse);
