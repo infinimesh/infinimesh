@@ -112,9 +112,9 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	defer s.PubSub.Unsub(events)
 	for event := range events {
 		var value structpb.Value
-		if raw, ok := event.(*DeltaDeviceStateMessage); ok {
+		if raw, ok := event.(*FullDeviceStateMessage); ok {
 			var u jsonpb.Unmarshaler
-			err = u.Unmarshal(bytes.NewReader(raw.Delta), &value)
+			err = u.Unmarshal(bytes.NewReader(raw.State), &value)
 			if err != nil {
 				fmt.Println("Failed to unmarshal jsonpb: ", err)
 				continue
