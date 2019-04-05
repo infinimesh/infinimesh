@@ -39,7 +39,7 @@ type DeviceState json.RawMessage
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.delta.computed")
+	viper.SetDefault("KAFKA_TOPIC", "shadow.reported-state.full")
 	viper.SetDefault("DB_ADDR", ":6379")
 	viper.AutomaticEnv()
 
