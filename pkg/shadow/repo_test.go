@@ -28,7 +28,7 @@ func TestSetGet(t *testing.T) {
 
 	input := DeviceState{
 		ID: key,
-		State: FullDeviceStateMessage{
+		State: DeviceStateMessage{
 			Version: 1,
 			State:   json.RawMessage([]byte("50")),
 		},
@@ -48,7 +48,7 @@ func TestSetGetDesiredAndReported(t *testing.T) {
 
 	input := DeviceState{
 		ID: key,
-		State: FullDeviceStateMessage{
+		State: DeviceStateMessage{
 			Version: 1,
 			State:   json.RawMessage([]byte("50")),
 		},
@@ -59,7 +59,7 @@ func TestSetGetDesiredAndReported(t *testing.T) {
 
 	inputReported := DeviceState{
 		ID: key,
-		State: FullDeviceStateMessage{
+		State: DeviceStateMessage{
 			Version: 1,
 			State:   json.RawMessage([]byte("60")),
 		},
