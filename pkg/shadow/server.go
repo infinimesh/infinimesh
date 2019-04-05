@@ -93,7 +93,6 @@ func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchD
 	var b bytes.Buffer
 	err = marshaler.Marshal(&b, req.GetData())
 	if err != nil {
-		fmt.Println("Fail")
 		return nil, err
 	}
 
@@ -103,10 +102,8 @@ func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchD
 		Value: sarama.ByteEncoder(b.Bytes()),
 	})
 	if err != nil {
-		fmt.Println("Fail")
 		return nil, err
 	}
-	fmt.Println("sent to " + s.ProduceTopic)
 	return &shadowpb.PatchDesiredStateResponse{}, nil
 }
 
@@ -143,18 +140,24 @@ outer:
 				break outer
 			}
 
-			srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				ReportedState: value,
 			})
+			if err != nil {
+				break
+			}
 		case desiredEvent := <-eventsDesired:
 			value, err := toProto(desiredEvent)
 			if err != nil {
 				break outer
 			}
 
-			srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				DesiredState: value,
 			})
+			if err != nil {
+				break
+			}
 		}
 
 	}
