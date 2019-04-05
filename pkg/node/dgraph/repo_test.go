@@ -80,10 +80,10 @@ func TestChangePassword(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Setup
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	_, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.SetPassword(ctx, account, "newpassword")
+	err = repo.SetPassword(ctx, acc, "newpassword")
 	require.NoError(t, err)
 
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
