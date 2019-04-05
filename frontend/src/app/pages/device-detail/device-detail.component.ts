@@ -31,10 +31,12 @@ export class DeviceDetailComponent implements OnInit, OnDestroy {
           };
         }
         this.stateSubscription = this.deviceService.streamState(deviceId).subscribe((data) => {
-          this.state.reported.data = data.reportedState.data;
-          this.state.reported.timestamp = data.reportedState.timestamp;
-          this.state.reported.version = data.reportedState.version;
-          this.stateUpdated = true
+          if (data.reportedState) {
+            this.state.reported.data = data.reportedState.data;
+            this.state.reported.timestamp = data.reportedState.timestamp;
+            this.state.reported.version = data.reportedState.version;
+            this.stateUpdated = true
+          }
           setTimeout(() => {
             this.stateUpdated = false
           }, 500);
