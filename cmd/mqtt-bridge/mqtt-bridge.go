@@ -298,10 +298,10 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 			}
 
 			// TODO better loop over subscribing topics..
-			topic := p.Payload.Subscriptions[0].Topic
-
-			ps.AddSub(backChannel, topic)
-			fmt.Println("Added Subscription", topic, deviceID)
+			for _, sub := range p.Payload.Subscriptions {
+				ps.AddSub(backChannel, sub.Topic)
+				fmt.Println("Added Subscription", sub.Topic, deviceID)
+			}
 		}
 	}
 }
