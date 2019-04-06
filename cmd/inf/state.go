@@ -87,9 +87,6 @@ var stateGetCmd = &cobra.Command{
 		fmt.Fprintf(w, "Desired State:")
 		printState(w, response.Shadow.Desired)
 
-		fmt.Fprintf(w, "Configuration:")
-		printState(w, response.Shadow.Config)
-
 		if watch {
 			for {
 				resp, err := shadowClient.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
