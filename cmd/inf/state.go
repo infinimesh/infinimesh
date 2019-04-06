@@ -91,31 +91,33 @@ var stateGetCmd = &cobra.Command{
 		printState(w, response.Shadow.Config)
 
 		if watch {
-			resp, err := shadowClient.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
-				Id: args[0],
-			})
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to get state: %v\n", err)
-				os.Exit(1)
-			}
-
 			for {
-				msg, err := resp.Recv()
+				resp, err := shadowClient.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
+					Id: args[0],
+				})
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Failed to get state: %v\n", err)
 					os.Exit(1)
 				}
-				if msg.ReportedState != nil {
-					fmt.Fprintf(w, "Reported State:")
-					printState(w, msg.ReportedState)
-				}
 
-				if msg.DesiredState != nil {
-					fmt.Fprintf(w, "Desired State:")
-					printState(w, msg.DesiredState)
-				}
+				for {
+					msg, err := resp.Recv()
+					if err != nil {
+						break
+					}
 
-				w.Flush()
+					if msg.ReportedState != nil {
+						fmt.Fprintf(w, "Reported State:")
+						printState(w, msg.ReportedState)
+					}
+
+					if msg.DesiredState != nil {
+						fmt.Fprintf(w, "Desired State:")
+						printState(w, msg.DesiredState)
+					}
+
+					w.Flush()
+				}
 			}
 
 		}

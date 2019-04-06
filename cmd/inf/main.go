@@ -8,11 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/manifoldco/promptui"
@@ -84,7 +86,10 @@ func connectGRPC() error {
 		option = grpc.WithInsecure()
 	}
 
-	conn, err := grpc.Dial(current.Server, option)
+	conn, err := grpc.Dial(current.Server, option, grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		Time:    time.Second * 30,
+		Timeout: time.Second * 60,
+	}))
 	if err != nil {
 		return err
 	}
