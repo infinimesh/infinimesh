@@ -96,3 +96,17 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 	err := repo.SetPassword(ctx, "non-existing-user", "newpassword")
 	require.Error(t, err)
 }
+
+func TestListPermissionsOnNamespace(t *testing.T) {
+	ctx := context.Background()
+	permissions, err := repo.ListPermissionsInNamespace(ctx, "joe")
+	require.NoError(t, err)
+
+	var joeFound bool
+	for _, permission := range permissions {
+		if permission.AccountName == "joe" {
+			joeFound = true
+		}
+	}
+	require.True(t, joeFound, "joe must be authorized on namespace joe")
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -11,6 +12,8 @@ import (
 )
 
 type namespaceAPI struct {
+	log *zap.Logger
+
 	client        nodepb.NamespacesClient
 	accountClient nodepb.AccountServiceClient
 }
@@ -112,10 +115,34 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 			Action:    request.Permission.Action,
 		})
 		if err != nil {
+			log.Error("Failed to create permission", zap.String("account_id", request.AccountId), zap.String("namespace", request.Namespace), zap.Error(err))
 			return &apipb.CreateNamespacePermissionResponse{}, status.Error(codes.Internal, "Failed to authorize for namespace")
 		}
 		return &apipb.CreateNamespacePermissionResponse{}, nil
 	}
 
 	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+}
+
+func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   account,
+		Namespace: request.Namespace,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		return n.client.ListPermissions(ctx, request)
+	}
+
+	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+
 }

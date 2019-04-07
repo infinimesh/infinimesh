@@ -38,6 +38,46 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
+func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespace string) (permissions []*nodepb.Permission, err error) {
+	const q = `{
+  accounts(func: eq(name, "joe")) @filter(eq(type, "namespace")) @normalize @cascade  {
+    ~access.to.namespace {
+      uid: uid
+      name: name
+    } @facets(permission)
+  }
+}`
+
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespace})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Accounts []*struct {
+			UID    string `json:"uid"`
+			Name   string `json:"name"`
+			Action string `json:"~access.to.namespace|permission"`
+		} `json:"accounts"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, account := range resultSet.Accounts {
+		permissions = append(permissions, &nodepb.Permission{
+			Namespace:   namespace,
+			AccountId:   account.UID,
+			AccountName: account.Name,
+			Action:      nodepb.Action(nodepb.Action_value[account.Action]),
+		})
+	}
+
+	return permissions, nil
+
+}
+
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
                      namespaces(func: uid($account)) @normalize @cascade  {

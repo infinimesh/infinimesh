@@ -43,7 +43,6 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 
 func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nodepb.AuthorizeNamespaceRequest) (response *nodepb.AuthorizeNamespaceResponse, err error) {
 	err = s.Repo.AuthorizeNamespace(ctx, request.GetAccount(), request.GetNamespace(), request.GetAction())
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to authorize")
 	}

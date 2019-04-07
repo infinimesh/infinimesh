@@ -28,6 +28,7 @@ func ImportSchema(dg *dgo.Dgraph) error {
   owns: uid @reverse .
   kind: string @index(exact) .
   has.credentials: uid @reverse .
+  access.to.namespace: uid @reverse .
   fingerprint: string @index(exact) .
   certificates: uid @reverse .
   password: password .`,

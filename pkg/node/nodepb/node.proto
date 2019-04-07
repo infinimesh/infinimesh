@@ -9,7 +9,6 @@ option java_package = "com.infinimesh.node";
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/field_mask.proto";
-import "pkg/node/nodepb/namespace.proto";
 
 // Account
 
@@ -152,8 +151,55 @@ service AccountService {
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
 }
 
+message Namespace {
+  string id = 1;
+  string name = 2;
+}
+
+message CreateNamespaceRequest {
+  string name = 1;
+}
+
+message GetNamespaceRequest {
+  string namespace = 1; // name
+}
+
+message ListNamespacesRequest {}
+
+message ListNamespacesForAccountRequest {
+  string account = 1;
+}
+
+message ListNamespacesResponse {
+  repeated Namespace namespaces = 1;
+}
+
+message ListPermissionsRequest {
+  string namespace = 1;
+}
+
+message ListPermissionsResponse{
+  repeated Permission permissions = 1;
+}
+
+message Permission {
+  string namespace = 1;
+  string account_id = 2;
+  string account_name = 3;
+  Action action = 4;
+}
+
+
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
   rpc DeleteObject(DeleteObjectRequest) returns (DeleteObjectResponse);
+}
+
+service Namespaces {
+  rpc CreateNamespace(CreateNamespaceRequest) returns (Namespace);
+  rpc GetNamespace(GetNamespaceRequest) returns (Namespace);
+  rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
+  rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
 }

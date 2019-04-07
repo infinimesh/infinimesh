@@ -2,12 +2,6 @@ components:
   schemas:
     apiCreateNamespacePermissionResponse:
       type: object
-    apiPermission:
-      description: 'Permission.Action may either be NONE, READ or WRITE.'
-      properties:
-        action:
-          $ref: '#/components/schemas/nodeAction'
-      type: object
     apiTokenRequest:
       properties:
         password:
@@ -82,10 +76,27 @@ components:
         parent:
           type: string
       type: object
+    infinimeshapiPermission:
+      description: 'Permission.Action may either be NONE, READ or WRITE.'
+      properties:
+        action:
+          $ref: '#/components/schemas/nodeAction'
+      type: object
     infinimeshdeviceregistryGetResponse:
       properties:
         device:
           $ref: '#/components/schemas/deviceregistryDevice'
+      type: object
+    infinimeshnodePermission:
+      properties:
+        account_id:
+          type: string
+        account_name:
+          type: string
+        action:
+          $ref: '#/components/schemas/nodeAction'
+        namespace:
+          type: string
       type: object
     infinimeshshadowGetResponse:
       properties:
@@ -154,6 +165,13 @@ components:
         objects:
           items:
             $ref: '#/components/schemas/nodeObject'
+          type: array
+      type: object
+    nodeListPermissionsResponse:
+      properties:
+        permissions:
+          items:
+            $ref: '#/components/schemas/infinimeshnodePermission'
           type: array
       type: object
     nodeNamespace:
@@ -1063,6 +1081,24 @@ paths:
           description: A successful response.
       tags:
         - Namespaces
+  '/namespaces/{namespace}/permissions':
+    get:
+      operationId: ListPermissions
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeListPermissionsResponse'
+          description: A successful response.
+      tags:
+        - Namespaces
   '/namespaces/{namespace}/permissions/{account_id}':
     put:
       operationId: CreatePermission
@@ -1081,7 +1117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/apiPermission'
+              $ref: '#/components/schemas/infinimeshapiPermission'
         required: true
       responses:
         '200':

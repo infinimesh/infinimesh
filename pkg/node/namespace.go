@@ -55,3 +55,12 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 
 	return namespace, nil
 }
+
+func (n *NamespaceController) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
+	permissions, err := n.Repo.ListPermissionsInNamespace(ctx, request.Namespace)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed get permissions")
+	}
+
+	return &nodepb.ListPermissionsResponse{Permissions: permissions}, nil
+}
