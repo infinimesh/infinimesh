@@ -1,4 +1,5 @@
-<button nbButton size="xsmall" [routerLink]="['devices']"><i class="icon ion-android-arrow-back"></i>All Devices</button>
+<button nbButton size="xsmall" [routerLink]="['devices']"><i class="icon ion-android-arrow-back"></i>All Devices
+</button>
 <ng-container *ngIf="device$ | async as device">
   <h1>{{device.name}}</h1>
   <nb-card>
@@ -14,10 +15,20 @@
   <nb-card>
     <nb-card-header>State</nb-card-header>
     <nb-card-body>
-      <p><strong>Version:</strong> {{state?.reported?.version}}</p>
-      <p><strong>Updated:</strong> {{state?.reported?.timestamp}}</p>
-      <p><strong>Reported:</strong></p>
-      <pre [ngClass]="{'updated': stateUpdated}">{{JSON.stringify(state?.reported?.data, null, 2)}}</pre>
+      <div class="row">
+        <div class="col-md-6">
+          <h2>Reported</h2>
+          <p><strong>Version:</strong> {{state?.reported?.version}}</p>
+          <p><strong>Updated:</strong> {{state?.reported?.timestamp | date: 'long'}}</p>
+          <pre [ngClass]="{'updated': reportedStateUpdated}">{{JSON.stringify(state?.reported?.data, null, 2)}}</pre>
+        </div>
+        <div class="col-md-6">
+          <h2>Desired</h2>
+          <p><strong>Version:</strong> {{state?.desired?.version}}</p>
+          <p><strong>Updated:</strong> {{state?.desired?.timestamp | date: 'long'}}</p>
+          <pre [ngClass]="{'updated': desiredStateUpdated}">{{JSON.stringify(state?.desired?.data, null, 2)}}</pre>
+        </div>
+      </div>
     </nb-card-body>
   </nb-card>
 </ng-container>
