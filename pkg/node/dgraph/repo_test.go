@@ -110,3 +110,26 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 	}
 	require.True(t, joeFound, "joe must be authorized on namespace joe")
 }
+
+func TestDeletePermissionOnNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	randomNS := randomdata.SillyName()
+	_, err := repo.CreateNamespace(ctx, randomNS)
+	require.NoError(t, err)
+
+	randomUser := randomdata.SillyName()
+	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
+	require.NoError(t, err)
+
+	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
+	require.NoError(t, err)
+
+	err = repo.DeletePermissionInNamespace(ctx, randomNS, accountID)
+	require.NoError(t, err)
+
+	permissions, err := repo.ListPermissionsInNamespace(ctx, randomNS)
+	require.NoError(t, err)
+	require.Empty(t, permissions)
+
+}

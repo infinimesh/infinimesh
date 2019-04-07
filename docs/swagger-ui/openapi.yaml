@@ -146,6 +146,8 @@ components:
       type: object
     nodeDeleteObjectResponse:
       type: object
+    nodeDeletePermissionResponse:
+      type: object
     nodeListAccountsResponse:
       properties:
         accounts:
@@ -1100,6 +1102,28 @@ paths:
       tags:
         - Namespaces
   '/namespaces/{namespace}/permissions/{account_id}':
+    delete:
+      operationId: DeletePermission
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeDeletePermissionResponse'
+          description: A successful response.
+      tags:
+        - Namespaces
     put:
       operationId: CreatePermission
       parameters:

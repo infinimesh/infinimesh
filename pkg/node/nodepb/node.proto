@@ -182,6 +182,14 @@ message ListPermissionsResponse{
   repeated Permission permissions = 1;
 }
 
+message DeletePermissionRequest {
+  string namespace = 1;
+  string account_id = 2;
+}
+
+message DeletePermissionResponse{
+}
+
 message Permission {
   string namespace = 1;
   string account_id = 2;
@@ -202,4 +210,5 @@ service Namespaces {
   rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
   rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
+  rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
 }

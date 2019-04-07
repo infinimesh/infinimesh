@@ -211,6 +211,12 @@ service Namespaces {
       get : "/namespaces/{namespace}/permissions"
     };
   };
+  rpc DeletePermission(infinimesh.node.DeletePermissionRequest)
+      returns (infinimesh.node.DeletePermissionResponse) {
+    option (google.api.http) = {
+      delete : "/namespaces/{namespace}/permissions/{account_id}"
+    };
+  };
 }
 
 message CreateNamespacePermissionRequest {

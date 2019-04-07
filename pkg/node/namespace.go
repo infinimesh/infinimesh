@@ -64,3 +64,11 @@ func (n *NamespaceController) ListPermissions(ctx context.Context, request *node
 
 	return &nodepb.ListPermissionsResponse{Permissions: permissions}, nil
 }
+
+func (n *NamespaceController) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
+	err = n.Repo.DeletePermissionInNamespace(ctx, request.Namespace, request.AccountId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to delete permission")
+	}
+	return &nodepb.DeletePermissionResponse{}, nil
+}

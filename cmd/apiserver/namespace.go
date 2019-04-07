@@ -12,8 +12,6 @@ import (
 )
 
 type namespaceAPI struct {
-	log *zap.Logger
-
 	client        nodepb.NamespacesClient
 	accountClient nodepb.AccountServiceClient
 }
@@ -141,6 +139,29 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 
 	if resp.GetDecision().GetValue() {
 		return n.client.ListPermissions(ctx, request)
+	}
+
+	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+
+}
+
+func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+
+	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   account,
+		Namespace: request.Namespace,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		return n.client.DeletePermission(ctx, request)
 	}
 
 	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
