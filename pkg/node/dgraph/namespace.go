@@ -40,7 +40,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 
 func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespace string) (permissions []*nodepb.Permission, err error) {
 	const q = `{
-  accounts(func: eq(name, "joe")) @filter(eq(type, "namespace")) @normalize @cascade  {
+  accounts(func: eq(name, "$namespace")) @filter(eq(type, "namespace")) @normalize @cascade  {
     ~access.to.namespace {
       uid: uid
       name: name
