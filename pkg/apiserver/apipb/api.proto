@@ -121,11 +121,12 @@ service Accounts {
   };
 };
 
-  rpc GetAccount(infinimesh.node.GetAccountRequest) returns (infinimesh.node.Account) {
-    option (google.api.http) = {
-      get : "/accounts/{id}"
-    };
+rpc GetAccount(infinimesh.node.GetAccountRequest)
+    returns (infinimesh.node.Account) {
+  option (google.api.http) = {
+    get : "/accounts/{id}"
   };
+};
 
 rpc UpdateAccount(infinimesh.node.UpdateAccountRequest)
     returns (infinimesh.node.Account) {
@@ -198,4 +199,24 @@ service Namespaces {
       get : "/namespaces"
     };
   };
+  rpc CreatePermission(CreateNamespacePermissionRequest)
+      returns (CreateNamespacePermissionResponse) {
+    option (google.api.http) = {
+      put : "/namespaces/{namespace}/permissions/{account_id}"
+      body: "permission"
+    };
+  };
 }
+
+message CreateNamespacePermissionRequest{
+  string account_id = 1;
+  string namespace = 2;
+  Permission permission = 3;
+}
+
+// Permission.Action may either be NONE, READ or WRITE.
+message Permission {
+  infinimesh.node.Action action = 3;
+}
+
+message CreateNamespacePermissionResponse{}

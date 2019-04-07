@@ -1,5 +1,13 @@
 components:
   schemas:
+    apiCreateNamespacePermissionResponse:
+      type: object
+    apiPermission:
+      description: 'Permission.Action may either be NONE, READ or WRITE.'
+      properties:
+        action:
+          $ref: '#/components/schemas/nodeAction'
+      type: object
     apiTokenRequest:
       properties:
         password:
@@ -101,6 +109,13 @@ components:
         uid:
           type: string
       type: object
+    nodeAction:
+      default: NONE
+      enum:
+        - NONE
+        - READ
+        - WRITE
+      type: string
     nodeCreateNamespaceRequest:
       properties:
         name:
@@ -1045,6 +1060,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeNamespace'
+          description: A successful response.
+      tags:
+        - Namespaces
+  '/namespaces/{namespace}/permissions/{account_id}':
+    put:
+      operationId: CreatePermission
+      parameters:
+        - in: path
+          name: namespace
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/apiPermission'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/apiCreateNamespacePermissionResponse'
           description: A successful response.
       tags:
         - Namespaces
