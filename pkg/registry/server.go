@@ -474,8 +474,6 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		return nil, status.Error(codes.Internal, "Failed to delete node "+err.Error())
 	}
 
-	fmt.Println(string(res.Json))
-
 	var result struct {
 		Objects []*dgraph.Object `json:"objects"`
 	}
