@@ -16,8 +16,7 @@ func ImportSchema(dg *dgo.Dgraph) error {
 	if err != nil {
 		return err
 	}
-	return dg.Alter(context.Background(), &api.Operation{
-		Schema: `
+	schema := `
   tags: [string] .
   name: string @index(exact) .
   username: string @index(exact) .
@@ -31,7 +30,10 @@ func ImportSchema(dg *dgo.Dgraph) error {
   access.to.namespace: uid @reverse .
   fingerprint: string @index(exact) .
   certificates: uid @reverse .
-  password: password .`,
+  password: password .`
+	fmt.Println("Apply schema ", schema)
+	return dg.Alter(context.Background(), &api.Operation{
+		Schema: schema,
 	})
 
 }
