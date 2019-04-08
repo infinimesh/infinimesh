@@ -49,7 +49,7 @@ func main() {
 			fmt.Println("Dropped data")
 		}
 
-		_ = dgraph.ImportSchema(dg)
+		_ = dgraph.ImportSchema(dg, true)
 		fmt.Println("Imported schema")
 
 		_, _, err := dgraph.ImportStandardSet(repo)
