@@ -1,5 +1,12 @@
 version: "3.2"
 services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg11
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - 5432:5432
   zero:
     image: dgraph/dgraph:v1.0.12-rc5
     volumes:

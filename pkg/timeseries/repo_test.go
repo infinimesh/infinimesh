@@ -2,6 +2,7 @@ package timeseries
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -10,17 +11,27 @@ import (
 )
 
 var (
-	log *zap.Logger
+	log  *zap.Logger
+	repo TimeseriesRepo
 )
 
 func init() {
 	log, _ = zap.NewDevelopment()
+
+	dbAddr := os.Getenv("TIMESERIES_URL")
+	if dbAddr == "" {
+		dbAddr = "postgres://postgres:postgres@localhost/postgres?sslmode=disable"
+	}
+
+	r, err := NewTimescaleRepo(log, dbAddr)
+	if err != nil {
+		panic(err)
+	}
+	repo = r
 }
 
 func TestSave(t *testing.T) {
-	repo, err := NewTimescaleRepo(log, "postgres://postgres:postgres@localhost/postgres?sslmode=disable")
-	require.NoError(t, err)
-	err = repo.CreateDataPoint(context.TODO(), &DataPoint{
+	err := repo.CreateDataPoint(context.TODO(), &DataPoint{
 		DeviceID:   "test-device-1",
 		DeviceName: "test-device-1",
 		Property:   "voltage",

@@ -96,11 +96,10 @@ github.com/imdario/mergo
 github.com/inconshreveable/mousetrap
 # github.com/infinimesh/mqtt-go v0.0.0-20190331134856-46f3ca3950fb
 github.com/infinimesh/mqtt-go/packet
+# github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603
+github.com/jeremywohl/flatten
 # github.com/jinzhu/gorm v1.9.2
 github.com/jinzhu/gorm/dialects/postgres
-github.com/jinzhu/gorm
-# github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a
-github.com/jinzhu/inflection
 # github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a
 github.com/juju/ansiterm
 github.com/juju/ansiterm/tabwriter
@@ -217,6 +216,7 @@ google.golang.org/grpc/codes
 google.golang.org/grpc/reflection
 google.golang.org/grpc/status
 google.golang.org/grpc/credentials
+google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
 google.golang.org/grpc/grpclog
 google.golang.org/grpc/balancer
@@ -230,7 +230,6 @@ google.golang.org/grpc/internal/channelz
 google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/transport
-google.golang.org/grpc/keepalive
 google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
