@@ -5,6 +5,13 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+  timescaledb:
+    image: timescale/timescaledb:latest-pg11
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - 5432:5432
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
