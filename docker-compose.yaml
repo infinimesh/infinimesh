@@ -12,6 +12,13 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
     - 5432:5432
+  grafana:
+    hostname: grafana
+    image: grafana/grafana:6.1.3
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
