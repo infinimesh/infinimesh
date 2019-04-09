@@ -37,10 +37,6 @@ func init() {
 	log, _ = inflog.NewProdOrDev()
 }
 
-type handler struct {
-	repo timeseries.TimeseriesRepo
-}
-
 func main() {
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
