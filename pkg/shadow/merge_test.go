@@ -12,7 +12,7 @@ func TestMergeEmptyString(t *testing.T) {
 	old := ""
 	merged, err := applyDelta(old, `{"abc" : 13}`)
 	require.NoError(t, err)
-	require.Equal(t, `{"abc":13}`, merged)
+	require.JSONEq(t, `{"abc":13}`, merged)
 }
 
 func TestMerge(t *testing.T) {
@@ -61,6 +61,26 @@ func TestMergePrimitive(t *testing.T) {
 	require.EqualValues(t, "true", merged)
 }
 
+func TestMergeBothPrimitive(t *testing.T) {
+	old := `true`
+	newDelta := `false`
+
+	merged, err := applyDelta(old, newDelta)
+
+	require.NoError(t, err)
+	require.JSONEq(t, "false", merged)
+}
+
+func TestMergeOldPrimitive(t *testing.T) {
+	old := `true`
+	newDelta := `{"a" : "b"}`
+
+	merged, err := applyDelta(old, newDelta)
+
+	require.NoError(t, err)
+	require.JSONEq(t, newDelta, merged)
+}
+
 func TestCalculateDelta(t *testing.T) {
 	old := `{"a":{"very_much":true}}`
 	new := `{"a":{"very_much":true,"bla":13}}`
@@ -80,4 +100,15 @@ func TestCalculateDeltaArray(t *testing.T) {
 
 	expected := `{"a":["fitze","fatze"]}`
 	require.EqualValues(t, expected, merged)
+}
+
+// Map string -> primitive is replaced by string -> object
+func TestNestedDifferentType(t *testing.T) {
+	old := `{"2_202":21.31999969482422,"2_203":823.4000244140625}`
+	new := `{"2_202":{"value":21.639999389648438,"name":"Measurand Room Temperature"},"2_203":{"value":823.4000244140625,"name":"Measurand Volatile Organic Components for Air Quality"}}`
+
+	merged, err := applyDelta(old, new)
+
+	require.NoError(t, err)
+	require.JSONEq(t, new, merged)
 }
