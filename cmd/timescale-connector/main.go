@@ -24,7 +24,7 @@ var (
 
 	log *zap.Logger
 
-	consumerGroup = "timescale-connector"
+	consumerGroup = "timescale-connector-import"
 )
 
 func init() {
