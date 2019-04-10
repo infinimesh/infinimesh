@@ -51,6 +51,7 @@ func init() {
 	if err != nil {
 		fmt.Printf("Error during DDL import: %v. Ignoring\n", err)
 	}
+	txn.Commit()
 }
 
 func TestSave(t *testing.T) {
