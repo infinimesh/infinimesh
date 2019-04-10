@@ -32,6 +32,11 @@ func NewTimescaleRepo(log *zap.Logger, connection string) (result TimeseriesRepo
 		return nil, err
 	}
 
+	err = conn.Ping()
+	if err != nil {
+		return nil, err
+	}
+
 	return &timescaleRepo{
 		log: log,
 		db:  conn,
