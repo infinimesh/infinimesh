@@ -57,6 +57,9 @@ func main() {
 		log.Named("TimescaleRepo"),
 		addr,
 	)
+	if err != nil {
+		panic(err)
+	}
 
 	handler := &timeseries.Consumer{
 		Log:  log.Named("Consumer"),
