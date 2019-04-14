@@ -57,7 +57,9 @@ export class DeviceDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.stateSubscription.unsubscribe();
+    if(this.stateSubscription) {
+      this.stateSubscription.unsubscribe();
+    }
   }
 
 }
