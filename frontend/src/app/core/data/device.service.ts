@@ -51,4 +51,16 @@ export class DeviceService {
     }).map((response: any) => response.result);
   }
 
+  create(device): Observable<any> {
+    const url = `${this.apiUtilService.getApiUrl()}/devices`;
+    return this.http.post(url, {
+      'device': device
+    }, this.apiUtilService.getHttpOptions())
+      .map((response: any) => response.device);
+  }
+
+  remove(deviceId: string) {
+    const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}`;
+    return this.http.delete(url, this.apiUtilService.getHttpOptions());
+  }
 }

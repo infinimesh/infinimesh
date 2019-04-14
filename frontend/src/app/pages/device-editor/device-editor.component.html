@@ -1,0 +1,43 @@
+<h2>{{new ? 'Create new Device' : 'Edit Device'}}</h2>
+<form *ngIf="deviceFormModel" #f="ngForm" (ngSubmit)="save()">
+  <div *ngIf="!new" class="form-group">
+    <label>ID</label>
+    <input disabled name="id" type="text" nbInput fullWidth>
+  </div>
+  <div class="form-group">
+    <label>Name*</label>
+    <input name="name" [(ngModel)]="deviceFormModel.name" type="text" required nbInput fullWidth>
+  </div>
+  <div class="form-group">
+    <label>Namespace*</label>
+    <nb-select name="namespace" placeholder="Select Namespace" required
+               [(ngModel)]="deviceFormModel.namespace" outline status="primary">
+      <nb-option *ngFor="let namespace of namespaces$ | async" [value]="namespace">
+        {{namespace.name}}
+      </nb-option>
+    </nb-select>
+  </div>
+  <div class="form-group">
+    <label>Tags</label>
+    <input name="tags" [(ngModel)]="deviceFormModel.tags" type="text" nbInput fullWidth>
+    <small class="form-text">Separate your tags with commas (e.g. tag1,tag2)</small>
+  </div>
+  <div class="form-group">
+    <label>Certificate*</label>
+    <textarea name="certificate" [(ngModel)]="deviceFormModel.certificate.pem_data"
+              nbInput fullWidth rows="4" required></textarea>
+    <small class="form-text">Provide your device client certificate as pem file. Check <a
+      href="https://infinimesh.github.io/infinimesh/docs/#/quickstart" target="_blank">Quickstart Guide</a> for help
+      with certificate creation.
+    </small>
+  </div>
+  <div class="form-group">
+    <nb-checkbox name="enabled" [(ngModel)]="deviceFormModel.enabled">Enabled</nb-checkbox>
+  </div>
+  <div class="action-bar">
+    <a nbButton outline status="primary" (click)="closed.emit(false)">Cancel</a>
+    <button type="submit" nbButton [disabled]="!f.valid">
+      <i class="icon ion-android-checkmark-circle"></i> Save
+    </button>
+  </div>
+</form>

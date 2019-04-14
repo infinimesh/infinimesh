@@ -1,3 +1,8 @@
+<div class="action-bar">
+  <button nbButton (click)="addDevice()"><i class="icon ion-android-add"></i> Add Device
+  </button>
+</div>
+
 <nb-card *ngIf="!namespaceService.getSelected()">
   <nb-card-body>No namespaces selected. Please select a namespace first to see your devices.</nb-card-body>
 </nb-card>
@@ -15,6 +20,8 @@
           <p>Enabled: {{device.enabled ? 'Yes' : 'No'}}</p>
         </nb-card-body>
         <nb-card-footer class="text-right">
+          <delete-confirm (deleteConfirmed)="delete(device.id)"></delete-confirm>
+          <!--button nbButton size="xsmall" [routerLink]="[device.id]"><i class="icon ion-android-create"></i></button-->
           <button nbButton size="xsmall" [routerLink]="[device.id]">
             Details <i class="icon ion-android-arrow-forward"></i></button>
         </nb-card-footer>
@@ -22,3 +29,7 @@
     </div>
   </div>
 </ng-container>
+
+<sidebar #sidebar>
+  <template content #editorContainer></template>
+</sidebar>

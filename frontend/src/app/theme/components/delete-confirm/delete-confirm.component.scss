@@ -1,0 +1,11 @@
+.btn-group {
+  button {
+    margin: 0;
+  }
+  button:first-child {
+    border-radius: 0.5rem 0rem 0rem 0.5rem
+  }
+  button:last-child {
+    border-radius: 0rem 0.5rem 0.5rem 0rem
+  }
+}
