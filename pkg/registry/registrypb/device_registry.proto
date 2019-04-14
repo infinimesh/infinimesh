@@ -18,7 +18,6 @@ message Device {
 
 message CreateRequest {
   Device device = 1;
-  string namespace = 2;
 }
 
 message Certificate {

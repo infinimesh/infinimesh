@@ -24,7 +24,7 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 	}
 
 	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespace: request.GetNamespace(),
+		Namespace: request.Device.Namespace,
 		Account:   account,
 		Action:    nodepb.Action_WRITE,
 	})

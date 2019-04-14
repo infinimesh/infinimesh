@@ -66,11 +66,11 @@ func sha256Sum(c []byte) []byte {
 func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
 	txn := s.dgo.NewTxn()
 	defer txn.Discard(ctx) // nolint
-	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Namespace, ""); exists {
+	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
 		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
 	}
 
-	ns, err := s.repo.GetNamespace(ctx, request.Namespace)
+	ns, err := s.repo.GetNamespace(ctx, request.Device.Namespace)
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, "Invalid namespace")
 	}
@@ -149,7 +149,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 			Name:        request.Device.Name,
 			Enabled:     request.Device.Enabled,
 			Tags:        request.Device.Tags,
-			Namespace:   request.Namespace,
+			Namespace:   request.Device.Namespace,
 			Certificate: request.Device.Certificate,
 		},
 	}, nil

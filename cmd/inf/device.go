@@ -85,8 +85,8 @@ var createDeviceCmd = &cobra.Command{
 				Certificate: &registrypb.Certificate{
 					PemData: string(pem),
 				},
+				Namespace: getNamespace(),
 			},
-			Namespace: getNamespace(),
 		})
 		if err != nil {
 			panic(err)

@@ -30,8 +30,6 @@ components:
       properties:
         device:
           $ref: '#/components/schemas/deviceregistryDevice'
-        namespace:
-          type: string
       type: object
     deviceregistryCreateResponse:
       properties:
