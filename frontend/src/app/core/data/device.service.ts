@@ -59,4 +59,8 @@ export class DeviceService {
       .map((response: any) => response.device);
   }
 
+  remove(deviceId: string) {
+    const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}`;
+    return this.http.delete(url, this.apiUtilService.getHttpOptions());
+  }
 }

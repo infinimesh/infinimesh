@@ -46,13 +46,17 @@ export class DeviceRegistryComponent implements OnInit {
     this.editorComponentRef.instance.closed.subscribe(saved => {
       this.sidebar.open = false;
       this.editorComponentRef.destroy();
-      console.log(saved);
+      if(saved) {
+        this.requestDevices();
+      }
     })
     this.sidebar.open = true;
   }
 
   delete(deviceId) {
-    console.log('Delete ' + deviceId);
+    this.deviceService.remove(deviceId).subscribe(result => {
+      this.requestDevices();
+    });
   }
 
   saveDevice() {
