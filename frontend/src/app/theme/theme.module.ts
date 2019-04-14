@@ -42,6 +42,8 @@ import {CapitalizePipe, EvaIconsPipe, NumberWithCommasPipe, PluralPipe, RoundPip
 import {SampleLayoutComponent,} from './layouts';
 import {DEFAULT_THEME} from './styles/theme.default';
 import {COSMIC_THEME} from './styles/theme.cosmic';
+import { DeleteConfirmComponent } from './components/delete-confirm/delete-confirm.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 const BASE_MODULES = [CommonModule, FormsModule, ReactiveFormsModule];
 
@@ -111,8 +113,8 @@ const NB_THEME_PROVIDERS = [
 
 @NgModule({
   imports: [...BASE_MODULES, ...NB_MODULES],
-  exports: [...BASE_MODULES, ...NB_MODULES, ...COMPONENTS, ...PIPES],
-  declarations: [...COMPONENTS, ...PIPES],
+  exports: [...BASE_MODULES, ...NB_MODULES, ...COMPONENTS, ...PIPES, DeleteConfirmComponent, SidebarComponent],
+  declarations: [...COMPONENTS, ...PIPES, DeleteConfirmComponent, SidebarComponent],
   entryComponents: [...ENTRY_COMPONENTS],
 })
 export class ThemeModule {

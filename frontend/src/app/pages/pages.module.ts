@@ -7,6 +7,7 @@ import {ThemeModule} from '../theme/theme.module';
 import {MiscellaneousModule} from './miscellaneous/miscellaneous.module';
 import {DeviceRegistryComponent} from './device-registry/device-registry.component';
 import { DeviceDetailComponent } from './device-detail/device-detail.component';
+import { DeviceEditorComponent } from './device-editor/device-editor.component';
 
 @NgModule({
   imports: [
@@ -18,8 +19,12 @@ import { DeviceDetailComponent } from './device-detail/device-detail.component';
   declarations: [
     PagesComponent,
     DeviceRegistryComponent,
-    DeviceDetailComponent
+    DeviceDetailComponent,
+    DeviceEditorComponent
   ],
+  entryComponents: [
+    DeviceEditorComponent
+  ]
 })
 export class PagesModule {
 }
