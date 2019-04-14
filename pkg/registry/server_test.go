@@ -79,9 +79,10 @@ func TestListForAccount(t *testing.T) {
 
 func sampleDevice(name string) *registrypb.Device {
 	return &registrypb.Device{
-		Name:    name,
-		Enabled: &wrappers.BoolValue{Value: true},
-		Tags:    []string{"a", "b", "c"},
+		Namespace: "joe",
+		Name:      name,
+		Enabled:   &wrappers.BoolValue{Value: true},
+		Tags:      []string{"a", "b", "c"},
 		Certificate: &registrypb.Certificate{
 			PemData: `-----BEGIN CERTIFICATE-----
 MIIDiDCCAnCgAwIBAgIJAMNNOKhM9eyOMA0GCSqGSIb3DQEBCwUAMFkxCzAJBgNV
@@ -112,8 +113,7 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 func TestCreateGet(t *testing.T) {
 	// Create
 	request := &registrypb.CreateRequest{
-		Namespace: "joe",
-		Device:    sampleDevice("test-devicex"),
+		Device: sampleDevice("test-devicex"),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
@@ -139,8 +139,7 @@ func TestCreateGet(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	request := &registrypb.CreateRequest{
-		Namespace: "joe",
-		Device:    sampleDevice(randomdata.SillyName()),
+		Device: sampleDevice(randomdata.SillyName()),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
