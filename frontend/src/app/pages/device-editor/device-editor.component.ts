@@ -15,7 +15,7 @@ export class DeviceEditorComponent implements OnInit {
 
   public deviceFormModel;
   public namespaces$: Observable<any>;
-  private new = false;
+  public new = false;
 
   constructor(private namespaceService: NamespaceService,
               private deviceService: DeviceService) { }
