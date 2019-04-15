@@ -120,3 +120,19 @@ Configuration: <none>
 
 Thank you for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR. 
 
+## Send states from the platform to the device
+Sending states (`desired states`) to a device is very simple. You only need to know the deviceID.
+Use the API, or just the CLI.
+
+```
+inf state set 0x9c 1337
+```
+
+This sends the state `1337` to the device. Note that repeatedly sending the same state does not trigger a new message every time. One changes are send to the device.
+
+Once the state it sent, you can inspect this from the server side by running:
+```
+inf state get 0x9c
+```
+
+The state is visible in the `desired` section.
