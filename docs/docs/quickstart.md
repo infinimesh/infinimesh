@@ -30,6 +30,10 @@ Generate the client certificate (and self-sign it):
 ```
 openssl req -new -x509 -sha256 -key sample_1.key -out sample_1.crt -days 365
 ```
+Create a namespace for your device(s). A namespace is a reference to an organisational entinity to which the device belongs, e.g. Windmills or Buildings:
+```
+inf namespace create NAME
+```
 Register the device in infinimesh's device registry:
 ```
 inf device create my-sample-device --cert-file sample_1.crt
