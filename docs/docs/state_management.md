@@ -29,5 +29,4 @@ As you can see, a state can be any JSON document. This extremely flexible approa
 Whenever a state document is transferred to the platform, it is merged with the previous version of the document. This allows devices to send `delta` messages: they do not have transfer the whole state every time, but can just send an update when a state change occurred.
 
 ## Send states from a device
-The device must publish the JSON 
 ## Send states to a device
