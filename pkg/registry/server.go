@@ -226,6 +226,7 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
     ~certificates {
       uid : uid
       name : name
+      enabled : enabled
       ~owns {
         namespace: name
       }
@@ -247,6 +248,7 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 		Devices []struct {
 			Uid       string `json:"uid"`
 			Name      string `json:"name"`
+			Enabled   bool   `json:"enabled"`
 			Namespace string `json:"namespace"`
 		} `json:"devices"`
 	}
@@ -256,13 +258,13 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 		return nil, err
 	}
 
-	// FIXME dedupe, we could have multiple entries possibly?
-	var devices []*registrypb.DeviceForFingerprint
+	var devices []*registrypb.Device
 	for _, device := range res.Devices {
-		devices = append(devices, &registrypb.DeviceForFingerprint{
+		devices = append(devices, &registrypb.Device{
 			Id:        device.Uid,
 			Name:      device.Name,
 			Namespace: device.Namespace,
+			Enabled:   &wrappers.BoolValue{Value: device.Enabled},
 		})
 	}
 

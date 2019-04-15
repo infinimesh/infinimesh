@@ -27,21 +27,25 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		digest := getFingerprint(rawcert)
 		fmt.Printf("Validating certificate with fingerprint sha256-%X\n", digest)
 
-		// Request information about a potential device with this fingerprint
+		// Request information about all devices with this fingerprint
 		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{Fingerprint: digest})
 		if err != nil {
 			fmt.Printf("Failed to find device for fingerprint: %v\n", err)
 			continue
 		}
 
-		if len(reply.Devices) == 0 {
-			return errors.New("Invalid device")
+		var enabled []*registrypb.Device
+		for _, device := range reply.Devices {
+			if device.Enabled.Value {
+				enabled = append(enabled, device)
+			}
 		}
 
-		result := reply.Devices[0] // FIXME silly Workaround
+		if len(enabled) == 0 {
+			return fmt.Errorf("no devices found for fingerprint %X\n", digest)
+		}
 
-		// TODO verify with configured CACert.
-		fmt.Printf("Verified client with fingerprint device for fingerprint: %v\n", result.Name)
+		fmt.Printf("Verified connection with fingerprint [%v]. There are %v enabled devices with this fingerprint.\n", digest, len(enabled))
 		return nil
 	}
 	return errors.New("Could not verify fingerprint")
@@ -178,13 +182,19 @@ func main() {
 			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
 			continue
 		}
-		response := reply.Devices[0] // FIXME
-		fmt.Printf("Client connected, id: %v, name: %v\n", response.Id, response.Name)
 
-		backChannel := ps.Sub()
+		var possibleIDs []string
 
-		go handleConn(conn, response.Id, backChannel)
-		go handleBackChannel(conn, response.Id, backChannel)
+		for _, device := range reply.Devices {
+			if device.Enabled.Value {
+				possibleIDs = append(possibleIDs, device.Id)
+			}
+		}
+
+		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
+
+		go handleConn(conn, possibleIDs)
+
 	}
 
 }
@@ -227,11 +237,7 @@ func printConnState(con net.Conn) {
 }
 
 // Connection is expected to be valid & legitimate at this point
-func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
-	defer fmt.Println("Client disconnected ", deviceID)
-	defer func() {
-		ps.Unsub(backChannel)
-	}()
+func handleConn(c net.Conn, deviceIDs []string) {
 	p, err := packet.ReadPacket(c)
 
 	if debug {
@@ -249,9 +255,33 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 		return
 	}
 
-	id := connectPacket.ConnectPayload.ClientID
-	fmt.Printf("Client with ID %v connected!\n", id)
+	defer fmt.Println("Client disconnected ", connectPacket.ConnectPayload.ClientID)
+
+	fmt.Printf("Client with ID %v connected!\n", connectPacket.ConnectPayload.ClientID)
 	// TODO ignore/compare this ID with the given ID from the verify function
+
+	var clientIDOK bool
+	var deviceID string
+	if len(deviceIDs) == 1 {
+		// only one ID is possible with this cert; no need to have clientID set
+		clientIDOK = true
+		deviceID = deviceIDs[0]
+	} else {
+		for _, possibleID := range deviceIDs {
+			if connectPacket.ConnectPayload.ClientID == possibleID {
+				fmt.Printf("Using ClientID: %v\n", possibleID)
+				clientIDOK = true
+				deviceID = possibleID
+			}
+		}
+	}
+
+	if !clientIDOK {
+		fmt.Printf("Client used invalid clientID, disconnecting\n")
+		_ = c.Close()
+		return
+
+	}
 
 	resp := packet.ConnAckControlPacket{
 		FixedHeader: packet.FixedHeader{
@@ -259,6 +289,16 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 		},
 		VariableHeader: packet.ConnAckVariableHeader{},
 	}
+
+	// Only open Back-channel after conn packet was received
+
+	// Create empty subscription
+	backChannel := ps.Sub()
+	go handleBackChannel(c, deviceID, backChannel)
+	defer func() {
+		fmt.Printf("Unsubbed channel %v\n", deviceID)
+		ps.Unsub(backChannel)
+	}()
 
 	_, err = resp.WriteTo(c)
 	if err != nil {
@@ -297,7 +337,6 @@ func handleConn(c net.Conn, deviceID string, backChannel chan interface{}) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 
-			// TODO better loop over subscribing topics..
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, sub.Topic)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)

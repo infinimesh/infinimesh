@@ -111,9 +111,10 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 }
 
 func TestCreateGet(t *testing.T) {
+	randomName := randomdata.SillyName()
 	// Create
 	request := &registrypb.CreateRequest{
-		Device: sampleDevice("test-devicex"),
+		Device: sampleDevice(randomName),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
@@ -125,7 +126,7 @@ func TestCreateGet(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, respGet.Device)
-	require.EqualValues(t, "test-devicex", respGet.Device.Name)
+	require.EqualValues(t, randomName, respGet.Device.Name)
 	require.EqualValues(t, request.Device.Certificate.PemData, respGet.Device.Certificate.PemData)
 	require.EqualValues(t, request.Device.Certificate.Algorithm, respGet.Device.Certificate.Algorithm)
 
@@ -134,7 +135,7 @@ func TestCreateGet(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.DeviceForFingerprint{Id: respGet.Device.Id, Name: respGet.Device.Name, Namespace: "joe"})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: "joe"})
 }
 
 func TestDelete(t *testing.T) {
