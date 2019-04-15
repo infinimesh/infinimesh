@@ -43,7 +43,14 @@ inf login
 ```
 Use the users joe / test123 or admin/admin123 for local development.
 
-Send sample message via `mosquitto_pub`:
+Send sample message to the local instance:
+```
+mosquitto_pub --cafile hack/server.crt   --cert hack/device_certs/sample_1.crt --key hack/device_certs/sample_1.key -m '{"sensor" : {"temp" : 41}}' -t "devices/0x6ddd1/state/reported/delta" -h localhost  --tls-version tlsv1.2 -d -p 8089
+```
+
+Remember to replace 0x6ddd1 with the ID of your device. Also use the certificate and key of your device.
+
+Send sample message via `mosquitto_pub` to the hosted SaaS instance:
 ```
 mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt   --cert hack/server.crt --key hack/server.key -m "blaaa" -t "shadows/testdeviceX" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
 ```
