@@ -46,6 +46,11 @@ inf login
 ```
 Use the users joe / test123 or admin/admin123 for local development.
 
+Register a device:
+```
+inf device create sample-device --cert-file hack/device_certs/sample_1.crt
+```
+
 Send sample message to the local instance:
 ```
 mosquitto_pub --cafile hack/server.crt   --cert hack/device_certs/sample_1.crt --key hack/device_certs/sample_1.key -m '{"sensor" : {"temp" : 41}}' -t "devices/0x6ddd1/state/reported/delta" -h localhost  --tls-version tlsv1.2 -d -p 8089
