@@ -85,6 +85,12 @@ services:
       - KAFKA_HOST=kafka:29092
       - "DB_ADDR=redis:6379"
     restart: unless-stopped
+  frontend:
+    ports:
+      - "8082:80"
+    image: quay.io/infinimesh/frontend:latest
+    environment:
+            - "APISERVER_URL=http://localhost:8081"
   apiserver:
     ports:
       - "8080:8080"
