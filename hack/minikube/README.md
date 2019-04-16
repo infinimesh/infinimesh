@@ -25,6 +25,7 @@ Strimzi is a Kubernetes operator to install and maintain Kafka in a Cloud Native
 
 Install Strimzi Kafka Operator into the namespace `kafka`:
 ```
+kubectl create namespace kafka
 curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml \
   | sed 's/namespace: .*/namespace: kafka/' \
   | kubectl -n kafka apply -f -
