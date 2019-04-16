@@ -32,6 +32,15 @@ curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11
 
 For more details refer to [![Strimzi Documentation](https://strimzi.io/quickstarts/minikube/)].
 
+### NGINX Ingress Controller
+
+For API Servers and App, infinimesh uses [![Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/)]. When using Minikube, enable it as addon:
+```
+minikube addons enable ingress
+```
+
+When deploy to a real cluster, follow the [![instructions](https://kubernetes.github.io/ingress-nginx/deploy/)]. This involves installing some manifests or a HELM chart and may vary slightly, depending on your infrastructure.
+
 ## TLS Certicate Setup
 Infinimesh requires X509 KeyPairs for the following applications:
 - API Server gRPC
