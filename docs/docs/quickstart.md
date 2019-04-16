@@ -81,8 +81,6 @@ Configuration: <none>
 ```
 In this case, the device sent a datapoint `abc` with the value `1337` at `20:53:41`.
 
-Thank you for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR.
-
 ## Send states from the platform to the device
 Sending states (`desired states`) to a device is very simple. You only need to know the deviceID.
 Use the API, or just the CLI.
@@ -99,3 +97,7 @@ inf state get 0x9c
 ```
 
 The state is visible in the `desired` section.
+
+## Thank you
+
+Many thanks for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR.
