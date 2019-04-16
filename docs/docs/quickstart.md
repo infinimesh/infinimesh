@@ -19,9 +19,9 @@ This adds a ```context``` entry to the CLI configuration at `~/.inf/config`. TLS
 Now, you can log into infinimesh. Run ```inf login``` and enter your username and password. This requests a token from the API server - your username and password is *NOT* stored - we take security very seriously.
 
 ## Creating a device
-To get started, we will create a device. Please note, every device _needs_ to have an own certificate. We strongly advice to use human readable names like raspi-building-campus1 for key and certificate generation. It makes the latter work much more easily. Going forward, we will implement bulk device creation for ODM factory deployments.
- 
-At present, Infinimesh supports only X509 certificate authentication for devices. 
+To get started, we will create a device. Please note, every device _needs_ to have an own certificate.
+
+At present, Infinimesh supports only X509 certificate authentication for devices.
 Generate a private key for the device:
 ```
 openssl genrsa -out sample_1.key 4096
@@ -30,7 +30,7 @@ Generate the client certificate (and self-sign it):
 ```
 openssl req -new -x509 -sha256 -key sample_1.key -out sample_1.crt -days 365
 ```
-A namespace for your device(s) will be automatically created and reflect your username. A namespace is a reference to an organisational entinity to which the device belongs, e.g. Windmills or Buildings. To show the namespace(s) use the list command:
+A namespace for your user will be automatically created, the name of the namespace is your username. To show the namespace(s) use the list command:
 ```
 inf namespace list
 ```
@@ -58,21 +58,8 @@ Client mosqpub|3396-thinkpad received CONNACK (0)
 Client mosqpub|3396-thinkpad sending PUBLISH (d0, q0, r0, m1, 'devices/0x1/state/reported/delta', ... (14 bytes))
 Client mosqpub|3396-thinkpad sending DISCONNECT
 ```
-The data has been sent successfully to the platform. To send more as one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp). Here is a JSON example from one of our BACnet tests:
-```
-{
-"temperature":72,
-"t_metric":"F",
-"co2":1456,
-"c_metric":"ppm",
-"noise":56,
-"n_metric":"db",
-"spot_enabled":3,
-"spot_light_brightness":[ "78", "73", "44" ],
-"s_metric":"lux"
-}
-```
- 
+The data has been sent successfully to the platform. To send more than one value per API call you can use JSON arrays in any complexity (https://www.w3schools.com/js/js_json_arrays.asp).
+
 ## Read device data from the platform
 We managed to send data from a device to the platform. Now let's read back the device data from infinimesh!
 You can do this via gRPC or HTTP API. The simplest way is with the CLI (which uses gRPC).
@@ -92,33 +79,9 @@ Reported State:
 Desired State: <none>
 Configuration: <none>
 ```
-In this case, the device sent a datapoint `abc` with the value `1337` at `20:53:41`. Remember the BACnet data? That looks like this:
-```
-inf state get 0x9c
-Reported State:
-  Version:    5
-  Timestamp:  2019-03-31 12:47:13.158610661 +0200 DST
-  Data:
-    {
-      "c_metric": "ppm",
-      "co2": 1456,
-      "n_metric": "db",
-      "noise": 56,
-      "s_metric": "lux",
-      "spot_enabled": 3,
-      "spot_light_brightness": [
-        "78",
-        "73",
-        "44"
-      ],
-      "t_metric": "F",
-      "temperature": 72,
-    }
-Desired State: <none>
-Configuration: <none>
-```
+In this case, the device sent a datapoint `abc` with the value `1337` at `20:53:41`.
 
-Thank you for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR. 
+Thank you for your time and if you have any questions don't hesitate to get in touch with us! We are grateful for any improvements to the platform or this documentation, just send us a PR.
 
 ## Send states from the platform to the device
 Sending states (`desired states`) to a device is very simple. You only need to know the deviceID.
@@ -128,9 +91,9 @@ Use the API, or just the CLI.
 inf state set 0x9c 1337
 ```
 
-This sends the state `1337` to the device. Note that repeatedly sending the same state does not trigger a new message every time. One changes are send to the device.
+This sends the state `1337` to the device. Note that repeatedly sending the same state does not trigger a new message every time. Only changes are sent to the device.
 
-Once the state it sent, you can inspect this from the server side by running:
+Once the state has been sent, you can inspect it on the server by running:
 ```
 inf state get 0x9c
 ```
