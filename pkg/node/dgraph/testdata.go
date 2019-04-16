@@ -12,9 +12,11 @@ import (
 )
 
 func ImportSchema(dg *dgo.Dgraph, drop bool) error {
-	err := dg.Alter(context.Background(), &api.Operation{DropAll: drop})
-	if err != nil {
-		return err
+	if drop {
+		err := dg.Alter(context.Background(), &api.Operation{DropAll: drop})
+		if err != nil {
+			return err
+		}
 	}
 	schema := `
   tags: [string] .
