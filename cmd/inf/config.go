@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"io/ioutil"
+
 	"github.com/manifoldco/promptui"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -24,11 +26,13 @@ type Context struct {
 	TLS              bool   `yaml:"tls"`
 	Token            string `yaml:"token,omitempty"`
 	DefaultNamespace string `yaml:"defaultNamespace,omitempty"`
+	CaCert           string `yaml:"cacert,omitempty"`
 }
 
 var (
 	apiserverFlag string
 	tlsFlag       bool
+	caFileFlag    string
 )
 
 func init() {
@@ -37,6 +41,7 @@ func init() {
 	configCmd.AddCommand(configSelectContext)
 	configSetContextCmd.Flags().StringVar(&apiserverFlag, "apiserver", "grpc.infinimesh.io:443", "Infinimesh APIServer. Defaults to grpc.infinimesh.io:443")
 	configSetContextCmd.Flags().BoolVar(&tlsFlag, "tls", true, "Enable or disable TLS. Defaults to true.")
+	configSetContextCmd.Flags().StringVar(&caFileFlag, "ca-file", "", "Path to CA certificate. optional.")
 }
 
 var configCmd = &cobra.Command{
@@ -80,11 +85,22 @@ var configSetContextCmd = &cobra.Command{
 		if config == nil {
 			config = &Config{}
 		}
+
 		newCtx := &Context{
 			Name:   args[0],
 			Server: apiserverFlag,
 			TLS:    tlsFlag,
 		}
+
+		if caFileFlag != "" {
+			cacert, err := ioutil.ReadFile(caFileFlag)
+			if err != nil {
+				fmt.Printf("Could not read ca certificate: %v\n", err)
+				os.Exit(1)
+			}
+			newCtx.CaCert = string(cacert)
+		}
+
 		var replaced bool
 		for i, ctx := range config.Contexts {
 			if ctx.Name == args[0] {

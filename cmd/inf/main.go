@@ -19,6 +19,8 @@ import (
 
 	"github.com/manifoldco/promptui"
 
+	"encoding/pem"
+
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 )
 
@@ -80,6 +82,17 @@ func connectGRPC() error {
 	}
 	var option grpc.DialOption
 	pool, _ := x509.SystemCertPool()
+
+	if current.CaCert != "" {
+		block, _ := pem.Decode([]byte(current.CaCert))
+		cert, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			fmt.Printf("Failed to load ca cert: %v. Ignoring cert.", err)
+		} else {
+			pool.AddCert(cert)
+		}
+	}
+
 	option = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{RootCAs: pool}))
 
 	if !current.TLS {
