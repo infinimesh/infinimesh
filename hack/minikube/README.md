@@ -224,7 +224,10 @@ In order to log in, you have to get the password of the root user. The Kubernete
 kubectl get secret my-platform-root-account -o=jsonpath='{.data.password}' | base64 -d
 ```
 
-TODO create a device
+Create a device
+```
+inf device create sample-device --cert-file sample_1.crt
+```
 
 ### Access UI
 You can access the UI at https://app.infinimesh.minikube
