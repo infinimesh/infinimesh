@@ -43,6 +43,10 @@ For API Servers and App, infinimesh uses [![Nginx Ingress Controller](https://ku
 ```
 minikube addons enable ingress
 ```
+When you use microk8s replace ```minikube``` with ```microk8s.enable```, if you use microk8s via multipass use:
+```
+multipass exec microk8s-vm -- /snap/bin/microk8s.enable ingress
+```
 
 When deploy to a real cluster, follow the [![instructions](https://kubernetes.github.io/ingress-nginx/deploy/)]. This involves installing some manifests or a HELM chart and may vary slightly, depending on your infrastructure.
 
