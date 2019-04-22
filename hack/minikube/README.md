@@ -1,4 +1,4 @@
-# Setup instructions for minikube
+# Setup instructions for minikube / microk8s
 
 ## Installing operators
 Infinimesh is a Cloud Native Application and leverages Kubernetes Operators to install and maintain the platform. Depending on your setup, you may need to install:
