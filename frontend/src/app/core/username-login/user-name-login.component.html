@@ -79,24 +79,6 @@
   </button>
 </form>
 
-<section *ngIf="socialLinks && socialLinks.length > 0" class="links" aria-label="Social sign in">
-  or enter with:
-  <div class="socials">
-    <ng-container *ngFor="let socialLink of socialLinks">
-      <a *ngIf="socialLink.link"
-         [routerLink]="socialLink.link"
-         [attr.target]="socialLink.target"
-         [attr.class]="socialLink.icon"
-         [class.with-icon]="socialLink.icon">{{ socialLink.title }}</a>
-      <a *ngIf="socialLink.url"
-         [attr.href]="socialLink.url"
-         [attr.target]="socialLink.target"
-         [attr.class]="socialLink.icon"
-         [class.with-icon]="socialLink.icon">{{ socialLink.title }}</a>
-    </ng-container>
-  </div>
-</section>
-
-<section class="another-action" aria-label="Register">
+<section class="another-action" aria-label="Register" *ngIf="showRegisterLink">
   Don't have an account? <a class="text-link" href="https://infinimesh.io/signup.html" target="_blank">Sign up</a>
 </section>
