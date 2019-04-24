@@ -59,9 +59,12 @@ export class DeviceService {
       .map((response: any) => response.device);
   }
 
-  updateDesiredState(deviceId: string, desiredState: object): Observable<any> {
+  updateDesiredState(deviceId: string, desiredState: any): Observable<any> {
     const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}/state`;
-    return this.http.patch(url, desiredState, this.apiUtilService.getHttpOptions());
+
+    // workaround required to support plain strings as payload
+    const payload = typeof desiredState === "string" ? "\"" + desiredState +  "\"" : desiredState;
+    return this.http.patch(url, payload, this.apiUtilService.getHttpOptions());
   }
 
   remove(deviceId: string) {
