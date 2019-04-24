@@ -59,6 +59,11 @@ export class DeviceService {
       .map((response: any) => response.device);
   }
 
+  updateDesiredState(deviceId: string, desiredState: object): Observable<any> {
+    const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}/state`;
+    return this.http.patch(url, desiredState, this.apiUtilService.getHttpOptions());
+  }
+
   remove(deviceId: string) {
     const url = `${this.apiUtilService.getApiUrl()}/devices/${deviceId}`;
     return this.http.delete(url, this.apiUtilService.getHttpOptions());

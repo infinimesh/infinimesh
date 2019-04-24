@@ -77,3 +77,12 @@ $nb-themes: nb-register-theme((
   ecommerce-card-border-width: 1px,
   progress-bar-background: linear-gradient(90deg, #00c7c7 0%, #00d977 100%),
 ), cosmic, cosmic);
+
+/* Global styles */
+.action-bar {
+  text-align: right;
+
+  button {
+    margin-left: 1rem;
+  }
+}

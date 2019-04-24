@@ -24,9 +24,29 @@
         </div>
         <div class="col-md-6">
           <h2>Desired</h2>
-          <p><strong>Version:</strong> {{state?.desired?.version}}</p>
-          <p><strong>Updated:</strong> {{state?.desired?.timestamp | date: 'long'}}</p>
-          <pre [ngClass]="{'updated': desiredStateUpdated}">{{JSON.stringify(state?.desired?.data, null, 2)}}</pre>
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Version:</strong> {{state?.desired?.version}}</p>
+              <p><strong>Updated:</strong> {{state?.desired?.timestamp | date: 'long'}}</p>
+            </div>
+            <div class="col-md-6 text-right action-bar">
+              <ng-container *ngIf="!editDesiredStateStatus">
+                <button nbButton (click)="editDesiredState()"><i class="icon ion-android-create"></i> Edit
+                </button>
+              </ng-container>
+              <ng-container *ngIf="editDesiredStateStatus">
+                <button nbButton outline status="primary"  (click)="editDesiredStateStatus = false">Cancel
+                </button>
+                <button nbButton (click)="updateDesiredState()"><i class="icon ion-android-checkmark-circle"></i> Save
+                </button>
+              </ng-container>
+            </div>
+          </div>
+          <pre [ngClass]="{'updated': desiredStateUpdated}"
+               *ngIf="!editDesiredStateStatus">{{JSON.stringify(state?.desired?.data, null, 2)}}</pre>
+          <textarea nbInput fullWidth rows="15" *ngIf="editDesiredStateStatus"
+                    [(ngModel)]="desiredState">
+          </textarea>
         </div>
       </div>
     </nb-card-body>

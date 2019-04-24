@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
-import {DeviceService} from "../../core/data/device.service";
+import {ActivatedRoute} from '@angular/router';
+import {DeviceService} from '../../core/data/device.service';
 
 @Component({
   selector: 'device-detail',
@@ -9,22 +9,27 @@ import {DeviceService} from "../../core/data/device.service";
 })
 export class DeviceDetailComponent implements OnInit, OnDestroy {
 
+  deviceId;
   device$;
   state;
   stateSubscription;
   desiredStateUpdated = false;
   reportedStateUpdated = false;
+  editDesiredStateStatus = false;
+  desiredState;
+
   JSON = JSON;
 
   constructor(private route: ActivatedRoute,
-              private deviceService: DeviceService) { }
+              private deviceService: DeviceService) {
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      const deviceId = params.get("deviceId")
-      this.device$ = this.deviceService.getOne(deviceId);
-      this.deviceService.getState(deviceId).subscribe(state => {
-        if(state) {
+      this.deviceId = params.get('deviceId');
+      this.device$ = this.deviceService.getOne(this.deviceId);
+      this.deviceService.getState(this.deviceId).subscribe(state => {
+        if (state) {
           this.state = state;
         } else {
           this.state = {
@@ -32,32 +37,48 @@ export class DeviceDetailComponent implements OnInit, OnDestroy {
             desired: {}
           };
         }
-        this.stateSubscription = this.deviceService.streamState(deviceId).subscribe((data) => {
+        this.stateSubscription = this.deviceService.streamState(this.deviceId).subscribe((data) => {
           this.handleStateUpdate(data);
         });
-      })
-    })
+      });
+    });
   }
 
   private handleStateUpdate(data) {
     if (data.reportedState && data.reportedState !== null) {
       this.state.reported = data.reportedState;
-      this.reportedStateUpdated = true
+      this.reportedStateUpdated = true;
       setTimeout(() => {
-        this.reportedStateUpdated = false
+        this.reportedStateUpdated = false;
       }, 500);
     }
     if (data.desiredState && data.desiredState !== null) {
       this.state.desired = data.desiredState;
-      this.desiredStateUpdated = true
+      this.desiredStateUpdated = true;
       setTimeout(() => {
-        this.desiredStateUpdated = false
+        this.desiredStateUpdated = false;
       }, 500);
     }
   }
 
+  private editDesiredState() {
+    this.editDesiredStateStatus = true;
+    this.desiredState = JSON.stringify(this.state.desired.data, null, 2);
+  }
+
+  private updateDesiredState() {
+    const desiredStateObject = JSON.parse(this.desiredState);
+    this.deviceService.updateDesiredState(this.deviceId, desiredStateObject)
+      .subscribe(() => {
+        this.deviceService.getState(this.deviceId).subscribe(state => {
+          this.state = state;
+          this.editDesiredStateStatus = false;
+        });
+      });
+  }
+
   ngOnDestroy(): void {
-    if(this.stateSubscription) {
+    if (this.stateSubscription) {
       this.stateSubscription.unsubscribe();
     }
   }
