@@ -26,14 +26,16 @@ var (
 	addr   string
 	broker string
 
-	consumerGroup = "persister"
+	consumerGroup string
 )
 
 func init() {
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("DB_ADDR", ":6379")
+	viper.SetDefault("KAFKA_CONSUMER_GROUP", "persister")
 	viper.AutomaticEnv()
 	broker = viper.GetString("KAFKA_HOST")
+	consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
 	addr = viper.GetString("DB_ADDR")
 }
 
