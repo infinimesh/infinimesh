@@ -127,6 +127,7 @@ kubectl create secret tls apiserver-grpc-tls --cert apiserver_grpc.crt --key api
 kubectl create secret tls apiserver-rest-tls --cert apiserver_rest.crt --key apiserver_rest.key 
 kubectl create secret tls mqtt-bridge-tls --cert mqtt_bridge.crt --key mqtt_bridge.key 
 kubectl create secret tls app-tls --cert app.crt --key app.key 
+cd -
 
 # getting IP and add hosts entries
 echo " checking for host entries"
@@ -150,7 +151,8 @@ printf '\n'
 
 echo "=> installing inf (infinimesh CLI) and point to the local setup:"
 curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash  
-echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile && . ~/.profile  
+echo "inf CLI installed in" $HOME/bin
+echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile
 ~/bin/inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file ~/infinimesh-local/certs/ca.crt
 
 printf '\n'
