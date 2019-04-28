@@ -151,11 +151,11 @@ printf '\n'
 echo "=> installing inf (infinimesh CLI) and point to the local setup:"
 curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash  
 echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile && . ~/.profile  
-inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file infinimesh-local/certs/ca.crt
+~/bin/inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file ~/infinimesh-local/certs/ca.crt
 
 printf '\n'
 echo "we wait 30 secs to get all things in place ...."
-secs=$(30)
+secs=$((30))
 while [ $secs -gt 0 ]; do
    echo -ne "$secs\033[0K\r"
    sleep 1
@@ -163,7 +163,7 @@ while [ $secs -gt 0 ]; do
 done
 printf '\n'
 
-echo "infinimesh is now ready, point your browser to app.infinimesh.local or use our cli tool"
+echo "infinimesh is now ready, point your browser to app.infinimesh.local or use our CLI"
 echo "your master user credentials are: "
 echo " root" 
 kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
@@ -171,3 +171,6 @@ printf '\n'
 echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority. This works best with Firefox or Safari, we encounter some issues with Chrome."
 
 echo "please read our documention under https://infinimesh.github.io/infinimesh/docs/#/ to proceed with adding devices and sending data. Happy IoTing ..."
+
+echo "starting infinimesh CLI:"
+~/bin/inf login
