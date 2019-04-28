@@ -118,6 +118,9 @@ kubectl create secret tls mqtt-bridge-tls --cert mqtt_bridge.crt --key mqtt_brid
 kubectl create secret tls app-tls --cert app.crt --key app.key 
 
 # getting IP and add hosts entries
+echo "checking for host entries"
+printf '\n'
+
 IP=`multipass list|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
 if ! grep -q infinimesh.local "/etc/hosts"; then
 echo "please add this host entries into /etc/hosts: "
@@ -139,8 +142,19 @@ curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash
 echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile && . ~/.profile  
 inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file infinimesh-local/certs/ca.crt
 
+printf '\n'
+echo "we wait 30 secs to get all things in place ...."
+secs=$(30)
+while [ $secs -gt 0 ]; do
+   echo -ne "$secs\033[0K\r"
+   sleep 1
+   : $((secs--))
+done
+printf '\n'
+
 echo "infinimesh is now ready, point your browser to app.infinimesh.local or use our cli tool"
-echo "your master user credentials are root /"
+echo "your master user credentials are: "
+echo " root" 
 kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
 printf '\n'
 echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority. This works best with Firefox or Safari, we encounter some issues with Chrome."
