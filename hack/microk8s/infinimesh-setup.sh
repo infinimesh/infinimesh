@@ -27,8 +27,8 @@ fi
 if which kubectl >/dev/null; then
         echo " kubectl found, proceed .."
     else
-        echo " kubectl not found, please install:" \
-        echo " for OS X: brew install kubectl" \
+	echo " kubectl not found, please install:" \
+	echo " for OS X: brew install kubectl" \
 	echo " for Ubuntu: sudo snap install kubectl --classic"
         exit 0
  fi
@@ -36,7 +36,7 @@ if which kubectl >/dev/null; then
 echo "=> everything ready, let's start"
 printf '\n'
 # setup vm and install microk8s
-echo "setup VM and install microk8s into ..." 
+echo " setup VM and install microk8s into ..." 
 printf '\n'
 multipass launch --name microk8s-vm --mem 6G --disk 40G -c 2 &&
 sleep 10
