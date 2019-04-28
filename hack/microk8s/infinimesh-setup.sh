@@ -61,7 +61,7 @@ export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # setup kubectl
 if ! grep -q KUBECONFIG "~/.bashrc"; then
- 	cat 'export KUBECONFIG=$KUBECONFIG:~/kubeconfig' >> ~/.bashrc && . ~/.bashrc
+ 	cat 'export KUBECONFIG=$KUBECONFIG:~/kubeconfig' >> ~/.bashrc && . ~/.bashrc 
      else
   echo " KUBECONFIG set, ignoring ..."
 fi
