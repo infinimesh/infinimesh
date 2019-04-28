@@ -163,6 +163,9 @@ while [ $secs -gt 0 ]; do
 done
 printf '\n'
 
+# export kubeconfig again, to be sure
+export KUBECONFIG=$KUBECONFIG:~/kubeconfig
+
 echo "infinimesh is now ready, point your browser to app.infinimesh.local or use our CLI"
 echo "your master user credentials are: "
 echo " root" 
