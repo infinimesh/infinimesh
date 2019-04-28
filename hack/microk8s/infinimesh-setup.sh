@@ -35,7 +35,6 @@ if which kubectl >/dev/null; then
 echo "everything ready, let's start"
 # setup vm and install microk8s
 echo "setup VM and install microk8s into ..." 
-waitcircle &
 
 multipass launch --name microk8s-vm --mem 6G --disk 40G -c 2 &&
 multipass exec microk8s-vm -- sudo snap install microk8s --classic &&
@@ -49,8 +48,6 @@ multipass exec microk8s-vm -- /snap/bin/microk8s.enable dns ingress
 sleep 3
 multipass exec microk8s-vm -- /snap/bin/microk8s.config > ~/kubeconfig &&
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
-kill "$!" # kill wheel
-printf '\n'
 multipass list &&
 printf '\n'
 
