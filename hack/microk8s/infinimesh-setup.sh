@@ -154,7 +154,7 @@ echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile && . ~/.profile
 ~/bin/inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file ~/infinimesh-local/certs/ca.crt
 
 printf '\n'
-echo "we wait 30 secs to get all things in place ...."
+echo "wait a few secs to get all things in place ...."
 secs=$((60))
 while [ $secs -gt 0 ]; do
    echo -ne "$secs\033[0K\r"
