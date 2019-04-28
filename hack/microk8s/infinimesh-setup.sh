@@ -178,7 +178,7 @@ printf '\n'
 
 echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority." 
 echo "This works best with Firefox or Safari, we encounter some issues with Chrome."
-echo " in firefox open "about:preferences#privacy" and import ca.crt from ~/infinimesh-local/certs/ into Certificates." 
+echo "In Firefox open "about:preferences#privacy" and import ca.crt from ~/infinimesh-local/certs/ into Certificates." 
 echo "Please read our documention under https://infinimesh.github.io/infinimesh/docs/#/ to proceed with adding devices and sending data. Happy IoTing ..."
 printf '\n'
 echo "starting infinimesh CLI:"
