@@ -36,7 +36,7 @@ if which kubectl >/dev/null; then
 echo "=> everything ready, let's start"
 printf '\n'
 # setup vm and install microk8s
-echo " setup VM and install microk8s into ..." 
+echo " setup VM with multipass and install microk8s ..." 
 printf '\n'
 multipass launch --name microk8s-vm --mem 4G --disk 60G -c 4 &&
 sleep 10
@@ -61,7 +61,7 @@ export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # setup kubectl
 if ! grep -q KUBECONFIG "~/.bashrc"; then
- 	cat 'export KUBECONFIG=$KUBECONFIG:~/kubeconfig' >> ~/.bashrc && . ~/.bashrc 
+ 	echo "export KUBECONFIG=$KUBECONFIG:~/kubeconfig" >> ~/.bashrc
      else
   echo " KUBECONFIG set, ignoring ..."
 fi
@@ -167,13 +167,20 @@ printf '\n'
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 echo "infinimesh is now ready, point your browser to app.infinimesh.local or use our CLI"
-echo "your master user credentials are: "
-echo " root" 
-kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
 printf '\n'
-echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority. This works best with Firefox or Safari, we encounter some issues with Chrome."
+echo "your master user credentials are: "
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo "root" 
+kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+printf '\n'
+printf '\n'
 
-echo "please read our documention under https://infinimesh.github.io/infinimesh/docs/#/ to proceed with adding devices and sending data. Happy IoTing ..."
+echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority." 
+echo "This works best with Firefox or Safari, we encounter some issues with Chrome."
+echo " in firefox open "about:preferences#privacy" and import ca.crt from ~/infinimesh-local/certs/ into Certificates." 
+echo "Please read our documention under https://infinimesh.github.io/infinimesh/docs/#/ to proceed with adding devices and sending data. Happy IoTing ..."
 printf '\n'
 echo "starting infinimesh CLI:"
+printf '\n'
 ~/bin/inf login
