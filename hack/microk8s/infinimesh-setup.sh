@@ -38,7 +38,7 @@ printf '\n'
 # setup vm and install microk8s
 echo " setup VM and install microk8s into ..." 
 printf '\n'
-multipass launch --name microk8s-vm --mem 6G --disk 40G -c 2 &&
+multipass launch --name microk8s-vm --mem 4G --disk 60G -c 4 &&
 sleep 10
 
 multipass exec microk8s-vm -- sudo snap install microk8s --classic 
