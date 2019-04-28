@@ -135,7 +135,7 @@ printf '\n'
 
 IP=`multipass list|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
 if ! grep -q infinimesh.local "/etc/hosts"; then
-echo "=> please add this host entries into /etc/hosts: "
+echo "=> please add host entries into /etc/hosts: "
 printf '\n'
 cat <<EOL
 # infinimesh-local
