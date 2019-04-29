@@ -137,6 +137,7 @@ outer:
 		case reportedEvent := <-events:
 			value, err := toProto(reportedEvent)
 			if err != nil {
+				fmt.Println(err)
 				break outer
 			}
 
@@ -144,11 +145,13 @@ outer:
 				ReportedState: value,
 			})
 			if err != nil {
-				break
+				fmt.Println(err)
+				break outer
 			}
 		case desiredEvent := <-eventsDesired:
 			value, err := toProto(desiredEvent)
 			if err != nil {
+				fmt.Println(err)
 				break outer
 			}
 
@@ -156,7 +159,8 @@ outer:
 				DesiredState: value,
 			})
 			if err != nil {
-				break
+				fmt.Println(err)
+				break outer
 			}
 		}
 
