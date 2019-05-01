@@ -14,8 +14,8 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 |---------	|---	|
 | Q1      	| Set-up GraphDB (*Done*)<br /> Local Kubernetes operator (*Done*)<br />  Graphana POC (*Done*)	|
 | Q2    	  | Full Graphana integration incl. authentication (*In progress*) <br />  K8s operator improvements (Volumes / Cert gen) <br /> User registration in platform / UI <br /> OTA update support	|
-| Q3       	|  More granular permissions management <br /> Rules engine 	<br /> Openshift support|
-| Q4      	|   Transform device data to state in platform <br /> Improved device stats in UI	<br /> OAuth / External IAM integration|
+| Q3       	|  OPC-UA support <br /> More granular permissions management <br /> Rules engine 	<br /> Openshift support|
+| Q4      	|   OAuth / External IAM integration <br /> Transform device data to state in platform <br /> Improved device stats in UI	|
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_shield)
