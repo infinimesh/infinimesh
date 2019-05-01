@@ -26,7 +26,7 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
 
 ## k8s demo / laptop installation
-We have built an automated demo setup with microk8s as a one-liner:
+We have built an automated demo setup with microk8s as an one-liner:
 https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s
 
 ## Development
