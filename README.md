@@ -5,17 +5,7 @@ Infinimesh Platform is an opinionated multi-tenant hyperscale Platform to connec
 
 ## Project status
 Infinimesh is currently under heavy development. All development, except minor additional services for our SaaS, is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components are already available: MQTT Bridge, State management, Graph-based permission management, Device-to-Cloud and Cloud-to-Device messages. A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is by using our SaaS offering: register [here](https://www.infinimesh.io/signup.html) for free.
-A ui/dashboard is currently under development and will be available in mid Q2 2019.
-
-## Feature Roadmap
-*Subject to change*
-
-| **2019** 	|  **Features** 	|
-|---------	|---	|
-| Q1      	| Set-up GraphDB (*Done*)<br /> Local Kubernetes operator (*Done*)<br />  Graphana POC (*Done*)	|
-| Q2    	  | Full Graphana integration incl. authentication (*In progress*) <br />  K8s operator improvements (Volumes / Cert gen) <br /> User registration in platform / UI <br /> OTA update support	|
-| Q3       	|  OPC-UA support <br /> More granular permissions management <br /> Rules engine 	<br /> Openshift support|
-| Q4      	|   OAuth / External IAM integration <br /> Transform device data to state in platform <br /> Improved device stats in UI	|
+A ui/dashboard is currently under development and will be available in mid Q2 2019. <br /> [Here](https://github.com/infinimesh/infinimesh/blob/master/roadmap.md) is a link to our feature roadmap.
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_shield)
