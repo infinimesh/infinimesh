@@ -1,5 +1,5 @@
 # Feature Roadmap
-The infinimesh platform is quickly moving towards a open beta release which we are targeting for Q3 or Q4 2019. Below you find our feature roadmap. As a community-driven project we highly appreciate feedback or suggestions for missing features. Just send us a PR :) 
+The infinimesh platform is quickly moving towards an open beta release which we are targeting for Q3 or Q4 2019. Below you find our feature roadmap. As a community-driven project we highly appreciate feedback or suggestions for missing features. Just send us a PR :) 
 
 | **2019** 	|  **Features** 	|
 |---------	|---	|
