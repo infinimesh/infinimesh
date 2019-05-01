@@ -111,7 +111,7 @@ func handler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) 
 			}
 			name = acc.Name
 
-			userCache.Add(userID, acc.Name, time.Minute*1)
+			_ = userCache.Add(userID, acc.Name, time.Minute*1)
 		}
 
 		r.Header.Set("X-WEBAUTH-USER", name)
