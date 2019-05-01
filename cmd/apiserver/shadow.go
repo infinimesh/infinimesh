@@ -64,7 +64,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 		return status.Error(codes.Unauthenticated, "Unauthenticated")
 	}
 
-	resp, err := s.accountClient.IsAuthorized(context.TODO(), &nodepb.IsAuthorizedRequest{
+	resp, err := s.accountClient.IsAuthorized(srv.Context(), &nodepb.IsAuthorizedRequest{
 		Node:    request.Id,
 		Account: account,
 		Action:  nodepb.Action_READ,
@@ -76,7 +76,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 		return status.Error(codes.PermissionDenied, "Permission denied")
 	}
 
-	c, err := s.client.StreamReportedStateChanges(context.Background(), request)
+	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {
 		return err
 	}
