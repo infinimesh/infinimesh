@@ -27,6 +27,7 @@ var (
 	accountIDClaim = "account_id"
 
 	nodeserver string
+	grafanaURL string
 
 	log *zap.Logger
 
@@ -39,9 +40,11 @@ func init() {
 	log, _ = zap.NewDevelopment()
 
 	viper.SetDefault("NODE_HOST", "localhost:8082")
+	viper.SetDefault("GRAFANA_URL", "localhost:3000")
 	viper.AutomaticEnv()
 
 	nodeserver = viper.GetString("NODE_HOST")
+	grafanaURL = viper.GetString("GRAFANA_URL")
 
 	{
 		b64SignSecret := viper.GetString("JWT_SIGNING_KEY")
@@ -59,7 +62,7 @@ func init() {
 }
 
 func main() {
-	u, err := url.Parse("http://localhost:3000")
+	u, err := url.Parse(grafanaURL)
 	if err != nil {
 		panic(err)
 	}
