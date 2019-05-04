@@ -209,7 +209,7 @@ func main() {
 
 func handler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Info("Request", zap.String("URL", r.URL.String()))
+		log.Info("Request", zap.String("URL", r.URL.RequestURI()))
 		cookie, err := r.Cookie("token")
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
