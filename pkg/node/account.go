@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/infinimesh/pkg/grafana"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
@@ -16,7 +17,8 @@ type AccountController struct {
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
 
-	Repo Repo
+	Grafana *grafana.Client
+	Repo    Repo
 }
 
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
@@ -36,7 +38,14 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Failed to create user")
 	}
 
-	log.Info("Successfully created account", zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
+	log.Info("Created account", zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
+
+	err = s.Grafana.CreateUser(request.Account.Name)
+	if err != nil {
+		log.Error("Failed to create grafana user", zap.String("name", request.Account.Name), zap.Error(err))
+	} else {
+		log.Info("Created Grafana user")
+	}
 
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
@@ -19,6 +18,9 @@ import (
 
 	cache "github.com/patrickmn/go-cache"
 
+	"time"
+
+	"github.com/infinimesh/infinimesh/pkg/grafana"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
@@ -31,16 +33,18 @@ var (
 
 	log *zap.Logger
 
-	accountService nodepb.AccountServiceClient
+	accountService   nodepb.AccountServiceClient
+	namespaceService nodepb.NamespacesClient
 
 	userCache *cache.Cache
+	g         *grafana.Client
 )
 
 func init() {
 	log, _ = zap.NewDevelopment()
 
 	viper.SetDefault("NODE_HOST", "localhost:8082")
-	viper.SetDefault("GRAFANA_URL", "localhost:3000")
+	viper.SetDefault("GRAFANA_URL", "http://localhost:3000")
 	viper.AutomaticEnv()
 
 	nodeserver = viper.GetString("NODE_HOST")
@@ -59,6 +63,102 @@ func init() {
 	}
 
 	userCache = cache.New(1*time.Second, 5*time.Second)
+	g = grafana.NewClient("http://localhost:3000", "admin", "admin")
+}
+
+// TODO remove accounts in grafana if deleted in platform
+func syncAccounts() {
+	resp, err := accountService.ListAccounts(context.Background(), &nodepb.ListAccountsRequest{})
+	if err != nil {
+		log.Error("Failed to ListAccounts", zap.Error(err))
+		return
+	}
+
+	for _, account := range resp.Accounts {
+		if !account.Enabled {
+			log.Debug("Account disabled, skipping", zap.String("id", account.Uid), zap.String("name", account.Name), zap.Error(err))
+			continue
+		}
+		err := g.CreateUser(account.Name)
+		if err != nil {
+			log.Debug("Could not create account", zap.String("id", account.Uid), zap.String("name", account.Name), zap.Error(err))
+		} else {
+			log.Info("Created account", zap.String("id", account.Uid), zap.String("name", account.Name))
+		}
+
+		if account.Name == "root" {
+			userID, err := g.GetUserID("root")
+			if err != nil {
+				log.Error("Failed to get userID of root", zap.Error(err))
+				continue
+			}
+
+			err = g.MakeUserAdmin(userID)
+			if err != nil {
+				log.Error("Failed to make root admin", zap.Error(err))
+			}
+		}
+
+	}
+}
+
+func syncPermissions(namespace string) {
+	// Get Permissions per NS
+	r, err := namespaceService.ListPermissions(context.Background(), &nodepb.ListPermissionsRequest{Namespace: namespace})
+	if err != nil {
+		log.Error("Failed to fetch perms", zap.Error(err))
+	}
+
+	orgID, err := g.GetOrgID(namespace)
+	if orgID == 1 {
+		log.Error("Ignoring Org with ID 1")
+		return
+	}
+	for _, permission := range r.Permissions {
+		log.Info("Found permission", zap.Any("perm", permission))
+
+		role, err := actionToGrafanaRole(permission.Action)
+		if err != nil {
+			return
+		}
+		err = g.AddUserToOrg(orgID, permission.AccountName, role)
+		if err != nil {
+			log.Info("Failed to add user to org", zap.Error(err))
+		} else {
+			log.Info("Added user to org", zap.String("org", namespace), zap.String("account", permission.AccountName))
+		}
+	}
+
+}
+
+func actionToGrafanaRole(action nodepb.Action) (string, error) {
+	switch action {
+	case nodepb.Action_READ:
+		return "Viewer", nil
+	case nodepb.Action_WRITE:
+		return "Editor", nil
+	}
+	return "", errors.New("Invalid action")
+}
+
+// TODO remove namespaces & permissions deleted in platform
+func syncNamespaces() {
+	resp, err := namespaceService.ListNamespaces(context.Background(), &nodepb.ListNamespacesRequest{})
+	if err != nil {
+		log.Error("Failed to ListNamespaces", zap.Error(err))
+	}
+
+	for _, namespace := range resp.Namespaces {
+		err := g.CreateOrg(namespace.Name)
+		if err != nil {
+			log.Debug("Could not create Org", zap.Error(err))
+		} else {
+			log.Info("Created Org", zap.String("name", namespace.Name))
+		}
+
+		syncPermissions(namespace.Name)
+
+	}
 }
 
 func main() {
@@ -74,9 +174,22 @@ func main() {
 	}
 
 	accountService = nodepb.NewAccountServiceClient(c)
+	namespaceService = nodepb.NewNamespacesClient(c)
+
+	ticker := time.NewTicker(time.Minute * 5)
+
+	go func() {
+		log.Info("Start Sync")
+		syncAccounts()
+		syncNamespaces()
+		for range ticker.C {
+			syncAccounts()
+			syncNamespaces()
+		}
+	}()
 
 	http.HandleFunc("/", handler(proxy))
-	err = http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8071", nil)
 	if err != nil {
 		panic(err)
 	}
