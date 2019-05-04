@@ -118,6 +118,10 @@ func syncPermissions(namespace string) {
 	}
 
 	orgID, err := g.GetOrgID(namespace)
+	if err != nil {
+		log.Error("Could not get ID for namespace", zap.String("namespace", namespace))
+	}
+
 	if orgID == 1 {
 		log.Error("Ignoring Org with ID 1")
 		return

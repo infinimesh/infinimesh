@@ -184,10 +184,12 @@ func (c *Client) MakeUserAdmin(userID int) error {
 	js, err := json.Marshal(map[string]interface{}{
 		"isGrafanaAdmin": true,
 	})
+	if err != nil {
+		return err
+	}
 
 	buf := bytes.NewBuffer(js)
 	req, err := http.NewRequest("PUT", c.baseURL+"/api/admin/users/"+strconv.Itoa(userID)+"/permissions", buf)
-	fmt.Println(req.URL.String())
 	if err != nil {
 		return err
 	}
@@ -195,6 +197,10 @@ func (c *Client) MakeUserAdmin(userID int) error {
 
 	req.SetBasicAuth(c.user, c.password)
 	resp, err := c.c.Do(req)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
 	}
