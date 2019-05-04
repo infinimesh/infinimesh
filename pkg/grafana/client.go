@@ -48,6 +48,7 @@ func (c *Client) CreateUser(name string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
@@ -75,6 +76,7 @@ func (c *Client) CreateOrg(name string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
@@ -104,6 +106,7 @@ func (c *Client) AddUserToOrg(orgID int, name string, role string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
@@ -128,6 +131,7 @@ func (c *Client) GetOrgID(orgName string) (orgID int, err error) {
 	if err != nil {
 		return 0, err
 	}
+	defer resp.Body.Close()
 
 	buf := &bytes.Buffer{}
 	var org Org
@@ -162,6 +166,7 @@ func (c *Client) GetUserID(username string) (userID int, err error) {
 	if err != nil {
 		return 0, err
 	}
+	defer resp.Body.Close()
 
 	buf := &bytes.Buffer{}
 	var user User
@@ -200,6 +205,7 @@ func (c *Client) MakeUserAdmin(userID int) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
