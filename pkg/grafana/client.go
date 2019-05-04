@@ -72,6 +72,10 @@ func (c *Client) CreateOrg(name string) error {
 
 	req.SetBasicAuth(c.user, c.password)
 	resp, err := c.c.Do(req)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
 	}
@@ -84,6 +88,9 @@ func (c *Client) AddUserToOrg(orgID int, name string, role string) error {
 		"loginOrEmail": name,
 		"role":         role,
 	})
+	if err != nil {
+		return err
+	}
 
 	buf := bytes.NewBuffer(js)
 	req, err := http.NewRequest("POST", c.baseURL+"/api/orgs/"+strconv.Itoa(orgID)+"/users", buf)
@@ -94,6 +101,10 @@ func (c *Client) AddUserToOrg(orgID int, name string, role string) error {
 
 	req.SetBasicAuth(c.user, c.password)
 	resp, err := c.c.Do(req)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
 	}
