@@ -22,6 +22,7 @@ export class UserService {
       .subscribe((token: NbAuthJWTToken) => {
 
         if (token.isValid()) {
+          document.cookie = "token=" + token.getValue();
           this.accountId = token.getPayload().account_id;
           this.httpOptions = {
             headers: new HttpHeaders({
