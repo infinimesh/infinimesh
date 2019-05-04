@@ -86,8 +86,8 @@ func syncAccounts() {
 			log.Info("Created account", zap.String("id", account.Uid), zap.String("name", account.Name))
 		}
 
-		if account.Name == "root" {
-			userID, err := g.GetUserID("root")
+		if account.IsRoot {
+			userID, err := g.GetUserID(account.Name)
 			if err != nil {
 				log.Error("Failed to get userID of root", zap.Error(err))
 				continue
@@ -96,6 +96,14 @@ func syncAccounts() {
 			err = g.MakeUserAdmin(userID)
 			if err != nil {
 				log.Error("Failed to make root admin", zap.Error(err))
+			}
+
+			err = g.AddUserToOrg(1, account.Name, "Admin")
+			if err != nil {
+				log.Error("Could not add user to main org", zap.String("id", account.Uid), zap.String("name", account.Name), zap.Error(err))
+			} else {
+
+				log.Info("Made user root", zap.String("id", account.Uid), zap.String("name", account.Name), zap.Error(err))
 			}
 		}
 
@@ -123,7 +131,7 @@ func syncPermissions(namespace string) {
 		}
 		err = g.AddUserToOrg(orgID, permission.AccountName, role)
 		if err != nil {
-			log.Info("Failed to add user to org", zap.Error(err))
+			log.Info("Failed to add user to org", zap.String("org/ns", namespace), zap.String("account", permission.AccountName), zap.Error(err))
 		} else {
 			log.Info("Added user to org", zap.String("org", namespace), zap.String("account", permission.AccountName))
 		}
