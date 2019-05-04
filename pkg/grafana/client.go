@@ -31,6 +31,9 @@ func (c *Client) CreateUser(name string) error {
 		"login":    name,
 		"password": "dummy",
 	})
+	if err != nil {
+		return err
+	}
 
 	buf := bytes.NewBuffer(js)
 	req, err := http.NewRequest("POST", c.baseURL+"/api/admin/users", buf)
@@ -42,6 +45,10 @@ func (c *Client) CreateUser(name string) error {
 	req.SetBasicAuth(c.user, c.password)
 
 	resp, err := c.c.Do(req)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
 	}
@@ -52,6 +59,9 @@ func (c *Client) CreateOrg(name string) error {
 	js, err := json.Marshal(map[string]string{
 		"name": name,
 	})
+	if err != nil {
+		return err
+	}
 
 	buf := bytes.NewBuffer(js)
 	req, err := http.NewRequest("POST", c.baseURL+"/api/orgs", buf)
