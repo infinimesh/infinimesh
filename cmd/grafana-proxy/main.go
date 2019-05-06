@@ -206,6 +206,7 @@ func main() {
 	ticker := time.NewTicker(time.Minute * 5)
 
 	go func() {
+		time.Sleep(time.Second * 30)
 		log.Info("Start Sync")
 		syncAccounts()
 		syncNamespaces()
