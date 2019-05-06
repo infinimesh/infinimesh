@@ -133,11 +133,26 @@ func syncPermissions(namespace string) {
 		if err != nil {
 			return
 		}
+
 		err = g.AddUserToOrg(orgID, permission.AccountName, role)
 		if err != nil {
 			log.Info("Failed to add user to org", zap.String("org/ns", namespace), zap.String("account", permission.AccountName), zap.Error(err))
 		} else {
 			log.Info("Added user to org", zap.String("org", namespace), zap.String("account", permission.AccountName))
+
+			if permission.AccountName == namespace {
+
+				userID, err := g.GetUserID(permission.AccountName)
+				if err != nil {
+					log.Info("Failed to get userID", zap.String("org/ns", namespace), zap.String("account", permission.AccountName), zap.Error(err))
+				}
+
+				err = g.SwitchUserOrg(userID, orgID)
+				if err != nil {
+					log.Info("Failed to switch user org", zap.String("org/ns", namespace), zap.String("account", permission.AccountName), zap.Error(err))
+				}
+				log.Info("Failed to set org", zap.String("org/ns", namespace), zap.String("account", permission.AccountName), zap.Error(err))
+			}
 		}
 	}
 
