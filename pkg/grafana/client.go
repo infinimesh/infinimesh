@@ -212,3 +212,24 @@ func (c *Client) MakeUserAdmin(userID int) error {
 	}
 	return nil
 }
+
+func (c *Client) SwitchUserOrg(userID int, orgID int) error {
+	req, err := http.NewRequest("POST", c.baseURL+"/api/users/"+strconv.Itoa(userID)+"/using/"+strconv.Itoa(orgID), http.NoBody)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	req.SetBasicAuth(c.user, c.password)
+	resp, err := c.c.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Wrong status code: %v", resp.StatusCode)
+	}
+	return nil
+
+}
