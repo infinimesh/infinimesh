@@ -38,7 +38,7 @@ printf '\n'
 # setup vm and install microk8s
 echo " setup VM with multipass and install microk8s ..." 
 printf '\n'
-multipass launch --name microk8s-vm --mem 4G --disk 60G -c 4 &&
+multipass launch --name microk8s-vm --mem 3G --disk 10G -c 3 &&
 sleep 10
 
 multipass exec microk8s-vm -- sudo snap install microk8s --classic 
@@ -157,7 +157,7 @@ echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile
 
 printf '\n'
 echo "wait a few secs to get all things in place ...."
-secs=$((60))
+secs=$((90))
 while [ $secs -gt 0 ]; do
    echo -ne "$secs\033[0K\r"
    sleep 1
@@ -174,8 +174,8 @@ echo "your master user credentials are: "
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "root" 
 kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 printf '\n'
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 printf '\n'
 
 echo "To trust the root certificate, you must go to your browser settings and add the file ca.crt as an certificate Authority." 
