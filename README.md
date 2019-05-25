@@ -1,11 +1,14 @@
 # Infinimesh Platform
 Infinimesh Platform is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully cloud native. No vendor lock-in - run it yourself on Kubernetes or use our SaaS offering.
 
-![asciicinema](asciicast.gif)
-
 ## Project status
-Infinimesh is currently under heavy development. All development, except minor additional services for our SaaS, is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components are already available: MQTT Bridge, State management, Graph-based permission management, Device-to-Cloud and Cloud-to-Device messages. A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is by using our SaaS offering: register [here](https://www.infinimesh.io/signup.html) for free.
-A ui/dashboard is currently under development and will be available in mid Q2 2019. <br /> [Here](https://github.com/infinimesh/infinimesh/blob/master/roadmap.md) is a link to our feature roadmap.
+Infinimesh is currently under open source development. All development, except minor additional services for our SaaS, is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components are already available: MQTT Bridge, State management, Graph-based permission management, Device-to-Cloud and Cloud-to-Device messages. A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is by using kubernetes:
+```
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup.sh)
+```
+
+A ui/dashboard is currently under development and will be available in mid Q2 2019. 
+<br /> [Here](https://github.com/infinimesh/infinimesh/blob/master/roadmap.md) is a link to our feature roadmap.
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_shield)
@@ -24,6 +27,9 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 
 ## API Documentation
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+
+## Community
+You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity)
 
 ## Development
 ### Local development installation
