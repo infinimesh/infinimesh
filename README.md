@@ -26,7 +26,7 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 | Shadow | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-delta-merger/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-delta-merger) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-api/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-api) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-persister/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-persister) |
 
 ## API Documentation
-You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+You can find swagger docs for the API server [here](https://2pk03.github.io/infinimesh/swagger-ui/)
 
 ## Community
 You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity)
