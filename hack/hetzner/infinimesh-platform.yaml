@@ -8,23 +8,23 @@ spec:
   kafka:
     bootstrapServers: "infinimesh-kafka-bootstrap.kafka.svc.cluster.local:9092"
   app:
-    host: "app.infinimesh.io"
+    host: "app.infinimesh.net"
     tls:
       - hosts:
-        - "app.infinimesh.io"
+        - "app.infinimesh.net"
         secretName: "app-tls"
   mqtt:
     secretName: "mqtt-bridge-tls"
   apiserver:
     restful:
-      host: "api.infinimesh.io"
+      host: "api.infinimesh.net"
       tls:
         - hosts:
-          - "api.infinimesh.io"
+          - "api.infinimesh.net"
           secretName: "apiserver-rest-tls"
     grpc:
-      host: "grpc.api.infinimesh.io"
+      host: "grpc.api.infinimesh.net"
       tls:
         - hosts:
-          - "grpc.api.infinimesh.io"
+          - "grpc.api.infinimesh.net"
           secretName: "apiserver-grpc-tls"
