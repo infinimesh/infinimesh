@@ -23,8 +23,8 @@ spec:
           - "api.infinimesh.net"
           secretName: "apiserver-rest-tls"
     grpc:
-      host: "grpc.api.infinimesh.net"
+      host: "grpc.infinimesh.net"
       tls:
         - hosts:
-          - "grpc.api.infinimesh.net"
+          - "grpc.infinimesh.net"
           secretName: "apiserver-grpc-tls"
