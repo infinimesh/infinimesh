@@ -40,7 +40,7 @@ sleep 5
 sleep 10 
 
 /snap/bin/microk8s.enable dns ingress
-sleep 3
+sleep 20
 
 /snap/bin/microk8s.config > ~/kubeconfig 
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
@@ -116,7 +116,7 @@ cd -
 echo " checking for host entries"
 printf '\n'
 
-IP=`udo hostname -i|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
+IP=`sudo hostname -i|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
 if ! grep -q infinimesh.local "/etc/hosts"; then
 echo "=> please add host entries into /etc/hosts: "
 printf '\n'
@@ -156,7 +156,7 @@ printf '\n'
 echo "your master user credentials are: "
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "root" 
-kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -D
+kubectl get secret my-infinimesh-root-account -o=jsonpath='{.data.password}' | base64 -d
 printf '\n'
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 printf '\n'
