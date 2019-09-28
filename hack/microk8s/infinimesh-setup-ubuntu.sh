@@ -70,13 +70,13 @@ sleep 2
 
 echo " installing kubeDB from https://github.com/kubedb "
 printf '\n'
-curl -fsSL curl -fsSL https://github.com/kubedb/installer/raw/v0.13.0-rc.0/deploy/kubedb.sh | bash
+curl -fsSL https://github.com/kubedb/installer/raw/v0.13.0-rc.0/deploy/kubedb.sh | bash
 sleep 5
 
 echo " installing Kafka from https://github.com/strimzi "
 printf '\n'
 kubectl create namespace kafka &&
-curl -L curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.13.0/strimzi-cluster-operator-0.13.0.yaml \
+curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.13.0/strimzi-cluster-operator-0.13.0.yaml \
   | sed 's/namespace: .*/namespace: kafka/' \
   | kubectl -n kafka apply -f -
 printf '\n'
