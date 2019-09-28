@@ -26,7 +26,7 @@ dd if=/dev/urandom of=randfile bs=256 count=1
 echo "=> everything ready, let's start"
 printf '\n'
 # install microk8s
-sudo snap install microk8s --classic 
+snap install microk8s --classic --channel=1.14/stable 
 sleep 30
 
 sudo iptables -P FORWARD ACCEPT
@@ -74,7 +74,7 @@ sleep 5
 echo " installing Kafka from https://github.com/strimzi "
 printf '\n'
 kubectl create namespace kafka &&
-curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml \
+curl -L curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.13.0/strimzi-cluster-operator-0.13.0.yaml \
   | sed 's/namespace: .*/namespace: kafka/' \
   | kubectl -n kafka apply -f -
 printf '\n'
