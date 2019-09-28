@@ -38,25 +38,25 @@ printf '\n'
 # setup vm and install microk8s
 echo " setup VM with multipass and install microk8s ..." 
 printf '\n'
-multipass launch --name microk8s-vm --mem 3G --disk 10G -c 3 &&
+multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
 sleep 10
 
-multipass exec microk8s-vm -- sudo snap install microk8s --classic 
+multipass exec infinimesh-dev -- sudo snap install microk8s --classic 
 sleep 5
 
-multipass exec microk8s-vm -- sudo iptables -P FORWARD ACCEPT
+multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-multipass exec microk8s-vm -- /snap/bin/microk8s.enable dns dashboard
+multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns dashboard
 sleep 5
 
-multipass exec microk8s-vm -- /snap/bin/microk8s.enable storage
+multipass exec infinimesh-dev -- /snap/bin/microk8s.enable storage
 sleep 10 
 
-multipass exec microk8s-vm -- /snap/bin/microk8s.enable dns ingress
+multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns ingress
 sleep 3
 
-multipass exec microk8s-vm -- /snap/bin/microk8s.config > ~/kubeconfig 
+multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig 
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # setup kubectl
@@ -138,7 +138,7 @@ if ! grep -q infinimesh.local "/etc/hosts"; then
 echo "=> please add host entries into /etc/hosts: "
 printf '\n'
 cat <<EOL
-# infinimesh-local
+# infinimesh-dev
 $IP grpc.api.infinimesh.local
 $IP api.infinimesh.local
 $IP app.infinimesh.local
