@@ -27,7 +27,7 @@ echo "=> everything ready, let's start"
 printf '\n'
 # install microk8s
 sudo snap install microk8s --classic 
-sleep 5
+sleep 30
 
 sudo iptables -P FORWARD ACCEPT
 sleep 15
