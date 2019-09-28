@@ -21,6 +21,8 @@ if which kubectl >/dev/null; then
 	echo " for Ubuntu: sudo snap install kubectl --classic"
         exit 0
  fi
+# creating RND file for secure cert creation
+dd if=/dev/urandom of=randfile bs=256 count=1
 
 echo "=> everything ready, let's start"
 printf '\n'
