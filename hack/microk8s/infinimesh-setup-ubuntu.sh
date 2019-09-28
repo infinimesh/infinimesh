@@ -32,14 +32,11 @@ sleep 30
 sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-/snap/bin/microk8s.enable dns dashboard
+/snap/bin/microk8s.enable dns dashboard ingress
 sleep 5
 
 /snap/bin/microk8s.enable storage
-sleep 10 
-
-/snap/bin/microk8s.enable dns ingress
-sleep 20
+sleep 10
 
 /snap/bin/microk8s.config > ~/kubeconfig 
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
