@@ -38,25 +38,25 @@ printf '\n'
 # setup vm and install microk8s
 echo " setup VM with multipass and install microk8s ..." 
 printf '\n'
-multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
+sudo multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
 sleep 10
 
-multipass exec infinimesh-dev -- sudo snap install microk8s --classic 
+sudo multipass exec infinimesh-dev -- sudo snap install microk8s --classic 
 sleep 5
 
-multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
+sudo multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns dashboard
+sudo multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns dashboard
 sleep 5
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.enable storage
+sudo multipass exec infinimesh-dev -- /snap/bin/microk8s.enable storage
 sleep 10 
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns ingress
+sudo multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns ingress
 sleep 3
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig 
+sudo multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig 
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # setup kubectl
@@ -67,7 +67,7 @@ if ! grep -q KUBECONFIG "~/.bashrc"; then
 fi
 printf '\n'
 
-multipass list &&
+sudo multipass list &&
 printf '\n'
 
 # check if we can reach kubernetes and abort if not
@@ -133,7 +133,7 @@ cd -
 echo " checking for host entries"
 printf '\n'
 
-IP=`multipass list|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
+IP=`sudo multipass list|grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}"`
 if ! grep -q infinimesh.local "/etc/hosts"; then
 echo "=> please add host entries into /etc/hosts: "
 printf '\n'
