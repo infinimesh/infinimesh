@@ -1,5 +1,5 @@
 # microk8s automated setup
-This script installs infinimesh and microk8s to allow a seamless developer experience. We support at the moment OS X (well tested) and Ubuntu (not so well tested). We need 2 tools installed on your system:
+This script installs infinimesh and microk8s to allow a seamless developer experience. We support at the moment OS X (well tested) and Ubuntu (not so well tested). We need two tools installed on your system:
 ```
 multipass
 kubectl
