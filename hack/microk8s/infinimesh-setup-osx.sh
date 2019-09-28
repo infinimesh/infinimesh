@@ -38,7 +38,7 @@ printf '\n'
 # setup vm and install microk8s
 echo " setup VM with multipass and install microk8s ..." 
 printf '\n'
-multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
+multipass launch --name infinimesh-dev --mem 3G --disk 5G -c 3 &&
 sleep 10
 
 multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.14/stable
