@@ -56,12 +56,12 @@ sleep 10
 multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns ingress
 sleep 3
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig 
-export KUBECONFIG=$KUBECONFIG:~/kubeconfig
+multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig-local 
+export KUBECONFIG=$KUBECONFIG:~/kubeconfig-local
 
 # setup kubectl
 if ! grep -q KUBECONFIG "~/.bashrc"; then
- 	echo "export KUBECONFIG=$KUBECONFIG:~/kubeconfig" >> ~/.bashrc
+ 	echo "export KUBECONFIG=$KUBECONFIG:~/kubeconfig-local" >> ~/.bashrc
      else
   echo " KUBECONFIG set, ignoring ..."
 fi
