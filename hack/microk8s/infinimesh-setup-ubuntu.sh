@@ -7,10 +7,8 @@ mkdir -p ~/infinimesh-local && cd ~/infinimesh-local
 # check if we on Linux or OS X
  if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	 echo "Linux OS found, proceed ..."
-     elif [[ "$OSTYPE" == "darwin"* ]]; then
-         echo " OS X found, proceed ..."
      else
-	 echo "no Linux / OSX environment, aborting ..."
+	 echo "no Linux environment, aborting ..."
        	 exit 0
 fi
 
