@@ -4,9 +4,13 @@ This script installs infinimesh and microk8s to allow a seamless developer exper
 multipass
 kubectl
 ```
-## Quickstart
+## Quickstart OSX
 ```
-bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup.sh)
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
+```
+## Quickstart Ubuntu
+```
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-ubuntu.sh)
 ```
 
 The script installs microk8s in his own VM, enables DNS, Storage, Ingress + Grafana monitoring and infinimesh as a local development system. Please read our documention https://infinimesh.github.io/infinimesh/docs/#/ and our blog https://blog.infinimesh.io/ for latest insights and HowTos.
