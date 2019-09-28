@@ -4,7 +4,7 @@ clear
 # create infinimesh directory
 mkdir -p ~/infinimesh-local && cd ~/infinimesh-local
 
-# check if we on Linux or OS X
+# check if we on Linux
  if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	 echo "Linux OS found, proceed ..."
      else
@@ -17,7 +17,6 @@ if which kubectl >/dev/null; then
         echo " kubectl found, proceed .."
     else
 	echo " kubectl not found, please install:" \
-	echo " for OS X: brew install kubectl" \
 	echo " for Ubuntu: sudo snap install kubectl --classic"
         exit 0
  fi
@@ -46,7 +45,7 @@ sleep 20
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # setup kubectl
-if ! grep -q KUBECONFIG "~/.bashrc"; then
+if ! grep -q KUBECONFIG ~/.bashrc; then
  	echo "export KUBECONFIG=$KUBECONFIG:~/kubeconfig" >> ~/.bashrc
      else
   echo " KUBECONFIG set, ignoring ..."
