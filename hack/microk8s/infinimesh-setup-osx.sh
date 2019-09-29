@@ -81,9 +81,12 @@ printf '\n'
 	exit 0
  fi
 
-echo " enable standard storage class"
+echo " enable standard storage class and patch to non-default"
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/storage.yaml
 sleep 15
+
+kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+sleep 10
 
 echo " installing infinimesh operator "
 printf '\n'
