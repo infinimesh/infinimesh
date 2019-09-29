@@ -106,11 +106,6 @@ printf '\n'
 echo "=> now we install infinimesh ..."
 printf '\n'
 
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/postgres.yaml
-sleep 30
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
-
 echo " creating self - signed certificates "
 printf '\n'
 mkdir -p certs && cd certs
@@ -137,6 +132,11 @@ kubectl create secret tls apiserver-rest-tls --cert apiserver_rest.crt --key api
 kubectl create secret tls mqtt-bridge-tls --cert mqtt_bridge.crt --key mqtt_bridge.key 
 kubectl create secret tls app-tls --cert app.crt --key app.key 
 cd -
+
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/postgres.yaml
+sleep 30
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
 
 # getting IP and add hosts entries
 echo " checking for host entries"
