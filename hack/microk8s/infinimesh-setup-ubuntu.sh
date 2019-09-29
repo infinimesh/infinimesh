@@ -61,30 +61,6 @@ printf '\n'
 	echo "something went wrong, check the logs, aborting "
 	exit 0
  fi
-	 	
-echo " installing infinimesh operator "
-printf '\n'
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/crd.yaml
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/operator.yaml
-sleep 2
-
-echo " installing kubeDB from https://github.com/kubedb "
-printf '\n'
-curl -fsSL https://raw.githubusercontent.com/kubedb/cli/0.11.0/hack/deploy/kubedb.sh | bash
-sleep 5
-
-echo " installing Kafka from https://github.com/strimzi "
-printf '\n'
-kubectl create namespace kafka &&
-curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml \
-  | sed 's/namespace: .*/namespace: kafka/' \
-  | kubectl -n kafka apply -f -
-printf '\n'
-echo "=> now we install infinimesh ..."
-printf '\n'
-
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
 
 echo " creating self - signed certificates "
 printf '\n'
@@ -112,6 +88,31 @@ kubectl create secret tls apiserver-rest-tls --cert apiserver_rest.crt --key api
 kubectl create secret tls mqtt-bridge-tls --cert mqtt_bridge.crt --key mqtt_bridge.key 
 kubectl create secret tls app-tls --cert app.crt --key app.key 
 cd -
+
+echo " installing infinimesh operator "
+printf '\n'
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/operator.yaml
+sleep 2
+
+echo " installing kubeDB from https://github.com/kubedb "
+printf '\n'
+curl -fsSL https://raw.githubusercontent.com/kubedb/cli/0.11.0/hack/deploy/kubedb.sh | bash
+sleep 5
+
+echo " installing Kafka from https://github.com/strimzi "
+printf '\n'
+kubectl create namespace kafka &&
+curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml \
+  | sed 's/namespace: .*/namespace: kafka/' \
+  | kubectl -n kafka apply -f -
+printf '\n'
+echo "=> now we install infinimesh ..."
+printf '\n'
+
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
+
 
 # getting IP and add hosts entries
 echo " checking for host entries"
