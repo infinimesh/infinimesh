@@ -44,6 +44,9 @@ sleep 10
 multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.14/stable
 sleep 5
 
+# set sudo for accessing k8s
+multipass exec infinimesh-dev -- sudo usermod -a -G microk8s multipass
+
 multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
 sleep 15
 
@@ -55,9 +58,6 @@ sleep 10
 
 multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns ingress
 sleep 3
-
-# set sudo for accessing k8s
-multipass exec infinimesh-dev -- sudo usermod -a -G microk8s multipass
 
 multipass exec infinimesh-dev -- /snap/bin/microk8s.config > ~/kubeconfig-local 
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig-local
