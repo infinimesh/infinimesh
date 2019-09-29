@@ -41,7 +41,7 @@ printf '\n'
 multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
 sleep 10
 
-multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.13/stable
+multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.14/stable
 sleep 5
 
 multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
@@ -80,7 +80,11 @@ printf '\n'
 	echo "something went wrong, check the logs, aborting "
 	exit 0
  fi
-	 	
+
+echo " enable standard storage class"
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/storage.yaml
+sleep 15
+
 echo " installing infinimesh operator "
 printf '\n'
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/crd.yaml
