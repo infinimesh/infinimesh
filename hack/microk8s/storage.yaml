@@ -7,4 +7,4 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
   labels:
     addonmanager.kubernetes.io/mode: EnsureExists
-provisioner: kubernetes.io/host-path
+provisioner: microk8s.io/hostpath
