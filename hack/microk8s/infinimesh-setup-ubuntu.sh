@@ -26,7 +26,7 @@ dd if=/dev/urandom of=randfile bs=256 count=1
 echo "=> everything ready, let's start"
 printf '\n'
 # install microk8s
-sudo snap install --channel=1.12 microk8s --classic 
+sudo snap install --channel=1.13 microk8s --classic 
 sleep 30
 
 sudo iptables -P FORWARD ACCEPT
@@ -61,6 +61,14 @@ printf '\n'
 	echo "something went wrong, check the logs, aborting "
 	exit 0
  fi
+
+# add standard storage class for postgres op
+echo " enable standard storage class and patch to non-default"
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/storage.yaml
+sleep 15
+
+kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+sleep 10
 
 echo " creating self - signed certificates "
 printf '\n'
@@ -114,8 +122,6 @@ kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/
 sleep 30
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
-
-
 
 # getting IP and add hosts entries
 echo " checking for host entries"
