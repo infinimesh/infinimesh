@@ -42,9 +42,9 @@ sleep 10
 export KUBECONFIG=$KUBECONFIG:~/kubeconfig
 
 # retrieve token
-token=$(microk8s.kubectl -n kube-system get secret | grep default-token | cut -d " " -f1)
-echo `microk8s.kubectl -n kube-system describe secret $token` > .k8stoken
-microk8s.kubectl -n kube-system describe secret $token
+token=$(kubectl -n kube-system get secret | grep default-token | cut -d " " -f1)
+echo `kubectl -n kube-system describe secret $token` > .k8stoken
+kubectl -n kube-system describe secret $token
 
 # setup kubectl
 if ! grep -q KUBECONFIG ~/.bashrc; then
