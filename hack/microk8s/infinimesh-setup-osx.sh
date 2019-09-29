@@ -50,7 +50,7 @@ multipass exec infinimesh-dev -- sudo usermod -a -G microk8s multipass
 multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dns dashboard
+multipass exec infinimesh-dev -- /snap/bin/microk8s.enable dashboard
 sleep 5
 
 multipass exec infinimesh-dev -- /snap/bin/microk8s.enable storage
