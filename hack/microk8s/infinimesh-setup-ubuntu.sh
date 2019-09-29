@@ -32,7 +32,7 @@ sleep 30
 sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-/snap/bin/microk8s.enable dns dashboard ingress
+/snap/bin/microk8s.enable dns dashboard ingress registry
 sleep 5
 
 /snap/bin/microk8s.enable storage
