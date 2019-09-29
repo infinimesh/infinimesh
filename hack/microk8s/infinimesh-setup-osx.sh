@@ -41,7 +41,7 @@ printf '\n'
 multipass launch --name infinimesh-dev --mem 3G --disk 50G -c 3 &&
 sleep 10
 
-multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.14/stable
+multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.13/stable
 sleep 5
 
 # set sudo for accessing k8s
