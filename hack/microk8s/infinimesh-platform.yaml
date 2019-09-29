@@ -3,7 +3,7 @@ kind: Platform
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: my-platform
+  name: my-infinimesh
 spec:
   kafka:
     bootstrapServers: "infinimesh-kafka-bootstrap.kafka.svc.cluster.local:9092"
