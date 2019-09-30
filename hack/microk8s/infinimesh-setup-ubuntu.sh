@@ -108,7 +108,7 @@ sleep 2
 
 echo " installing kubeDB from https://github.com/kubedb "
 printf '\n'
-curl -fsSL https://raw.githubusercontent.com/kubedb/cli/0.11.0/hack/deploy/kubedb.sh | bash
+curl -fsSL https://github.com/kubedb/installer/raw/v0.13.0-rc.0/deploy/kubedb.sh | bash
 sleep 5
 
 echo " installing Kafka from https://github.com/strimzi "
