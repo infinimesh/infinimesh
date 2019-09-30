@@ -44,7 +44,7 @@ sleep 10
 multipass exec infinimesh-dev -- sudo snap install microk8s --classic --channel=1.13/stable
 sleep 5
 
-# set sudo for accessing k8s
+# set sudo for accessing k8s > 1.14
 multipass exec infinimesh-dev -- sudo usermod -a -G microk8s multipass
 
 multipass exec infinimesh-dev -- sudo iptables -P FORWARD ACCEPT

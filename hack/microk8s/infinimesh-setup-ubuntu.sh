@@ -26,8 +26,11 @@ dd if=/dev/urandom of=randfile bs=256 count=1
 echo "=> everything ready, let's start"
 printf '\n'
 # install microk8s
-sudo snap install --channel=1.13 microk8s --classic 
+sudo snap install microk8s --classic --channel=1.13/stable
 sleep 30
+
+# set sudo for accessing k8s > 1.14
+sudo usermod -a -G microk8s multipass
 
 sudo iptables -P FORWARD ACCEPT
 sleep 15
