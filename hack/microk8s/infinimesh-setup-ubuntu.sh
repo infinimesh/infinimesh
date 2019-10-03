@@ -149,7 +149,16 @@ printf '\n'
 echo "=> installing inf (infinimesh CLI) and point to the local setup:"
 curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash  
 echo "inf CLI installed in" $HOME/bin
+
+# check if inf is already in $PATH
+if ! grep -q HOME/bin "~/.profile"; then
 echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile
+else
+        echo "=> PATH already set"
+fi
+printf '\n'
+
+echo "=> set CLI context"
 ~/bin/inf config set-context local --apiserver grpc.api.infinimesh.local:443 --tls=true --ca-file ~/infinimesh-local/certs/ca.crt
 
 printf '\n'
