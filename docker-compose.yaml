@@ -120,7 +120,7 @@ services:
       - DGRAPH_HOST=server:9080
   # dgraph
   zero:
-    image: dgraph/dgraph:v1.0.12-rc5
+    image: dgraph/dgraph:v1.0.14
     volumes:
       - type: volume
         source: dgraph
@@ -133,7 +133,7 @@ services:
     restart: on-failure
     command: dgraph zero --my=zero:5080
   server:
-    image: dgraph/dgraph:v1.0.12-rc5
+    image: dgraph/dgraph:v1.0.14
     volumes:
       - type: volume
         source: dgraph
@@ -146,7 +146,7 @@ services:
     restart: on-failure
     command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
   ratel:
-    image: dgraph/dgraph:v1.0.12-rc5
+    image: dgraph/dgraph:v1.0.14
     volumes:
       - type: volume
         source: dgraph
