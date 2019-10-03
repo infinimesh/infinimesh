@@ -54,7 +54,7 @@ services:
       - kafka
     restart: unless-stopped
   device-registry:
-    image: quay.io/infinimesh/device-registry:latest
+    image: quay.io/infinimesh/device-registry:v0.1.4
     ports:
       - "8070:8080"
     environment:
