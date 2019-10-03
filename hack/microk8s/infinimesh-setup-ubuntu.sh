@@ -151,7 +151,7 @@ curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash
 echo "inf CLI installed in" $HOME/bin
 
 # check if inf is already in $PATH
-if ! grep -q HOME/bin "~/.profile"; then
+if ! grep -q HOME/bin ~/.profile; then
 echo 'export PATH=$HOME/bin:$PATH' >> ~/.profile
 else
         echo "=> PATH already set"
