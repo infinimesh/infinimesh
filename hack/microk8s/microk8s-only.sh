@@ -16,7 +16,7 @@ sleep 15
 /snap/bin/microk8s.enable dashboard
 sleep 15
 /snap/bin/microk8s.enable ingress
-sleep 15
+sleep 30
 /snap/bin/microk8s.enable storage
 sleep 10
 
