@@ -2,7 +2,7 @@
 clear
 
 # install microk8s
-sudo snap install microk8s --classic --channel=1.13/stable
+sudo snap install microk8s --classic
 sleep 30
 
 # set sudo for accessing k8s > 1.14
@@ -11,9 +11,12 @@ sudo usermod -a -G microk8s multipass
 sudo iptables -P FORWARD ACCEPT
 sleep 15
 
-/snap/bin/microk8s.enable dns dashboard ingress registry
-sleep 5
-
+/snap/bin/microk8s.enable dns
+sleep 15
+/snap/bin/microk8s.enable dashboard
+sleep 15
+/snap/bin/microk8s.enable ingress
+sleep 15
 /snap/bin/microk8s.enable storage
 sleep 10
 
