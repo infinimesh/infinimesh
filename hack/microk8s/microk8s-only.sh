@@ -2,7 +2,7 @@
 clear
 
 # install microk8s
-sudo snap install microk8s --classic
+sudo snap install microk8s --classic --channel=1.13/stable
 sleep 30
 
 # set sudo for accessing k8s > 1.14
