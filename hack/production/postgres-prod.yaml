@@ -6,10 +6,10 @@ spec:
   version: "11.1-v1"
   storageType: Durable
   storage:
-    storageClassName: "standard"
+    storageClassName: standard
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 150Gi
+        storage: 500Gi
   terminationPolicy: DoNotTerminat
