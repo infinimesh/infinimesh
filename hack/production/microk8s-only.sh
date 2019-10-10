@@ -17,6 +17,9 @@ sleep 5
 /snap/bin/microk8s.enable storage
 sleep 10
 
+/snap/bin/microk8s.enable helm
+sleep 10
+
 mkdir -p ${HOME}/.kube
 /snap/bin/microk8s.config > ${HOME}/.kube/config
 
