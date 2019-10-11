@@ -1,15 +1,15 @@
 apiVersion: kubedb.com/v1alpha1
 kind: Postgres
 metadata:
-  name: my-infinimesh-timescaledb
+  name: my-platform-timescaledb
 spec:
   version: "11.1-v1"
   storageType: Durable
   storage:
-    storageClassName: standard
+    storageClassName: "standard"
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 500Gi
-  terminationPolicy: DoNotTerminat
+        storage: 100Gi
+  terminationPolicy: DoNotTerminate
