@@ -24,6 +24,8 @@ func (h *Consumer) Setup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
+func (db *DB) SetMaxOpenConns(90 int)
+
 func (h *Consumer) Cleanup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
