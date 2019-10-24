@@ -2,7 +2,10 @@
 Infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-Infinimesh is currently under open source development. All development, is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components are already available: MQTT Bridge, State management, Graph-based permission management, Device-to-Cloud and Cloud-to-Device messages. A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s).
+Infinimesh is currently under open source development. All development is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components modern IoT cloud provider won't have yet are already available: 
+**MQTT Bridge**, **State management (digital twin)**, **Graph-based permission management (multi-dimensional permissons at data layer)** and **Device-to-Cloud and Cloud-to-Device messages**. 
+
+A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s).
 
 A ui/dashboard is currently under development and will be available in mid Q2 2019. 
 <br /> [Here](https://github.com/infinimesh/infinimesh/blob/master/roadmap.md) is a link to our feature roadmap.
