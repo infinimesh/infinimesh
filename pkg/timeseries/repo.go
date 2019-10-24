@@ -32,6 +32,10 @@ func NewTimescaleRepo(log *zap.Logger, connection string) (result TimeseriesRepo
 		return nil, err
 	}
 
+	// set connection limit -> https://godoc.org/database/sql#DB.SetMaxOpenConns
+	DB.SetMaxIdleConns(0)
+	DB.SetMaxOpenConns(90)
+	
 	err = conn.Ping()
 	if err != nil {
 		return nil, err
