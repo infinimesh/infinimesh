@@ -765,12 +765,12 @@ components:
       bearerFormat: JWT
 info:
   contact:
-    email: joe@infinimesh.io
+    email: engineering@infinimesh.io
     name: Infinimesh
     url: 'http://infinimesh.io'
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
-  version: 0.0.1
+  version: 0.0.8
 openapi: 3.0.0
 paths:
   /account:
