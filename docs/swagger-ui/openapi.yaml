@@ -1210,8 +1210,9 @@ paths:
       tags:
         - Objects
 servers:
-  - url: 'http://localhost:8081'
   - url: 'https://api.infinimesh.io/'
+  - url: 'https://api.ionos-iot.de/'
+  - url: 'http://localhost:8081'
 x-stream-definitions:
   shadowStreamReportedStateChangesResponse:
     properties:
