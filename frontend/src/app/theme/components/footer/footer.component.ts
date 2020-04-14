@@ -4,7 +4,7 @@ import {Component} from '@angular/core';
   selector: 'ngx-footer',
   styleUrls: ['./footer.component.scss'],
   template: `
-    <span>©2019 — <strong>infinimesh, inc</strong> - source code at <a
+    <span>©2019 — <strong>Infinite Devices GmbH</strong> - source code at <a
       href="https://www.github.com/infinimesh/infinimesh" target="_new"><strong
       style="color: white;">GitHub</strong></a></span>
   `,

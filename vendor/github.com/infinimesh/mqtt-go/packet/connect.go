@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh, INC
+// Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io 
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
