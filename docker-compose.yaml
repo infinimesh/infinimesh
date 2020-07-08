@@ -115,7 +115,7 @@ services:
     image: quay.io/infinimesh/nodeserver:latest
     restart: unless-stopped
     depends_on:
-      - alpha
+      - server
     environment:
       - DGRAPH_HOST=server:9080
   # dgraph
