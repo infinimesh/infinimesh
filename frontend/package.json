@@ -1,7 +1,7 @@
 {
   "name": "console.infinimesh.app",
   "version": "1.0.0",
-  "description": "Infinimesh Console UI",
+  "description": "Console Infinimesh UI",
   "author": "Infinite Devices",
   "private": true,
   "scripts": {
