@@ -1,6 +1,0 @@
-<div class="btn-group" *ngIf="confirm">
-  <button nbButton size="xsmall" outline status="danger" (click)="confirm = false">Cancel</button>
-  <button nbButton size="xsmall" status="danger" (click)="confirmDelete()">Delete</button>
-</div>
-<button nbButton size="xsmall" *ngIf="!confirm" (click)="confirm = true"><i class="icon ion-android-delete"></i>
-</button>
