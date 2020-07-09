@@ -1,6 +1,6 @@
 # console.infinimesh.app
 
-> Infinimesh Console UI
+> Console Infinimesh UI
 
 ## Build Setup
 
