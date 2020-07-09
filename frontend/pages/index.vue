@@ -6,7 +6,7 @@
         console.infinimesh.app
       </h1>
       <h2 class="subtitle">
-        Infinimesh Console UI
+        Console Infinimesh UI
       </h2>
       <div class="links">
         <a
