@@ -1,34 +1,42 @@
 <template>
   <a-row type="flex" justify="center" class="rootRow" align="middle">
     <a-col :span="12">
-      <a-row>
-        <h1>Login</h1>
+      <a-row type="flex" justify="center">
+        <h1>infinimesh Login</h1>
       </a-row>
+      <a-row
+        type="flex"
+        justify="center"
+      >Welcome to infinimesh. Log in with your username and password.</a-row>
+
       <a-row>
         <a-form>
-          <a-form-item></a-form-item>
+          <a-form-item
+            label="Username"
+            v-decorator="['username', {rules: [{required: true, message: 'Pleeeeease, input your username, OK?!'}]}]"
+          >
+            <a-input placeholder="Enter your username" />
+          </a-form-item>
+          <a-form-item
+            label="Password"
+            v-decorator="['password', {rules: [{required: true, message: 'Pleeeeease, input your password, OK?!'}]}]"
+          >
+            <a-input-password placeholder="Input password" />
+          </a-form-item>
         </a-form>
       </a-row>
     </a-col>
   </a-row>
 </template>
 
-<script lang="ts">
-import Vue from "vue";
-
-interface IUser {
-  login: string;
-  password: string;
-}
-
-export default Vue.extend({
+<script>
+export default {
   data() {
-    const form = {};
     return {
-      form
+      form: this.$form.createForm(this, { name: "login" })
     };
   }
-});
+};
 </script>
 
 <style scoped>

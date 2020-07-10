@@ -21,10 +21,13 @@
   "devDependencies": {
     "@nuxt/types": "^2.13.3",
     "@nuxt/typescript-build": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
     "babel-eslint": "^10.0.1",
-    "eslint": "^4.19.1",
+    "eslint": "^6.0.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^2.1.1",
-    "eslint-plugin-vue": "^4.0.0"
+    "eslint-plugin-vue": "^6.0.0"
   }
 }
