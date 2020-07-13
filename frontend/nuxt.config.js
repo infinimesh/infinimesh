@@ -15,7 +15,7 @@ module.exports = {
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
   },
-  plugins: ["@/plugins/ant-design-vue"],
+  plugins: ["@/plugins/ant-design-vue", "@/plugins/typeface-exo"],
   /*
    ** Customize the progress bar color
    */
@@ -61,5 +61,6 @@ module.exports = {
   },
   router: {
     middleware: ["auth"]
-  }
+  },
+  css: ["@/assets/styles/themes.css"]
 };

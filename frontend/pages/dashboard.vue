@@ -1,55 +1,71 @@
 <template>
-  <section class="container">
-    <div>
-      <app-logo />
-      <h1 class="title">console.infinimesh.app</h1>
-      <h2 class="subtitle">Console Infinimesh UI</h2>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" class="button--green">Documentation</a>
-        <a href="https://github.com/nuxt/nuxt.js" target="_blank" class="button--grey">GitHub</a>
-      </div>
-    </div>
-  </section>
+  <div id="components-layout-demo-basic">
+    <a-layout>
+      <a-layout-header class="wide-header">
+        <Header v-model="menu_collapsed" />
+      </a-layout-header>
+      <a-layout>
+        <a-layout-sider>Sider</a-layout-sider>
+        <a-layout>
+          <a-layout-content>
+            <nuxt-child />
+          </a-layout-content>
+          <a-layout-footer>Footer</a-layout-footer>
+        </a-layout>
+      </a-layout>
+    </a-layout>
+  </div>
 </template>
 
 <script>
-import AppLogo from "@/components/AppLogo.vue";
+import Header from "@/components/Header.vue";
 
 export default {
   components: {
-    AppLogo
+    Header
+  },
+  data() {
+    return {
+      menu_collapsed: false
+    };
+  },
+  fetch({ store, params }) {
+    store.dispatch("getNamespaces");
   }
 };
 </script>
 
 <style>
-.container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.wide-header {
+  padding: 0 !important;
+}
+
+#components-layout-demo-basic {
   text-align: center;
 }
 
-.title {
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
+#components-layout-demo-basic .ant-layout-footer {
+  background: #7dbcea;
+  color: #fff;
 }
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
+#components-layout-demo-basic .ant-layout-footer {
+  line-height: 1.5;
 }
-
-.links {
-  padding-top: 15px;
+#components-layout-demo-basic .ant-layout-sider {
+  background: #3ba0e9;
+  color: #fff;
+  line-height: 120px;
+}
+#components-layout-demo-basic .ant-layout-content {
+  background: rgba(16, 142, 233, 1);
+  color: #fff;
+  min-height: 120px;
+  line-height: 120px;
+}
+#components-layout-demo-basic > .ant-layout {
+  margin-bottom: 48px;
+}
+#components-layout-demo-basic > .ant-layout:last-child {
+  margin: 0;
 }
 </style>
