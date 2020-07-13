@@ -10,10 +10,10 @@ module.exports = {
       {
         hid: "description",
         name: "description",
-        content: "Console Infinimesh UI",
-      },
+        content: "Console Infinimesh UI"
+      }
     ],
-    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
   },
   plugins: ["@/plugins/ant-design-vue"],
   /*
@@ -33,15 +33,15 @@ module.exports = {
           enforce: "pre",
           test: /\.(js|vue)$/,
           loader: "eslint-loader",
-          exclude: /(node_modules)/,
+          exclude: /(node_modules)/
         });
       }
-    },
+    }
   },
   buildModules: ["@nuxt/typescript-build"],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
   axios: {
-    baseURL: "https://api.infinimesh.app/",
+    baseURL: "https://api.infinimesh.app/"
   },
   auth: {
     strategies: {
@@ -50,13 +50,16 @@ module.exports = {
           login: {
             url: "account/token",
             method: "post",
-            propertyName: "data.token",
+            propertyName: "token"
           },
-          user: { url: "account", method: "get", propertyName: "data" },
-          logout: false,
+          user: { url: "account", method: "get", propertyName: false },
+          logout: false
         },
-        tokenType: "bearer",
-      },
-    },
+        tokenType: "bearer"
+      }
+    }
   },
+  router: {
+    middleware: ["auth"]
+  }
 };
