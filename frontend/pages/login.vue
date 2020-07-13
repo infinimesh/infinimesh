@@ -1,6 +1,6 @@
 <template>
   <a-row type="flex" justify="center" class="rootRow" align="middle">
-    <a-col :span="12">
+    <a-col :span="8">
       <a-row type="flex" justify="center">
         <h1>infinimesh Login</h1>
       </a-row>
@@ -10,18 +10,32 @@
       >Welcome to infinimesh. Log in with your username and password.</a-row>
 
       <a-row>
-        <a-form>
-          <a-form-item
-            label="Username"
-            v-decorator="['username', {rules: [{required: true, message: 'Pleeeeease, input your username, OK?!'}]}]"
-          >
-            <a-input placeholder="Enter your username" />
+        <a-form :form="form" @submit="handleSubmit">
+          <a-form-item>
+            <a-input
+              v-decorator="[
+                'username',
+                { rules: [{ required: true, message: 'Please input your username!' }] },
+              ]"
+              placeholder="Username"
+            >
+              <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
+            </a-input>
           </a-form-item>
-          <a-form-item
-            label="Password"
-            v-decorator="['password', {rules: [{required: true, message: 'Pleeeeease, input your password, OK?!'}]}]"
-          >
-            <a-input-password placeholder="Input password" />
+          <a-form-item>
+            <a-input
+              v-decorator="[
+                'password',
+                { rules: [{ required: true, message: 'Please input your Password!' }] },
+              ]"
+              type="password"
+              placeholder="Password"
+            >
+              <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
+            </a-input>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" html-type="submit" style="width: 100%">Login</a-button>
           </a-form-item>
         </a-form>
       </a-row>
@@ -35,6 +49,30 @@ export default {
     return {
       form: this.$form.createForm(this, { name: "login" })
     };
+  },
+  methods: {
+    handleSubmit(e) {
+      e.preventDefault();
+      this.form.validateFields(async (err, values) => {
+        if (!err) {
+          console.log(values);
+          try {
+            let res = await this.$auth.loginWith("local", {
+              data: values
+            });
+            this.$axios.setToken(res.data.token);
+            this.$router.push("/dashboard");
+            console.log("pushed");
+          } catch (e) {
+            this.$notification.error({
+              placement: "bottomLeft",
+              duration: 10,
+              ...e.response.data
+            });
+          }
+        }
+      });
+    }
   }
 };
 </script>
