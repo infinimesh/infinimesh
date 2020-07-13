@@ -7,3 +7,10 @@ export const getters = {
     return state.auth.user;
   }
 };
+
+export const actions = {
+  async getNamespaces({ commit }) {
+    const namespaces = await this.$axios.$get("/namespaces");
+    commit("devices/namespaces", namespaces);
+  }
+};
