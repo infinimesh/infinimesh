@@ -62,5 +62,13 @@ module.exports = {
   router: {
     middleware: ["auth"]
   },
-  css: ["@/assets/styles/themes.css"]
+  build: {
+    loaders: {
+      less: {
+        javascriptEnabled: true,
+        modifyVars: require("./assets/styles/antThemeMod.js")
+      }
+    }
+  },
+  css: [{ lang: "less", src: "@/assets/styles/themes.less" }]
 };

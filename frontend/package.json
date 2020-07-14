@@ -16,6 +16,7 @@
     "@nuxtjs/auth": "^4.9.1",
     "@nuxtjs/axios": "^5.12.0",
     "ant-design-vue": "^1.6.3",
+    "less-loader": "^5.0.0",
     "nuxt": "^2.0.0",
     "typeface-exo": "0.0.61"
   },
@@ -30,7 +31,7 @@
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^2.1.1",
     "eslint-plugin-vue": "^6.0.0",
-    "node-sass": "^4.14.1",
-    "sass-loader": "^9.0.2"
+    "less": "^3.12.0",
+    "node-sass": "^4.14.1"
   }
 }
