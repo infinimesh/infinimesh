@@ -1,5 +1,5 @@
 <template>
-  <a-menu theme="dark" mode="inline" v-model="route">
+  <a-menu mode="inline" v-model="route" id="menu">
     <a-menu-item key="dashboard">
       <a-icon type="cloud" />
       <span>Device Registry</span>
@@ -18,3 +18,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+#menu {
+  height: 100%;
+}
+</style>
