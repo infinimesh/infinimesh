@@ -2,7 +2,7 @@
   <a-row class="gay-theme-nav">
     <a-col :xs="{ span: 1, offset: 1 }" :md="{ span: 1, offset: 0 }">
       <a @click="toggleCollapsed" class="menu-control">
-        <a-icon :type="value ? 'menu-fold' : 'menu-unfold'" />
+        <a-icon :type="value ? 'menu-unfold' : 'menu-fold'" />
       </a>
     </a-col>
 
@@ -26,10 +26,7 @@
       :xl="{ span: 6, offset: 4 }"
       :xxl="{ span: 3, offset: 7 }"
     >
-      <a-select
-        style="width: 100%"
-        :default-value="$store.state.devices.namespace"
-      >
+      <a-select style="width: 100%" v-model="namespace">
         <a-select-option :key="ns.id" :value="ns.id" v-for="ns in namespaces"
           >NS: {{ ns.name }}</a-select-option
         >
@@ -61,15 +58,23 @@
 export default {
   props: ["value"],
   computed: {
-    namespaces() {
-      return this.$store.state.devices.namespaces;
+    namespace: {
+      get() {
+        return this.$store.state.devices.namespace;
+      },
+      set(val) {
+        this.$store.commit("devices/namespace", val);
+      }
+    },
+    namespaces: {
+      deep: true,
+      get() {
+        return this.$store.state.devices.namespaces;
+      }
     }
   },
-  fetch({ store }) {
-    store.commit(
-      "devices/namespace",
-      $store.state.auth.user.default_namespace.id
-    );
+  mounted() {
+    this.namespace = this.$store.state.auth.user.default_namespace.id;
   },
   methods: {
     toggleCollapsed() {

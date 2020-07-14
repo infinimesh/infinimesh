@@ -11,6 +11,6 @@ export const getters = {
 export const actions = {
   async getNamespaces({ commit }) {
     const namespaces = await this.$axios.$get("/namespaces");
-    commit("devices/namespaces", namespaces);
+    commit("devices/namespaces", namespaces.namespaces);
   }
 };
