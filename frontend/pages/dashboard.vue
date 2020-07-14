@@ -1,5 +1,5 @@
 <template>
-  <a-layout>
+  <a-layout id="dashboard">
     <a-layout-header class="wide-header">
       <Header v-model="menu_collapsed" />
     </a-layout-header>
@@ -9,7 +9,13 @@
         <a-layout-content>
           <nuxt-child />
         </a-layout-content>
-        <a-layout-footer>Footer</a-layout-footer>
+        <a-layout-footer>
+          ©2020 — <strong> infinimesh, inc </strong>
+          - source code at
+          <a href="https://www.github.com/infinimesh/infinimesh" target="_new"
+            ><strong style="color: white;">GitHub</strong></a
+          >
+        </a-layout-footer>
       </a-layout>
     </a-layout>
   </a-layout>
