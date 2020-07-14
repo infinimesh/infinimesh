@@ -1,0 +1,20 @@
+module.exports = {
+  "@link-color": "white",
+  "@text-color": "white",
+  "@border-radius-base": "2.5px",
+  "@box-shadow-base": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
+  "@primary-color": "#673ab7",
+  "@component-background": "@primary-color",
+  "@body-background": "#4e219e",
+  "@icon-color": "white",
+  "@link-color": "white",
+  "@link-hover-color": "@primary-color",
+  "@menu-bg": "@component-background",
+  "@layout-header-background": "@component-background",
+  "@layout-footer-background": "@layout-header-background",
+  "@menu-item-color": "@text-color",
+  "@menu-icon-size": "25px",
+  "@menu-icon-size-lg": "30px",
+  "@menu-highlight-color": "white",
+  "@menu-item-active-bg": "@component-background"
+};
