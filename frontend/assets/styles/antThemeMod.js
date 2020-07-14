@@ -16,5 +16,8 @@ module.exports = {
   "@menu-icon-size": "25px",
   "@menu-icon-size-lg": "30px",
   "@menu-highlight-color": "white",
-  "@menu-item-active-bg": "@component-background"
+  "@menu-item-active-bg": "tint(@primary-color, 10%)",
+  "@item-active-bg": "tint(@primary-color, 10%)",
+  "@item-hover-bg": "tint(@primary-color, 20%)",
+  "@select-item-selected-bg": "tint(@primary-color, 10%)"
 };

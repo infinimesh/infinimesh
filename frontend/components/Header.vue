@@ -27,7 +27,11 @@
       :xxl="{ span: 3, offset: 7 }"
     >
       <a-select style="width: 100%" v-model="namespace">
-        <a-select-option :key="ns.id" :value="ns.id" v-for="ns in namespaces"
+        <a-select-option
+          :key="ns.id"
+          :value="ns.id"
+          :label="ns.name"
+          v-for="ns in namespaces"
           >NS: {{ ns.name }}</a-select-option
         >
       </a-select>
@@ -119,8 +123,5 @@ div.logo {
 div.user {
   color: white;
   text-align: left;
-}
-.root {
-  box-shadow: 0 8px 20px 0 rgba(40, 37, 89, 0.6);
 }
 </style>
