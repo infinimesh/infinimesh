@@ -35,8 +35,8 @@ export default {
       menu_collapsed: false
     };
   },
-  fetch({ store, params }) {
-    store.dispatch("getNamespaces");
+  mounted() {
+    this.$store.dispatch("getNamespaces");
   }
 };
 </script>

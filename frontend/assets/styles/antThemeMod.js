@@ -2,7 +2,6 @@ module.exports = {
   "@link-color": "white",
   "@text-color": "white",
   "@border-radius-base": "2.5px",
-  "@box-shadow-base": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
   "@primary-color": "#673ab7",
   "@component-background": "@primary-color",
   "@body-background": "#4e219e",
@@ -11,7 +10,8 @@ module.exports = {
   "@link-hover-color": "@primary-color",
   "@menu-bg": "@component-background",
   "@layout-header-background": "@component-background",
-  "@layout-footer-background": "@layout-header-background",
+  "@layout-body-background": "@body-background",
+  "@layout-footer-background": "@body-background",
   "@menu-item-color": "@text-color",
   "@menu-icon-size": "25px",
   "@menu-icon-size-lg": "30px",
@@ -19,5 +19,6 @@ module.exports = {
   "@menu-item-active-bg": "tint(@primary-color, 10%)",
   "@item-active-bg": "tint(@primary-color, 10%)",
   "@item-hover-bg": "tint(@primary-color, 20%)",
-  "@select-item-selected-bg": "tint(@primary-color, 10%)"
+  "@select-item-selected-bg": "tint(@primary-color, 10%)",
+  "shadow-color": "0 8px 20px 0 rgba(40, 37, 89, 0.6)"
 };
