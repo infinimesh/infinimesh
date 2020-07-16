@@ -36,7 +36,7 @@ export default {
     };
   },
   mounted() {
-    this.$store.dispatch("getNamespaces");
+    this.$store.dispatch("devices/getNamespaces");
   }
 };
 </script>
