@@ -1,6 +1,7 @@
 export const state = () => ({
   namespace: "",
-  namespaces: []
+  namespaces: [],
+  pool: []
 });
 
 export const mutations = {
@@ -9,5 +10,8 @@ export const mutations = {
   },
   namespaces(state, val) {
     state.namespaces = val;
+  },
+  pool(state, val) {
+    state.pool = val;
   }
 };
