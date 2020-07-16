@@ -67,7 +67,7 @@ export default {
         return this.$store.state.devices.namespace;
       },
       set(val) {
-        this.$store.dispatch("setNamespace", val);
+        this.$store.dispatch("devices/setNamespace", val);
       }
     },
     namespaces: {
