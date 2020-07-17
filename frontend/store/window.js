@@ -39,10 +39,14 @@ export const actions = {
         break;
       }
     }
-    state.commit("setGridSize", size);
+    state.dispatch("setGrid", size);
   },
   toggleMenu(state, val) {
     state.commit("setMenu", val);
+  },
+  setGrid(state, size) {
+    state.commit("setGridSize", size);
+    state.commit("setMenu", ["xs", "sm"].includes(size));
   }
 };
 
@@ -52,3 +56,9 @@ class WrongGridSizeException {
     this.message = `Wrong grid size name, can be ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'], but "${given} were given."`;
   }
 }
+
+export const getters = {
+  menu(state) {
+    return state.menu;
+  }
+};
