@@ -26,7 +26,6 @@ const gridSizes = {
 
 export const actions = {
   set(state, width) {
-    console.log("Window Width changed to", width);
     state.commit("setWidth", width);
     let size = "xs";
     for (let [k, v] of Object.entries(gridSizes)) {
