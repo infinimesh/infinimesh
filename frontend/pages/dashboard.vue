@@ -10,11 +10,17 @@
           <nuxt-child />
         </a-layout-content>
         <a-layout-footer>
-          ©2020 — <strong> infinimesh, inc </strong>
-          - source code at
-          <a href="https://www.github.com/infinimesh/infinimesh" target="_new"
-            ><strong style="color: white;">GitHub</strong></a
-          >
+          <a-row type="flex" justify="center">
+            <a-col :span="12">
+              ©2020 — <strong> infinimesh, inc </strong>
+              - source code at
+              <a
+                href="https://www.github.com/infinimesh/infinimesh"
+                target="_new"
+                ><strong style="color: white;">GitHub</strong></a
+              >
+            </a-col>
+          </a-row>
         </a-layout-footer>
       </a-layout>
     </a-layout>
@@ -37,6 +43,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch("devices/getNamespaces");
+    if (this.$store.state.window.gridSize == "xs") this.menu_collapsed = true;
   }
 };
 </script>
