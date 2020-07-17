@@ -1,6 +1,7 @@
 export const state = () => ({
   width: 0,
-  gridSize: "xs"
+  gridSize: "xs",
+  menu: true
 });
 
 export const mutations = {
@@ -13,6 +14,9 @@ export const mutations = {
     } else {
       throw new WrongGridSizeException(size);
     }
+  },
+  setMenu(state, val) {
+    state.menu = val;
   }
 };
 
@@ -36,6 +40,9 @@ export const actions = {
       }
     }
     state.commit("setGridSize", size);
+  },
+  toggleMenu(state, val) {
+    state.commit("setMenu", val);
   }
 };
 
