@@ -1,4 +1,5 @@
 module.exports = {
+  "@infinimesh-dark-purple": "#342e73",
   "@link-color": "white",
   "@text-color": "white",
   "@border-radius-base": "2.5px",
@@ -20,5 +21,11 @@ module.exports = {
   "@item-active-bg": "tint(@primary-color, 10%)",
   "@item-hover-bg": "tint(@primary-color, 20%)",
   "@select-item-selected-bg": "tint(@primary-color, 10%)",
-  "shadow-color": "0 8px 20px 0 rgba(40, 37, 89, 0.6)"
+  "@shadow-color": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
+  "@card-head-color": "white",
+  "@border-color-split": "@infinimesh-dark-purple",
+  "@border-radius-base": "0.5rem",
+  "@border-radius-sm": "0.5rem",
+  "@card-shadow": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
+  "@tag-default-bg": "transparent"
 };
