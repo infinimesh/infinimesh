@@ -1,9 +1,11 @@
 <template>
   <a-row class="gay-theme-nav">
     <a-col :xs="{ span: 1, offset: 1 }" :md="{ span: 1, offset: 0 }">
-      <a @click="toggleCollapsed" class="menu-control">
-        <a-icon :type="value ? 'menu-unfold' : 'menu-fold'" />
-      </a>
+      <a-row type="flex" justify="center">
+        <a @click="toggleCollapsed" class="menu-control">
+          <a-icon :type="menu ? 'menu-unfold' : 'menu-fold'" />
+        </a>
+      </a-row>
     </a-col>
 
     <a-col :xs="{ span: 12, offset: 2 }" :sm="{ offset: 1 }" :md="{ span: 8 }">
@@ -60,8 +62,15 @@
 
 <script>
 export default {
-  props: ["value"],
   computed: {
+    menu: {
+      get() {
+        return this.$store.getters["window/menu"];
+      },
+      set(val) {
+        this.$store.dispatch("window/toggleMenu", val);
+      }
+    },
     namespace: {
       get() {
         return this.$store.state.devices.namespace;
@@ -82,8 +91,7 @@ export default {
   },
   methods: {
     toggleCollapsed() {
-      this.value = !this.value;
-      this.$emit("input", this.value);
+      this.menu = !this.menu;
     }
   }
 };

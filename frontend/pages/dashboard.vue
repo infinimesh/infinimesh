@@ -1,7 +1,7 @@
 <template>
   <a-layout id="dashboard">
     <a-layout-header class="wide-header">
-      <Header v-model="menu_collapsed" />
+      <Header />
     </a-layout-header>
     <a-layout>
       <a-layout-sider v-model="menu_collapsed"><Sider /></a-layout-sider>
@@ -36,14 +36,18 @@ export default {
     Header,
     Sider
   },
-  data() {
-    return {
-      menu_collapsed: false
-    };
-  },
   mounted() {
     this.$store.dispatch("devices/getNamespaces");
-    if (this.$store.state.window.gridSize == "xs") this.menu_collapsed = true;
+  },
+  computed: {
+    menu_collapsed: {
+      get() {
+        return this.$store.getters["window/menu"];
+      },
+      set(val) {
+        this.$store.dispatch("window/toggleMenu", val);
+      }
+    }
   }
 };
 </script>
