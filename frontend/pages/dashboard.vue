@@ -11,7 +11,7 @@
         </a-layout-content>
         <a-layout-footer>
           <a-row type="flex" justify="center">
-            <a-col :span="12">
+            <a-col :xs="24" :sm="18" :md="12" :lg="10" :xl="8">
               ©2020 — <strong> infinimesh, inc </strong>
               - source code at
               <a
