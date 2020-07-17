@@ -41,3 +41,9 @@ export const actions = {
     dispatch("get");
   }
 };
+
+export const getters = {
+  get: state => id => {
+    return state.pool.filter(el => el.id == id)[0];
+  }
+};
