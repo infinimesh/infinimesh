@@ -2,7 +2,6 @@ module.exports = {
   "@infinimesh-dark-purple": "#342e73",
   "@link-color": "white",
   "@text-color": "white",
-  "@border-radius-base": "2.5px",
   "@primary-color": "#673ab7",
   "@component-background": "@primary-color",
   "@body-background": "#4e219e",
