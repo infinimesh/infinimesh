@@ -23,11 +23,18 @@
                 <b class="muted">
                   {{ device.id }}
                 </b>
-                <a-icon
-                  type="bulb"
-                  :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
-                  theme="filled"
-                />
+                <a-tooltip
+                  :title="
+                    device.enabled ? 'Device enabled' : 'Device is not enabled'
+                  "
+                  placement="bottom"
+                >
+                  <a-icon
+                    type="bulb"
+                    :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
+                    theme="filled"
+                  />
+                </a-tooltip>
               </template>
               <template>
                 <a-row v-if="device.tags.length">
