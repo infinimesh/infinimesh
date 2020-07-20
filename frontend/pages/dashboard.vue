@@ -20,7 +20,7 @@
         >
           <nuxt-child />
         </a-layout-content>
-        <a-layout-footer>
+        <a-layout-footer id="footer">
           <a-row type="flex" justify="center">
             <a-col :xs="24" :sm="18" :md="12" :lg="10" :xl="8">
               ©2020 — <strong> infinimesh, inc </strong>
@@ -66,5 +66,12 @@ export default {
 <style>
 .wide-header {
   padding: 0 !important;
+}
+#footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
 }
 </style>
