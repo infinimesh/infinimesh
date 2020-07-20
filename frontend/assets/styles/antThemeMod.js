@@ -20,11 +20,15 @@ module.exports = {
   "@item-active-bg": "tint(@primary-color, 10%)",
   "@item-hover-bg": "tint(@primary-color, 20%)",
   "@select-item-selected-bg": "tint(@primary-color, 10%)",
-  "@shadow-color": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
+  "@shadow-color": "3px 3px 7px 2px rgba(0, 0, 0, 0.3)",
   "@card-head-color": "white",
   "@border-color-split": "@infinimesh-dark-purple",
   "@border-radius-base": "0.5rem",
   "@border-radius-sm": "0.5rem",
   "@card-shadow": "0 8px 20px 0 rgba(40, 37, 89, 0.6)",
-  "@tag-default-bg": "transparent"
+  "@tag-default-bg": "transparent",
+  "@border-color-base": "white",
+  "@btn-default-border": "white",
+  "@btn-group-border": "white",
+  "@success-color": "#52c41a"
 };
