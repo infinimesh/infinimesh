@@ -39,8 +39,8 @@
 </template>
 
 <script>
-import Header from "@/components/Header";
-import Sider from "@/components/Sider";
+import Header from "@/components/layout/Header";
+import Sider from "@/components/layout/Sider";
 
 export default {
   components: {
