@@ -4,9 +4,20 @@
       <Header />
     </a-layout-header>
     <a-layout>
-      <a-layout-sider v-model="menu_collapsed"><Sider /></a-layout-sider>
+      <a-layout-sider
+        v-model="menu_collapsed"
+        :style="{
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',
+          left: 0
+        }"
+        ><Sider
+      /></a-layout-sider>
       <a-layout>
-        <a-layout-content>
+        <a-layout-content
+          :style="{ marginLeft: menu_collapsed ? '40px' : '200px' }"
+        >
           <nuxt-child />
         </a-layout-content>
         <a-layout-footer>
