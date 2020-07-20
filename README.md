@@ -27,16 +27,21 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 | timescale-connector | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/timescale-connector/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/timescale-connector)|
 
 ## API Documentation
-You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+You can find swagger docs for the API server [here](https://infinitedevices.github.io/infinimesh/swagger-ui/)
 
 ## Community
 You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity)
 
 ## Development
 ### Local development installation
-We have built an automated local development setup based on microk8s:
+We have built an automated local development setup based on microk8s.
+For Ubuntu please use:
 ```
-bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup.sh)
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-ubuntu.sh)
+```
+For OSX please use:
+```
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
 ```
 Source: https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s
 
