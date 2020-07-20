@@ -13,6 +13,9 @@ export default {
     route: {
       get() {
         return [this.$route.name];
+      },
+      set(val) {
+        this.$router.push({ name: val[0] });
       }
     }
   }
