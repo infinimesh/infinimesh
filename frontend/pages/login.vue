@@ -76,7 +76,6 @@ export default {
             let res = await this.$auth.loginWith("local", {
               data: values
             });
-            // this.$axios.setToken(res.data.token);
             this.$router.push("/dashboard");
           } catch (e) {
             this.$notification.error({
