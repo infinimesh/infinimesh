@@ -1,5 +1,5 @@
 <template>
-  <a-row class="gay-theme-nav">
+  <a-row class="gay-theme-nav" type="flex" align="middle">
     <a-col :xs="{ span: 1, offset: 1 }" :md="{ span: 1, offset: 0 }">
       <a-row type="flex" justify="center">
         <a @click="toggleCollapsed" class="menu-control">
@@ -8,7 +8,12 @@
       </a-row>
     </a-col>
 
-    <a-col :xs="{ span: 12, offset: 2 }" :sm="{ offset: 1 }" :md="{ span: 8 }">
+    <a-col
+      :xs="{ span: 12, offset: 2 }"
+      :sm="{ offset: 1 }"
+      :md="{ span: 8 }"
+      :xxl="{ span: 7 }"
+    >
       <a-row type="flex" justify="start">
         <a-col>
           <img
@@ -20,13 +25,23 @@
         <a-col class="logo">infinimesh<span>.io</span></a-col>
       </a-row>
     </a-col>
+    <a-col :xxl="{ span: 1, offset: 3 }">
+      <a-row>
+        <a-col class="nav-button" :span="5" @click="$router.go(-1)"
+          ><a-icon type="left"
+        /></a-col>
+        <a-col class="nav-button" :span="5" :offset="14" @click="$router.go(1)"
+          ><a-icon type="right"
+        /></a-col>
+      </a-row>
+    </a-col>
     <a-col
       :xs="{ span: 6, offset: 1 }"
       :sm="{ span: 4, offset: 4 }"
       :md="{ span: 4, offset: 4 }"
       :lg="{ span: 4, offset: 4 }"
       :xl="{ span: 6, offset: 4 }"
-      :xxl="{ span: 3, offset: 7 }"
+      :xxl="{ span: 3, offset: 5 }"
     >
       <a-select style="width: 100%" v-model="namespace">
         <a-select-option
@@ -42,6 +57,7 @@
       :xs="{ span: 0 }"
       :md="{ span: 5, offset: 1 }"
       :xl="{ span: 3, offset: 1 }"
+      :xxl="{ span: 2, offset: 1 }"
     >
       <a-row type="flex" justify="end">
         <a-col :span="8">
@@ -131,5 +147,12 @@ div.logo {
 div.user {
   color: white;
   text-align: left;
+}
+</style>
+
+<style lang="less" scoped>
+.nav-button:hover {
+  cursor: pointer;
+  background-color: @infinimesh-dark-purple;
 }
 </style>
