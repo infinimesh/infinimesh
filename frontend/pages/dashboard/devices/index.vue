@@ -12,10 +12,25 @@
         :key="i"
       >
         <div style="padding-top: 10px" v-for="device in col" :key="device.id">
+          <a-row
+            class="create-form"
+            v-if="device.type && device.type == 'create-form'"
+            :style="deviceCreateFormStyle"
+            type="flex"
+            justify="center"
+            align="middle"
+          >
+            <a-icon type="plus" style="font-size: 6rem" />
+          </a-row>
           <nuxt-link
+            v-else
             :to="{ name: 'dashboard-devices-id', params: { id: device.id } }"
           >
-            <a-card :hoverable="true" :bordered="false">
+            <a-card
+              :hoverable="true"
+              :bordered="false"
+              :ref="`device-card-${device.id}`"
+            >
               <template slot="title">
                 {{ device.name }}
               </template>
@@ -94,20 +109,39 @@ export default {
             break;
           }
         }
+        let pool = [{ type: "create-form" }, ...this.pool];
         if (div == 1) {
-          return [this.pool];
+          return [pool];
         }
         let res = new Array(div);
         for (let i = 0; i < div; i++) {
           res[i] = new Array();
         }
-        for (let i = 0; i <= this.pool.length; i++) {
-          for (let j = 0; j < div && i + j < this.pool.length; j++) {
-            res[j].push(this.pool[i + j]);
+        for (let i = 0; i <= pool.length; i++) {
+          for (let j = 0; j < div && i + j < pool.length; j++) {
+            res[j].push(pool[i + j]);
           }
           i += div - 1;
         }
         return res;
+      }
+    },
+    deviceCreateFormStyle() {
+      return {
+        "--device-card-height": this.deviceCardHeight
+      };
+    },
+    deviceCardHeight: {
+      deep: true,
+      get() {
+        if (this.$refs.length) {
+          return this.$refs.reduce((curr, el) => {
+            if (el < curr) curr = el.clientHeight;
+            return curr;
+          }, 1000);
+        } else {
+          return "8rem";
+        }
       }
     },
     gridSize() {
@@ -125,5 +159,12 @@ export default {
 <style lang="less" scoped>
 .muted {
   color: @infinimesh-dark-purple;
+}
+.create-form {
+  border-radius: @border-radius-base;
+  background: @infinimesh-dark-purple;
+  border: 1px dashed white;
+  min-height: var(--device-card-height);
+  cursor: pointer;
 }
 </style>
