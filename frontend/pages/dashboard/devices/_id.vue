@@ -89,7 +89,7 @@
 </template>
 
 <script>
-import DeviceState from "@/components/device/DeviceState";
+import DeviceState from "@/components/device/State";
 
 export default {
   components: { DeviceState },
