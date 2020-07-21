@@ -113,7 +113,7 @@ printf '\n'
 echo "=> now we install infinimesh ..."
 printf '\n'
 
-kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/postgres.yaml
+kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/postgres-dev.yaml
 sleep 30
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-platform.yaml
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-kafka.yaml -n kafka
