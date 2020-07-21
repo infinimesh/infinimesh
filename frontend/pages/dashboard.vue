@@ -16,7 +16,7 @@
       /></a-layout-sider>
       <a-layout>
         <a-layout-content
-          :style="{ marginLeft: menu_collapsed ? '40px' : '200px' }"
+          :style="{ marginLeft: menu_collapsed ? '80px' : '200px' }"
         >
           <nuxt-child />
         </a-layout-content>
