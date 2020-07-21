@@ -15,7 +15,11 @@ module.exports = {
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
   },
-  plugins: ["@/plugins/ant-design-vue", "@/plugins/typeface-exo"],
+  plugins: [
+    "@/plugins/ant-design-vue",
+    "@/plugins/typeface-exo"
+    // "@/plugins/axios"
+  ],
   /*
    ** Customize the progress bar color
    */
@@ -41,7 +45,10 @@ module.exports = {
   buildModules: ["@nuxt/typescript-build"],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
   axios: {
-    baseURL: "https://api.infinimesh.app/"
+    baseURL:
+      process.env.NODE_ENV == "development"
+        ? "https://api.infinimesh.app/"
+        : "http://localhost:8001"
   },
   auth: {
     strategies: {
