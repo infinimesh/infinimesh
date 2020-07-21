@@ -38,7 +38,7 @@
       <a-row>
         <a-col :xxl="{ span: 12, offset: 1 }">
           <transition-group name="slide">
-            <a-card title="Details" key="details" v-if="device">
+            <a-card title="Details" key="details" v-if="device" hoverable>
               <template>
                 <a-row v-if="device.tags && device.tags.length">
                   <p>
@@ -58,7 +58,12 @@
                 </p>
               </template>
             </a-card>
-            <a-card title="State" key="state" v-if="device && device.state">
+            <a-card
+              title="State"
+              key="state"
+              v-if="device && device.state"
+              hoverable
+            >
               <a-row>
                 <a-col :span="12">
                   <device-state
