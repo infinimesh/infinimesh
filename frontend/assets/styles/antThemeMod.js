@@ -30,5 +30,6 @@ module.exports = {
   "@border-color-base": "white",
   "@btn-default-border": "white",
   "@btn-group-border": "white",
-  "@success-color": "#52c41a"
+  "@success-color": "#52c41a",
+  "@heading-color": "white"
 };

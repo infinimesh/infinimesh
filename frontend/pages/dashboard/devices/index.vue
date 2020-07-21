@@ -94,7 +94,6 @@ export default {
             break;
           }
         }
-        console.log("DIV:", div);
         if (div == 1) {
           return [this.pool];
         }

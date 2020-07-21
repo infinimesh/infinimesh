@@ -58,6 +58,12 @@
                 </p>
               </template>
             </a-card>
+            <a-card title="Actions" key="actions" v-if="device" hoverable>
+              <device-actions
+                :device-id="device.id"
+                @delete="handleDeviceDelete"
+              />
+            </a-card>
             <a-card
               title="State"
               key="state"
@@ -90,9 +96,22 @@
 
 <script>
 import DeviceState from "@/components/device/State";
+import DeviceActions from "@/components/device/Actions";
 
 export default {
-  components: { DeviceState },
+  /**
+   * Represents Device as both object and component
+   * @displayName Device
+   */
+  components: { DeviceState, DeviceActions },
+  props: {
+    /**
+     * Device ID - not required if compinent is mounted via Router _id
+     */
+    deviceId: {
+      required: false
+    }
+  },
   data() {
     return {
       deviceObject: false
@@ -119,14 +138,30 @@ export default {
   },
   mounted() {
     this.device = {
-      id: this.$route.params.id
+      id: this.deviceId || this.$route.params.id
     };
-    this.$axios.get(`/devices/${this.device.id}`).then(res => {
-      this.device = res.data.device;
-    });
+    // Getting Device data from API
+    this.$axios
+      .get(`/devices/${this.device.id}`)
+      .then(res => {
+        this.device = res.data.device;
+      })
+      .catch(res => {
+        if (res.response.status == 404) {
+          this.$notification.error({
+            message: "Device wasn't found",
+            description: "Redirecting...",
+            placement: "bottomRight"
+          });
+          this.$router.push({ name: "dashboard-devices" });
+        }
+      });
     this.deviceStateGet();
   },
   methods: {
+    /**
+     * Obtains device state(s) (desired and reported) and merges them into deviceObject
+     */
     async deviceStateGet() {
       await this.$axios.get(`/devices/${this.device.id}/state`).then(res => {
         this.device = {
@@ -135,6 +170,11 @@ export default {
         };
       });
     },
+    /**
+     * Performs PATCH /device/id and changes desired state to given.
+     * Used by device-state component so it invokes callback after patch response handling is done
+     * @param {String} state, the desired state as in JSON String
+     */
     handleStateUpdate(state, callback) {
       this.$axios({
         url: `/devices/${this.device.id}/state`,
@@ -150,6 +190,16 @@ export default {
         .then(() => {
           callback();
         });
+    },
+    handleDeviceDelete() {
+      this.$axios({
+        url: `/devices/${this.device.id}`,
+        method: "delete"
+      }).then(() => {
+        this.$message.success("Device successfuly deleted!");
+        this.$store.dispatch("devices/get");
+        this.$router.push({ name: "dashboard-devices" });
+      });
     }
   },
   validate({ params }) {
@@ -185,5 +235,9 @@ export default {
 .device-state-bulb {
   font-size: 1.5rem;
   padding-top: 0.8rem;
+}
+
+.ant-card + .ant-card {
+  margin-top: 1rem;
 }
 </style>
