@@ -20,7 +20,16 @@
             justify="center"
             align="middle"
           >
-            <a-icon type="plus" style="font-size: 6rem" />
+            <a-icon
+              type="plus"
+              style="font-size: 6rem; height: 100%; width: 100%"
+              @click="addDeviceActive = true"
+            />
+            <device-add
+              :active="addDeviceActive"
+              @cancel="addDeviceActive = false"
+              @add="handleDeviceAdd"
+            />
           </a-row>
           <nuxt-link
             v-else
@@ -69,8 +78,18 @@
 </template>
 
 <script>
+import DeviceAdd from "@/components/device/Add.vue";
+
 export default {
   name: "devicesTable",
+  components: {
+    DeviceAdd
+  },
+  data() {
+    return {
+      addDeviceActive: false
+    };
+  },
   computed: {
     pool: {
       deep: true,
@@ -146,6 +165,12 @@ export default {
     },
     gridSize() {
       return this.$store.state.window.gridSize;
+    }
+  },
+  methods: {
+    handleDeviceAdd(device) {
+      console.log(device);
+      this.addDeviceActive = false;
     }
   }
 };

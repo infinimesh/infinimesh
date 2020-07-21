@@ -31,5 +31,9 @@ module.exports = {
   "@btn-default-border": "white",
   "@btn-group-border": "white",
   "@success-color": "#52c41a",
-  "@heading-color": "white"
+  "@heading-color": "white",
+  "@font-size-xl": "25px",
+  "@font-weight-default": "500",
+  "@font-family-default": "Exo",
+  "@switch-color": "#5D8EB7"
 };
