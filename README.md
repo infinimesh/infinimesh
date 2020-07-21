@@ -27,7 +27,7 @@ A ui/dashboard is currently under development and will be available in mid Q2 20
 | timescale-connector | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/timescale-connector/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/timescale-connector)|
 
 ## API Documentation
-You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+You can find swagger docs for the API server [here](https://infinitedevices.github.io/infinimesh/swagger-ui/)
 
 ## Community
 You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity)
