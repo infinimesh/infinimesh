@@ -32,6 +32,16 @@ export const actions = {
     });
     commit("pool", devices.devices);
   },
+  add({ dispatch }, device) {
+    this.$axios
+      .$post("/devices", {
+        device: device
+      })
+      .then(res => {
+        dispatch("get");
+      })
+      .catch(e => console.log(e));
+  },
   async getNamespaces({ commit }) {
     const namespaces = await this.$axios.$get("/namespaces");
     commit("namespaces", namespaces.namespaces);
