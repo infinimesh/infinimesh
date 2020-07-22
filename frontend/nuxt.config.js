@@ -46,9 +46,9 @@ module.exports = {
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
   axios: {
     baseURL:
-      process.env.NODE_ENV == "development"
-        ? "https://api.infinimesh.app/"
-        : "http://localhost:8001"
+      // process.env.NODE_ENV == "development"
+      "https://api.infinimesh.app/"
+    // : "http://localhost:8001"
   },
   auth: {
     strategies: {
@@ -77,5 +77,9 @@ module.exports = {
       }
     }
   },
-  css: [{ lang: "less", src: "@/assets/styles/themes.less" }]
+  css: [{ lang: "less", src: "@/assets/styles/themes.less" }],
+  server: {
+    port: 80,
+    host: "0.0.0.0"
+  }
 };
