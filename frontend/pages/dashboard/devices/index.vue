@@ -87,7 +87,8 @@ export default {
     poolCols: {
       deep: true,
       get() {
-        if (!this.pool.length) return this.pool;
+        let pool = [{ type: "create-form" }, ...this.pool];
+        if (!pool.length) return pool;
         let div = 1;
         switch (this.gridSize) {
           case "xs": {
@@ -115,7 +116,6 @@ export default {
             break;
           }
         }
-        let pool = [{ type: "create-form" }, ...this.pool];
         if (div == 1) {
           return [pool];
         }
