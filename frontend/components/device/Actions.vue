@@ -1,7 +1,14 @@
 <template>
   <a-row type="flex" justify="space-between">
     <a-col :span="24">
-      <a-button type="danger" @click="$emit('delete')">Delete</a-button>
+      <a-popconfirm
+        title="Are you sure deleting this device?"
+        ok-text="Yes"
+        cancel-text="No"
+        @confirm="$emit('delete')"
+      >
+        <a-button type="danger" icon="delete">Delete</a-button>
+      </a-popconfirm>
     </a-col>
   </a-row>
 </template>
