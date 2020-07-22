@@ -31,22 +31,11 @@
               @add="handleDeviceAdd"
             />
           </a-row>
-          <nuxt-link
-            v-else
-            :to="{ name: 'dashboard-devices-id', params: { id: device.id } }"
-          >
-            <a-card
-              :hoverable="true"
-              :bordered="false"
-              :ref="`device-card-${device.id}`"
-            >
-              <template slot="title">
-                {{ device.name }}
-              </template>
+          <nuxt-link v-else :to="{ name: 'dashboard-devices-id', params: { id: device.id } }">
+            <a-card :hoverable="true" :bordered="false" :ref="`device-card-${device.id}`">
+              <template slot="title">{{ device.name }}</template>
               <template slot="extra">
-                <b class="muted">
-                  {{ device.id }}
-                </b>
+                <b class="muted">{{ device.id }}</b>
                 <a-tooltip
                   :title="
                     device.enabled ? 'Device enabled' : 'Device is not enabled'
@@ -65,9 +54,7 @@
                   Tags:
                   <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
                 </a-row>
-                <a-row v-else type="flex" justify="center" class="muted">
-                  No tags were provided
-                </a-row>
+                <a-row v-else type="flex" justify="center" class="muted">No tags were provided</a-row>
               </template>
             </a-card>
           </nuxt-link>
@@ -170,6 +157,7 @@ export default {
   methods: {
     handleDeviceAdd(device) {
       console.log(device);
+      this.$store.dispatch("devices/add", device);
       this.addDeviceActive = false;
     }
   }
