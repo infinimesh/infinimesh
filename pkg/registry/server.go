@@ -101,6 +101,11 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
 	}
 
+	//To check if the fingerprint already exists, in this case creating new device is not permissible
+	if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
+		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists")
+	}
+
 	var enabled bool
 	if request.Device.Enabled != nil {
 		enabled = request.Device.Enabled.GetValue()
