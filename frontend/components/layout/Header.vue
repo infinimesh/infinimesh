@@ -8,31 +8,25 @@
       </a-row>
     </a-col>
 
-    <a-col
-      :xs="{ span: 12, offset: 2 }"
-      :sm="{ offset: 1 }"
-      :md="{ span: 8 }"
-      :xxl="{ span: 7 }"
-    >
+    <a-col :xs="{ span: 12, offset: 2 }" :sm="{ offset: 1 }" :md="{ span: 8 }" :xxl="{ span: 7 }">
       <a-row type="flex" justify="start">
         <a-col>
-          <img
-            src="@/assets/infinimesh_logo.png"
-            alt="infinimesh Logo"
-            class="logo"
-          />
+          <img src="@/assets/infinimesh_logo.png" alt="infinimesh Logo" class="logo" />
         </a-col>
-        <a-col class="logo">infinimesh<span>.io</span></a-col>
+        <a-col class="logo">
+          infinimesh
+          <span>.io</span>
+        </a-col>
       </a-row>
     </a-col>
     <a-col :xxl="{ span: 1, offset: 3 }">
       <a-row>
-        <a-col class="nav-button" :span="5" @click="$router.go(-1)"
-          ><a-icon type="left"
-        /></a-col>
-        <a-col class="nav-button" :span="5" :offset="14" @click="$router.go(1)"
-          ><a-icon type="right"
-        /></a-col>
+        <a-col class="nav-button" :span="5" @click="$router.go(-1)">
+          <a-icon type="left" />
+        </a-col>
+        <a-col class="nav-button" :span="5" :offset="14" @click="$router.go(1)">
+          <a-icon type="right" />
+        </a-col>
       </a-row>
     </a-col>
     <a-col
@@ -49,8 +43,7 @@
           :value="ns.id"
           :label="ns.name"
           v-for="ns in namespaces"
-          >NS: {{ ns.name }}</a-select-option
-        >
+        >NS: {{ ns.name }}</a-select-option>
       </a-select>
     </a-col>
     <a-col
@@ -59,25 +52,15 @@
       :xl="{ span: 3, offset: 1 }"
       :xxl="{ span: 2, offset: 1 }"
     >
-      <a-row type="flex" justify="end">
-        <a-col :span="8">
-          <a-avatar>R</a-avatar>
-        </a-col>
-        <a-col
-          class="user"
-          :xs="{ span: 0 }"
-          :sm="{ span: 0 }"
-          :md="{ span: 16 }"
-        >
-          root
-        </a-col>
-      </a-row>
+      <user-actions />
     </a-col>
   </a-row>
 </template>
 
 <script>
+import UserActions from "./header/user";
 export default {
+  components: { UserActions },
   computed: {
     menu: {
       get() {
