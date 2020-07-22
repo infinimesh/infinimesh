@@ -49,6 +49,7 @@ export const actions = {
   setNamespace({ commit, dispatch }, ns) {
     commit("namespace", ns);
     dispatch("get");
+    $nuxt.$router.push({ name: "dashboard" });
   }
 };
 
