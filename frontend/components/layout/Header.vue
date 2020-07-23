@@ -8,7 +8,12 @@
       </a-row>
     </a-col>
 
-    <a-col :xs="{ span: 12, offset: 2 }" :sm="{ offset: 1 }" :md="{ span: 8 }" :xxl="{ span: 7 }">
+    <a-col
+      :xs="{ span: 12, offset: 2 }"
+      :sm="{ span: 12, offset: 1 }"
+      :md="{ span: 8 }"
+      :xxl="{ span: 7 }"
+    >
       <a-row type="flex" justify="start">
         <a-col>
           <img src="@/assets/infinimesh_logo.png" alt="infinimesh Logo" class="logo" />
@@ -19,7 +24,14 @@
         </a-col>
       </a-row>
     </a-col>
-    <a-col :xxl="{ span: 1, offset: 3 }">
+    <a-col
+      :xs="{span: 0}"
+      :sm="{span: 0}"
+      :md="{span: 1, offset: 1}"
+      :lg="{span: 1, offset: 1}"
+      :xl="{span: 1, offset: 1}"
+      :xxl="{ span: 1, offset: 3 }"
+    >
       <a-row>
         <a-col class="nav-button" :span="5" @click="$router.go(-1)">
           <a-icon type="left" />
@@ -32,9 +44,9 @@
     <a-col
       :xs="{ span: 6, offset: 1 }"
       :sm="{ span: 4, offset: 4 }"
-      :md="{ span: 4, offset: 4 }"
-      :lg="{ span: 4, offset: 4 }"
-      :xl="{ span: 6, offset: 4 }"
+      :md="{ span: 4, offset: 2 }"
+      :lg="{ span: 4, offset: 3 }"
+      :xl="{ span: 4, offset: 4 }"
       :xxl="{ span: 3, offset: 5 }"
     >
       <a-select style="width: 100%" v-model="namespace">
@@ -48,7 +60,9 @@
     </a-col>
     <a-col
       :xs="{ span: 0 }"
+      :sm="{span: 0}"
       :md="{ span: 5, offset: 1 }"
+      :lg="{span: 4, offset: 1}"
       :xl="{ span: 3, offset: 1 }"
       :xxl="{ span: 2, offset: 1 }"
     >
