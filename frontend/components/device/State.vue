@@ -4,33 +4,9 @@
       <a-col :span="10">
         <h1 class="lead">{{ title }}</h1>
       </a-col>
-      <template v-if="editable">
-        <template v-if="active_edit">
-          <a-col :span="6">
-            <a-button type="primary" icon="close" @click="active_edit = false"
-              >Cancel</a-button
-            >
-          </a-col>
-          <a-col :span="6" :offset="1">
-            <a-popconfirm
-              title="Are you sure saving this state?"
-              ok-text="Yes"
-              cancel-text="No"
-              @confirm="
-                handleSaveState();
-                active_edit = false;
-              "
-            >
-              <a-button type="success" icon="save">Save</a-button>
-            </a-popconfirm>
-          </a-col>
-        </template>
-        <a-col :span="4" :offset="8" v-else>
-          <a-button type="primary" icon="edit" @click="active_edit = true"
-            >Edit</a-button
-          >
-        </a-col>
-      </template>
+      <a-col :span="4" :offset="8" v-if="editable && !active_edit">
+        <a-button type="primary" icon="edit" @click="active_edit = true">Edit</a-button>
+      </a-col>
     </a-row>
     <p>
       <strong>Version:</strong>
@@ -44,6 +20,24 @@
       <a-textarea v-model="desired_state" :autoSize="{ minRows: 3 }" />
     </a-spin>
     <pre v-html="state.data" v-else />
+    <a-row v-if="active_edit">
+      <a-col :span="10">
+        <a-button type="primary" icon="close" @click="active_edit = false">Cancel</a-button>
+      </a-col>
+      <a-col :span="10" :offset="2" style="text-align: right">
+        <a-popconfirm
+          title="Are you sure saving this state?"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="
+                handleSaveState();
+                active_edit = false;
+              "
+        >
+          <a-button type="success" icon="save">Save</a-button>
+        </a-popconfirm>
+      </a-col>
+    </a-row>
   </div>
 </template>
 
