@@ -79,7 +79,7 @@ module.exports = {
   },
   css: [{ lang: "less", src: "@/assets/styles/themes.less" }],
   server: {
-    port: 80,
-    host: "0.0.0.0"
+    host: process.env.NODE_ENV == "production" ? "0.0.0.0" : "localhost",
+    port: process.env.NODE_ENV == "production" ? 80 : 3000
   }
 };

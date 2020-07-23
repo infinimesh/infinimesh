@@ -12,24 +12,27 @@
           position: 'fixed',
           left: 0
         }"
-        ><Sider
-      /></a-layout-sider>
+      >
+        <Sider />
+      </a-layout-sider>
       <a-layout>
         <a-layout-content
-          :style="{ marginLeft: menu_collapsed ? '80px' : '200px' }"
+          :style="{ marginLeft: menu_collapsed ? '80px' : '200px', paddingBottom: '20rem'}"
         >
           <nuxt-child />
         </a-layout-content>
         <a-layout-footer id="footer">
           <a-row type="flex" justify="center">
             <a-col :xs="24" :sm="18" :md="12" :lg="10" :xl="8">
-              ©2020 — <strong> infinimesh, inc </strong>
+              ©2020 —
+              <strong>infinimesh, inc</strong>
               - source code at
               <a
                 href="https://www.github.com/infinimesh/infinimesh"
                 target="_new"
-                ><strong style="color: white;">GitHub</strong></a
               >
+                <strong style="color: white;">GitHub</strong>
+              </a>
             </a-col>
           </a-row>
         </a-layout-footer>
@@ -68,6 +71,7 @@ export default {
   padding: 0 !important;
 }
 #footer {
+  margin-top: 15rem;
   position: fixed;
   left: 0;
   bottom: 0;
