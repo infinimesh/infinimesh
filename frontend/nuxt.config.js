@@ -59,11 +59,13 @@ module.exports = {
             method: "post",
             propertyName: "token"
           },
-          user: { url: "account", method: "get", propertyName: false },
-          logout: false
+          user: { url: "account", method: "get", propertyName: false }
         },
         tokenType: "bearer"
       }
+    },
+    redirect: {
+      logout: "/login"
     }
   },
   router: {
