@@ -35,5 +35,6 @@ module.exports = {
   "@font-size-xl": "25px",
   "@font-weight-default": "500",
   "@font-family-default": "Exo",
-  "@switch-color": "#5D8EB7"
+  "@switch-color": "#5D8EB7",
+  "@menu-item-font-size": "1rem"
 };
