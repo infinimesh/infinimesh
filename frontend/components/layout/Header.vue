@@ -13,21 +13,8 @@
       :sm="{ span: 12, offset: 1 }"
       :md="{ span: 8 }"
       :xxl="{ span: 7 }"
-    >
-      <a-row type="flex" justify="start">
-        <a-col>
-          <img
-            src="@/assets/infinimesh_logo.png"
-            alt="infinimesh Logo"
-            class="logo"
-          />
-        </a-col>
-        <a-col class="logo">
-          infinimesh
-          <span>.io</span>
-        </a-col>
-      </a-row>
-    </a-col>
+      class="logo"
+    >infinimesh.io</a-col>
     <a-col
       :xs="{ span: 0 }"
       :sm="{ span: 0 }"
@@ -59,8 +46,7 @@
           :value="ns.id"
           :label="ns.name"
           v-for="ns in namespaces"
-          >NS: {{ ns.name }}</a-select-option
-        >
+        >NS: {{ ns.name }}</a-select-option>
       </a-select>
     </a-col>
   </a-row>
@@ -75,7 +61,7 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      }
+      },
     },
     namespace: {
       get() {
@@ -83,14 +69,14 @@ export default {
       },
       set(val) {
         this.$store.dispatch("devices/setNamespace", val);
-      }
+      },
     },
     namespaces: {
       deep: true,
       get() {
         return this.$store.state.devices.namespaces;
-      }
-    }
+      },
+    },
   },
   mounted() {
     this.namespace = this.$store.state.auth.user.default_namespace.id;
@@ -98,8 +84,8 @@ export default {
   methods: {
     toggleCollapsed() {
       this.menu = !this.menu;
-    }
-  }
+    },
+  },
 };
 </script>
 
