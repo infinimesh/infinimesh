@@ -7,12 +7,12 @@
     <a-sub-menu key="user">
       <span slot="title">
         <a-icon type="user" />
-        <span
-          ><b>{{ user.name }}</b></span
-        >
+        <span>
+          <b>{{ user.name }}</b>
+        </span>
       </span>
       <a-menu-item key="logout">
-        <a @click="$store.commit('logout')">Log Out</a>
+        <a @click="$store.dispatch('logout')">Log Out</a>
       </a-menu-item>
     </a-sub-menu>
   </a-menu>
@@ -30,9 +30,9 @@ export default {
       },
       set(val) {
         this.$router.push({ name: val[0] });
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 

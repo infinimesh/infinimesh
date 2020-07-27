@@ -15,3 +15,9 @@ export const mutations = {
     state.auth.loggedIn = false;
   }
 };
+
+export const actions = {
+  async logout() {
+    await this.$auth.logout();
+  }
+};
