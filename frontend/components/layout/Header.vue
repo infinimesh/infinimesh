@@ -16,7 +16,11 @@
     >
       <a-row type="flex" justify="start">
         <a-col>
-          <img src="@/assets/infinimesh_logo.png" alt="infinimesh Logo" class="logo" />
+          <img
+            src="@/assets/infinimesh_logo.png"
+            alt="infinimesh Logo"
+            class="logo"
+          />
         </a-col>
         <a-col class="logo">
           infinimesh
@@ -25,12 +29,12 @@
       </a-row>
     </a-col>
     <a-col
-      :xs="{span: 0}"
-      :sm="{span: 0}"
-      :md="{span: 1, offset: 1}"
-      :lg="{span: 1, offset: 1}"
-      :xl="{span: 1, offset: 1}"
-      :xxl="{ span: 1, offset: 3 }"
+      :xs="{ span: 0 }"
+      :sm="{ span: 0 }"
+      :md="{ span: 1, offset: 2 }"
+      :lg="{ span: 1, offset: 2 }"
+      :xl="{ span: 1, offset: 2 }"
+      :xxl="{ span: 1, offset: 4 }"
     >
       <a-row>
         <a-col class="nav-button" :span="5" @click="$router.go(-1)">
@@ -44,10 +48,10 @@
     <a-col
       :xs="{ span: 6, offset: 1 }"
       :sm="{ span: 4, offset: 4 }"
-      :md="{ span: 4, offset: 2 }"
-      :lg="{ span: 4, offset: 3 }"
-      :xl="{ span: 4, offset: 4 }"
-      :xxl="{ span: 3, offset: 5 }"
+      :md="{ span: 6, offset: 4 }"
+      :lg="{ span: 6, offset: 3 }"
+      :xl="{ span: 6, offset: 4 }"
+      :xxl="{ span: 4, offset: 5 }"
     >
       <a-select style="width: 100%" v-model="namespace">
         <a-select-option
@@ -55,26 +59,15 @@
           :value="ns.id"
           :label="ns.name"
           v-for="ns in namespaces"
-        >NS: {{ ns.name }}</a-select-option>
+          >NS: {{ ns.name }}</a-select-option
+        >
       </a-select>
-    </a-col>
-    <a-col
-      :xs="{ span: 0 }"
-      :sm="{span: 0}"
-      :md="{ span: 5, offset: 1 }"
-      :lg="{span: 4, offset: 1}"
-      :xl="{ span: 3, offset: 1 }"
-      :xxl="{ span: 2, offset: 1 }"
-    >
-      <user-actions />
     </a-col>
   </a-row>
 </template>
 
 <script>
-import UserActions from "./header/user";
 export default {
-  components: { UserActions },
   computed: {
     menu: {
       get() {

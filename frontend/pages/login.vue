@@ -1,6 +1,6 @@
 <template>
   <a-row type="flex" justify="center" class="rootRow" align="middle">
-    <a-col :span="8">
+    <a-col :xs="22" :md="16" :lg="12">
       <a-row type="flex" justify="center">
         <h1>infinimesh Login</h1>
       </a-row>
@@ -8,7 +8,7 @@
         >Welcome to infinimesh. Log in with your username and password.</a-row
       >
 
-      <a-row>
+      <a-row style="margin-top: 1rem">
         <a-form :form="form" @submit="handleSubmit">
           <a-form-item>
             <a-input

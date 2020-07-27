@@ -17,7 +17,10 @@ export default {
   },
   methods: {
     onWindowResize() {
-      this.$store.dispatch("window/set", window.innerWidth);
+      this.$store.dispatch("window/set", {
+        height: window.innerHeight,
+        width: window.innerWidth
+      });
     }
   }
 };
