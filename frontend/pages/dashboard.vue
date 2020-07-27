@@ -10,14 +10,18 @@
           overflow: 'auto',
           height: '100vh',
           position: 'fixed',
-          left: 0
+          left: 0,
+          zIndex: 99
         }"
       >
         <Sider />
       </a-layout-sider>
       <a-layout>
         <a-layout-content
-          :style="{ marginLeft: menu_collapsed ? '80px' : '200px', paddingBottom: '20rem'}"
+          :style="{
+            marginLeft: menu_collapsed ? '80px' : '200px',
+            paddingBottom: '20rem'
+          }"
         >
           <nuxt-child />
         </a-layout-content>

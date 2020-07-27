@@ -1,10 +1,14 @@
 export const state = () => ({
   width: 0,
+  height: 0,
   gridSize: "xs",
   menu: true
 });
 
 export const mutations = {
+  setHeight(state, height) {
+    state.height = height;
+  },
   setWidth(state, width) {
     state.width = width;
   },
@@ -29,11 +33,12 @@ const gridSizes = {
 };
 
 export const actions = {
-  set(state, width) {
-    state.commit("setWidth", width);
+  set(state, win) {
+    state.commit("setWidth", win.width);
+    state.commit("setHeight", win.height);
     let size = "xs";
     for (let [k, v] of Object.entries(gridSizes)) {
-      if (width >= v) {
+      if (win.width >= v) {
         size = k;
       } else {
         break;
