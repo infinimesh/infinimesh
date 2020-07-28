@@ -34,9 +34,14 @@ You can reach out to the community via [Slack](https://launchpass.com/infinimesh
 
 ## Development
 ### Local development installation
-We have built an automated local development setup based on microk8s:
+We have built an automated local development setup based on microk8s.
+For Ubuntu please use:
 ```
-bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup.sh)
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-ubuntu.sh)
+```
+For OSX please use:
+```
+bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
 ```
 Source: https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s
 

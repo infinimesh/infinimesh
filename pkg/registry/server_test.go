@@ -153,6 +153,10 @@ func TestCreateGet(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: "joe"})
+
+	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+		Id: response.Device.Id,
+	})
 }
 
 func TestDelete(t *testing.T) {
@@ -173,6 +177,30 @@ func TestDelete(t *testing.T) {
 		Id: response.Device.Id,
 	})
 	require.Error(t, err)
+}
+
+func TestDeviceWithExistingFingerprint(t *testing.T) {
+	randomName := randomdata.SillyName()
+	randomName2 := randomdata.SillyName()
+	// Create
+	request := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName),
+	}
+	request1 := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName2),
+	}
+
+	response, err := server.Create(context.Background(), request)
+	require.NoError(t, err)
+	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
+
+	response2, err1 := server.Create(context.Background(), request1)
+	require.Error(t, err1)
+	require.Empty(t, response2.Device.Certificate.Fingerprint)
+
+	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+		Id: response.Device.Id,
+	})
 }
 
 //TODO test update/patch; also with cert
