@@ -347,21 +347,21 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 	txn := s.dgo.NewReadOnlyTxn()
 
 	const q = `query list($namespace: string){
-                     var(func: eq(name,$namespace)) @filter(eq(type, "namespace")) {
-                       owns {
-                         OBJs as uid
-                       } @filter(eq(kind, "device"))
-                     }
+		var(func: uid($namespace)) @filter(eq(type, "namespace")) {
+		  owns {
+			OBJs as uid
+		  } @filter(eq(kind, "device"))
+		}
 
-                     nodes(func: uid(OBJs)) @recurse {
-                       children{}
-                       uid
-                       name
-                       kind
-                       enabled
-                       tags
-                     }
-                   }`
+		nodes(func: uid(OBJs)) @recurse {
+		  children{}
+		  uid
+		  name
+		  kind
+		  enabled
+		  tags
+		}
+	  }`
 
 	vars := map[string]string{
 		"$namespace": request.Namespace,
