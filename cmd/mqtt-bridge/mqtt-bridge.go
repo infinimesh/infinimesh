@@ -284,13 +284,19 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		clientIDOK = true
 		deviceID = deviceIDs[0]
 	} else {
-		for _, possibleID := range deviceIDs {
-			if connectPacket.ConnectPayload.ClientID == possibleID {
-				fmt.Printf("Using ClientID: %v\n", possibleID)
-				clientIDOK = true
-				deviceID = possibleID
+		fmt.Printf("Client used duplicate fingerprint, Please use unique certificate for your device\n")
+		_ = c.Close()
+		return
+		//TODO : when multiple devices have single fingerprint authentication
+		/*
+			for _, possibleID := range deviceIDs {
+				if connectPacket.ConnectPayload.ClientID == possibleID {
+					fmt.Printf("Using ClientID: %v\n", possibleID)
+					clientIDOK = true
+					deviceID = possibleID
+				}
 			}
-		}
+		*/
 	}
 
 	if !clientIDOK {
