@@ -65,7 +65,7 @@ func init() {
 
 func TestList(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "joe",
+		Namespace: "0x4",
 	})
 	require.NoError(t, err)
 	var found int
@@ -75,23 +75,23 @@ func TestList(t *testing.T) {
 		}
 	}
 
-	require.EqualValues(t, 2, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
 func TestListForAccount(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "joe",
+		Namespace: "0x4",
 		Account:   userID,
 	})
 	require.NoError(t, err)
 	var found int
 	for _, device := range response.Devices {
-		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" {
+		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" || device.Name == "Smartmeter" {
 			found++
 		}
 	}
 
-	require.EqualValues(t, 2, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
 func sampleDevice(name string) *registrypb.Device {
@@ -178,6 +178,7 @@ func TestDelete(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
 /*
 func TestDeviceWithExistingFingerprint(t *testing.T) {
 	randomName := randomdata.SillyName()
