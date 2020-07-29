@@ -80,13 +80,13 @@ func TestList(t *testing.T) {
 
 func TestListForAccount(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "0x2785",
+		Namespace: "0x4",
 		Account:   userID,
 	})
 	require.NoError(t, err)
 	var found int
 	for _, device := range response.Devices {
-		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" {
+		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" || device.Name == "Smartmeter" {
 			found++
 		}
 	}
