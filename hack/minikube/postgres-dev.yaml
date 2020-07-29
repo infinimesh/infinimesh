@@ -11,5 +11,5 @@ spec:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 1Gi
-  terminationPolicy: DoNotTerminate
+        storage: 200Mi
+  terminationPolicy: DoNotTerminat
