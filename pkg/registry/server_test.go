@@ -80,7 +80,7 @@ func TestList(t *testing.T) {
 
 func TestListForAccount(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "joe",
+		Namespace: "0x2785",
 		Account:   userID,
 	})
 	require.NoError(t, err)
