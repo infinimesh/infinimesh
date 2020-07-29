@@ -15,7 +15,7 @@ spec:
       transaction.state.log.min.isr: 1
       log.message.format.version: "2.1"
     storage:
-      type: persistent-claim
+      type: ephemeral
       size: 1Gi
       deleteClaim: false
   zookeeper:
