@@ -65,7 +65,7 @@ func init() {
 
 func TestList(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "joe",
+		Namespace: "0x4",
 	})
 	require.NoError(t, err)
 	var found int
