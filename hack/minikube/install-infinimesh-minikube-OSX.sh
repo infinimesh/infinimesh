@@ -56,7 +56,7 @@ minikube config set driver virtualbox
 # start minikube
 echo " we start up a small k8s with 4 CPU and 8GB RAM"
 minikube stop && minikube delete
-minikube start --cpus 4 --memory 8192 --disk-size 150GB
+minikube start --cpus 3 --memory 4GB --disk-size 150GB
 
 # configure minikube
 minikube addons enable ingress
@@ -70,7 +70,7 @@ echo " creating self - signed certificates "
 printf '\n'
 mkdir -p ~/certs && cd ~/certs
 openssl genrsa -out ca.key 4096
-openssl req -subj '/CN=infinimesh.minikube/O=Infinimesh' -new -x509 -sha256 -key ca.key -out ca.crt -days 3650
+openssl req -subj '/CN=infinimesh.minikube/O=Infinimesh' -new -x509 -sha256 -key ca.key -out ca.crt -days 365
 openssl genrsa -out apiserver_grpc.key 4096
 openssl req -subj /CN=grpc.api.infinimesh.minikube -out apiserver_grpc.csr -key apiserver_grpc.key -new
 openssl x509 -req -days 3650 -in apiserver_grpc.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out apiserver_grpc.crt -sha256
