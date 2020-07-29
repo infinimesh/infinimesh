@@ -15,9 +15,13 @@ spec:
       transaction.state.log.min.isr: 1
       log.message.format.version: "2.1"
     storage:
-      type: persistent-claim
-      size: 1Gi
-      deleteClaim: false
+      type: jbod
+      volumes:
+      - id: 0
+        type: persistent-claim
+        size: 1Gi
+        deleteClaim: false
+      storageClassName: "standard"
   zookeeper:
     replicas: 1
     storage:
