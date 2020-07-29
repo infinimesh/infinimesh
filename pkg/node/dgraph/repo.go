@@ -19,6 +19,7 @@ package dgraph
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 
@@ -127,6 +128,46 @@ func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent strin
 	}
 
 	return len(result.Object) > 0
+}
+
+func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bool { //nolint
+	q := `query devices($fingerprint: string){
+		devices(func: eq(fingerprint, $fingerprint)) @normalize {
+		  ~certificates {
+			uid : uid
+			name : name
+			enabled : enabled
+			~owns {
+			  namespace: name
+			}
+		  }
+		}
+	  }
+		`
+
+	vars := map[string]string{
+		"$fingerprint": base64.StdEncoding.EncodeToString(fingerprint),
+	}
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return false
+	}
+
+	var result struct {
+		Devices []struct {
+			UID       string `json:"uid"`
+			Name      string `json:"name"`
+			Enabled   bool   `json:"enabled"`
+			Namespace string `json:"namespace"`
+		} `json:"devices"`
+	}
+
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return false
+	}
+
+	return len(result.Devices) > 0
 }
 
 func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
