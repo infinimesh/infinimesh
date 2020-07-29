@@ -131,8 +131,7 @@ func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent strin
 }
 
 func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bool { //nolint
-	var q string
-	q = `query devices($fingerprint: string){
+	q := `query devices($fingerprint: string){
 		devices(func: eq(fingerprint, $fingerprint)) @normalize {
 		  ~certificates {
 			uid : uid
