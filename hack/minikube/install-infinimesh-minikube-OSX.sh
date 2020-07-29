@@ -114,8 +114,12 @@ sleep 20
 kubectl apply -f https://raw.githubusercontent.com/InfiniteDevices/infinimesh/master/hack/minikube/infinimesh-platform.yaml
 sleep 20
 
+# add some debug pods
+kubectl apply -f https://raw.githubusercontent.com/InfiniteDevices/infinimesh/master/hack/minikube/dnsutil.yaml
+
 echo "=> installing inf (infinimesh CLI) and point to the local setup:"
 curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash  
 echo "inf CLI installed in" $HOME/bin
 ~/bin/inf config set-context local --apiserver grpc.api.infinimesh.minikube:443 --tls=true --ca-file ~/certs/ca.crt
+
 
