@@ -75,7 +75,7 @@ func TestList(t *testing.T) {
 		}
 	}
 
-	require.EqualValues(t, 2, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
 func TestListForAccount(t *testing.T) {
