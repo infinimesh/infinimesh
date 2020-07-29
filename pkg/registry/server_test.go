@@ -91,7 +91,7 @@ func TestListForAccount(t *testing.T) {
 		}
 	}
 
-	require.EqualValues(t, 2, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
 func sampleDevice(name string) *registrypb.Device {
@@ -178,6 +178,7 @@ func TestDelete(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
 /*
 func TestDeviceWithExistingFingerprint(t *testing.T) {
 	randomName := randomdata.SillyName()
