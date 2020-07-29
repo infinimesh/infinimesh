@@ -50,19 +50,17 @@ if which minikube >/dev/null; then
     brew install minikube
  fi
 
-# start minikube
-echo " we start up a small k8s with 4 CPU and 8GB RAM" \
-minikube start --cpus 4 --memory 8192
-
 # set virtualbox as default driver
 minikube config set driver virtualbox
+
+# start minikube
+echo " we start up a small k8s with 4 CPU and 8GB RAM"
+minikube stop && minikube delete
+minikube start --cpus 4 --memory 8192 --disk-size 150GB
 
 # configure minikube
 minikube addons enable ingress
 minikube addons enable ingress-dns
-
-# enable dashboard
- minikube dashboard
 
 # check if we see nodes
  kubectl get nodes
@@ -70,7 +68,7 @@ minikube addons enable ingress-dns
 # certificates
 echo " creating self - signed certificates "
 printf '\n'
-mkdir -p certs && cd certs
+mkdir -p ~/certs && cd ~/certs
 openssl genrsa -out ca.key 4096
 openssl req -subj '/CN=infinimesh.minikube/O=Infinimesh' -new -x509 -sha256 -key ca.key -out ca.crt -days 3650
 openssl genrsa -out apiserver_grpc.key 4096
@@ -103,11 +101,21 @@ kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/ma
 kubectl apply -f https://raw.githubusercontent.com/infinimesh/operator/master/manifests/operator.yaml
 sleep 2
 
-echo " installing kubeDB from https://github.com/kubedb "
-printf '\n'
-curl -fsSL https://raw.githubusercontent.com/kubedb/cli/0.11.0/hack/deploy/kubedb.sh | bash
-sleep 5
-
+kubectl create namespace kafka
 curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.14.0/strimzi-cluster-operator-0.14.0.yaml \
   | sed 's/namespace: .*/namespace: kafka/' \
   | kubectl apply -f - -n kafka 
+
+sleep 20
+
+kubectl apply -f https://raw.githubusercontent.com/InfiniteDevices/infinimesh/master/hack/minikube/infinimesh-kafka.yaml -n kafka
+sleep 20
+
+kubectl apply -f https://raw.githubusercontent.com/InfiniteDevices/infinimesh/master/hack/minikube/infinimesh-platform.yaml
+sleep 20
+
+echo "=> installing inf (infinimesh CLI) and point to the local setup:"
+curl -L https://bit.ly/2CNKWzJ | BINDIR=$HOME/bin bash  
+echo "inf CLI installed in" $HOME/bin
+~/bin/inf config set-context local --apiserver grpc.api.infinimesh.minikube:443 --tls=true --ca-file ~/certs/ca.crt
+
