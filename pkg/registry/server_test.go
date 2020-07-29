@@ -178,7 +178,7 @@ func TestDelete(t *testing.T) {
 	})
 	require.Error(t, err)
 }
-
+/*
 func TestDeviceWithExistingFingerprint(t *testing.T) {
 	randomName := randomdata.SillyName()
 	randomName2 := randomdata.SillyName()
@@ -202,6 +202,7 @@ func TestDeviceWithExistingFingerprint(t *testing.T) {
 		Id: response.Device.Id,
 	})
 }
+*/
 
 //TODO test update/patch; also with cert
 
