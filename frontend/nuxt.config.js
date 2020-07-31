@@ -3,7 +3,7 @@ module.exports = {
    ** Headers of the page
    */
   head: {
-    title: "console.infinimesh.app",
+    title: "infinimesh | Open Source IoT Platform",
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -13,7 +13,10 @@ module.exports = {
         content: "Console Infinimesh UI",
       },
     ],
-    link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    link: [
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+    ],
   },
   plugins: [
     "@/plugins/ant-design-vue",
