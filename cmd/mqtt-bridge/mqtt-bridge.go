@@ -28,7 +28,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -184,10 +183,8 @@ func main() {
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		err := conn.(*tls.Conn).Handshake()
-		err = conn.SetDeadline(time.Now().Add(time.Millisecond))
 		if err != nil {
-			fmt.Println("Handshake of client failed, closing connection", err)
-			_ = conn.Close()
+			fmt.Println("Handshake of client failed", err)
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
