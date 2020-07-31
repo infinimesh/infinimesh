@@ -183,8 +183,10 @@ func main() {
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		err := conn.(*tls.Conn).Handshake()
+		err = conn.SetDeadline(time.Now().Add(10 * time.Millisecond))
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
+			_ = conn.Close()
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
