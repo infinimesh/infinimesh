@@ -346,8 +346,8 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query list($namespace: string){
-		var(func: uid($namespace)) @filter(eq(type, "namespace")) {
+	const q = `query list($namespaceid: string){
+		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
 		  owns {
 			OBJs as uid
 		  } @filter(eq(kind, "device"))
@@ -364,7 +364,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 	  }`
 
 	vars := map[string]string{
-		"$namespace": request.Namespace,
+		"$namespaceid": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
