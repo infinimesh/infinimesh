@@ -185,6 +185,8 @@ func main() {
 		err := conn.(*tls.Conn).Handshake()
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
+			_ = conn.Close()
+			fmt.Printf("Closing connection. err=%v\n", err)
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
@@ -208,7 +210,7 @@ func main() {
 			}
 		}
 
-		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
+		fmt.Printf("Client connected successfully, IDs: %v\n", possibleIDs)
 
 		go handleConn(conn, possibleIDs)
 
