@@ -28,6 +28,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -184,8 +185,12 @@ func main() {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		err := conn.(*tls.Conn).Handshake()
 
+<<<<<<< HEAD
 		//time.Sleep(time.Second * 20)
 		//_ = conn.SetDeadline(time.Now().Add(time.Millisecond * 5))
+=======
+		conn.SetDeadline(time.Now().Add(10 * time.Millisecond))
+>>>>>>> ee18fb83ca70d31b169a814272e07587af4d936c
 
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
