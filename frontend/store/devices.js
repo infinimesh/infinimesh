@@ -20,9 +20,9 @@ export const actions = {
   async get({ commit, state, rootState }) {
     let ns = "";
     if (state.namespaces.length) {
-      ns = state.namespaces.filter(el => el.id == state.namespace)[0].name;
+      ns = state.namespaces.filter(el => el.id == state.namespace)[0].id;
     } else {
-      ns = rootState.auth.user.default_namespace.name;
+      ns = rootState.auth.user.default_namespace.id;
     }
 
     const devices = await this.$axios.$get("/devices", {
