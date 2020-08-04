@@ -181,10 +181,14 @@ func main() {
 	go readBackchannelFromKafka()
 
 	for {
-		conn, err := tlsl.Accept() // nolint: gosec
-		if err != nil {
-			fmt.Println("TLS connection failed", err)
-			_ = conn.Close()
+		conn, _ := tlsl.Accept() // nolint: gosec
+
+		recieveBuffer := make([]byte, 5)
+		messageSize, err := conn.Read(recieveBuffer)
+
+		if messageSize == 0 {
+			fmt.Printf("No packet recieved : %v, message size : %v\n", messageSize, err)
+
 		}
 
 		err = conn.(*tls.Conn).Handshake()
