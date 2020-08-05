@@ -28,6 +28,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -181,13 +182,21 @@ func main() {
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		//conn.SetReadDeadline(time.Now().Add(10 * time.Second))
-		err := conn.(*tls.Conn).Handshake()
+		timeout := time.Second * 3
+		errChannel := make(chan error, 2)
 
-		if err != nil {
-			fmt.Println("Handshake of client failed", err)
+		go func() {
+			errChannel <- conn.(*tls.Conn).Handshake()
+		}()
+
+		select {
+		case err := <-errChannel:
+			if err != nil {
+				fmt.Println("Handshake failed", err)
+			}
+		case <-time.After(timeout):
+			fmt.Println("Handshake failed due to timeout")
 			_ = conn.Close()
-			err = tlsl.Close()
-			fmt.Printf("closing connection. err=%v\n", err)
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
