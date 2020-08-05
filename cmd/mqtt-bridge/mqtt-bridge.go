@@ -181,14 +181,11 @@ func main() {
 	go readBackchannelFromKafka()
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
-		//conn.SetReadDeadline(time.Now().Add(10 * time.Second))
-		timeout := time.Second * 3
+		timeout := time.Second / 2
 		errChannel := make(chan error, 2)
-
 		go func() {
 			errChannel <- conn.(*tls.Conn).Handshake()
 		}()
-
 		select {
 		case err := <-errChannel:
 			if err != nil {
@@ -198,7 +195,6 @@ func main() {
 			fmt.Println("Handshake failed due to timeout")
 			_ = conn.Close()
 		}
-
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
 			continue
 		}
