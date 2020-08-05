@@ -178,7 +178,6 @@ func main() {
 	}
 
 	go readBackchannelFromKafka()
-	type timeoutError struct{}
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		//conn.SetReadDeadline(time.Now().Add(10 * time.Second))
@@ -186,6 +185,7 @@ func main() {
 
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
+			_ = conn.Close()
 			err = tlsl.Close()
 			fmt.Printf("closing connection. err=%v\n", err)
 		}
