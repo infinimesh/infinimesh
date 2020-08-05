@@ -28,7 +28,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -143,12 +142,6 @@ func fqTopic(deviceID, subPath string) string {
 	return "devices/" + deviceID + "/" + subPath
 }
 
-type timeoutError struct{}
-
-func (timeoutError) Error() string   { return "tls: handshake timed out" }
-func (timeoutError) Timeout() bool   { return true }
-func (timeoutError) Temporary() bool { return true }
-
 func main() {
 	serverCert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
 	if err != nil {
@@ -185,34 +178,15 @@ func main() {
 	}
 
 	go readBackchannelFromKafka()
-
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
-		timeout := time.Second * 2
-
-		var errChannel chan error
-
-		if timeout != 0 {
-			errChannel = make(chan error, 2)
-			timer := time.AfterFunc(timeout, func() {
-				errChannel <- timeoutError{}
-			})
-			defer timer.Stop()
-		}
-
-		if timeout == 0 {
-			err = conn.(*tls.Conn).Handshake()
-		} else {
-			go func() {
-				errChannel <- conn.(*tls.Conn).Handshake()
-			}()
-
-			err = <-errChannel
-		}
+		//conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+		err := conn.(*tls.Conn).Handshake()
 
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
-			err = conn.Close()
+			_ = conn.Close()
+			err = tlsl.Close()
 			fmt.Printf("closing connection. err=%v\n", err)
 		}
 
