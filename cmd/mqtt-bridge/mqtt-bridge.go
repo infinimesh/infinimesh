@@ -28,7 +28,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -182,12 +181,13 @@ func main() {
 	go readBackchannelFromKafka()
 
 	for {
-		conn, _ := tlsl.Accept() // nolint: gosec
-		//conn.SetReadDeadline(time.Now().Add(10 * time.Second))
-		printConnState(conn)
+		conn, err := tlsl.Accept() // nolint: gosec
+		if err != nil {
+			fmt.Println("TLS connection failed", err)
+			_ = conn.Close()
+		}
 
-		err := conn.(*tls.Conn).Handshake()
-		time.Sleep(time.Second * 10)
+		err = conn.(*tls.Conn).Handshake()
 
 		if err != nil {
 			fmt.Println("Handshake of client failed", err)
