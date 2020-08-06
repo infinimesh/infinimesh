@@ -435,7 +435,7 @@ var xxx_messageInfo_ListDevicesRequest proto.InternalMessageInfo
 
 func (m *ListDevicesRequest) GetNamespace() string {
 	if m != nil {
-		return m.Namespace
+		return m.Namespaceid
 	}
 	return ""
 }

@@ -343,6 +343,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 	}, nil
 }
 
+//Method to get Device list based on Namespace ID
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
