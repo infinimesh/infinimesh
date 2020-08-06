@@ -192,7 +192,7 @@ func main() {
 				fmt.Println("Handshake failed", err)
 			}
 		case <-time.After(timeout):
-			fmt.Println("Handshake failed due to timeout")
+			fmt.Println("Handshake failed due to timeout: ", conn.RemoteAddr().String)
 			_ = conn.Close()
 		}
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
