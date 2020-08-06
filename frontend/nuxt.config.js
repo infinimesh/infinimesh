@@ -47,13 +47,14 @@ module.exports = {
   },
   buildModules: ["@nuxt/typescript-build"],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
+
   axios: {
     proxy: true,
     browserBaseURL: "/api/"
   },
   proxy: {
     "/api": {
-      target: process.env.APISERVER_URL,
+      target: process.env.APISERVER_URL, // This will be defined on start
       pathRewrite: {
         "^/api": "/"
       }
