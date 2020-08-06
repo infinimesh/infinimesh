@@ -90,7 +90,7 @@ services:
       - "8082:80"
     image: quay.io/infinimesh/frontend:infinidev
     environment:
-      - "APISERVER_URL=http://localhost:8081"
+      - "APISERVER_URL=apiserver-rest:8081"
   apiserver:
     ports:
       - "8080:8080"
