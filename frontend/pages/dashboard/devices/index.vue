@@ -70,11 +70,11 @@ import DeviceAdd from "@/components/device/Add.vue";
 export default {
   name: "devicesTable",
   components: {
-    DeviceAdd
+    DeviceAdd,
   },
   data() {
     return {
-      addDeviceActive: false
+      addDeviceActive: false,
     };
   },
   computed: {
@@ -82,7 +82,7 @@ export default {
       deep: true,
       get() {
         return this.$store.state.devices.pool;
-      }
+      },
     },
     poolCols: {
       deep: true,
@@ -130,11 +130,11 @@ export default {
           i += div - 1;
         }
         return res;
-      }
+      },
     },
     deviceCreateFormStyle() {
       return {
-        "--device-card-height": this.deviceCardHeight
+        "--device-card-height": this.deviceCardHeight,
       };
     },
     deviceCardHeight: {
@@ -148,19 +148,18 @@ export default {
         } else {
           return "8rem";
         }
-      }
+      },
     },
     gridSize() {
       return this.$store.state.window.gridSize;
-    }
+    },
   },
   methods: {
     handleDeviceAdd(device) {
-      console.log(device);
       this.$store.dispatch("devices/add", device);
       this.addDeviceActive = false;
-    }
-  }
+    },
+  },
 };
 </script>
 

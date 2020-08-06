@@ -28,6 +28,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -173,22 +174,27 @@ func main() {
 		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
-
 	if err != nil {
 		panic(err)
 	}
 
 	go readBackchannelFromKafka()
-
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
-		err := conn.(*tls.Conn).Handshake()
-		if err != nil {
-			fmt.Println("Handshake of client failed", err)
+		timeout := time.Second / 2
+		errChannel := make(chan error, 2)
+		go func() {
+			errChannel <- conn.(*tls.Conn).Handshake()
+		}()
+		select {
+		case err := <-errChannel:
+			if err != nil {
+				fmt.Println("Handshake failed", err)
+			}
+		case <-time.After(timeout):
+			fmt.Println("Handshake failed due to timeout")
 			_ = conn.Close()
-			fmt.Printf("Closing connection. err=%v\n", err)
 		}
-
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
 			continue
 		}
@@ -210,7 +216,7 @@ func main() {
 			}
 		}
 
-		fmt.Printf("Client connected successfully, IDs: %v\n", possibleIDs)
+		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
 
 		go handleConn(conn, possibleIDs)
 

@@ -10,17 +10,17 @@ module.exports = {
       {
         hid: "description",
         name: "description",
-        content: "Console Infinimesh UI",
-      },
+        content: "Console Infinimesh UI"
+      }
     ],
     link: [
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
-    ],
+      { rel: "icon", type: "image/png", href: "/favicon.png" }
+    ]
   },
   plugins: [
     "@/plugins/ant-design-vue",
-    "@/plugins/typeface-exo",
+    "@/plugins/typeface-exo"
     // "@/plugins/axios"
   ],
   /*
@@ -40,15 +40,25 @@ module.exports = {
           enforce: "pre",
           test: /\.(js|vue)$/,
           loader: "eslint-loader",
-          exclude: /(node_modules)/,
+          exclude: /(node_modules)/
         });
       }
-    },
+    }
   },
   buildModules: ["@nuxt/typescript-build"],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
+
   axios: {
-    baseURL: process.env.APISERVER_URL,
+    proxy: true,
+    browserBaseURL: "/api/"
+  },
+  proxy: {
+    "/api": {
+      target: process.env.APISERVER_URL, // This will be defined on start
+      pathRewrite: {
+        "^/api": "/"
+      }
+    }
   },
   auth: {
     strategies: {
@@ -57,31 +67,31 @@ module.exports = {
           login: {
             url: "account/token",
             method: "post",
-            propertyName: "token",
+            propertyName: "token"
           },
-          user: { url: "account", method: "get", propertyName: false },
+          user: { url: "account", method: "get", propertyName: false }
         },
-        tokenType: "bearer",
-      },
+        tokenType: "bearer"
+      }
     },
     redirect: {
-      logout: "/login",
-    },
+      logout: "/login"
+    }
   },
   router: {
-    middleware: ["auth"],
+    middleware: ["auth"]
   },
   build: {
     loaders: {
       less: {
         javascriptEnabled: true,
-        modifyVars: require("./assets/styles/antThemeMod.js"),
-      },
-    },
+        modifyVars: require("./assets/styles/antThemeMod.js")
+      }
+    }
   },
   css: [{ lang: "less", src: "@/assets/styles/themes.less" }],
   server: {
     host: process.env.NODE_ENV == "production" ? "0.0.0.0" : "localhost",
-    port: process.env.NODE_ENV == "production" ? 80 : 3000,
-  },
+    port: process.env.NODE_ENV == "production" ? 80 : 3000
+  }
 };
