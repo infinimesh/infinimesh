@@ -127,9 +127,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
 
-	if err != nil {
-		return "", err
-	}
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -157,6 +154,9 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 
 		//Create Default namespace for the new user being created
 		defaultNs, err := s.CreateNamespace(ctx, username)
+		if err != nil {
+			return "", err
+		}
 
 		js, err := json.Marshal(&Account{
 			Node: Node{
