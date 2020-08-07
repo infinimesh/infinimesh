@@ -25,7 +25,7 @@ export const actions = {
       ns = rootState.auth.user.default_namespace.id;
     }
 
-    const devices = await this.$axios.$get("/devices", {
+    const devices = await this.$axios.$get("/api/devices", {
       params: {
         namespace: ns
       }
@@ -34,7 +34,7 @@ export const actions = {
   },
   add({ dispatch }, device) {
     this.$axios
-      .$post("/devices", {
+      .$post("/api/devices", {
         device: device
       })
       .then(res => {
@@ -43,7 +43,7 @@ export const actions = {
       .catch(e => console.log(e));
   },
   async getNamespaces({ commit }) {
-    const namespaces = await this.$axios.$get("/namespaces");
+    const namespaces = await this.$axios.$get("/api/namespaces");
     commit("namespaces", namespaces.namespaces);
   },
   setNamespace({ commit, dispatch }, ns) {
