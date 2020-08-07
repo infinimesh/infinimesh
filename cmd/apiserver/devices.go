@@ -112,10 +112,10 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	}
 
 	if isRootResp.IsRoot {
-		return d.client.List(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
+		return d.client.List(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespace})
 	}
 
-	resp, err := d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace, Account: account})
+	resp, err := d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespace, Account: account})
 	return resp, err
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
