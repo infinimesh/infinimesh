@@ -49,8 +49,7 @@ module.exports = {
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
 
   axios: {
-    proxy: true,
-    browserBaseURL: "/api/"
+    proxy: true
   },
   proxy: {
     "/api": {
@@ -65,7 +64,7 @@ module.exports = {
       local: {
         endpoints: {
           login: {
-            url: "account/token",
+            url: "api/account/token",
             method: "post",
             propertyName: "token"
           },
