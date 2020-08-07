@@ -68,7 +68,7 @@ module.exports = {
             method: "post",
             propertyName: "token"
           },
-          user: { url: "account", method: "get", propertyName: false }
+          user: { url: "api/account", method: "get", propertyName: false }
         },
         tokenType: "bearer"
       }
