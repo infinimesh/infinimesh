@@ -115,12 +115,12 @@ export default {
      * Device ID - not required if compinent is mounted via Router _id
      */
     deviceId: {
-      required: false
-    }
+      required: false,
+    },
   },
   data() {
     return {
-      deviceObject: false
+      deviceObject: false,
     };
   },
   computed: {
@@ -130,7 +130,7 @@ export default {
       },
       set(obj) {
         this.deviceObject = { ...this.deviceObject, ...obj };
-      }
+      },
     },
     deviceStateBulbColor() {
       if (!(this.device && this.device.enabled !== undefined)) {
@@ -140,24 +140,24 @@ export default {
       } else {
         return "#eb2f96";
       }
-    }
+    },
   },
   mounted() {
     this.device = {
-      id: this.deviceId || this.$route.params.id
+      id: this.deviceId || this.$route.params.id,
     };
     // Getting Device data from API
     this.$axios
-      .get(`/devices/${this.device.id}`)
-      .then(res => {
+      .get(`/api/devices/${this.device.id}`)
+      .then((res) => {
         this.device = res.data.device;
       })
-      .catch(res => {
+      .catch((res) => {
         if (res.response.status == 404) {
           this.$notification.error({
             message: "Device wasn't found",
             description: "Redirecting...",
-            placement: "bottomRight"
+            placement: "bottomRight",
           });
           this.$router.push({ name: "dashboard-devices" });
         }
@@ -169,12 +169,14 @@ export default {
      * Obtains device state(s) (desired and reported) and merges them into deviceObject
      */
     async deviceStateGet() {
-      await this.$axios.get(`/devices/${this.device.id}/state`).then(res => {
-        this.device = {
-          ...this.device,
-          state: res.data
-        };
-      });
+      await this.$axios
+        .get(`/api/devices/${this.device.id}/state`)
+        .then((res) => {
+          this.device = {
+            ...this.device,
+            state: res.data,
+          };
+        });
     },
     /**
      * Performs PATCH /device/id and changes desired state to given.
@@ -183,14 +185,14 @@ export default {
      */
     handleStateUpdate(state, callback) {
       this.$axios({
-        url: `/devices/${this.device.id}/state`,
+        url: `/api/devices/${this.device.id}/state`,
         method: "patch",
-        data: state
+        data: state,
       })
-        .then(res => {
+        .then((res) => {
           this.deviceStateGet();
         })
-        .catch(res => {
+        .catch((res) => {
           console.log(res);
         })
         .then(() => {
@@ -199,18 +201,18 @@ export default {
     },
     handleDeviceDelete() {
       this.$axios({
-        url: `/devices/${this.device.id}`,
-        method: "delete"
+        url: `/api/devices/${this.device.id}`,
+        method: "delete",
       }).then(() => {
         this.$message.success("Device successfuly deleted!");
         this.$store.dispatch("devices/get");
         this.$router.push({ name: "dashboard-devices" });
       });
-    }
+    },
   },
   validate({ params }) {
     return /0[xX][0-9a-fA-F]+/.test(params.id);
-  }
+  },
 };
 </script>
 
