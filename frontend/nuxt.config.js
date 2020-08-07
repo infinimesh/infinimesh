@@ -92,5 +92,9 @@ module.exports = {
   server: {
     host: process.env.NODE_ENV == "production" ? "0.0.0.0" : "localhost",
     port: process.env.NODE_ENV == "production" ? 80 : 3000
+  },
+
+  publicRuntimeConfig: {
+    baseURL: process.env.APISERVER_URL
   }
 };
