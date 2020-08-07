@@ -8,11 +8,11 @@
     >
       <a-row style="padding-top: 10px">
         <a-col
-          :xs="{span: 21}"
-          :sm="{span: 20, offset: 1}"
-          :md="{span: 20, offset: 1}"
-          :lg="{span: 20, offset: 1}"
-          :xl="{span: 16, offset: 1}"
+          :xs="{ span: 21 }"
+          :sm="{ span: 20, offset: 1 }"
+          :md="{ span: 20, offset: 1 }"
+          :lg="{ span: 20, offset: 1 }"
+          :xl="{ span: 16, offset: 1 }"
           :xxl="{ span: 12, offset: 1 }"
         >
           <transition name="fade">
@@ -22,7 +22,13 @@
             </h1>
           </transition>
         </a-col>
-        <a-col :xs="1" :sm="1" :md="1" :xl="{ span: 1, offset: 1 }" :xxl="{ span: 1, offset: 1 }">
+        <a-col
+          :xs="1"
+          :sm="1"
+          :md="1"
+          :xl="{ span: 1, offset: 1 }"
+          :xxl="{ span: 1, offset: 1 }"
+        >
           <a-row type="flex" justify="end">
             <a-tooltip
               :title="
@@ -45,10 +51,10 @@
       </a-row>
       <a-row>
         <a-col
-          :sm="{span: 22, offset: 1}"
-          :md="{span: 22, offset: 1}"
-          :lg="{span: 22, offset: 1}"
-          :xl="{span: 18, offset: 1}"
+          :sm="{ span: 22, offset: 1 }"
+          :md="{ span: 22, offset: 1 }"
+          :lg="{ span: 22, offset: 1 }"
+          :xl="{ span: 18, offset: 1 }"
           :xxl="{ span: 14, offset: 1 }"
         >
           <transition-group name="slide">
@@ -58,9 +64,7 @@
                   <p>
                     Tags:
                     <a-tag v-for="tag in device.tags" :key="tag">
-                      {{
-                      tag
-                      }}
+                      {{ tag }}
                     </a-tag>
                   </p>
                 </a-row>
@@ -76,12 +80,23 @@
               </template>
             </a-card>
             <a-card title="Actions" key="actions" v-if="device" hoverable>
-              <device-actions :device-id="device.id" @delete="handleDeviceDelete" />
+              <device-actions
+                :device-id="device.id"
+                @delete="handleDeviceDelete"
+              />
             </a-card>
-            <a-card title="State" key="state" v-if="device && device.state" hoverable>
+            <a-card
+              title="State"
+              key="state"
+              v-if="device && device.state"
+              hoverable
+            >
               <a-row>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
-                  <device-state title="Reported" :state="device.state.shadow.reported" />
+                  <device-state
+                    title="Reported"
+                    :state="device.state.shadow.reported"
+                  />
                 </a-col>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
                   <device-state
@@ -112,15 +127,15 @@ export default {
   components: { DeviceState, DeviceActions },
   props: {
     /**
-     * Device ID - not required if compinent is mounted via Router _id
+     * Device ID - not required if component is mounted via Router _id
      */
     deviceId: {
-      required: false,
-    },
+      required: false
+    }
   },
   data() {
     return {
-      deviceObject: false,
+      deviceObject: false
     };
   },
   computed: {
@@ -130,7 +145,7 @@ export default {
       },
       set(obj) {
         this.deviceObject = { ...this.deviceObject, ...obj };
-      },
+      }
     },
     deviceStateBulbColor() {
       if (!(this.device && this.device.enabled !== undefined)) {
@@ -140,24 +155,38 @@ export default {
       } else {
         return "#eb2f96";
       }
-    },
+    }
   },
   mounted() {
     this.device = {
-      id: this.deviceId || this.$route.params.id,
+      id: this.deviceId || this.$route.params.id
     };
     // Getting Device data from API
     this.$axios
       .get(`/api/devices/${this.device.id}`)
-      .then((res) => {
+      .then(res => {
         this.device = res.data.device;
+        this.socket = new WebSocket(
+          `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
+            this.device.id
+          }/state/stream`,
+          ["Bearer", this.$auth.getToken("local").split(" ")[1]]
+        );
+        this.socket.onmessage = msg => {
+          this.device.state.shadow.reported = JSON.parse(
+            msg.data
+          ).result.reportedState;
+        };
+        window.addEventListener("beforeunload", function(event) {
+          this.socket.close();
+        });
       })
-      .catch((res) => {
+      .catch(res => {
         if (res.response.status == 404) {
           this.$notification.error({
             message: "Device wasn't found",
             description: "Redirecting...",
-            placement: "bottomRight",
+            placement: "bottomRight"
           });
           this.$router.push({ name: "dashboard-devices" });
         }
@@ -171,10 +200,10 @@ export default {
     async deviceStateGet() {
       await this.$axios
         .get(`/api/devices/${this.device.id}/state`)
-        .then((res) => {
+        .then(res => {
           this.device = {
             ...this.device,
-            state: res.data,
+            state: res.data
           };
         });
     },
@@ -187,12 +216,12 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}/state`,
         method: "patch",
-        data: state,
+        data: state
       })
-        .then((res) => {
+        .then(res => {
           this.deviceStateGet();
         })
-        .catch((res) => {
+        .catch(res => {
           console.log(res);
         })
         .then(() => {
@@ -202,17 +231,17 @@ export default {
     handleDeviceDelete() {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
-        method: "delete",
+        method: "delete"
       }).then(() => {
         this.$message.success("Device successfuly deleted!");
         this.$store.dispatch("devices/get");
         this.$router.push({ name: "dashboard-devices" });
       });
-    },
+    }
   },
   validate({ params }) {
     return /0[xX][0-9a-fA-F]+/.test(params.id);
-  },
+  }
 };
 </script>
 
