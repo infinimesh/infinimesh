@@ -364,7 +364,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 	  }`
 
 	vars := map[string]string{
-		"$namespaceid": request.Namespaceid,
+		"$namespaceid": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -418,7 +418,7 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
                      }
                    }`
 
-	if request.Namespaceid != "" {
+	if request.Namespace != "" {
 		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))")
 	} else {
 		q = fmt.Sprintf(q, "")
@@ -426,7 +426,7 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
 
 	vars := map[string]string{
 		"$account":   request.Account,
-		"$namespace": request.Namespaceid,
+		"$namespace": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
