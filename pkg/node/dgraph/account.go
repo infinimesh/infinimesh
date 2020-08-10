@@ -101,6 +101,10 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	for _, field := range account.FieldMask.Paths {
 		switch field {
+		case "Name":
+			acc.Name = account.Account.Name
+		case "IsRoot":
+			acc.IsRoot = account.Account.IsRoot
 		case "Enabled":
 			acc.Enabled = account.Account.Enabled
 		}
@@ -126,10 +130,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
-	defaultNs, err := s.CreateNamespace(ctx, username)
-	if err != nil {
-		return "", err
-	}
+
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -152,7 +153,16 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 		return "", err
 	}
 
+	//If the user doesnt exists then create user
 	if len(result.Exists) == 0 {
+
+		//Create Default namespace for the new user being created
+		defaultNs, err := s.CreateNamespace(ctx, username)
+		if err != nil {
+			return "", err
+		}
+
+		//Build the json data structure to create the user for DGraph
 		js, err := json.Marshal(&Account{
 			Node: Node{
 				Type: "account",
@@ -190,6 +200,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 			return "", err
 		}
 
+		//Create the new user in the Dgraph DB
 		m := &api.Mutation{SetJson: js}
 		a, err := txn.Mutate(ctx, m)
 		if err != nil {
@@ -205,6 +216,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 
 	}
 
+	//If the user exists then return error
 	return "", errors.New("User exists already")
 }
 
