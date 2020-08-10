@@ -101,6 +101,10 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	for _, field := range account.FieldMask.Paths {
 		switch field {
+		case "Name":
+			acc.Name = account.Account.Name
+		case "IsRoot":
+			acc.IsRoot = account.Account.IsRoot
 		case "Enabled":
 			acc.Enabled = account.Account.Enabled
 		}
