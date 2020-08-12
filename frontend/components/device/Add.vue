@@ -116,6 +116,7 @@ export default Vue.component("device-add", {
           return "100%";
           break;
       }
+      return "0%";
     },
   },
   watch: {
