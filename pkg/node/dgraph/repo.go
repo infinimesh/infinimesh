@@ -196,7 +196,7 @@ func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	return len(result.Object) > 0
 }
 
-func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error) {
+func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespaceID string, action nodepb.Action) (err error) {
 	txn := s.Dg.NewTxn()
 
 	if ok := checkType(ctx, txn, account, "account"); !ok {
@@ -204,7 +204,7 @@ func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespace 
 	}
 
 	// TODO use internal method that runs within txn
-	ns, err := s.GetNamespace(ctx, namespace)
+	ns, err := s.GetNamespace(ctx, namespaceID)
 	if err != nil {
 		return err
 	}
@@ -427,14 +427,14 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 }
 
 func (s *DGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
-	const q = `query getNamespaces($namespace: string) {
-                     namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
+	const q = `query getNamespaces($namespaceid: string) {
+                     namespaces(func: eq(uid, $namespaceid)) @filter(eq(type, "namespace"))  {
 	               uid
                        name
 	             }
                    }`
 
-	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespaceID})
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespaceid": namespaceID})
 	if err != nil {
 		return nil, err
 	}
