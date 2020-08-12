@@ -189,17 +189,17 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 
 	txn := s.Dg.NewReadOnlyTxn()
 
-	const q = `query access($namespace: string, $user_id: string){
-  access(func: uid($user_id)) @cascade {
-    name
-    uid
-    access.to.namespace @filter(eq(uid, "$namespace")) {
-      uid
-      name
-      type
-    }
-  }
-}
+	const q = `query access($namespaceid: string, $user_id: string){
+		access(func: uid($user_id)) @cascade {
+		  name
+		  uid
+		  access.to.namespace @filter(uid($namespaceid)) {
+			uid
+			name
+			type
+		  }
+		}
+	  }
 `
 
 	res, err := txn.QueryWithVars(ctx, q, params)
