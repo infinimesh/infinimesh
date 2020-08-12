@@ -60,7 +60,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespace, accountID string) (err error) {
 	txn := s.Dg.NewTxn()
 	const q = `query deletePermissionInNamespace($namespace: string, $accountID: string){
-  accounts(func: eq(id, $namespace)) @filter(eq(type, "namespace")) @cascade @normalize {
+  accounts(func: eq(uid, $namespace)) @filter(eq(type, "namespace")) @cascade @normalize {
     namespace_uid: uid
     ~access.to.namespace @filter(uid($accountID))  {
       account_uid: uid
@@ -193,7 +193,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
   access(func: uid($user_id)) @cascade {
     name
     uid
-    access.to.namespace @filter(eq(id, "$namespace")) {
+    access.to.namespace @filter(eq(uid, "$namespace")) {
       uid
       name
       type

@@ -29,19 +29,19 @@ components:
     deviceregistryCreateRequest:
       properties:
         device:
-          $ref: '#/components/schemas/deviceregistryDevice'
+          $ref: "#/components/schemas/deviceregistryDevice"
       type: object
     deviceregistryCreateResponse:
       properties:
         device:
-          $ref: '#/components/schemas/deviceregistryDevice'
+          $ref: "#/components/schemas/deviceregistryDevice"
       type: object
     deviceregistryDeleteResponse:
       type: object
     deviceregistryDevice:
       properties:
         certificate:
-          $ref: '#/components/schemas/deviceregistryCertificate'
+          $ref: "#/components/schemas/deviceregistryCertificate"
         enabled:
           format: boolean
           type: boolean
@@ -60,7 +60,7 @@ components:
       properties:
         devices:
           items:
-            $ref: '#/components/schemas/deviceregistryDevice'
+            $ref: "#/components/schemas/deviceregistryDevice"
           type: array
       type: object
     deviceregistryUpdateResponse:
@@ -70,20 +70,20 @@ components:
         namespace:
           type: string
         object:
-          $ref: '#/components/schemas/nodeObject'
+          $ref: "#/components/schemas/nodeObject"
         parent:
           type: string
       type: object
     infinimeshapiPermission:
-      description: 'Permission.Action may either be NONE, READ or WRITE.'
+      description: "Permission.Action may either be NONE, READ or WRITE."
       properties:
         action:
-          $ref: '#/components/schemas/nodeAction'
+          $ref: "#/components/schemas/nodeAction"
       type: object
     infinimeshdeviceregistryGetResponse:
       properties:
         device:
-          $ref: '#/components/schemas/deviceregistryDevice'
+          $ref: "#/components/schemas/deviceregistryDevice"
       type: object
     infinimeshnodePermission:
       properties:
@@ -92,19 +92,19 @@ components:
         account_name:
           type: string
         action:
-          $ref: '#/components/schemas/nodeAction'
+          $ref: "#/components/schemas/nodeAction"
         namespace:
           type: string
       type: object
     infinimeshshadowGetResponse:
       properties:
         shadow:
-          $ref: '#/components/schemas/shadowShadow'
+          $ref: "#/components/schemas/shadowShadow"
       type: object
     nodeAccount:
       properties:
         default_namespace:
-          $ref: '#/components/schemas/nodeNamespace'
+          $ref: "#/components/schemas/nodeNamespace"
         enabled:
           format: boolean
           type: boolean
@@ -133,7 +133,7 @@ components:
     nodeCreateUserAccountRequest:
       properties:
         account:
-          $ref: '#/components/schemas/nodeAccount'
+          $ref: "#/components/schemas/nodeAccount"
         password:
           type: string
       type: object
@@ -150,28 +150,28 @@ components:
       properties:
         accounts:
           items:
-            $ref: '#/components/schemas/nodeAccount'
+            $ref: "#/components/schemas/nodeAccount"
           type: array
       type: object
     nodeListNamespacesResponse:
       properties:
         namespaces:
           items:
-            $ref: '#/components/schemas/nodeNamespace'
+            $ref: "#/components/schemas/nodeNamespace"
           type: array
       type: object
     nodeListObjectsResponse:
       properties:
         objects:
           items:
-            $ref: '#/components/schemas/nodeObject'
+            $ref: "#/components/schemas/nodeObject"
           type: array
       type: object
     nodeListPermissionsResponse:
       properties:
         permissions:
           items:
-            $ref: '#/components/schemas/infinimeshnodePermission'
+            $ref: "#/components/schemas/infinimeshnodePermission"
           type: array
       type: object
     nodeNamespace:
@@ -189,7 +189,7 @@ components:
           type: string
         objects:
           items:
-            $ref: '#/components/schemas/nodeObject'
+            $ref: "#/components/schemas/nodeObject"
           type: array
         uid:
           type: string
@@ -637,7 +637,7 @@ components:
           items:
             type: string
           type: array
-      title: '`FieldMask` represents a set of symbolic field paths, for example:'
+      title: "`FieldMask` represents a set of symbolic field paths, for example:"
       type: object
     protobufListValue:
       description: |-
@@ -648,7 +648,7 @@ components:
         values:
           description: Repeated field of dynamically typed values.
           items:
-            $ref: '#/components/schemas/protobufValue'
+            $ref: "#/components/schemas/protobufValue"
           type: array
       type: object
     protobufNullValue:
@@ -678,7 +678,7 @@ components:
       properties:
         fields:
           additionalProperties:
-            $ref: '#/components/schemas/protobufValue'
+            $ref: "#/components/schemas/protobufValue"
           description: Unordered map of dynamically typed values.
           type: object
       type: object
@@ -696,10 +696,10 @@ components:
           format: boolean
           type: boolean
         list_value:
-          $ref: '#/components/schemas/protobufListValue'
+          $ref: "#/components/schemas/protobufListValue"
           description: Represents a repeated `Value`.
         null_value:
-          $ref: '#/components/schemas/protobufNullValue'
+          $ref: "#/components/schemas/protobufNullValue"
           description: Represents a null value.
         number_value:
           description: Represents a double value.
@@ -709,14 +709,14 @@ components:
           description: Represents a string value.
           type: string
         struct_value:
-          $ref: '#/components/schemas/protobufStruct'
+          $ref: "#/components/schemas/protobufStruct"
           description: Represents a structured value.
       type: object
     runtimeStreamError:
       properties:
         details:
           items:
-            $ref: '#/components/schemas/protobufAny'
+            $ref: "#/components/schemas/protobufAny"
           type: array
         grpc_code:
           format: int32
@@ -734,23 +734,23 @@ components:
     shadowShadow:
       properties:
         config:
-          $ref: '#/components/schemas/shadowVersionedValue'
+          $ref: "#/components/schemas/shadowVersionedValue"
         desired:
-          $ref: '#/components/schemas/shadowVersionedValue'
+          $ref: "#/components/schemas/shadowVersionedValue"
         reported:
-          $ref: '#/components/schemas/shadowVersionedValue'
+          $ref: "#/components/schemas/shadowVersionedValue"
       type: object
     shadowStreamReportedStateChangesResponse:
       properties:
         desiredState:
-          $ref: '#/components/schemas/shadowVersionedValue'
+          $ref: "#/components/schemas/shadowVersionedValue"
         reportedState:
-          $ref: '#/components/schemas/shadowVersionedValue'
+          $ref: "#/components/schemas/shadowVersionedValue"
       type: object
     shadowVersionedValue:
       properties:
         data:
-          $ref: '#/components/schemas/protobufValue'
+          $ref: "#/components/schemas/protobufValue"
         timestamp:
           format: date-time
           type: string
@@ -767,7 +767,7 @@ info:
   contact:
     email: engineering@infinimesh.io
     name: Infinimesh
-    url: 'http://infinimesh.io'
+    url: "http://infinimesh.io"
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
   version: 0.0.8
@@ -777,11 +777,11 @@ paths:
     get:
       operationId: SelfAccount
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeAccount'
+                $ref: "#/components/schemas/nodeAccount"
           description: A successful response.
       tags:
         - Accounts
@@ -792,14 +792,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/apiTokenRequest'
+              $ref: "#/components/schemas/apiTokenRequest"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/apiTokenResponse'
+                $ref: "#/components/schemas/apiTokenResponse"
           description: A successful response.
       tags:
         - Accounts
@@ -807,11 +807,11 @@ paths:
     get:
       operationId: ListAccounts
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeListAccountsResponse'
+                $ref: "#/components/schemas/nodeListAccountsResponse"
           description: A successful response.
       tags:
         - Accounts
@@ -821,18 +821,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/nodeCreateUserAccountRequest'
+              $ref: "#/components/schemas/nodeCreateUserAccountRequest"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeCreateUserAccountResponse'
+                $ref: "#/components/schemas/nodeCreateUserAccountResponse"
           description: A successful response.
       tags:
         - Accounts
-  '/accounts/{account.uid}':
+  "/accounts/{account.uid}":
     patch:
       operationId: UpdateAccount
       parameters:
@@ -845,18 +845,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/nodeAccount'
+              $ref: "#/components/schemas/nodeAccount"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeAccount'
+                $ref: "#/components/schemas/nodeAccount"
           description: A successful response.
       tags:
         - Accounts
-  '/accounts/{id}':
+  "/accounts/{id}":
     get:
       operationId: GetAccount
       parameters:
@@ -866,11 +866,11 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeAccount'
+                $ref: "#/components/schemas/nodeAccount"
           description: A successful response.
       tags:
         - Accounts
@@ -880,15 +880,16 @@ paths:
       parameters:
         - in: query
           name: namespace
+          description: namespace id(like 0xabc012)
           required: false
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryListResponse'
+                $ref: "#/components/schemas/deviceregistryListResponse"
           description: A successful response.
       tags:
         - Devices
@@ -898,18 +899,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deviceregistryCreateRequest'
+              $ref: "#/components/schemas/deviceregistryCreateRequest"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryCreateResponse'
+                $ref: "#/components/schemas/deviceregistryCreateResponse"
           description: A successful response.
       tags:
         - Devices
-  '/devices/{device.id}':
+  "/devices/{device.id}":
     patch:
       operationId: Update
       parameters:
@@ -922,18 +923,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deviceregistryDevice'
+              $ref: "#/components/schemas/deviceregistryDevice"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryUpdateResponse'
+                $ref: "#/components/schemas/deviceregistryUpdateResponse"
           description: A successful response.
       tags:
         - Devices
-  '/devices/{id}':
+  "/devices/{id}":
     delete:
       operationId: Delete
       parameters:
@@ -943,11 +944,11 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deviceregistryDeleteResponse'
+                $ref: "#/components/schemas/deviceregistryDeleteResponse"
           description: A successful response.
       tags:
         - Devices
@@ -960,15 +961,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
+                $ref: "#/components/schemas/infinimeshdeviceregistryGetResponse"
           description: A successful response.
       tags:
         - Devices
-  '/devices/{id}/state':
+  "/devices/{id}/state":
     get:
       operationId: Get
       parameters:
@@ -978,11 +979,11 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/infinimeshshadowGetResponse'
+                $ref: "#/components/schemas/infinimeshshadowGetResponse"
           description: A successful response.
       tags:
         - States
@@ -998,18 +999,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/protobufValue'
+              $ref: "#/components/schemas/protobufValue"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
+                $ref: "#/components/schemas/shadowPatchDesiredStateResponse"
           description: A successful response.
       tags:
         - States
-  '/devices/{id}/state/stream':
+  "/devices/{id}/state/stream":
     get:
       operationId: StreamReportedStateChanges
       parameters:
@@ -1025,7 +1026,7 @@ paths:
             format: boolean
             type: boolean
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -1038,11 +1039,11 @@ paths:
     get:
       operationId: ListNamespaces
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeListNamespacesResponse'
+                $ref: "#/components/schemas/nodeListNamespacesResponse"
           description: A successful response.
       tags:
         - Namespaces
@@ -1052,18 +1053,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/nodeCreateNamespaceRequest'
+              $ref: "#/components/schemas/nodeCreateNamespaceRequest"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeNamespace'
+                $ref: "#/components/schemas/nodeNamespace"
           description: A successful response.
       tags:
         - Namespaces
-  '/namespaces/{namespace}':
+  "/namespaces/{namespace}":
     get:
       operationId: GetNamespace
       parameters:
@@ -1073,15 +1074,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeNamespace'
+                $ref: "#/components/schemas/nodeNamespace"
           description: A successful response.
       tags:
         - Namespaces
-  '/namespaces/{namespace}/permissions':
+  "/namespaces/{namespace}/permissions":
     get:
       operationId: ListPermissions
       parameters:
@@ -1091,15 +1092,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeListPermissionsResponse'
+                $ref: "#/components/schemas/nodeListPermissionsResponse"
           description: A successful response.
       tags:
         - Namespaces
-  '/namespaces/{namespace}/permissions/{account_id}':
+  "/namespaces/{namespace}/permissions/{account_id}":
     delete:
       operationId: DeletePermission
       parameters:
@@ -1114,11 +1115,11 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeDeletePermissionResponse'
+                $ref: "#/components/schemas/nodeDeletePermissionResponse"
           description: A successful response.
       tags:
         - Namespaces
@@ -1139,14 +1140,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/infinimeshapiPermission'
+              $ref: "#/components/schemas/infinimeshapiPermission"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/apiCreateNamespacePermissionResponse'
+                $ref: "#/components/schemas/apiCreateNamespacePermissionResponse"
           description: A successful response.
       tags:
         - Namespaces
@@ -1166,11 +1167,11 @@ paths:
             format: boolean
             type: boolean
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeListObjectsResponse'
+                $ref: "#/components/schemas/nodeListObjectsResponse"
           description: A successful response.
       tags:
         - Objects
@@ -1180,18 +1181,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
+              $ref: "#/components/schemas/infinimeshapiCreateObjectRequest"
         required: true
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeObject'
+                $ref: "#/components/schemas/nodeObject"
           description: A successful response.
       tags:
         - Objects
-  '/objects/{uid}':
+  "/objects/{uid}":
     delete:
       operationId: DeleteObject
       parameters:
@@ -1201,25 +1202,25 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeDeleteObjectResponse'
+                $ref: "#/components/schemas/nodeDeleteObjectResponse"
           description: A successful response.
       tags:
         - Objects
 servers:
-  - url: 'https://api.infinimesh.io/'
-  - url: 'https://api.ionos-iot.de/'
-  - url: 'http://localhost:8081'
+  - url: "https://api.infinimesh.io/"
+  - url: "https://api.ionos-iot.de/"
+  - url: "http://localhost:8081"
 x-stream-definitions:
   shadowStreamReportedStateChangesResponse:
     properties:
       error:
-        $ref: '#/components/schemas/runtimeStreamError'
+        $ref: "#/components/schemas/runtimeStreamError"
       result:
-        $ref: '#/components/schemas/shadowStreamReportedStateChangesResponse'
+        $ref: "#/components/schemas/shadowStreamReportedStateChangesResponse"
     title: Stream result of shadowStreamReportedStateChangesResponse
     type: object
 security:
