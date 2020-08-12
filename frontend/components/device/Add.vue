@@ -2,15 +2,15 @@
   <a-drawer
     title="Create New Device"
     :visible="active"
-    width="30%"
+    :width="drawerSize"
     :headerStyle="{ fontSize: '4rem' }"
     @close="$emit('cancel')"
   >
     <a-form-model
       :model="device"
       :rules="rules"
-      :label-col="{ span: 6 }"
-      :wrapper-col="{ span: 18 }"
+      :label-col="{ xs: 24, sm: 6, md: 6, lg: 6 }"
+      :wrapper-col="{ xs: 24, sm: 16, md: 18, lg: { span: 14, offset: 1} }"
       ref="deviceAddForm"
     >
       <a-form-model-item prop="name" label="Name">
@@ -92,10 +92,30 @@ export default Vue.component("device-add", {
     },
   },
   computed: {
-    namespaces: {
-      get() {
-        return this.$store.state.devices.namespaces;
-      },
+    namespaces() {
+      return this.$store.state.devices.namespaces;
+    },
+    drawerSize() {
+      switch (this.$store.state.window.gridSize) {
+        case "xxl":
+          return "30%";
+          break;
+        case "xl":
+          return "50%";
+          break;
+        case "lg":
+          return "60%";
+          break;
+        case "md":
+          return "75%";
+          break;
+        case "sm":
+          return "90%";
+          break;
+        case "xs":
+          return "100%";
+          break;
+      }
     },
   },
   watch: {
