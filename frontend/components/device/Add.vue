@@ -73,6 +73,7 @@
           textAlign: 'right',
           zIndex: 1,
         }"
+      id="deviceAddDrawerActionsRow"
     >
       <a-button :style="{ marginRight: '8px' }" @click="setDefault">Reset</a-button>
       <a-button :style="{ marginRight: '8px' }" @click="$emit('cancel')">Cancel</a-button>
@@ -201,5 +202,8 @@ export default Vue.component("device-add", {
 <style lang="less">
 #certificate-tabs .ant-upload.ant-upload-drag p.ant-upload-text {
   color: @primary-color;
+}
+#deviceAddDrawerActionsRow {
+  background: @primary-color;
 }
 </style>
