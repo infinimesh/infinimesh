@@ -156,8 +156,20 @@ export default {
   },
   methods: {
     handleDeviceAdd(device) {
-      this.$store.dispatch("devices/add", device);
-      this.addDeviceActive = false;
+      this.$store.dispatch("devices/add", {
+        device: device,
+        error: (err) => {
+          this.$notification.error({
+            message: "Failed to create the device",
+            description: `Response: ${err.response.data.message}`,
+            placement: "bottomRight",
+            duration: 10,
+          });
+        },
+        always: () => {
+          this.addDeviceActive = false;
+        },
+      });
     },
   },
 };
