@@ -51,13 +51,13 @@ func init() {
 
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
-	_, err := repo.CreateNamespace(ctx, "default")
+	nsID, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
 	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, true)
 	require.NoError(t, err)
 
-	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
+	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsID)
 	require.NoError(t, err)
 
 	err = repo.Authorize(ctx, account, node, "READ", true)
@@ -132,20 +132,20 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
 	randomNS := randomdata.SillyName()
-	_, err := repo.CreateNamespace(ctx, randomNS)
+	nsID, err := repo.CreateNamespace(ctx, randomNS)
 	require.NoError(t, err)
 
 	randomUser := randomdata.SillyName()
 	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, accountID, nsID, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	err = repo.DeletePermissionInNamespace(ctx, randomNS, accountID)
+	err = repo.DeletePermissionInNamespace(ctx, nsID, accountID)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, randomNS)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
