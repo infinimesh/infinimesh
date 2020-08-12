@@ -396,37 +396,37 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
 
 	// TODO direct access!
 
-	var q = `query list($account: string, $namespace: string){
-                     var(func: uid($account)) {
-                       access.to.namespace %v {
-                         owns {
-                           OBJs as uid
-                         } @filter(eq(kind, "device"))
-                       }
-                     }
+	var q = `query list($account: string, $namespaceid: string){
+		var(func: uid($account)) {
+		  access.to.namespace %v {
+			owns {
+			  OBJs as uid
+			} @filter(eq(kind, "device"))
+		  }
+		}
 
-                     nodes(func: uid(OBJs)) @recurse {
-                       children{} 
-                       uid
-                       name
-                       kind
-                       enabled
-                       tags
-                       ~owns {
-                         name
-                       }
-                     }
-                   }`
+		nodes(func: uid(OBJs)) @recurse {
+		  children{} 
+		  uid
+		  name
+		  kind
+		  enabled
+		  tags
+		  ~owns {
+			name
+		  }
+		}
+	  }`
 
 	if request.Namespace != "" {
-		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))")
+		q = fmt.Sprintf(q, "@filter(uid($namespaceid))")
 	} else {
 		q = fmt.Sprintf(q, "")
 	}
 
 	vars := map[string]string{
-		"$account":   request.Account,
-		"$namespace": request.Namespace,
+		"$account":     request.Account,
+		"$namespaceid": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)

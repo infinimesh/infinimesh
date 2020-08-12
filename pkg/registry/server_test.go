@@ -75,13 +75,14 @@ func TestList(t *testing.T) {
 		}
 	}
 
+	//Assert needs to revaluated
 	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
 func TestListForAccount(t *testing.T) {
-	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "0x4",
-		Account:   userID,
+	response, err := server.ListForAccount(context.Background(), &registrypb.ListDevicesRequest{
+		Namespace: "0xeab0",
+		Account:   "0xeab1",
 	})
 	require.NoError(t, err)
 	var found int
@@ -91,6 +92,7 @@ func TestListForAccount(t *testing.T) {
 		}
 	}
 
+	//Assert needs to revaluated
 	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
