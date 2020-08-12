@@ -51,6 +51,7 @@ components:
           type: string
         namespace:
           type: string
+          description: namespace id(like 0xabc123)
         tags:
           items:
             type: string
