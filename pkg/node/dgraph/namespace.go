@@ -183,8 +183,8 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 	}
 
 	params := map[string]string{
-		"$namespace": namespace,
-		"$user_id":   account,
+		"$namespaceid": namespace,
+		"$user_id":     account,
 	}
 
 	txn := s.Dg.NewReadOnlyTxn()

@@ -68,6 +68,21 @@ func TestAuthorize(t *testing.T) {
 	require.True(t, decision)
 }
 
+func TestIsAuthorizedNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	accountname := randomdata.SillyName()
+	account, err := repo.CreateUserAccount(ctx, accountname, "password", false, true)
+	require.NoError(t, err)
+
+	ns, err := repo.GetNamespace(ctx, accountname)
+	require.NoError(t, err)
+
+	decision, err := repo.IsAuthorizedNamespace(ctx, ns.Id, account, nodepb.Action_WRITE)
+	require.NoError(t, err)
+	require.True(t, decision)
+}
+
 func TestListInNamespaceForAccount(t *testing.T) {
 	ctx := context.Background()
 

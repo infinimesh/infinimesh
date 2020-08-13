@@ -426,9 +426,43 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 	return assigned.GetUids()["namespace"], nil
 }
 
-func (s *DGraphRepo) GetNamespace(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
+//Function to get the namespace based on name
+//Soon to be deprecrated
+func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
+	const q = `query getNamespaces($namespace: string) {
+                     namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
+	               uid
+                       name
+	             }
+                   }`
+
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespacename})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	if len(resultSet.Namespaces) > 0 {
+		return &nodepb.Namespace{
+			Id:   resultSet.Namespaces[0].UID,
+			Name: resultSet.Namespaces[0].Name,
+		}, nil
+	}
+
+	return nil, errors.New("Namespace not found")
+}
+
+//Function to get the namespace based on ID
+func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespaceid: string) {
-                     namespaces(func: eq(name, $namespaceid)) @filter(eq(type, "namespace"))  {
+                     namespaces(func: uid($namespaceid)) @filter(eq(type, "namespace"))  {
 	               uid
                        name
 	             }
