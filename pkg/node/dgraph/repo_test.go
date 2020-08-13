@@ -132,20 +132,20 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
 	randomNS := randomdata.SillyName()
-	nsID, err := repo.CreateNamespace(ctx, randomNS)
+	_, err := repo.CreateNamespace(ctx, randomNS)
 	require.NoError(t, err)
 
 	randomUser := randomdata.SillyName()
 	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, nsID, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	err = repo.DeletePermissionInNamespace(ctx, nsID, accountID)
+	err = repo.DeletePermissionInNamespace(ctx, randomNS, accountID)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, randomNS)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
