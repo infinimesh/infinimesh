@@ -72,9 +72,9 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 			return nil, status.Error(codes.Internal, "Failed to check credentials")
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			accountIDClaim: resp.Account.Uid,
-		})
+		claim := jwt.MapClaims{}
+		claim[accountIDClaim] = resp.Account.Uid
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
 		// Sign and get the complete encoded token as a string using the secret
 		tokenString, err := token.SignedString(a.signingSecret)
