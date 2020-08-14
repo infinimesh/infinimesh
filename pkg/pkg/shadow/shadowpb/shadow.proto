@@ -1,0 +1,67 @@
+//--------------------------------------------------------------------------
+// Copyright 2018 Infinite Devices GmbH
+// www.infinimesh.io
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//--------------------------------------------------------------------------
+
+syntax = "proto3";
+
+package infinimesh.shadow;
+option go_package = "shadowpb";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+message VersionedValue {
+  uint64 version = 1;
+  google.protobuf.Value data = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message GetRequest {
+  string id = 1;
+}
+
+message GetResponse { Shadow shadow = 1; }
+
+message Shadow {
+  VersionedValue config = 2;
+  VersionedValue reported = 3;
+  VersionedValue desired = 4;
+}
+
+message PatchDesiredStateRequest {
+  string id = 1;
+  google.protobuf.Value data = 2;
+}
+message PatchDesiredStateResponse {
+}
+
+message StreamReportedStateChangesRequest {
+  string id = 1;
+  bool only_delta = 2;
+}
+
+message StreamReportedStateChangesResponse {
+  VersionedValue reportedState = 2;
+  VersionedValue desiredState = 3;
+}
+
+service Shadows {
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc PatchDesiredState(PatchDesiredStateRequest)
+      returns (PatchDesiredStateResponse);
+  rpc StreamReportedStateChanges(StreamReportedStateChangesRequest)
+      returns (stream StreamReportedStateChangesResponse);
+}
