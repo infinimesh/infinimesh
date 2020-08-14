@@ -86,9 +86,11 @@ services:
       - "DB_ADDR=redis:6379"
     restart: unless-stopped
   frontend:
+    image: quay.io/infinimesh/frontend:infinidev
+    depends_on:
+      - apiserver-rest
     ports:
       - "8082:80"
-    image: quay.io/infinimesh/frontend:infinidev
     environment:
       - "APISERVER_URL=apiserver-rest:8081"
   apiserver:
