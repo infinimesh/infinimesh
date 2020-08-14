@@ -65,7 +65,7 @@ func init() {
 
 func TestList(t *testing.T) {
 	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "0x4",
+		Namespaceid: "0x4",
 	})
 	require.NoError(t, err)
 	var found int
@@ -81,8 +81,8 @@ func TestList(t *testing.T) {
 
 func TestListForAccount(t *testing.T) {
 	response, err := server.ListForAccount(context.Background(), &registrypb.ListDevicesRequest{
-		Namespace: "0xeab0",
-		Account:   "0xeab1",
+		Namespaceid: "0xeab0",
+		Account:     "0xeab1",
 	})
 	require.NoError(t, err)
 	var found int
