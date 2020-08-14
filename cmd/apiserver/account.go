@@ -82,7 +82,14 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		return nil, status.Error(codes.Internal, "Failed to sign token")
 	}
 
-	return &apipb.TokenResponse{Token: tokenString + ":" + request.GetRuleset().GetMethod()}, nil
+	ruleset := request.GetRuleset()
+	methods := ""
+	for _, rule := range ruleset {
+		methods += rule.GetMethod()
+		methods += "/"
+	}
+
+	return &apipb.TokenResponse{Token: tokenString + ":" + methods}, nil
 	// }
 
 	// return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
