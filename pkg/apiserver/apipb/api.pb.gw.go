@@ -9,6 +9,7 @@ It translates gRPC into RESTful JSON APIs.
 package apipb
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -19,7 +20,6 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
