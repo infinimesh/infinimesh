@@ -20,7 +20,6 @@ package main
 import (
 	"context"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -62,30 +61,32 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 }
 
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
-	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
-	if err != nil {
-		return nil, err
-	}
+	return &apipb.TokenResponse{Token: "HaHaHaHaItSnOtAtOkEnYEEEEEE"}, nil
 
-	if resp.GetSuccess() {
-		if resp.Account == nil {
-			return nil, status.Error(codes.Internal, "Failed to check credentials")
-		}
+	// resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-		claim := jwt.MapClaims{}
-		claim[accountIDClaim] = resp.Account.Uid
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	// if resp.GetSuccess() {
+	// 	if resp.Account == nil {
+	// 		return nil, status.Error(codes.Internal, "Failed to check credentials")
+	// 	}
 
-		// Sign and get the complete encoded token as a string using the secret
-		tokenString, err := token.SignedString(a.signingSecret)
-		if err != nil {
-			return nil, status.Error(codes.Internal, "Failed to sign token")
-		}
+	// 	claim := jwt.MapClaims{}
+	// 	claim[accountIDClaim] = resp.Account.Uid
+	// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
-		return &apipb.TokenResponse{Token: tokenString}, nil
-	}
+	// 	// Sign and get the complete encoded token as a string using the secret
+	// 	tokenString, err := token.SignedString(a.signingSecret)
+	// 	if err != nil {
+	// 		return nil, status.Error(codes.Internal, "Failed to sign token")
+	// 	}
 
-	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
+	// 	return &apipb.TokenResponse{Token: tokenString}, nil
+	// }
+
+	// return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 }
 
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
