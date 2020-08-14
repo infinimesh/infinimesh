@@ -23,6 +23,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -61,29 +62,27 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 }
 
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
-	return &apipb.TokenResponse{Token: "HaHaHaHaItSnOtAtOkEnYEEEEEE"}, nil
-
 	// resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	// if err != nil {
 	// 	return nil, err
 	// }
 
 	// if resp.GetSuccess() {
-	// 	if resp.Account == nil {
-	// 		return nil, status.Error(codes.Internal, "Failed to check credentials")
-	// 	}
+	// if resp.Account == nil {
+	// 	return nil, status.Error(codes.Internal, "Failed to check credentials")
+	// }
 
-	// 	claim := jwt.MapClaims{}
-	// 	claim[accountIDClaim] = resp.Account.Uid
-	// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	claim := jwt.MapClaims{}
+	claim[accountIDClaim] = "0x1" //resp.Account.Uid
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
-	// 	// Sign and get the complete encoded token as a string using the secret
-	// 	tokenString, err := token.SignedString(a.signingSecret)
-	// 	if err != nil {
-	// 		return nil, status.Error(codes.Internal, "Failed to sign token")
-	// 	}
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString(a.signingSecret)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to sign token")
+	}
 
-	// 	return &apipb.TokenResponse{Token: tokenString}, nil
+	return &apipb.TokenResponse{Token: tokenString + ":" + request.GetRuleset().GetMethod()}, nil
 	// }
 
 	// return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
