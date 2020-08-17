@@ -96,9 +96,9 @@ func TestListForAccount(t *testing.T) {
 	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
 }
 
-func sampleDevice(name string) *registrypb.Device {
+func sampleDevice(name string, namespaceid string) *registrypb.Device {
 	return &registrypb.Device{
-		Namespace: "0x1",
+		Namespace: namespaceid,
 		Name:      name,
 		Enabled:   &wrappers.BoolValue{Value: true},
 		Tags:      []string{"a", "b", "c"},
@@ -130,10 +130,18 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 }
 
 func TestCreateGet(t *testing.T) {
+	ctx := context.Background()
 	randomName := randomdata.SillyName()
+
+	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	require.NoError(t, err)
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
 	// Create
 	request := &registrypb.CreateRequest{
-		Device: sampleDevice(randomName),
+		Device: sampleDevice(randomName, ns.Id),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
@@ -154,7 +162,7 @@ func TestCreateGet(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: "joe"})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Id})
 
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,
@@ -163,7 +171,7 @@ func TestCreateGet(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	request := &registrypb.CreateRequest{
-		Device: sampleDevice(randomdata.SillyName()),
+		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
 	response, err := server.Create(context.Background(), request)
 	require.NoError(t, err)
