@@ -162,7 +162,7 @@ func TestCreateGet(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Id})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
 
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,
