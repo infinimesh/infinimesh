@@ -87,9 +87,9 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
 	}
 
-	ns, err := s.repo.GetNamespace(ctx, request.Device.Namespace)
+	ns, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid namespace")
+		return nil, status.Error(codes.FailedPrecondition, "The Namespace provided is not found.")
 	}
 
 	if request.Device.Certificate == nil {
