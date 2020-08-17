@@ -263,7 +263,6 @@ func printConnState(con net.Conn) {
 
 // Connection is expected to be valid & legitimate at this point
 func handleConn(c net.Conn, deviceIDs []string) {
-	//connect properties added to packet
 	p, err := packet.ReadPacket(c)
 
 	if debug {
