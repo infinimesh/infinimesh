@@ -98,7 +98,7 @@ func TestListForAccount(t *testing.T) {
 
 func sampleDevice(name string) *registrypb.Device {
 	return &registrypb.Device{
-		Namespace: "joe",
+		Namespace: "0x1",
 		Name:      name,
 		Enabled:   &wrappers.BoolValue{Value: true},
 		Tags:      []string{"a", "b", "c"},
