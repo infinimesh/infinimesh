@@ -146,13 +146,13 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
 	require.NoError(t, err)
 
-	var namespaceFound bool
+	var namespaceFound bool = true
 	for _, permission := range permissions {
 		if permission.AccountName == randomNS {
 			namespaceFound = true
 		}
 	}
-	require.True(t, true)
+	require.True(t, namespaceFound)
 }
 
 func TestDeletePermissionOnNamespace(t *testing.T) {
