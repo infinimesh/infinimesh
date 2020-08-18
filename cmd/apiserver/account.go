@@ -19,6 +19,8 @@ package main
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -62,37 +64,49 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 }
 
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
-	// resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if resp.GetSuccess() {
-	// if resp.Account == nil {
-	// 	return nil, status.Error(codes.Internal, "Failed to check credentials")
-	// }
-
-	claim := jwt.MapClaims{}
-	claim[accountIDClaim] = "0x1" //resp.Account.Uid
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-
-	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(a.signingSecret)
+	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to sign token")
+		return nil, err
 	}
 
-	ruleset := request.GetRuleset()
-	methods := ""
-	for _, rule := range ruleset {
-		methods += rule.GetMethod()
-		methods += "/"
+	if resp.GetSuccess() {
+		if resp.Account == nil {
+			return nil, status.Error(codes.Internal, "Failed to check credentials")
+		}
+
+		claim := jwt.MapClaims{}
+		claim[accountIDClaim] = "0x2713" //resp.Account.Uid
+
+		if request.GetExpireTime() != "" {
+			exp, err := strconv.Atoi(request.GetExpireTime())
+			if err != nil {
+				return nil, status.Error(codes.InvalidArgument, "Can't parse expire time")
+			}
+			claim[expiresAt] = time.Now().UTC().Add(time.Duration(exp) * time.Second).Unix()
+		}
+
+		if ruleset := request.GetRuleset(); len(ruleset) > 0 {
+			claim[tokenRestrictedClaim] = true
+			prefix := "infinimesh.api." // Should be equal to api.proto package name + .
+			for _, rule := range ruleset {
+				claim[prefix+rule.GetType()] = rule.GetIds()
+			}
+		} else {
+			claim[tokenRestrictedClaim] = false
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+
+		// Sign and get the complete encoded token as a string using the secret
+		tokenString, err := token.SignedString(a.signingSecret)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "Failed to sign token")
+		}
+
+		return &apipb.TokenResponse{Token: tokenString}, nil
 	}
 
-	return &apipb.TokenResponse{Token: tokenString + ":" + methods}, nil
-	// }
-
-	// return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
+	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 }
 
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
