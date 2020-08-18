@@ -131,23 +131,23 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
-	permissions, err := repo.ListPermissionsInNamespace(ctx, "joe")
+	permissions, err := repo.ListPermissionsInNamespace(ctx, "0x2")
 	require.NoError(t, err)
 
-	var joeFound bool
+	var namespaceFound bool
 	for _, permission := range permissions {
-		if permission.AccountName == "joe" {
-			joeFound = true
+		if permission.AccountName == "root" {
+			namespaceFound = true
 		}
 	}
-	require.True(t, joeFound, "joe must be authorized on namespace joe")
+	require.True(t, namespaceFound, "Account must be authorized on the namespace.")
 }
 
 func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
 	randomNS := randomdata.SillyName()
-	_, err := repo.CreateNamespace(ctx, randomNS)
+	ns, err := repo.CreateNamespace(ctx, randomNS)
 	require.NoError(t, err)
 
 	randomUser := randomdata.SillyName()
@@ -157,10 +157,10 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	err = repo.DeletePermissionInNamespace(ctx, randomNS, accountID)
+	err = repo.DeletePermissionInNamespace(ctx, ns, accountID)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, randomNS)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
