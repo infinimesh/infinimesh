@@ -19,11 +19,13 @@ package main
 
 import (
 	"context"
+	"strconv"
+	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -72,9 +74,28 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 			return nil, status.Error(codes.Internal, "Failed to check credentials")
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			accountIDClaim: resp.Account.Uid,
-		})
+		claim := jwt.MapClaims{}
+		claim[accountIDClaim] = "0x2713" //resp.Account.Uid
+
+		if request.GetExpireTime() != "" {
+			exp, err := strconv.Atoi(request.GetExpireTime())
+			if err != nil {
+				return nil, status.Error(codes.InvalidArgument, "Can't parse expire time")
+			}
+			claim[expiresAt] = time.Now().UTC().Add(time.Duration(exp) * time.Second).Unix()
+		}
+
+		if ruleset := request.GetRuleset(); len(ruleset) > 0 {
+			claim[tokenRestrictedClaim] = true
+			prefix := "infinimesh.api." // Should be equal to api.proto package name + .
+			for _, rule := range ruleset {
+				claim[prefix+rule.GetType()] = rule.GetIds()
+			}
+		} else {
+			claim[tokenRestrictedClaim] = false
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
 		// Sign and get the complete encoded token as a string using the secret
 		tokenString, err := token.SignedString(a.signingSecret)

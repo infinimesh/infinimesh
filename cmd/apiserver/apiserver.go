@@ -120,8 +120,6 @@ func init() {
 	nodeHost = viper.GetString("NODE_HOST")
 	port = viper.GetInt("PORT")
 
-	jwtSigningSecret = []byte("super secret key")
-
 	b64SignSecret := viper.GetString("JWT_SIGNING_KEY")
 	if b64SignSecret == "" {
 		panic("Invalid signing secret")
