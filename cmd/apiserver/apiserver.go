@@ -45,7 +45,9 @@ import (
 )
 
 const (
-	accountIDClaim = "account_id"
+	accountIDClaim       = "account_id"
+	tokenRestrictedClaim = "restricted"
+	expiresAt            = "exp"
 )
 
 var (
