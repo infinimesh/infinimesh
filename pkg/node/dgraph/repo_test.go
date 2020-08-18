@@ -131,7 +131,7 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
-	permissions, err := repo.ListPermissionsInNamespace(ctx, "0x1")
+	permissions, err := repo.ListPermissionsInNamespace(ctx, "0x3")
 	require.NoError(t, err)
 
 	var namespaceFound bool
