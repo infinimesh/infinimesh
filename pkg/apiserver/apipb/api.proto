@@ -56,9 +56,8 @@ message TokenRequest {
 }
 
 message RestrictionRule {
-  string method = 1;
-  string obj_id = 2;
-  bool   forbid = 3;
+  string type = 1;
+  string ids = 2;
 }
 
 message TokenResponse { string token = 1; }
