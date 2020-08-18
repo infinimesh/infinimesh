@@ -46,7 +46,7 @@ type Repo interface {
 	ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error)
 
 	CreateNamespace(ctx context.Context, name string) (id string, err error)
-	GetNamespace(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error)
+	GetNamespace(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error) //To be deprecated
 	GetNamespaceID(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error)
 	ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error)
 	ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error)
