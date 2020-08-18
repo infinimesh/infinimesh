@@ -45,7 +45,9 @@ import (
 )
 
 const (
-	accountIDClaim = "account_id"
+	accountIDClaim       = "account_id"
+	tokenRestrictedClaim = "restricted"
+	expiresAt            = "exp"
 )
 
 var (
@@ -119,8 +121,6 @@ func init() {
 	shadowHost = viper.GetString("SHADOW_HOST")
 	nodeHost = viper.GetString("NODE_HOST")
 	port = viper.GetInt("PORT")
-
-	jwtSigningSecret = []byte("super secret key")
 
 	b64SignSecret := viper.GetString("JWT_SIGNING_KEY")
 	if b64SignSecret == "" {
