@@ -75,7 +75,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		}
 
 		claim := jwt.MapClaims{}
-		claim[accountIDClaim] = "0x2713" //resp.Account.Uid
+		claim[accountIDClaim] = resp.Account.Uid
 
 		if request.GetExpireTime() != "" {
 			exp, err := strconv.Atoi(request.GetExpireTime())
