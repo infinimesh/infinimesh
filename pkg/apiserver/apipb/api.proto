@@ -51,13 +51,14 @@ import "protoc-gen-swagger/options/annotations.proto";
 message TokenRequest {
   string username    = 1;
   string password    = 2;
-  string  expire_time = 3; // token expire time in seconds
+  string expire_time = 3; // token expire time in seconds
   repeated RestrictionRule ruleset = 4; // methods restrictions ruleset
 }
 
 message RestrictionRule {
   string method = 1;
   string obj_id = 2;
+  bool   forbid = 3;
 }
 
 message TokenResponse { string token = 1; }
