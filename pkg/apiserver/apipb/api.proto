@@ -57,7 +57,7 @@ message TokenRequest {
 
 message RestrictionRule {
   string type = 1;
-  string ids = 2;
+  repeated string ids = 2;
 }
 
 message TokenResponse { string token = 1; }
