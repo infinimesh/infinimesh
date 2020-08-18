@@ -64,8 +64,8 @@ func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, requ
 	}, nil
 }
 
-//Function to get the namespace based on name
-//Soon to be deprecrated
+//Function to get the namespace based on namespace name
+//Soon to be deprecated
 func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
 	if err != nil {
