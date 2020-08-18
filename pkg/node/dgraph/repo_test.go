@@ -136,7 +136,7 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 
 	var namespaceFound bool
 	for _, permission := range permissions {
-		if permission.AccountName == "root" {
+		if permission.AccountName == "joe" {
 			namespaceFound = true
 		}
 	}
