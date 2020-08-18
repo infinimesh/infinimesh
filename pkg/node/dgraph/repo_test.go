@@ -140,7 +140,7 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 			namespaceFound = true
 		}
 	}
-	require.True(t, namespaceFound, "joe must be authorized on namespace joe")
+	require.True(t, namespaceFound)
 }
 
 func TestDeletePermissionOnNamespace(t *testing.T) {
