@@ -133,7 +133,6 @@ func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
 	randomName := randomdata.SillyName()
 
-	//Create an Accunt
 	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
 	require.NoError(t, err)
 
