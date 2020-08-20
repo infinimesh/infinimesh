@@ -102,7 +102,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	err = repo.AuthorizeNamespace(ctx, account, nsName.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	objs, err := repo.ListForAccount(ctx, account, nsName.Id, true)
+	objs, err := repo.ListForAccount(ctx, account, nsName.GetName(), true)
 	require.NoError(t, err)
 
 	// Assert
