@@ -87,19 +87,22 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	ctx := context.Background()
 
 	acc := randomdata.SillyName()
-	nsName := acc
 
-	// Setup
+	// Create Account
 	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
-	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName)
+	//Get Namespace
+	nsName, err := repo.GetNamespace(ctx, acc)
+
+	//Create Object
+	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Name)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, account, nsName, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, account, nsName.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	objs, err := repo.ListForAccount(ctx, account, nsName, true)
+	objs, err := repo.ListForAccount(ctx, account, nsName.Id, true)
 	require.NoError(t, err)
 
 	// Assert
@@ -111,7 +114,7 @@ func TestChangePassword(t *testing.T) {
 
 	acc := randomdata.SillyName()
 
-	// Setup
+	// Create Account
 	_, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
@@ -132,23 +135,24 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	randomNS := randomdata.SillyName()
-	ns, err := repo.CreateNamespace(ctx, randomNS)
-	require.NoError(t, err)
-
 	randomUser := randomdata.SillyName()
+
+	//Create Account
 	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
+	//Get Namespace
+	nsName, err := repo.GetNamespace(ctx, randomUser)
+
+	err = repo.AuthorizeNamespace(ctx, accountID, nsName.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsName.Id)
 	require.NoError(t, err)
 
-	var namespaceFound bool = true
+	var namespaceFound bool
 	for _, permission := range permissions {
-		if permission.AccountName == randomNS {
+		if permission.AccountName == nsName.Name {
 			namespaceFound = true
 		}
 	}
@@ -158,21 +162,22 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	randomNS := randomdata.SillyName()
-	ns, err := repo.CreateNamespace(ctx, randomNS)
-	require.NoError(t, err)
-
 	randomUser := randomdata.SillyName()
+
+	//Create Account
 	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
+	//Get Namespace
+	nsName, err := repo.GetNamespace(ctx, randomUser)
+
+	err = repo.AuthorizeNamespace(ctx, accountID, nsName.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	err = repo.DeletePermissionInNamespace(ctx, ns, accountID)
+	err = repo.DeletePermissionInNamespace(ctx, nsName.Id, accountID)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsName.Id)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
