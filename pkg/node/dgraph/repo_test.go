@@ -135,24 +135,22 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	randomUser := randomdata.SillyName()
-
-	//Create Account
-	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
+	//Get Account
+	accountID, err := repo.GetAccount(ctx, "joe")
 	require.NoError(t, err)
 
 	//Get Namespace
-	nsName, err := repo.GetNamespace(ctx, randomUser)
+	nsID, err := repo.GetNamespace(ctx, "joe")
 
-	err = repo.AuthorizeNamespace(ctx, accountID, nsName.Id, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, nsName.Id)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID.Id)
 	require.NoError(t, err)
 
 	var namespaceFound bool
 	for _, permission := range permissions {
-		if permission.AccountName == nsName.Name {
+		if permission.AccountName == nsID.Name {
 			namespaceFound = true
 		}
 	}
@@ -162,22 +160,20 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	randomUser := randomdata.SillyName()
-
-	//Create Account
-	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
+	//Get Account
+	accountID, err := repo.GetAccount(ctx, "joe")
 	require.NoError(t, err)
 
 	//Get Namespace
-	nsName, err := repo.GetNamespace(ctx, randomUser)
+	nsID, err := repo.GetNamespace(ctx, "shared-project")
 
-	err = repo.AuthorizeNamespace(ctx, accountID, nsName.Id, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	err = repo.DeletePermissionInNamespace(ctx, nsName.Id, accountID)
+	err = repo.DeletePermissionInNamespace(ctx, nsID.Id, accountID.Uid)
 	require.NoError(t, err)
 
-	permissions, err := repo.ListPermissionsInNamespace(ctx, nsName.Id)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID.Id)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
