@@ -62,7 +62,7 @@ var (
 	log *zap.Logger
 )
 
-var jwtAuth = func(ctx context.Context) (context.Context, error) {
+var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -99,8 +99,11 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
 				}
 
-				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
-				return newCtx, nil
+				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
+					return nil, status.Error(codes.Internal, info.FullMethod)
+				}
+
+				return handler(ctx, req)
 			}
 
 		}
@@ -148,8 +151,7 @@ func main() {
 	}()
 
 	srv := grpc.NewServer(
-		grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(jwtAuth)),
-		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(jwtAuth)),
+		grpc.UnaryInterceptor(jwtAuthInterceptor),
 	)
 
 	registryConn, err := grpc.Dial(registryHost, grpc.WithInsecure())
