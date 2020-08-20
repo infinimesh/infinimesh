@@ -113,28 +113,32 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
 					for ns, ids := range claims {
 						if reqNS == ns {
-							log.Info("Request", zap.Any("payload", req))
+							log.Info("Request", zap.Any("payload", req), zap.Any("ids", ids))
 							idSet := make(map[string]bool)
-							for _, id := range ids.([]string) {
-								idSet[id] = true
+							if ids != nil {
+								for _, id := range ids.([]interface{}) {
+									idSet[id.(string)] = true
+								}
 							}
 							if reqMethod == "List" {
 								r, err := handler(ctx, req)
 								if err != nil {
 									return r, err
 								}
-								ns = strings.ToLower(ns)
-								var pool []interface{}
-								for _, idevice := range r.(map[string][]interface{})[ns] {
-									device := idevice.(map[string]interface{})
-									if idSet[device["id"].(string)] {
-										pool = append(pool, device)
+								if ids != nil {
+									ns = strings.ToLower(ns)
+									var pool []interface{}
+									for _, idevice := range r.(map[string][]interface{})[ns] {
+										device := idevice.(map[string]interface{})
+										if idSet[device["id"].(string)] {
+											pool = append(pool, device)
+										}
 									}
+									log.Info("Response", zap.Any("body", r), zap.Any("filtered", pool))
 								}
-								log.Info("Response", zap.Any("body", r), zap.Any("filtered", pool))
 								return r, err
 							} else if reqMethod == "Get" {
-								if idSet[req.(map[string]interface{})["id"].(string)] {
+								if ids == nil || idSet[req.(map[string]interface{})["id"].(string)] {
 									return handler(ctx, req)
 								}
 							}
