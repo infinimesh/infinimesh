@@ -60,7 +60,7 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
 func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error) {
 	// careful,  currently when referencing a namespace, the name of it has to be used, not the id (0x...)
 	sharedNs := "shared-project"
-	_, err = repo.CreateNamespace(context.Background(), sharedNs)
+	namespace, err := repo.CreateNamespace(context.Background(), sharedNs)
 	if err != nil {
 		return "", "", err
 	}
@@ -81,12 +81,12 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 
 	// Authorize both users on a shared project
 	{
-		err = repo.AuthorizeNamespace(context.Background(), joe, sharedNs, nodepb.Action_WRITE)
+		err = repo.AuthorizeNamespace(context.Background(), joe, namespace, nodepb.Action_WRITE)
 		if err != nil {
 			return "", "", err
 		}
 
-		err = repo.AuthorizeNamespace(context.Background(), hanswurst, sharedNs, nodepb.Action_WRITE)
+		err = repo.AuthorizeNamespace(context.Background(), hanswurst, namespace, nodepb.Action_WRITE)
 		if err != nil {
 			return "", "", err
 		}
