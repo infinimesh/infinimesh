@@ -114,21 +114,31 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					for ns, ids := range claims {
 						if reqNS == ns {
 							log.Info("Request", zap.Any("payload", req))
+							idSet := make(map[string]bool)
+							for _, id := range ids.([]string) {
+								idSet[id] = true
+							}
 							if reqMethod == "List" {
 								r, err := handler(ctx, req)
 								if err != nil {
 									return r, err
 								}
-								log.Info("Response", zap.Any("body", r))
-								return r, err
-							} else if reqMethod == "Get" {
-								for _, id := range ids.([]string) {
-									if id == req.(map[string]interface{})["id"].(string) {
-										return handler(ctx, req)
+								ns = strings.ToLower(ns)
+								var pool []interface{}
+								for _, idevice := range r.(map[string][]interface{})[ns] {
+									device := idevice.(map[string]interface{})
+									if idSet[device["id"].(string)] {
+										pool = append(pool, device)
 									}
 								}
-								return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
+								log.Info("Response", zap.Any("body", r), zap.Any("filtered", pool))
+								return r, err
+							} else if reqMethod == "Get" {
+								if idSet[req.(map[string]interface{})["id"].(string)] {
+									return handler(ctx, req)
+								}
 							}
+							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 						}
 					}
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
