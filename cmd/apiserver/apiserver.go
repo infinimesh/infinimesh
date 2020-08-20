@@ -113,8 +113,14 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
 					for ns := range claims {
 						if reqNS == ns {
+							log.Info("Request", zap.Any("payload", req))
 							if reqMethod == "List" {
-								return handler(ctx, req)
+								r, err := handler(ctx, req)
+								if err != nil {
+									return r, err
+								}
+								log.Info("Response", zap.Any("body", r))
+								return r, err
 							}
 						}
 					}
