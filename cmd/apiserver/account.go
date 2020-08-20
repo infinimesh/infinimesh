@@ -140,13 +140,6 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
 }
 
-func (a *accountAPI) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
-	if fullMethodName != "/infinimesh.api.Accounts/Token" {
-		return jwtAuth(ctx)
-	}
-	return ctx, nil
-}
-
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {

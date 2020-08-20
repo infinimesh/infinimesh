@@ -63,6 +63,10 @@ var (
 )
 
 var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
+		return handler(ctx, req)
+	}
+
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -97,10 +101,6 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 
 				if !resp.Enabled {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
-				}
-
-				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
-					return nil, status.Error(codes.Internal, info.FullMethod)
 				}
 
 				return handler(ctx, req)
