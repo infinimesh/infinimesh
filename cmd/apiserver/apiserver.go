@@ -64,10 +64,6 @@ var (
 	log *zap.Logger
 )
 
-type ListReponseElement interface {
-	GetId() string
-}
-
 var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
 		return handler(ctx, req)
