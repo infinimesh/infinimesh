@@ -205,9 +205,9 @@ func TestDeviceWithExistingFingerprint(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
-	response2, err1 := server.Create(context.Background(), request1)
+	_, err1 := server.Create(context.Background(), request1)
 	require.Error(t, err1)
-	require.Empty(t, response2.Device.Certificate.Fingerprint)
+	//require.Empty(t, response2.Device.Certificate.Fingerprint)
 
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,

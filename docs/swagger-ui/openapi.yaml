@@ -36,6 +36,18 @@ components:
         device:
           $ref: "#/components/schemas/deviceregistryDevice"
       type: object
+    deviceregistryCreatePermissionDeniedResponse:
+      properties:
+        code:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
     deviceregistryDeleteResponse:
       type: object
     deviceregistryDevice:
@@ -909,6 +921,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/deviceregistryCreateResponse"
           description: A successful response.
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deviceregistryCreatePermissionDeniedResponse"
+          description: A permission denied error response.
       tags:
         - Devices
   "/devices/{device.id}":
