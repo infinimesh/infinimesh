@@ -204,7 +204,7 @@ func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespaceI
 	}
 
 	// TODO use internal method that runs within txn
-	ns, err := s.GetNamespace(ctx, namespaceID)
+	ns, err := s.GetNamespaceID(ctx, namespaceID)
 	if err != nil {
 		return err
 	}

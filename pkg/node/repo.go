@@ -38,7 +38,7 @@ type Repo interface {
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
-	AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error)
+	AuthorizeNamespace(ctx context.Context, account, namespaceID string, action nodepb.Action) (err error)
 	Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error)
 
 	CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error)
