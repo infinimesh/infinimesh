@@ -104,22 +104,24 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
 				}
 
+				ctx = context.WithValue(ctx, accountIDClaim, accountID)
+
 				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
+					log.Info("Token is restricted", zap.Any("restricted", restricted))
+
 					fullMethod := strings.Split(info.FullMethod, "/")
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
 					for ns := range claims {
 						if reqNS == ns {
 							if reqMethod == "List" {
-								r, err := handler(ctx, req)
-								return r, err
+								return handler(ctx, req)
 							}
-							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 						}
 					}
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 				}
 
-				r, err := handler(ctx, req)
-				return r, err
+				return handler(ctx, req)
 			}
 
 		}
