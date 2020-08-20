@@ -45,7 +45,9 @@ import (
 )
 
 const (
-	accountIDClaim = "account_id"
+	accountIDClaim       = "account_id"
+	tokenRestrictedClaim = "restricted"
+	expiresAt            = "exp"
 )
 
 var (
@@ -60,7 +62,11 @@ var (
 	log *zap.Logger
 )
 
-var jwtAuth = func(ctx context.Context) (context.Context, error) {
+var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
+		return handler(ctx, req)
+	}
+
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -97,8 +103,7 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
 				}
 
-				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
-				return newCtx, nil
+				return handler(ctx, req)
 			}
 
 		}
@@ -119,8 +124,6 @@ func init() {
 	shadowHost = viper.GetString("SHADOW_HOST")
 	nodeHost = viper.GetString("NODE_HOST")
 	port = viper.GetInt("PORT")
-
-	jwtSigningSecret = []byte("super secret key")
 
 	b64SignSecret := viper.GetString("JWT_SIGNING_KEY")
 	if b64SignSecret == "" {
@@ -148,8 +151,7 @@ func main() {
 	}()
 
 	srv := grpc.NewServer(
-		grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(jwtAuth)),
-		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(jwtAuth)),
+		grpc.UnaryInterceptor(jwtAuthInterceptor),
 	)
 
 	registryConn, err := grpc.Dial(registryHost, grpc.WithInsecure())

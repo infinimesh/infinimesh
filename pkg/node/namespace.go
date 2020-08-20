@@ -64,8 +64,20 @@ func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, requ
 	}, nil
 }
 
+//Function to get the namespace based on namespace name
+//Soon to be deprecated
 func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed get namespace")
+	}
+
+	return namespace, nil
+}
+
+//Function to get the namespace based on ID
+func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
+	namespace, err := n.Repo.GetNamespaceID(ctx, request.GetNamespace())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed get namespace")
 	}

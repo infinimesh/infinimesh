@@ -34,7 +34,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   mqtt-bridge:
-    image: quay.io/infinimesh/mqtt-bridge:latest
+    image: quay.io/infinimesh/mqtt-bridge:infinidev
     ports:
       - "8089:8089"
     volumes:
@@ -47,7 +47,7 @@ services:
       - kafka
     restart: unless-stopped
   telemetry-router:
-    image: quay.io/infinimesh/telemetry-router:latest
+    image: quay.io/infinimesh/telemetry-router:infinidev
     environment:
       - KAFKA_HOST=kafka:29092
     depends_on:
@@ -61,14 +61,14 @@ services:
       - DGRAPH_HOST=server:9080
     restart: unless-stopped
   shadow-delta-merger:
-    image: quay.io/infinimesh/shadow-delta-merger:latest
+    image: quay.io/infinimesh/shadow-delta-merger:infinidev
     depends_on:
       - kafka
     environment:
       - KAFKA_HOST=kafka:29092
     restart: unless-stopped
   shadow-api:
-    image: quay.io/infinimesh/shadow-api:latest
+    image: quay.io/infinimesh/shadow-api:infinidev
     ports:
       - "8096:8096"
     depends_on:
@@ -78,7 +78,7 @@ services:
       - "DB_ADDR=redis:6379"
     restart: unless-stopped
   shadow-persister:
-    image: quay.io/infinimesh/shadow-persister:latest
+    image: quay.io/infinimesh/shadow-persister:infinidev
     depends_on:
       - kafka
     environment:
@@ -88,13 +88,13 @@ services:
   frontend:
     ports:
       - "8082:80"
-    image: quay.io/infinimesh/frontend:latest
+    image: quay.io/infinimesh/frontend:infinidev
     environment:
       - "APISERVER_URL=apiserver-rest:8081"
   apiserver:
     ports:
       - "8080:8080"
-    image: quay.io/infinimesh/apiserver:latest
+    image: quay.io/infinimesh/apiserver:infinidev
     environment:
       - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=
     depends_on:
@@ -103,7 +103,7 @@ services:
       - nodeserver
     restart: unless-stopped
   apiserver-rest:
-    image: quay.io/infinimesh/apiserver-rest:latest
+    image: quay.io/infinimesh/apiserver-rest:infinidev
     environment:
       - APISERVER_ENDPOINT=apiserver:8080
     ports:
@@ -112,7 +112,7 @@ services:
       - apiserver
     restart: unless-stopped
   nodeserver:
-    image: quay.io/infinimesh/nodeserver:latest
+    image: quay.io/infinimesh/nodeserver:infinidev
     restart: unless-stopped
     depends_on:
       - alpha

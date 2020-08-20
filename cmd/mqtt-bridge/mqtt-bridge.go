@@ -174,13 +174,11 @@ func main() {
 		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
-
 	if err != nil {
 		panic(err)
 	}
 
 	go readBackchannelFromKafka()
-
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		timeout := time.Second / 2
@@ -197,7 +195,6 @@ func main() {
 			fmt.Println("Handshake failed due to timeout")
 			_ = conn.Close()
 		}
-
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
 			continue
 		}

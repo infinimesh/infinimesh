@@ -87,9 +87,9 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
 	}
 
-	ns, err := s.repo.GetNamespace(ctx, request.Device.Namespace)
+	ns, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid namespace")
+		return nil, status.Error(codes.FailedPrecondition, "The Namespace provided is not found.")
 	}
 
 	if request.Device.Certificate == nil {
@@ -346,8 +346,8 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query list($namespace: string){
-		var(func: uid($namespace)) @filter(eq(type, "namespace")) {
+	const q = `query list($namespaceid: string){
+		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
 		  owns {
 			OBJs as uid
 		  } @filter(eq(kind, "device"))
@@ -364,7 +364,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 	  }`
 
 	vars := map[string]string{
-		"$namespace": request.Namespace,
+		"$namespaceid": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -396,37 +396,37 @@ func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDev
 
 	// TODO direct access!
 
-	var q = `query list($account: string, $namespace: string){
-                     var(func: uid($account)) {
-                       access.to.namespace %v {
-                         owns {
-                           OBJs as uid
-                         } @filter(eq(kind, "device"))
-                       }
-                     }
+	var q = `query list($account: string, $namespaceid: string){
+		var(func: uid($account)) {
+		  access.to.namespace %v {
+			owns {
+			  OBJs as uid
+			} @filter(eq(kind, "device"))
+		  }
+		}
 
-                     nodes(func: uid(OBJs)) @recurse {
-                       children{} 
-                       uid
-                       name
-                       kind
-                       enabled
-                       tags
-                       ~owns {
-                         name
-                       }
-                     }
-                   }`
+		nodes(func: uid(OBJs)) @recurse {
+		  children{} 
+		  uid
+		  name
+		  kind
+		  enabled
+		  tags
+		  ~owns {
+			name
+		  }
+		}
+	  }`
 
 	if request.Namespace != "" {
-		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))")
+		q = fmt.Sprintf(q, "@filter(uid($namespaceid))")
 	} else {
 		q = fmt.Sprintf(q, "")
 	}
 
 	vars := map[string]string{
-		"$account":   request.Account,
-		"$namespace": request.Namespace,
+		"$account":     request.Account,
+		"$namespaceid": request.Namespace,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)

@@ -66,6 +66,11 @@ var lsDeviceCmd = &cobra.Command{
 		w := tabwriter.NewWriter(os.Stdout, tabwriterMinWidth, tabwriterWidth, tabwriterPadding, tabwriterPadChar, tabwriterFlags)
 		defer w.Flush()
 
+		if namespace := getNamespace(); namespace == "" {
+			fmt.Println("Please set namespace for you id.")
+			os.Exit(1)
+		}
+
 		response, err := deviceClient.List(ctx, &apipb.ListDevicesRequest{
 			Namespace: getNamespace(),
 		})

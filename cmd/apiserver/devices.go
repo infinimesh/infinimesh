@@ -46,10 +46,10 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 		Action:    nodepb.Action_WRITE,
 	})
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "Permission denied to create device.")
 	}
 	return d.client.Create(ctx, request)
 }

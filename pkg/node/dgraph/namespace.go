@@ -57,10 +57,10 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
-func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespace, accountID string) (err error) {
+func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error) {
 	txn := s.Dg.NewTxn()
-	const q = `query deletePermissionInNamespace($namespace: string, $accountID: string){
-  accounts(func: eq(name, $namespace)) @filter(eq(type, "namespace")) @cascade @normalize {
+	const q = `query deletePermissionInNamespace($namespaceID: string, $accountID: string){
+  accounts(func: uid($namespaceID)) @filter(eq(type, "namespace")) @cascade @normalize {
     namespace_uid: uid
     ~access.to.namespace @filter(uid($accountID))  {
       account_uid: uid
@@ -69,8 +69,8 @@ func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespace,
 }`
 
 	res, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$namespace": namespace,
-		"$accountID": accountID,
+		"$namespaceID": namespaceID,
+		"$accountID":   accountID,
 	})
 	if err != nil {
 		return err
@@ -99,17 +99,17 @@ func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespace,
 	return err
 }
 
-func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespace string) (permissions []*nodepb.Permission, err error) {
-	const q = `query listPermissionsInNamespace($namespace: string) {
-  accounts(func: eq(name, $namespace)) @filter(eq(type, "namespace")) @normalize @cascade  {
-    ~access.to.namespace {
-      uid: uid
-      name: name
-    } @facets(permission)
-  }
-}`
+func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid string) (permissions []*nodepb.Permission, err error) {
+	const q = `query listPermissionsInNamespace($namespaceid: string) {
+		accounts(func: uid($namespaceid)) @filter(eq(type, "namespace")) @normalize @cascade  {
+		  ~access.to.namespace {
+			uid: uid
+			name: name
+		  } @facets(permission)
+		}
+	  }`
 
-	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespace})
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespaceid": namespaceid})
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespace s
 
 	for _, account := range resultSet.Accounts {
 		permissions = append(permissions, &nodepb.Permission{
-			Namespace:   namespace,
+			Namespace:   namespaceid,
 			AccountId:   account.UID,
 			AccountName: account.Name,
 			Action:      nodepb.Action(nodepb.Action_value[account.Action]),
@@ -172,7 +172,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
-func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error) {
+func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error) {
 	acc, err := s.GetAccount(ctx, account)
 	if err != nil {
 		return false, err
@@ -183,23 +183,23 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespace, accou
 	}
 
 	params := map[string]string{
-		"$namespace": namespace,
-		"$user_id":   account,
+		"$namespaceid": namespaceid,
+		"$user_id":     account,
 	}
 
 	txn := s.Dg.NewReadOnlyTxn()
 
-	const q = `query access($namespace: string, $user_id: string){
-  access(func: uid($user_id)) @cascade {
-    name
-    uid
-    access.to.namespace @filter(eq(name, "$namespace")) {
-      uid
-      name
-      type
-    }
-  }
-}
+	const q = `query access($namespaceid: string, $user_id: string){
+		access(func: uid($user_id)) @cascade {
+		  name
+		  uid
+		  access.to.namespace @filter(uid($namespaceid)) {
+			uid
+			name
+			type
+		  }
+		}
+	  }
 `
 
 	res, err := txn.QueryWithVars(ctx, q, params)
