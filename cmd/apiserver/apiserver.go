@@ -107,20 +107,19 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
 					fullMethod := strings.Split(info.FullMethod, "/")
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
-					log.Info("fullMethod extracted", zap.Any("fullMethod", fullMethod))
 					for ns := range claims {
-						log.Info("Looped Condition", zap.Any("comparing", []string{reqNS, ns}), zap.Any("result", reqNS == ns))
 						if reqNS == ns {
-							log.Info("Method Condition", zap.Any("comparing", []string{reqMethod, "List"}), zap.Any("result", reqMethod == "List"))
-							// if reqMethod == "List" {
-							// 	return handler(ctx, req)
-							// }
-							// return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted, requested: "+info.FullMethod))
+							if reqMethod == "List" {
+								r, err := handler(ctx, req)
+								return r, err
+							}
+							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 						}
 					}
 				}
 
-				return handler(ctx, req)
+				r, err := handler(ctx, req)
+				return r, err
 			}
 
 		}
