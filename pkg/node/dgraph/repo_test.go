@@ -185,7 +185,7 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	}
 
 	//Get Namespace
-	nsID, err := repo.GetNamespace(ctx, "shared-project")
+	nsID, err := repo.GetNamespace(ctx, "joe")
 
 	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
