@@ -129,7 +129,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 									key := strings.Split(ns, ".")[2]
 									resBase := reflect.Indirect(reflect.ValueOf(r))
 									res := resBase.FieldByName(key)
-									pool := reflect.New(reflect.TypeOf(res))
+									pool := reflect.New(reflect.TypeOf(res)).Elem()
 									for i := 0; i < res.Len(); i++ {
 										obj := reflect.Indirect(res.Index(i))
 										if idSet[obj.FieldByName("Id").String()] {
