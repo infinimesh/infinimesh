@@ -63,6 +63,10 @@ var (
 	log *zap.Logger
 )
 
+type ListReponseElement interface {
+	GetId() string
+}
+
 var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
 		return handler(ctx, req)
@@ -113,7 +117,6 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
 					for ns, ids := range claims {
 						if reqNS == ns {
-							log.Info("Request", zap.Any("payload", req), zap.Any("ids", ids))
 							idSet := make(map[string]bool)
 							if ids != nil {
 								for _, id := range ids.([]interface{}) {
@@ -128,10 +131,9 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 								if ids != nil {
 									ns = strings.ToLower(ns)
 									var pool []interface{}
-									for _, idevice := range r.(map[string][]interface{})[ns] {
-										device := idevice.(map[string]interface{})
-										if idSet[device["id"].(string)] {
-											pool = append(pool, device)
+									for _, obj := range r.([]interface{}) {
+										if idSet[obj.(ListReponseElement).GetId()] {
+											pool = append(pool, obj)
 										}
 									}
 									log.Info("Response", zap.Any("body", r), zap.Any("filtered", pool))
