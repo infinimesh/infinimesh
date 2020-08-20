@@ -129,7 +129,6 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 									return r, err
 								}
 								if ids != nil {
-									ns = strings.ToLower(ns)
 									var pool []interface{}
 									for _, obj := range r.([]interface{}) {
 										if idSet[obj.(ListReponseElement).GetId()] {
