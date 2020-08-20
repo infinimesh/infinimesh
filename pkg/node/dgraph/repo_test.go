@@ -134,10 +134,20 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
+	var accountID *nodepb.Account
 
-	//Get Account
-	accountID, err := repo.GetAccount(ctx, "joe")
-	require.NoError(t, err)
+	//Get All accounts
+	accounts, err := repo.ListAccounts(ctx)
+
+	//Find the required account
+	for _, account := range accounts {
+		if account.Name == "joe" {
+			//Get Account
+			accountID, err = repo.GetAccount(ctx, account.Uid)
+			require.NoError(t, err)
+
+		}
+	}
 
 	//Get Namespace
 	nsID, err := repo.GetNamespace(ctx, "joe")
@@ -159,13 +169,23 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 
 func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
+	var accountID *nodepb.Account
 
-	//Get Account
-	accountID, err := repo.GetAccount(ctx, "joe")
-	require.NoError(t, err)
+	//Get All accounts
+	accounts, err := repo.ListAccounts(ctx)
+
+	//Find the required account
+	for _, account := range accounts {
+		if account.Name == "joe" {
+			//Get Account
+			accountID, err = repo.GetAccount(ctx, account.Uid)
+			require.NoError(t, err)
+
+		}
+	}
 
 	//Get Namespace
-	nsID, err := repo.GetNamespace(ctx, "shared-project")
+	nsID, err := repo.GetNamespace(ctx, "joe")
 
 	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
