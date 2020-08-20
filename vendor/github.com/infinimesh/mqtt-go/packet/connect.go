@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh, INC
-// www.infinimesh.io
+// Copyright 2018 Infinite Devices GmbH
+// www.infinimesh.io 
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -25,21 +25,12 @@ import (
 )
 
 type ConnectFlags struct {
-	UserName   bool
-	Password   bool
-	WillRetain bool
-	WillQoS    int
-	WillFlag   bool
-	CleanStart bool
-}
-
-type ConnectProperties struct {
-	PropertyLength         uint64
-	RecieveMaximumValue    uint32 //limits the number of QoS 1 and QoS 2 Pub at Client - default 65,535
-	MaximumPacketSize      uint32 //represents max packet size client accepts
-	TopicAliasMaximumValue uint16 //max num of topic alias accepted by client
-	RequestResponseInfo    bool   //0 = no response info in CONNACK
-	RequestProblemInfo     bool   //0 = no reason string in CONNACK
+	UserName     bool
+	Password     bool
+	WillRetain   bool
+	WillQoS      byte // 2 bytes actually
+	WillFlag     bool
+	CleanSession bool
 }
 
 type ConnectControlPacket struct {
@@ -49,11 +40,10 @@ type ConnectControlPacket struct {
 }
 
 type ConnectVariableHeader struct {
-	ProtocolName      string
-	ProtocolLevel     byte
-	ConnectFlags      ConnectFlags
-	KeepAlive         int
-	ConnectProperties ConnectProperties
+	ProtocolName  string
+	ProtocolLevel byte
+	ConnectFlags  ConnectFlags
+	KeepAlive     int
 }
 
 type ConnectPayload struct {
@@ -97,7 +87,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	hdr.ConnectFlags.Password = connectFlagsByte[0]&64 == 1
 	hdr.ConnectFlags.WillRetain = connectFlagsByte[0]&32 == 1
 	hdr.ConnectFlags.WillFlag = connectFlagsByte[0]&4 == 1
-	hdr.ConnectFlags.CleanStart = connectFlagsByte[0]&2 == 1
+	hdr.ConnectFlags.CleanSession = connectFlagsByte[0]&2 == 1
 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
@@ -110,69 +100,8 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	}
 
 	hdr.KeepAlive = int(binary.BigEndian.Uint16(keepAliveByte))
-
 	// TODO Will QoS
-	if connectFlagsByte[0]&16 == 1 && connectFlagsByte[0]&8 == 1 {
-		hdr.ConnectFlags.WillQoS = 3
-	} else if connectFlagsByte[0]&8 == 1 {
-		hdr.ConnectFlags.WillQoS = 2
-	} else {
-		hdr.ConnectFlags.WillQoS = 1
-	}
 
-	// TODO Connect Properties
-	connectPropertiesLength := make([]byte, 4)
-	n, err = r.Read(connectPropertiesLength)
-	len += n
-	if err != nil {
-		fmt.Println("Could not read connect properties byte")
-	}
-	if n != 4 {
-		fmt.Println("Connect Properties are not set, but no worries!")
-	}
-	hdr.ConnectProperties.PropertyLength = binary.BigEndian.Uint64(connectPropertiesLength)
-	if hdr.ConnectProperties.PropertyLength > 0 {
-		connectRecieveMaximumValue := make([]byte, 2)
-		n, err = r.Read(connectRecieveMaximumValue)
-
-		if err != nil {
-			return
-		}
-		hdr.ConnectProperties.RecieveMaximumValue = binary.BigEndian.Uint32(connectRecieveMaximumValue)
-	}
-	/*
-	   connectMaximumPacketSize := make([]byte, 4)
-	   n, err = r.Read(connectMaximumPacketSize)
-	   len += n
-	   if err != nil {
-	       return
-	   }
-	   hdr.ConnectProperties.MaximumPacketSize = binary.BigEndian.Uint32(connectMaximumPacketSize)
-
-	   connectRequestProblemInfo := make([]byte, 1)
-	   n, err = r.Read(connectRequestProblemInfo)
-	   len += n
-	   if err != nil {
-	       return
-	   }
-	   hdr.ConnectProperties.RequestProblemInfo = connectRequestProblemInfo[0]&1 == 1
-
-	   connectRequestResponseInfo := make([]byte, 1)
-	   n, err = r.Read(connectRequestResponseInfo)
-	   len += n
-	   if err != nil {
-	       return
-	   }
-	   hdr.ConnectProperties.RequestResponseInfo = connectRequestResponseInfo[0]&1 == 1
-
-	   connectTopicAliasMaxValue := make([]byte, 2)
-	   n, err = r.Read(connectTopicAliasMaxValue)
-	   len += n
-	   if err != nil {
-	       return
-	   }
-	   hdr.ConnectProperties.TopicAliasMaximumValue = binary.BigEndian.Uint16(connectTopicAliasMaxValue)
-	*/
 	return
 }
 
