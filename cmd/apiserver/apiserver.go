@@ -63,6 +63,10 @@ var (
 	log *zap.Logger
 )
 
+type ListReponseElement interface {
+	GetId() string
+}
+
 var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
 		return handler(ctx, req)
@@ -104,17 +108,46 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
 				}
 
+				ctx = context.WithValue(ctx, accountIDClaim, accountID)
+
 				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
+					log.Info("Token is restricted", zap.Any("restricted", restricted))
+
 					fullMethod := strings.Split(info.FullMethod, "/")
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
-					for ns := range claims {
+					for ns, ids := range claims {
 						if reqNS == ns {
+							idSet := make(map[string]bool)
+							if ids != nil {
+								for _, id := range ids.([]interface{}) {
+									idSet[id.(string)] = true
+								}
+							}
 							if reqMethod == "List" {
-								return handler(ctx, req)
+								r, err := handler(ctx, req)
+								if err != nil {
+									return r, err
+								}
+								if ids != nil {
+									ns = strings.ToLower(ns)
+									var pool []interface{}
+									for _, obj := range r.([]interface{}) {
+										if idSet[obj.(ListReponseElement).GetId()] {
+											pool = append(pool, obj)
+										}
+									}
+									log.Info("Response", zap.Any("body", r), zap.Any("filtered", pool))
+								}
+								return r, err
+							} else if reqMethod == "Get" {
+								if ids == nil || idSet[req.(map[string]interface{})["id"].(string)] {
+									return handler(ctx, req)
+								}
 							}
 							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 						}
 					}
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 				}
 
 				return handler(ctx, req)
