@@ -112,7 +112,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 							if reqMethod == "List" {
 								return handler(ctx, req)
 							}
-							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
+							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted, requested: "+info.FullMethod))
 						}
 					}
 				}
