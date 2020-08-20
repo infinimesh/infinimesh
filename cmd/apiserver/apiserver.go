@@ -111,7 +111,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 
 					fullMethod := strings.Split(info.FullMethod, "/")
 					reqNS, reqMethod := fullMethod[1], fullMethod[2]
-					for ns := range claims {
+					for ns, ids := range claims {
 						if reqNS == ns {
 							log.Info("Request", zap.Any("payload", req))
 							if reqMethod == "List" {
@@ -121,6 +121,13 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 								}
 								log.Info("Response", zap.Any("body", r))
 								return r, err
+							} else if reqMethod == "Get" {
+								for _, id := range ids.([]string) {
+									if id == req.(map[string]interface{})["id"].(string) {
+										return handler(ctx, req)
+									}
+								}
+								return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 							}
 						}
 					}
