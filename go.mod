@@ -1,7 +1,5 @@
 module github.com/infinimesh/infinimesh
 
-go 1.14
-
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Pallinder/go-randomdata v1.1.0
@@ -29,7 +27,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/infinimesh/mqtt-go v0.0.0-20200820072706-1a7661aa9646
+	github.com/infinimesh/mqtt-go v0.0.0-20190331134856-46f3ca3950fb
 	github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603
 	github.com/jinzhu/gorm v1.9.2
 	github.com/julienschmidt/httprouter v1.2.0
