@@ -143,7 +143,7 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 	for _, account := range accounts {
 		if account.Name == "joe" {
 			//Get Account
-			accountID, err = repo.GetAccount(ctx, "joe")
+			accountID, err = repo.GetAccount(ctx, account.Uid)
 			require.NoError(t, err)
 
 		}
@@ -178,7 +178,7 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	for _, account := range accounts {
 		if account.Name == "joe" {
 			//Get Account
-			accountID, err = repo.GetAccount(ctx, "joe")
+			accountID, err = repo.GetAccount(ctx, account.Uid)
 			require.NoError(t, err)
 
 		}
