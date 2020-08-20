@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"reflect"
 	"strings"
 
 	"strconv"
@@ -130,8 +131,10 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 								}
 								if ids != nil {
 									var pool []interface{}
-									for _, obj := range r.([]interface{}) {
-										if idSet[obj.(ListReponseElement).GetId()] {
+									res := reflect.Indirect(reflect.ValueOf(r)).FieldByName(ns).Interface()
+
+									for _, obj := range res.([]ListReponseElement) {
+										if idSet[obj.GetId()] {
 											pool = append(pool, obj)
 										}
 									}
