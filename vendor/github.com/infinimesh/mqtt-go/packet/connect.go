@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh, INC
-// www.infinimesh.io
+// Copyright 2018 Infinite Devices GmbH
+// www.infinimesh.io 
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,30 +24,13 @@ import (
 	"io"
 )
 
-const (
-	RecieveMaximumID      = 33
-	MaximumPacketSizeID   = 39
-	TopicAliasMaximumID   = 34
-	RequestResponseInfoID = 25
-	RequestProblemInfoID  = 23
-)
-
-type ConnectProperties struct {
-	PropertyLength         int //variable header properties length
-	RecieveMaximumValue    int //limits the number of QoS 1 and QoS 2 Pub at Client - default 65,535
-	MaximumPacketSize      int //represents max packet size client accepts
-	TopicAliasMaximumValue int //max num of topic alias accepted by client
-	RequestResponseInfo    int //0 = no response info in CONNACK
-	RequestProblemInfo     int //0 = no reason string in CONNACK
-}
-
 type ConnectFlags struct {
-	UserName   bool
-	Password   bool
-	WillRetain bool
-	WillQoS    int // 2 bytes actually
-	WillFlag   bool
-	CleanStart bool
+	UserName     bool
+	Password     bool
+	WillRetain   bool
+	WillQoS      byte // 2 bytes actually
+	WillFlag     bool
+	CleanSession bool
 }
 
 type ConnectControlPacket struct {
@@ -57,18 +40,17 @@ type ConnectControlPacket struct {
 }
 
 type ConnectVariableHeader struct {
-	ProtocolName      string
-	ProtocolLevel     byte
-	ConnectFlags      ConnectFlags
-	KeepAlive         int
-	ConnectProperties ConnectProperties
+	ProtocolName  string
+	ProtocolLevel byte
+	ConnectFlags  ConnectFlags
+	KeepAlive     int
 }
 
 type ConnectPayload struct {
 	ClientID string
 }
 
-func getConnectVariableHeader(r io.Reader, propertiesLength int) (hdr ConnectVariableHeader, len int, err error) {
+func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, err error) {
 	// Protocol name
 	protocolName, n, err := getProtocolName(r)
 	len += n
@@ -105,7 +87,7 @@ func getConnectVariableHeader(r io.Reader, propertiesLength int) (hdr ConnectVar
 	hdr.ConnectFlags.Password = connectFlagsByte[0]&64 == 1
 	hdr.ConnectFlags.WillRetain = connectFlagsByte[0]&32 == 1
 	hdr.ConnectFlags.WillFlag = connectFlagsByte[0]&4 == 1
-	hdr.ConnectFlags.CleanStart = connectFlagsByte[0]&2 == 1
+	hdr.ConnectFlags.CleanSession = connectFlagsByte[0]&2 == 1
 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
@@ -118,26 +100,7 @@ func getConnectVariableHeader(r io.Reader, propertiesLength int) (hdr ConnectVar
 	}
 
 	hdr.KeepAlive = int(binary.BigEndian.Uint16(keepAliveByte))
-
 	// TODO Will QoS
-	if connectFlagsByte[0]&16 == 1 && connectFlagsByte[0]&8 == 1 {
-		hdr.ConnectFlags.WillQoS = 3
-	} else if connectFlagsByte[0]&8 == 1 {
-		hdr.ConnectFlags.WillQoS = 2
-	} else {
-		hdr.ConnectFlags.WillQoS = 1
-	}
-
-	bufProperties := make([]byte, propertiesLength)
-	n, err = io.ReadFull(r, bufProperties)
-	len += n
-	if n != propertiesLength {
-		return hdr, len, errors.New("short properties read")
-	}
-	if err != nil {
-		return hdr, len, err
-	}
-	hdr.ConnectProperties.PropertyLength = propertiesLength
 
 	return
 }
