@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 Infinite Devices GmbH
+// Copyright 2018 infinimesh, INC
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,7 +136,13 @@ func ReadPacket(r io.Reader) (ControlPacket, error) {
 func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPacket, error) {
 	switch fh.ControlPacketType {
 	case CONNECT:
-		vh, variableHeaderSize, err := getConnectVariableHeader(remainingReader)
+		PropertiesLength, err := getRemainingLength(remainingReader)
+		if err != nil {
+			fmt.Printf("variable header properties length can not be read %v", PropertiesLength)
+		} else {
+			fmt.Printf("variable header properties length %v", PropertiesLength)
+		}
+		vh, variableHeaderSize, err := getConnectVariableHeader(remainingReader, PropertiesLength)
 		if err != nil {
 			return nil, err
 		}
