@@ -338,6 +338,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 
 	for {
+		//TODO : Add MQTT 5 Properties Handler
 		p, err := packet.ReadPacket(c)
 		if err != nil {
 			if err == io.EOF {

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 Infinite Devices GmbH
-// www.infinimesh.io 
+// Copyright 2018 infinimesh, INC
+// www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ type ConnectFlags struct {
 	UserName     bool
 	Password     bool
 	WillRetain   bool
-	WillQoS      byte // 2 bytes actually
+	WillQoS      int // 2 bytes actually
 	WillFlag     bool
 	CleanSession bool
 }
@@ -100,7 +100,15 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	}
 
 	hdr.KeepAlive = int(binary.BigEndian.Uint16(keepAliveByte))
+
 	// TODO Will QoS
+	if connectFlagsByte[0]&16 == 1 && connectFlagsByte[0]&8 == 1 {
+		hdr.ConnectFlags.WillQoS = 3
+	} else if connectFlagsByte[0]&8 == 1 {
+		hdr.ConnectFlags.WillQoS = 2
+	} else {
+		hdr.ConnectFlags.WillQoS = 1
+	}
 
 	return
 }
