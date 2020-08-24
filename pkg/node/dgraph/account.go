@@ -94,7 +94,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	//Get the data for the Account that is to be modified
 	tempacc, _ := s.GetAccount(ctx, account.Account.Uid)
 
-	// TODO this may override fields with zero-values
 	acc := &Account{
 		Node: Node{
 			Type: "account",
@@ -118,7 +117,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 			if err != nil {
 				return err
 			}
-			return nil
 		}
 	}
 
