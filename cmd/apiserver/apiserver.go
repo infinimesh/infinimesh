@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"reflect"
 	"strings"
 
 	"strconv"
@@ -44,6 +43,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"robpike.io/filter"
 )
 
 const (
@@ -126,19 +126,12 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 									return r, err
 								}
 								if ids != nil {
-									key := strings.Split(ns, ".")[2]
-									resBase := reflect.Indirect(reflect.ValueOf(r))
-									res := resBase.FieldByName(key)
-									pool := reflect.New(reflect.TypeOf(res)).Elem()
-									for i := 0; i < res.Len(); i++ {
-										obj := reflect.Indirect(res.Index(i))
-										if idSet[obj.FieldByName("Id").String()] {
-											pool = reflect.Append(pool, obj)
-										}
+									switch reqNS {
+									case "infinimesh.api.Devices":
+										res := r.(registrypb.ListResponse)
+										res.Devices = filter.Choose(res.Devices, func(el registrypb.Device) bool { return idSet[el.Id] }).([]*registrypb.Device)
+										r = res
 									}
-									log.Info("", zap.Any("pool", pool))
-									resBase.FieldByName(key).Set(reflect.ValueOf(pool))
-									return resBase, nil
 								}
 								return r, err
 							} else if reqMethod == "Get" {
