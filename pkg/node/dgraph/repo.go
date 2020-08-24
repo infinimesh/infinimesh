@@ -316,7 +316,7 @@ func (s *DGraphRepo) SetPassword(ctx context.Context, account, password string) 
 	}
 
 	if len(result.Account[0].HasCredentials) == 0 {
-		return errors.New("No credentials found")
+		return errors.New("The account doesnot have credentials. Please set credential node.")
 	}
 
 	_, err = txn.Mutate(ctx, &api.Mutation{

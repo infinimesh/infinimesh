@@ -91,12 +91,18 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		return errors.New("Account not found")
 	}
 
+	//Get the data for the Account that is to be modified
+	tempacc, _ := s.GetAccount(ctx, account.Account.Uid)
+
 	// TODO this may override fields with zero-values
 	acc := &Account{
 		Node: Node{
 			Type: "account",
 			UID:  account.Account.Uid,
 		},
+		Name:    tempacc.Name,
+		IsRoot:  tempacc.IsRoot,
+		Enabled: tempacc.Enabled,
 	}
 
 	for _, field := range account.FieldMask.Paths {
@@ -107,6 +113,9 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 			acc.IsRoot = account.Account.IsRoot
 		case "Enabled":
 			acc.Enabled = account.Account.Enabled
+		case "Password":
+			s.SetPassword(ctx, account.Account.Name, account.Account.Password)
+			return nil
 		}
 	}
 
