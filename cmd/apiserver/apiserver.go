@@ -131,6 +131,18 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 										res := r.(registrypb.ListResponse)
 										res.Devices = filter.Choose(res.Devices, func(el registrypb.Device) bool { return idSet[el.Id] }).([]*registrypb.Device)
 										r = res
+									case "infinimesh.api.Accounts":
+										res := r.(nodepb.ListAccountsResponse)
+										res.Accounts = filter.Choose(res.Accounts, func(el nodepb.Account) bool { return idSet[el.Id] }).([]*nodepb.Account)
+										r = res
+									case "infinimesh.api.Namespaces":
+										res := r.(nodepb.ListNamespacesResponse)
+										res.Namespaces = filter.Choose(res.Namespaces, func(el nodepb.Namespace) bool { return idSet[el.Id] }).([]*nodepb.Namespace)
+										r = res
+									case "infinimesh.api.Objects":
+										res := r.(nodepb.ListObjectsResponse)
+										res.Objects = filter.Choose(res.Objects, func(el nodepb.Object) bool { return idSet[el.Uid] }).([]*nodepb.Object)
+										r = res
 									}
 								}
 								return r, err
