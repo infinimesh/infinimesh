@@ -114,7 +114,10 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		case "Enabled":
 			acc.Enabled = account.Account.Enabled
 		case "Password":
-			s.SetPassword(ctx, account.Account.Name, account.Account.Password)
+			err = s.SetPassword(ctx, account.Account.Name, account.Account.Password)
+			if err != nil {
+				return err
+			}
 			return nil
 		}
 	}
