@@ -133,7 +133,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 										r = res
 									case "infinimesh.api.Accounts":
 										res := r.(nodepb.ListAccountsResponse)
-										res.Accounts = filter.Choose(res.Accounts, func(el nodepb.Account) bool { return idSet[el.Id] }).([]*nodepb.Account)
+										res.Accounts = filter.Choose(res.Accounts, func(el nodepb.Account) bool { return idSet[el.Uid] }).([]*nodepb.Account)
 										r = res
 									case "infinimesh.api.Namespaces":
 										res := r.(nodepb.ListNamespacesResponse)
