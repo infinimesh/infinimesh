@@ -24,13 +24,30 @@ import (
 	"io"
 )
 
+const (
+	RecieveMaximumID      = 33
+	MaximumPacketSizeID   = 39
+	TopicAliasMaximumID   = 34
+	RequestResponseInfoID = 25
+	RequestProblemInfoID  = 23
+)
+
+type ConnectProperties struct {
+	PropertyLength         int //variable header properties length
+	RecieveMaximumValue    int //limits the number of QoS 1 and QoS 2 Pub at Client - default 65,535
+	MaximumPacketSize      int //represents max packet size client accepts
+	TopicAliasMaximumValue int //max num of topic alias accepted by client
+	RequestResponseInfo    int //0 = no response info in CONNACK
+	RequestProblemInfo     int //0 = no reason string in CONNACK
+}
+
 type ConnectFlags struct {
-	UserName     bool
-	Password     bool
-	WillRetain   bool
-	WillQoS      int // 2 bytes actually
-	WillFlag     bool
-	CleanSession bool
+	UserName   bool
+	Password   bool
+	WillRetain bool
+	WillQoS    int // 2 bytes actually
+	WillFlag   bool
+	CleanStart bool
 }
 
 type ConnectControlPacket struct {
@@ -40,10 +57,11 @@ type ConnectControlPacket struct {
 }
 
 type ConnectVariableHeader struct {
-	ProtocolName  string
-	ProtocolLevel byte
-	ConnectFlags  ConnectFlags
-	KeepAlive     int
+	ProtocolName      string
+	ProtocolLevel     byte
+	ConnectFlags      ConnectFlags
+	KeepAlive         int
+	ConnectProperties ConnectProperties
 }
 
 type ConnectPayload struct {
@@ -87,7 +105,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	hdr.ConnectFlags.Password = connectFlagsByte[0]&64 == 1
 	hdr.ConnectFlags.WillRetain = connectFlagsByte[0]&32 == 1
 	hdr.ConnectFlags.WillFlag = connectFlagsByte[0]&4 == 1
-	hdr.ConnectFlags.CleanSession = connectFlagsByte[0]&2 == 1
+	hdr.ConnectFlags.CleanStart = connectFlagsByte[0]&2 == 1
 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
@@ -114,8 +132,10 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 }
 
 func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
+	fmt.Printf("readConnectPayload len %v\n", len)
 	payloadBytes := make([]byte, len)
 	n, err := io.ReadFull(r, payloadBytes)
+	fmt.Printf("payloadBytes len n %v\n", n)
 	// TODO set upper limit for payload
 	// TODO only stream it
 	if err != nil {
@@ -134,8 +154,9 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	// TODO am besten so viel einlesen wie moeglich, und dann reslicen / reader zusammenstecken
 
 	clientIDLengthBytes := payloadBytes[:2]
+	fmt.Printf("clientIDLengthBytes = %v\n", clientIDLengthBytes)
 	clientIDLength := binary.BigEndian.Uint16(clientIDLengthBytes)
-
+	fmt.Printf("clientIDLength = %v\n", clientIDLength)
 	clientID := string(payloadBytes[2 : 2+clientIDLength])
 	return ConnectPayload{
 		ClientID: clientID,

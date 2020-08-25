@@ -29,7 +29,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/infinimesh/mqtt-go v0.0.0-20200821083744-772a8fe6bc2c
+	github.com/infinimesh/mqtt-go v0.0.0-20200825065207-4562147e5024
 	github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603
 	github.com/jinzhu/gorm v1.9.2
 	github.com/julienschmidt/httprouter v1.2.0

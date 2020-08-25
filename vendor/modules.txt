@@ -121,7 +121,7 @@ github.com/hokaccha/go-prettyjson
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
-# github.com/infinimesh/mqtt-go v0.0.0-20200821083744-772a8fe6bc2c
+# github.com/infinimesh/mqtt-go v0.0.0-20200825065207-4562147e5024
 ## explicit
 github.com/infinimesh/mqtt-go/packet
 # github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603
@@ -303,3 +303,4 @@ gopkg.in/alecthomas/kingpin.v3-unstable
 gopkg.in/yaml.v2
 # robpike.io/filter v0.0.0-20150108201509-2984852a2183
 ## explicit
+robpike.io/filter
