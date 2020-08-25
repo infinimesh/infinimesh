@@ -138,7 +138,7 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	fmt.Printf("readConnectPayload len %v\n", len)
 	payloadBytes := make([]byte, len)
 	n, err := io.ReadFull(r, payloadBytes)
-	fmt.Printf("payloadBytes len n %v\n", n)
+	fmt.Printf("payloadBytes len n %v and payload %v\n ", n, payloadBytes)
 	// TODO set upper limit for payload
 	// TODO only stream it
 	if err != nil {
