@@ -136,10 +136,13 @@ func ReadPacket(r io.Reader) (ControlPacket, error) {
 func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPacket, error) {
 	switch fh.ControlPacketType {
 	case CONNECT:
+		fmt.Printf("remainingReader %v\n", remainingReader)
 		vh, variableHeaderSize, err := getConnectVariableHeader(remainingReader)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("fh.RemainingLength %v\n", fh.RemainingLength)
+		fmt.Printf("variableHeaderSize %v\n", variableHeaderSize)
 		payloadLength := fh.RemainingLength - variableHeaderSize
 
 		cp, err := readConnectPayload(remainingReader, payloadLength)

@@ -72,6 +72,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	// Protocol name
 	protocolName, n, err := getProtocolName(r)
 	len += n
+	fmt.Printf("After protocolName Connect calculated length n %v\n", len)
 	if err != nil {
 		return hdr, 0, err
 	}
@@ -85,6 +86,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	protocolLevelBytes := make([]byte, 1)
 	n, err = r.Read(protocolLevelBytes)
 	len += n
+	fmt.Printf("After protocolLevelBytes Connect calculated length n %v\n", len)
 	if err != nil {
 		return
 	}
@@ -110,6 +112,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
 	len += n
+	fmt.Printf("After keep alive Connect calculated length n %v\n", len)
 	if err != nil {
 		return hdr, len, errors.New("Could not read keepalive byte")
 	}
@@ -127,7 +130,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	} else {
 		hdr.ConnectFlags.WillQoS = 1
 	}
-
+	fmt.Printf("Connect calculated length n %v\n", len)
 	return
 }
 
