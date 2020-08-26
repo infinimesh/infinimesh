@@ -36,7 +36,7 @@ type namespaceAPI struct {
 func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
@@ -56,7 +56,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
@@ -90,7 +90,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -111,7 +111,7 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.CreateNamespacePermissionRequest) (response *apipb.CreateNamespacePermissionResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -142,7 +142,7 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -165,7 +165,7 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+account+" is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
