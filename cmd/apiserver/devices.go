@@ -37,7 +37,7 @@ type deviceAPI struct {
 func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateRequest) (response *registrypb.CreateResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+ctx.Value("account_id").(string)+" is not authenticated.")
 	}
 
 	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -49,7 +49,7 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied to create device.")
+		return nil, status.Error(codes.PermissionDenied, "The "+ctx.Value("account_id").(string)+"does not have permission to create device.")
 	}
 	return d.client.Create(ctx, request)
 }
@@ -57,7 +57,7 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+ctx.Value("account_id").(string)+" is not authenticated.")
 	}
 
 	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
@@ -66,10 +66,10 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 		Action:  nodepb.Action_WRITE,
 	})
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "Could not get permission to update device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "The "+ctx.Value("account_id").(string)+"does not have permission to update device.")
 	}
 
 	return d.client.Update(ctx, request)
@@ -78,7 +78,7 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The "+ctx.Value("account_id").(string)+" is not authenticated.")
 	}
 
 	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
@@ -87,12 +87,12 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 		Action:  nodepb.Action_READ,
 	})
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "Could not get permission to list devices.")
 	}
 
 	fmt.Println("decision", resp.Decision.Value)
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+		return nil, status.Error(codes.PermissionDenied, "The "+ctx.Value("account_id").(string)+"does not have permission to get device list.")
 	}
 
 	return d.client.Get(ctx, request)
@@ -101,7 +101,7 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, ctx.Value("account_id").(string)+" is not authenticated.")
 	}
 
 	isRootResp, err := d.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{
