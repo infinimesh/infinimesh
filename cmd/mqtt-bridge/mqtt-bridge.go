@@ -320,7 +320,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		},
 		VariableHeader: packet.ConnAckVariableHeader{},
 	}
-	fmt.Printf("CONNACK created %v\n", resp)
+
 	// Only open Back-channel after conn packet was received
 
 	// Create empty subscription
@@ -331,17 +331,15 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		ps.Unsub(backChannel)
 	}()
 
-	n, err := resp.WriteTo(c)
+	_, err = resp.WriteTo(c)
 	if err != nil {
 		fmt.Println("Failed to write ConnAck. Closing connection.")
 		return
 	}
-	fmt.Printf("CONNACK length n = %v\n", n)
 
 	for {
 		//TODO : Add MQTT 5 Properties Handler
 		p, err := packet.ReadPacket(c)
-		fmt.Printf("CONNACK packet to be recieved %v and error %v\n", p, err)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Printf("Client closed connection.\n")

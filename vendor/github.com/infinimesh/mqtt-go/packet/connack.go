@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh, INC
+// Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ type ConnAckControlPacket struct {
 
 type ConnAckVariableHeader struct {
 	SessionPresent bool
-	ReasonCode     byte
+	ReturnCode     byte
 }
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
@@ -47,7 +47,7 @@ func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	buf := make([]byte, 2)
 
-	buf[1] = c.ReasonCode
+	buf[1] = c.ReturnCode
 
 	bytesWritten, err := w.Write(buf)
 	n += int64(bytesWritten)
