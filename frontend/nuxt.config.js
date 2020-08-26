@@ -10,7 +10,7 @@ module.exports = {
       {
         hid: "description",
         name: "description",
-        content: "Console Infinimesh UI"
+        content: "Console infinimesh UI"
       }
     ],
     link: [
@@ -18,11 +18,7 @@ module.exports = {
       { rel: "icon", type: "image/png", href: "/favicon.png" }
     ]
   },
-  plugins: [
-    "@/plugins/ant-design-vue",
-    "@/plugins/typeface-exo"
-    // "@/plugins/axios"
-  ],
+  plugins: ["@/plugins/ant-design-vue", "@/plugins/typeface-exo"],
   /*
    ** Customize the progress bar color
    */
@@ -43,11 +39,20 @@ module.exports = {
           exclude: /(node_modules)/
         });
       }
+    },
+    loaders: {
+      less: { lessOptions: { javascriptEnabled: true } }
     }
   },
-  buildModules: ["@nuxt/typescript-build"],
+  buildModules: [
+    "@nuxt/typescript-build",
+    "@nuxtjs/style-resources",
+    "@nuxtjs/color-mode"
+  ],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
-
+  styleResources: {
+    less: ["~/assets/main.less"]
+  },
   axios: {
     proxy: true
   },
@@ -80,15 +85,6 @@ module.exports = {
   router: {
     middleware: ["auth"]
   },
-  build: {
-    loaders: {
-      less: {
-        javascriptEnabled: true,
-        modifyVars: require("./assets/styles/antThemeMod.js")
-      }
-    }
-  },
-  css: [{ lang: "less", src: "@/assets/styles/themes.less" }],
   server: {
     host: process.env.NODE_ENV == "production" ? "0.0.0.0" : "localhost",
     port: process.env.NODE_ENV == "production" ? 80 : 3000

@@ -14,7 +14,8 @@
       :md="{ span: 8 }"
       :xxl="{ span: 7 }"
       class="logo"
-    >infinimesh.io</a-col>
+      >infinimesh.io</a-col
+    >
     <a-col
       :xs="{ span: 0 }"
       :sm="{ span: 0 }"
@@ -46,7 +47,8 @@
           :value="ns.id"
           :label="ns.name"
           v-for="ns in namespaces"
-        >NS: {{ ns.name }}</a-select-option>
+          >NS: {{ ns.name }}</a-select-option
+        >
       </a-select>
     </a-col>
   </a-row>
@@ -61,7 +63,7 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      },
+      }
     },
     namespace: {
       get() {
@@ -69,14 +71,14 @@ export default {
       },
       set(val) {
         this.$store.dispatch("devices/setNamespace", val);
-      },
+      }
     },
     namespaces: {
       deep: true,
       get() {
         return this.$store.state.devices.namespaces;
-      },
-    },
+      }
+    }
   },
   mounted() {
     this.namespace = this.$store.state.auth.user.default_namespace.id;
@@ -84,8 +86,8 @@ export default {
   methods: {
     toggleCollapsed() {
       this.menu = !this.menu;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -129,6 +131,12 @@ div.user {
 <style lang="less" scoped>
 .nav-button:hover {
   cursor: pointer;
-  background-color: @infinimesh-dark-purple;
+  background-color: @primary-color-dark;
+}
+.gay-theme-nav {
+  max-height: 64px;
+}
+.gay-theme-nav .menu-control {
+  font-size: @font-size-xl !important;
 }
 </style>
