@@ -36,7 +36,7 @@ type objectAPI struct {
 func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjectRequest) (response *nodepb.Object, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if request.Object == nil || request.Object.Name == "" {
@@ -85,7 +85,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	fmt.Println("rec?", request.Recurse)
@@ -97,7 +97,7 @@ func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsR
 func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := o.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
@@ -110,7 +110,7 @@ func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObje
 	}
 
 	if !resp.Decision.GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "No permission to access resource")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to access resource.")
 	}
 
 	return o.objectClient.DeleteObject(ctx, request)
