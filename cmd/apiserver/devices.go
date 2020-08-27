@@ -119,5 +119,24 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	return resp, err
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+	}
+
+	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Id,
+		Account: account,
+		Action:  nodepb.Action_READ,
+	})
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, "Could not get permission to list devices.")
+	}
+
+	fmt.Println("decision", resp.Decision.Value)
+	if !resp.GetDecision().GetValue() {
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to delete list.")
+	}
+
 	return d.client.Delete(ctx, request)
 }
