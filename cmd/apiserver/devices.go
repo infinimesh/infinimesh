@@ -49,7 +49,7 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account "+account+"does not have permission to create device.")
+		return nil, status.Error(codes.PermissionDenied, "The account "+account+" does not have permission to create device.")
 	}
 	return d.client.Create(ctx, request)
 }
@@ -69,7 +69,7 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 		return nil, status.Error(codes.PermissionDenied, "Could not get permission to update device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account "+account+"does not have permission to update device.")
+		return nil, status.Error(codes.PermissionDenied, "The account "+account+" does not have permission to update device.")
 	}
 
 	return d.client.Update(ctx, request)
@@ -92,7 +92,7 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 
 	fmt.Println("decision", resp.Decision.Value)
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account "+account+"does not have permission to get device list.")
+		return nil, status.Error(codes.PermissionDenied, "The account "+account+" does not have permission to get device list.")
 	}
 
 	return d.client.Get(ctx, request)
