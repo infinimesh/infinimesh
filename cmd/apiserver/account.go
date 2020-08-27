@@ -40,7 +40,7 @@ type accountAPI struct {
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account "+account+" is not authenticated.")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	return a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
@@ -51,7 +51,7 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account "+account+" is not authenticated.")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -112,7 +112,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account "+account+" is not authenticated.")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -127,7 +127,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account "+account+" is not authenticated.")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -143,7 +143,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account "+account+" is not authenticated.")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
