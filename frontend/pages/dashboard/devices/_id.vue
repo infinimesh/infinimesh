@@ -238,11 +238,19 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
         method: "delete"
-      }).then(() => {
-        this.$message.success("Device successfuly deleted!");
-        this.$store.dispatch("devices/get");
-        this.$router.push({ name: "dashboard-devices" });
-      });
+      })
+        .then(() => {
+          this.$message.success("Device successfuly deleted!");
+          this.$store.dispatch("devices/get");
+          this.$router.push({ name: "dashboard-devices" });
+        })
+        .catch(e => {
+          this.$notification.error({
+            message: "Error deleting device",
+            description: e.response.data,
+            placement: "bottomRight"
+          });
+        });
     }
   },
   validate({ params }) {
