@@ -1,5 +1,5 @@
 <template>
-  <a-row class="gay-theme-nav" type="flex" align="middle">
+  <a-row class="infini-nav" type="flex" align="middle">
     <a-col :xs="{ span: 1, offset: 1 }" :md="{ span: 1, offset: 0 }">
       <a-row type="flex" justify="center">
         <a @click="toggleCollapsed" class="menu-control">
@@ -131,12 +131,14 @@ div.user {
 <style lang="less" scoped>
 .nav-button:hover {
   cursor: pointer;
-  background-color: @primary-color-dark;
+  opacity: 0.5;
+  -webkit-filter: grayscale(100%) sepia(100%);
+  filter: grayscale(100%) sepia(100%);
 }
-.gay-theme-nav {
+.infini-nav {
   max-height: 64px;
 }
-.gay-theme-nav .menu-control {
+.infini-nav .menu-control {
   font-size: @font-size-xl !important;
 }
 </style>

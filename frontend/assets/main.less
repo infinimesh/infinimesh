@@ -2,14 +2,21 @@
 
 // Basic variables section
 
-@primary-color: #673ab7;
-@primary-color-dark: #4e219e;
-@component-background: @primary-color;
+// @primary-color: #673ab7;
+// @primary-color-dark: #4e219e;
+// @line-color: white
+
+@primary-color: #104e83;
+@primary-color-dark: white;
+@line-color: @primary-color;
 
 // Basic style definition
+@component-background: @primary-color;
 @body-background: @primary-color-dark;
-@icon-color: white;
+@icon-color: @primary-color-dark;
+@icon-color-dark: @line-color;
 @tag-default-bg: transparent;
+@border-base: 1px dashed @line-color;
 
 // Font style
 @text-color: white;

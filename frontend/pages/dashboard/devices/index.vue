@@ -196,8 +196,11 @@ export default {
 .create-form {
   border-radius: @border-radius-base;
   background: @primary-color-dark;
-  border: 1px dashed white;
+  border: @border-base;
   min-height: var(--device-card-height);
   cursor: pointer;
+}
+.create-form .anticon {
+  color: @icon-color-dark;
 }
 </style>

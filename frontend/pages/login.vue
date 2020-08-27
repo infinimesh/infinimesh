@@ -2,9 +2,9 @@
   <a-row type="flex" justify="center" class="rootRow" align="middle">
     <a-col :xs="22" :md="16" :lg="12">
       <a-row type="flex" justify="center">
-        <h1>infinimesh Login</h1>
+        <h1>infinimesh</h1>
       </a-row>
-      <a-row type="flex" justify="center"
+      <a-row type="flex" justify="center" style="color: rgba(0, 0, 0, 0.65);"
         >Welcome to infinimesh. Log in with your username and password.</a-row
       >
 
@@ -96,5 +96,11 @@ export default {
   height: 100%;
   min-height: 500px;
   width: 100%;
+}
+</style>
+
+<style lang="less" scoped>
+h1 {
+  color: @line-color;
 }
 </style>
