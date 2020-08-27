@@ -29,7 +29,7 @@
           <a-row type="flex" justify="center">
             <a-col :xs="24" :sm="18" :md="12" :lg="10" :xl="8">
               ©2020 —
-              <strong>infinimesh, inc</strong>
+              <strong>InfniteDevices, GmbH</strong>
               - source code at
               <a
                 href="https://www.github.com/infinimesh/infinimesh"
