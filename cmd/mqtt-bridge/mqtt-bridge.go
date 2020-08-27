@@ -318,7 +318,14 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		FixedHeader: packet.FixedHeader{
 			ControlPacketType: packet.CONNACK,
 		},
-		VariableHeader: packet.ConnAckVariableHeader{},
+		VariableHeader: packet.ConnAckVariableHeader{
+			ConnAckProperties: packet.ConnAckProperties{
+				RecieveMaximum: packet.RecieveMaximum{
+					RecieveMaximumID:    33,
+					RecieveMaximumValue: 10,
+				},
+			},
+		},
 	}
 
 	// Only open Back-channel after conn packet was received

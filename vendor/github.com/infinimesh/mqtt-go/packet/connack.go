@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 Infinite Devices GmbH
+// Copyright 2018 infinimesh, INC
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,17 @@
 package packet
 
 import (
+	"encoding/binary"
 	"io"
 )
+
+type RecieveMaximum struct {
+	RecieveMaximumID    int
+	RecieveMaximumValue uint16
+}
+type ConnAckProperties struct {
+	RecieveMaximum RecieveMaximum
+}
 
 type ConnAckControlPacket struct {
 	FixedHeader    FixedHeader
@@ -27,12 +36,13 @@ type ConnAckControlPacket struct {
 }
 
 type ConnAckVariableHeader struct {
-	SessionPresent bool
-	ReturnCode     byte
+	SessionPresent    bool
+	ReasonCode        byte
+	ConnAckProperties ConnAckProperties
 }
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
-	p.FixedHeader.RemainingLength = 2
+	p.FixedHeader.RemainingLength = 5
 	var nWritten int64
 	nWritten, err = p.FixedHeader.WriteTo(w)
 	n += nWritten
@@ -46,13 +56,19 @@ func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 
 func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	buf := make([]byte, 2)
-
-	buf[1] = c.ReturnCode
+	buf[1] = c.ReasonCode
 
 	bytesWritten, err := w.Write(buf)
 	n += int64(bytesWritten)
 	if err != nil {
 		return
 	}
+	buf = make([]byte, 1)
+	buf[0] = byte(c.ConnAckProperties.RecieveMaximum.RecieveMaximumID)
+	bytesWritten, err = w.Write(buf)
+
+	buf = make([]byte, 2)
+	binary.BigEndian.PutUint16(buf, c.ConnAckProperties.RecieveMaximum.RecieveMaximumValue)
+	bytesWritten, err = w.Write(buf)
 	return
 }
