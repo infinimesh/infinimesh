@@ -18,22 +18,16 @@
 package packet
 
 import (
+	"encoding/binary"
 	"io"
 )
 
-type MaximumPacketSize struct {
-	MaximumPacketSizeID    int
-	MaximumPacketSizeValue uint64
-}
 type RecieveMaximum struct {
 	RecieveMaximumID    int
 	RecieveMaximumValue uint16
 }
-
 type ConnAckProperties struct {
-	PropertiesLength  int
-	RecieveMaximum    RecieveMaximum
-	MaximumPacketSize MaximumPacketSize
+	RecieveMaximum RecieveMaximum
 }
 
 type ConnAckControlPacket struct {
@@ -55,11 +49,6 @@ func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return n, err
 	}
-
-	p.VariableHeader.ConnAckProperties.PropertiesLength = 3
-	p.VariableHeader.ConnAckProperties.RecieveMaximum.RecieveMaximumID = RECIEVE_MAXIMUM_ID
-	p.VariableHeader.ConnAckProperties.RecieveMaximum.RecieveMaximumValue = 30
-
 	nWritten, err = p.VariableHeader.WriteTo(w)
 	n += nWritten
 	return n, err
@@ -74,6 +63,12 @@ func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return
 	}
+	buf = make([]byte, 1)
+	buf[0] = byte(c.ConnAckProperties.RecieveMaximum.RecieveMaximumID)
+	bytesWritten, err = w.Write(buf)
 
+	buf = make([]byte, 2)
+	binary.BigEndian.PutUint16(buf, c.ConnAckProperties.RecieveMaximum.RecieveMaximumValue)
+	bytesWritten, err = w.Write(buf)
 	return
 }
