@@ -24,11 +24,18 @@ import (
 	"io"
 )
 
+const (
+	RecieveMaximumID      = 33
+	MaximumPacketSizeID   = 39
+	TopicAliasMaximumID   = 34
+	RequestResponseInfoID = 25
+	RequestProblemInfoID  = 23
+)
+
 type ConnectProperties struct {
 	PropertyLength         int //variable header properties length
 	RecieveMaximumValue    int //limits the number of QoS 1 and QoS 2 Pub at Client - default 65,535
 	MaximumPacketSize      int //represents max packet size client accepts
-	SessionExpiryInterval  int //sesion expiry interval
 	TopicAliasMaximumValue int //max num of topic alias accepted by client
 	RequestResponseInfo    int //0 = no response info in CONNACK
 	RequestProblemInfo     int //0 = no reason string in CONNACK
@@ -146,50 +153,12 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 
 func readConnectProperties(r io.Reader, hdr ConnectVariableHeader) (ConnectVariableHeader, error) {
 	connectProperties := make([]byte, hdr.ConnectProperties.PropertyLength)
-	propertiesLength, err := io.ReadFull(r, connectProperties)
+	n, err := io.ReadFull(r, connectProperties)
 	if err != nil {
 		return hdr, err
 	}
-	if propertiesLength != hdr.ConnectProperties.PropertyLength {
+	if n != hdr.ConnectProperties.PropertyLength {
 		return hdr, errors.New("Connect Properties length incorrect")
-	}
-
-	for propertiesLength > 0 {
-		connectPropertyID := int(connectProperties[0])
-		if connectPropertyID == RECIEVE_MAXIMUM_ID {
-			recieveMaximum := connectProperties[1:RECIEVE_MAXIMUM_LENGTH]
-			hdr.ConnectProperties.RecieveMaximumValue = int(binary.BigEndian.Uint16(recieveMaximum))
-			connectProperties = connectProperties[RECIEVE_MAXIMUM_LENGTH:propertiesLength]
-			propertiesLength -= RECIEVE_MAXIMUM_LENGTH + 1
-		} else if connectPropertyID == MAXIMUM_PACKET_SIZE_ID {
-			maxPacketSize := connectProperties[1:MAXIMUM_PACKET_SIZE_LENGTH]
-			hdr.ConnectProperties.MaximumPacketSize = int(binary.BigEndian.Uint64(maxPacketSize))
-			connectProperties = connectProperties[MAXIMUM_PACKET_SIZE_LENGTH:propertiesLength]
-			propertiesLength -= MAXIMUM_PACKET_SIZE_LENGTH + 1
-		} else if connectPropertyID == SESSION_EXPIRY_INTERVAL_ID {
-			SessionExpiryInterval := connectProperties[1:SESSION_EXPIRY_INTERVAL_LENGTH]
-			hdr.ConnectProperties.SessionExpiryInterval = int(binary.BigEndian.Uint64(SessionExpiryInterval))
-			connectProperties = connectProperties[SESSION_EXPIRY_INTERVAL_LENGTH:propertiesLength]
-			propertiesLength -= SESSION_EXPIRY_INTERVAL_LENGTH + 1
-		} else if connectPropertyID == TOPIC_ALIAS_MAXIMUM_ID {
-			topicAliasMaximum := connectProperties[1:TOPIC_ALIAS_MAXIMUM_LENGTH]
-			hdr.ConnectProperties.TopicAliasMaximumValue = int(binary.BigEndian.Uint16(topicAliasMaximum))
-			connectProperties = connectProperties[TOPIC_ALIAS_MAXIMUM_LENGTH:propertiesLength]
-			propertiesLength -= TOPIC_ALIAS_MAXIMUM_LENGTH + 1
-		} else if connectPropertyID == REQUEST_RESPONSE_INFORMATION_ID {
-			resquestResponseInfo := connectProperties[1:REQUEST_RESPONSE_INFORMATION_LENGTH]
-			hdr.ConnectProperties.RequestResponseInfo = int(resquestResponseInfo[0])
-			connectProperties = connectProperties[REQUEST_RESPONSE_INFORMATION_LENGTH:propertiesLength]
-			propertiesLength -= REQUEST_RESPONSE_INFORMATION_LENGTH + 1
-		} else if connectPropertyID == REQUEST_PROBLEM_INFORMATION_ID {
-			resquestResponseInfo := connectProperties[1:REQUEST_PROBLEM_INFORMATION_LENGTH]
-			hdr.ConnectProperties.RequestResponseInfo = int(resquestResponseInfo[0])
-			connectProperties = connectProperties[REQUEST_PROBLEM_INFORMATION_LENGTH:propertiesLength]
-			propertiesLength -= REQUEST_PROBLEM_INFORMATION_LENGTH + 1
-		} else {
-			fmt.Printf("%v Connect Property is not supported yet..", connectProperties[0])
-			break
-		}
 	}
 	return hdr, nil
 }
