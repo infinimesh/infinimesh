@@ -3,7 +3,7 @@
     <a-layout-header class="wide-header">
       <Header />
     </a-layout-header>
-    <a-layout>
+    <a-layout class="layout-content">
       <a-layout-sider
         v-model="menu_collapsed"
         :style="{
@@ -73,7 +73,11 @@ export default {
 <style>
 .wide-header {
   padding: 0 !important;
+  position: fixed;
+  z-index: 1;
+  width: 100%;
 }
+
 #footer {
   margin-top: 15rem;
   position: fixed;
@@ -81,5 +85,10 @@ export default {
   bottom: 0;
   width: 100%;
   text-align: center;
+}
+</style>
+<style lang="less" scoped>
+.layout-content {
+  margin-top: @layout-header-height;
 }
 </style>
