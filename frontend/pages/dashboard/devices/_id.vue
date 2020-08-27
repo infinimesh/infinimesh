@@ -247,7 +247,7 @@ export default {
         .catch(e => {
           this.$notification.error({
             message: "Error deleting device",
-            description: e.response.data,
+            description: e.response.data.message,
             placement: "bottomRight"
           });
         });
