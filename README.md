@@ -2,7 +2,7 @@
 Infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-Infinimesh is always under development - we never stop to make the IoT platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/InfiniteDevices/infinimesh/tree/infinidev), there is the place all magic is happen - with unexpected results.
+Infinimesh is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/InfiniteDevices/infinimesh/tree/infinidev), there is the place all magic is happen - with unexpected results.
 All development is open source and completely transparent on GitHub. APIs are alpha and may change at any time. Many components modern IoT cloud provider won't have yet are already available: 
 **MQTT Bridge**, **State management (digital twin)**, **Graph-based permission management (multi-dimensional permissons at data layer)** and **Device-to-Cloud and Cloud-to-Device messages**. 
 
