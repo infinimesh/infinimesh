@@ -193,7 +193,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		access(func: uid($user_id)) @cascade {
 		  name
 		  uid
-		  access.to.namespace @filter(uid($namespaceid)) {
+		  access.to.namespace @filter(uid($namespaceid)) @facets(NOT eq(permission,NONE)) {
 			uid
 			name
 			type
