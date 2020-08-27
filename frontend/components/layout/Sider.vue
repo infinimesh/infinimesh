@@ -30,9 +30,9 @@ export default {
       },
       set(val) {
         this.$router.push({ name: val[0] });
-      },
-    },
-  },
+      }
+    }
+  }
 };
 </script>
 

@@ -1,0 +1,97 @@
+@import "~ant-design-vue/dist/antd.less";
+
+// Basic variables section
+
+// @primary-color: #673ab7;
+// @primary-color-dark: #4e219e;
+// @line-color: white
+
+@primary-color: #104e83;
+@primary-color-dark: white;
+@line-color: @primary-color;
+
+// Basic style definition
+@component-background: @primary-color;
+@body-background: @primary-color-dark;
+@icon-color: @primary-color-dark;
+@icon-color-dark: @line-color;
+@tag-default-bg: transparent;
+@border-base: 1px dashed @line-color;
+
+// Font style
+@text-color: white;
+@heading-color: white;
+@font-size-xl: 25px;
+@font-weight-default: 500;
+@font-family-default: Exo;
+
+// Borders styles
+@border-muted: solid 1px rgba(255, 255, 255, 0.5) !important;
+@shadow-color: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+@border-color-split: @primary-color-dark;
+@border-radius-base: 0.5rem;
+@border-radius-sm: 0.5rem;
+@border-color-base: white;
+
+// AntDesign Button styles
+@success-color: #52c41a;
+@switch-color: #5d8eb7;
+@btn-default-border: white;
+@btn-group-border: white;
+
+// AntDesign Card styles
+@card-shadow: 0 8px 20px 0 rgba(40, 37, 89, 0.6);
+@card-head-color: white;
+@item-active-bg: tint(@primary-color, 10%);
+@item-hover-bg: tint(@primary-color, 20%);
+@select-item-selected-bg: tint(@primary-color, 10%);
+@menu-bg: @component-background;
+@menu-item-font-size: 1rem;
+
+// AntDesign Menu styles
+@menu-item-color: @text-color;
+@menu-icon-size: 25px;
+@menu-icon-size-lg: 30px;
+@menu-highlight-color: white;
+@menu-item-active-bg: tint(@primary-color, 10%);
+
+// AntDesign Link styles
+@link-hover-color: @primary-color;
+@link-color: white;
+
+// AntDesign Layouts styles
+@layout-header-background: @component-background;
+@layout-body-background: @body-background;
+@layout-footer-background: @body-background;
+
+// AntDesign Classes Overloads
+.ant-btn-primary {
+  border-color: @btn-default-border!important;
+}
+
+.ant-btn-success {
+  background-color: @success-color!important;
+  border-color: transparent !important;
+}
+
+.ant-popover-inner {
+  border: @border-muted;
+  box-shadow: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ant-popover-arrow {
+  border-right: @border-muted;
+  border-bottom: @border-muted;
+  box-shadow: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ant-drawer-title {
+  font-size: @font-size-xl !important;
+  font-family: @font-family-default !important;
+  font-weight: @font-weight-default !important;
+}
+
+// Custom tags
+strong {
+  color: #d1d1ff;
+}

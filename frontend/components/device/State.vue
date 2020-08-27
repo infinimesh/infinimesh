@@ -142,7 +142,7 @@ pre {
   width: 95%;
 }
 textarea {
-  background: @infinimesh-dark-purple;
+  background: @primary-color-dark;
   width: 95%;
   font-family: monospace, monospace;
 }

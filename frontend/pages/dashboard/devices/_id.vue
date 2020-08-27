@@ -251,10 +251,6 @@ export default {
   font-family: Exo;
   font-weight: 500;
 }
-.lead {
-  font-size: 2rem;
-  color: #fff;
-}
 .muted {
   opacity: 0.7;
 }
@@ -276,5 +272,12 @@ export default {
 
 .ant-card + .ant-card {
   margin-top: 1rem;
+}
+</style>
+
+<style lang="less" scoped>
+.lead {
+  font-size: 2rem;
+  color: @line-color;
 }
 </style>

@@ -31,8 +31,15 @@
               @add="handleDeviceAdd"
             />
           </a-row>
-          <nuxt-link v-else :to="{ name: 'dashboard-devices-id', params: { id: device.id } }">
-            <a-card :hoverable="true" :bordered="false" :ref="`device-card-${device.id}`">
+          <nuxt-link
+            v-else
+            :to="{ name: 'dashboard-devices-id', params: { id: device.id } }"
+          >
+            <a-card
+              :hoverable="true"
+              :bordered="false"
+              :ref="`device-card-${device.id}`"
+            >
               <template slot="title">{{ device.name }}</template>
               <template slot="extra">
                 <b class="muted">{{ device.id }}</b>
@@ -54,7 +61,9 @@
                   Tags:
                   <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
                 </a-row>
-                <a-row v-else type="flex" justify="center" class="muted">No tags were provided</a-row>
+                <a-row v-else type="flex" justify="center" class="muted"
+                  >No tags were provided</a-row
+                >
               </template>
             </a-card>
           </nuxt-link>
@@ -70,11 +79,11 @@ import DeviceAdd from "@/components/device/Add.vue";
 export default {
   name: "devicesTable",
   components: {
-    DeviceAdd,
+    DeviceAdd
   },
   data() {
     return {
-      addDeviceActive: false,
+      addDeviceActive: false
     };
   },
   computed: {
@@ -82,7 +91,7 @@ export default {
       deep: true,
       get() {
         return this.$store.state.devices.pool;
-      },
+      }
     },
     poolCols: {
       deep: true,
@@ -130,11 +139,11 @@ export default {
           i += div - 1;
         }
         return res;
-      },
+      }
     },
     deviceCreateFormStyle() {
       return {
-        "--device-card-height": this.deviceCardHeight,
+        "--device-card-height": this.deviceCardHeight
       };
     },
     deviceCardHeight: {
@@ -148,30 +157,30 @@ export default {
         } else {
           return "8rem";
         }
-      },
+      }
     },
     gridSize() {
       return this.$store.state.window.gridSize;
-    },
+    }
   },
   methods: {
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
-        error: (err) => {
+        error: err => {
           this.$notification.error({
             message: "Failed to create the device",
             description: `Response: ${err.response.data.message}`,
             placement: "bottomRight",
-            duration: 10,
+            duration: 10
           });
         },
         always: () => {
           this.addDeviceActive = false;
-        },
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -182,13 +191,16 @@ export default {
 </style>
 <style lang="less" scoped>
 .muted {
-  color: @infinimesh-dark-purple;
+  color: @primary-color-dark;
 }
 .create-form {
   border-radius: @border-radius-base;
-  background: @infinimesh-dark-purple;
-  border: 1px dashed white;
+  background: @primary-color-dark;
+  border: @border-base;
   min-height: var(--device-card-height);
   cursor: pointer;
+}
+.create-form .anticon {
+  color: @icon-color-dark;
 }
 </style>

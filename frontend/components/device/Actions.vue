@@ -18,3 +18,9 @@ import Vue from "vue";
 
 export default Vue.component("device-actions", {});
 </script>
+
+<style lang="less" scoped>
+.anticon {
+  color: @icon-color-dark;
+}
+</style>
