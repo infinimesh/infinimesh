@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 Infinite Devices GmbH
+// Copyright 2018 infinimesh, INC
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,24 +21,45 @@ import (
 	"io"
 )
 
+type MaximumPacketSize struct {
+	MaximumPacketSizeID    int
+	MaximumPacketSizeValue uint64
+}
+type RecieveMaximum struct {
+	RecieveMaximumID    int
+	RecieveMaximumValue uint16
+}
+
+type ConnAckProperties struct {
+	PropertiesLength  int
+	RecieveMaximum    RecieveMaximum
+	MaximumPacketSize MaximumPacketSize
+}
+
 type ConnAckControlPacket struct {
 	FixedHeader    FixedHeader
 	VariableHeader ConnAckVariableHeader
 }
 
 type ConnAckVariableHeader struct {
-	SessionPresent bool
-	ReturnCode     byte
+	SessionPresent    bool
+	ReasonCode        byte
+	ConnAckProperties ConnAckProperties
 }
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
-	p.FixedHeader.RemainingLength = 2
+	p.FixedHeader.RemainingLength = 5
 	var nWritten int64
 	nWritten, err = p.FixedHeader.WriteTo(w)
 	n += nWritten
 	if err != nil {
 		return n, err
 	}
+
+	p.VariableHeader.ConnAckProperties.PropertiesLength = 3
+	p.VariableHeader.ConnAckProperties.RecieveMaximum.RecieveMaximumID = RECIEVE_MAXIMUM_ID
+	p.VariableHeader.ConnAckProperties.RecieveMaximum.RecieveMaximumValue = 30
+
 	nWritten, err = p.VariableHeader.WriteTo(w)
 	n += nWritten
 	return n, err
@@ -46,13 +67,13 @@ func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 
 func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	buf := make([]byte, 2)
-
-	buf[1] = c.ReturnCode
+	buf[1] = c.ReasonCode
 
 	bytesWritten, err := w.Write(buf)
 	n += int64(bytesWritten)
 	if err != nil {
 		return
 	}
+
 	return
 }

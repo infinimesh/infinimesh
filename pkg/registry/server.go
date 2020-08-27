@@ -84,7 +84,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	txn := s.dgo.NewTxn()
 	defer txn.Discard(ctx) // nolint
 	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
-		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
+		return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
 	}
 
 	ns, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
@@ -93,17 +93,17 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}
 
 	if request.Device.Certificate == nil {
-		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
+		return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
 	}
 
 	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
+		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
 	}
 
 	//To check if the fingerprint already exists, in this case creating new device is not permissible
 	if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
-		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists")
+		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
 	}
 
 	var enabled bool
@@ -218,7 +218,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		switch field {
 		// Certificates can't be updated at this time
 		case "Enabled":
-			d.Enabled = request.Device.Enabled.GetValue()
+			d.Enabled = request.Device.GetEnabled().Value
 		case "Tags":
 			d.Tags = request.Device.Tags
 		}
