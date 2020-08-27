@@ -188,8 +188,14 @@ export default {
             description: "Redirecting...",
             placement: "bottomRight"
           });
-          this.$router.push({ name: "dashboard-devices" });
+        } else if (res.response.status == 403) {
+          this.$notification.error({
+            message: "You have no access to this device",
+            description: "Redirecting...",
+            placement: "bottomRight"
+          });
         }
+        this.$router.push({ name: "dashboard-devices" });
       });
     this.deviceStateGet();
   },
