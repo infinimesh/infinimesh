@@ -53,6 +53,20 @@ const (
 	PINGRESP    = 13
 	DISCONNECT  = 14
 )
+const (
+	SESSION_EXPIRY_INTERVAL_ID          = 17
+	SESSION_EXPIRY_INTERVAL_LENGTH      = 4
+	RECIEVE_MAXIMUM_ID                  = 33
+	RECIEVE_MAXIMUM_LENGTH              = 2
+	MAXIMUM_PACKET_SIZE_ID              = 39
+	MAXIMUM_PACKET_SIZE_LENGTH          = 4
+	TOPIC_ALIAS_MAXIMUM_ID              = 34
+	TOPIC_ALIAS_MAXIMUM_LENGTH          = 2
+	REQUEST_RESPONSE_INFORMATION_ID     = 25
+	REQUEST_RESPONSE_INFORMATION_LENGTH = 1
+	REQUEST_PROBLEM_INFORMATION_ID      = 23
+	REQUEST_PROBLEM_INFORMATION_LENGTH  = 1
+)
 
 // FixedHeader is contained in every packet (thus, fixed). It consists of the
 // Packet Type, Packet-specific Flags and the length of the rest of the message.
