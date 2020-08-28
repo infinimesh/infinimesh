@@ -130,12 +130,13 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 		Action:    nodepb.Action_READ,
 	})
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
+		return nil, status.Error(codes.PermissionDenied, "Could not get permission to list device.")
 	}
 	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device.")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to list device.")
 	}
 
+	//List the devices if the user has access
 	list, err := d.client.ListForAccount(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace, Account: account})
 	return list, err
 }
