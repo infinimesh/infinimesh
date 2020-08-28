@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/dgraph-io/dgo/protos/api"
 
@@ -193,7 +194,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		access(func: uid($user_id)) @cascade {
 		  name
 		  uid
-		  access.to.namespace @filter(uid($namespaceid)) @facets(NOT eq(permission,NONE)) {
+		  access.to.namespace @filter(uid($namespaceid)) @facets(permission) {
 			uid
 			name
 			type
@@ -213,6 +214,14 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	err = json.Unmarshal(res.Json, &access)
 	if err != nil {
 		return false, err
+	}
+
+	actionValue := strings.Split(action.String(), "_")
+
+	if len(access.Access) > 0 {
+		if isPermissionSufficient(actionValue[1], access.Access[0].AccessToPermission) {
+			return true, nil
+		}
 	}
 
 	return len(access.Access) > 0, nil
