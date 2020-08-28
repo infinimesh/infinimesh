@@ -194,7 +194,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		access(func: uid($user_id)) @cascade {
 		  name
 		  uid
-		  access.to.namespace @filter(uid($namespaceid)) @facets(permission) {
+		  access.to.namespace @filter(uid($namespaceid)) @facets(permission,inherit) {
 			uid
 			name
 			type
@@ -208,7 +208,8 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		return false, err
 	}
 	var access struct {
-		Access []Object `json:"access"`
+		Access             []Object `json:"access"`
+		AccessToPermission string   `json:"access.to.namespace|permission,omitempty"`
 	}
 
 	err = json.Unmarshal(res.Json, &access)
@@ -219,10 +220,10 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	actionValue := strings.Split(action.String(), "_")
 
 	if len(access.Access) > 0 {
-		if isPermissionSufficient(actionValue[1], access.Access[0].AccessToPermission) {
+		if isPermissionSufficient(actionValue[0], access.AccessToPermission) {
 			return true, nil
 		}
 	}
 
-	return len(access.Access) > 0, nil
+	return false, nil
 }
