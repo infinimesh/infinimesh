@@ -136,7 +136,7 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 		return &apipb.CreateNamespacePermissionResponse{}, nil
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 }
 
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
@@ -158,7 +158,7 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 		return n.client.ListPermissions(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 
 }
 
@@ -181,6 +181,6 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 		return n.client.DeletePermission(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 
 }

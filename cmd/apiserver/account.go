@@ -59,7 +59,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	}); err == nil && res.GetIsRoot() {
 		return a.client.GetAccount(ctx, request)
 	}
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to get details.")
 
 }
 
@@ -121,7 +121,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to update details.")
 }
 
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
@@ -137,7 +137,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 		return res, err
 	}
 
-	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "The account does not have permission to create another account.")
 }
 
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
@@ -153,6 +153,6 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return res, err
 	}
 
-	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The account does not have permission to list details.")
 
 }

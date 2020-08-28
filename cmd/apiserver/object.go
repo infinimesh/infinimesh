@@ -40,7 +40,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 	}
 
 	if request.Object == nil || request.Object.Name == "" {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid object given")
+		return nil, status.Error(codes.FailedPrecondition, "Invalid object given.")
 	}
 
 	// If a parent is given, we need permission on the parent. otherwise, we need permission on the namespace as it's created without a parent
@@ -71,7 +71,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 	}
 
 	if !authorized {
-		return nil, status.Error(codes.PermissionDenied, "No permission to create object")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create object.")
 	}
 
 	return o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
@@ -110,7 +110,7 @@ func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObje
 	}
 
 	if !resp.Decision.GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to access resource.")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to access the resource.")
 	}
 
 	return o.objectClient.DeleteObject(ctx, request)
