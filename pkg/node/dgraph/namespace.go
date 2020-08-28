@@ -142,13 +142,13 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
-                     namespaces(func: uid($account)) @normalize @cascade  {
-                       access.to.namespace @filter(eq(type, "namespace")) {
-                         uid : uid
-                         name : name
-                       }
-	             }
-                   }`
+		namespaces(func: uid($account)) @normalize @cascade  {
+		  access.to.namespace @filter(eq(type, "namespace")) @facets(NOT eq(permission,"NONE")) {
+			uid : uid
+			name : name
+		  }
+		}
+	  }`
 
 	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
 	if err != nil {
