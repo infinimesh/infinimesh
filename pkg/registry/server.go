@@ -250,7 +250,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			d.Tags = request.Device.Tags
 		case "Name":
 			d.Name = request.Device.Name
-		case "Certificates":
+		case "Certificate":
 			d.Certificates[0].PemData = request.Device.Certificate.PemData
 			d.Certificates[0].Algorithm = request.Device.Certificate.Algorithm
 			d.Certificates[0].Fingerprint = request.Device.Certificate.Fingerprint
