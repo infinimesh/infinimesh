@@ -81,7 +81,10 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 		if err != nil {
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
-		return &nodepb.Namespace{}, nil
+		return &nodepb.Namespace{
+			Id:   ns.Id,
+			Name: ns.Name,
+		}, nil
 
 	}
 	return nil, status.Error(codes.PermissionDenied, "Account is not root")
