@@ -181,11 +181,24 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	txn := s.dgo.NewTxn()
 
-	const q = `query devices($id: string)  {
-                     devices(func: uid($id)) @filter(eq(kind, "device")) {
-                       uid
-                     }
-                   }`
+	const q = `query devices($id: string){
+		device(func: uid($id)) @filter(eq(kind, "device")) {
+		  uid
+		  name
+		  ~owns {
+			uid
+		  }
+		  tags
+		  enabled
+		  certificates {
+			uid
+			pem_data
+			algorithm
+			fingerprint
+			fingerprint.algorithm
+		  }
+		}
+	  }`
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
 		"$id": request.Device.Id,
@@ -195,7 +208,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	}
 
 	var result struct {
-		Devices []dgraph.Node `json:"devices"`
+		Devices []Device `json:"devices"`
 	}
 
 	err = json.Unmarshal(resp.Json, &result)
@@ -212,15 +225,44 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			Node: dgraph.Node{
 				UID: result.Devices[0].UID,
 			},
+			Name:    result.Devices[0].Name,
+			OwnedBy: result.Devices[0].OwnedBy,
+		},
+		Enabled: result.Devices[0].Enabled,
+		Tags:    result.Devices[0].Tags,
+		Certificates: []*X509Cert{
+			&X509Cert{
+				PemData:              result.Devices[0].Certificates[0].PemData,
+				Algorithm:            result.Devices[0].Certificates[0].Algorithm,
+				Fingerprint:          result.Devices[0].Certificates[0].Fingerprint,
+				FingerprintAlgorithm: result.Devices[0].Certificates[0].FingerprintAlgorithm,
+			},
 		},
 	}
+
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
-		// Certificates can't be updated at this time
+
+		//Update the device details
 		case "Enabled":
 			d.Enabled = request.Device.GetEnabled().Value
 		case "Tags":
 			d.Tags = request.Device.Tags
+		case "Name":
+			d.Name = request.Device.Name
+		case "Certificates":
+			d.Certificates[0].PemData = request.Device.Certificate.PemData
+			d.Certificates[0].Algorithm = request.Device.Certificate.Algorithm
+			d.Certificates[0].Fingerprint = request.Device.Certificate.Fingerprint
+			d.Certificates[0].FingerprintAlgorithm = request.Device.Certificate.FingerprintAlgorithm
+		case "Namespace":
+			d.OwnedBy = []*dgraph.Namespace{
+				&dgraph.Namespace{
+					Node: dgraph.Node{
+						UID: request.Device.Namespace,
+					},
+				},
+			}
 		}
 	}
 
