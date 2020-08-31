@@ -181,6 +181,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	txn := s.dgo.NewTxn()
 
+	//Query to get the device details from the Dgraph DB
 	const q = `query devices($id: string){
 		device(func: uid($id)) @filter(eq(kind, "device")) {
 		  uid
@@ -200,6 +201,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		}
 	  }`
 
+	//Execute the Query to get device details
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
 		"$id": request.Device.Id,
 	})
@@ -240,6 +242,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		},
 	}
 
+	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
 
