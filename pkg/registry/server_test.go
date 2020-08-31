@@ -169,6 +169,68 @@ func TestCreateGet(t *testing.T) {
 	})
 }
 
+func TestUpdate(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := "testflight"
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	// Create the device
+	request := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName, ns.Id),
+	}
+	response, err := server.Create(context.Background(), request)
+	require.NoError(t, err)
+	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
+
+	// Get the device
+	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
+		Id: response.Device.Id,
+	})
+
+	//Validate the device
+	require.NoError(t, err)
+	require.NotNil(t, respGet.Device)
+	require.EqualValues(t, randomName, respGet.Device.Name)
+	require.EqualValues(t, request.Device.Certificate.PemData, respGet.Device.Certificate.PemData)
+	require.EqualValues(t, request.Device.Certificate.Algorithm, respGet.Device.Certificate.Algorithm)
+
+	// Get by fingerprint
+	respFP, err := server.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+		Fingerprint: response.Device.Certificate.Fingerprint,
+	})
+	require.NoError(t, err)
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
+
+	//Set new values
+	randomName = "Ankit"
+
+	//Update the device
+	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
+		Device: &registrypb.Device{
+			Id:   response.Device.Id,
+			Name: randomName,
+		},
+	})
+	require.NoError(t, err)
+
+	// Get the updated device details
+	respGet, err = server.Get(context.Background(), &registrypb.GetRequest{
+		Id: response.Device.Id,
+	})
+	require.NoError(t, err)
+
+	//Validate the updated device
+	require.NoError(t, err)
+	require.EqualValues(t, randomName, respGet.Device.Name)
+
+	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+		Id: response.Device.Id,
+	})
+}
+
 func TestDelete(t *testing.T) {
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
