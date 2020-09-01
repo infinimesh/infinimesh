@@ -169,7 +169,6 @@ func TestCreateGet(t *testing.T) {
 	})
 }
 
-/*
 func TestUpdate(t *testing.T) {
 	ctx := context.Background()
 
@@ -231,7 +230,6 @@ func TestUpdate(t *testing.T) {
 		Id: response.Device.Id,
 	})
 }
-*/
 
 func TestDelete(t *testing.T) {
 	request := &registrypb.CreateRequest{

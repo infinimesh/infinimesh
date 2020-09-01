@@ -210,7 +210,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	}
 
 	var result struct {
-		Devices []Device `json:"devices"`
+		Devices []Device `json:"device"`
 	}
 
 	err = json.Unmarshal(resp.Json, &result)
@@ -227,8 +227,8 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			Node: dgraph.Node{
 				UID: result.Devices[0].UID,
 			},
-			Name:    result.Devices[0].Name,
-			OwnedBy: result.Devices[0].OwnedBy,
+			Name: result.Devices[0].Name,
+			//OwnedBy: result.Devices[0].OwnedBy,
 		},
 		Enabled: result.Devices[0].Enabled,
 		Tags:    result.Devices[0].Tags,
@@ -273,6 +273,8 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
+
+	//fmt.Printf(string(js))
 
 	_, err = txn.Mutate(ctx, &api.Mutation{
 		SetJson:   js,
