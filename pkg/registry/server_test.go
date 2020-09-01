@@ -209,16 +209,22 @@ func TestUpdate(t *testing.T) {
 	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
 
 	//Set new values
-	randomName = "NewName"
+	NewName := "NewName"
+	var NewStatus *wrappers.BoolValue
+	NewTag := []string{"d"}
+	NewNamespace := "0x138f0"
 
 	//Update the device
 	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
 		Device: &registrypb.Device{
-			Id:   response.Device.Id,
-			Name: randomName,
+			Id:        response.Device.Id,
+			Name:      NewName,
+			Enabled:   NewStatus,
+			Tags:      NewTag,
+			Namespace: NewNamespace,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name"},
+			Paths: []string{"Name", "Tags", "Namespace"},
 		},
 	})
 	require.NoError(t, err)
@@ -231,7 +237,8 @@ func TestUpdate(t *testing.T) {
 
 	//Validate the updated device
 	require.NoError(t, err)
-	require.EqualValues(t, randomName, respGet.Device.Name)
+	require.EqualValues(t, NewName, respGet.Device.Name)
+	require.EqualValues(t, []string{"d", "c", "b", "a"}, respGet.Device.Tags)
 
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,

@@ -228,7 +228,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 				UID: result.Devices[0].UID,
 			},
 			Name: result.Devices[0].Name,
-			//OwnedBy: result.Devices[0].OwnedBy,
 		},
 		Enabled: result.Devices[0].Enabled,
 		Tags:    result.Devices[0].Tags,
@@ -242,6 +241,9 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		},
 	}
 
+	var nsMut *api.NQuad
+	fmt.Printf("%+v\n", d)
+
 	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
@@ -252,20 +254,44 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		case "Tags":
 			d.Tags = request.Device.Tags
 		case "Name":
+			if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
+				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
+			}
 			d.Name = request.Device.Name
+		case "Namespace":
+			//Pre-check before updating Namespace Ownership
+			_, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
+			if err != nil {
+				return nil, status.Error(codes.FailedPrecondition, "The Namespace provided is not found.")
+			}
+			//Update the namespace
+			nsMut = &api.NQuad{
+				Subject:   request.Device.Namespace,
+				Predicate: "owns",
+				ObjectId:  request.Device.Id,
+			}
+
 		case "Certificate":
+			//Pre-check for updating certificates
+			if request.Device.Certificate == nil {
+				return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
+			}
+
+			fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
+			if err != nil {
+				return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
+			}
+
+			//To check if the fingerprint already exists, in this case creating new device is not permissible
+			if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
+				return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
+			}
+
+			//update the certificate
 			d.Certificates[0].PemData = request.Device.Certificate.PemData
 			d.Certificates[0].Algorithm = request.Device.Certificate.Algorithm
 			d.Certificates[0].Fingerprint = request.Device.Certificate.Fingerprint
 			d.Certificates[0].FingerprintAlgorithm = request.Device.Certificate.FingerprintAlgorithm
-		case "Namespace":
-			d.OwnedBy = []*dgraph.Namespace{
-				&dgraph.Namespace{
-					Node: dgraph.Node{
-						UID: request.Device.Namespace,
-					},
-				},
-			}
 		}
 	}
 
@@ -274,10 +300,13 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
 
-	//fmt.Printf(string(js))
+	fmt.Printf(string(js))
 
 	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson:   js,
+		SetJson: js,
+		Set: []*api.NQuad{
+			nsMut,
+		},
 		CommitNow: true,
 	})
 	if err != nil {
