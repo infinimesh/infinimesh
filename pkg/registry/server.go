@@ -242,7 +242,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	}
 
 	var nsMut *api.NQuad
-	fmt.Printf("%+v\n", d)
 
 	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
@@ -299,8 +298,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
-
-	fmt.Printf(string(js))
 
 	_, err = txn.Mutate(ctx, &api.Mutation{
 		SetJson: js,
