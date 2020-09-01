@@ -209,10 +209,16 @@ func TestUpdate(t *testing.T) {
 	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
 
 	//Set new values
-	NewName := "NewName"
+	NewName := randomdata.SillyName()
+
+	_, err = server.repo.CreateUserAccount(ctx, NewName, "password", false, true)
+	require.NoError(t, err)
+
+	NewNamespace, err := server.repo.GetNamespace(ctx, NewName)
+	require.NoError(t, err)
+
 	var NewStatus *wrappers.BoolValue
 	NewTag := []string{"d"}
-	NewNamespace := "0x138f0"
 
 	//Update the device
 	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
@@ -221,7 +227,7 @@ func TestUpdate(t *testing.T) {
 			Name:      NewName,
 			Enabled:   NewStatus,
 			Tags:      NewTag,
-			Namespace: NewNamespace,
+			Namespace: NewNamespace.Id,
 		},
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Name", "Tags", "Namespace"},
