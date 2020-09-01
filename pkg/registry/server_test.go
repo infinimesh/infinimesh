@@ -172,7 +172,10 @@ func TestCreateGet(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	ctx := context.Background()
 
-	randomName := "testflight"
+	randomName := randomdata.SillyName()
+
+	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
