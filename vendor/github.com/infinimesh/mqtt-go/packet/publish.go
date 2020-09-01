@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh, INC
+// Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,13 +24,6 @@ import (
 	"io"
 )
 
-type PublishProperties struct {
-	PropertyLength        int    //1 byte
-	MessageExpiryInterval int    //4 bytes
-	TopicAlias            int    //2 byte
-	ResponseTopic         string //
-	CorrelationData       string
-}
 type PublishControlPacket struct {
 	FixedHeader      FixedHeader
 	FixedHeaderFlags PublishHeaderFlags
@@ -45,9 +38,8 @@ type PublishHeaderFlags struct {
 }
 
 type PublishVariableHeader struct {
-	Topic             string
-	PacketID          int
-	PublishProperties PublishProperties
+	Topic    string
+	PacketID int
 }
 
 func interpretPublishHeaderFlags(header byte) (flags PublishHeaderFlags, err error) {
@@ -90,14 +82,6 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		}
 		len += 2
 	}
-
-	//TODO
-	/*
-		propertyLength := make([]byte,1)
-		n,err = r.Read(propertyLength)
-		if err!=nil{
-		}
-	*/
 
 	return
 }
@@ -160,14 +144,9 @@ func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPa
 		RemainingLength:   0, // will be populated by WriteTo for the moment
 	}
 
-	pb := PublishProperties{
-		PropertyLength: 0,
-	}
-
 	vh := PublishVariableHeader{
-		Topic:             topic,
-		PacketID:          int(packetID),
-		PublishProperties: pb,
+		Topic:    topic,
+		PacketID: int(packetID),
 	}
 
 	flags := PublishHeaderFlags{
@@ -175,6 +154,7 @@ func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPa
 		Dup:    false,        // TODO
 		Retain: false,        // TODO
 	}
+
 	return &PublishControlPacket{
 		FixedHeader:      fh,
 		FixedHeaderFlags: flags,
