@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -91,17 +92,55 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		len += 2
 	}
 
-	//TODO
-	/*
-		propertyLength := make([]byte,1)
-		n,err = r.Read(propertyLength)
-		if err!=nil{
-		}
-	*/
+	propertyLength := make([]byte, 1)
+	n, err = r.Read(propertyLength)
+	len += n
+	if err != nil {
+		return
+	}
+	vh.PublishProperties.PropertyLength = int(propertyLength[0])
+	if vh.PublishProperties.PropertyLength < 1 {
+		fmt.Printf("No optional publish properties added")
+	} else {
+		len += vh.PublishProperties.PropertyLength
+		vh, _ = readPublishProperties(r, vh)
+	}
 
 	return
 }
 
+func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariableHeader, error) {
+	publishProperties := make([]byte, vh.PublishProperties.PropertyLength)
+	propertiesLength, err := io.ReadFull(r, publishProperties)
+	if err != nil {
+		return vh, err
+	}
+	if propertiesLength != vh.PublishProperties.PropertyLength {
+		return vh, errors.New("Connect Properties length incorrect")
+	}
+	for propertiesLength > 1 {
+		publishPropertyID := int(publishProperties[0])
+		if publishPropertyID == TOPIC_ALIAS_ID {
+			topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
+			vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
+			propertiesLength -= TOPIC_ALIAS_LENGTH + 1
+		}
+		if publishPropertyID == MESSAGE_EXPIRY_INTERVAL_ID {
+			messageExpiryInterval := publishProperties[1 : MESSAGE_EXPIRY_INTERVAL_LENGTH+1]
+			vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
+			propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
+		}
+		if publishPropertyID == RESPONSE_TOPIC_ID {
+			responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
+			vh.PublishProperties.ResponseTopic = string(responseTopic)
+			propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
+		} else {
+			fmt.Printf("%v Connect Property is not supported yet..", publishProperties[0])
+			propertiesLength = 0
+		}
+	}
+	return vh, nil
+}
 func readPublishPayload(r io.Reader, len int) (buf []byte, err error) {
 	buf = make([]byte, len)
 	_, err = io.ReadFull(r, buf)
