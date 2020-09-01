@@ -390,7 +390,6 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 		}
 
 	}
-	fmt.Println("publish handled")
 	return nil
 }
 
@@ -411,6 +410,5 @@ func publishTelemetry(topic string, data []byte, deviceID string) error {
 		Key:   sarama.StringEncoder(deviceID), // TODO
 		Value: sarama.ByteEncoder(serialized),
 	}
-	fmt.Println("Publish Telemetry returned successfully")
 	return nil
 }
