@@ -241,8 +241,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		},
 	}
 
-	var nsMut *api.NQuad
-
 	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
@@ -257,19 +255,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
 			}
 			d.Name = request.Device.Name
-		case "Namespace":
-			//Pre-check before updating Namespace Ownership
-			_, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
-			if err != nil {
-				return nil, status.Error(codes.FailedPrecondition, "The Namespace provided is not found.")
-			}
-			//Update the namespace
-			nsMut = &api.NQuad{
-				Subject:   request.Device.Namespace,
-				Predicate: "owns",
-				ObjectId:  request.Device.Id,
-			}
-
 		case "Certificate":
 			//Pre-check for updating certificates
 			if request.Device.Certificate == nil {
@@ -300,10 +285,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	}
 
 	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson: js,
-		Set: []*api.NQuad{
-			nsMut,
-		},
+		SetJson:   js,
 		CommitNow: true,
 	})
 	if err != nil {
