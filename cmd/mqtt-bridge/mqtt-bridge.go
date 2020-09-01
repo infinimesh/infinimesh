@@ -379,6 +379,9 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) error {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
+	if p.VariableHeader.PublishProperties.TopicAlias != 0 {
+	}
+	fmt.Printf("Publish Telemetry parameters : %v, %v and %v", p.VariableHeader.Topic, p.Payload, deviceID)
 	if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
 		return err
 	}
