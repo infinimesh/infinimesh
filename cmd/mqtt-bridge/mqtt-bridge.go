@@ -410,6 +410,5 @@ func publishTelemetry(topic string, data []byte, deviceID string) error {
 		Key:   sarama.StringEncoder(deviceID), // TODO
 		Value: sarama.ByteEncoder(serialized),
 	}
-	fmt.Println("Publish Telemetry has returned")
 	return nil
 }
