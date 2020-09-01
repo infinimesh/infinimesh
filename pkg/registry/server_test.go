@@ -25,6 +25,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -208,13 +209,16 @@ func TestUpdate(t *testing.T) {
 	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
 
 	//Set new values
-	randomName = "Ankit"
+	randomName = "NewName"
 
 	//Update the device
 	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
 		Device: &registrypb.Device{
 			Id:   response.Device.Id,
 			Name: randomName,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name"},
 		},
 	})
 	require.NoError(t, err)
