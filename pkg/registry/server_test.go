@@ -211,26 +211,19 @@ func TestUpdate(t *testing.T) {
 	//Set new values
 	NewName := randomdata.SillyName()
 
-	_, err = server.repo.CreateUserAccount(ctx, NewName, "password", false, true)
-	require.NoError(t, err)
-
-	NewNamespace, err := server.repo.GetNamespace(ctx, NewName)
-	require.NoError(t, err)
-
 	var NewStatus *wrappers.BoolValue
 	NewTag := []string{"d"}
 
 	//Update the device
 	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
 		Device: &registrypb.Device{
-			Id:        response.Device.Id,
-			Name:      NewName,
-			Enabled:   NewStatus,
-			Tags:      NewTag,
-			Namespace: NewNamespace.Id,
+			Id:      response.Device.Id,
+			Name:    NewName,
+			Enabled: NewStatus,
+			Tags:    NewTag,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "Tags", "Namespace"},
+			Paths: []string{"Name", "Tags"},
 		},
 	})
 	require.NoError(t, err)
