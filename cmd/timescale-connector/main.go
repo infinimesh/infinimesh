@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -70,6 +71,7 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println("Before conneting to timescale db")
 	repo, err := timeseries.NewTimescaleRepo(
 		log.Named("TimescaleRepo"),
 		addr,
@@ -77,7 +79,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	fmt.Println("timescale db conneted")
 	handler := &timeseries.Consumer{
 		Log:  log.Named("Consumer"),
 		Repo: repo,

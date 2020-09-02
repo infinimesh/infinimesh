@@ -141,7 +141,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		}
 
 		target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
-
+		fmt.Printf("telemetry router : %v", target)
 		h.producer.Input() <- &sarama.ProducerMessage{
 			Key:   sarama.StringEncoder(msg.SourceDevice),
 			Topic: target,
