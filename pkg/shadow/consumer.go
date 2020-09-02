@@ -156,6 +156,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		old := string(deviceState.State)
 
 		newState, err := applyDelta(old, delta)
+		fmt.Printf("Consumer newState : %v", newState)
 		if err != nil {
 			fmt.Println("Failed to apply new delta. Ignoring message", err)
 			continue

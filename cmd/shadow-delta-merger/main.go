@@ -112,8 +112,9 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	go func() {
 	outer:
 		for {
-
+			fmt.Printf("group : %v", group)
 			err = group.Consume(ctx, []string{inputTopic}, handler)
+			fmt.Printf("Handler called : %v", inputTopic)
 			if err != nil {
 				panic(err)
 			}
@@ -141,8 +142,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
+	fmt.Printf("closeReported, doneReported: %v,%v", closeReported, doneReported)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
-
+	fmt.Printf("closeReported, doneReported: %v,%v", closeDesired, doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
 	// TODO adjust code to new topology
 

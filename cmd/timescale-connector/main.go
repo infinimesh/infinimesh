@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -74,6 +75,7 @@ func main() {
 		log.Named("TimescaleRepo"),
 		addr,
 	)
+	fmt.Printf("timescale called : %v", repo)
 	if err != nil {
 		panic(err)
 	}
@@ -82,6 +84,7 @@ func main() {
 		Log:  log.Named("Consumer"),
 		Repo: repo,
 	}
+	fmt.Printf("timescale Consumer : %v", handler)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT)
