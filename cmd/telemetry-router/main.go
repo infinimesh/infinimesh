@@ -63,6 +63,7 @@ func main() {
 	config.Version = sarama.V2_0_0_0
 
 	client, err := sarama.NewClient([]string{broker}, config)
+	fmt.Printf("telemetry router client created: %v, %v", client, broker)
 	if err != nil {
 		panic(err)
 	}
@@ -73,6 +74,7 @@ func main() {
 	}
 
 	group, err := sarama.NewConsumerGroupFromClient(consumerGroup, client)
+	fmt.Printf("new consumer group created: %v, %v", client, group)
 	if err != nil {
 		panic(err)
 	}
@@ -99,6 +101,7 @@ func main() {
 		for {
 
 			err = group.Consume(context.Background(), []string{sourceTopic}, handler)
+			fmt.Printf("group to be consumed from %v", []string{sourceTopic})
 			if err != nil {
 				panic(err)
 			}
@@ -134,6 +137,7 @@ func (h *handler) Cleanup(s sarama.ConsumerGroupSession) error {
 
 func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
+		fmt.Println("Consumer claim msgs : ", message)
 		var msg mqtt.IncomingMessage
 		err := json.Unmarshal(message.Value, &msg)
 		if err != nil {
@@ -141,7 +145,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		}
 
 		target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
-
+		fmt.Println("target", target)
 		h.producer.Input() <- &sarama.ProducerMessage{
 			Key:   sarama.StringEncoder(msg.SourceDevice),
 			Topic: target,

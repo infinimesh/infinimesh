@@ -63,6 +63,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	}
 
 	group, err := sarama.NewConsumerGroupFromClient(consumerGroup, client)
+	fmt.Println("Shadow consumer group : %v", group)
 	if err != nil {
 		panic(err)
 	}
@@ -83,6 +84,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	pconfig.Version = sarama.V1_1_0_0
 
 	producerClient, err := sarama.NewClient([]string{broker}, pconfig)
+	fmt.Println("shadow producer client\n", producerClient)
 	if err != nil {
 		panic(err)
 	}
@@ -112,8 +114,9 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	go func() {
 	outer:
 		for {
-
+			fmt.Println("before consume\n")
 			err = group.Consume(ctx, []string{inputTopic}, handler)
+			fmt.Println("after consume shadow\n")
 			if err != nil {
 				panic(err)
 			}
@@ -141,8 +144,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
+	fmt.Println("Run merger shadow 1 completed :", doneReported)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
-
+	fmt.Println("Run merger shadow 2 completed :", doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
 	// TODO adjust code to new topology
 
