@@ -47,7 +47,6 @@ func (h *Consumer) Cleanup(s sarama.ConsumerGroupSession) error {
 
 func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		fmt.Println("message %v", message)
 		if message == nil {
 			break
 		}
