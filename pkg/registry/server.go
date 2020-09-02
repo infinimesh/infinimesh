@@ -233,6 +233,9 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		Tags:    result.Devices[0].Tags,
 		Certificates: []*X509Cert{
 			&X509Cert{
+				Node: dgraph.Node{
+					UID: result.Devices[0].Certificates[0].UID,
+				},
 				PemData:              result.Devices[0].Certificates[0].PemData,
 				Algorithm:            result.Devices[0].Certificates[0].Algorithm,
 				Fingerprint:          result.Devices[0].Certificates[0].Fingerprint,
