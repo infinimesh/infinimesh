@@ -61,10 +61,11 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		localStates[partition] = make(map[string]*DeviceStateMessage)
 		offsets[partition] = 0
 		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
-
+		fmt.Printf("Partition Consumer :%v", pc)
 		if err != nil {
 			return nil, nil, err
 		}
+		fmt.Printf("PC Messages :%v", pc.Messages())
 		defer pc.Close()
 
 		newestOffset, err := client.GetOffset(c.MergedTopic, partition, sarama.OffsetNewest)
