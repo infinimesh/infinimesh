@@ -57,15 +57,18 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 
 	offsets = make(map[int32]int64)
 	for _, partition := range partitions {
+		fmt.Printf("Consumer partition reading : %v\n", partition)
 		localStates[partition] = make(map[string]*DeviceStateMessage)
 		offsets[partition] = 0
 		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
+
 		if err != nil {
 			return nil, nil, err
 		}
 		defer pc.Close()
 
 		newestOffset, err := client.GetOffset(c.MergedTopic, partition, sarama.OffsetNewest)
+		fmt.Printf("Consumer partition newestOffset : %v\n", newestOffset)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -75,6 +78,7 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		}
 
 		for item := range pc.Messages() {
+			fmt.Printf("Consumer partition item : %v\n", item)
 			var st DeviceStateMessage
 
 			err := json.Unmarshal(item.Value, &st)
@@ -96,10 +100,11 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	fmt.Println("Rebalance, assigned partitions:", s.Claims())
 	c.localStates = make(map[int32]map[string]*DeviceStateMessage)
-
+	fmt.Printf("localstates initialized %v", c.localStates)
 	//TODO enforce co-partitioning
 
 	producer, err := sarama.NewAsyncProducerFromClient(c.ChangelogProducerClient)
+	fmt.Printf("producer client created in shadow consumer %v", producer)
 	if err != nil {
 		return err
 	}
@@ -107,12 +112,14 @@ func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	c.changelogProducer = producer
 
 	partitionsToFetch, ok := s.Claims()[c.SourceTopic]
+	fmt.Printf("Partitions to fetch %v", partitionsToFetch)
 	if !ok {
 		fmt.Println("No partitions assigned. sleeping.")
 	}
 
 	start := time.Now()
-	localStates, _, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
+	localStates, offsets, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
+	fmt.Printf("Local states fetched %v and offsets %v", localStates, offsets)
 	if err != nil {
 		return err
 	}
@@ -124,6 +131,7 @@ func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	fmt.Println(localStates)
 	return nil
 }
+
 func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 	fmt.Println("Cleaning consumer group session")
 
