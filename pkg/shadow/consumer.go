@@ -60,6 +60,7 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 		fmt.Printf("Consumer partition reading : %v\n", partition)
 		localStates[partition] = make(map[string]*DeviceStateMessage)
 		offsets[partition] = 0
+		fmt.Printf("Partition Consumer Before:%v, %v", c.MergedTopic, sarama.OffsetOldest)
 		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
 		fmt.Printf("Partition Consumer :%v", pc)
 		if err != nil {
