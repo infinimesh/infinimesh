@@ -3,7 +3,6 @@ module github.com/infinimesh/infinimesh
 go 1.14
 
 require (
-	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Pallinder/go-randomdata v1.1.0
 	github.com/Shopify/sarama v1.19.0
 	github.com/Shopify/toxiproxy v2.1.3+incompatible // indirect
@@ -50,12 +49,10 @@ require (
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.9.1
-	golang.org/x/crypto v0.0.0-20181127143415-eb0de9b17e85 // indirect
-	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc
-	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
-	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
+	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c
 	google.golang.org/grpc v1.27.0
+	google.golang.org/protobuf v1.21.0
 	gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c // indirect
-	gopkg.in/yaml.v2 v2.2.1
+	gopkg.in/yaml.v2 v2.2.3
 	robpike.io/filter v0.0.0-20150108201509-2984852a2183
 )
