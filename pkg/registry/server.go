@@ -540,16 +540,22 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
+	//Query to get the device to be deleted with all the related edges
 	const q = `query delete($device: string){
-  objects(func: uid($device)) @filter(eq(kind, "device")) {
-    ~owns {
-      uid
-    }
-    ~children {
-      uid
-    }
-  }
-}`
+		objects(func: uid($device)) @filter(eq(kind, "device")) {
+			uid
+		  ~owns {
+			uid
+		  }
+		  ~children {
+			uid
+		  }
+		 certificates {
+			uid
+        type
+		  }
+		}
+	  }`
 
 	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$device": request.Id})
 	if err != nil {
@@ -557,7 +563,8 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	}
 
 	var result struct {
-		Objects []*dgraph.Object `json:"objects"`
+		//Get the Device edge details from the query response and build JSON
+		Objects []*Device `json:"objects"`
 	}
 
 	err = json.Unmarshal(res.Json, &result)
@@ -566,9 +573,10 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	}
 
 	if len(result.Objects) != 1 {
-		return nil, status.Error(codes.NotFound, "Not found")
+		return nil, status.Error(codes.NotFound, "The Device is not found")
 	}
 
+	//Append edge if there is a owns edge
 	if len(result.Objects[0].OwnedBy) == 1 {
 		m.Del = append(m.Del, &api.NQuad{
 			Subject:   result.Objects[0].OwnedBy[0].UID,
@@ -577,6 +585,7 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		})
 	}
 
+	//Append edge if there is a children edge
 	if len(result.Objects[0].Parent) == 1 {
 		m.Del = append(m.Del, &api.NQuad{
 			Subject:   result.Objects[0].Parent[0].UID,
@@ -585,9 +594,18 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		})
 	}
 
-	// TODO delete reverse edge ~children
-
+	//Delete all the edges appended in mutation m
 	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
+
+	//Append node if there is a certificate edge to delete the certificate node
+	if len(result.Objects[0].Certificates) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:     result.Objects[0].Certificates[0].UID,
+			Predicate:   "_STAR_ALL",
+			ObjectId:    "_STAR_ALL",
+			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
+		})
+	}
 
 	_, err = txn.Mutate(context.Background(), m)
 	if err != nil {
