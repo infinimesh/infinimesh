@@ -265,7 +265,7 @@ golang.org/x/tools/go/internal/gcimporter
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/rpc/status
 google.golang.org/genproto/protobuf/field_mask
-# google.golang.org/grpc v1.16.0
+# google.golang.org/grpc v1.27.0
 ## explicit
 google.golang.org/grpc
 google.golang.org/grpc/balancer
