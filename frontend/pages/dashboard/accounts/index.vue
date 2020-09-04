@@ -22,6 +22,13 @@
               <a-icon type="bulb" :style="{color: enabled ? 'green' : 'red', fontSize: '24px' }" />
             </a-row>
           </span>
+          <span slot="actions" slot-scope="text, account">
+            <a-space>
+              <a-button type="link" @click="deleteAccount(account)">
+                <a-icon type="delete" style="color: red; font-size: 18px" />
+              </a-button>
+            </a-space>
+          </span>
         </a-table>
       </a-col>
     </a-row>
@@ -79,6 +86,14 @@ export default {
             this.$router.push({ name: "dashboard-devices" });
           }
         });
+    },
+    deleteAccount(account) {
+      console.dir(account);
+      this.$notification.warning({
+        message: "Coming soon",
+        description: `Can't delete ${account.name}(${account.uid})`,
+        placement: "bottomRight",
+      });
     },
   },
 };
