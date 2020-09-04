@@ -504,8 +504,6 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		return nil, status.Error(codes.Internal, "Failed to delete node "+err.Error())
 	}
 
-	fmt.Printf(string(res.Json))
-
 	var result struct {
 		//Get the Device edge details from the query response and build JSON
 		Objects []*Device `json:"objects"`
