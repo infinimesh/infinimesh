@@ -25,7 +25,7 @@ require (
 	github.com/google/uuid v1.0.0
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
-	github.com/grpc-ecosystem/grpc-gateway v1.12.2
+	github.com/grpc-ecosystem/grpc-gateway v1.7.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/infinimesh/mqtt-go v0.0.0-20200828071453-3049256e2ae0
