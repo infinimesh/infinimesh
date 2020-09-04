@@ -42,7 +42,6 @@ const columns = [
     dataIndex: "name",
     sorter: true,
     scopedSlots: { customRender: "name" },
-    // width: "30%",
   },
   {
     title: "Enabled",
@@ -88,7 +87,6 @@ export default {
         });
     },
     deleteAccount(account) {
-      console.dir(account);
       this.$notification.warning({
         message: "Coming soon",
         description: `Can't delete ${account.name}(${account.uid})`,
