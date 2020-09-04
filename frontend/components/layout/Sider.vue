@@ -25,6 +25,11 @@ export default {
       pages: [
         { title: "Device Registry", icon: "cloud", link: "dashboard-devices" },
         { title: "Accounts", icon: "idcard", link: "dashboard-accounts" },
+        {
+          title: "Namespaces",
+          icon: "folder-open",
+          link: "dashboard-namespaces",
+        },
       ],
     };
   },
