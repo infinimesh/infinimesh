@@ -30,6 +30,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//AccountController is a Data type for Account Controller file
 type AccountController struct {
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
@@ -38,6 +39,7 @@ type AccountController struct {
 	Repo    Repo
 }
 
+//IsRoot is a method that returns if the account has root priviledges or not
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
 	if err != nil {
@@ -47,6 +49,7 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
+//CreateUserAccount is a method for creating user account
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 	log := s.Log.Named("CreateUserAccount")
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Password, request.Account.IsRoot, request.Account.Enabled)
@@ -67,6 +70,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
+//AuthorizeNamespace is a method that reutrns if the user has access to namespace
 func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nodepb.AuthorizeNamespaceRequest) (response *nodepb.AuthorizeNamespaceResponse, err error) {
 	err = s.Repo.AuthorizeNamespace(ctx, request.GetAccount(), request.GetNamespace(), request.GetAction())
 	if err != nil {
@@ -76,6 +80,7 @@ func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nod
 	return &nodepb.AuthorizeNamespaceResponse{}, nil
 }
 
+//Authorize is a method that reutrns if the user has access to a particulare node in Dgraph
 func (s *AccountController) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest) (response *nodepb.AuthorizeResponse, err error) {
 	err = s.Repo.Authorize(ctx, request.GetAccount(), request.GetNode(), request.GetAction(), request.GetInherit())
 	if err != nil {
@@ -85,6 +90,7 @@ func (s *AccountController) Authorize(ctx context.Context, request *nodepb.Autho
 	return &nodepb.AuthorizeResponse{}, nil
 }
 
+//IsAuthorizedNamespace is a method that reutrns if the user has access to namespace
 func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *nodepb.IsAuthorizedNamespaceRequest) (response *nodepb.IsAuthorizedNamespaceResponse, err error) {
 	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: request.GetAccount(),
@@ -107,6 +113,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
+//SetPassword is a method that allows to change password for the account
 func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.SetPasswordRequest) (response *nodepb.SetPasswordResponse, err error) {
 	err = s.Repo.SetPassword(ctx, request.Username, request.Password)
 	if err != nil {
@@ -116,6 +123,7 @@ func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.Set
 	return &nodepb.SetPasswordResponse{}, nil
 }
 
+//IsAuthorized is a method that reutrns if the user has access to a node
 func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.IsAuthorizedRequest) (response *nodepb.IsAuthorizedResponse, err error) {
 	log := s.Log.Named("Authorize").With(
 		zap.String("request.account", request.GetAccount()),
@@ -145,6 +153,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 	return &nodepb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
+//GetAccount is a method that reutrns details of the an account
 func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
 	account, err := s.Repo.GetAccount(ctx, request.Id)
 	if err != nil {
@@ -153,6 +162,7 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 	return account, nil
 }
 
+//Authenticate is a method that validates user credentials
 func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.AuthenticateRequest) (response *nodepb.AuthenticateResponse, err error) {
 	ok, uid, defaultNs, err := s.Repo.Authenticate(ctx, request.GetUsername(), request.GetPassword())
 	if !ok || (err != nil) {
@@ -162,6 +172,7 @@ func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.Au
 	return &nodepb.AuthenticateResponse{Success: ok, Account: &nodepb.Account{Uid: uid}, DefaultNamespace: defaultNs}, nil
 }
 
+//ListAccounts is a method that list details of the all account
 func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 	accounts, err := s.Repo.ListAccounts(ctx)
 	if err != nil {
@@ -173,10 +184,20 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	}, nil
 }
 
+//UpdateAccount is a method that update details of the an account
 func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
 	err = s.Repo.UpdateAccount(ctx, request)
 	if err != nil {
 		return &nodepb.Account{}, err
 	}
 	return request.Account, nil
+}
+
+//DeleteAccount is a method that deletes an account
+func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (response *nodepb.DeleteAccountResponse, err error) {
+	err = s.Repo.DeleteAccount(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return &nodepb.DeleteAccountResponse{}, nil
 }
