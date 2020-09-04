@@ -7,7 +7,13 @@
     </a-row>
     <a-row>
       <a-col :span="21" :offset="1">
-        <a-table :columns="columns" :data-source="accounts" :loading="loading" rowKey="uid">
+        <a-table
+          :columns="columns"
+          :data-source="accounts"
+          :loading="loading"
+          rowKey="uid"
+          class="accounts-table"
+        >
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
           </span>
@@ -78,8 +84,19 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .ant-empty-description {
-  color: lightgrey;
+  color: lightgrey !important;
+}
+</style>
+<style lang="less">
+table.accounts-table {
+  border-collapse: collapse;
+}
+.accounts-table > table,
+th,
+td {
+  border-bottom: 1px solid @primary-color !important;
+  color: black;
 }
 </style>
