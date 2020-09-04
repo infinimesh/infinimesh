@@ -23,10 +23,13 @@ import (
 	"errors"
 
 	"github.com/dgraph-io/dgo/protos/api"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//ListAccounts is a method to List details of all Account
 func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
@@ -64,6 +67,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 	return accounts, nil
 }
 
+//UpdateAccount is a method to Udpdate details of an Account
 func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
 	txn := s.Dg.NewTxn()
 
@@ -138,6 +142,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	return nil
 }
 
+//CreateUserAccount is a method to Create User Account
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
 
@@ -230,6 +235,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 	return "", errors.New("User exists already")
 }
 
+//GetAccount is a method to Get details of an Account
 func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *nodepb.Account, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 	const q = `query accounts($account: string) {
@@ -279,4 +285,85 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}
 
 	return account, err
+}
+
+//DeleteAccount is a method to delete the Account
+func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (err error) {
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	//Query to get the Account to be deleted with all the related edges
+	const q = `query delete($userid: string){
+		account(func: uid($userid)) @filter(eq(type, "account")) {
+			uid
+		  has.credentials {
+			uid
+		  }
+		  default.namespace {
+			uid
+		  }
+		 ~access.to.namespace {
+			uid
+		  }
+		}
+	  }`
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$userid": request.Uid})
+	if err != nil {
+		return status.Error(codes.Internal, "Failed to delete Account: "+err.Error())
+	}
+
+	var result struct {
+		//Get the Device edge details from the query response and build JSON
+		Accounts []*Account `json:"account"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Accounts) != 1 {
+		return status.Error(codes.NotFound, "The Account is not found.")
+	}
+
+	/*//Append edge if there is a default.namespace edge
+	if len(result.Accounts[0].DefaultNamespace) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:   result.Accounts[0].DefaultNamespace[0].UID,
+			Predicate: "default.namespace",
+			ObjectId:  request.Uid,
+		})
+	}
+
+	//Delete all the edges appended in mutation m
+	dgo.DeleteEdges(m, request.Uid, "_STAR_ALL")
+	*/
+
+	//Append node related to has.credentials edge
+	if len(result.Accounts[0].HasCredentials) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:     result.Accounts[0].HasCredentials[0].UID,
+			Predicate:   "_STAR_ALL",
+			ObjectId:    "_STAR_ALL",
+			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
+		})
+	}
+
+	//Append node related to default.namespace edge
+	if len(result.Accounts[0].DefaultNamespace) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:     result.Accounts[0].DefaultNamespace[0].UID,
+			Predicate:   "_STAR_ALL",
+			ObjectId:    "_STAR_ALL",
+			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
+		})
+	}
+
+	_, err = txn.Mutate(context.Background(), m)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

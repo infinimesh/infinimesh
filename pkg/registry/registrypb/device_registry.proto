@@ -65,7 +65,7 @@ message GetResponse {
 }
 
 message ListDevicesRequest {
-  string namespaceid = 1;
+  string namespace = 1;
   string account = 2;
 }
 
