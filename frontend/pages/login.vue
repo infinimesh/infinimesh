@@ -71,7 +71,7 @@ export default {
             this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
-              placement: "bottomLeft",
+              placement: "bottomRight",
               duration: 10,
               ...e.response.data,
             });
