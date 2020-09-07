@@ -3,7 +3,7 @@ excludes:
   - tools/proto
 
 protoc:
-  version: 3.6.1
+  version: 3.11.0
   includes:
     - tools/proto/
 
