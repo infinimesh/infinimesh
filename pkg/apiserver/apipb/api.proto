@@ -94,7 +94,7 @@ service Devices {
   rpc Delete(infinimesh.deviceregistry.DeleteRequest)
       returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete : "/devices/{uid}"
+      delete : "/devices/{id}"
     };
   }
 }
