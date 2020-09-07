@@ -55,7 +55,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	consumerGroupClient := sarama.NewConfig()
 	consumerGroupClient.Version = sarama.V1_0_0_0
 	consumerGroupClient.Consumer.Return.Errors = true
-	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetNewest
+	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	client, err := sarama.NewClient([]string{broker}, consumerGroupClient)
 	fmt.Printf("client created %v\n", client)
