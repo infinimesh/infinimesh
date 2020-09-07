@@ -64,6 +64,13 @@
 @layout-body-background: @body-background;
 @layout-footer-background: @body-background;
 
+// AntDesign Table styles
+@table-header-bg: @primary-color;
+@table-header-sort-bg: @primary-color;
+
+// AntDesign Select styles
+@select-background: white;
+
 // AntDesign Classes Overloads
 .ant-btn-primary {
   border-color: @btn-default-border!important;
@@ -91,7 +98,26 @@
   font-weight: @font-weight-default !important;
 }
 
+.ant-empty-description {
+  color: white;
+}
+
+.ant-select-selection-selected-value {
+  color: black;
+}
+
+.ant-pagination-item-active a {
+  color: black !important;
+}
+
 // Custom tags
 strong {
-  color: #d1d1ff;
+  color: black;
+  font-style: bold;
+}
+
+// Custom classes
+.lead {
+  font-size: 2rem;
+  color: @line-color;
 }

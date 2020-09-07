@@ -2,7 +2,8 @@ export const state = () => ({
   width: 0,
   height: 0,
   gridSize: "xs",
-  menu: true
+  menu: true,
+  noAccessScopes: []
 });
 
 export const mutations = {
@@ -21,6 +22,9 @@ export const mutations = {
   },
   setMenu(state, val) {
     state.menu = val;
+  },
+  noAccess(state, scope) {
+    state.noAccessScopes.push(scope);
   }
 };
 
@@ -65,5 +69,8 @@ class WrongGridSizeException {
 export const getters = {
   menu(state) {
     return state.menu;
+  },
+  hasAccess: state => scope => {
+    return !state.noAccessScopes.includes(scope);
   }
 };
