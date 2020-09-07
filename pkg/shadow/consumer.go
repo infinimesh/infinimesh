@@ -145,9 +145,11 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 }
 
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	fmt.Printf("Inside ConsumerClaim %v and session %v", claim, sess)
 	h.m.Lock()
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
 	h.m.Unlock()
+	fmt.Printf("claim messages in consume claim %v", claim.Messages())
 	for message := range claim.Messages() {
 		sess.MarkMessage(message, "")
 		fmt.Println("Recv message", string(message.Value))
