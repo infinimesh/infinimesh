@@ -169,7 +169,7 @@ rpc ListAccounts(infinimesh.node.ListAccountsRequest)
 rpc DeleteAccount(infinimesh.node.DeleteAccountRequest)
     returns (infinimesh.node.DeleteAccountResponse) {
   option (google.api.http) = {
-    delete : "/accounts/{uid}"
+    delete : "/accounts/{id}"
   };
 };
 }
