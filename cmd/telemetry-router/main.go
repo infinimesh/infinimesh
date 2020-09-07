@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -46,6 +47,7 @@ var (
 )
 
 func init() {
+	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.AutomaticEnv()
 

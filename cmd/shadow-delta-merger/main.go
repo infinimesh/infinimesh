@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -44,6 +45,7 @@ var (
 )
 
 func init() {
+	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.AutomaticEnv()
 
@@ -55,7 +57,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	consumerGroupClient := sarama.NewConfig()
 	consumerGroupClient.Version = sarama.V1_0_0_0
 	consumerGroupClient.Consumer.Return.Errors = true
-	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
+	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	client, err := sarama.NewClient([]string{broker}, consumerGroupClient)
 	fmt.Printf("client created %v\n", client)
