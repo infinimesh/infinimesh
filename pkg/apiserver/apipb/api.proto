@@ -94,7 +94,7 @@ service Devices {
   rpc Delete(infinimesh.deviceregistry.DeleteRequest)
       returns (infinimesh.deviceregistry.DeleteResponse) {
     option (google.api.http) = {
-      delete : "/devices/{id}"
+      delete : "/devices/{uid}"
     };
   }
 }
@@ -169,7 +169,7 @@ rpc ListAccounts(infinimesh.node.ListAccountsRequest)
 rpc DeleteAccount(infinimesh.node.DeleteAccountRequest)
     returns (infinimesh.node.DeleteAccountResponse) {
   option (google.api.http) = {
-    delete : "/accounts/{uid}"
+    delete : "/accounts/{id}"
   };
 };
 }
