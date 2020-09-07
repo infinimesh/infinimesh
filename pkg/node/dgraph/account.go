@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -267,7 +268,7 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}
 
 	if len(result.Account) == 0 {
-		return nil, errors.New("Account not found")
+		return nil, errors.New("The Account is not found.")
 	}
 
 	account = &nodepb.Account{
@@ -327,18 +328,45 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 		return status.Error(codes.NotFound, "The Account is not found.")
 	}
 
-	/*//Append edge if there is a default.namespace edge
+	//Append edge if there is a default.namespace edge
 	if len(result.Accounts[0].DefaultNamespace) == 1 {
 		m.Del = append(m.Del, &api.NQuad{
-			Subject:   result.Accounts[0].DefaultNamespace[0].UID,
+			Subject:   request.Uid,
 			Predicate: "default.namespace",
-			ObjectId:  request.Uid,
+			ObjectId:  result.Accounts[0].DefaultNamespace[0].UID,
+		})
+	}
+
+	//Append edge if there is a has.credentials edge
+	if len(result.Accounts[0].HasCredentials) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:   request.Uid,
+			Predicate: "has.credentials",
+			ObjectId:  result.Accounts[0].HasCredentials[0].UID,
+		})
+	}
+
+	//Append edge if there is a reverse edge access.to.namespace edge
+	if len(result.Accounts[0].AccessToNamespace) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:   request.Uid,
+			Predicate: "access.to.namespace",
+			ObjectId:  result.Accounts[0].AccessToNamespace[0].UID,
 		})
 	}
 
 	//Delete all the edges appended in mutation m
 	dgo.DeleteEdges(m, request.Uid, "_STAR_ALL")
-	*/
+
+	//Append node for the user account
+	if len(result.Accounts[0].Node.UID) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:     result.Accounts[0].Node.UID,
+			Predicate:   "_STAR_ALL",
+			ObjectId:    "_STAR_ALL",
+			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
+		})
+	}
 
 	//Append node related to has.credentials edge
 	if len(result.Accounts[0].HasCredentials) == 1 {

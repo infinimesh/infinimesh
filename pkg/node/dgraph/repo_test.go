@@ -66,6 +66,9 @@ func TestAuthorize(t *testing.T) {
 	decision, err := repo.IsAuthorized(ctx, node, account, "READ")
 	require.NoError(t, err)
 	require.True(t, decision)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestIsAuthorizedNamespace(t *testing.T) {
@@ -81,6 +84,9 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 	decision, err := repo.IsAuthorizedNamespace(ctx, ns.Id, account, nodepb.Action_WRITE)
 	require.NoError(t, err)
 	require.True(t, decision)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestListInNamespaceForAccount(t *testing.T) {
@@ -107,6 +113,9 @@ func TestListInNamespaceForAccount(t *testing.T) {
 
 	// Assert
 	require.Contains(t, objs, &nodepb.Object{Uid: newObj, Name: "sample-node", Kind: "asset", Objects: []*nodepb.Object{}})
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestChangePassword(t *testing.T) {
@@ -115,7 +124,7 @@ func TestChangePassword(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	_, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
 	err = repo.SetPassword(ctx, acc, "newpassword")
@@ -123,6 +132,28 @@ func TestChangePassword(t *testing.T) {
 
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
 	require.True(t, ok)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+}
+
+func TestDeleteAccount(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	require.NoError(t, err)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+
+	//Try to fetch the delete account
+	_, err = repo.GetAccount(ctx, account)
+
+	//Validation
+	require.EqualValues(t, string(err.Error()), "The Account is not found.")
 }
 
 func TestChangePasswordWithNoUser(t *testing.T) {

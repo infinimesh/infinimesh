@@ -33,6 +33,8 @@ import (
 	randomdata "github.com/Pallinder/go-randomdata"
 
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
@@ -134,7 +136,7 @@ func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
 	randomName := randomdata.SillyName()
 
-	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
 	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
@@ -168,6 +170,9 @@ func TestCreateGet(t *testing.T) {
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 func TestUpdate(t *testing.T) {
@@ -175,7 +180,7 @@ func TestUpdate(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
 	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
@@ -242,6 +247,9 @@ func TestUpdate(t *testing.T) {
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 func TestDelete(t *testing.T) {
