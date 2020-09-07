@@ -134,6 +134,7 @@ func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	return nil
 }
 
+/*
 func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 	fmt.Println("Cleaning consumer group session")
 
@@ -143,7 +144,7 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 
 	return nil
 }
-
+*/
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	h.m.Lock()
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
