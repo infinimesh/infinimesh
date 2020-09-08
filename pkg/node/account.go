@@ -186,10 +186,14 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 
 //UpdateAccount is a method that update details of the an account
 func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
+	log := s.Log.Named("UpdateUserAccount")
 	err = s.Repo.UpdateAccount(ctx, request)
+
 	if err != nil {
 		return &nodepb.Account{}, err
 	}
+
+	log.Info("Account Updated", zap.String("Account updated:", request.Account.Name))
 	return request.Account, nil
 }
 
