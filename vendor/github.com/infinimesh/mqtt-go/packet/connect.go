@@ -65,7 +65,6 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	// Protocol name
 	protocolName, n, err := getProtocolName(r)
 	len += n
-	fmt.Printf("After protocolName Connect calculated length n %v\n", len)
 	if err != nil {
 		return hdr, 0, err
 	}
@@ -79,7 +78,6 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	protocolLevelBytes := make([]byte, 1)
 	n, err = r.Read(protocolLevelBytes)
 	len += n
-	fmt.Printf("After protocolLevelBytes Connect calculated length n %v\n", len)
 	if err != nil {
 		return
 	}
@@ -105,7 +103,6 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
 	len += n
-	fmt.Printf("After keep alive Connect calculated length n %v\n", len)
 	if err != nil {
 		return hdr, len, errors.New("Could not read keepalive byte")
 	}
@@ -131,7 +128,6 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	if err != nil {
 		return hdr, len, errors.New("Could not read properties length")
 	}
-	fmt.Printf("optional properties length %v and propertiesLength= %v\n ", n, propertiesLength)
 	hdr.ConnectProperties.PropertyLength = int(propertiesLength[0])
 	if hdr.ConnectProperties.PropertyLength < 1 {
 		fmt.Printf("No optional properties added")
@@ -216,7 +212,6 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	// TODO am besten so viel einlesen wie moeglich, und dann reslicen / reader zusammenstecken
 
 	clientIDLengthBytes := payloadBytes[:2]
-	fmt.Printf("clientIDLengthBytes = %v\n", clientIDLengthBytes)
 	clientIDLength := int(clientIDLengthBytes[0])
 	clientID := string(payloadBytes[1 : 1+clientIDLength])
 
@@ -224,7 +219,6 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 		clientIDLength = int(binary.BigEndian.Uint16(clientIDLengthBytes))
 		clientID = string(payloadBytes[2 : 2+clientIDLength])
 	}
-	fmt.Printf("clientIDLength = %v\n", clientIDLength)
 	//clientID := string(payloadBytes[2 : 2+clientIDLength])
 	return ConnectPayload{
 		ClientID: clientID,
