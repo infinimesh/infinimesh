@@ -46,10 +46,16 @@
                 @cancel="resetAccountPasswordVisible = false"
                 @reset="handleResetAccountPassword"
               />
+
+              <a-divider type="vertical" />
+
               <a-button
                 type="link"
                 @click="toogleAccount(account)"
               >{{ account.enabled ? 'Disable' : 'Enable' }}</a-button>
+
+              <a-divider type="vertical" />
+
               <a-button type="link" @click="deleteAccount(account)">
                 <a-icon type="delete" style="color: red; font-size: 18px" />
               </a-button>
@@ -83,7 +89,7 @@ const columns = [
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "40%",
+    width: "15%",
     scopedSlots: { customRender: "actions" },
   },
 ];
