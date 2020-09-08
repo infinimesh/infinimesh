@@ -1,8 +1,22 @@
 <template>
   <div id="accountsTable">
-    <a-row>
-      <a-col :span="23" :offset="1">
+    <a-row type="flex" align="middle">
+      <a-col :span="12" :offset="1">
         <h1 class="lead">Accounts</h1>
+      </a-col>
+      <a-col :span="3" :offset="6">
+        <a-row type="flex" justify="end">
+          <a-button
+            type="primary"
+            icon="plus"
+            @click="createAccountDrawerVisible = true"
+          >Create Account</a-button>
+        </a-row>
+        <account-add
+          :active="createAccountDrawerVisible"
+          @cancel="createAccountDrawerVisible = false"
+          @add="handleAccountAdd"
+        />
       </a-col>
     </a-row>
     <a-row>
@@ -24,6 +38,24 @@
           </span>
           <span slot="actions" slot-scope="text, account">
             <a-space>
+              <a-button type="link" @click="resetAccountPassword(account)">Reset password</a-button>
+              <account-reset-password
+                v-if="selectedAccount"
+                :active="resetAccountPasswordVisible"
+                :account="selectedAccount"
+                @cancel="resetAccountPasswordVisible = false"
+                @reset="handleResetAccountPassword"
+              />
+
+              <a-divider type="vertical" />
+
+              <a-button
+                type="link"
+                @click="toogleAccount(account)"
+              >{{ account.enabled ? 'Disable' : 'Enable' }}</a-button>
+
+              <a-divider type="vertical" />
+
               <a-button type="link" @click="deleteAccount(account)">
                 <a-icon type="delete" style="color: red; font-size: 18px" />
               </a-button>
@@ -36,6 +68,9 @@
 </template>
 
 <script>
+import AccountAdd from "@/components/account/Add.vue";
+import AccountResetPassword from "@/components/account/ResetPassword.vue";
+
 const columns = [
   {
     title: "Username",
@@ -54,17 +89,26 @@ const columns = [
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "20%",
+    width: "15%",
     scopedSlots: { customRender: "actions" },
   },
 ];
 
 export default {
+  components: {
+    AccountAdd,
+    AccountResetPassword,
+  },
   data() {
     return {
       columns,
       accounts: [],
       loading: false,
+
+      createAccountDrawerVisible: false,
+
+      resetAccountPasswordVisible: false,
+      selectedAccount: null,
     };
   },
   mounted() {
@@ -72,26 +116,108 @@ export default {
   },
   methods: {
     getAccountsPool() {
-      this.$axios
+      const vm = this;
+      vm.loading = true;
+      vm.$axios
         .get("/api/accounts")
-        .then((res) => (this.accounts = res.data.accounts))
+        .then((res) => (vm.accounts = res.data.accounts))
         .catch((e) => {
           if (e.response.status == 403) {
-            this.$notification.error({
+            vm.$notification.error({
               message: "Oops",
               description: e.response.data.message,
             });
-            this.$store.commit("window/noAccess", "dashboard-accounts");
-            this.$router.push({ name: "dashboard-devices" });
+            vm.$store.commit("window/noAccess", "dashboard-accounts");
+            vm.$router.push({ name: "dashboard-devices" });
           }
-        });
+        })
+        .then(() => (vm.loading = false));
     },
     deleteAccount(account) {
-      this.$notification.warning({
-        message: "Coming soon",
-        description: `Can't delete ${account.name}(${account.uid})`,
-        placement: "bottomRight",
-      });
+      const vm = this;
+      this.$axios({
+        url: `/api/accounts/${account.uid}`,
+        method: "delete",
+      })
+        .then(() => {
+          vm.$message.success("Account successfuly deleted!");
+          vm.getAccountsPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: "Error deleting account " + account.name,
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        });
+    },
+    toogleAccount(account) {
+      this.updateAccount(
+        account.uid,
+        {
+          enabled: !account.enabled,
+        },
+        `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`,
+        `Error ${account.enabled ? "disabling" : "enabling"} account`
+      );
+    },
+    handleAccountAdd(account) {
+      const vm = this;
+      vm.$axios({
+        method: "post",
+        url: "/api/accounts",
+        data: account,
+      })
+        .then(() => {
+          vm.$notification.success({
+            message: "Account created successfuly",
+            placement: "bottomRight",
+          });
+          vm.createAccountDrawerVisible = false;
+          vm.getAccountsPool();
+        })
+        .catch((err) => {
+          this.$notification.error({
+            message: "Failed to create an account",
+            description: `Response: ${err.response.data.message}`,
+            placement: "bottomRight",
+            duration: 10,
+          });
+        });
+    },
+    updateAccount(id, data, success, error) {
+      const vm = this;
+      vm.loading = true;
+      vm.$axios({
+        method: "patch",
+        url: `/api/accounts/${id}`,
+        data: data,
+      })
+        .then(() => {
+          vm.$message.success(success);
+          vm.getAccountsPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: error,
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        })
+        .then(() => (vm.loading = false));
+    },
+    resetAccountPassword(account) {
+      this.selectedAccount = account;
+      this.resetAccountPasswordVisible = true;
+    },
+    handleResetAccountPassword(password) {
+      this.resetAccountPasswordVisible = false;
+      this.updateAccount(
+        this.selectedAccount.uid,
+        { password: password },
+        "Password changed successfuly",
+        "Reset password failed"
+      );
     },
   },
 };
