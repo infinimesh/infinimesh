@@ -114,7 +114,7 @@ export default Vue.component("device-add", {
       certificate_tab: "upload",
       rules: {
         name: [
-          { required: true, message: "Please input the new Device name" },
+          { required: true, message: "Please, input the new Device name" },
           {
             min: 4,
             max: 24,

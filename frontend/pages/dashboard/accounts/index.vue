@@ -1,8 +1,22 @@
 <template>
   <div id="accountsTable">
-    <a-row>
-      <a-col :span="23" :offset="1">
+    <a-row type="flex" align="middle">
+      <a-col :span="12" :offset="1">
         <h1 class="lead">Accounts</h1>
+      </a-col>
+      <a-col :span="3" :offset="6">
+        <a-row type="flex" justify="end">
+          <a-button
+            type="primary"
+            icon="plus"
+            @click="createAccountDrawerVisible = true"
+          >Create Account</a-button>
+        </a-row>
+        <account-add
+          :active="createAccountDrawerVisible"
+          @cancel="createAccountDrawerVisible = false"
+          @add="handleAccountAdd"
+        />
       </a-col>
     </a-row>
     <a-row>
@@ -40,6 +54,8 @@
 </template>
 
 <script>
+import AccountAdd from "@/components/account/Add.vue";
+
 const columns = [
   {
     title: "Username",
@@ -64,11 +80,15 @@ const columns = [
 ];
 
 export default {
+  components: {
+    AccountAdd,
+  },
   data() {
     return {
       columns,
       accounts: [],
       loading: false,
+      createAccountDrawerVisible: false,
     };
   },
   mounted() {
@@ -126,6 +146,30 @@ export default {
           });
         })
         .then(() => (vm.loading = false));
+    },
+    handleAccountAdd(account) {
+      const vm = this;
+      vm.$axios({
+        method: "post",
+        url: "/api/accounts",
+        data: account,
+      })
+        .then(() => {
+          vm.$notification.success({
+            message: "Account created successfuly",
+            placement: "bottomRight",
+          });
+          vm.createAccountDrawerVisible = false;
+          vm.getAccountsPool();
+        })
+        .catch((err) => {
+          this.$notification.error({
+            message: "Failed to create an account",
+            description: `Response: ${err.response.data.message}`,
+            placement: "bottomRight",
+            duration: 10,
+          });
+        });
     },
   },
 };
