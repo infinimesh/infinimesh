@@ -50,6 +50,7 @@ func init() {
 	repo = NewDGraphRepo(dg)
 }
 
+//test for Authorize
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
 	_, err := repo.CreateNamespace(ctx, "default")
