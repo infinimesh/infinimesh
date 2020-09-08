@@ -25,7 +25,6 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -45,8 +44,7 @@ func isPermissionSufficient(required, actual string) bool {
 }
 
 type DGraphRepo struct {
-	Dg  *dgo.Dgraph
-	Log *zap.Logger
+	Dg *dgo.Dgraph
 }
 
 func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
