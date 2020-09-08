@@ -38,6 +38,14 @@
           </span>
           <span slot="actions" slot-scope="text, account">
             <a-space>
+              <a-button type="link" @click="resetAccountPassword(account)">Reset password</a-button>
+              <account-reset-password
+                v-if="selectedAccount"
+                :active="resetAccountPasswordVisible"
+                :account="selectedAccount"
+                @cancel="resetAccountPasswordVisible = false"
+                @reset="handleResetAccountPassword"
+              />
               <a-button
                 type="link"
                 @click="toogleAccount(account)"
@@ -55,6 +63,7 @@
 
 <script>
 import AccountAdd from "@/components/account/Add.vue";
+import AccountResetPassword from "@/components/account/ResetPassword.vue";
 
 const columns = [
   {
@@ -74,7 +83,7 @@ const columns = [
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "20%",
+    width: "40%",
     scopedSlots: { customRender: "actions" },
   },
 ];
@@ -82,13 +91,18 @@ const columns = [
 export default {
   components: {
     AccountAdd,
+    AccountResetPassword,
   },
   data() {
     return {
       columns,
       accounts: [],
       loading: false,
+
       createAccountDrawerVisible: false,
+
+      resetAccountPasswordVisible: false,
+      selectedAccount: null,
     };
   },
   mounted() {
@@ -121,31 +135,14 @@ export default {
       });
     },
     toogleAccount(account) {
-      const vm = this;
-      vm.loading = true;
-      vm.$axios({
-        method: "patch",
-        url: `/api/accounts/${account.uid}`,
-        data: {
+      this.updateAccount(
+        account.uid,
+        {
           enabled: !account.enabled,
         },
-      })
-        .then(() => {
-          vm.$message.success(
-            `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`
-          );
-          vm.getAccountsPool();
-        })
-        .catch((e) => {
-          vm.$notification.error({
-            message: `Error ${
-              account.enabled ? "disabling" : "enabling"
-            } account`,
-            description: e.response.data.message,
-            placement: "bottomRight",
-          });
-        })
-        .then(() => (vm.loading = false));
+        `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`,
+        `Error ${account.enabled ? "disabling" : "enabling"} account`
+      );
     },
     handleAccountAdd(account) {
       const vm = this;
@@ -170,6 +167,40 @@ export default {
             duration: 10,
           });
         });
+    },
+    updateAccount(id, data, success, error) {
+      const vm = this;
+      vm.loading = true;
+      vm.$axios({
+        method: "patch",
+        url: `/api/accounts/${id}`,
+        data: data,
+      })
+        .then(() => {
+          vm.$message.success(success);
+          vm.getAccountsPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: error,
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        })
+        .then(() => (vm.loading = false));
+    },
+    resetAccountPassword(account) {
+      this.selectedAccount = account;
+      this.resetAccountPasswordVisible = true;
+    },
+    handleResetAccountPassword(password) {
+      this.resetAccountPasswordVisible = false;
+      this.updateAccount(
+        this.selectedAccount.uid,
+        { password: password },
+        "Password changed successfuly",
+        "Reset password failed"
+      );
     },
   },
 };
