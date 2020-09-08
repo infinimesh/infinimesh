@@ -71,6 +71,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 
 //UpdateAccount is a method to Udpdate details of an Account
 func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
+
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($id: string) {
@@ -141,6 +142,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	if err != nil {
 		return errors.New("Failed to commit")
 	}
+
 	return nil
 }
 
