@@ -151,7 +151,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 //CreateUserAccount is a method to Create User Account
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
-	log.Info("Validated token", zap.String("P:", password))
+	//log.Info("User Data", zap.String("P:", password))
 
 	txn := s.Dg.NewTxn()
 
