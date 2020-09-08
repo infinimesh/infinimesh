@@ -264,3 +264,50 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 	require.Empty(t, permissions)
 
 }
+
+/*//Test to check API Endpoints
+
+//Generic function to Perform HTTP request and return resopnse
+
+func performRequest(r http.Handler, method, path string, body bytes.Buffer) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
+func TestUpdateAccountAPI(t *testing.T) {
+
+	ctx := context.Background()
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	require.NoError(t, err)
+
+	//Set the JSON Body for the HTTP Request
+	var jsonStr = []byte(`{"name":"Ankit"}`)
+
+	//Set the request with the Method, path and the Json
+	req, err := http.NewRequest("PATCH", "/accounts/"+account, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Set Http header
+	req.Header.Set("Content-Type", "application/json")
+
+	//Create the recorder for the request
+	rr := httptest.NewRecorder()
+
+	//Send the HTTP request to the endpoint
+	handler := http.HandlerFunc(http.NewServeMux().ServeHTTP)
+	handler.ServeHTTP(rr, req)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+
+	//assert.Equal(t, http.StatusBadRequest, w.Code)
+	//assert.Equal(t, "{\"error\":\"Record not found!\"}", w.Body.String())
+}
+*/

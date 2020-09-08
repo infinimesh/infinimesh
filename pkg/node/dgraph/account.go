@@ -24,10 +24,15 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+)
+
+var (
+	log *zap.Logger
 )
 
 //ListAccounts is a method to List details of all Account
@@ -146,6 +151,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 //CreateUserAccount is a method to Create User Account
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
 	// TODO move this to the controller
+	log.Info("Validated token", zap.String("P:", password))
 
 	txn := s.Dg.NewTxn()
 
