@@ -134,11 +134,22 @@ export default {
         .then(() => (vm.loading = false));
     },
     deleteAccount(account) {
-      this.$notification.warning({
-        message: "Coming soon",
-        description: `Can't delete ${account.name}(${account.uid})`,
-        placement: "bottomRight",
-      });
+      const vm = this;
+      this.$axios({
+        url: `/api/accounts/${account.uid}`,
+        method: "delete",
+      })
+        .then(() => {
+          vm.$message.success("Account successfuly deleted!");
+          vm.getAccountsPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: "Error deleting account " + account.name,
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        });
     },
     toogleAccount(account) {
       this.updateAccount(
