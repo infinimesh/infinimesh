@@ -24,6 +24,7 @@ import (
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
+	"go.uber.org/zap"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -71,6 +72,13 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 
 //UpdateAccount is a method to Udpdate details of an Account
 func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
+
+	log := s.Log.Named("UpdateAccount").With(
+		zap.String("account.uid", account.Account.Uid),
+		zap.String("account.name", account.Account.Name),
+		zap.String("account.node", account.FieldMask.Paths[0]),
+	)
+
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($id: string) {
@@ -110,6 +118,8 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		Enabled: tempacc.Enabled,
 	}
 
+	log.Info("Data Ready for updating the Account", zap.Bool("Update Data", true))
+
 	for _, field := range account.FieldMask.Paths {
 		switch field {
 		case "Name":
@@ -141,6 +151,8 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	if err != nil {
 		return errors.New("Failed to commit")
 	}
+
+	log.Info("Updation Complete", zap.String("Account Updated", ""))
 	return nil
 }
 
