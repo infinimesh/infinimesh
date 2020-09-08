@@ -27,6 +27,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
 
 	"github.com/infinimesh/infinimesh/pkg/node"
@@ -132,6 +133,40 @@ func TestChangePassword(t *testing.T) {
 
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
 	require.True(t, ok)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+}
+
+func TestUpdateAccount(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the device
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:  account,
+			Name: NewName,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+
+	//Validate the updated Account
+	require.NoError(t, err)
+	require.EqualValues(t, NewName, respGet.Name)
 
 	//Delete the Account created
 	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
