@@ -24,6 +24,10 @@
           </span>
           <span slot="actions" slot-scope="text, account">
             <a-space>
+              <a-button
+                type="link"
+                @click="toogleAccount(account)"
+              >{{ account.enabled ? 'Disable' : 'Enable' }}</a-button>
               <a-button type="link" @click="deleteAccount(account)">
                 <a-icon type="delete" style="color: red; font-size: 18px" />
               </a-button>
@@ -72,19 +76,22 @@ export default {
   },
   methods: {
     getAccountsPool() {
-      this.$axios
+      const vm = this;
+      vm.loading = true;
+      vm.$axios
         .get("/api/accounts")
-        .then((res) => (this.accounts = res.data.accounts))
+        .then((res) => (vm.accounts = res.data.accounts))
         .catch((e) => {
           if (e.response.status == 403) {
-            this.$notification.error({
+            vm.$notification.error({
               message: "Oops",
               description: e.response.data.message,
             });
-            this.$store.commit("window/noAccess", "dashboard-accounts");
-            this.$router.push({ name: "dashboard-devices" });
+            vm.$store.commit("window/noAccess", "dashboard-accounts");
+            vm.$router.push({ name: "dashboard-devices" });
           }
-        });
+        })
+        .then(() => (vm.loading = false));
     },
     deleteAccount(account) {
       this.$notification.warning({
@@ -92,6 +99,33 @@ export default {
         description: `Can't delete ${account.name}(${account.uid})`,
         placement: "bottomRight",
       });
+    },
+    toogleAccount(account) {
+      const vm = this;
+      vm.loading = true;
+      vm.$axios({
+        method: "patch",
+        url: `/api/accounts/${account.uid}`,
+        data: {
+          enabled: !account.enabled,
+        },
+      })
+        .then(() => {
+          vm.$message.success(
+            `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`
+          );
+          vm.getAccountsPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: `Error ${
+              account.enabled ? "disabling" : "enabling"
+            } account`,
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        })
+        .then(() => (vm.loading = false));
     },
   },
 };
