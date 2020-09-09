@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -35,11 +36,13 @@ import (
 type accountAPI struct {
 	signingSecret []byte
 	client        nodepb.AccountServiceClient
+	log           *zap.Logger
 }
 
 //API Method to get details of own Account
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
+	log.Info("Context to be Used", zap.Any("Context4", ctx))
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
@@ -52,6 +55,7 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 //API Method to Get Details of an Account
 func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
+	log.Info("Context to be Used", zap.Any("Context5", ctx))
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}

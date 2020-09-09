@@ -75,6 +75,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 	}
 
 	log.Debug("Extracted bearer token", zap.String("token", tokenString))
+	log.Info("Context to be Used", zap.Any("Context1", ctx))
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -90,12 +91,14 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 		return ctx, errors.New("Invalid token")
 	}
 
+	log.Info("Context to be Used", zap.Any("Context2", ctx))
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		log.Info("Validated token", zap.Any("claims", claims))
 
 		if accountID, ok := claims[accountIDClaim]; ok {
 
 			if accountIDStr, ok := accountID.(string); ok {
+				log.Info("Context to be Used", zap.Any("Context3", ctx))
 				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
 				if err != nil {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
