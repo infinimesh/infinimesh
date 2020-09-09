@@ -135,8 +135,6 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 		len += hdr.ConnectProperties.PropertyLength
 		hdr, _ = readConnectProperties(r, hdr)
 	}
-
-	fmt.Printf("Connect calculated length n %v\n", len)
 	return
 }
 
@@ -190,10 +188,8 @@ func readConnectProperties(r io.Reader, hdr ConnectVariableHeader) (ConnectVaria
 }
 
 func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
-	fmt.Printf("readConnectPayload len %v\n", len)
 	payloadBytes := make([]byte, len)
 	n, err := io.ReadFull(r, payloadBytes)
-	fmt.Printf("payloadBytes len n %v and payload %v\n ", n, payloadBytes)
 	// TODO set upper limit for payload
 	// TODO only stream it
 	if err != nil {
@@ -219,7 +215,6 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 		clientIDLength = int(binary.BigEndian.Uint16(clientIDLengthBytes))
 		clientID = string(payloadBytes[2 : 2+clientIDLength])
 	}
-	//clientID := string(payloadBytes[2 : 2+clientIDLength])
 	return ConnectPayload{
 		ClientID: clientID,
 	}, nil
