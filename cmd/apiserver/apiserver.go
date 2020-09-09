@@ -73,6 +73,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 	}
 
 	log.Debug("Extracted bearer token", zap.String("token", tokenString))
+	log.Info("Token Validation Failed.", zap.Any("claims", ctx))
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -96,10 +97,12 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 			if accountIDStr, ok := accountID.(string); ok {
 				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
 				if err != nil {
+					log.Info("Token Validation failed.", zap.Any("claims", claims))
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
 				}
 
 				if !resp.Enabled {
+					log.Info("Token Validation Passed but Account disabled.", zap.Any("claims", claims))
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
 				}
 
@@ -110,6 +113,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 		log.Info("Token does not contain account id field", zap.Any("token", token))
 	}
 
+	log.Info("Token Validation Failed.", zap.Any("claims", ctx))
 	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
 }
 
