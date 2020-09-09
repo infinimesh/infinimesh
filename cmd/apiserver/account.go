@@ -36,7 +36,6 @@ import (
 type accountAPI struct {
 	signingSecret []byte
 	client        nodepb.AccountServiceClient
-	log           *zap.Logger
 }
 
 //API Method to get details of own Account
