@@ -27,6 +27,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
 
 	"github.com/infinimesh/infinimesh/pkg/node"
@@ -49,6 +50,7 @@ func init() {
 	repo = NewDGraphRepo(dg)
 }
 
+//test for Authorize
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
 	_, err := repo.CreateNamespace(ctx, "default")
@@ -66,6 +68,9 @@ func TestAuthorize(t *testing.T) {
 	decision, err := repo.IsAuthorized(ctx, node, account, "READ")
 	require.NoError(t, err)
 	require.True(t, decision)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestIsAuthorizedNamespace(t *testing.T) {
@@ -81,29 +86,38 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 	decision, err := repo.IsAuthorizedNamespace(ctx, ns.Id, account, nodepb.Action_WRITE)
 	require.NoError(t, err)
 	require.True(t, decision)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestListInNamespaceForAccount(t *testing.T) {
 	ctx := context.Background()
 
 	acc := randomdata.SillyName()
-	nsName := acc
 
-	// Setup
+	// Create Account
 	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
-	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName)
+	//Get Namespace
+	nsName, err := repo.GetNamespace(ctx, acc)
+
+	//Create Object
+	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Name)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, account, nsName, nodepb.Action_WRITE)
+	err = repo.AuthorizeNamespace(ctx, account, nsName.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	objs, err := repo.ListForAccount(ctx, account, nsName, true)
+	objs, err := repo.ListForAccount(ctx, account, nsName.GetName(), true)
 	require.NoError(t, err)
 
 	// Assert
 	require.Contains(t, objs, &nodepb.Object{Uid: newObj, Name: "sample-node", Kind: "asset", Objects: []*nodepb.Object{}})
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 }
 
 func TestChangePassword(t *testing.T) {
@@ -111,8 +125,8 @@ func TestChangePassword(t *testing.T) {
 
 	acc := randomdata.SillyName()
 
-	// Setup
-	_, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
 	err = repo.SetPassword(ctx, acc, "newpassword")
@@ -120,6 +134,62 @@ func TestChangePassword(t *testing.T) {
 
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
 	require.True(t, ok)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+}
+
+func TestUpdateAccount(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the device
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:  account,
+			Name: NewName,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+
+	//Validate the updated Account
+	require.NoError(t, err)
+	require.EqualValues(t, NewName, respGet.Name)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+}
+
+func TestDeleteAccount(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	require.NoError(t, err)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+
+	//Try to fetch the delete account
+	_, err = repo.GetAccount(ctx, account)
+
+	//Validation
+	require.EqualValues(t, string(err.Error()), "The Account is not found.")
 }
 
 func TestChangePasswordWithNoUser(t *testing.T) {
@@ -131,24 +201,33 @@ func TestChangePasswordWithNoUser(t *testing.T) {
 
 func TestListPermissionsOnNamespace(t *testing.T) {
 	ctx := context.Background()
+	var accountID *nodepb.Account
 
-	randomNS := randomdata.SillyName()
-	ns, err := repo.CreateNamespace(ctx, randomNS)
+	//Get All accounts
+	accounts, err := repo.ListAccounts(ctx)
+
+	//Find the required account
+	for _, account := range accounts {
+		if account.Name == "joe" {
+			//Get Account
+			accountID, err = repo.GetAccount(ctx, account.Uid)
+			require.NoError(t, err)
+
+		}
+	}
+
+	//Get Namespace
+	nsID, err := repo.GetNamespace(ctx, "joe")
+
+	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	randomUser := randomdata.SillyName()
-	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID.Id)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
-	require.NoError(t, err)
-
-	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
-	require.NoError(t, err)
-
-	var namespaceFound bool = true
+	var namespaceFound bool
 	for _, permission := range permissions {
-		if permission.AccountName == randomNS {
+		if permission.AccountName == nsID.Name {
 			namespaceFound = true
 		}
 	}
@@ -157,23 +236,79 @@ func TestListPermissionsOnNamespace(t *testing.T) {
 
 func TestDeletePermissionOnNamespace(t *testing.T) {
 	ctx := context.Background()
+	var accountID *nodepb.Account
 
-	randomNS := randomdata.SillyName()
-	ns, err := repo.CreateNamespace(ctx, randomNS)
+	//Get All accounts
+	accounts, err := repo.ListAccounts(ctx)
+
+	//Find the required account
+	for _, account := range accounts {
+		if account.Name == "joe" {
+			//Get Account
+			accountID, err = repo.GetAccount(ctx, account.Uid)
+			require.NoError(t, err)
+
+		}
+	}
+
+	//Get Namespace
+	nsID, err := repo.GetNamespace(ctx, "joe")
+
+	err = repo.AuthorizeNamespace(ctx, accountID.Uid, nsID.Id, nodepb.Action_WRITE)
 	require.NoError(t, err)
 
-	randomUser := randomdata.SillyName()
-	accountID, err := repo.CreateUserAccount(ctx, randomUser, "password", false, true)
+	err = repo.DeletePermissionInNamespace(ctx, nsID.Id, accountID.Uid)
 	require.NoError(t, err)
 
-	err = repo.AuthorizeNamespace(ctx, accountID, randomNS, nodepb.Action_WRITE)
-	require.NoError(t, err)
-
-	err = repo.DeletePermissionInNamespace(ctx, ns, accountID)
-	require.NoError(t, err)
-
-	permissions, err := repo.ListPermissionsInNamespace(ctx, ns)
+	permissions, err := repo.ListPermissionsInNamespace(ctx, nsID.Id)
 	require.NoError(t, err)
 	require.Empty(t, permissions)
 
 }
+
+/*//Test to check API Endpoints
+
+//Generic function to Perform HTTP request and return resopnse
+
+func performRequest(r http.Handler, method, path string, body bytes.Buffer) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest(method, path, nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
+func TestUpdateAccountAPI(t *testing.T) {
+
+	ctx := context.Background()
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	require.NoError(t, err)
+
+	//Set the JSON Body for the HTTP Request
+	var jsonStr = []byte(`{"name":"Ankit"}`)
+
+	//Set the request with the Method, path and the Json
+	req, err := http.NewRequest("PATCH", "/accounts/"+account, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	//Set Http header
+	req.Header.Set("Content-Type", "application/json")
+
+	//Create the recorder for the request
+	rr := httptest.NewRecorder()
+
+	//Send the HTTP request to the endpoint
+	handler := http.HandlerFunc(http.NewServeMux().ServeHTTP)
+	handler.ServeHTTP(rr, req)
+
+	//Delete the Account created
+	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+
+	//assert.Equal(t, http.StatusBadRequest, w.Code)
+	//assert.Equal(t, "{\"error\":\"Record not found!\"}", w.Body.String())
+}
+*/

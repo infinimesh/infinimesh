@@ -36,7 +36,7 @@ type namespaceAPI struct {
 func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
@@ -56,7 +56,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
@@ -68,20 +68,23 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 		// TODO this is not atomic and if the application crashes
 		// between both calls, we'll have a problem. Maybe move it to
 		// one operation into the repo, and do within a txn.
-		_, err = n.client.CreateNamespace(ctx, request)
+		ns, err := n.client.CreateNamespace(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		_, err := n.accountClient.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
+		_, err = n.accountClient.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
 			Account:   account,
-			Namespace: request.GetName(),
+			Namespace: ns.GetId(),
 			Action:    nodepb.Action_WRITE,
 		})
 		if err != nil {
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
-		return &nodepb.Namespace{}, nil
+		return &nodepb.Namespace{
+			Id:   ns.Id,
+			Name: ns.Name,
+		}, nil
 
 	}
 	return nil, status.Error(codes.PermissionDenied, "Account is not root")
@@ -90,7 +93,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -111,7 +114,7 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.CreateNamespacePermissionRequest) (response *apipb.CreateNamespacePermissionResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -136,13 +139,13 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 		return &apipb.CreateNamespacePermissionResponse{}, nil
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 }
 
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -158,14 +161,14 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 		return n.client.ListPermissions(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 
 }
 
 func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -181,6 +184,6 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 		return n.client.DeletePermission(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
 
 }

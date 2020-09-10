@@ -84,7 +84,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	txn := s.dgo.NewTxn()
 	defer txn.Discard(ctx) // nolint
 	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
-		return nil, status.Error(codes.FailedPrecondition, "Name exists already")
+		return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
 	}
 
 	ns, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
@@ -93,17 +93,17 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	}
 
 	if request.Device.Certificate == nil {
-		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
+		return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
 	}
 
 	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate")
+		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
 	}
 
 	//To check if the fingerprint already exists, in this case creating new device is not permissible
 	if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
-		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists")
+		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
 	}
 
 	var enabled bool
@@ -181,12 +181,27 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
 	txn := s.dgo.NewTxn()
 
-	const q = `query devices($id: string)  {
-                     devices(func: uid($id)) @filter(eq(kind, "device")) {
-                       uid
-                     }
-                   }`
+	//Query to get the device details from the Dgraph DB
+	const q = `query devices($id: string){
+		device(func: uid($id)) @filter(eq(kind, "device")) {
+		  uid
+		  name
+		  ~owns {
+			uid
+		  }
+		  tags
+		  enabled
+		  certificates {
+			uid
+			pem_data
+			algorithm
+			fingerprint
+			fingerprint.algorithm
+		  }
+		}
+	  }`
 
+	//Execute the Query to get device details
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
 		"$id": request.Device.Id,
 	})
@@ -195,7 +210,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	}
 
 	var result struct {
-		Devices []dgraph.Node `json:"devices"`
+		Devices []Device `json:"device"`
 	}
 
 	err = json.Unmarshal(resp.Json, &result)
@@ -212,15 +227,58 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			Node: dgraph.Node{
 				UID: result.Devices[0].UID,
 			},
+			Name: result.Devices[0].Name,
+		},
+		Enabled: result.Devices[0].Enabled,
+		Tags:    result.Devices[0].Tags,
+		Certificates: []*X509Cert{
+			&X509Cert{
+				Node: dgraph.Node{
+					UID: result.Devices[0].Certificates[0].UID,
+				},
+				PemData:              result.Devices[0].Certificates[0].PemData,
+				Algorithm:            result.Devices[0].Certificates[0].Algorithm,
+				Fingerprint:          result.Devices[0].Certificates[0].Fingerprint,
+				FingerprintAlgorithm: result.Devices[0].Certificates[0].FingerprintAlgorithm,
+			},
 		},
 	}
+
+	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
 		switch field {
-		// Certificates can't be updated at this time
+
+		//Update the device details
 		case "Enabled":
-			d.Enabled = request.Device.Enabled.GetValue()
+			d.Enabled = request.Device.GetEnabled().Value
 		case "Tags":
 			d.Tags = request.Device.Tags
+		case "Name":
+			if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
+				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
+			}
+			d.Name = request.Device.Name
+		case "Certificate":
+			//Pre-check for updating certificates
+			if request.Device.Certificate == nil {
+				return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
+			}
+
+			fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
+			if err != nil {
+				return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
+			}
+
+			//To check if the fingerprint already exists, in this case creating new device is not permissible
+			if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
+				return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
+			}
+
+			//update the certificate
+			d.Certificates[0].PemData = request.Device.Certificate.PemData
+			d.Certificates[0].Algorithm = request.Device.Certificate.Algorithm
+			d.Certificates[0].Fingerprint = request.Device.Certificate.Fingerprint
+			d.Certificates[0].FingerprintAlgorithm = request.Device.Certificate.FingerprintAlgorithm
 		}
 	}
 
@@ -482,16 +540,22 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
+	//Query to get the device to be deleted with all the related edges
 	const q = `query delete($device: string){
-  objects(func: uid($device)) @filter(eq(kind, "device")) {
-    ~owns {
-      uid
-    }
-    ~children {
-      uid
-    }
-  }
-}`
+		objects(func: uid($device)) @filter(eq(kind, "device")) {
+			uid
+		  ~owns {
+			uid
+		  }
+		  ~children {
+			uid
+		  }
+		 certificates {
+			uid
+        type
+		  }
+		}
+	  }`
 
 	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$device": request.Id})
 	if err != nil {
@@ -499,7 +563,8 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	}
 
 	var result struct {
-		Objects []*dgraph.Object `json:"objects"`
+		//Get the Device edge details from the query response and build JSON
+		Objects []*Device `json:"objects"`
 	}
 
 	err = json.Unmarshal(res.Json, &result)
@@ -508,9 +573,10 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 	}
 
 	if len(result.Objects) != 1 {
-		return nil, status.Error(codes.NotFound, "Not found")
+		return nil, status.Error(codes.NotFound, "The Device is not found")
 	}
 
+	//Append edge if there is a owns edge
 	if len(result.Objects[0].OwnedBy) == 1 {
 		m.Del = append(m.Del, &api.NQuad{
 			Subject:   result.Objects[0].OwnedBy[0].UID,
@@ -519,6 +585,7 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		})
 	}
 
+	//Append edge if there is a children edge
 	if len(result.Objects[0].Parent) == 1 {
 		m.Del = append(m.Del, &api.NQuad{
 			Subject:   result.Objects[0].Parent[0].UID,
@@ -527,9 +594,18 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		})
 	}
 
-	// TODO delete reverse edge ~children
-
+	//Delete all the edges appended in mutation m
 	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
+
+	//Append node if there is a certificate edge to delete the certificate node
+	if len(result.Objects[0].Certificates) == 1 {
+		m.Del = append(m.Del, &api.NQuad{
+			Subject:     result.Objects[0].Certificates[0].UID,
+			Predicate:   "_STAR_ALL",
+			ObjectId:    "_STAR_ALL",
+			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
+		})
+	}
 
 	_, err = txn.Mutate(context.Background(), m)
 	if err != nil {

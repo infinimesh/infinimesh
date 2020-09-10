@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 Infinite Devices GmbH
-// www.infinimesh.io 
+// Copyright 2018 infinimesh, INC
+// www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -24,13 +24,23 @@ import (
 	"io"
 )
 
+type ConnectProperties struct {
+	PropertyLength         int //variable header properties length
+	RecieveMaximumValue    int //limits the number of QoS 1 and QoS 2 Pub at Client - default 65,535
+	MaximumPacketSize      int //represents max packet size client accepts
+	SessionExpiryInterval  int //sesion expiry interval
+	TopicAliasMaximumValue int //max num of topic alias accepted by client
+	RequestResponseInfo    int //0 = no response info in CONNACK
+	RequestProblemInfo     int //0 = no reason string in CONNACK
+}
+
 type ConnectFlags struct {
-	UserName     bool
-	Password     bool
-	WillRetain   bool
-	WillQoS      byte // 2 bytes actually
-	WillFlag     bool
-	CleanSession bool
+	UserName   bool
+	Password   bool
+	WillRetain bool
+	WillQoS    int // 2 bytes actually
+	WillFlag   bool
+	CleanStart bool
 }
 
 type ConnectControlPacket struct {
@@ -40,10 +50,11 @@ type ConnectControlPacket struct {
 }
 
 type ConnectVariableHeader struct {
-	ProtocolName  string
-	ProtocolLevel byte
-	ConnectFlags  ConnectFlags
-	KeepAlive     int
+	ProtocolName      string
+	ProtocolLevel     byte
+	ConnectFlags      ConnectFlags
+	KeepAlive         int
+	ConnectProperties ConnectProperties
 }
 
 type ConnectPayload struct {
@@ -87,7 +98,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	hdr.ConnectFlags.Password = connectFlagsByte[0]&64 == 1
 	hdr.ConnectFlags.WillRetain = connectFlagsByte[0]&32 == 1
 	hdr.ConnectFlags.WillFlag = connectFlagsByte[0]&4 == 1
-	hdr.ConnectFlags.CleanSession = connectFlagsByte[0]&2 == 1
+	hdr.ConnectFlags.CleanStart = connectFlagsByte[0]&2 == 1
 
 	keepAliveByte := make([]byte, 2)
 	n, err = r.Read(keepAliveByte)
@@ -100,9 +111,80 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 	}
 
 	hdr.KeepAlive = int(binary.BigEndian.Uint16(keepAliveByte))
-	// TODO Will QoS
 
+	// TODO Will QoS
+	if connectFlagsByte[0]&16 == 1 && connectFlagsByte[0]&8 == 1 {
+		hdr.ConnectFlags.WillQoS = 3
+	} else if connectFlagsByte[0]&8 == 1 {
+		hdr.ConnectFlags.WillQoS = 2
+	} else {
+		hdr.ConnectFlags.WillQoS = 1
+	}
+
+	//reading variable header properties length
+	propertiesLength := make([]byte, 1)
+	n, err = r.Read(propertiesLength)
+	len += n
+	if err != nil {
+		return hdr, len, errors.New("Could not read properties length")
+	}
+	hdr.ConnectProperties.PropertyLength = int(propertiesLength[0])
+	if hdr.ConnectProperties.PropertyLength < 1 {
+		fmt.Printf("No optional properties added")
+	} else {
+		len += hdr.ConnectProperties.PropertyLength
+		hdr, _ = readConnectProperties(r, hdr)
+	}
 	return
+}
+
+func readConnectProperties(r io.Reader, hdr ConnectVariableHeader) (ConnectVariableHeader, error) {
+	connectProperties := make([]byte, hdr.ConnectProperties.PropertyLength)
+	propertiesLength, err := io.ReadFull(r, connectProperties)
+	if err != nil {
+		return hdr, err
+	}
+	if propertiesLength != hdr.ConnectProperties.PropertyLength {
+		return hdr, errors.New("Connect Properties length incorrect")
+	}
+	for propertiesLength > 1 {
+		connectPropertyID := int(connectProperties[0])
+		if connectPropertyID == RECIEVE_MAXIMUM_ID {
+			recieveMaximum := connectProperties[1 : RECIEVE_MAXIMUM_LENGTH+1]
+			hdr.ConnectProperties.RecieveMaximumValue = int(binary.BigEndian.Uint16(recieveMaximum))
+			connectProperties = connectProperties[RECIEVE_MAXIMUM_LENGTH+1 : propertiesLength]
+			propertiesLength -= RECIEVE_MAXIMUM_LENGTH + 1
+		} else if connectPropertyID == MAXIMUM_PACKET_SIZE_ID {
+			maxPacketSize := connectProperties[1 : MAXIMUM_PACKET_SIZE_LENGTH+1]
+			hdr.ConnectProperties.MaximumPacketSize = int(binary.BigEndian.Uint64(maxPacketSize))
+			connectProperties = connectProperties[MAXIMUM_PACKET_SIZE_LENGTH+1 : propertiesLength]
+			propertiesLength -= MAXIMUM_PACKET_SIZE_LENGTH + 1
+		} else if connectPropertyID == SESSION_EXPIRY_INTERVAL_ID {
+			SessionExpiryInterval := connectProperties[1 : SESSION_EXPIRY_INTERVAL_LENGTH+1]
+			hdr.ConnectProperties.SessionExpiryInterval = int(binary.BigEndian.Uint64(SessionExpiryInterval))
+			connectProperties = connectProperties[SESSION_EXPIRY_INTERVAL_LENGTH+1 : propertiesLength]
+			propertiesLength -= SESSION_EXPIRY_INTERVAL_LENGTH + 1
+		} else if connectPropertyID == TOPIC_ALIAS_MAXIMUM_ID {
+			topicAliasMaximum := connectProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
+			hdr.ConnectProperties.TopicAliasMaximumValue = int(binary.BigEndian.Uint16(topicAliasMaximum))
+			connectProperties = connectProperties[TOPIC_ALIAS_MAXIMUM_LENGTH+1 : propertiesLength]
+			propertiesLength -= TOPIC_ALIAS_MAXIMUM_LENGTH + 1
+		} else if connectPropertyID == REQUEST_RESPONSE_INFORMATION_ID {
+			resquestResponseInfo := connectProperties[1]
+			hdr.ConnectProperties.RequestResponseInfo = int(resquestResponseInfo)
+			connectProperties = connectProperties[REQUEST_RESPONSE_INFORMATION_LENGTH:propertiesLength]
+			propertiesLength -= REQUEST_RESPONSE_INFORMATION_LENGTH + 1
+		} else if connectPropertyID == REQUEST_PROBLEM_INFORMATION_ID {
+			resquestResponseInfo := connectProperties[1]
+			hdr.ConnectProperties.RequestResponseInfo = int(resquestResponseInfo)
+			connectProperties = connectProperties[REQUEST_PROBLEM_INFORMATION_LENGTH:propertiesLength]
+			propertiesLength -= REQUEST_PROBLEM_INFORMATION_LENGTH + 1
+		} else {
+			fmt.Printf("%v Connect Property is not supported yet..", connectProperties[0])
+			propertiesLength = 0
+		}
+	}
+	return hdr, nil
 }
 
 func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
@@ -126,9 +208,13 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	// TODO am besten so viel einlesen wie moeglich, und dann reslicen / reader zusammenstecken
 
 	clientIDLengthBytes := payloadBytes[:2]
-	clientIDLength := binary.BigEndian.Uint16(clientIDLengthBytes)
+	clientIDLength := int(clientIDLengthBytes[0])
+	clientID := string(payloadBytes[1 : 1+clientIDLength])
 
-	clientID := string(payloadBytes[2 : 2+clientIDLength])
+	if clientIDLength == 0 {
+		clientIDLength = int(binary.BigEndian.Uint16(clientIDLengthBytes))
+		clientID = string(payloadBytes[2 : 2+clientIDLength])
+	}
 	return ConnectPayload{
 		ClientID: clientID,
 	}, nil

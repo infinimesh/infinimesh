@@ -2,11 +2,13 @@
   <a-row type="flex" justify="center" class="rootRow" align="middle">
     <a-col :xs="22" :md="16" :lg="12">
       <a-row type="flex" justify="center">
-        <h1>infinimesh Login</h1>
+        <h1>infinimesh</h1>
       </a-row>
-      <a-row type="flex" justify="center"
-        >Welcome to infinimesh. Log in with your username and password.</a-row
-      >
+      <a-row
+        type="flex"
+        justify="center"
+        style="color: rgba(0, 0, 0, 0.65);"
+      >Welcome to infinimesh. Log in with your username and password.</a-row>
 
       <a-row style="margin-top: 1rem">
         <a-form :form="form" @submit="handleSubmit">
@@ -22,11 +24,7 @@
               ]"
               placeholder="Username"
             >
-              <a-icon
-                slot="prefix"
-                type="user"
-                style="color: rgba(0,0,0,.25)"
-              />
+              <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
             </a-input>
           </a-form-item>
           <a-form-item>
@@ -42,17 +40,11 @@
               type="password"
               placeholder="Password"
             >
-              <a-icon
-                slot="prefix"
-                type="lock"
-                style="color: rgba(0,0,0,.25)"
-              />
+              <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
             </a-input>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" html-type="submit" style="width: 100%"
-              >Login</a-button
-            >
+            <a-button type="primary" html-type="submit" style="width: 100%">Login</a-button>
           </a-form-item>
         </a-form>
       </a-row>
@@ -64,7 +56,7 @@
 export default {
   data() {
     return {
-      form: this.$form.createForm(this, { name: "login" })
+      form: this.$form.createForm(this, { name: "login" }),
     };
   },
   methods: {
@@ -74,20 +66,20 @@ export default {
         if (!err) {
           try {
             let res = await this.$auth.loginWith("local", {
-              data: values
+              data: values,
             });
-            this.$router.push("/dashboard");
+            this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
-              placement: "bottomLeft",
+              placement: "bottomRight",
               duration: 10,
-              ...e.response.data
+              ...e.response.data,
             });
           }
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -96,5 +88,11 @@ export default {
   height: 100%;
   min-height: 500px;
   width: 100%;
+}
+</style>
+
+<style lang="less" scoped>
+h1 {
+  color: @line-color;
 }
 </style>

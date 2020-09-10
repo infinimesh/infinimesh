@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 
 	"strconv"
 
@@ -42,6 +43,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"robpike.io/filter"
 )
 
 const (
@@ -101,6 +103,58 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 
 				if !resp.Enabled {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
+				}
+
+				ctx = context.WithValue(ctx, accountIDClaim, accountID)
+
+				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
+					log.Info("Token is restricted", zap.Any("restricted", restricted))
+
+					fullMethod := strings.Split(info.FullMethod, "/")
+					reqNS, reqMethod := fullMethod[1], fullMethod[2]
+					for ns, ids := range claims {
+						if reqNS == ns {
+							idSet := make(map[string]bool)
+							if ids != nil {
+								for _, id := range ids.([]interface{}) {
+									idSet[id.(string)] = true
+								}
+							}
+							if reqMethod == "List" {
+								r, err := handler(ctx, req)
+								if err != nil {
+									return r, err
+								}
+								if ids != nil {
+									switch reqNS {
+									case "infinimesh.api.Devices":
+										res := r.(*registrypb.ListResponse)
+										res.Devices = filter.Choose(res.Devices, func(el *registrypb.Device) bool { return idSet[el.Id] }).([]*registrypb.Device)
+										r = res
+									case "infinimesh.api.Accounts":
+										res := r.(*nodepb.ListAccountsResponse)
+										res.Accounts = filter.Choose(res.Accounts, func(el *nodepb.Account) bool { return idSet[el.Uid] }).([]*nodepb.Account)
+										r = res
+									case "infinimesh.api.Namespaces":
+										res := r.(*nodepb.ListNamespacesResponse)
+										res.Namespaces = filter.Choose(res.Namespaces, func(el *nodepb.Namespace) bool { return idSet[el.Id] }).([]*nodepb.Namespace)
+										r = res
+									case "infinimesh.api.Objects":
+										res := r.(*nodepb.ListObjectsResponse)
+										res.Objects = filter.Choose(res.Objects, func(el *nodepb.Object) bool { return idSet[el.Uid] }).([]*nodepb.Object)
+										r = res
+									}
+								}
+								return r, err
+							} else if reqMethod == "Get" {
+								if ids == nil || idSet[req.(map[string]interface{})["id"].(string)] {
+									return handler(ctx, req)
+								}
+							}
+							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
+						}
+					}
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
 				}
 
 				return handler(ctx, req)

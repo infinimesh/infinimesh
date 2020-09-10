@@ -204,7 +204,7 @@ func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespaceI
 	}
 
 	// TODO use internal method that runs within txn
-	ns, err := s.GetNamespace(ctx, namespaceID)
+	ns, err := s.GetNamespaceID(ctx, namespaceID)
 	if err != nil {
 		return err
 	}
@@ -316,7 +316,7 @@ func (s *DGraphRepo) SetPassword(ctx context.Context, account, password string) 
 	}
 
 	if len(result.Account[0].HasCredentials) == 0 {
-		return errors.New("No credentials found")
+		return errors.New("The account doesnot have credentials. Please set credential node.")
 	}
 
 	_, err = txn.Mutate(ctx, &api.Mutation{

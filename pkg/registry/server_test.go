@@ -25,6 +25,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -32,6 +33,8 @@ import (
 	randomdata "github.com/Pallinder/go-randomdata"
 
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
@@ -133,7 +136,7 @@ func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
 	randomName := randomdata.SillyName()
 
-	_, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
 	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
@@ -167,6 +170,86 @@ func TestCreateGet(t *testing.T) {
 	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
+}
+
+func TestUpdate(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	require.NoError(t, err)
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	// Create the device
+	request := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName, ns.Id),
+	}
+	response, err := server.Create(context.Background(), request)
+	require.NoError(t, err)
+	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
+
+	// Get the device
+	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
+		Id: response.Device.Id,
+	})
+
+	//Validate the device
+	require.NoError(t, err)
+	require.NotNil(t, respGet.Device)
+	require.EqualValues(t, randomName, respGet.Device.Name)
+	require.EqualValues(t, request.Device.Certificate.PemData, respGet.Device.Certificate.PemData)
+	require.EqualValues(t, request.Device.Certificate.Algorithm, respGet.Device.Certificate.Algorithm)
+
+	// Get by fingerprint
+	respFP, err := server.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+		Fingerprint: response.Device.Certificate.Fingerprint,
+	})
+	require.NoError(t, err)
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	var NewStatus *wrappers.BoolValue
+	NewTag := []string{"d"}
+
+	//Update the device
+	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
+		Device: &registrypb.Device{
+			Id:      response.Device.Id,
+			Name:    NewName,
+			Enabled: NewStatus,
+			Tags:    NewTag,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "Tags"},
+		},
+	})
+	require.NoError(t, err)
+
+	// Get the updated device details
+	respGet, err = server.Get(context.Background(), &registrypb.GetRequest{
+		Id: response.Device.Id,
+	})
+	require.NoError(t, err)
+
+	//Validate the updated device
+	require.NoError(t, err)
+	require.EqualValues(t, NewName, respGet.Device.Name)
+	require.EqualValues(t, []string{"d", "c", "b", "a"}, respGet.Device.Tags)
+
+	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+		Id: response.Device.Id,
+	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 func TestDelete(t *testing.T) {

@@ -22,13 +22,7 @@
             </h1>
           </transition>
         </a-col>
-        <a-col
-          :xs="1"
-          :sm="1"
-          :md="1"
-          :xl="{ span: 1, offset: 1 }"
-          :xxl="{ span: 1, offset: 1 }"
-        >
+        <a-col :xs="1" :sm="1" :md="1" :xl="{ span: 1, offset: 1 }" :xxl="{ span: 1, offset: 1 }">
           <a-row type="flex" justify="end">
             <a-tooltip
               :title="
@@ -63,9 +57,7 @@
                 <a-row v-if="device.tags && device.tags.length">
                   <p>
                     Tags:
-                    <a-tag v-for="tag in device.tags" :key="tag">
-                      {{ tag }}
-                    </a-tag>
+                    <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
                   </p>
                 </a-row>
                 <a-row v-else type="flex" justify="center" class="muted">
@@ -80,23 +72,12 @@
               </template>
             </a-card>
             <a-card title="Actions" key="actions" v-if="device" hoverable>
-              <device-actions
-                :device-id="device.id"
-                @delete="handleDeviceDelete"
-              />
+              <device-actions :device-id="device.id" @delete="handleDeviceDelete" />
             </a-card>
-            <a-card
-              title="State"
-              key="state"
-              v-if="device && device.state"
-              hoverable
-            >
+            <a-card title="State" key="state" v-if="device && device.state" hoverable>
               <a-row>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
-                  <device-state
-                    title="Reported"
-                    :state="device.state.shadow.reported"
-                  />
+                  <device-state title="Reported" :state="device.state.shadow.reported" />
                 </a-col>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
                   <device-state
@@ -130,12 +111,12 @@ export default {
      * Device ID - not required if component is mounted via Router _id
      */
     deviceId: {
-      required: false
-    }
+      required: false,
+    },
   },
   data() {
     return {
-      deviceObject: false
+      deviceObject: false,
     };
   },
   computed: {
@@ -145,7 +126,7 @@ export default {
       },
       set(obj) {
         this.deviceObject = { ...this.deviceObject, ...obj };
-      }
+      },
     },
     deviceStateBulbColor() {
       if (!(this.device && this.device.enabled !== undefined)) {
@@ -155,16 +136,16 @@ export default {
       } else {
         return "#eb2f96";
       }
-    }
+    },
   },
   mounted() {
     this.device = {
-      id: this.deviceId || this.$route.params.id
+      id: this.deviceId || this.$route.params.id,
     };
     // Getting Device data from API
     this.$axios
       .get(`/api/devices/${this.device.id}`)
-      .then(res => {
+      .then((res) => {
         this.device = res.data.device;
         this.socket = new WebSocket(
           `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
@@ -172,24 +153,30 @@ export default {
           }/state/stream`,
           ["Bearer", this.$auth.getToken("local").split(" ")[1]]
         );
-        this.socket.onmessage = msg => {
+        this.socket.onmessage = (msg) => {
           this.device.state.shadow.reported = JSON.parse(
             msg.data
           ).result.reportedState;
         };
-        window.addEventListener("beforeunload", function(event) {
+        window.addEventListener("beforeunload", function (event) {
           this.socket.close();
         });
       })
-      .catch(res => {
+      .catch((res) => {
         if (res.response.status == 404) {
           this.$notification.error({
             message: "Device wasn't found",
             description: "Redirecting...",
-            placement: "bottomRight"
+            placement: "bottomRight",
           });
-          this.$router.push({ name: "dashboard-devices" });
+        } else if (res.response.status == 403) {
+          this.$notification.error({
+            message: "You have no access to this device",
+            description: "Redirecting...",
+            placement: "bottomRight",
+          });
         }
+        this.$router.push({ name: "dashboard-devices" });
       });
     this.deviceStateGet();
   },
@@ -200,10 +187,10 @@ export default {
     async deviceStateGet() {
       await this.$axios
         .get(`/api/devices/${this.device.id}/state`)
-        .then(res => {
+        .then((res) => {
           this.device = {
             ...this.device,
-            state: res.data
+            state: res.data,
           };
         });
     },
@@ -216,12 +203,12 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}/state`,
         method: "patch",
-        data: state
+        data: state,
       })
-        .then(res => {
+        .then((res) => {
           this.deviceStateGet();
         })
-        .catch(res => {
+        .catch((res) => {
           console.log(res);
         })
         .then(() => {
@@ -231,17 +218,25 @@ export default {
     handleDeviceDelete() {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
-        method: "delete"
-      }).then(() => {
-        this.$message.success("Device successfuly deleted!");
-        this.$store.dispatch("devices/get");
-        this.$router.push({ name: "dashboard-devices" });
-      });
-    }
+        method: "delete",
+      })
+        .then(() => {
+          this.$message.success("Device successfuly deleted!");
+          this.$store.dispatch("devices/get");
+          this.$router.push({ name: "dashboard-devices" });
+        })
+        .catch((e) => {
+          this.$notification.error({
+            message: "Error deleting device",
+            description: e.response.data.message,
+            placement: "bottomRight",
+          });
+        });
+    },
   },
   validate({ params }) {
     return /0[xX][0-9a-fA-F]+/.test(params.id);
-  }
+  },
 };
 </script>
 
@@ -250,10 +245,6 @@ export default {
   overflow: hidden;
   font-family: Exo;
   font-weight: 500;
-}
-.lead {
-  font-size: 2rem;
-  color: #fff;
 }
 .muted {
   opacity: 0.7;

@@ -21,6 +21,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 )
 
+//Device data struct with Certificates data strcuture as slice
 type Device struct {
 	dgraph.Object
 	Tags    []string `json:"tags,omitempty"`
@@ -29,6 +30,7 @@ type Device struct {
 	Certificates []*X509Cert `json:"certificates,omitempty"`
 }
 
+//X509Cert is Certificate data struct which is refered in Device data strcuture
 type X509Cert struct {
 	dgraph.Node
 	PemData              string `json:"pem_data,omitempty"`

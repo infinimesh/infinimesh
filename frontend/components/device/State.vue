@@ -5,9 +5,7 @@
         <h1 class="lead">{{ title }}</h1>
       </a-col>
       <a-col :span="4" :offset="8" v-if="editable && !active_edit">
-        <a-button type="primary" icon="edit" @click="active_edit = true"
-          >Edit</a-button
-        >
+        <a-button type="primary" icon="edit" @click="active_edit = true">Edit</a-button>
       </a-col>
     </a-row>
     <p>
@@ -24,9 +22,7 @@
     <pre v-html="state.data" v-else />
     <a-row v-if="active_edit">
       <a-col :span="10">
-        <a-button type="primary" icon="close" @click="active_edit = false"
-          >Cancel</a-button
-        >
+        <a-button type="primary" icon="close" @click="active_edit = false">Cancel</a-button>
       </a-col>
       <a-col :span="10" :offset="2" style="text-align: right">
         <a-popconfirm
@@ -55,36 +51,36 @@ const formatDateNumber = (num, n = 2) => {
   }
   return num;
 };
-const date2Object = date => {
+const date2Object = (date) => {
   return {
     day: date.getDate(),
     month: date.getMonth(),
     year: date.getFullYear(),
     hour: date.getHours(),
     minute: date.getMinutes(),
-    second: date.getSeconds()
+    second: date.getSeconds(),
   };
 };
 
 export default Vue.component("device-state", {
   props: {
     state: {
-      required: true
+      required: true,
     },
     title: {
       required: true,
-      type: String
+      type: String,
     },
     editable: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
       active_edit: false,
       desired_state: JSON.stringify(this.state.data, null, 2),
-      state_updating: false
+      state_updating: false,
     };
   },
   methods: {
@@ -128,8 +124,8 @@ export default Vue.component("device-state", {
       this.$emit("update", this.desired_state, () => {
         this.state_updating = false;
       });
-    }
-  }
+    },
+  },
 });
 </script>
 
@@ -142,11 +138,14 @@ pre {
   width: 95%;
 }
 textarea {
-  background: @infinimesh-dark-purple;
+  background: @primary-color-dark;
   width: 95%;
   font-family: monospace, monospace;
 }
 button {
   margin-top: 0.3rem;
+}
+strong {
+  color: #d1d1ff;
 }
 </style>

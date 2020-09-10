@@ -182,13 +182,16 @@ export default {
 </style>
 <style lang="less" scoped>
 .muted {
-  color: @infinimesh-dark-purple;
+  color: @primary-color-dark;
 }
 .create-form {
   border-radius: @border-radius-base;
-  background: @infinimesh-dark-purple;
-  border: 1px dashed white;
+  background: @primary-color-dark;
+  border: @border-base;
   min-height: var(--device-card-height);
   cursor: pointer;
+}
+.create-form .anticon {
+  color: @icon-color-dark;
 }
 </style>

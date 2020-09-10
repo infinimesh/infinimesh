@@ -47,6 +47,7 @@ var (
 )
 
 func init() {
+	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("DB_ADDR", ":6379")
 	viper.SetDefault("KAFKA_CONSUMER_GROUP", "persister")

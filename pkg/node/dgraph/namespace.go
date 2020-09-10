@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	"github.com/dgraph-io/dgo/protos/api"
 
@@ -141,13 +142,13 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
-                     namespaces(func: uid($account)) @normalize @cascade  {
-                       access.to.namespace @filter(eq(type, "namespace")) {
-                         uid : uid
-                         name : name
-                       }
-	             }
-                   }`
+		namespaces(func: uid($account)) @normalize @cascade  {
+		  access.to.namespace @filter(eq(type, "namespace")) @facets(NOT eq(permission,"NONE")) {
+			uid : uid
+			name : name
+		  }
+		}
+	  }`
 
 	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$account": accountID})
 	if err != nil {
@@ -190,10 +191,10 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query access($namespaceid: string, $user_id: string){
-		access(func: uid($user_id)) @cascade {
+		access(func: uid($user_id)) @normalize @cascade {
 		  name
 		  uid
-		  access.to.namespace @filter(uid($namespaceid)) {
+		  access.to.namespace @filter(uid($namespaceid)) @facets(permission,inherit) {
 			uid
 			name
 			type
@@ -207,7 +208,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		return false, err
 	}
 	var access struct {
-		Access []Object `json:"access"`
+		Access []Namespace `json:"access"`
 	}
 
 	err = json.Unmarshal(res.Json, &access)
@@ -215,5 +216,13 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 		return false, err
 	}
 
-	return len(access.Access) > 0, nil
+	actionValue := strings.Split(action.String(), "_")
+
+	if len(access.Access) > 0 {
+		if isPermissionSufficient(actionValue[0], access.Access[0].AccessToPermission) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

@@ -37,10 +37,11 @@ type accountAPI struct {
 	client        nodepb.AccountServiceClient
 }
 
+//API Method to get details of own Account
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	return a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
@@ -48,10 +49,11 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 	})
 }
 
+//API Method to Get Details of an Account
 func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -59,10 +61,11 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	}); err == nil && res.GetIsRoot() {
 		return a.client.GetAccount(ctx, request)
 	}
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to get details.")
 
 }
 
+//API Method to token for an Account
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
@@ -109,10 +112,11 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 	return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 }
 
+//API Method to Update an Account
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -121,13 +125,14 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to update details.")
 }
 
+//API Method to Create an Account
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -137,13 +142,14 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 		return res, err
 	}
 
-	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "The account does not have permission to create another account.")
 }
 
+//API Method to List all account
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -153,6 +159,22 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return res, err
 	}
 
-	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "Insufficient permissions")
+	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The account does not have permission to list details.")
 
+}
+
+//API Method to Delete an Account
+func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (response *nodepb.DeleteAccountResponse, err error) {
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+	}
+
+	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: account,
+	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.DeleteAccount(ctx, request)
+		return res, err
+	}
+	return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The account does not have permission to update details.")
 }

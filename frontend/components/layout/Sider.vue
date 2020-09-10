@@ -1,8 +1,8 @@
 <template>
   <a-menu mode="vertical" v-model="route" id="menu">
-    <a-menu-item key="dashboard">
-      <a-icon type="cloud" />
-      <span>Device Registry</span>
+    <a-menu-item :key="page.link" v-for="page in pagesFiltered">
+      <a-icon :type="page.icon" />
+      <span>{{page.title}}</span>
     </a-menu-item>
     <a-sub-menu key="user">
       <span slot="title">
@@ -20,7 +20,23 @@
 
 <script>
 export default {
+  data() {
+    return {
+      pages: [
+        { title: "Device Registry", icon: "cloud", link: "dashboard-devices" },
+        { title: "Accounts", icon: "idcard", link: "dashboard-accounts" },
+        {
+          title: "Namespaces",
+          icon: "folder-open",
+          link: "dashboard-namespaces",
+        },
+      ],
+    };
+  },
   computed: {
+    pagesFiltered() {
+      return this.pages.filter((page) => this.allowedScope(page.link));
+    },
     user() {
       return this.$store.getters.loggedInUser;
     },
@@ -31,6 +47,11 @@ export default {
       set(val) {
         this.$router.push({ name: val[0] });
       },
+    },
+  },
+  methods: {
+    allowedScope(scope) {
+      return this.$store.getters["window/hasAccess"](scope);
     },
   },
 };

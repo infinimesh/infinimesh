@@ -23,22 +23,25 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//KindAsset and KindDevice are constants for creating Object Heirarchy
 const (
 	KindAsset  = "asset"
 	KindDevice = "device"
 )
 
+//Repo Interface to expose methods
 type Repo interface {
 	CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error)
 	ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error)
 	UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error)
 	GetAccount(ctx context.Context, accountID string) (account *nodepb.Account, err error)
 	SetPassword(ctx context.Context, account, password string) error
+	DeleteAccount(ctx context.Context, account *nodepb.DeleteAccountRequest) (err error)
 
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
-	AuthorizeNamespace(ctx context.Context, account, namespace string, action nodepb.Action) (err error)
+	AuthorizeNamespace(ctx context.Context, account, namespaceID string, action nodepb.Action) (err error)
 	Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error)
 
 	CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error)

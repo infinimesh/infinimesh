@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -44,6 +45,7 @@ var (
 )
 
 func init() {
+	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.AutomaticEnv()
 
@@ -53,16 +55,18 @@ func init() {
 func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, stop chan bool, ctx context.Context) (close io.Closer, done chan bool) {
 	done = make(chan bool)
 	consumerGroupClient := sarama.NewConfig()
-	consumerGroupClient.Version = sarama.V1_0_0_0
+	consumerGroupClient.Version = sarama.V2_0_0_0
 	consumerGroupClient.Consumer.Return.Errors = true
 	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	client, err := sarama.NewClient([]string{broker}, consumerGroupClient)
+	fmt.Printf("client created %v\n", client)
 	if err != nil {
 		panic(err)
 	}
 
 	group, err := sarama.NewConsumerGroupFromClient(consumerGroup, client)
+	fmt.Printf("consumer group %v, client %v, group %v \n", consumerGroup, client, group)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +84,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	pconfig.Producer.Partitioner = sarama.NewManualPartitioner
 	pconfig.Producer.Return.Errors = false
 	pconfig.Producer.Return.Successes = false
-	pconfig.Version = sarama.V1_1_0_0
+	pconfig.Version = sarama.V2_0_0_0
 
 	producerClient, err := sarama.NewClient([]string{broker}, pconfig)
 	if err != nil {
@@ -88,11 +92,11 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	}
 
 	config := sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
+	config.Version = sarama.V2_0_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	pconfig.Producer.Return.Errors = false
-	pconfig.Producer.Return.Successes = false
+	//pconfig.Producer.Return.Errors = false
+	//pconfig.Producer.Return.Successes = false
 	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	config.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 
@@ -112,8 +116,9 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	go func() {
 	outer:
 		for {
-
+			fmt.Printf("group : %v, %v,  %v \n", group, inputTopic, handler)
 			err = group.Consume(ctx, []string{inputTopic}, handler)
+			fmt.Printf("Handler called : %v and err: %v ", inputTopic, err)
 			if err != nil {
 				panic(err)
 			}
@@ -141,8 +146,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
+	fmt.Printf("closeReported, doneReported: %v, %v\n", closeReported, doneReported)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
-
+	//fmt.Printf("closeReported, doneReported: %v,%v", closeDesired, doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
 	// TODO adjust code to new topology
 
