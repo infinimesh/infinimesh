@@ -92,22 +92,21 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		len += 2
 	}
 
-	/*
-		propertyLength := make([]byte, 1)
-		n, err = io.ReadFull(r, propertyLength)
-		len += n
-		if err != nil {
-			return
-		}
+	propertyLength := make([]byte, 1)
+	n, err = io.ReadFull(r, propertyLength)
+	len += n
+	if err != nil {
+		return
+	}
 
-			vh.PublishProperties.PropertyLength = int(propertyLength[0])
-			if vh.PublishProperties.PropertyLength < 1 {
-				fmt.Printf("No optional publish properties added")
-			} else {
-				len += vh.PublishProperties.PropertyLength
-				vh, _ = readPublishProperties(r, vh)
-			}
-	*/
+	vh.PublishProperties.PropertyLength = int(propertyLength[0])
+	if vh.PublishProperties.PropertyLength < 1 {
+		fmt.Printf("No optional publish properties added")
+	} else {
+		len += vh.PublishProperties.PropertyLength
+		vh, _ = readPublishProperties(r, vh)
+	}
+
 	return
 }
 
@@ -201,13 +200,14 @@ func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPa
 		RemainingLength:   0, // will be populated by WriteTo for the moment
 	}
 
-	/*pb := PublishProperties{
+	pb := PublishProperties{
 		PropertyLength: 0,
-	}*/
+	}
 
 	vh := PublishVariableHeader{
-		Topic:    topic,
-		PacketID: int(packetID),
+		Topic:             topic,
+		PacketID:          int(packetID),
+		PublishProperties: pb,
 	}
 
 	flags := PublishHeaderFlags{
