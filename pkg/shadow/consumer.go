@@ -166,6 +166,7 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		// Input: any JSON
 		delta := string(message.Value)
 		old := string(deviceState.State)
+		fmt.Printf("old state: %v", old)
 
 		newState, err := applyDelta(old, delta)
 		fmt.Printf("Consumer newState : %v", newState)
