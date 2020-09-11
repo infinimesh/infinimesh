@@ -313,7 +313,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		return
 
 	}
-
+	//TODO : MQTT CONNACK Properties need add
 	resp := packet.ConnAckControlPacket{
 		FixedHeader: packet.FixedHeader{
 			ControlPacketType: packet.CONNACK,
