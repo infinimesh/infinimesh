@@ -95,7 +95,7 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags, protoLevel
 	if int(protoLevel) == 5 {
 		propertyLength := make([]byte, 1)
 		n, err = io.ReadFull(r, propertyLength)
-		len += n
+		len++
 		if err != nil {
 			return
 		}
