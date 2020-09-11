@@ -214,7 +214,7 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	//clientIDLength := int(clientIDLengthBytes[0])
 	//clientID := string(payloadBytes[1 : 1+clientIDLength])
 	clientIDLength := int(binary.BigEndian.Uint16(clientIDLengthBytes))
-	clientID = string(payloadBytes[2 : 2+clientIDLength])
+	clientID := string(payloadBytes[2 : 2+clientIDLength])
 	return ConnectPayload{
 		ClientID: clientID,
 	}, nil
