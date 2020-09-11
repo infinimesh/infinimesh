@@ -208,7 +208,7 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	// TODO am besten so viel einlesen wie moeglich, und dann reslicen / reader zusammenstecken
 
 	clientIDLengthBytes := payloadBytes[:2]
-	clientIDLength := int(clientIDLengthBytes[0])
+	clientIDLength := int(binary.BigEndian.Uint16(clientIDLengthBytes[0]))
 	clientID := string(payloadBytes[1 : 1+clientIDLength])
 
 	if clientIDLength == 0 {
