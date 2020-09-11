@@ -92,13 +92,14 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		len += 2
 	}
 
+	/*
 	propertyLength := make([]byte, 1)
 	n, err = io.ReadFull(r, propertyLength)
 	len += n
 	if err != nil {
 		return
 	}
-
+	
 	vh.PublishProperties.PropertyLength = int(propertyLength[0])
 	if vh.PublishProperties.PropertyLength < 1 {
 		fmt.Printf("No optional publish properties added")
@@ -106,7 +107,7 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		len += vh.PublishProperties.PropertyLength
 		vh, _ = readPublishProperties(r, vh)
 	}
-
+	*/
 	return
 }
 
@@ -199,15 +200,14 @@ func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPa
 		ControlPacketType: PUBLISH,
 		RemainingLength:   0, // will be populated by WriteTo for the moment
 	}
-
+	/*
 	pb := PublishProperties{
 		PropertyLength: 0,
 	}
-
+	*/
 	vh := PublishVariableHeader{
 		Topic:             topic,
-		PacketID:          int(packetID),
-		PublishProperties: pb,
+		PacketID:          int(packetID)
 	}
 
 	flags := PublishHeaderFlags{
