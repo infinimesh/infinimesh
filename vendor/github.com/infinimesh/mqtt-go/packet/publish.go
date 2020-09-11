@@ -92,7 +92,7 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags, protoLevel
 		len += 2
 	}
 
-	print("protoLevel added : %v, %v", protoLevel, int(protoLevel))
+	fmt.Printf("protoLevel added : %v, %v", protoLevel, int(protoLevel))
 	if int(protoLevel) == 5 {
 		len++
 		propertyLength := make([]byte, 1)
