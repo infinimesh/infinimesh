@@ -121,6 +121,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 		hdr.ConnectFlags.WillQoS = 1
 	}
 
+	fmt.Printf("ProtoLevel %v, %v\n", hdr.ProtocolLevel, int(hdr.ProtocolLevel))
 	if int(hdr.ProtocolLevel) == 5 {
 		//reading variable header properties length
 		propertiesLength := make([]byte, 1)
