@@ -130,7 +130,7 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 			return hdr, len, errors.New("Could not read properties length")
 		}
 		hdr.ConnectProperties.PropertyLength = int(propertiesLength[0])
-		if hdr.ConnectProperties.PropertyLength = 0 {
+		if hdr.ConnectProperties.PropertyLength == 0 {
 			fmt.Printf("No optional properties added")
 		} else {
 			len += hdr.ConnectProperties.PropertyLength
