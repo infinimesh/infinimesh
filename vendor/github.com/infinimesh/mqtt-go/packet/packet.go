@@ -200,6 +200,7 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPa
 		}
 
 		payload, err := readPublishPayload(remainingReader, fh.RemainingLength-vhLength)
+		fmt.Printf("Publish payload :%v\n", payload)
 		if err != nil {
 			return nil, err
 		}
