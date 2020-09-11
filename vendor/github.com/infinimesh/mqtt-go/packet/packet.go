@@ -29,7 +29,7 @@ type ControlPacketType byte
 
 type QosLevel int
 
-type protocolLevel int
+type protocolLevel byte
 
 // MQTT Quality of Service levels
 const (
