@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -40,6 +41,10 @@ type accountAPI struct {
 //API Method to get details of own Account
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
+
+	//Added logging
+	log.Info("Self Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
@@ -52,6 +57,10 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 //API Method to Get Details of an Account
 func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
+
+	//Added logging
+	log.Info("Get Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
@@ -61,12 +70,19 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	}); err == nil && res.GetIsRoot() {
 		return a.client.GetAccount(ctx, request)
 	}
+
+	//Added logging
+	log.Info("Get Account API Method", zap.Any("Validation Failed", err))
 	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to get details.")
 
 }
 
 //API Method to token for an Account
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
+
+	//Added logging
+	log.Info("Token Method", zap.Any("Function Invoked", request.GetUsername()))
+
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
 		return nil, err
@@ -97,6 +113,9 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		} else {
 			claim[tokenRestrictedClaim] = false
 		}
+
+		//Added logging
+		log.Info("Token Method", zap.Any("Get Token for the Authenticated User", ctx.Value("account_id")))
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
