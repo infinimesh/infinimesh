@@ -92,7 +92,7 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		len += 2
 	}
 
-	/*
+	if int(protoLevel) == 5 {
 		propertyLength := make([]byte, 1)
 		n, err = io.ReadFull(r, propertyLength)
 		len += n
@@ -101,13 +101,13 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		}
 
 		vh.PublishProperties.PropertyLength = int(propertyLength[0])
-		if vh.PublishProperties.PropertyLength < 1 {
+		if vh.PublishProperties.PropertyLength == 0 {
 			fmt.Printf("No optional publish properties added")
 		} else {
 			len += vh.PublishProperties.PropertyLength
 			vh, _ = readPublishProperties(r, vh)
 		}
-	*/
+	}
 	return
 }
 
