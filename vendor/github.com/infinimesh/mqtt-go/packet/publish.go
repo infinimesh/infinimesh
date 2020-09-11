@@ -69,7 +69,7 @@ func interpretPublishHeaderFlags(header byte) (flags PublishHeaderFlags, err err
 	return
 }
 
-func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh PublishVariableHeader, len int, err error) {
+func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags, protoLevel byte) (vh PublishVariableHeader, len int, err error) {
 	topicLength, err := readUint16(r)
 	len += 2
 	if err != nil {
