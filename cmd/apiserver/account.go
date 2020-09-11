@@ -134,6 +134,10 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 //API Method to Update an Account
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
 	account, ok := ctx.Value("account_id").(string)
+
+	//Added logging
+	log.Info("Update Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
@@ -141,15 +145,24 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+
+		//Added logging
+		log.Info("Update Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
+
 	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to update details.")
 }
 
 //API Method to Create an Account
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 	account, ok := ctx.Value("account_id").(string)
+
+	//Added logging
+	log.Info("Creation Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
@@ -157,6 +170,10 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+
+		//Added logging
+		log.Info("Create Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+
 		res, err := a.client.CreateUserAccount(ctx, request)
 		return res, err
 	}
@@ -166,6 +183,10 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 
 //API Method to List all account
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
+
+	//Added logging
+	log.Info("List Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -174,6 +195,10 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+
+		//Added logging
+		log.Info("List Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+
 		res, err := a.client.ListAccounts(ctx, request)
 		return res, err
 	}
@@ -184,6 +209,10 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 
 //API Method to Delete an Account
 func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (response *nodepb.DeleteAccountResponse, err error) {
+
+	//Added logging
+	log.Info("Delete Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -192,6 +221,10 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+
+		//Added logging
+		log.Info("Delete Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+
 		res, err := a.client.DeleteAccount(ctx, request)
 		return res, err
 	}
