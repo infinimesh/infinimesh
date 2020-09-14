@@ -43,7 +43,7 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Self Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("Self Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -59,7 +59,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Get Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("Get Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -71,17 +71,14 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 		return a.client.GetAccount(ctx, request)
 	}
 
-	//Added logging
-	log.Info("Get Account API Method", zap.Any("Validation Failed", err))
 	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to get details.")
-
 }
 
-//API Method to token for an Account
+//Method to get token for an Account
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
-	log.Info("Token Method", zap.Any("Function Invoked", request.GetUsername()))
+	log.Info("Token Generate Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
@@ -115,7 +112,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		}
 
 		//Added logging
-		log.Info("Token Method", zap.Any("Get Token for the Authenticated User", ctx.Value("account_id")))
+		log.Info("Token Generate Method", zap.String("Get Token for the Authenticated User", request.Username))
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
@@ -136,7 +133,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Update Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("Update Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -147,7 +144,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 	}); err == nil && res.GetIsRoot() {
 
 		//Added logging
-		log.Info("Update Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+		log.Info("Update Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
 
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
@@ -158,10 +155,11 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 
 //API Method to Create an Account
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
-	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Create Account API Method", zap.Any("Function Invoked", nil), zap.Any("Account ID:", ctx.Value("account_id")))
+	log.Info("Create Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
+
+	account, ok := ctx.Value("account_id").(string)
 
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -172,7 +170,8 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	}); err == nil && res.GetIsRoot() {
 
 		//Added logging
-		log.Info("Create Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+		log.Info("Create Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
+		log.Info("Create Account API Method", zap.Bool("Temporary Log", true), zap.Any("Contect", ctx), zap.Any("Request", request))
 
 		res, err := a.client.CreateUserAccount(ctx, request)
 		return res, err
@@ -185,7 +184,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 
 	//Added logging
-	log.Info("List Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("List Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -197,7 +196,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 	}); err == nil && res.GetIsRoot() {
 
 		//Added logging
-		log.Info("List Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+		log.Info("List Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
 
 		res, err := a.client.ListAccounts(ctx, request)
 		return res, err
@@ -211,7 +210,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (response *nodepb.DeleteAccountResponse, err error) {
 
 	//Added logging
-	log.Info("Delete Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("Delete Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -223,7 +222,7 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	}); err == nil && res.GetIsRoot() {
 
 		//Added logging
-		log.Info("Delete Account API Method", zap.Any("Validation for Root Account", res.GetIsRoot()))
+		log.Info("Delete Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
 
 		res, err := a.client.DeleteAccount(ctx, request)
 		return res, err
