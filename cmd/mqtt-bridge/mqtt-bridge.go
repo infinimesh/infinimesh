@@ -338,7 +338,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 
 	for {
-		p, err := packet.ReadPacket(c)
+		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Printf("Client closed connection.\n")
