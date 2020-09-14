@@ -29,8 +29,6 @@ type ControlPacketType byte
 
 type QosLevel int
 
-var protocolLevel byte
-
 // MQTT Quality of Service levels
 const (
 	QoSLevelNone        QosLevel = 0
@@ -168,6 +166,7 @@ func ReadPacket(r io.Reader) (ControlPacket, error) {
 
 // nolint: gocyclo
 func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPacket, error) {
+	var protocolLevel byte
 	switch fh.ControlPacketType {
 	case CONNECT:
 		vh, variableHeaderSize, err := getConnectVariableHeader(remainingReader)
@@ -194,7 +193,6 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPa
 		if err != nil {
 			return nil, err
 		}
-
 		vh, vhLength, err := readPublishVariableHeader(remainingReader, flags, protocolLevel)
 		if err != nil {
 			return nil, err
