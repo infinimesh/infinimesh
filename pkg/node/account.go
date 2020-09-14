@@ -51,7 +51,12 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 
 //CreateUserAccount is a method for creating user account
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
-	log := s.Log.Named("CreateUserAccount")
+
+	log := s.Log.Named("CreateUserAccount Controller")
+
+	//Added logging
+	log.Info("Create Account Controller Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
 		log.Error("Failed to create user", zap.Error(err))
