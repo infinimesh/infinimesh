@@ -52,27 +52,27 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 //CreateUserAccount is a method for creating user account
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 
-	log := s.Log.Named("CreateUserAccount Controller")
+	//log := s.Log.Named("CreateUserAccount Controller")
 
 	//Added logging
 	//log.Info("Create Account Controller Method", zap.Any("Function Invoked", nil), zap.String("Account ID:", request.Account.Uid))
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
-		log.Error("Failed to create user", zap.Error(err))
+		//log.Error("Failed to create user", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to create user")
 	}
 
 	//Added logging
-	log.Info("Create Account Controller Method", zap.Any("User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
+	//log.Info("Create Account Controller Method", zap.Any("User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
 
 	err = s.Grafana.CreateUser(request.Account.Name)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to create grafana user", zap.String("name", request.Account.Name), zap.Error(err))
+		//log.Error("Failed to create grafana user", zap.String("name", request.Account.Name), zap.Error(err))
 	} else {
 		//Added logging
-		log.Info("Create Account Controller Method", zap.Any("Graphana User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
+		//log.Info("Create Account Controller Method", zap.Any("Graphana User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
 	}
 
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
