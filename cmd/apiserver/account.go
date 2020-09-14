@@ -161,7 +161,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Creation Account API Method", zap.Any("Function Invoked", ctx.Value("account_id")))
+	log.Info("Create Account API Method", zap.Any("Function Invoked", nil), zap.Any("Account ID:", ctx.Value("account_id")))
 
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
