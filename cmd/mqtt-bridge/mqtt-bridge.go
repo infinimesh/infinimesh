@@ -336,6 +336,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		fmt.Println("Failed to write ConnAck. Closing connection.")
 		return
 	}
+	var topicAliasPublishMap map[string]int
 
 	for {
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
@@ -357,7 +358,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write PingResp", err)
 			}
 		case *packet.PublishControlPacket:
-			err = handlePublish(p, c, deviceID)
+			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap)
 			if err != nil {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
@@ -376,20 +377,33 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 }
 
-func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) error {
+func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int) (map[string]int, error) {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
-	if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
-		return err
+	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
+		if val, ok := topicAliasPublishMap[p.VariableHeader.Topic]; ok {
+			if val == p.VariableHeader.PublishProperties.TopicAlias {
+				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+					return topicAliasPublishMap, err
+				}
+			} else {
+				fmt.Printf("Please use the correct topic alias")
+			}
+		} else {
+			topicAliasPublishMap[p.VariableHeader.Topic] = p.VariableHeader.PublishProperties.TopicAlias
+		}
+	} else {
+		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+			return topicAliasPublishMap, err
+		}
 	}
 	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
 		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)) // TODO better always use directly uint16 for PacketIDs,everywhere
 		_, err := pubAck.WriteTo(c)
 		if err != nil {
-			return err
+			return topicAliasPublishMap, err
 		}
-
 	}
-	return nil
+	return topicAliasPublishMap, nil
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string) error {
