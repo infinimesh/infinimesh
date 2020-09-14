@@ -49,7 +49,7 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
-//CreateUserAccount is a method for creating user account.
+//CreateUserAccount is a method for creating user account
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 
 	log := s.Log.Named("CreateUserAccount Controller")
