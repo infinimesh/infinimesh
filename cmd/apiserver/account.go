@@ -171,7 +171,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 
 		//Added logging
 		log.Info("Create Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
-		log.Info("Create Account API Method", zap.Bool("Temporary Log", true), zap.Any("Contect", ctx), zap.Any("Request", request))
+		log.Info("Create Account API Method", zap.Bool("Temporary Log", true), zap.Any("Context", ctx), zap.Any("Request", request))
 
 		res, err := a.client.CreateUserAccount(ctx, request)
 		return res, err
