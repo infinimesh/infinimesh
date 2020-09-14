@@ -121,7 +121,8 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 		hdr.ConnectFlags.WillQoS = 1
 	}
 
-	/*
+	fmt.Printf("ProtoLevel %v, %v\n", hdr.ProtocolLevel, int(hdr.ProtocolLevel))
+	if int(hdr.ProtocolLevel) == 5 {
 		//reading variable header properties length
 		propertiesLength := make([]byte, 1)
 		n, err = r.Read(propertiesLength)
@@ -130,13 +131,13 @@ func getConnectVariableHeader(r io.Reader) (hdr ConnectVariableHeader, len int, 
 			return hdr, len, errors.New("Could not read properties length")
 		}
 		hdr.ConnectProperties.PropertyLength = int(propertiesLength[0])
-		if hdr.ConnectProperties.PropertyLength < 1 {
+		if hdr.ConnectProperties.PropertyLength == 0 {
 			fmt.Printf("No optional properties added")
 		} else {
 			len += hdr.ConnectProperties.PropertyLength
 			hdr, _ = readConnectProperties(r, hdr)
 		}
-	*/
+	}
 	return
 }
 
@@ -186,6 +187,7 @@ func readConnectProperties(r io.Reader, hdr ConnectVariableHeader) (ConnectVaria
 			propertiesLength = 0
 		}
 	}
+
 	return hdr, nil
 }
 
@@ -210,9 +212,10 @@ func readConnectPayload(r io.Reader, len int) (ConnectPayload, error) {
 	// TODO am besten so viel einlesen wie moeglich, und dann reslicen / reader zusammenstecken
 
 	clientIDLengthBytes := payloadBytes[:2]
+	//clientIDLength := int(clientIDLengthBytes[0])
+	//clientID := string(payloadBytes[1 : 1+clientIDLength])
 	clientIDLength := int(binary.BigEndian.Uint16(clientIDLengthBytes))
 	clientID := string(payloadBytes[2 : 2+clientIDLength])
-
 	return ConnectPayload{
 		ClientID: clientID,
 	}, nil

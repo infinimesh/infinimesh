@@ -69,7 +69,7 @@ func interpretPublishHeaderFlags(header byte) (flags PublishHeaderFlags, err err
 	return
 }
 
-func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh PublishVariableHeader, len int, err error) {
+func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags, protoLevel byte) (vh PublishVariableHeader, len int, err error) {
 	topicLength, err := readUint16(r)
 	len += 2
 	if err != nil {
@@ -91,22 +91,22 @@ func readPublishVariableHeader(r io.Reader, flags PublishHeaderFlags) (vh Publis
 		}
 		len += 2
 	}
-	/*
+
+	if int(protoLevel) == 5 {
 		propertyLength := make([]byte, 1)
-		n, err = io.ReadFull(r, propertyLength)
+		n, err = r.Read(propertyLength)
 		len += n
 		if err != nil {
 			return
 		}
-
 		vh.PublishProperties.PropertyLength = int(propertyLength[0])
-		if vh.PublishProperties.PropertyLength < 1 {
+		if vh.PublishProperties.PropertyLength == 0 {
 			fmt.Printf("No optional publish properties added")
 		} else {
 			len += vh.PublishProperties.PropertyLength
 			vh, _ = readPublishProperties(r, vh)
 		}
-	*/
+	}
 	return
 }
 

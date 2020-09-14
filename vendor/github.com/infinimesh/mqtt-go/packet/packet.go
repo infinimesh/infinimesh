@@ -114,6 +114,16 @@ func getProtocolName(r io.Reader) (protocolName string, len int, err error) {
 	return string(protocolNameBuffer), len, nil
 }
 
+func getProtocolLevel(r io.Reader) (protocolLevel byte, len int, err error) {
+	// Get Proto level
+	protocolLevelBytes := make([]byte, 1)
+	len, err = r.Read(protocolLevelBytes)
+	if err != nil {
+		return protocolLevelBytes[0], len, err
+	}
+	return protocolLevelBytes[0], len, nil
+}
+
 func getFixedHeader(r io.Reader) (fh FixedHeader, err error) {
 	buf := make([]byte, 1)
 	n, err := io.ReadFull(r, buf)
@@ -133,7 +143,7 @@ func getFixedHeader(r io.Reader) (fh FixedHeader, err error) {
 	return
 }
 
-func ReadPacket(r io.Reader) (ControlPacket, error) {
+func ReadPacket(r io.Reader, protocolLevel byte) (ControlPacket, error) {
 	fh, err := getFixedHeader(r)
 	if err != nil {
 		return nil, err
@@ -151,11 +161,11 @@ func ReadPacket(r io.Reader) (ControlPacket, error) {
 
 	remainingReader := bytes.NewBuffer(bufRemaining)
 
-	return parseToConcretePacket(remainingReader, fh)
+	return parseToConcretePacket(remainingReader, fh, protocolLevel)
 }
 
 // nolint: gocyclo
-func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPacket, error) {
+func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLevel byte) (ControlPacket, error) {
 	switch fh.ControlPacketType {
 	case CONNECT:
 		vh, variableHeaderSize, err := getConnectVariableHeader(remainingReader)
@@ -182,12 +192,13 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader) (ControlPa
 			return nil, err
 		}
 
-		vh, vhLength, err := readPublishVariableHeader(remainingReader, flags)
+		vh, vhLength, err := readPublishVariableHeader(remainingReader, flags, protocolLevel)
 		if err != nil {
 			return nil, err
 		}
 
 		payload, err := readPublishPayload(remainingReader, fh.RemainingLength-vhLength)
+		fmt.Printf("Publish payload :%v\n", payload)
 		if err != nil {
 			return nil, err
 		}

@@ -263,7 +263,7 @@ func printConnState(con net.Conn) {
 
 // Connection is expected to be valid & legitimate at this point
 func handleConn(c net.Conn, deviceIDs []string) {
-	p, err := packet.ReadPacket(c)
+	p, err := packet.ReadPacket(c, 0)
 
 	if debug {
 		printConnState(c)
@@ -313,7 +313,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		return
 
 	}
-
+	//TODO : MQTT CONNACK Properties need to add here
 	resp := packet.ConnAckControlPacket{
 		FixedHeader: packet.FixedHeader{
 			ControlPacketType: packet.CONNACK,
@@ -338,7 +338,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 
 	for {
-		p, err := packet.ReadPacket(c)
+		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 		if err != nil {
 			if err == io.EOF {
 				fmt.Printf("Client closed connection.\n")
@@ -387,7 +387,6 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string) 
 		if err != nil {
 			return err
 		}
-
 	}
 	return nil
 }

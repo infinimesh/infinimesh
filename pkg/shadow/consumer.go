@@ -57,30 +57,22 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 
 	offsets = make(map[int32]int64)
 	for _, partition := range partitions {
-		fmt.Printf("Consumer partition reading : %v\n", partition)
 		localStates[partition] = make(map[string]*DeviceStateMessage)
 		offsets[partition] = 0
-		fmt.Printf("Partition Consumer Before:%v, %v", c.MergedTopic, sarama.OffsetOldest)
 		pc, err := consumer.ConsumePartition(c.MergedTopic, partition, sarama.OffsetOldest)
-		fmt.Printf("Partition Consumer :%v", pc)
 		if err != nil {
 			return nil, nil, err
 		}
-		fmt.Printf("PC Messages :%v", pc.Messages())
 		defer pc.Close()
 
 		newestOffset, err := client.GetOffset(c.MergedTopic, partition, sarama.OffsetNewest)
-		fmt.Printf("Consumer partition newestOffset : %v\n", newestOffset)
 		if err != nil {
 			return nil, nil, err
 		}
-
 		if newestOffset == 0 {
 			continue
 		}
-
 		for item := range pc.Messages() {
-			fmt.Printf("Consumer partition item : %v\n", item)
 			var st DeviceStateMessage
 
 			err := json.Unmarshal(item.Value, &st)
@@ -102,30 +94,23 @@ func (c *StateMerger) fetchLocalState(client sarama.Client, partitions []int32) 
 func (c *StateMerger) Setup(s sarama.ConsumerGroupSession) error {
 	fmt.Println("Rebalance, assigned partitions:", s.Claims())
 	c.localStates = make(map[int32]map[string]*DeviceStateMessage)
-	fmt.Printf("localstates initialized %v", c.localStates)
 	//TODO enforce co-partitioning
 
 	producer, err := sarama.NewAsyncProducerFromClient(c.ChangelogProducerClient)
-	fmt.Printf("producer client created in shadow consumer %v", producer)
 	if err != nil {
 		return err
 	}
 
 	c.changelogProducer = producer
-
 	partitionsToFetch, ok := s.Claims()[c.SourceTopic]
-	fmt.Printf("Partitions to fetch %v", partitionsToFetch)
 	if !ok {
 		fmt.Println("No partitions assigned. sleeping.")
 	}
-
 	start := time.Now()
-	localStates, offsets, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
-	fmt.Printf("Local states fetched %v and offsets %v", localStates, offsets)
+	localStates, _, err := c.fetchLocalState(c.ChangelogConsumerClient, partitionsToFetch)
 	if err != nil {
 		return err
 	}
-
 	c.localStates = localStates
 	// c.localStateMaxOffsets = offsets
 
@@ -145,14 +130,11 @@ func (h *StateMerger) Cleanup(s sarama.ConsumerGroupSession) error {
 }
 
 func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	fmt.Printf("Inside ConsumerClaim %v and session %v", claim, sess)
 	h.m.Lock()
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
 	h.m.Unlock()
-	fmt.Printf("claim messages in consume claim %v", claim.Messages())
 	for message := range claim.Messages() {
 		sess.MarkMessage(message, "")
-		fmt.Println("Recv message", string(message.Value))
 		key := string(message.Key)
 
 		var deviceState *DeviceStateMessage
@@ -166,10 +148,8 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 		// Input: any JSON
 		delta := string(message.Value)
 		old := string(deviceState.State)
-		fmt.Printf("old state: %v", old)
 
 		newState, err := applyDelta(old, delta)
-		fmt.Printf("Consumer newState : %v", newState)
 		if err != nil {
 			fmt.Println("Failed to apply new delta. Ignoring message", err)
 			continue
