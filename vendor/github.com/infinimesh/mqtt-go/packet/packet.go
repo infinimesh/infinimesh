@@ -191,6 +191,7 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLe
 		if err != nil {
 			return nil, err
 		}
+
 		vh, vhLength, err := readPublishVariableHeader(remainingReader, flags, protocolLevel)
 		if err != nil {
 			return nil, err

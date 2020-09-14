@@ -109,6 +109,12 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/infinimesh/mqtt-go v0.0.0-20200828071453-3049256e2ae0 h1:NJwd+0NjSX32JdXo1cqekqOaQ8HA/OjLFbwZAzx8sog=
 github.com/infinimesh/mqtt-go v0.0.0-20200828071453-3049256e2ae0/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
+github.com/infinimesh/mqtt-go v0.0.0-20200909154035-a8b9cdce9417 h1:2akdIVxLPhzohIn/L6+vFki8RHx+3n+uOp24IL6ANk8=
+github.com/infinimesh/mqtt-go v0.0.0-20200909154035-a8b9cdce9417/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
+github.com/infinimesh/mqtt-go v0.0.0-20200914083008-c82fb4cdc5ad h1:7cPYY6XrISLuSSbPahZi46+Iy4nBW+vjeWivCJrbemg=
+github.com/infinimesh/mqtt-go v0.0.0-20200914083008-c82fb4cdc5ad/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
+github.com/infinimesh/mqtt-go v0.0.0-20200914083350-10478c297b53 h1:j+5ORrZckiSjyTvaPU/PmXW7/VyWJ1YfyyuZ9TVipUY=
+github.com/infinimesh/mqtt-go v0.0.0-20200914083350-10478c297b53/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
 github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603 h1:gSech9iGLFCosfl/DC7BWnpSSh/tQClWnKS2I2vdPww=
 github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603/go.mod h1:4AmD/VxjWcI5SRB0n6szE2A6s2fsNHDLO0nAlMHgfLQ=
 github.com/jinzhu/gorm v1.9.2 h1:lCvgEaqe/HVE+tjAR2mt4HbbHAZsQOv3XAZiEZV37iw=
