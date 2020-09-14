@@ -55,7 +55,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	log := s.Log.Named("CreateUserAccount Controller")
 
 	//Added logging
-	log.Info("Create Account Controller Method", zap.Any("Function Invoked", nil), zap.String("Account ID:", request.Account.Uid))
+	//log.Info("Create Account Controller Method", zap.Any("Function Invoked", nil), zap.String("Account ID:", request.Account.Uid))
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
