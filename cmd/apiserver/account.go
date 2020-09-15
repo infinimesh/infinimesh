@@ -165,6 +165,26 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
 	}
 
+	//Validated that required data is populated with values
+	if request.Account.Uid == "" {
+		//Added logging
+		log.Error("Create Account API Method", zap.Bool("Data Validation for Account Creation", false), zap.String("Error", "The UID cannot not be empty."))
+		return nil, status.Error(codes.FailedPrecondition, "The UID cannot not be empty.")
+	}
+
+	if request.Account.Name == "" {
+		//Added logging
+		log.Error("Create Account API Method", zap.Bool("Data Validation for Account Creation", false), zap.String("Error", "The Name cannot not be empty."))
+		return nil, status.Error(codes.FailedPrecondition, "The Name cannot not be empty.")
+	}
+
+	if request.Account.Password == "" {
+		//Added logging
+		log.Error("Create Account API Method", zap.Bool("Data Validation for Account Creation", false), zap.String("Error", "The Password cannot not be empty."))
+		return nil, status.Error(codes.FailedPrecondition, "The Password cannot not be empty.")
+	}
+
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {

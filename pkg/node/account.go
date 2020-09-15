@@ -59,6 +59,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
+		//Added logging
 		log.Error("Failed to create user", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
