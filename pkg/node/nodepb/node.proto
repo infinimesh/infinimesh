@@ -53,7 +53,7 @@ message IsAuthorizedResponse { google.protobuf.BoolValue decision = 1; }
 
 message CreateUserAccountRequest {
   Account account = 1;
-  string password = 2;
+  string password = 2; //To be Deprecated. Donot use this field. Instead use the password field in Account struct
 }
 
 message CreateUserAccountResponse { string uid = 1; }
