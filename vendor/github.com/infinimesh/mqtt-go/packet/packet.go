@@ -74,6 +74,8 @@ const (
 	RESPONSE_TOPIC_LENGTH               = 1
 	CORRELATION_DATA_ID                 = 9
 	CORRELATION_DATA_LENGTH             = 1
+	USER_PROPERTY_ID                    = 38
+	USER_PROPERTY_LENGTH                = 1
 )
 
 // FixedHeader is contained in every packet (thus, fixed). It consists of the

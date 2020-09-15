@@ -337,6 +337,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		return
 	}
 	var topicAliasPublishMap map[string]int
+	topicAliasPublishMap = make(map[string]int)
 
 	for {
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
@@ -390,11 +391,17 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 			}
 		} else {
 			topicAliasPublishMap[p.VariableHeader.Topic] = p.VariableHeader.PublishProperties.TopicAlias
+			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+				return topicAliasPublishMap, err
+			}
 		}
 	} else {
 		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
 			return topicAliasPublishMap, err
 		}
+	}
+	if len(p.VariableHeader.PublishProperties.UserProperty) > 0 {
+		fmt.Printf("p.VariableHeader.UserProperty %v", p.VariableHeader.PublishProperties.UserProperty)
 	}
 	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
 		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)) // TODO better always use directly uint16 for PacketIDs,everywhere
