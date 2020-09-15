@@ -57,14 +57,14 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	//Added logging
 	log.Info("Create Account Controller Method", zap.Any("Function Invoked", nil), zap.String("Account ID:", request.Account.Uid))
 
-	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Password, request.Account.IsRoot, request.Account.Enabled)
+	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
 		log.Error("Failed to create user", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Info("Create Account Controller Method", zap.Any("User Created", nil), zap.String("username", request.Account.Name), zap.String("uid", uid))
+	log.Info("Create Account Controller Method", zap.Bool("User Created", true), zap.String("username", request.Account.Name), zap.String("uid", uid))
 
 	err = s.Grafana.CreateUser(request.Account.Name)
 	if err != nil {
@@ -72,7 +72,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 		log.Error("Failed to create grafana user", zap.String("name", request.Account.Name), zap.Error(err))
 	} else {
 		//Added logging
-		log.Info("Create Account Controller Method", zap.Any("Graphana User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Password), zap.String("uid", uid))
+		log.Info("Create Account Controller Method", zap.Any("Graphana User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Account.Password), zap.String("uid", uid))
 	}
 
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
