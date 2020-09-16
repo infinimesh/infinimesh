@@ -124,21 +124,25 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 		topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
 		vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
 		propertiesLength -= TOPIC_ALIAS_LENGTH + 1
+		publishProperties = publishProperties[TOPIC_ALIAS_MAXIMUM_LENGTH+1:]
 	}
 	if propertiesLength > 1 && int(publishProperties[0]) == MESSAGE_EXPIRY_INTERVAL_ID {
 		messageExpiryInterval := publishProperties[1 : MESSAGE_EXPIRY_INTERVAL_LENGTH+1]
 		vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
 		propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
+		publishProperties = publishProperties[MESSAGE_EXPIRY_INTERVAL_LENGTH+1:]
 	}
 	if propertiesLength > 1 && int(publishProperties[0]) == RESPONSE_TOPIC_ID {
 		responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
 		vh.PublishProperties.ResponseTopic = string(responseTopic)
 		propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
+		publishProperties = publishProperties[RESPONSE_TOPIC_LENGTH+1:]
 	}
 	if propertiesLength > 1 && int(publishProperties[0]) == USER_PROPERTY_ID {
 		userProperty := publishProperties[1 : USER_PROPERTY_LENGTH+1]
 		vh.PublishProperties.UserProperty = string(userProperty)
 		propertiesLength -= USER_PROPERTY_LENGTH + 1
+		publishProperties = publishProperties[USER_PROPERTY_LENGTH+1:]
 	}
 	return vh, nil
 }
