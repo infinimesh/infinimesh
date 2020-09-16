@@ -25,13 +25,17 @@ import (
 	"io"
 )
 
+type UserProperty struct {
+	key   string
+	value string
+}
 type PublishProperties struct {
 	PropertyLength        int    //1 byte
 	MessageExpiryInterval int    //4 bytes
 	TopicAlias            int    //2 byte
 	ResponseTopic         string //
 	CorrelationData       string
-	UserProperty          string
+	UserProperty          UserProperty
 }
 type PublishControlPacket struct {
 	FixedHeader      FixedHeader
@@ -120,29 +124,46 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 	if propertiesLength != vh.PublishProperties.PropertyLength {
 		return vh, errors.New("Connect Properties length incorrect")
 	}
-	if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_ID {
-		topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
-		vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
-		propertiesLength -= TOPIC_ALIAS_LENGTH + 1
-		publishProperties = publishProperties[TOPIC_ALIAS_MAXIMUM_LENGTH+1:]
-	}
-	if propertiesLength > 1 && int(publishProperties[0]) == MESSAGE_EXPIRY_INTERVAL_ID {
-		messageExpiryInterval := publishProperties[1 : MESSAGE_EXPIRY_INTERVAL_LENGTH+1]
-		vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
-		propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
-		publishProperties = publishProperties[MESSAGE_EXPIRY_INTERVAL_LENGTH+1:]
-	}
-	if propertiesLength > 1 && int(publishProperties[0]) == RESPONSE_TOPIC_ID {
-		responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
-		vh.PublishProperties.ResponseTopic = string(responseTopic)
-		propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
-		publishProperties = publishProperties[RESPONSE_TOPIC_LENGTH+1:]
-	}
-	if propertiesLength > 1 && int(publishProperties[0]) == USER_PROPERTY_ID {
-		userProperty := publishProperties[1 : USER_PROPERTY_LENGTH+1]
-		vh.PublishProperties.UserProperty = string(userProperty)
-		propertiesLength -= USER_PROPERTY_LENGTH + 1
-		publishProperties = publishProperties[USER_PROPERTY_LENGTH+1:]
+	for propertiesLength > 1 {
+		if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_ID {
+			topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
+			vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
+			propertiesLength -= TOPIC_ALIAS_LENGTH + 1
+			publishProperties = publishProperties[TOPIC_ALIAS_MAXIMUM_LENGTH+1:]
+		}
+		if propertiesLength > 1 && int(publishProperties[0]) == MESSAGE_EXPIRY_INTERVAL_ID {
+			messageExpiryInterval := publishProperties[1 : MESSAGE_EXPIRY_INTERVAL_LENGTH+1]
+			vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
+			propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
+			publishProperties = publishProperties[MESSAGE_EXPIRY_INTERVAL_LENGTH+1:]
+		}
+		if propertiesLength > 1 && int(publishProperties[0]) == RESPONSE_TOPIC_ID {
+			responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
+			vh.PublishProperties.ResponseTopic = string(responseTopic)
+			propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
+			publishProperties = publishProperties[RESPONSE_TOPIC_LENGTH+1:]
+		}
+		if propertiesLength > 1 && publishProperties[0] == USER_PROPERTY_ID {
+			publishProperties = publishProperties[1:]
+			userPropertyKeyLength := int(binary.BigEndian.Uint16(publishProperties[0:2]))
+			publishProperties = publishProperties[2:]
+
+			vh.PublishProperties.UserProperty.key = string(publishProperties[0:userPropertyKeyLength])
+			publishProperties = publishProperties[userPropertyKeyLength:]
+			fmt.Printf("pubProp key: %v", vh.PublishProperties.UserProperty.key)
+
+			userPropertyValueLength := int(binary.BigEndian.Uint16(publishProperties[0:2]))
+			publishProperties = publishProperties[2:]
+
+			vh.PublishProperties.UserProperty.value = string(publishProperties[0:userPropertyValueLength])
+			publishProperties = publishProperties[userPropertyValueLength:]
+			fmt.Printf("pubProp value: %v", vh.PublishProperties.UserProperty.value)
+
+			propertiesLength -= (4 + userPropertyKeyLength + userPropertyValueLength)
+			publishProperties = publishProperties[propertiesLength:]
+		}
+		propertiesLength = 0
+		fmt.Printf("No additional Publish Properties added or supported")
 	}
 	return vh, nil
 }
