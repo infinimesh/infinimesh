@@ -166,12 +166,6 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	}
 
 	//Validated that required data is populated with values
-	if request.Account.Uid == "" {
-		//Added logging
-		log.Error("Create Account API Method", zap.Bool("Data Validation for Account Creation", false), zap.String("Error", "The UID cannot not be empty."))
-		return nil, status.Error(codes.FailedPrecondition, "The UID cannot not be empty.")
-	}
-
 	if request.Account.Name == "" {
 		//Added logging
 		log.Error("Create Account API Method", zap.Bool("Data Validation for Account Creation", false), zap.String("Error", "The Name cannot not be empty."))
