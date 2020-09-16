@@ -158,9 +158,7 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 			vh.PublishProperties.UserProperty.value = string(publishProperties[0:userPropertyValueLength])
 			publishProperties = publishProperties[userPropertyValueLength:]
 			fmt.Printf("pubProp value: %v", vh.PublishProperties.UserProperty.value)
-
 			propertiesLength -= (4 + userPropertyKeyLength + userPropertyValueLength)
-			publishProperties = publishProperties[propertiesLength:]
 		}
 		propertiesLength = 0
 		fmt.Printf("No additional Publish Properties added or supported")
