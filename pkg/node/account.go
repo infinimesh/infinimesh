@@ -41,10 +41,19 @@ type AccountController struct {
 
 //IsRoot is a method that returns if the account has root priviledges or not
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
+
+	log := s.Log.Named("IsRoot Validation Controller")
+
+	//Added logging
+	log.Info("IsRoot Validation Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account))
+
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Could not find account")
 	}
+
+	//Added logging
+	log.Info("IsRoot Validation Controller", zap.Bool("Validation for Root Account", account.IsRoot))
 
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
@@ -55,33 +64,28 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	log := s.Log.Named("CreateUserAccount Controller")
 
 	//Added logging
-	log.Info("Create Account Controller Method", zap.Any("Function Invoked", nil), zap.String("Account ID:", request.Account.Uid))
+	log.Info("Create Account Controller Method", zap.Bool("Function Invoked", true), zap.Any("Account", ctx.Value("account_id")))
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
-		//Added logging
-		log.Error("Failed to create user", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	//Added logging
-	log.Info("Create Account Controller Method", zap.Bool("User Created", true), zap.String("username", request.Account.Name), zap.String("uid", uid))
 
 	if request.CreateGfUser {
 		err = s.Grafana.CreateUser(request.Account.Name)
 		if err != nil {
 			//Added logging
-			log.Error("Failed to create grafana user", zap.String("name", request.Account.Name), zap.Error(err))
+			log.Error("Create Account Controller Method", zap.Bool("Failed to create Grafana user", true), zap.String("Name", request.Account.Name), zap.Error(err))
 		} else {
 			//Added logging
-			log.Info("Create Account Controller Method", zap.Any("Graphana User Created", nil), zap.String("username", request.Account.Name), zap.String("password", request.Account.Password), zap.String("uid", uid))
+			log.Info("Create Account Controller Method", zap.Bool("Graphana User Created", true), zap.String("Grafana UserName", request.Account.Name), zap.String("password", request.Account.Password), zap.String("uid", uid))
 		}
 	}
 
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
-//AuthorizeNamespace is a method that reutrns if the user has access to namespace
+//AuthorizeNamespace is a method that provides the user access to namespace
 func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nodepb.AuthorizeNamespaceRequest) (response *nodepb.AuthorizeNamespaceResponse, err error) {
 	err = s.Repo.AuthorizeNamespace(ctx, request.GetAccount(), request.GetNamespace(), request.GetAction())
 	if err != nil {
@@ -91,7 +95,7 @@ func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nod
 	return &nodepb.AuthorizeNamespaceResponse{}, nil
 }
 
-//Authorize is a method that reutrns if the user has access to a particulare node in Dgraph
+//Authorize is a method that provides the user access to a particulare node in Dgraph
 func (s *AccountController) Authorize(ctx context.Context, request *nodepb.AuthorizeRequest) (response *nodepb.AuthorizeResponse, err error) {
 	err = s.Repo.Authorize(ctx, request.GetAccount(), request.GetNode(), request.GetAction(), request.GetInherit())
 	if err != nil {
@@ -136,11 +140,6 @@ func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.Set
 
 //IsAuthorized is a method that reutrns if the user has access to a node
 func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.IsAuthorizedRequest) (response *nodepb.IsAuthorizedResponse, err error) {
-	log := s.Log.Named("Authorize").With(
-		zap.String("request.account", request.GetAccount()),
-		zap.String("request.action", request.GetAction().String()),
-		zap.String("request.node", request.GetNode()),
-	)
 
 	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: request.GetAccount(),
@@ -160,7 +159,6 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Info("Return decision", zap.Bool("decision", decision))
 	return &nodepb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
