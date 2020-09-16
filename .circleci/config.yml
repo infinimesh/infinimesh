@@ -26,13 +26,13 @@ jobs:
           command: task build
   build-frontend:
     docker:
-      - image: circleci/node:10.14.2
+      - image: circleci/node:latest
     working_directory: ~/build
     steps:
       - checkout
       - run:
           name: deps
-          command: cd frontend && npm i
+          command: cd frontend && yarn
       - run:
           name: lint
           command: cd frontend && npm run lint
@@ -41,9 +41,9 @@ jobs:
           command: cd frontend && npm run build
   tests:
     docker:
-     - image: circleci/golang:1.11 
-       environment:
-         GO111MODULE: "on"
+      - image: circleci/golang:1.11
+        environment:
+          GO111MODULE: "on"
     working_directory: /go/src/github.com/infinimesh/infinimesh
     steps:
       - checkout
