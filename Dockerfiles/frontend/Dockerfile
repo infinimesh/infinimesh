@@ -2,9 +2,7 @@ FROM node:latest
 
 ADD ./frontend /frontend/
 WORKDIR /frontend
-RUN npm install
-RUN npm run build
+RUN yarn
 
-EXPOSE 80
-
-ENTRYPOINT [ "npm", "start" ]
+RUN yarn run build
+ENTRYPOINT [ "yarn", "start" ]
