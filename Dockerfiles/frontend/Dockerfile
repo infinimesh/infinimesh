@@ -4,5 +4,5 @@ ADD ./frontend /frontend/
 WORKDIR /frontend
 RUN yarn
 
-RUN npm run build
-ENTRYPOINT [ "npm", "start" ]
+RUN yarn run build
+ENTRYPOINT [ "yarn", "start" ]
