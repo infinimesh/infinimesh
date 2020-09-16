@@ -143,9 +143,6 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
 
-		//Added logging
-		log.Info("Update Account API Method", zap.Bool("Validation for Root Account", res.GetIsRoot()))
-
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
