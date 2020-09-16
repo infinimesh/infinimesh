@@ -179,7 +179,7 @@ func TestDeleteAccount(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
