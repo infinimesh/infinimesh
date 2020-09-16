@@ -401,10 +401,6 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 			return topicAliasPublishMap, err
 		}
 	}
-	if p.VariableHeader.PublishProperties.UserProperty.value {
-
-	}
-
 	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
 		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)) // TODO better always use directly uint16 for PacketIDs,everywhere
 		_, err := pubAck.WriteTo(c)
