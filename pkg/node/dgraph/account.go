@@ -298,8 +298,12 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	m := &api.Mutation{CommitNow: true}
 
 	//Query to get the Account to be deleted with all the related edges
+	//conidition for deleting an account
+	//1. Account should not be named root
+	//2. Account should have isRoot flag as false
+	//3. Account should have enabled flag as false
 	const q = `query delete($userid: string){
-		account(func: uid($userid)) @filter(eq(type, "account")) {
+		account(func: uid($userid)) @filter(eq(type, "account") and  eq(isRoot,false) and Not eq(name,"root") and eq(enabled,false)) {
 			uid
 		  has.credentials {
 			uid
