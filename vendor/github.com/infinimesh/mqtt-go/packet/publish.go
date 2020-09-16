@@ -130,12 +130,12 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 		vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
 		propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
 	}
-	if propertiesLength > 1 && int(publishProperties[0]) == RESPONSE_TOPIC_LENGTH {
+	if propertiesLength > 1 && int(publishProperties[0]) == RESPONSE_TOPIC_ID {
 		responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
 		vh.PublishProperties.ResponseTopic = string(responseTopic)
 		propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
 	}
-	if propertiesLength > 1 && int(publishProperties[0]) == USER_PROPERTY_LENGTH {
+	if propertiesLength > 1 && int(publishProperties[0]) == USER_PROPERTY_ID {
 		userProperty := publishProperties[1 : USER_PROPERTY_LENGTH+1]
 		vh.PublishProperties.UserProperty = string(userProperty)
 		propertiesLength -= USER_PROPERTY_LENGTH + 1
