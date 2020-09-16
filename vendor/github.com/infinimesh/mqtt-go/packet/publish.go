@@ -122,26 +122,29 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 	}
 	for propertiesLength > 1 {
 		publishPropertyID := int(publishProperties[0])
-		if publishPropertyID == TOPIC_ALIAS_ID {
+		switch publishPropertyID {
+		case TOPIC_ALIAS_ID:
+			fmt.Printf("topicAlias : %v\n", publishProperties[1:TOPIC_ALIAS_MAXIMUM_LENGTH+1])
 			topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
 			vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
 			propertiesLength -= TOPIC_ALIAS_LENGTH + 1
-		}
-		if publishPropertyID == MESSAGE_EXPIRY_INTERVAL_ID {
+			fallthrough
+		case MESSAGE_EXPIRY_INTERVAL_ID:
 			messageExpiryInterval := publishProperties[1 : MESSAGE_EXPIRY_INTERVAL_LENGTH+1]
 			vh.PublishProperties.MessageExpiryInterval = int(binary.BigEndian.Uint16(messageExpiryInterval))
 			propertiesLength -= MESSAGE_EXPIRY_INTERVAL_LENGTH + 1
-		}
-		if publishPropertyID == RESPONSE_TOPIC_ID {
+			fallthrough
+		case RESPONSE_TOPIC_ID:
 			responseTopic := publishProperties[1 : RESPONSE_TOPIC_LENGTH+1]
 			vh.PublishProperties.ResponseTopic = string(responseTopic)
 			propertiesLength -= RESPONSE_TOPIC_LENGTH + 1
-		}
-		if publishPropertyID == USER_PROPERTY_ID {
+
+		case USER_PROPERTY_ID:
+			fmt.Printf("UserProperty : %v\n", publishProperties[1:USER_PROPERTY_LENGTH+1])
 			userProperty := publishProperties[1 : USER_PROPERTY_LENGTH+1]
 			vh.PublishProperties.UserProperty = string(userProperty)
 			propertiesLength -= USER_PROPERTY_LENGTH + 1
-		} else {
+		default:
 			fmt.Printf("%v Connect Property is not supported yet..", publishProperties[0])
 			propertiesLength = 0
 		}
