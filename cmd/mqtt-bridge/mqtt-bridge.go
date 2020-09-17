@@ -369,9 +369,9 @@ func handleConn(c net.Conn, deviceIDs []string) {
 			if err != nil {
 				fmt.Println("Failed to write SubAck:", err)
 			}
-
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, sub.Topic)
+				handleBackChannel(c, deviceID, backChannel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
 			}
 		}
