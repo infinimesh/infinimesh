@@ -83,7 +83,10 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 
 	log := s.Log.Named("List Objects Controller")
 	//Added logging
-	log.Info("List Objects Controller", zap.Bool("Function Invoked", true))
+	log.Info("List Objects Controller", zap.Bool("Function Invoked", true),
+		zap.String("Account", request.Account),
+		zap.String("Namespace", request.Namespace),
+		zap.Bool("Recurse", request.Recurse))
 
 	objects, err := s.Repo.ListForAccount(ctx, request.Account, request.Namespace, request.Recurse)
 	if err != nil {
