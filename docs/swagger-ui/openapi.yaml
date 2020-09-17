@@ -1351,6 +1351,6 @@ paths:
         - Objects
 servers:
   - url: 'http://localhost:8081'
-  - url: 'https://api.iot-ionos.de/'
+  - url: 'https://api.infinimesh.io/'
 security:
   - bearerAuth: []
