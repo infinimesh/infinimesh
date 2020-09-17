@@ -39,6 +39,7 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
   tags: [string] .
   name: string @index(exact) .
   username: string @index(exact) .
+  enabled: bool .
   action: string @index(term) .
   type: string @index(exact) .
   access.to: uid @reverse .
@@ -49,9 +50,7 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
   access.to.namespace: uid @reverse .
   fingerprint: string @index(exact) .
   certificates: uid @reverse .
-  password: password .
-  isRoot: bool @index(exact) .
-  enabled: bool @index(exact) .`
+  password: password .`
 	fmt.Println("Apply schema ", schema)
 	return dg.Alter(context.Background(), &api.Operation{
 		Schema: schema,
