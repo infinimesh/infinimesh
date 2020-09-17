@@ -39,6 +39,8 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
   tags: [string] .
   name: string @index(exact) .
   username: string @index(exact) .
+  isRoot: bool @index(exact) .
+  enabled: bool @index(exact) .
   action: string @index(term) .
   type: string @index(exact) .
   access.to: uid @reverse .
