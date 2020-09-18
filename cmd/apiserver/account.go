@@ -148,12 +148,17 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 
 //API Method to Update an Account
 func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
-	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Update Account API Method", zap.Bool("Function Invoked", true), zap.Any("Account ID:", ctx.Value("account_id")))
+	log.Info("Update Account API Method", zap.Bool("Function Invoked", true),
+		zap.Any("Account", request.Account.Uid),
+		zap.Any("Name:", request.Account.Name))
+
+	account, ok := ctx.Value("account_id").(string)
 
 	if !ok {
+		//Added logging
+		log.Error("Update Account API Method", zap.Bool("The account is not authenticated", true), zap.Bool("Authentication", ok))
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
 

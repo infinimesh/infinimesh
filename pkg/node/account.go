@@ -276,6 +276,9 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	//Added logging
 	log.Info("Update Account Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account.Uid))
 
+	log.Info("Temporary Log", zap.Any("Account", ctx))
+	log.Info("Temporary Log", zap.Any("Account", request))
+
 	err = s.Repo.UpdateAccount(ctx, request)
 
 	if err != nil {
