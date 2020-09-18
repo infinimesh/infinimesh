@@ -44,15 +44,17 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 
 	log := s.Log.Named("IsRoot Validation Controller")
 	//Added logging
-	log.Info("IsRoot Validation Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account))
+	log.Info("Function Invoked", zap.String("Account", request.Account))
 
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
 	if err != nil {
+		//Added logging
+		log.Error("Could not find account", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Could not find account")
 	}
 
 	//Added logging
-	log.Info("IsRoot Validation Controller", zap.Bool("Validation for Root Account", account.IsRoot))
+	log.Info("Validation for Root Account", zap.Bool("Validation Result", account.IsRoot))
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
@@ -61,12 +63,12 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 
 	log := s.Log.Named("CreateUserAccount Controller")
 	//Added logging
-	log.Info("Create Account Controller", zap.Bool("Function Invoked", true), zap.Any("Account", request.Account.Name))
+	log.Info("Function Invoked", zap.Any("Account", request.Account.Name))
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
 		//Added logging
-		log.Error("Create Account Controller", zap.Bool("Failed to create user", true), zap.String("Name", request.Account.Name), zap.Error(err))
+		log.Error("Failed to create user", zap.String("Name", request.Account.Name), zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -74,15 +76,15 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 		err = s.Grafana.CreateUser(request.Account.Name)
 		if err != nil {
 			//Added logging
-			log.Error("Create Account Controller", zap.Bool("Failed to create Grafana user", true), zap.String("Name", request.Account.Name), zap.Error(err))
+			log.Error("Failed to create Grafana user", zap.String("Name", request.Account.Name), zap.Error(err))
 		} else {
 			//Added logging
-			log.Info("Create Account Controller", zap.Bool("Graphana User Created", true), zap.String("Grafana UserName", request.Account.Name), zap.String("uid", uid))
+			log.Info("Graphana User Created", zap.String("Grafana UserName", request.Account.Name), zap.String("uid", uid))
 		}
 	}
 
 	//Added logging
-	log.Info("Create Account Controller", zap.Bool("Infinimesh User Created", true), zap.String("UserName", request.Account.Name), zap.String("uid", uid))
+	log.Info("Infinimesh User Created", zap.String("UserName", request.Account.Name), zap.String("uid", uid))
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
@@ -91,17 +93,20 @@ func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nod
 
 	log := s.Log.Named("Authorize Namespace Controller")
 	//Added logging
-	log.Info("Authorize Namespace Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account), zap.String("Namespace", request.Namespace), zap.String("Action", request.Action.String()))
+	log.Info("Function Invoked",
+		zap.String("Account", request.Account),
+		zap.String("Namespace", request.Namespace),
+		zap.String("Action", request.Action.String()))
 
 	err = s.Repo.AuthorizeNamespace(ctx, request.GetAccount(), request.GetNamespace(), request.GetAction())
 	if err != nil {
 		//Added logging
-		log.Error("Authorize Namespace Controller", zap.Bool("Failed to provide Authorization to Namespace", true), zap.Error(err))
+		log.Error("Failed to provide Authorization to Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to provide Authorization to Namespace")
 	}
 
 	//Added logging
-	log.Info("Authorize Namespace Controller", zap.Bool("Account Authorized to Access Namespace", true))
+	log.Info("Account Authorized to Access Namespace")
 	return &nodepb.AuthorizeNamespaceResponse{}, nil
 }
 
@@ -110,17 +115,20 @@ func (s *AccountController) Authorize(ctx context.Context, request *nodepb.Autho
 
 	log := s.Log.Named("Authorize Controller")
 	//Added logging
-	log.Info("Authorize Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account), zap.String("Node", request.Node), zap.String("Action", request.Action))
+	log.Info("Function Invoked",
+		zap.String("Account", request.Account),
+		zap.String("Node", request.Node),
+		zap.String("Action", request.Action))
 
 	err = s.Repo.Authorize(ctx, request.GetAccount(), request.GetNode(), request.GetAction(), request.GetInherit())
 	if err != nil {
 		//Added logging
-		log.Error("Authorize Controller", zap.Bool("Failed to provide Authorization to Node", true), zap.Error(err))
+		log.Error("Failed to provide Authorization to Node", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to provide Authorization to Node")
 	}
 
 	//Added logging
-	log.Info("Authorize Controller", zap.Bool("Account Authorized to Access Node", true))
+	log.Info("Account Authorized to Access Node")
 	return &nodepb.AuthorizeResponse{}, nil
 }
 
@@ -129,7 +137,10 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 
 	log := s.Log.Named("Is Authorize Namespace Controller")
 	//Added logging
-	log.Info("Is Authorize Namespace Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account), zap.String("Namespace", request.Namespace), zap.String("Action", request.Action.String()))
+	log.Info("Function Invoked",
+		zap.String("Account", request.Account),
+		zap.String("Namespace", request.Namespace),
+		zap.String("Action", request.Action.String()))
 
 	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: request.GetAccount(),
@@ -139,7 +150,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	}
 
 	if root.GetIsRoot() {
-		log.Info("Is Authorize Namespace Controller", zap.Bool("Authorization check successful for the Account and the Namespace as root", true))
+		log.Info("Authorization check successful for the Account and the Namespace as root")
 		return &nodepb.IsAuthorizedNamespaceResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
@@ -148,12 +159,12 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespace(), request.GetAccount(), request.GetAction())
 	if err != nil {
 		//Added logging
-		log.Error("Is Authorize Namespace Controller", zap.Bool("Authorization check failed for the Account and the Namespace", true), zap.Error(err))
+		log.Error("Authorization check failed for the Account and the Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Info("Is Authorize Namespace Controller", zap.Bool("Authorization check successful for the Account and the Namespace", true))
+	log.Info("Authorization check successful for the Account and the Namespace")
 	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
@@ -162,17 +173,17 @@ func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.Set
 
 	log := s.Log.Named("Set Password Controller")
 	//Added logging
-	log.Info("Set Password Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Username))
+	log.Info("Function Invoked", zap.String("Account", request.Username))
 
 	err = s.Repo.SetPassword(ctx, request.Username, request.Password)
 	if err != nil {
 		//Added logging
-		log.Error("Set Password Controller", zap.Bool("Password change failed", true), zap.Error(err))
+		log.Error("Password change failed", zap.Error(err))
 		return &nodepb.SetPasswordResponse{}, err
 	}
 
 	//Added logging
-	log.Info("Set Password Controller", zap.Bool("Passsed changed sucesssful", true))
+	log.Info("Passsed changed sucesssful")
 	return &nodepb.SetPasswordResponse{}, nil
 }
 
@@ -181,7 +192,10 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 
 	log := s.Log.Named("Is Authorized Controller")
 	//Added logging
-	log.Info("Is Authorized Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account), zap.String("Node", request.Node), zap.String("Action", request.Action.String()))
+	log.Info("Function Invoked",
+		zap.String("Account", request.Account),
+		zap.String("Node", request.Node),
+		zap.String("Action", request.Action.String()))
 
 	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: request.GetAccount(),
@@ -192,7 +206,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 
 	if root.GetIsRoot() {
 		//Added logging
-		log.Info("Is Authorize Controller", zap.Bool("Authorization check successful for the Account and the Node as root account", true))
+		log.Info("Authorization check successful for the Account and the Node as root account")
 		return &nodepb.IsAuthorizedResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
@@ -201,12 +215,12 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 	decision, err := s.Repo.IsAuthorized(ctx, request.GetNode(), request.GetAccount(), request.GetAction().String())
 	if err != nil {
 		//Added logging
-		log.Error("Is Authorize Controller", zap.Bool("Authorization check failed for the Account and the Node", true), zap.Error(err))
+		log.Error("Authorization check failed for the Account and the Node", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Info("Is Authorize Controller", zap.Bool("Authorization check successful for the Account and the Node", true))
+	log.Info("Authorization check successful for the Account and the Node")
 	return &nodepb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
@@ -215,17 +229,17 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 
 	log := s.Log.Named("Get Account Controller")
 	//Added logging
-	log.Info("Get Account Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Id))
+	log.Info("Function Invoked", zap.String("Account", request.Id))
 
 	account, err := s.Repo.GetAccount(ctx, request.Id)
 	if err != nil {
 		//Added logging
-		log.Error("Get Account Controller", zap.Bool("Unable able to get Account", true), zap.Error(err))
+		log.Error("Unable able to get Account", zap.Error(err))
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	//Added logging
-	log.Info("Get Account Controller", zap.Bool("Account details obtained", true))
+	log.Info("Account details obtained")
 	return account, nil
 }
 
@@ -234,17 +248,17 @@ func (s *AccountController) Authenticate(ctx context.Context, request *nodepb.Au
 
 	log := s.Log.Named("Authenticate Controller")
 	//Added logging
-	log.Info("Authenticate Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Username))
+	log.Info("Function Invoked", zap.String("Account", request.Username))
 
 	ok, uid, defaultNs, err := s.Repo.Authenticate(ctx, request.GetUsername(), request.GetPassword())
 	if !ok || (err != nil) {
 		//Added logging
-		log.Error("Authenticate Controller", zap.Bool("Authentication Failed", true), zap.Error(err))
+		log.Error("Authentication Failed", zap.Error(err))
 		return &nodepb.AuthenticateResponse{}, status.Error(codes.Unauthenticated, "Invalid credentials")
 	}
 
 	//Added logging
-	log.Info("Authenticate Controller", zap.Bool("Authentication successsful", true))
+	log.Info("Authentication successsful")
 	return &nodepb.AuthenticateResponse{Success: ok, Account: &nodepb.Account{Uid: uid}, DefaultNamespace: defaultNs}, nil
 }
 
@@ -253,17 +267,17 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 
 	log := s.Log.Named("List Accounts Controller")
 	//Added logging
-	log.Info("List Accounts Controller", zap.Bool("Function Invoked", true))
+	log.Info("Function Invoked")
 
 	accounts, err := s.Repo.ListAccounts(ctx)
 	if err != nil {
 		//Added logging
-		log.Error("List Accounts Controller", zap.Bool("Failed to list accounts", true), zap.Error(err))
+		log.Error("Failed to list accounts", zap.Error(err))
 		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list accounts")
 	}
 
 	//Added logging
-	log.Info("List Accounts Controller", zap.Bool("List Account successful", true))
+	log.Info("List Account successful")
 	return &nodepb.ListAccountsResponse{
 		Accounts: accounts,
 	}, nil
@@ -274,7 +288,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 
 	log := s.Log.Named("Update Account Controller")
 	//Added logging
-	log.Info("Update Account Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Account.Uid))
+	log.Info("Function Invoked", zap.String("Account", request.Account.Uid))
 
 	log.Info("Temporary Log", zap.Any("Account", ctx))
 	log.Info("Temporary Log", zap.Any("Account", request))
@@ -283,12 +297,12 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 
 	if err != nil {
 		//Added logging
-		log.Error("Update Account Controller", zap.Bool("Failed to update account", true), zap.Error(err))
+		log.Error("Failed to update account", zap.Error(err))
 		return &nodepb.Account{}, err
 	}
 
 	//Added Logging
-	log.Info("Update Account Controller", zap.Bool("Update Account successful", true))
+	log.Info("Update Account successful")
 	return request.Account, nil
 }
 
@@ -297,16 +311,16 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 
 	log := s.Log.Named("Delete Account Controller")
 	//Added logging
-	log.Info("Delete Account Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Uid))
+	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
 	err = s.Repo.DeleteAccount(ctx, request)
 	if err != nil {
 		//Added logging
-		log.Error("Delete Account Controller", zap.Bool("Failed to delete account", true), zap.Error(err))
+		log.Error("Failed to delete account", zap.Error(err))
 		return nil, err
 	}
 
 	//Added Logging
-	log.Info("Delete Account Controller", zap.Bool("Delete Account successful", true))
+	log.Info("Delete Account successful")
 	return &nodepb.DeleteAccountResponse{}, nil
 }
