@@ -298,7 +298,7 @@ func (s *DGraphRepo) SetPassword(ctx context.Context, accountid, password string
                      }
                    }`
 
-	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$account": accountid})
+	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$accountid": accountid})
 	if err != nil {
 		return err
 	}
