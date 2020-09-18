@@ -310,8 +310,9 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
+	accountID := ctx.Value("account_id").(string)
 	//Validate that the user has access to delete account
-	if res, err := s.Repo.GetAccount(ctx, ctx.Value("account_id").(string)); err == nil && res.IsRoot {
+	if res, err := s.Repo.GetAccount(ctx, accountID); err == nil && res.IsRoot {
 
 		//Added logging
 		log.Info("The account does not have permission to delete another account")
