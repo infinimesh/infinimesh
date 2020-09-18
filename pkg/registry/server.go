@@ -249,16 +249,16 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		switch field {
 
 		//Update the device details
-		case "Enabled":
+		case "enabled", "Enabled", "ENABLED":
 			d.Enabled = request.Device.GetEnabled().Value
-		case "Tags":
+		case "tags", "Tags", "TAGS":
 			d.Tags = request.Device.Tags
-		case "Name":
+		case "name", "Name", "NAME":
 			if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
 				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
 			}
 			d.Name = request.Device.Name
-		case "Certificate":
+		case "certificate", "Certificate", "CERTIFICATE":
 			//Pre-check for updating certificates
 			if request.Device.Certificate == nil {
 				return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
