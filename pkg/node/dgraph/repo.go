@@ -285,19 +285,20 @@ func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string
 	return false, "", "", errors.New("Invalid credentials")
 }
 
-func (s *DGraphRepo) SetPassword(ctx context.Context, account, password string) error {
+//SetPassword is a method to change the password of the user account
+func (s *DGraphRepo) SetPassword(ctx context.Context, accountid, password string) error {
 	txn := s.Dg.NewTxn()
-	const q = `query accounts($account: string) {
-                     accounts(func: eq(name, $account)) @filter(eq(type, "account"))  {
+	const q = `query accounts($accountid: string) {
+                     accounts(func: uid($accountid)) @filter(eq(type, "account"))  {
                        uid
                        has.credentials {
-                         name @filter(eq(username, $account))
+                         name
                          uid
                        }
                      }
                    }`
 
-	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$account": account})
+	response, err := txn.QueryWithVars(ctx, q, map[string]string{"$account": accountid})
 	if err != nil {
 		return err
 	}

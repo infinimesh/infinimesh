@@ -129,7 +129,7 @@ func TestChangePassword(t *testing.T) {
 	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
 	require.NoError(t, err)
 
-	err = repo.SetPassword(ctx, acc, "newpassword")
+	err = repo.SetPassword(ctx, account, "newpassword")
 	require.NoError(t, err)
 
 	ok, _, _, err := repo.Authenticate(ctx, acc, "newpassword")
