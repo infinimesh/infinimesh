@@ -178,6 +178,11 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 //API Method to Create an Account
 func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 
+	//Temporary Assigning the request.password to request.account.password
+	if request.Account.Password == "" {
+		request.Account.Password = request.Password
+	}
+
 	//Added logging
 	log.Info("Create Account API Method", zap.Bool("Function Invoked", true),
 		zap.String("Account", request.Account.Name),
