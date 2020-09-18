@@ -225,7 +225,9 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("List Accounts API Method", zap.Bool("The account is not authenticated", true), zap.Bool("Authentication", ok))
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
@@ -253,7 +255,9 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("Delete Account API Method", zap.Bool("The account is not authenticated", true), zap.Bool("Authentication", ok))
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
