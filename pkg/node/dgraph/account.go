@@ -148,9 +148,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 //CreateUserAccount is a method to Create User Account
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
-	// TODO move this to the controller
-	//log.Info("User Data", zap.String("P:", password))
-
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -272,7 +269,7 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}
 
 	if len(result.Account) == 0 {
-		return nil, errors.New("The Account is not found.")
+		return nil, errors.New("The Account is not found")
 	}
 
 	account = &nodepb.Account{
