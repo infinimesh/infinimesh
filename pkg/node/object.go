@@ -41,7 +41,7 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 
 	log := s.Log.Named("Create Object Controller")
 	//Added logging
-	log.Info("Create Object Controller", zap.Bool("Function Invoked", true),
+	log.Info("Function Invoked",
 		zap.String("Name", request.Name),
 		zap.String("Kind", request.Kind),
 		zap.String("Namespace", request.Namespace),
@@ -50,12 +50,12 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespace())
 	if err != nil {
 		//Added logging
-		log.Error("Create Object Controller", zap.Bool("Failed to create Object", true), zap.String("Name", request.Name), zap.Error(err))
+		log.Error("Failed to create Object", zap.String("Name", request.Name), zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Info("Create Object Controller", zap.Bool("Object Created", true), zap.String("Name", request.Name), zap.String("Object Id", id))
+	log.Info("Object Created", zap.String("Name", request.Name), zap.String("Object Id", id))
 	return &nodepb.Object{Uid: id, Name: request.GetName()}, nil
 }
 
@@ -64,17 +64,17 @@ func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.Del
 
 	log := s.Log.Named("Delete Object Controller")
 	//Added logging
-	log.Info("Delete Object Controller", zap.Bool("Function Invoked", true), zap.String("Account", request.Uid))
+	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
 	err = s.Repo.DeleteObject(ctx, request.GetUid())
 	if err != nil {
 		//Added logging
-		log.Error("Delete Object Controller", zap.Bool("Failed to delete object", true), zap.Error(err))
+		log.Error("Failed to delete object", zap.Error(err))
 		return nil, err
 	}
 
 	//Added Logging
-	log.Info("Delete Object Controller", zap.Bool("Delete Object successful", true))
+	log.Info("Delete Object successful")
 	return &nodepb.DeleteObjectResponse{}, nil
 }
 
@@ -83,7 +83,7 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 
 	log := s.Log.Named("List Objects Controller")
 	//Added logging
-	log.Info("List Objects Controller", zap.Bool("Function Invoked", true),
+	log.Info("Function Invoked",
 		zap.String("Account", request.Account),
 		zap.String("Namespace", request.Namespace),
 		zap.Bool("Recurse", request.Recurse))
@@ -91,13 +91,13 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 	objects, err := s.Repo.ListForAccount(ctx, request.Account, request.Namespace, request.Recurse)
 	if err != nil {
 		//Added logging
-		log.Error("List Objects Controller", zap.Bool("Failed to list accounts", true), zap.Error(err))
+		log.Error("Failed to list accounts", zap.Error(err))
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Info("List Objects Controller", zap.Bool("List Objects successful", true))
+	log.Info("List Objects successful")
 	return &nodepb.ListObjectsResponse{
 		Objects: objects,
 	}, nil
