@@ -331,7 +331,7 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	}
 
 	if len(result.Accounts) != 1 {
-		return status.Error(codes.NotFound, "The Account is not found.")
+		return status.Error(codes.NotFound, "The Account is not found")
 	}
 
 	//Append edge if there is a default.namespace edge

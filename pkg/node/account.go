@@ -290,9 +290,6 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Account.Uid))
 
-	log.Info("Temporary Log", zap.Any("Account", ctx))
-	log.Info("Temporary Log", zap.Any("Account", request))
-
 	err = s.Repo.UpdateAccount(ctx, request)
 
 	if err != nil {
@@ -313,6 +310,44 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
+	//Validate that the user has access to delete account
+	if res, err := s.Repo.GetAccount(ctx, ctx.Value("account_id").(string)); err == nil && res.GetIsRoot() {
+
+		//Added logging
+		log.Info("The account does not have permission to delete another account")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to delete another account")
+	}
+
+	//Get account details for validation
+	account, err := s.Repo.GetAccount(ctx, request.Uid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get account details", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details")
+	}
+
+	//Validate that account is not in the database
+	if account == nil {
+		//Added logging
+		log.Error("The Account was not found", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "The Account was not found")
+	}
+
+	//Validate that account is not root
+	if account.IsRoot {
+		//Added logging
+		log.Error("Cannot delete root account", zap.Error(err))
+		return nil, status.Error(codes.FailedPrecondition, "Failed to get account details")
+	}
+
+	//Validate that account is not enabled
+	if account.Enabled {
+		//Added logging
+		log.Error("Cannot delete enabled account", zap.Error(err))
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled account")
+	}
+
+	//Call the delete query when all the validation pass
 	err = s.Repo.DeleteAccount(ctx, request)
 	if err != nil {
 		//Added logging
