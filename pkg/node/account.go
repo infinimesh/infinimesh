@@ -192,7 +192,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 
 	if root.GetIsRoot() {
 		//Added logging
-		log.Info("Is Authorize Controller", zap.Bool("Authorization check successful for the Account and the Node as root", true))
+		log.Info("Is Authorize Controller", zap.Bool("Authorization check successful for the Account and the Node as root account", true))
 		return &nodepb.IsAuthorizedResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
