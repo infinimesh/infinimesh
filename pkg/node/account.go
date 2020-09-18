@@ -311,7 +311,7 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
 	//Validate that the user has access to delete account
-	if res, err := s.Repo.GetAccount(ctx, ctx.Value("account_id").(string)); err == nil && res.GetIsRoot() {
+	if res, err := s.Repo.GetAccount(ctx, ctx.Value("account_id").(string)); err == nil && res.IsRoot {
 
 		//Added logging
 		log.Info("The account does not have permission to delete another account")
@@ -329,21 +329,21 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Validate that account is not in the database
 	if account == nil {
 		//Added logging
-		log.Error("The Account was not found", zap.Error(err))
+		log.Error("The Account was not found")
 		return nil, status.Error(codes.NotFound, "The Account was not found")
 	}
 
 	//Validate that account is not root
 	if account.IsRoot {
 		//Added logging
-		log.Error("Cannot delete root account", zap.Error(err))
+		log.Error("Cannot delete root account")
 		return nil, status.Error(codes.FailedPrecondition, "Failed to get account details")
 	}
 
 	//Validate that account is not enabled
 	if account.Enabled {
 		//Added logging
-		log.Error("Cannot delete enabled account", zap.Error(err))
+		log.Error("Cannot delete enabled account")
 		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled account")
 	}
 

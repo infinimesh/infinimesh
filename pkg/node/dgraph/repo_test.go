@@ -35,6 +35,7 @@ import (
 )
 
 var repo node.Repo
+var account_conroller node.AccountController
 
 func init() {
 	dgURL := os.Getenv("DGRAPH_URL")
@@ -183,10 +184,13 @@ func TestDeleteAccount(t *testing.T) {
 	require.NoError(t, err)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	//_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	_, err = account_conroller.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 
 	//Try to fetch the delete account
 	_, err = repo.GetAccount(ctx, account)
+	require.NoError(t, err)
 
 	//Validation
 	require.EqualValues(t, string(err.Error()), "The Account is not found")
