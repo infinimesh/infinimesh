@@ -113,13 +113,14 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	for _, field := range account.FieldMask.Paths {
 		switch field {
-		case "Name":
+		//Including all comibnations of case
+		case "name", "Name", "NAME":
 			acc.Name = account.Account.Name
-		case "IsRoot":
+		case "isroot", "IsRoot", "ISROOT":
 			acc.IsRoot = account.Account.IsRoot
-		case "Enabled":
+		case "enabled", "Enabled", "ENABLED":
 			acc.Enabled = account.Account.Enabled
-		case "Password":
+		case "password", "Password", "PASSWORD":
 			err = s.SetPassword(ctx, account.Account.Name, account.Account.Password)
 			if err != nil {
 				return err
