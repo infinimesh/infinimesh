@@ -189,7 +189,7 @@ func TestDeleteAccount(t *testing.T) {
 	_, err = repo.GetAccount(ctx, account)
 
 	//Validation
-	require.EqualValues(t, string(err.Error()), "The Account is not found.")
+	require.EqualValues(t, string(err.Error()), "The Account is not found")
 }
 
 func TestChangePasswordWithNoUser(t *testing.T) {
