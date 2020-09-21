@@ -33,15 +33,24 @@ type namespaceAPI struct {
 	accountClient nodepb.AccountServiceClient
 }
 
+//API Method to list all Namespaces
 func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
+
+	//Added logging
+	log.Info("List Namespaces API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("List Namespaces API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to check permissions")
+		//Added logging
+		log.Error("List Namespaces API Method: Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
 	if resp.GetIsRoot() {
@@ -53,15 +62,24 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 	}
 }
 
+//API Method to create a Namespace
 func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
+
+	//Added logging
+	log.Info("Create Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("Create Namespace API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to check permissions")
+		//Added logging
+		log.Error("Create Namespace API Method: Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
 	if resp.GetIsRoot() {
@@ -73,6 +91,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 			return nil, err
 		}
 
+		//Assign Permissions to the namespace to the account that was used to create namespace
 		_, err = n.accountClient.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
 			Account:   account,
 			Namespace: ns.GetId(),
@@ -81,19 +100,32 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 		if err != nil {
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
+
+		//Added logging
+		log.Info("Create Namespace API Method: Namespace Created", zap.String("Namespace ID", ns.Id))
 		return &nodepb.Namespace{
 			Id:   ns.Id,
 			Name: ns.Name,
 		}, nil
 
 	}
-	return nil, status.Error(codes.PermissionDenied, "Account is not root")
+
+	//Added logging
+	log.Error("Create Namespace API Method: The Account does not have permission to create Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to create Namespace")
 }
 
+//API Method to get details of a Namespace
 func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
+
+	//Added logging
+	log.Info("Get Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("Get Namespace API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -108,13 +140,23 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 	if resp.GetDecision().GetValue() {
 		return n.client.GetNamespace(ctx, request)
 	}
-	return nil, status.Error(codes.PermissionDenied, "Account is not allowed to access this resource")
+
+	//Added logging
+	log.Error("Get Namespace API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
 }
 
+//API Method to create permissions for ana ccount to access a Namespace
 func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.CreateNamespacePermissionRequest) (response *apipb.CreateNamespacePermissionResponse, err error) {
+
+	//Added logging
+	log.Info("Create Permission API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("Create Permission API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -133,19 +175,27 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 			Action:    request.Permission.Action,
 		})
 		if err != nil {
-			log.Error("Failed to create permission", zap.String("account_id", request.AccountId), zap.String("namespace", request.Namespace), zap.Error(err))
-			return &apipb.CreateNamespacePermissionResponse{}, status.Error(codes.Internal, "Failed to authorize for namespace")
+			return &apipb.CreateNamespacePermissionResponse{}, status.Error(codes.Internal, err.Error())
 		}
 		return &apipb.CreateNamespacePermissionResponse{}, nil
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
+	//Added logging
+	log.Error("Create Permission API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
 }
 
+//API Method to list all the permissions for a Namespace
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
+
+	//Added logging
+	log.Info("List Permissions API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("List Permissions API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -161,14 +211,22 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 		return n.client.ListPermissions(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
-
+	//Added logging
+	log.Error("List Permissions API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the Namespace")
 }
 
+//API Method to delete permissions for am account for a Namespace
 func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
+
+	//Added logging
+	log.Info("Delete Permission API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+		//Added logging
+		log.Error("Delete Permission API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -184,6 +242,40 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 		return n.client.DeletePermission(ctx, request)
 	}
 
-	return nil, status.Error(codes.PermissionDenied, "The account is not allowed to access the resource")
+	//Added logging
+	log.Error("Delete Permission API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+
+}
+
+//API Method to delete namespace
+func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
+
+	//Added logging
+	log.Info("Delete Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		//Added logging
+		log.Error("Delete Namespace API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
+	}
+
+	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   account,
+		Namespace: request.Namespaceid,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		return n.client.DeleteNamespace(ctx, request)
+	}
+
+	//Added logging
+	log.Error("Delete Namespace API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
 
 }
