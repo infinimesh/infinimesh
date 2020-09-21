@@ -2,10 +2,25 @@ components:
   schemas:
     apiCreateNamespacePermissionResponse:
       type: object
+    apiRestrictionRule:
+      properties:
+        ids:
+          items:
+            type: string
+          type: array
+        type:
+          type: string
+      type: object
     apiTokenRequest:
       properties:
+        expire_time:
+          type: string
         password:
           type: string
+        ruleset:
+          items:
+            $ref: '#/components/schemas/apiRestrictionRule'
+          type: array
         username:
           type: string
       type: object
@@ -29,31 +44,19 @@ components:
     deviceregistryCreateRequest:
       properties:
         device:
-          $ref: "#/components/schemas/deviceregistryDevice"
+          $ref: '#/components/schemas/deviceregistryDevice'
       type: object
     deviceregistryCreateResponse:
       properties:
         device:
-          $ref: "#/components/schemas/deviceregistryDevice"
+          $ref: '#/components/schemas/deviceregistryDevice'
       type: object
-    deviceregistryCreatePermissionDeniedResponse:
-      properties:
-        code:
-          type: integer
-        error:
-          type: string
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: string
     deviceregistryDeleteResponse:
       type: object
     deviceregistryDevice:
       properties:
         certificate:
-          $ref: "#/components/schemas/deviceregistryCertificate"
+          $ref: '#/components/schemas/deviceregistryCertificate'
         enabled:
           format: boolean
           type: boolean
@@ -63,7 +66,6 @@ components:
           type: string
         namespace:
           type: string
-          description: namespace id(like 0xabc123)
         tags:
           items:
             type: string
@@ -73,7 +75,7 @@ components:
       properties:
         devices:
           items:
-            $ref: "#/components/schemas/deviceregistryDevice"
+            $ref: '#/components/schemas/deviceregistryDevice'
           type: array
       type: object
     deviceregistryUpdateResponse:
@@ -83,20 +85,20 @@ components:
         namespace:
           type: string
         object:
-          $ref: "#/components/schemas/nodeObject"
+          $ref: '#/components/schemas/nodeObject'
         parent:
           type: string
       type: object
     infinimeshapiPermission:
-      description: "Permission.Action may either be NONE, READ or WRITE."
+      description: 'Permission.Action may either be NONE, READ or WRITE.'
       properties:
         action:
-          $ref: "#/components/schemas/nodeAction"
+          $ref: '#/components/schemas/nodeAction'
       type: object
     infinimeshdeviceregistryGetResponse:
       properties:
         device:
-          $ref: "#/components/schemas/deviceregistryDevice"
+          $ref: '#/components/schemas/deviceregistryDevice'
       type: object
     infinimeshnodePermission:
       properties:
@@ -105,19 +107,19 @@ components:
         account_name:
           type: string
         action:
-          $ref: "#/components/schemas/nodeAction"
+          $ref: '#/components/schemas/nodeAction'
         namespace:
           type: string
       type: object
     infinimeshshadowGetResponse:
       properties:
         shadow:
-          $ref: "#/components/schemas/shadowShadow"
+          $ref: '#/components/schemas/shadowShadow'
       type: object
     nodeAccount:
       properties:
         default_namespace:
-          $ref: "#/components/schemas/nodeNamespace"
+          $ref: '#/components/schemas/nodeNamespace'
         enabled:
           format: boolean
           type: boolean
@@ -146,7 +148,10 @@ components:
     nodeCreateUserAccountRequest:
       properties:
         account:
-          $ref: "#/components/schemas/nodeAccount"
+          $ref: '#/components/schemas/nodeAccount'
+        create_gf_user:
+          format: boolean
+          type: boolean
         password:
           type: string
       type: object
@@ -154,6 +159,8 @@ components:
       properties:
         uid:
           type: string
+      type: object
+    nodeDeleteAccountResponse:
       type: object
     nodeDeleteObjectResponse:
       type: object
@@ -163,28 +170,28 @@ components:
       properties:
         accounts:
           items:
-            $ref: "#/components/schemas/nodeAccount"
+            $ref: '#/components/schemas/nodeAccount'
           type: array
       type: object
     nodeListNamespacesResponse:
       properties:
         namespaces:
           items:
-            $ref: "#/components/schemas/nodeNamespace"
+            $ref: '#/components/schemas/nodeNamespace'
           type: array
       type: object
     nodeListObjectsResponse:
       properties:
         objects:
           items:
-            $ref: "#/components/schemas/nodeObject"
+            $ref: '#/components/schemas/nodeObject'
           type: array
       type: object
     nodeListPermissionsResponse:
       properties:
         permissions:
           items:
-            $ref: "#/components/schemas/infinimeshnodePermission"
+            $ref: '#/components/schemas/infinimeshnodePermission'
           type: array
       type: object
     nodeNamespace:
@@ -202,7 +209,7 @@ components:
           type: string
         objects:
           items:
-            $ref: "#/components/schemas/nodeObject"
+            $ref: '#/components/schemas/nodeObject'
           type: array
         uid:
           type: string
@@ -311,8 +318,9 @@ components:
             A URL/resource name that uniquely identifies the type of the
             serialized
 
-            protocol buffer message. The last segment of the URL's path must
-            represent
+            protocol buffer message. This string must contain at least
+
+            one "/" character. The last segment of the URL's path must represent
 
             the fully qualified name of the type (as in
 
@@ -463,67 +471,63 @@ components:
         fields not covered by the mask.
 
 
-        If a repeated field is specified for an update operation, the existing
+        If a repeated field is specified for an update operation, new values
+        will
 
-        repeated values in the target resource will be overwritten by the new
-        values.
+        be appended to the existing repeated field in the target resource. Note
+        that
 
-        Note that a repeated field is only allowed in the last position of a
-        `paths`
-
+        a repeated field is only allowed in the last position of a `paths`
         string.
 
 
         If a sub-message is specified in the last position of the field mask for
         an
 
-        update operation, then the existing sub-message in the target resource
-        is
+        update operation, then new value will be merged into the existing
+        sub-message
 
-        overwritten. Given the target message:
+        in the target resource.
+
+
+        For example, given the target message:
 
             f {
               b {
-                d : 1
-                x : 2
+                d: 1
+                x: 2
               }
-              c : 1
+              c: [1]
             }
 
         And an update message:
 
             f {
               b {
-                d : 10
+                d: 10
               }
+              c: [2]
             }
 
         then if the field mask is:
 
-         paths: "f.b"
+         paths: ["f.b", "f.c"]
 
         then the result will be:
 
             f {
               b {
-                d : 10
+                d: 10
+                x: 2
               }
-              c : 1
+              c: [1, 2]
             }
 
-        However, if the update mask was:
+        An implementation may provide options to override this default behavior
+        for
 
-         paths: "f.b.d"
+        repeated and message fields.
 
-        then the result would be:
-
-            f {
-              b {
-                d : 10
-                x : 2
-              }
-              c : 1
-            }
 
         In order to reset a field's value to the default, the field must
 
@@ -643,26 +647,14 @@ components:
 
         request should verify the included field paths, and return an
 
-        `INVALID_ARGUMENT` error if any path is duplicated or unmappable.
+        `INVALID_ARGUMENT` error if any path is unmappable.
       properties:
         paths:
           description: The set of field mask paths.
           items:
             type: string
           type: array
-      title: "`FieldMask` represents a set of symbolic field paths, for example:"
-      type: object
-    protobufListValue:
-      description: |-
-        `ListValue` is a wrapper around a repeated field of values.
-
-        The JSON representation for `ListValue` is JSON array.
-      properties:
-        values:
-          description: Repeated field of dynamically typed values.
-          items:
-            $ref: "#/components/schemas/protobufValue"
-          type: array
+      title: '`FieldMask` represents a set of symbolic field paths, for example:'
       type: object
     protobufNullValue:
       default: NULL_VALUE
@@ -678,58 +670,25 @@ components:
       enum:
         - NULL_VALUE
       type: string
-    protobufStruct:
-      description: |-
-        `Struct` represents a structured data value, consisting of fields
-        which map to dynamically typed values. In some languages, `Struct`
-        might be supported by a native representation. For example, in
-        scripting languages like JS a struct is represented as an
-        object. The details of that representation are described together
-        with the proto support for the language.
-
-        The JSON representation for `Struct` is JSON object.
+    runtimeError:
       properties:
-        fields:
-          additionalProperties:
-            $ref: "#/components/schemas/protobufValue"
-          description: Unordered map of dynamically typed values.
-          type: object
-      type: object
-    protobufValue:
-      description: |-
-        `Value` represents a dynamically typed value which can be either
-        null, a number, a string, a boolean, a recursive struct value, or a
-        list of values. A producer of value is expected to set one of that
-        variants, absence of any variant indicates an error.
-
-        The JSON representation for `Value` is JSON value.
-      properties:
-        bool_value:
-          description: Represents a boolean value.
-          format: boolean
-          type: boolean
-        list_value:
-          $ref: "#/components/schemas/protobufListValue"
-          description: Represents a repeated `Value`.
-        null_value:
-          $ref: "#/components/schemas/protobufNullValue"
-          description: Represents a null value.
-        number_value:
-          description: Represents a double value.
-          format: double
-          type: number
-        string_value:
-          description: Represents a string value.
+        code:
+          format: int32
+          type: integer
+        details:
+          items:
+            $ref: '#/components/schemas/protobufAny'
+          type: array
+        error:
           type: string
-        struct_value:
-          $ref: "#/components/schemas/protobufStruct"
-          description: Represents a structured value.
+        message:
+          type: string
       type: object
     runtimeStreamError:
       properties:
         details:
           items:
-            $ref: "#/components/schemas/protobufAny"
+            $ref: '#/components/schemas/protobufAny'
           type: array
         grpc_code:
           format: int32
@@ -747,23 +706,23 @@ components:
     shadowShadow:
       properties:
         config:
-          $ref: "#/components/schemas/shadowVersionedValue"
+          $ref: '#/components/schemas/shadowVersionedValue'
         desired:
-          $ref: "#/components/schemas/shadowVersionedValue"
+          $ref: '#/components/schemas/shadowVersionedValue'
         reported:
-          $ref: "#/components/schemas/shadowVersionedValue"
+          $ref: '#/components/schemas/shadowVersionedValue'
       type: object
     shadowStreamReportedStateChangesResponse:
       properties:
         desiredState:
-          $ref: "#/components/schemas/shadowVersionedValue"
+          $ref: '#/components/schemas/shadowVersionedValue'
         reportedState:
-          $ref: "#/components/schemas/shadowVersionedValue"
+          $ref: '#/components/schemas/shadowVersionedValue'
       type: object
     shadowVersionedValue:
       properties:
         data:
-          $ref: "#/components/schemas/protobufValue"
+          type: object
         timestamp:
           format: date-time
           type: string
@@ -778,76 +737,100 @@ components:
       bearerFormat: JWT
 info:
   contact:
-    email: engineering@infinimesh.io
+    email: engineering@infinitedevices.io
     name: Infinimesh
-    url: "http://infinimesh.io"
+    url: 'https://infinitedevices.io'
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
-  version: 0.0.8
+  version: 0.0.1
 openapi: 3.0.0
 paths:
   /account:
     get:
-      operationId: SelfAccount
+      operationId: Accounts_SelfAccount
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeAccount"
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
   /account/token:
     post:
-      operationId: Token
+      operationId: Accounts_Token
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/apiTokenRequest"
+              $ref: '#/components/schemas/apiTokenRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/apiTokenResponse"
+                $ref: '#/components/schemas/apiTokenResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
   /accounts:
     get:
-      operationId: ListAccounts
+      operationId: Accounts_ListAccounts
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeListAccountsResponse"
+                $ref: '#/components/schemas/nodeListAccountsResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
     post:
-      operationId: CreateUserAccount
+      operationId: Accounts_CreateUserAccount
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/nodeCreateUserAccountRequest"
+              $ref: '#/components/schemas/nodeCreateUserAccountRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeCreateUserAccountResponse"
+                $ref: '#/components/schemas/nodeCreateUserAccountResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
-  "/accounts/{account.uid}":
+  '/accounts/{account.uid}':
     patch:
-      operationId: UpdateAccount
+      operationId: Accounts_UpdateAccount
       parameters:
         - in: path
           name: account.uid
@@ -858,20 +841,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/nodeAccount"
+              $ref: '#/components/schemas/nodeAccount'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeAccount"
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
-  "/accounts/{id}":
+  '/accounts/{id}':
     get:
-      operationId: GetAccount
+      operationId: Accounts_GetAccount
       parameters:
         - in: path
           name: id
@@ -879,59 +868,94 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeAccount"
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
+      tags:
+        - Accounts
+  '/accounts/{uid}':
+    delete:
+      operationId: Accounts_DeleteAccount
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeDeleteAccountResponse'
+          description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Accounts
   /devices:
     get:
-      operationId: List
+      operationId: Devices_List
       parameters:
         - in: query
           name: namespace
-          description: namespace id(like 0xabc012)
           required: false
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deviceregistryListResponse"
+                $ref: '#/components/schemas/deviceregistryListResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Devices
     post:
-      operationId: Create
+      operationId: Devices_Create
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/deviceregistryCreateRequest"
+              $ref: '#/components/schemas/deviceregistryCreateRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deviceregistryCreateResponse"
+                $ref: '#/components/schemas/deviceregistryCreateResponse'
           description: A successful response.
-        "403":
+        default:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deviceregistryCreatePermissionDeniedResponse"
-          description: A permission denied error response.
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Devices
-  "/devices/{device.id}":
+  '/devices/{device.id}':
     patch:
-      operationId: Update
+      operationId: Devices_Update
       parameters:
         - in: path
           name: device.id
@@ -942,20 +966,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/deviceregistryDevice"
+              $ref: '#/components/schemas/deviceregistryDevice'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deviceregistryUpdateResponse"
+                $ref: '#/components/schemas/deviceregistryUpdateResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Devices
-  "/devices/{id}":
+  '/devices/{id}':
     delete:
-      operationId: Delete
+      operationId: Devices_Delete
       parameters:
         - in: path
           name: id
@@ -963,16 +993,22 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/deviceregistryDeleteResponse"
+                $ref: '#/components/schemas/deviceregistryDeleteResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Devices
     get:
-      operationId: Get
+      operationId: Devices_Get
       parameters:
         - in: path
           name: id
@@ -980,17 +1016,23 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/infinimeshdeviceregistryGetResponse"
+                $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Devices
-  "/devices/{id}/state":
+  '/devices/{id}/state':
     get:
-      operationId: Get
+      operationId: States_Get
       parameters:
         - in: path
           name: id
@@ -998,16 +1040,22 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/infinimeshshadowGetResponse"
+                $ref: '#/components/schemas/infinimeshshadowGetResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - States
     patch:
-      operationId: PatchDesiredState
+      operationId: States_PatchDesiredState
       parameters:
         - in: path
           name: id
@@ -1018,20 +1066,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/protobufValue"
+              type: object
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/shadowPatchDesiredStateResponse"
+                $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - States
-  "/devices/{id}/state/stream":
+  '/devices/{id}/state/stream':
     get:
-      operationId: StreamReportedStateChanges
+      operationId: States_StreamReportedStateChanges
       parameters:
         - in: path
           name: id
@@ -1045,47 +1099,71 @@ paths:
             format: boolean
             type: boolean
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/x-stream-definitions/shadowStreamReportedStateChangesResponse
+                properties:
+                  error:
+                    $ref: '#/components/schemas/runtimeStreamError'
+                  result:
+                    $ref: >-
+                      #/components/schemas/shadowStreamReportedStateChangesResponse
+                title: Stream result of shadowStreamReportedStateChangesResponse
+                type: object
           description: A successful response.(streaming responses)
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - States
   /namespaces:
     get:
-      operationId: ListNamespaces
+      operationId: Namespaces_ListNamespaces
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeListNamespacesResponse"
+                $ref: '#/components/schemas/nodeListNamespacesResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
     post:
-      operationId: CreateNamespace
+      operationId: Namespaces_CreateNamespace
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/nodeCreateNamespaceRequest"
+              $ref: '#/components/schemas/nodeCreateNamespaceRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeNamespace"
+                $ref: '#/components/schemas/nodeNamespace'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
-  "/namespaces/{namespace}":
+  '/namespaces/{namespace}':
     get:
-      operationId: GetNamespace
+      operationId: Namespaces_GetNamespace
       parameters:
         - in: path
           name: namespace
@@ -1093,17 +1171,23 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeNamespace"
+                $ref: '#/components/schemas/nodeNamespace'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
-  "/namespaces/{namespace}/permissions":
+  '/namespaces/{namespace}/permissions':
     get:
-      operationId: ListPermissions
+      operationId: Namespaces_ListPermissions
       parameters:
         - in: path
           name: namespace
@@ -1111,17 +1195,23 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeListPermissionsResponse"
+                $ref: '#/components/schemas/nodeListPermissionsResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
-  "/namespaces/{namespace}/permissions/{account_id}":
+  '/namespaces/{namespace}/permissions/{account_id}':
     delete:
-      operationId: DeletePermission
+      operationId: Namespaces_DeletePermission
       parameters:
         - in: path
           name: namespace
@@ -1134,16 +1224,22 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeDeletePermissionResponse"
+                $ref: '#/components/schemas/nodeDeletePermissionResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
     put:
-      operationId: CreatePermission
+      operationId: Namespaces_CreatePermission
       parameters:
         - in: path
           name: namespace
@@ -1159,20 +1255,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/infinimeshapiPermission"
+              $ref: '#/components/schemas/infinimeshapiPermission'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/apiCreateNamespacePermissionResponse"
+                $ref: '#/components/schemas/apiCreateNamespacePermissionResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Namespaces
   /objects:
     get:
-      operationId: ListObjects
+      operationId: Objects_ListObjects
       parameters:
         - in: query
           name: namespace
@@ -1186,34 +1288,46 @@ paths:
             format: boolean
             type: boolean
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeListObjectsResponse"
+                $ref: '#/components/schemas/nodeListObjectsResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Objects
     post:
-      operationId: CreateObject
+      operationId: Objects_CreateObject
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/infinimeshapiCreateObjectRequest"
+              $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeObject"
+                $ref: '#/components/schemas/nodeObject'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Objects
-  "/objects/{uid}":
+  '/objects/{uid}':
     delete:
-      operationId: DeleteObject
+      operationId: Objects_DeleteObject
       parameters:
         - in: path
           name: uid
@@ -1221,25 +1335,22 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/nodeDeleteObjectResponse"
+                $ref: '#/components/schemas/nodeDeleteObjectResponse'
           description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
       tags:
         - Objects
 servers:
-  - url: "https://api.infinimesh.io/"
-  - url: "http://localhost:8081"
-x-stream-definitions:
-  shadowStreamReportedStateChangesResponse:
-    properties:
-      error:
-        $ref: "#/components/schemas/runtimeStreamError"
-      result:
-        $ref: "#/components/schemas/shadowStreamReportedStateChangesResponse"
-    title: Stream result of shadowStreamReportedStateChangesResponse
-    type: object
+  - url: 'http://localhost:8081'
+  - url: 'https://api.infinimesh.io/'
 security:
   - bearerAuth: []

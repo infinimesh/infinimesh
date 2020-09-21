@@ -60,13 +60,11 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	client, err := sarama.NewClient([]string{broker}, consumerGroupClient)
-	fmt.Printf("client created %v\n", client)
 	if err != nil {
 		panic(err)
 	}
 
 	group, err := sarama.NewConsumerGroupFromClient(consumerGroup, client)
-	fmt.Printf("consumer group %v, client %v, group %v \n", consumerGroup, client, group)
 	if err != nil {
 		panic(err)
 	}
@@ -116,9 +114,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	go func() {
 	outer:
 		for {
-			fmt.Printf("group : %v, %v,  %v \n", group, inputTopic, handler)
 			err = group.Consume(ctx, []string{inputTopic}, handler)
-			fmt.Printf("Handler called : %v and err: %v ", inputTopic, err)
 			if err != nil {
 				panic(err)
 			}
@@ -146,7 +142,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
-	fmt.Printf("closeReported, doneReported: %v, %v\n", closeReported, doneReported)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
 	//fmt.Printf("closeReported, doneReported: %v,%v", closeDesired, doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing

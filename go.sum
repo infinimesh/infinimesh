@@ -111,8 +111,6 @@ github.com/infinimesh/mqtt-go v0.0.0-20200828071453-3049256e2ae0 h1:NJwd+0NjSX32
 github.com/infinimesh/mqtt-go v0.0.0-20200828071453-3049256e2ae0/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
 github.com/infinimesh/mqtt-go v0.0.0-20200909154035-a8b9cdce9417 h1:2akdIVxLPhzohIn/L6+vFki8RHx+3n+uOp24IL6ANk8=
 github.com/infinimesh/mqtt-go v0.0.0-20200909154035-a8b9cdce9417/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
-github.com/infinimesh/mqtt-go v0.0.0-20200914083008-c82fb4cdc5ad h1:7cPYY6XrISLuSSbPahZi46+Iy4nBW+vjeWivCJrbemg=
-github.com/infinimesh/mqtt-go v0.0.0-20200914083008-c82fb4cdc5ad/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
 github.com/infinimesh/mqtt-go v0.0.0-20200914083350-10478c297b53 h1:j+5ORrZckiSjyTvaPU/PmXW7/VyWJ1YfyyuZ9TVipUY=
 github.com/infinimesh/mqtt-go v0.0.0-20200914083350-10478c297b53/go.mod h1:NqGcsGR40ZGfBgLreBUOXIXe734K7/51QJbA3YxSijE=
 github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603 h1:gSech9iGLFCosfl/DC7BWnpSSh/tQClWnKS2I2vdPww=
