@@ -144,6 +144,8 @@ message UpdateAccountRequest {
   google.protobuf.FieldMask fieldMask = 2;
 }
 
+message UpdateAccountResponse {}
+
 message SetPasswordRequest {
   string username = 1;
   string password = 2;
@@ -160,7 +162,7 @@ message DeleteAccountResponse {}
 
 service AccountService {
   rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
-  rpc UpdateAccount(UpdateAccountRequest) returns (Account);
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
   rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
@@ -222,6 +224,11 @@ message Permission {
   Action action = 4;
 }
 
+message DeleteNamespaceRequest {
+  string namespaceid = 1;
+}
+
+message DeleteNamespaceResponse{}
 
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
@@ -236,4 +243,5 @@ service Namespaces {
   rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
   rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
+  rpc DeleteNamespace(DeleteNamespaceRequest) returns (DeleteNamespaceResponse);
 }

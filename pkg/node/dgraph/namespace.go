@@ -27,6 +27,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//ListNamespaces is a method to List details of all Namespaces
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
@@ -58,6 +59,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
+//DeletePermissionInNamespace is a method to delete permissions for a Namespaces for an account
 func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error) {
 	txn := s.Dg.NewTxn()
 	const q = `query deletePermissionInNamespace($namespaceID: string, $accountID: string){
@@ -100,6 +102,7 @@ func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceI
 	return err
 }
 
+//ListPermissionsInNamespace is a method to list permissions for all accounts for a Namespace
 func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid string) (permissions []*nodepb.Permission, err error) {
 	const q = `query listPermissionsInNamespace($namespaceid: string) {
 		accounts(func: uid($namespaceid)) @filter(eq(type, "namespace")) @normalize @cascade  {
@@ -140,6 +143,7 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 }
 
+//ListNamespacesForAccount is a method to list Namespaces for an Account
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
 		namespaces(func: uid($account)) @normalize @cascade  {
@@ -173,6 +177,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
+//IsAuthorizedNamespace is a method that returns if the access to the namespace for an account is true or false
 func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error) {
 	acc, err := s.GetAccount(ctx, account)
 	if err != nil {
@@ -225,4 +230,26 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	}
 
 	return false, nil
+}
+
+//DeleteNamespace is a method that deletes a namespace
+func (s *DGraphRepo) DeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+	txn := s.Dg.NewTxn()
+	const q = `query deleteNamespace($namespaceID: string, $accountID: string){
+  accounts(func: uid($namespaceID)) @filter(eq(type, "namespace")) @cascade @normalize {
+    namespace_uid: uid
+    ~access.to.namespace @filter(uid($accountID))  {
+      account_uid: uid
+    }
+  }
+}`
+
+	_, err = txn.QueryWithVars(ctx, q, map[string]string{
+		"$namespaceID": namespaceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return err
 }
