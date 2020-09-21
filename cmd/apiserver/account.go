@@ -148,7 +148,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 }
 
 //API Method to Update an Account
-func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
+func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.UpdateAccountResponse, err error) {
 
 	//Added logging
 	log.Info("Update Account API Method", zap.Bool("Function Invoked", true),
@@ -173,7 +173,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 
 	//Added logging
 	log.Error("Update Account API Method", zap.Bool("The account does not have permission to update details", true))
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The account does not have permission to update details")
+	return nil, status.Error(codes.PermissionDenied, "The account does not have permission to update details")
 }
 
 //API Method to Create an Account
