@@ -70,7 +70,8 @@ func TestAuthorize(t *testing.T) {
 	require.True(t, decision)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestIsAuthorizedNamespace(t *testing.T) {
@@ -88,7 +89,8 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 	require.True(t, decision)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestListInNamespaceForAccount(t *testing.T) {
@@ -117,7 +119,8 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	require.Contains(t, objs, &nodepb.Object{Uid: newObj, Name: "sample-node", Kind: "asset", Objects: []*nodepb.Object{}})
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestChangePassword(t *testing.T) {
@@ -136,7 +139,8 @@ func TestChangePassword(t *testing.T) {
 	require.True(t, ok)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestUpdateAccount(t *testing.T) {
@@ -144,7 +148,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	account, err := repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", true, true)
 	require.NoError(t, err)
 
 	//Set new values
@@ -153,11 +157,13 @@ func TestUpdateAccount(t *testing.T) {
 	//Update the device
 	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
 		Account: &nodepb.Account{
-			Uid:  account,
-			Name: NewName,
+			Uid:     account,
+			Name:    NewName,
+			Enabled: false,
+			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name"},
+			Paths: []string{"Name", "Enabled", "IsRoot"},
 		},
 	})
 	require.NoError(t, err)
@@ -168,9 +174,11 @@ func TestUpdateAccount(t *testing.T) {
 	//Validate the updated Account
 	require.NoError(t, err)
 	require.EqualValues(t, NewName, respGet.Name)
+	require.EqualValues(t, false, respGet.Enabled)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestDeleteAccount(t *testing.T) {
@@ -183,7 +191,7 @@ func TestDeleteAccount(t *testing.T) {
 	require.NoError(t, err)
 
 	//Delete the Account created
-	_ = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 	require.NoError(t, err)
 
 	//Try to fetch the delete account
