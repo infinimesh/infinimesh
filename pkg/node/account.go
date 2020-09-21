@@ -24,6 +24,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/grafana"
@@ -310,6 +311,22 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
+	//Get the metadata from the context
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		//Added logging
+		log.Error("Failed to get metadata from context", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details")
+	}
+
+	//Check for Authentication
+	requestorID := md.Get("requestorID")
+	if requestorID == nil {
+		//Added logging
+		log.Error("The account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
+	}
+
 	//Get account details for validation
 	account, err := s.Repo.GetAccount(ctx, request.Uid)
 	if err != nil {
@@ -329,7 +346,7 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	if account.IsRoot {
 		//Added logging
 		log.Error("Cannot delete root account")
-		return nil, status.Error(codes.FailedPrecondition, "Failed to get account details")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root account")
 	}
 
 	//Validate that account is not enabled

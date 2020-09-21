@@ -24,6 +24,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -269,6 +270,9 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 		log.Error("Delete Account API Method", zap.Bool("The account is not authenticated", true), zap.Bool("Authentication", ok))
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
