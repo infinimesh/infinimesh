@@ -109,7 +109,7 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Enabled", "IsRoot"},
+			Paths: []string{"Enabled", "Is_Root"},
 		},
 	})
 	require.NoError(t, err)
@@ -152,7 +152,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Enabled", "IsRoot"},
+			Paths: []string{"Enabled", "Is_Root"},
 		},
 	})
 	require.NoError(t, err)
@@ -185,7 +185,7 @@ func TestChangePassword(t *testing.T) {
 			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Enabled", "IsRoot"},
+			Paths: []string{"Enabled", "Is_Root"},
 		},
 	})
 	require.NoError(t, err)
@@ -215,7 +215,7 @@ func TestUpdateAccount(t *testing.T) {
 			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "Enabled", "IsRoot"},
+			Paths: []string{"Name", "Enabled", "Is_Root"},
 		},
 	})
 	require.NoError(t, err)
