@@ -371,8 +371,8 @@ func handleConn(c net.Conn, deviceIDs []string) {
 			}
 			for _, sub := range p.Payload.Subscriptions {
 				backChannel = ps.Sub(sub.Topic)
-				//ps.AddSub(backChannel, sub.Topic)
-				handleBackChannel(c, deviceID, backChannel)
+				ps.AddSub(backChannel, sub.Topic)
+				//handleBackChannel(c, deviceID, backChannel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
 			}
 		}
