@@ -152,7 +152,7 @@ rpc GetAccount(infinimesh.node.GetAccountRequest)
 };
 
 rpc UpdateAccount(infinimesh.node.UpdateAccountRequest)
-    returns (infinimesh.node.Account) {
+    returns (infinimesh.node.UpdateAccountResponse) {
   option (google.api.http) = {
     patch : "/accounts/{account.uid}"
     body : "account"
