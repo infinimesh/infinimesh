@@ -2,9 +2,13 @@ package packet
 
 import (
 	"errors"
+	"fmt"
 	"io"
 )
 
+type SubscribeProperties struct {
+	PropertyLength int //1 byte
+}
 type SubscribeControlPacket struct {
 	// Bits 3,2,1 and 0 of the fixed header of the SUBSCRIBE Control Packet are reserved and MUST be set to 0,0,1 and 0 respectively. The Server MUST treat any other value as malformed and close the Network Connection [MQTT-3.8.1-1].
 	// TODO fail packet deserializing when this is not the case
@@ -14,7 +18,8 @@ type SubscribeControlPacket struct {
 }
 
 type SubscribeVariableHeader struct {
-	PacketID int // int16
+	PacketID            int // int16
+	SubscribeProperties SubscribeProperties
 }
 
 type SubscribePayload struct {
@@ -26,13 +31,29 @@ type Subscription struct {
 	QoS   QosLevel
 }
 
-func readSubscribeVariableHeader(r io.Reader) (n int, vh SubscribeVariableHeader, err error) {
+func readSubscribeVariableHeader(r io.Reader, protocolLevel byte) (n int, vh SubscribeVariableHeader, err error) {
+	len := 0
 	packetID, err := readUint16(r)
+	len += 2
 	if err != nil {
 		return 0, SubscribeVariableHeader{}, err
 	}
 
-	return 2, SubscribeVariableHeader{PacketID: packetID}, nil
+	if int(protocolLevel) == 5 {
+		propertyLength := make([]byte, 1)
+		n, err = r.Read(propertyLength)
+		len += n
+		if err != nil {
+			return
+		}
+		if vh.SubscribeProperties.PropertyLength == 0 {
+			fmt.Printf("No optional publish properties added")
+		} else {
+			len += vh.SubscribeProperties.PropertyLength
+			//vh, _ = readSubscribeProperties(r, vh)
+		}
+	}
+	return len, SubscribeVariableHeader{PacketID: packetID}, nil
 }
 
 func readSubscribePayload(r io.Reader, remainingLength int) (n int, payload SubscribePayload, err error) {
