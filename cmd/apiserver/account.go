@@ -153,7 +153,7 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 	//Added logging
 	log.Info("Update Account API Method", zap.Bool("Function Invoked", true),
 		zap.Any("Account", request.Account.Uid),
-		zap.Any("Name:", request.Account.Name))
+		zap.Any("Name", request.Account.Name))
 
 	account, ok := ctx.Value("account_id").(string)
 

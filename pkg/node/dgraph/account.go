@@ -116,7 +116,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		//Including all comibnations of case
 		case "name", "Name", "NAME":
 			acc.Name = account.Account.Name
-		case "isroot", "IsRoot", "ISROOT":
+		case "isroot", "isRoot", "IsRoot", "ISROOT":
 			acc.IsRoot = account.Account.IsRoot
 		case "enabled", "Enabled", "ENABLED":
 			acc.Enabled = account.Account.Enabled

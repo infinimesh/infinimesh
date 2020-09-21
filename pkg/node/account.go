@@ -301,7 +301,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 
 	//Added Logging
 	log.Info("Update Account successful")
-	return request.Account, nil
+	return nil, nil
 }
 
 //DeleteAccount is a method that deletes an account
