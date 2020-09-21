@@ -77,7 +77,7 @@ func TestAuthorize(t *testing.T) {
 			IsRoot:  false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Enabled", "IsRoot"},
+			Paths: []string{"Enabled", "Is_Root"},
 		},
 	})
 	require.NoError(t, err)
