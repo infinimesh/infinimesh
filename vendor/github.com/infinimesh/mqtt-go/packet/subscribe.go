@@ -46,8 +46,9 @@ func readSubscribeVariableHeader(r io.Reader, protocolLevel byte) (n int, vh Sub
 		if err != nil {
 			return
 		}
+		vh.SubscribeProperties.PropertyLength = int(propertyLength[0])
 		if vh.SubscribeProperties.PropertyLength == 0 {
-			fmt.Printf("No optional publish properties added")
+			fmt.Printf("No optional subscribe properties added")
 		} else {
 			len += vh.SubscribeProperties.PropertyLength
 			//vh, _ = readSubscribeProperties(r, vh)
