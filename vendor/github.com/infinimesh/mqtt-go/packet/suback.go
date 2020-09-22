@@ -76,7 +76,7 @@ func (vh *SubAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	b := make([]byte, 2)
 	binary.BigEndian.PutUint16(b, vh.PacketID)
 	n, err = io.Copy(w, bytes.NewReader(b))
-	if vh.SubAckProperties.propertiesLength > 0 {
+	if vh.SubAckProperties.propertiesLength != 0 {
 		propertyLength := make([]byte, 1)
 		nWritten, _ := w.Write(propertyLength)
 		n += int64(nWritten)
