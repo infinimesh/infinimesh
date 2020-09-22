@@ -1,25 +1,14 @@
 <template>
   <v-app id="dashboard">
-    <v-app-bar app class="wide-header" color="#104e83">
+    <v-app-bar app color="#104e83" clipped-left>
       <Header />
     </v-app-bar>
+    <Sider />
     <a-layout class="layout-content">
-      <a-layout-sider
-        v-model="menu_collapsed"
-        :style="{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          zIndex: 99
-        }"
-      >
-        <Sider />
-      </a-layout-sider>
       <a-layout>
         <a-layout-content
           :style="{
-            marginLeft: menu_collapsed ? '80px' : '200px',
+            marginLeft: '80px',
             paddingBottom: '20rem'
           }"
         >
