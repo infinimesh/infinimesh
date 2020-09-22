@@ -213,7 +213,7 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLe
 		}
 		return packet, nil
 	case SUBSCRIBE:
-		vhLen, vh, err := readSubscribeVariableHeader(remainingReader)
+		vhLen, vh, err := readSubscribeVariableHeader(remainingReader, protocolLevel)
 		if err != nil {
 			return nil, err
 		}
@@ -231,6 +231,10 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLe
 		return packet, nil
 	case PINGREQ:
 		return &PingReqControlPacket{FixedHeader: fh}, nil
+
+	case UNSUBSCRIBE:
+		fmt.Printf("Client has unsubscribed %v", fh.ControlPacketType)
+		return nil, nil
 	case DISCONNECT:
 		fmt.Println("Client disconnected")
 		return nil, errors.New("Client disconnected")

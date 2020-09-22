@@ -364,14 +364,15 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
 		case *packet.SubscribeControlPacket:
-			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), []byte{1})
+			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
 				fmt.Println("Failed to write SubAck:", err)
 			}
-
 			for _, sub := range p.Payload.Subscriptions {
+				backChannel = ps.Sub(sub.Topic)
 				ps.AddSub(backChannel, sub.Topic)
+				//handleBackChannel(c, deviceID, backChannel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
 			}
 		}
