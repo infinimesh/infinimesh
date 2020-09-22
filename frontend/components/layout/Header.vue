@@ -1,15 +1,12 @@
 <template>
   <v-row class="infini-nav" align="center">
-    <v-col cols="1">
-      <v-row justify="center">
-        <a @click="toggleCollapsed" class="menu-control">
-          <a-icon :type="menu ? 'menu-unfold' : 'menu-fold'" />
-        </a>
-      </v-row>
-    </v-col>
-
-    <v-col sm="6" md="4" xl="3" class="logo">infinimesh.io</v-col>
-    <v-col sm="0" md="1" lg="1" xl="1" offset-sm="1" offset-lg="2">
+    <v-col sm="6" md="5" lg="3" xl="3">
+      <a @click="toggleCollapsed" class="menu-control">
+        <a-icon :type="menu ? 'menu-unfold' : 'menu-fold'" />
+      </a>
+      <span class="logo">infinimesh</span></v-col
+    >
+    <v-col class="d-none d-lg-block" lg="1" xl="1" offset-sm="1" offset-lg="3">
       <v-row>
         <v-col class="nav-button" cols="5" @click="$router.go(-1)">
           <a-icon type="left" />
@@ -19,7 +16,7 @@
         </v-col>
       </v-row>
     </v-col>
-    <v-col sm="2" md="3" lg="3" xl="3" offset-sm="2" offset="2">
+    <v-col sm="5" md="5" lg="3" xl="3" offset-sm="1" offset-md="2" offset="2">
       <a-select style="width: 100%" v-model="namespace">
         <a-select-option
           :key="ns.id"
@@ -71,10 +68,7 @@ export default {
 </script>
 
 <style scoped>
-img.logo {
-  height: 35px;
-}
-div.logo {
+span.logo {
   padding: 0 1.25rem;
   font-weight: 500;
   white-space: nowrap;
@@ -82,22 +76,19 @@ div.logo {
   color: white;
 }
 @media screen and (max-width: 448px) {
-  div.logo {
+  span.logo {
     font-size: 1.2rem;
     padding: 0;
     padding-left: 0.3rem;
   }
-  img.logo {
-    height: 30px;
-  }
 }
 @media screen and (min-width: 448px) {
-  div.logo {
+  span.logo {
     font-size: 1.5rem;
   }
 }
 @media screen and (min-width: 576px) {
-  div.logo {
+  span.logo {
     font-size: 1.75rem;
   }
 }
