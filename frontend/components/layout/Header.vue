@@ -1,12 +1,12 @@
 <template>
-  <v-row class="infini-nav" align="center">
+  <v-row class="infini-nav" align="center" justify="space-between">
     <v-col sm="6" md="5" lg="3" xl="3">
       <a @click="toggleCollapsed" class="menu-control">
         <a-icon :type="menu ? 'menu-unfold' : 'menu-fold'" />
       </a>
       <span class="logo">infinimesh</span></v-col
     >
-    <v-col class="d-none d-lg-block" lg="1" xl="1" offset-sm="1" offset-lg="3">
+    <v-col class="d-none d-lg-block" lg="1" xl="1">
       <v-row>
         <v-col class="nav-button" cols="5" @click="$router.go(-1)">
           <a-icon type="left" />
@@ -16,7 +16,7 @@
         </v-col>
       </v-row>
     </v-col>
-    <v-col sm="5" md="5" lg="3" xl="3" offset-sm="1" offset-md="2" offset="2">
+    <v-col sm="5" md="5" lg="3" xl="3">
       <a-select style="width: 100%" v-model="namespace">
         <a-select-option
           :key="ns.id"
