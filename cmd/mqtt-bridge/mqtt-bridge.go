@@ -364,7 +364,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
 		case *packet.SubscribeControlPacket:
-			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), []byte{1})
+			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
 				fmt.Println("Failed to write SubAck:", err)
