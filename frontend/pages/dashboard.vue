@@ -1,8 +1,8 @@
 <template>
-  <a-layout id="dashboard">
-    <a-layout-header class="wide-header">
+  <v-app id="dashboard">
+    <v-app-bar app class="wide-header" color="#104e83">
       <Header />
-    </a-layout-header>
+    </v-app-bar>
     <a-layout class="layout-content">
       <a-layout-sider
         v-model="menu_collapsed"
@@ -28,7 +28,7 @@
         <infinimesh-footer />
       </a-layout>
     </a-layout>
-  </a-layout>
+  </v-app>
 </template>
 
 <script>
@@ -40,7 +40,7 @@ export default {
   components: {
     Header,
     Sider,
-    InfinimeshFooter,
+    InfinimeshFooter
   },
   mounted() {
     this.$store.dispatch("devices/getNamespaces");
@@ -52,20 +52,12 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      },
-    },
-  },
+      }
+    }
+  }
 };
 </script>
 
-<style>
-.wide-header {
-  padding: 0 !important;
-  position: fixed;
-  z-index: 1;
-  width: 100%;
-}
-</style>
 <style lang="less" scoped>
 .layout-content {
   margin-top: @layout-header-height;
