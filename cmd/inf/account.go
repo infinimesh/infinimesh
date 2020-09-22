@@ -51,10 +51,10 @@ var accountCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		response, err := accountClient.CreateUserAccount(ctx, &nodepb.CreateUserAccountRequest{
 			Account: &nodepb.Account{
-				Name:    args[0],
-				Enabled: true,
+				Name:     args[0],
+				Enabled:  true,
+				Password: args[1],
 			},
-			Password: args[1],
 		})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to create user: %v\n", err)

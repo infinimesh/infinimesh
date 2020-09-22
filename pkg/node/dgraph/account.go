@@ -113,14 +113,15 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	for _, field := range account.FieldMask.Paths {
 		switch field {
-		case "Name":
+		//Including all comibnations of case
+		case "name", "Name", "NAME":
 			acc.Name = account.Account.Name
-		case "IsRoot":
+		case "is_root", "is_Root", "Is_Root", "IS_ROOT":
 			acc.IsRoot = account.Account.IsRoot
-		case "Enabled":
+		case "enabled", "Enabled", "ENABLED":
 			acc.Enabled = account.Account.Enabled
-		case "Password":
-			err = s.SetPassword(ctx, account.Account.Name, account.Account.Password)
+		case "password", "Password", "PASSWORD":
+			err = s.SetPassword(ctx, account.Account.Uid, account.Account.Password)
 			if err != nil {
 				return err
 			}
@@ -148,9 +149,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 //CreateUserAccount is a method to Create User Account
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
-	// TODO move this to the controller
-	//log.Info("User Data", zap.String("P:", password))
-
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -272,7 +270,7 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 	}
 
 	if len(result.Account) == 0 {
-		return nil, errors.New("The Account is not found.")
+		return nil, errors.New("The Account is not found")
 	}
 
 	account = &nodepb.Account{
@@ -298,8 +296,12 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	m := &api.Mutation{CommitNow: true}
 
 	//Query to get the Account to be deleted with all the related edges
+	//conidition for deleting an account
+	//1. Account should not be named root
+	//2. Account should have isRoot flag as false
+	//3. Account should have enabled flag as false.
 	const q = `query delete($userid: string){
-		account(func: uid($userid)) @filter(eq(type, "account")) {
+		account(func: uid($userid)) @filter(eq(type, "account") and  eq(isRoot,false) and Not eq(name,"root") and eq(enabled,false)) {
 			uid
 		  has.credentials {
 			uid
@@ -329,7 +331,7 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	}
 
 	if len(result.Accounts) != 1 {
-		return status.Error(codes.NotFound, "The Account is not found.")
+		return status.Error(codes.NotFound, "The Account is not found")
 	}
 
 	//Append edge if there is a default.namespace edge

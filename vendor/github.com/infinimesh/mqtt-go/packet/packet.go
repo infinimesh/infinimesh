@@ -74,6 +74,8 @@ const (
 	RESPONSE_TOPIC_LENGTH               = 1
 	CORRELATION_DATA_ID                 = 9
 	CORRELATION_DATA_LENGTH             = 1
+	USER_PROPERTY_ID                    = 38
+	USER_PROPERTY_LENGTH                = 1
 )
 
 // FixedHeader is contained in every packet (thus, fixed). It consists of the
@@ -211,7 +213,7 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLe
 		}
 		return packet, nil
 	case SUBSCRIBE:
-		vhLen, vh, err := readSubscribeVariableHeader(remainingReader)
+		vhLen, vh, err := readSubscribeVariableHeader(remainingReader, protocolLevel)
 		if err != nil {
 			return nil, err
 		}
@@ -229,6 +231,10 @@ func parseToConcretePacket(remainingReader io.Reader, fh FixedHeader, protocolLe
 		return packet, nil
 	case PINGREQ:
 		return &PingReqControlPacket{FixedHeader: fh}, nil
+
+	case UNSUBSCRIBE:
+		fmt.Printf("Client has unsubscribed %v", fh.ControlPacketType)
+		return nil, nil
 	case DISCONNECT:
 		fmt.Println("Client disconnected")
 		return nil, errors.New("Client disconnected")

@@ -28,6 +28,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//ObjectController is a Data type for Object Controller file
 type ObjectController struct {
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
@@ -35,29 +36,68 @@ type ObjectController struct {
 	Repo Repo
 }
 
+//CreateObject is a method for creating objects in heirarchy
 func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.CreateObjectRequest) (response *nodepb.Object, err error) {
+
+	log := s.Log.Named("Create Object Controller")
+	//Added logging
+	log.Info("Function Invoked",
+		zap.String("Name", request.Name),
+		zap.String("Kind", request.Kind),
+		zap.String("Namespace", request.Namespace),
+		zap.String("Parent", request.Parent))
+
 	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespace())
 	if err != nil {
+		//Added logging
+		log.Error("Failed to create Object", zap.String("Name", request.Name), zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	//Added logging
+	log.Info("Object Created", zap.String("Name", request.Name), zap.String("Object Id", id))
 	return &nodepb.Object{Uid: id, Name: request.GetName()}, nil
 }
 
+//DeleteObject is a method for deleting objects in heirarchy
 func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
+
+	log := s.Log.Named("Delete Object Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Account", request.Uid))
+
 	err = s.Repo.DeleteObject(ctx, request.GetUid())
 	if err != nil {
+		//Added logging
+		log.Error("Failed to delete object", zap.Error(err))
 		return nil, err
 	}
+
+	//Added Logging
+	log.Info("Delete Object successful")
 	return &nodepb.DeleteObjectResponse{}, nil
 }
 
+//ListObjects is a method for listing objects in heirarchy
 func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
+
+	log := s.Log.Named("List Objects Controller")
+	//Added logging
+	log.Info("Function Invoked",
+		zap.String("Account", request.Account),
+		zap.String("Namespace", request.Namespace),
+		zap.Bool("Recurse", request.Recurse))
+
 	objects, err := s.Repo.ListForAccount(ctx, request.Account, request.Namespace, request.Recurse)
 	if err != nil {
+		//Added logging
+		log.Error("Failed to list accounts", zap.Error(err))
+
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	//Added logging
+	log.Info("List Objects successful")
 	return &nodepb.ListObjectsResponse{
 		Objects: objects,
 	}, nil
