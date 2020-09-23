@@ -1,13 +1,20 @@
 package packet
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 )
 
+type SubscribeUserProperty struct {
+	key   string
+	value string
+}
+
 type SubscribeProperties struct {
 	PropertyLength int //1 byte
+	UserProperty   SubscribeUserProperty
 }
 type SubscribeControlPacket struct {
 	// Bits 3,2,1 and 0 of the fixed header of the SUBSCRIBE Control Packet are reserved and MUST be set to 0,0,1 and 0 respectively. The Server MUST treat any other value as malformed and close the Network Connection [MQTT-3.8.1-1].
@@ -38,7 +45,7 @@ func readSubscribeVariableHeader(r io.Reader, protocolLevel byte) (n int, vh Sub
 	if err != nil {
 		return 0, SubscribeVariableHeader{}, err
 	}
-
+	vh.PacketID = packetID
 	if int(protocolLevel) == 5 {
 		propertyLength := make([]byte, 1)
 		n, err = r.Read(propertyLength)
@@ -51,10 +58,41 @@ func readSubscribeVariableHeader(r io.Reader, protocolLevel byte) (n int, vh Sub
 			fmt.Printf("No optional subscribe properties added")
 		} else {
 			len += vh.SubscribeProperties.PropertyLength
-			//vh, _ = readSubscribeProperties(r, vh)
+			vh, _ = readSubscribeProperties(r, vh)
 		}
 	}
-	return len, SubscribeVariableHeader{PacketID: packetID}, nil
+	return len, vh, nil
+}
+
+func readSubscribeProperties(r io.Reader, vh SubscribeVariableHeader) (SubscribeVariableHeader, error) {
+	subscribeProperties := make([]byte, vh.SubscribeProperties.PropertyLength)
+	propertiesLength, err := io.ReadFull(r, subscribeProperties)
+	if err != nil {
+		return vh, err
+	}
+	if propertiesLength != vh.SubscribeProperties.PropertyLength {
+		return vh, errors.New("Subscribe Properties length incorrect")
+	}
+	for propertiesLength > 1 {
+		if subscribeProperties[0] == USER_PROPERTY_ID {
+			subscribeProperties = subscribeProperties[1:]
+			userPropertyKeyLength := int(binary.BigEndian.Uint16(subscribeProperties[0:2]))
+			subscribeProperties = subscribeProperties[2:]
+
+			vh.SubscribeProperties.UserProperty.key = string(subscribeProperties[0:userPropertyKeyLength])
+			subscribeProperties = subscribeProperties[userPropertyKeyLength:]
+
+			userPropertyValueLength := int(binary.BigEndian.Uint16(subscribeProperties[0:2]))
+			subscribeProperties = subscribeProperties[2:]
+
+			vh.SubscribeProperties.UserProperty.value = string(subscribeProperties[0:userPropertyValueLength])
+			subscribeProperties = subscribeProperties[userPropertyValueLength:]
+		} else {
+			propertiesLength = 0
+			fmt.Printf("No additional subscribe properties added or supported")
+		}
+	}
+	return vh, nil
 }
 
 func readSubscribePayload(r io.Reader, remainingLength int) (n int, payload SubscribePayload, err error) {

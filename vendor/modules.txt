@@ -117,7 +117,7 @@ github.com/hokaccha/go-prettyjson
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
-# github.com/infinimesh/mqtt-go v0.0.0-20200922094715-275e659f0ba3
+# github.com/infinimesh/mqtt-go v0.0.0-20200923115042-381d84c9802a
 ## explicit
 github.com/infinimesh/mqtt-go/packet
 # github.com/jeremywohl/flatten v0.0.0-20180923035001-588fe0d4c603
