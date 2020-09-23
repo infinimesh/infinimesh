@@ -4,19 +4,14 @@
       <Header />
     </v-app-bar>
     <Sider />
-    <a-layout class="layout-content">
-      <a-layout>
-        <a-layout-content
-          :style="{
-            marginLeft: '80px',
-            paddingBottom: '20rem'
-          }"
-        >
-          <nuxt-child />
-        </a-layout-content>
-        <infinimesh-footer />
-      </a-layout>
-    </a-layout>
+    <v-main>
+      <v-container>
+        <nuxt-child />
+      </v-container>
+    </v-main>
+    <v-footer app>
+      <infinimesh-footer />
+    </v-footer>
   </v-app>
 </template>
 
@@ -46,9 +41,3 @@ export default {
   }
 };
 </script>
-
-<style lang="less" scoped>
-.layout-content {
-  margin-top: @layout-header-height;
-}
-</style>
