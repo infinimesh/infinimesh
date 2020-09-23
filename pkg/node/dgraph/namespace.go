@@ -23,8 +23,9 @@ import (
 	"strings"
 
 	"github.com/dgraph-io/dgo/protos/api"
-
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 //ListNamespaces is a method to List details of all Namespaces
@@ -234,21 +235,41 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 
 //DeleteNamespace is a method that deletes a namespace
 func (s *DGraphRepo) DeleteNamespace(ctx context.Context, namespaceID string) (err error) {
-	txn := s.Dg.NewTxn()
-	const q = `query deleteNamespace($namespaceID: string, $accountID: string){
-  accounts(func: uid($namespaceID)) @filter(eq(type, "namespace")) @cascade @normalize {
-    namespace_uid: uid
-    ~access.to.namespace @filter(uid($accountID))  {
-      account_uid: uid
-    }
-  }
-}`
+	txn := s.Dg.NewReadOnlyTxn()
+	const q = `query deleteNodes($namespaceID: string){
+		nodes(func: uid($namespaceID)) @filter(eq(type,"namespace") @normalize {
+		  uid
+		  name
+		owns {
+		  uid
+		  type
+		}
+		}
+	  }
+	  `
 
-	_, err = txn.QueryWithVars(ctx, q, map[string]string{
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{
 		"$namespaceID": namespaceID,
 	})
 	if err != nil {
 		return err
+	}
+
+	var result struct {
+		Nodes []*Node `json:"nodes"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Nodes) != 1 {
+		return status.Error(codes.NotFound, "The Namespace is not found")
+	}
+
+	for _, item := range result.Nodes {
+		err = s.DeleteObject(ctx, item.UID)
 	}
 
 	return err
