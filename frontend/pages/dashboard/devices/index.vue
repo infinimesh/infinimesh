@@ -31,33 +31,7 @@
               @add="handleDeviceAdd"
             />
           </a-row>
-          <nuxt-link v-else :to="{ name: 'dashboard-devices-id', params: { id: device.id } }">
-            <a-card :hoverable="true" :bordered="false" :ref="`device-card-${device.id}`">
-              <template slot="title">{{ device.name }}</template>
-              <template slot="extra">
-                <b class="muted">{{ device.id }}</b>
-                <a-tooltip
-                  :title="
-                    device.enabled ? 'Device enabled' : 'Device is not enabled'
-                  "
-                  placement="bottom"
-                >
-                  <a-icon
-                    type="bulb"
-                    :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
-                    theme="filled"
-                  />
-                </a-tooltip>
-              </template>
-              <template>
-                <a-row v-if="device.tags.length">
-                  Tags:
-                  <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
-                </a-row>
-                <a-row v-else type="flex" justify="center" class="muted">No tags were provided</a-row>
-              </template>
-            </a-card>
-          </nuxt-link>
+          <device-list-card :device="device" v-else />
         </div>
       </a-col>
     </a-row>
@@ -66,15 +40,17 @@
 
 <script>
 import DeviceAdd from "@/components/device/Add.vue";
+import DeviceListCard from "@/components/device/ListCard.vue";
 
 export default {
   name: "devicesTable",
   components: {
     DeviceAdd,
+    DeviceListCard
   },
   data() {
     return {
-      addDeviceActive: false,
+      addDeviceActive: false
     };
   },
   computed: {
@@ -82,7 +58,7 @@ export default {
       deep: true,
       get() {
         return this.$store.state.devices.pool;
-      },
+      }
     },
     poolCols: {
       deep: true,
@@ -130,11 +106,11 @@ export default {
           i += div - 1;
         }
         return res;
-      },
+      }
     },
     deviceCreateFormStyle() {
       return {
-        "--device-card-height": this.deviceCardHeight,
+        "--device-card-height": this.deviceCardHeight
       };
     },
     deviceCardHeight: {
@@ -148,38 +124,33 @@ export default {
         } else {
           return "8rem";
         }
-      },
+      }
     },
     gridSize() {
       return this.$store.state.window.gridSize;
-    },
+    }
   },
   methods: {
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
-        error: (err) => {
+        error: err => {
           this.$notification.error({
             message: "Failed to create the device",
             description: `Response: ${err.response.data.message}`,
             placement: "bottomRight",
-            duration: 10,
+            duration: 10
           });
         },
         always: () => {
           this.addDeviceActive = false;
-        },
+        }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
-<style scoped>
-#root {
-  padding: 10px;
-}
-</style>
 <style lang="less" scoped>
 .muted {
   color: @primary-color-dark;
