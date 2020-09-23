@@ -15,7 +15,6 @@
           <a-row
             class="create-form"
             v-if="device.type && device.type == 'create-form'"
-            :style="deviceCreateFormStyle"
             type="flex"
             justify="center"
             align="middle"
@@ -108,24 +107,6 @@ export default {
         return res;
       }
     },
-    deviceCreateFormStyle() {
-      return {
-        "--device-card-height": this.deviceCardHeight
-      };
-    },
-    deviceCardHeight: {
-      deep: true,
-      get() {
-        if (this.$refs.length) {
-          return this.$refs.reduce((curr, el) => {
-            if (el < curr) curr = el.clientHeight;
-            return curr;
-          }, 1000);
-        } else {
-          return "8rem";
-        }
-      }
-    },
     gridSize() {
       return this.$store.state.window.gridSize;
     }
@@ -152,14 +133,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.muted {
-  color: @primary-color-dark;
-}
 .create-form {
   border-radius: @border-radius-base;
   background: @primary-color-dark;
   border: @border-base;
-  min-height: var(--device-card-height);
+  min-height: 8rem;
   cursor: pointer;
 }
 .create-form .anticon {
