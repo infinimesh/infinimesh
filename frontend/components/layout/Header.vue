@@ -1,9 +1,6 @@
 <template>
   <v-row class="infini-nav" align="center" justify="space-between">
     <v-col sm="6" md="5" lg="3" xl="3">
-      <a @click="toggleCollapsed" class="menu-control">
-        <a-icon :type="menu ? 'menu-unfold' : 'menu-fold'" />
-      </a>
       <span class="logo">infinimesh</span></v-col
     >
     <v-col class="d-none d-lg-block" lg="1" xl="1">
