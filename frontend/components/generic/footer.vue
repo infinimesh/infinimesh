@@ -1,16 +1,16 @@
 <template>
-  <a-layout-footer id="footer">
-    <a-row type="flex" justify="center">
-      <a-col :xs="24" :sm="18" :md="12" :lg="10" :xl="8">
+  <v-container id="footer">
+    <v-row justify="center">
+      <v-col :sm="9" :md="6" :lg="5" :xl="4">
         ©2020 —
         <strong>InfiniteDevices GmbH</strong>
         - source code at
         <a href="https://www.github.com/infinimesh/infinimesh" target="_new">
           <strong>GitHub</strong>
         </a>
-      </a-col>
-    </a-row>
-  </a-layout-footer>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -24,11 +24,6 @@ export default InfinimeshFooter;
 <style scoped>
 #footer {
   color: black;
-  margin-top: 15rem;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
   text-align: center;
 }
 </style>
