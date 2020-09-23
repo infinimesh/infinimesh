@@ -7,19 +7,19 @@
     color="#104e83"
     mini-variant-width="64"
   >
-    <v-list nav v-model="route" dark>
-      <v-list-item link :key="page.link" v-for="page in pagesFiltered">
+    <v-list nav dark>
+      <v-list-item
+        link
+        :key="page.link"
+        v-for="page in pagesFiltered"
+        :nuxt="true"
+        :to="page.link"
+      >
         <v-list-item-icon>
           <v-icon>{{ page.icon }}</v-icon>
         </v-list-item-icon>
         <v-list-item-title>{{ page.title }}</v-list-item-title>
       </v-list-item>
-      <!-- <v-list-item no-action>
-        <v-list-item-icon>
-          <v-icon>{{ page.icon }}</v-icon>
-        </v-list-item-icon>
-        <v-list-item-title>{{ page.title }}</v-list-item-title>
-      </v-list-item> -->
       <v-list-group no-action prepend-icon="mdi-account-circle-outline">
         <template v-slot:activator>
           <v-list-item-title
@@ -46,17 +46,17 @@ export default {
         {
           title: "Device Registry",
           icon: "mdi-cloud-outline",
-          link: "dashboard-devices"
+          link: "devices"
         },
         {
           title: "Accounts",
           icon: "mdi-account-group",
-          link: "dashboard-accounts"
+          link: "accounts"
         },
         {
           title: "Namespaces",
           icon: "mdi-folder-multiple-outline",
-          link: "dashboard-namespaces"
+          link: "namespaces"
         }
       ]
     };
