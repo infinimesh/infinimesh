@@ -224,14 +224,14 @@ func main() {
 
 }
 
-func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}) {
+func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
 		topic := fqTopic(m.DeviceID, m.SubPath)
 		fmt.Println("Publish to topic ", topic, "of client", deviceID)
-		p := packet.NewPublish(topic, uint16(0), m.Data)
+		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
 		_, err := p.WriteTo(c)
 		if err != nil {
 			panic(err)
@@ -325,7 +325,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 	// Create empty subscription
 	backChannel := ps.Sub()
-	go handleBackChannel(c, deviceID, backChannel)
+	go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
 	defer func() {
 		fmt.Printf("Unsubbed channel %v\n", deviceID)
 		ps.Unsub(backChannel)
@@ -371,7 +371,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 			}
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, sub.Topic)
-				go handleBackChannel(c, deviceID, backChannel)
+				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
 			}
 		case *packet.UnsubscribeControlPacket:
