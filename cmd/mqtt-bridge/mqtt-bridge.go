@@ -371,6 +371,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 			}
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, sub.Topic)
+				go handleBackChannel(c, deviceID, backChannel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
 			}
 		case *packet.UnsubscribeControlPacket:
