@@ -218,8 +218,9 @@ func (c *PublishVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		return
 	}
 	if c.PublishProperties.PropertyLength > 0 {
+		b := make([]byte, 2)
 		binary.BigEndian.PutUint16(b, uint16(0))
-		written, err = w.Write(b)
+		written, err = w.Write(b[:1])
 		n += int64(written)
 		if err != nil {
 			return
