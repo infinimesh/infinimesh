@@ -125,7 +125,7 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 		return vh, errors.New("Connect Properties length incorrect")
 	}
 	for propertiesLength > 1 {
-		if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_ID {
+		if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_MAXIMUM_ID {
 			topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
 			vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
 			propertiesLength -= TOPIC_ALIAS_LENGTH + 1
