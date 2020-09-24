@@ -178,7 +178,7 @@ func (p *PublishControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 	p.FixedHeader.RemainingLength = 2 + len(p.VariableHeader.Topic) + len(p.Payload)
 
 	if p.VariableHeader.PublishProperties.PropertyLength > 0 {
-		p.FixedHeader.RemainingLength += 3
+		p.FixedHeader.RemainingLength += p.VariableHeader.PublishProperties.PropertyLength
 	}
 
 	if p.FixedHeaderFlags.QoS == QoSLevelAtLeastOnce || p.FixedHeaderFlags.QoS == QoSLevelExactlyOnce {
@@ -218,19 +218,8 @@ func (c *PublishVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		return
 	}
 	if c.PublishProperties.PropertyLength > 0 {
-		binary.BigEndian.PutUint16(b, uint16(c.PublishProperties.PropertyLength))
+		binary.BigEndian.PutUint16(b, uint16(0))
 		written, err = w.Write(b)
-		n += int64(written)
-		if err != nil {
-			return
-		}
-		binary.BigEndian.PutUint16(b, uint16(RESPONSE_TOPIC_ID))
-		written, err = w.Write(b)
-		n += int64(written)
-		if err != nil {
-			return
-		}
-		written, err = w.Write([]byte(c.PublishProperties.ResponseTopic))
 		n += int64(written)
 		if err != nil {
 			return
@@ -250,8 +239,7 @@ func NewPublish(topic string, packetID uint16, payload []byte, protocolLevel byt
 	}
 	if int(protocolLevel) == 5 {
 		vh.PublishProperties = PublishProperties{
-			PropertyLength: len(topic) + 1,
-			ResponseTopic:  topic,
+			PropertyLength: 1,
 		}
 	}
 	flags := PublishHeaderFlags{
