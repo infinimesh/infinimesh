@@ -218,7 +218,13 @@ func (c *PublishVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		return
 	}
 	if c.PublishProperties.PropertyLength > 0 {
-		binary.BigEndian.PutUint16(b, uint16(c.PublishProperties.PropertyLength))
+		binary.BigEndian.PutUint8(b, uint8(c.PublishProperties.PropertyLength))
+		written, err = w.Write(b)
+		n += int64(written)
+		if err != nil {
+			return
+		}
+		binary.BigEndian.PutUint8(b, uint8(RESPONSE_TOPIC_ID))
 		written, err = w.Write(b)
 		n += int64(written)
 		if err != nil {
@@ -244,7 +250,8 @@ func NewPublish(topic string, packetID uint16, payload []byte, protocolLevel byt
 	}
 	if int(protocolLevel) == 5 {
 		vh.PublishProperties = PublishProperties{
-			ResponseTopic: topic,
+			PropertyLength: len(topic) + 1,
+			ResponseTopic:  topic,
 		}
 	}
 	flags := PublishHeaderFlags{
