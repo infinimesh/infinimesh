@@ -26,9 +26,9 @@ type Node struct {
 //Namespace Data strcuture for Dgraph database
 type Namespace struct {
 	Node
-	Name            string `json:"name,omitempty"`
-	MarkForDeletion bool   `json:"markfordeletion,omitempty"`
-	//DeleteInitiationTime time.Time `json:"deleteinitiationtime,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	MarkForDeletion      bool   `json:"markfordeletion,omitempty"`
+	DeleteInitiationTime string `json:"deleteinitiationtime,omitempty"`
 
 	Owns []*Object `json:"owns,omitempty"`
 
