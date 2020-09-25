@@ -200,7 +200,7 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	}
 }
 
-//CreateObjects is a method to create objects
+//CreateObject is a method to create objects
 func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
 	txn := s.Dg.NewTxn()
 
@@ -277,7 +277,7 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	return a.GetUids()["new"], nil
 }
 
-//ListForAccounts is a method to list all the objects for an account
+//ListForAccount is a method to list all the objects for an account
 func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
