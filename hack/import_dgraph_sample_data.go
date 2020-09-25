@@ -33,6 +33,7 @@ func init() {
 
 func main() {
 	flag.Parse()
+	counter := 0
 
 	err := retry.Do(func() error {
 		conn, _ := grpc.Dial(dgraphURL, grpc.WithInsecure())
@@ -42,7 +43,6 @@ func main() {
 
 		repo := dgraph.NewDGraphRepo(dg)
 
-		counter := 0
 		counter++
 		fmt.Println("----------- Attempt " + strconv.Itoa(counter) + " -----------")
 
