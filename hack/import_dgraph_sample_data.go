@@ -51,7 +51,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			fmt.Println("Dropped data")
+			fmt.Println("Dgraph Data Drop Successful")
 		}
 
 		err := dgraph.ImportSchema(dg, true)
@@ -59,13 +59,14 @@ func main() {
 			fmt.Println("Import failed with error" + err.Error())
 			return err
 		}
-		fmt.Println("Imported schema")
+		fmt.Println("Dgraph Schema Import Successful")
 
 		_, _, err = dgraph.ImportStandardSet(repo)
 		if err != nil {
 			fmt.Println("Import Standard set failed with error" + err.Error())
 			return err
 		}
+		fmt.Println("Dgraph Test Data Import Successful")
 		return nil
 	}, retry.Delay(time.Second*2), retry.Attempts(5))
 
