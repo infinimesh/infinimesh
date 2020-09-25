@@ -111,7 +111,13 @@ func (n *NamespaceController) DeletePermission(ctx context.Context, request *nod
 
 //DeleteNamespace is a method to delete a Namespace
 func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
-	err = n.Repo.DeleteNamespace(ctx, request.Namespaceid)
+
+	if request.Harddelete {
+		err = n.Repo.HardDeleteNamespace(ctx, request.Namespaceid)
+	} else {
+		err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
+	}
+
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to delete Namespace")
 	}

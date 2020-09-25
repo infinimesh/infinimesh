@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -233,20 +234,68 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	return false, nil
 }
 
-//DeleteNamespace is a method that deletes a namespace
-func (s *DGraphRepo) DeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+//SoftDeleteNamespace is a method that mark the namespace for deletion
+func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	const q = `query deleteNodes($namespaceID: string){
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
+          uid
+        }
+      }
+      `
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$namespaceID": namespaceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Nodes []*Node `json:"nodes"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Nodes) != 1 {
+		return status.Error(codes.NotFound, "The Namespace is not found")
+	}
+
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:     namespaceID,
+		Predicate:   "markfordeletion",
+		ObjectId:    namespaceID,
+		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "true"}},
+	})
+
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:     namespaceID,
+		Predicate:   "deleteinitiationtime",
+		ObjectId:    namespaceID,
+		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: time.Now().Format(time.RFC3339)}},
+	})
+
+	_, err = txn.Mutate(ctx, m)
+	return err
+}
+
+//HardDeleteNamespace is a method that deletes a namespace permantly
+func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 	const q = `query deleteNodes($namespaceID: string){
-		nodes(func: uid($namespaceID)) @filter(eq(type,"namespace") @normalize {
-		  uid
-		  name
-		owns {
-		  uid
-		  type
-		}
-		}
-	  }
-	  `
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) @normalize {
+          uid
+        owns {
+          uid
+        }
+        }
+      }
+      `
 
 	res, err := txn.QueryWithVars(ctx, q, map[string]string{
 		"$namespaceID": namespaceID,
