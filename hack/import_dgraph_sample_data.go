@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"flag"
@@ -40,6 +41,10 @@ func main() {
 		dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
 		repo := dgraph.NewDGraphRepo(dg)
+
+		counter := 0
+		counter++
+		fmt.Println("----------- Attempt " + strconv.Itoa(counter) + " -----------")
 
 		if drop {
 			err := dg.Alter(context.Background(), &api.Operation{DropAll: true})
