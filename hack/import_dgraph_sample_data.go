@@ -67,7 +67,7 @@ func main() {
 			return err
 		}
 		return nil
-	}, retry.Delay(time.Second*2), retry.Attempts(10))
+	}, retry.Delay(time.Second*2), retry.Attempts(5))
 
 	if err != nil {
 		panic(err)

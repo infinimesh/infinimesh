@@ -227,7 +227,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 
 		err = txn.Commit(ctx)
 		if err != nil {
-			return "", errors.New("Failed to commit")
+			return "", err
 		}
 		userUID := a.GetUids()["user"]
 		return userUID, nil
