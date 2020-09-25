@@ -29,8 +29,8 @@ type Node struct {
 type Namespace struct {
 	Node
 	Name                 string    `json:"name,omitempty"`
-	MarkForDeletion      bool      `json:"markfordeletion"`
-	DeleteInitiationTime time.Time `json:"deleteinitiationtime"`
+	MarkForDeletion      bool      `json:"markfordeletion,omitempty"`
+	DeleteInitiationTime time.Time `json:"deleteinitiationtime,omitempty"`
 
 	Owns []*Object `json:"owns,omitempty"`
 
