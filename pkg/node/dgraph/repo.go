@@ -427,7 +427,7 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 	return assigned.GetUids()["namespace"], nil
 }
 
-//GetNamespace is a method to get the namespace based on ID
+//GetNamespace is a method to get the namespace based on Name
 func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
                      namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
@@ -453,8 +453,10 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 
 	if len(resultSet.Namespaces) > 0 {
 		return &nodepb.Namespace{
-			Id:   resultSet.Namespaces[0].UID,
-			Name: resultSet.Namespaces[0].Name,
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
 		}, nil
 	}
 
@@ -487,8 +489,10 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 
 	if len(resultSet.Namespaces) > 0 {
 		return &nodepb.Namespace{
-			Id:   resultSet.Namespaces[0].UID,
-			Name: resultSet.Namespaces[0].Name,
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
 		}, nil
 	}
 

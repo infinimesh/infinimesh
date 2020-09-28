@@ -352,7 +352,7 @@ func TestDeleteNamespace(t *testing.T) {
 	//Validation
 	require.EqualValues(t, ns, nsNew.Name)
 	require.EqualValues(t, true, nsNew.Markfordeletion)
-	//Not do time validation as its difficult to get the time when the delete was initiated
+	//Not doing time validation as its difficult to get the time when the delete was initiated
 	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
 
 }
