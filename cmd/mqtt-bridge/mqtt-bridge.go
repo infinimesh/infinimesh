@@ -224,14 +224,14 @@ func main() {
 
 }
 
-func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}) {
+func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
 		topic := fqTopic(m.DeviceID, m.SubPath)
 		fmt.Println("Publish to topic ", topic, "of client", deviceID)
-		p := packet.NewPublish(topic, uint16(0), m.Data)
+		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
 		_, err := p.WriteTo(c)
 		if err != nil {
 			panic(err)
@@ -325,7 +325,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 	// Create empty subscription
 	backChannel := ps.Sub()
-	go handleBackChannel(c, deviceID, backChannel)
+	go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
 	defer func() {
 		fmt.Printf("Unsubbed channel %v\n", deviceID)
 		ps.Unsub(backChannel)
@@ -364,16 +364,25 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
 		case *packet.SubscribeControlPacket:
-			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), []byte{1})
+			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				backChannel = ps.Sub(sub.Topic)
 				ps.AddSub(backChannel, sub.Topic)
-				//handleBackChannel(c, deviceID, backChannel)
+				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
 				fmt.Println("Added Subscription", sub.Topic, deviceID)
+			}
+		case *packet.UnsubscribeControlPacket:
+			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
+			_, err := response.WriteTo(c)
+			if err != nil {
+				fmt.Println("Failed to write UnSubAck:", err)
+			}
+			for _, unsub := range p.Payload.UnSubscriptions {
+				ps.Unsub(backChannel, unsub.Topic)
+				fmt.Println("Removed Subscription", unsub.Topic, deviceID)
 			}
 		}
 	}
@@ -381,7 +390,6 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int) (map[string]int, error) {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
-	fmt.Printf("Publis TopicAlias %v", p.VariableHeader.PublishProperties.TopicAlias)
 	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
 		if val, ok := topicAliasPublishMap[p.VariableHeader.Topic]; ok {
 			if val == p.VariableHeader.PublishProperties.TopicAlias {

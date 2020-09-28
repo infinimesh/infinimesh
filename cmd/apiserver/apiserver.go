@@ -91,7 +91,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		log.Info("Validated token", zap.Any("claims", claims))
+		log.Info("GRPC API Server", zap.String("Validated token", "Function Invoked"), zap.Any("Claims", claims))
 
 		if accountID, ok := claims[accountIDClaim]; ok {
 
@@ -229,6 +229,9 @@ func main() {
 
 	namespaceClient := nodepb.NewNamespacesClient(nodeConn)
 
+	//Added logging
+	log.Info("GRPC API Server", zap.String("Starting GRPC Service", ""))
+
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient, accountClient: accountClient})
 	apipb.RegisterStatesServer(srv, &shadowAPI{client: shadowClient, accountClient: accountClient})
 	apipb.RegisterAccountsServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
@@ -236,13 +239,19 @@ func main() {
 	apipb.RegisterNamespacesServer(srv, &namespaceAPI{client: namespaceClient, accountClient: accountClient})
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
+		//Added logging
+		log.Error("GRPC API Server", zap.String("Unable to start GRPC Service", ""), zap.Error(err))
 		panic(err)
 	}
 
+	//Added logging
+	log.Info("GRPC API Server", zap.String("GRPC Service Started", ""))
 	reflection.Register(srv)
 
 	err = srv.Serve(listener)
 	if err != nil {
+		//Added logging
+		log.Error("GRPC API Server", zap.String("Unable to start GRPC Service", ""), zap.Error(err))
 		panic(err)
 	}
 

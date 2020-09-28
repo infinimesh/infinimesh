@@ -21,13 +21,15 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/dgraph-io/dgo/protos/api"
-
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-//ListNamespaces is a method to Query details of all Namespaces
+//ListNamespaces is a method to List details of all Namespaces
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
@@ -59,6 +61,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
+//DeletePermissionInNamespace is a method to delete permissions for a Namespaces for an account
 func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error) {
 	txn := s.Dg.NewTxn()
 	const q = `query deletePermissionInNamespace($namespaceID: string, $accountID: string){
@@ -101,6 +104,7 @@ func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceI
 	return err
 }
 
+//ListPermissionsInNamespace is a method to list permissions for all accounts for a Namespace
 func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid string) (permissions []*nodepb.Permission, err error) {
 	const q = `query listPermissionsInNamespace($namespaceid: string) {
 		accounts(func: uid($namespaceid)) @filter(eq(type, "namespace")) @normalize @cascade  {
@@ -141,6 +145,7 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 }
 
+//ListNamespacesForAccount is a method to list Namespaces for an Account
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
 		namespaces(func: uid($account)) @normalize @cascade  {
@@ -174,6 +179,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
+//IsAuthorizedNamespace is a method that returns if the access to the namespace for an account is true or false
 func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error) {
 	acc, err := s.GetAccount(ctx, account)
 	if err != nil {
@@ -226,4 +232,94 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	}
 
 	return false, nil
+}
+
+//SoftDeleteNamespace is a method that mark the namespace for deletion
+func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	const q = `query deleteNodes($namespaceID: string){
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
+          uid
+        }
+      }
+      `
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$namespaceID": namespaceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Nodes []*Node `json:"nodes"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Nodes) != 1 {
+		return status.Error(codes.NotFound, "The Namespace is not found")
+	}
+
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:     namespaceID,
+		Predicate:   "markfordeletion",
+		ObjectId:    namespaceID,
+		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "true"}},
+	})
+
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:     namespaceID,
+		Predicate:   "deleteinitiationtime",
+		ObjectId:    namespaceID,
+		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: time.Now().Format(time.RFC3339)}},
+	})
+
+	_, err = txn.Mutate(ctx, m)
+	return err
+}
+
+//HardDeleteNamespace is a method that deletes a namespace permantly
+func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+	txn := s.Dg.NewReadOnlyTxn()
+	const q = `query deleteNodes($namespaceID: string){
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) @normalize {
+          uid
+        owns {
+          uid
+        }
+        }
+      }
+      `
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$namespaceID": namespaceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Nodes []*Node `json:"nodes"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Nodes) != 1 {
+		return status.Error(codes.NotFound, "The Namespace is not found")
+	}
+
+	for _, item := range result.Nodes {
+		err = s.DeleteObject(ctx, item.UID)
+	}
+
+	return err
 }

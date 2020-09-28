@@ -6,6 +6,10 @@ import (
 	"io"
 )
 
+type SubAckProperties struct {
+	propertiesLength int
+}
+
 type SubAckControlPacket struct {
 	FixedHeader    FixedHeader
 	VariableHeader SubAckVariableHeader
@@ -13,7 +17,8 @@ type SubAckControlPacket struct {
 }
 
 type SubAckVariableHeader struct {
-	PacketID uint16
+	PacketID         uint16
+	SubAckProperties SubAckProperties
 }
 
 type SubAckPayload struct {
@@ -33,7 +38,24 @@ const (
 	ReturncodeFailure     byte = 0x80
 )
 
-func NewSubAck(packetID uint16, returnCodes []byte) *SubAckControlPacket {
+func NewSubAck(packetID uint16, protocolLevel byte, returnCodes []byte) *SubAckControlPacket {
+	if int(protocolLevel) == 5 {
+		return &SubAckControlPacket{
+			FixedHeader: FixedHeader{
+				ControlPacketType: SUBACK,
+				RemainingLength:   3 /* length of VH */ + len(returnCodes),
+			},
+			VariableHeader: SubAckVariableHeader{
+				PacketID: packetID,
+				SubAckProperties: SubAckProperties{
+					propertiesLength: 1,
+				},
+			},
+			Payload: SubAckPayload{
+				ReturnCodes: returnCodes,
+			},
+		}
+	}
 	return &SubAckControlPacket{
 		FixedHeader: FixedHeader{
 			ControlPacketType: SUBACK,
@@ -53,8 +75,13 @@ func NewSubAck(packetID uint16, returnCodes []byte) *SubAckControlPacket {
 func (vh *SubAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	b := make([]byte, 2)
 	binary.BigEndian.PutUint16(b, vh.PacketID)
-
-	return io.Copy(w, bytes.NewReader(b))
+	n, err = io.Copy(w, bytes.NewReader(b))
+	if vh.SubAckProperties.propertiesLength != 0 {
+		propertyLength := make([]byte, 1)
+		nWritten, _ := w.Write(propertyLength)
+		n += int64(nWritten)
+	}
+	return n, err
 }
 
 func (p *SubAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {

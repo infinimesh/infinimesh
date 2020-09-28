@@ -125,7 +125,7 @@ func readPublishProperties(r io.Reader, vh PublishVariableHeader) (PublishVariab
 		return vh, errors.New("Connect Properties length incorrect")
 	}
 	for propertiesLength > 1 {
-		if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_ID {
+		if propertiesLength > 1 && int(publishProperties[0]) == TOPIC_ALIAS_MAXIMUM_ID {
 			topicAlias := publishProperties[1 : TOPIC_ALIAS_MAXIMUM_LENGTH+1]
 			vh.PublishProperties.TopicAlias = int(binary.BigEndian.Uint16(topicAlias))
 			propertiesLength -= TOPIC_ALIAS_LENGTH + 1
@@ -177,6 +177,10 @@ func (p *PublishControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 	// Calc Variable Header + Payload
 	p.FixedHeader.RemainingLength = 2 + len(p.VariableHeader.Topic) + len(p.Payload)
 
+	if p.VariableHeader.PublishProperties.PropertyLength > 0 {
+		p.FixedHeader.RemainingLength += p.VariableHeader.PublishProperties.PropertyLength
+	}
+
 	if p.FixedHeaderFlags.QoS == QoSLevelAtLeastOnce || p.FixedHeaderFlags.QoS == QoSLevelExactlyOnce {
 		p.FixedHeader.RemainingLength += 2
 	}
@@ -213,25 +217,32 @@ func (c *PublishVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return
 	}
-
+	if c.PublishProperties.PropertyLength > 0 {
+		b := make([]byte, 2)
+		binary.BigEndian.PutUint16(b, uint16(0))
+		written, err = w.Write(b[:1])
+		n += int64(written)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
 
-func NewPublish(topic string, packetID uint16, payload []byte) *PublishControlPacket {
+func NewPublish(topic string, packetID uint16, payload []byte, protocolLevel byte) *PublishControlPacket {
 	fh := FixedHeader{
 		ControlPacketType: PUBLISH,
 		RemainingLength:   0, // will be populated by WriteTo for the moment
 	}
-	/*
-		pb := PublishProperties{
-			PropertyLength: 0,
-		}
-	*/
 	vh := PublishVariableHeader{
 		Topic:    topic,
 		PacketID: int(packetID),
 	}
-
+	if int(protocolLevel) == 5 {
+		vh.PublishProperties = PublishProperties{
+			PropertyLength: 1,
+		}
+	}
 	flags := PublishHeaderFlags{
 		QoS:    QoSLevelNone, // TODO
 		Dup:    false,        // TODO
