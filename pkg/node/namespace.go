@@ -27,6 +27,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//NamespaceController is a Data type for Namespace Controller file
 type NamespaceController struct {
 	Repo Repo
 }
