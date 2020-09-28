@@ -113,15 +113,38 @@ func (n *NamespaceController) DeletePermission(ctx context.Context, request *nod
 //DeleteNamespace is a method to delete a Namespace
 func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
 
-	if request.Harddelete {
-		//Set the datecondition to 14days back date
-		//This is to ensure that records that are older then 14 days or more will be only be deleted.
-		datecondition := time.Now().AddDate(0, 0, -14)
+	if !request.Revokedelete {
+		//Action to perform when delete action is not revoked.
+		if request.Harddelete {
+			//Set the datecondition to 14days back date
+			//This is to ensure that records that are older then 14 days or more will be only be deleted.
+			datecondition := time.Now().AddDate(0, 0, -14)
 
-		//Invokde Hardelete function with the date conidtion
-		err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+			//Invokde Hardelete function with the date conidtion
+			err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+		} else {
+			//Soft delete will mark the record for deletion with the timestamp
+			err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+		}
 	} else {
-		err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
+		//Action to perform when delete action is revoked.
+		ns, err := n.GetNamespaceID(ctx, &nodepb.GetNamespaceRequest{Namespace: request.Namespaceid})
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		if ns.Markfordeletion {
+			//Add steps to update namespace
+		} else {
+			return nil, status.Error(codes.Internal, "The Namespace is not marked for deletion")
+		}
+
 	}
 
 	if err != nil {
