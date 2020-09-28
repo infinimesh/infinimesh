@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"testing"
+	"time"
 
 	"os"
 
@@ -330,23 +331,29 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 func TestDeleteNamespace(t *testing.T) {
 	ctx := context.Background()
 
+	//Random name for the namespace
+	ns := randomdata.SillyName()
+
 	//Create Namespace
-	nsID, err := repo.CreateNamespace(ctx, "Test12345")
+	nsID, err := repo.CreateNamespace(ctx, ns)
 	require.NoError(t, err)
 
 	//Mark the Namespace for deletion
 	err = repo.SoftDeleteNamespace(ctx, nsID)
 	require.NoError(t, err)
 
-	//Delete the Namespace marked for deletion
-	err = repo.HardDeleteNamespace(ctx, nsID)
-	require.NoError(t, err)
+	//Delete the Namespace marked for deletion - Will not work for test
+	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, -14).Format(time.RFC3339))
 
 	//Try to fetch the delete account
-	_, err = repo.GetNamespaceID(ctx, nsID)
+	nsNew, err := repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
 
 	//Validation
-	require.EqualValues(t, string(err.Error()), "The Namespace is not found")
+	require.EqualValues(t, ns, nsNew.Name)
+	require.EqualValues(t, true, nsNew.Markfordeletion)
+	//Not doing time validation as its difficult to get the time when the delete was initiated
+	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
 
 }
 

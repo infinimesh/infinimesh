@@ -56,5 +56,5 @@ type Repo interface {
 	ListPermissionsInNamespace(ctx context.Context, namespaceID string) (permissions []*nodepb.Permission, err error)
 	DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error)
 	SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error)
-	HardDeleteNamespace(ctx context.Context, namespaceID string) (err error)
+	HardDeleteNamespace(ctx context.Context, datecondition string) (err error)
 }

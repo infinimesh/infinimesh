@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -33,8 +34,10 @@ import (
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
-  	               uid
-                       name
+						uid
+						name
+						markfordeletion
+						deleteinitiationtime
 	             }
                    }`
 
@@ -53,8 +56,10 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 
 	for _, namespace := range resultSet.Namespaces {
 		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
+			Id:                   namespace.UID,
+			Name:                 namespace.Name,
+			Markfordeletion:      namespace.MarkForDeletion,
+			Deleteinitiationtime: namespace.DeleteInitiationTime,
 		})
 	}
 
@@ -152,6 +157,8 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 		  access.to.namespace @filter(eq(type, "namespace")) @facets(NOT eq(permission,"NONE")) {
 			uid : uid
 			name : name
+			markfordeletion : markfordeletion
+			deleteinitiationtime : deleteinitiationtime
 		  }
 		}
 	  }`
@@ -171,8 +178,10 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 
 	for _, namespace := range resultSet.Namespaces {
 		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
+			Id:                   namespace.UID,
+			Name:                 namespace.Name,
+			Markfordeletion:      namespace.MarkForDeletion,
+			Deleteinitiationtime: namespace.DeleteInitiationTime,
 		})
 	}
 
@@ -285,10 +294,10 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 }
 
 //HardDeleteNamespace is a method that deletes a namespace permantly
-func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
-	const q = `query deleteNodes($namespaceID: string){
-        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) @normalize {
+	var q = `query deleteNodes{
+        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v")) @normalize {
           uid
         owns {
           uid
@@ -297,9 +306,13 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string
       }
       `
 
-	res, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$namespaceID": namespaceID,
-	})
+	if datecondition != "" {
+		q = fmt.Sprintf(q, datecondition)
+	} else {
+		q = fmt.Sprintf(q, "")
+	}
+
+	res, err := txn.Query(ctx, q)
 	if err != nil {
 		return err
 	}
@@ -313,7 +326,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string
 		return err
 	}
 
-	if len(result.Nodes) != 1 {
+	if len(result.Nodes) < 1 {
 		return status.Error(codes.NotFound, "The Namespace is not found")
 	}
 
