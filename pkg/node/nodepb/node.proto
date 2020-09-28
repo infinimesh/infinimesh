@@ -157,6 +157,7 @@ message SetPasswordResponse{
 message DeleteAccountRequest {
   string uid = 1;
   bool harddelete = 2;
+  bool revokedelete = 3;
 }
 
 message DeleteAccountResponse {}
@@ -230,6 +231,7 @@ message Permission {
 message DeleteNamespaceRequest {
   string namespaceid = 1;
   bool harddelete = 2;
+  bool revokedelete = 3;
 }
 
 message DeleteNamespaceResponse{}
