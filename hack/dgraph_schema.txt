@@ -5,6 +5,22 @@ name: string @index(exact) .
   permission: string @index(term) .
   access.to: uid @reverse .
   contains: uid @reverse .
+  tags: [string] .
+  name: string @index(exact) .
+  username: string @index(exact) .
+  enabled: bool @index(bool) .
+  isRoot: bool @index(bool) .
+  markfordeletion: bool @index(bool) .
+  deleteinitiationtime: string @index(day) .
+  action: string @index(term) .
+  children: uid @reverse .
+  owns: uid @reverse .
+  kind: string @index(exact) .
+  has.credentials: uid @reverse .
+  access.to.namespace: uid @reverse .
+  fingerprint: string @index(exact) .
+  certificates: uid @reverse .
+  password: password .`
 ' | jq
 
 
