@@ -327,6 +327,29 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 
 }
 
+func TestDeleteNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	//Create Namespace
+	nsID, err := repo.CreateNamespace(ctx, "Test12345")
+	require.NoError(t, err)
+
+	//Mark the Namespace for deletion
+	err = repo.SoftDeleteNamespace(ctx, nsID)
+	require.NoError(t, err)
+
+	//Delete the Namespace marked for deletion
+	err = repo.HardDeleteNamespace(ctx, nsID)
+	require.NoError(t, err)
+
+	//Try to fetch the delete account
+	_, err = repo.GetNamespaceID(ctx, nsID)
+
+	//Validation
+	require.EqualValues(t, string(err.Error()), "The Namespace is not found")
+
+}
+
 /*//Test to check API Endpoints
 
 //Generic function to Perform HTTP request and return resopnse

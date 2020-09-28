@@ -29,6 +29,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//checkKind is a method to check the kind of the object
 func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) @filter(eq(type, $type)) {
@@ -56,31 +57,32 @@ func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //no
 	return len(result.Object) > 0
 }
 
+//DeleteObject is a method to delete objects
 func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	txn := s.Dg.NewTxn()
 
 	// Find target node
 	const q = `
 	query deleteObject($root: string){
-	  object(func: uid($root)) {
-	    uid
-	    name
-	    children {
-	      uid
-	    }
-	    ~children { # Parent
-	      uid
-	      name
-	    }
-            ~owns {
-              uid
-            }
-            ~access.to {
-              uid
-              name
-            }
+		object(func: uid($root)) @filter(has(name)) {
+		  uid
+		  name
+		  children {
+			uid
+		  }
+		  ~children { # Parent
+			uid
+			name
+		  }
+			  ~owns {
+				uid
+			  }
+			  ~access.to {
+				uid
+				name
+			  }
+		}
 	  }
-	}
 	`
 
 	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
@@ -102,7 +104,7 @@ func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	mu := &api.Mutation{}
 
 	if len(result.Objects) == 0 {
-		return errors.New("unexpected response from DB: 0 objects founds")
+		return errors.New("The Object is not found")
 	}
 
 	// Detect parent by ~contains edge
@@ -198,6 +200,7 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	}
 }
 
+//CreateObject is a method to create objects
 func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
 	txn := s.Dg.NewTxn()
 
@@ -274,6 +277,7 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	return a.GetUids()["new"], nil
 }
 
+//ListForAccount is a method to list all the objects for an account
 func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
