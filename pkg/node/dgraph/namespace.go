@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -285,10 +286,10 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 }
 
 //HardDeleteNamespace is a method that deletes a namespace permantly
-func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
+func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
-	const q = `query deleteNodes($namespaceID: string){
-        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) @normalize {
+	var q = `query deleteNodes{
+        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v")) @normalize {
           uid
         owns {
           uid
@@ -297,9 +298,13 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string
       }
       `
 
-	res, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$namespaceID": namespaceID,
-	})
+	if datecondition != "" {
+		q = fmt.Sprintf(q, datecondition)
+	} else {
+		q = fmt.Sprintf(q, "")
+	}
+
+	res, err := txn.Query(ctx, q)
 	if err != nil {
 		return err
 	}
@@ -313,7 +318,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, namespaceID string
 		return err
 	}
 
-	if len(result.Nodes) != 1 {
+	if len(result.Nodes) < 1 {
 		return status.Error(codes.NotFound, "The Namespace is not found")
 	}
 

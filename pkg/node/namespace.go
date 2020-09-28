@@ -19,6 +19,7 @@ package node
 
 import (
 	"context"
+	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -113,7 +114,12 @@ func (n *NamespaceController) DeletePermission(ctx context.Context, request *nod
 func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
 
 	if request.Harddelete {
-		err = n.Repo.HardDeleteNamespace(ctx, request.Namespaceid)
+		//Set the datecondition to 14days back date
+		//This is to ensure that records that are older then 14 days or more will be only be deleted.
+		datecondition := time.Now().AddDate(0, 0, -14)
+
+		//Invokde Hardelete function with the date conidtion
+		err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
 	} else {
 		err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
 	}
