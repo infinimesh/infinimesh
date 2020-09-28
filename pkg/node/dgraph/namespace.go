@@ -34,8 +34,10 @@ import (
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
-  	               uid
-                       name
+						uid
+						name
+						markfordeletion
+						deleteinitiationtime
 	             }
                    }`
 
@@ -54,8 +56,10 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 
 	for _, namespace := range resultSet.Namespaces {
 		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
+			Id:                   namespace.UID,
+			Name:                 namespace.Name,
+			Markfordeletion:      namespace.MarkForDeletion,
+			Deleteinitiationtime: namespace.DeleteInitiationTime,
 		})
 	}
 
@@ -174,8 +178,10 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 
 	for _, namespace := range resultSet.Namespaces {
 		namespaces = append(namespaces, &nodepb.Namespace{
-			Id:   namespace.UID,
-			Name: namespace.Name,
+			Id:                   namespace.UID,
+			Name:                 namespace.Name,
+			Markfordeletion:      namespace.MarkForDeletion,
+			Deleteinitiationtime: namespace.DeleteInitiationTime,
 		})
 	}
 
