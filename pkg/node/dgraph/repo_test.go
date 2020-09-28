@@ -350,7 +350,10 @@ func TestDeleteNamespace(t *testing.T) {
 	require.NoError(t, err)
 
 	//Validation
-	require.EqualValues(t, nsNew.Name, ns)
+	require.EqualValues(t, ns, nsNew.Name)
+	require.EqualValues(t, true, nsNew.Markfordeletion)
+	//Not do time validation as its difficult to get the time when the delete was initiated
+	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
 
 }
 

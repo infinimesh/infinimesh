@@ -431,8 +431,10 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
                      namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
-	               uid
-                       name
+	               	uid
+					name
+					markfordeletion
+					deleteinitiationtime
 	             }
                    }`
 
@@ -463,8 +465,10 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespaceid: string) {
                      namespaces(func: uid($namespaceid)) @filter(eq(type, "namespace"))  {
-	               uid
-                       name
+						uid
+						name
+						markfordeletion
+						deleteinitiationtime
 	             }
                    }`
 

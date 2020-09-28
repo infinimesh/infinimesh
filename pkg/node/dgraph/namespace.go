@@ -153,6 +153,8 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 		  access.to.namespace @filter(eq(type, "namespace")) @facets(NOT eq(permission,"NONE")) {
 			uid : uid
 			name : name
+			markfordeletion : markfordeletion
+			deleteinitiationtime : deleteinitiationtime
 		  }
 		}
 	  }`
