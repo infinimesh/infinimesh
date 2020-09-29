@@ -350,11 +350,22 @@ func TestDeleteNamespace(t *testing.T) {
 	nsNew, err := repo.GetNamespaceID(ctx, nsID)
 	require.NoError(t, err)
 
-	//Validation
+	//Validation for Soft delete
 	require.EqualValues(t, ns, nsNew.Name)
 	require.EqualValues(t, true, nsNew.Markfordeletion)
 	//Not doing time validation as its difficult to get the time when the delete was initiated
 	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
+
+	err = repo.RevokeNamespace(ctx, nsID)
+	require.NoError(t, err)
+
+	//Try to fetch the delete account
+	nsNew, err = repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Validation for revoke
+	require.EqualValues(t, false, nsNew.Markfordeletion)
+	require.EqualValues(t, nsNew.Deleteinitiationtime, "0000-01-01T00:00:00Z")
 
 }
 

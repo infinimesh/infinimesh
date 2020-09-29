@@ -118,7 +118,7 @@ func (n *NamespaceController) DeletePermission(ctx context.Context, request *nod
 func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
 
 	if !request.Revokedelete {
-		//Action to perform when delete action is not revoked.
+		//Action to perform when delete is issued instead of revoke
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
 			//This is to ensure that records that are older then 14 days or more will be only be deleted.
@@ -137,14 +137,19 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			}
 		}
 	} else {
-		//Action to perform when delete action is revoked.
-		ns, err := n.GetNamespaceID(ctx, &nodepb.GetNamespaceRequest{Namespace: request.Namespaceid})
+		//Action to perform when revoke is performed
+
+		ns, err := n.Repo.GetNamespaceID(ctx, request.Namespaceid)
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
+		//Initate Revoke
 		if ns.Markfordeletion {
-			//Add steps to update namespace
+			err := n.Repo.RevokeNamespace(ctx, request.Namespaceid)
+			if err != nil {
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 		} else {
 			return nil, status.Error(codes.Internal, "The Namespace is not marked for deletion")
 		}
@@ -163,13 +168,13 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, status.Error(codes.Aborted, "Failed to get account details")
+		return nil, status.Error(codes.Aborted, "Failed to get Namespace details")
 	}
 
 	//Check for Authentication
 	requestorID := md.Get("requestorID")
 	if requestorID == nil {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
