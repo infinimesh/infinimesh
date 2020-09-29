@@ -437,7 +437,7 @@ func TopicChecker(topic string) (string, bool) {
 	if state[3] == "desired" && state[4] == "delta" {
 		return topic, true
 	} else if state[3] == "desired" && state[4] == "#" {
-		topicAltered := state[0] + "/" + state[1] + "/" + state[3] + "/delta"
+		topicAltered := state[0] + "/" + state[1] + "/" + state[2] + "/" + state[3] + "/delta"
 		return topicAltered, true
 	}
 	return "", false
