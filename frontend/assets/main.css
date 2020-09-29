@@ -34,6 +34,8 @@ body {
   --font-size-xl: 25px;
   --font-weight-default: 500;
   --font-family-default: Exo;
+
+  --logo-color: var(--primary-color);
 }
 
 .dark-mode body {
@@ -42,6 +44,7 @@ body {
   --footer-text-color: white;
 
   --link-color: var(--background-color);
+  --logo-color: white;
 }
 
 .black-white-mode body {

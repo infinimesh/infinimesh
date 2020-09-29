@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-container>
+    <v-container style="margin-top: 100px">
       <v-row justify="center">
         <v-col sm="6" md="8" lg="6" cols="24">
           <v-row justify="center">
@@ -21,10 +21,10 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your username!',
-                        },
-                      ],
-                    },
+                          message: 'Please input your username!'
+                        }
+                      ]
+                    }
                   ]"
                   placeholder="Username"
                 >
@@ -43,10 +43,10 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your Password!',
-                        },
-                      ],
-                    },
+                          message: 'Please input your Password!'
+                        }
+                      ]
+                    }
                   ]"
                   type="password"
                   placeholder="Password"
@@ -68,14 +68,22 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-footer app>
+      <infinimesh-footer />
+    </v-footer>
   </v-app>
 </template>
 
 <script>
+import InfinimeshFooter from "@/components/generic/footer.vue";
+
 export default {
+  components: {
+    InfinimeshFooter
+  },
   data() {
     return {
-      form: this.$form.createForm(this, { name: "login" }),
+      form: this.$form.createForm(this, { name: "login" })
     };
   },
   methods: {
@@ -85,19 +93,19 @@ export default {
         if (!err) {
           try {
             let res = await this.$auth.loginWith("local", {
-              data: values,
+              data: values
             });
             this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
               duration: 10,
-              ...e.response.data,
+              ...e.response.data
             });
           }
         }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -108,7 +116,7 @@ export default {
   width: 100%;
 }
 h1 {
-  color: var(--line-color);
+  color: var(--logo-color);
   font-family: Exo;
 }
 </style>
