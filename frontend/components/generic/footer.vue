@@ -9,14 +9,22 @@
           <strong>GitHub</strong>
         </a>
       </v-col>
+      <v-col :sm="3" :md="3" :lg="2" :xl="2">
+        <themePicker />
+      </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
 import Vue from "vue";
+import themePicker from "@/components/generic/themePicker";
 
-const InfinimeshFooter = Vue.component("infinimesh-footer", {});
+const InfinimeshFooter = Vue.component("infinimesh-footer", {
+  components: {
+    themePicker,
+  },
+});
 
 export default InfinimeshFooter;
 </script>
