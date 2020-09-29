@@ -2,6 +2,7 @@
 body {
   --primary-color: #104e83;
   --secondary-color: white;
+
   --line-color: var(--primary-color);
   --link-color: var(--primary-color);
 
