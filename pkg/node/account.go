@@ -285,7 +285,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 }
 
 //UpdateAccount is a method that update details of the an account
-func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.Account, err error) {
+func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.UpdateAccountRequest) (response *nodepb.UpdateAccountResponse, err error) {
 
 	log := s.Log.Named("Update Account Controller")
 	//Added logging
@@ -296,12 +296,12 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	if err != nil {
 		//Added logging
 		log.Error("Failed to update account", zap.Error(err))
-		return &nodepb.Account{}, err
+		return nil, err
 	}
 
 	//Added Logging
 	log.Info("Update Account successful")
-	return request.Account, nil
+	return nil, nil
 }
 
 //DeleteAccount is a method that deletes an account

@@ -144,6 +144,8 @@ message UpdateAccountRequest {
   google.protobuf.FieldMask fieldMask = 2;
 }
 
+message UpdateAccountResponse {}
+
 message SetPasswordRequest {
   string username = 1;
   string password = 2;
@@ -154,13 +156,15 @@ message SetPasswordResponse{
 
 message DeleteAccountRequest {
   string uid = 1;
+  bool harddelete = 2;
+  bool revokedelete = 3;
 }
 
 message DeleteAccountResponse {}
 
 service AccountService {
   rpc CreateUserAccount(CreateUserAccountRequest) returns (CreateUserAccountResponse);
-  rpc UpdateAccount(UpdateAccountRequest) returns (Account);
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse);
   rpc GetAccount(GetAccountRequest) returns (Account);
   rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
   rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
@@ -179,6 +183,8 @@ service AccountService {
 message Namespace {
   string id = 1;
   string name = 2;
+  bool markfordeletion = 3;
+	string deleteinitiationtime = 4;
 }
 
 message CreateNamespaceRequest {
@@ -222,6 +228,13 @@ message Permission {
   Action action = 4;
 }
 
+message DeleteNamespaceRequest {
+  string namespaceid = 1;
+  bool harddelete = 2;
+  bool revokedelete = 3;
+}
+
+message DeleteNamespaceResponse{}
 
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
@@ -236,4 +249,5 @@ service Namespaces {
   rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
   rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
+  rpc DeleteNamespace(DeleteNamespaceRequest) returns (DeleteNamespaceResponse);
 }

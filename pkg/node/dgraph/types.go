@@ -17,14 +17,18 @@
 
 package dgraph
 
+//Node Data strcuture for Dgraph database
 type Node struct {
 	Type string `json:"type,omitempty"`
 	UID  string `json:"uid,omitempty"`
 }
 
+//Namespace Data strcuture for Dgraph database
 type Namespace struct {
 	Node
-	Name string `json:"name,omitempty"`
+	Name                 string `json:"name,omitempty"`
+	MarkForDeletion      bool   `json:"markfordeletion,omitempty"`
+	DeleteInitiationTime string `json:"deleteinitiationtime,omitempty"`
 
 	Owns []*Object `json:"owns,omitempty"`
 
@@ -32,6 +36,7 @@ type Namespace struct {
 	AccessToPermission string    `json:"access.to.namespace|permission,omitempty"`
 }
 
+//Account Data strcuture for Dgraph database
 type Account struct {
 	Node
 	Name string `json:"name,omitempty"`
@@ -47,6 +52,7 @@ type Account struct {
 	HasCredentials []*UsernameCredential `json:"has.credentials,omitempty"`
 }
 
+//UsernameCredential Data strcuture for Dgraph database
 type UsernameCredential struct {
 	Node
 	Username string     `json:"username"`
@@ -55,6 +61,7 @@ type UsernameCredential struct {
 	Account  []*Account `json:"~has.credentials,omitempty"`
 }
 
+//Object Data strcuture for Dgraph database
 type Object struct {
 	Node
 

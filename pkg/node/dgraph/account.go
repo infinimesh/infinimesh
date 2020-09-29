@@ -227,7 +227,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 
 		err = txn.Commit(ctx)
 		if err != nil {
-			return "", errors.New("Failed to commit")
+			return "", err
 		}
 		userUID := a.GetUids()["user"]
 		return userUID, nil
@@ -282,8 +282,9 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 
 	if len(result.Account[0].DefaultNamespace) == 1 {
 		account.DefaultNamespace = &nodepb.Namespace{
-			Name: result.Account[0].DefaultNamespace[0].Name,
-			Id:   result.Account[0].DefaultNamespace[0].UID,
+			Name:            result.Account[0].DefaultNamespace[0].Name,
+			Id:              result.Account[0].DefaultNamespace[0].UID,
+			Markfordeletion: false,
 		}
 	}
 

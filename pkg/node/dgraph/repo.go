@@ -427,13 +427,14 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 	return assigned.GetUids()["namespace"], nil
 }
 
-//Function to get the namespace based on name
-//Soon to be deprecrated
+//GetNamespace is a method to get the namespace based on Name
 func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
                      namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
-	               uid
-                       name
+	               	uid
+					name
+					markfordeletion
+					deleteinitiationtime
 	             }
                    }`
 
@@ -452,20 +453,24 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 
 	if len(resultSet.Namespaces) > 0 {
 		return &nodepb.Namespace{
-			Id:   resultSet.Namespaces[0].UID,
-			Name: resultSet.Namespaces[0].Name,
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
 		}, nil
 	}
 
-	return nil, errors.New("Namespace not found")
+	return nil, errors.New("The Namespace is not found")
 }
 
-//Function to get the namespace based on ID
+//GetNamespaceID is a method to get the namespace based on ID
 func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespaceid: string) {
                      namespaces(func: uid($namespaceid)) @filter(eq(type, "namespace"))  {
-	               uid
-                       name
+						uid
+						name
+						markfordeletion
+						deleteinitiationtime
 	             }
                    }`
 
@@ -484,12 +489,14 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 
 	if len(resultSet.Namespaces) > 0 {
 		return &nodepb.Namespace{
-			Id:   resultSet.Namespaces[0].UID,
-			Name: resultSet.Namespaces[0].Name,
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
 		}, nil
 	}
 
-	return nil, errors.New("Namespace not found")
+	return nil, errors.New("The Namespace is not found")
 }
 
 func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
