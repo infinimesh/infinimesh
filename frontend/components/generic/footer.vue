@@ -1,7 +1,7 @@
 <template>
   <v-container id="footer">
     <v-row justify="center">
-      <v-col :sm="9" :md="6" :lg="5" :xl="4">
+      <v-col :sm="9" :md="6" :lg="5" :xl="4" class="footer-text">
         ©2020 —
         <strong>InfiniteDevices GmbH</strong>
         - source code at
@@ -31,7 +31,10 @@ export default InfinimeshFooter;
 
 <style scoped>
 #footer {
-  color: black;
+  color: var(--footer-text-color) !important;
   text-align: center;
+}
+#footer strong {
+  color: var(--footer-text-color) !important;
 }
 </style>

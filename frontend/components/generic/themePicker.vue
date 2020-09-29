@@ -34,7 +34,6 @@ export default {
         { title: "Default(light)", value: "light" },
         { title: "Night(dark)", value: "dark" },
         { title: "Black and white", value: "black-white" },
-        { title: "Dark black", value: "dark-black" },
       ],
     };
   },

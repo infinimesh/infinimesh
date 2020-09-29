@@ -1,8 +1,13 @@
+/* Basic variables and Color Schemes */
 body {
-  /* Basic variables */
   --primary-color: #104e83;
   --secondary-color: white;
   --line-color: var(--primary-color);
+  --link-color: var(--primary-color);
+
+  --background-color: white;
+  --footer-background: #f5f5f5;
+  --footer-text-color: black;
 
   --success-color: #52c41a;
   --danger-color: #6f475b;
@@ -29,6 +34,23 @@ body {
   --font-size-xl: 25px;
   --font-weight-default: 500;
   --font-family-default: Exo;
+}
+
+.dark-mode body {
+  --background-color: #0f3358;
+  --footer-background: #104e83;
+  --footer-text-color: white;
+
+  --link-color: var(--background-color);
+}
+
+.black-white-mode body {
+  --primary-color: black;
+  --footer-background: var(--background-color);
+}
+
+a {
+  color: var(--link-color) !important;
 }
 
 /* Custom tags */
@@ -123,4 +145,12 @@ strong {
 .v-list-item--active {
   color: var(--secondary-color) !important;
   opacity: 0.5;
+}
+
+.v-application {
+  background: var(--background-color) !important;
+}
+
+.v-footer {
+  background-color: var(--footer-background) !important;
 }
