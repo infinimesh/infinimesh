@@ -28,6 +28,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -227,9 +228,10 @@ func main() {
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
+		fmt.Printf("Inside reading backchannel")
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
-		fmt.Printf("m.subpath %v :", m.SubPath)
+		fmt.Printf("m.subpath : %v", m.SubPath)
 		topic := fqTopic(m.DeviceID, m.SubPath)
 		fmt.Println("Publish to topic ", topic, "of client", deviceID)
 		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
@@ -371,9 +373,14 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				ps.AddSub(backChannel, sub.Topic)
-				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-				fmt.Println("Added Subscription", sub.Topic, deviceID)
+				validTopic := TopicChecker(sub.Topic)
+				if validTopic {
+					ps.AddSub(backChannel, sub.Topic)
+					go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
+					fmt.Println("Added Subscription", sub.Topic, deviceID)
+				} else {
+					fmt.Println("Invalid Subscribed Topic")
+				}
 			}
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
@@ -419,6 +426,20 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 		}
 	}
 	return topicAliasPublishMap, nil
+}
+
+/*TopicChecker: to validate the subscribed topic name
+  input : topic name string
+  output : bool
+*/
+func TopicChecker(topic string) bool {
+	state := strings.Split(topic, "/")[3]
+	deviceState := strings.Split(topic, "/")[4]
+	fmt.Printf("deviceState %v", deviceState)
+	if state == "desired" && deviceState == "delta" {
+		return true
+	}
+	return false
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string) error {
