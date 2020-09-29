@@ -119,7 +119,6 @@ export default {
           this.$notification.error({
             message: "Failed to create the device",
             description: `Response: ${err.response.data.message}`,
-            placement: "bottomRight",
             duration: 10,
           });
         },

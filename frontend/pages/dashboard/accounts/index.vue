@@ -152,7 +152,6 @@ export default {
           vm.$notification.error({
             message: "Error deleting account " + account.name,
             description: e.response.data.message,
-            placement: "bottomRight",
           });
         });
     },
@@ -176,7 +175,6 @@ export default {
         .then(() => {
           vm.$notification.success({
             message: "Account created successfuly",
-            placement: "bottomRight",
           });
           vm.createAccountDrawerVisible = false;
           vm.getAccountsPool();
@@ -185,7 +183,6 @@ export default {
           this.$notification.error({
             message: "Failed to create an account",
             description: `Response: ${err.response.data.message}`,
-            placement: "bottomRight",
             duration: 10,
           });
         });
@@ -206,7 +203,6 @@ export default {
           vm.$notification.error({
             message: error,
             description: e.response.data.message,
-            placement: "bottomRight",
           });
         })
         .then(() => (vm.loading = false));

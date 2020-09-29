@@ -72,7 +72,6 @@ export default {
       this.$notification.warning({
         message: "Coming soon",
         description: `Can't delete ${namespace.name}(${namespace.id})`,
-        placement: "bottomRight",
       });
     },
   },
