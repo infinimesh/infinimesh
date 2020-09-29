@@ -373,11 +373,11 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				validTopic := TopicChecker(sub.Topic)
+				sub_topic, validTopic := TopicChecker(sub.Topic)
 				if validTopic {
-					ps.AddSub(backChannel, sub.Topic)
+					ps.AddSub(backChannel, sub_topic)
 					go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-					fmt.Println("Added Subscription", sub.Topic, deviceID)
+					fmt.Println("Added Subscription", sub_topic, deviceID)
 				} else {
 					fmt.Println("Invalid Subscribed Topic")
 				}
@@ -432,14 +432,15 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
   input : topic name string
   output : bool
 */
-func TopicChecker(topic string) bool {
-	state := strings.Split(topic, "/")[3]
-	deviceState := strings.Split(topic, "/")[4]
-	fmt.Printf("deviceState %v", deviceState)
-	if state == "desired" && deviceState == "delta" {
-		return true
+func TopicChecker(topic string) (string, bool) {
+	state := strings.Split(topic, "/")
+	if state[3] == "desired" && state[4] == "delta" {
+		return topic, true
+	} else if state[3] == "desired" && state[4] == "#" {
+		topicAltered := state[0] + "/" + state[1] + "/" + state[3] + "/delta"
+		return topicAltered, true
 	}
-	return false
+	return "", false
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string) error {
