@@ -235,7 +235,7 @@ message DeleteNamespaceRequest {
 message DeleteNamespaceResponse{}
 
 message UpdateNamespaceRequest {
-  Namespace namespaces = 1;
+  Namespace namespace = 1;
   google.protobuf.FieldMask fieldMask = 2;
 }
 

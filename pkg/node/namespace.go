@@ -153,3 +153,12 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	}
 	return &nodepb.DeleteNamespaceResponse{}, nil
 }
+
+//UpdateNamespace is a method to delete access to a Namespace for a account
+func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
+	err = n.Repo.DeletePermissionInNamespace(ctx, request.Namespace.Name, request.Namespace.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to update permission")
+	}
+	return &nodepb.UpdateNamespaceResponse{}, nil
+}
