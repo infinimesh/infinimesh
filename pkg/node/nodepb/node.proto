@@ -172,11 +172,9 @@ service AccountService {
 
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
-  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest)
-      returns (IsAuthorizedNamespaceResponse);
+  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest) returns (IsAuthorizedNamespaceResponse);
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
-  rpc AuthorizeNamespace(AuthorizeNamespaceRequest)
-      returns (AuthorizeNamespaceResponse);
+  rpc AuthorizeNamespace(AuthorizeNamespaceRequest) returns (AuthorizeNamespaceResponse);
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
 }
 
@@ -236,6 +234,13 @@ message DeleteNamespaceRequest {
 
 message DeleteNamespaceResponse{}
 
+message UpdateNamespaceRequest {
+  Namespace namespaces = 1;
+  google.protobuf.FieldMask fieldMask = 2;
+}
+
+message UpdateNamespaceResponse {}
+
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
@@ -250,4 +255,5 @@ service Namespaces {
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
   rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
   rpc DeleteNamespace(DeleteNamespaceRequest) returns (DeleteNamespaceResponse);
+  rpc UpdateNamespace(UpdateNamespaceRequest) returns (UpdateNamespaceResponse);
 }
