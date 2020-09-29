@@ -20,12 +20,15 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -245,8 +248,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 
 //SoftDeleteNamespace is a method that mark the namespace for deletion
 func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
-	txn := s.Dg.NewTxn()
-	m := &api.Mutation{CommitNow: true}
+	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query deleteNodes($namespaceID: string){
         nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
@@ -275,21 +277,16 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 		return status.Error(codes.NotFound, "The Namespace is not found")
 	}
 
-	m.Set = append(m.Set, &api.NQuad{
-		Subject:     namespaceID,
-		Predicate:   "markfordeletion",
-		ObjectId:    namespaceID,
-		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "true"}},
+	err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:                   namespaceID,
+			Markfordeletion:      true,
+			Deleteinitiationtime: time.Now().Format(time.RFC3339),
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"markfordeletion", "deleteinitiationtime"},
+		},
 	})
-
-	m.Set = append(m.Set, &api.NQuad{
-		Subject:     namespaceID,
-		Predicate:   "deleteinitiationtime",
-		ObjectId:    namespaceID,
-		ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: time.Now().Format(time.RFC3339)}},
-	})
-
-	_, err = txn.Mutate(ctx, m)
 	return err
 }
 
@@ -335,4 +332,113 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	}
 
 	return err
+}
+
+//RevokeNamespace is a method that nmarks the Namespace from deletion
+func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (err error) {
+	txn := s.Dg.NewReadOnlyTxn()
+
+	const q = `query revokeNodes($namespaceID: string){
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
+          uid
+        }
+      }
+      `
+
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{
+		"$namespaceID": namespaceID,
+	})
+	if err != nil {
+		return err
+	}
+
+	var result struct {
+		Nodes []*Node `json:"nodes"`
+	}
+
+	err = json.Unmarshal(res.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Nodes) != 1 {
+		return status.Error(codes.NotFound, "The Namespace is not found")
+	}
+
+	err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:                   namespaceID,
+			Markfordeletion:      false,
+			Deleteinitiationtime: "0000",
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"markfordeletion", "deleteinitiationtime"},
+		},
+	})
+	return err
+}
+
+//UpdateNamespace is a method to Udpdate details of an Namespace
+func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error) {
+
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	q := `query namespaceExists($namespaceid: string) {
+                exists(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
+                  uid
+                }
+              }
+             `
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$namespaceid": namespace.Namespace.Id})
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Exists) == 0 {
+		return errors.New("The Namespace is not found")
+	}
+
+	//Loop through the field masks and update the required fields
+	for _, field := range namespace.FieldMask.Paths {
+		switch strings.ToLower(field) {
+		case "name":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "name",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Name}},
+			})
+		case "markfordeletion":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "markfordeletion",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
+			})
+		case "deleteinitiationtime":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "deleteinitiationtime",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Deleteinitiationtime}},
+			})
+		}
+	}
+
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

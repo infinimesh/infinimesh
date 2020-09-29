@@ -196,8 +196,13 @@ components:
       type: object
     nodeNamespace:
       properties:
+        deleteinitiationtime:
+          type: string
         id:
           type: string
+        markfordeletion:
+          format: boolean
+          type: boolean
         name:
           type: string
       type: object
@@ -213,6 +218,8 @@ components:
           type: array
         uid:
           type: string
+      type: object
+    nodeUpdateAccountResponse:
       type: object
     protobufAny:
       description: >-
@@ -742,7 +749,7 @@ info:
     url: 'https://infinitedevices.io'
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
-  version: 0.0.1
+  version: 0.0.9
 openapi: 3.0.0
 paths:
   /account:
@@ -848,7 +855,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/nodeAccount'
+                $ref: '#/components/schemas/nodeUpdateAccountResponse'
           description: A successful response.
         default:
           content:
@@ -891,6 +898,18 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: harddelete
+          required: false
+          schema:
+            format: boolean
+            type: boolean
+        - in: query
+          name: revokedelete
+          required: false
+          schema:
+            format: boolean
+            type: boolean
       responses:
         '200':
           content:

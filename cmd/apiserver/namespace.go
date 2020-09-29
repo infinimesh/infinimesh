@@ -22,6 +22,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -277,5 +278,18 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 	//Added logging
 	log.Error("Delete Namespace API Method: The Account is not allowed to access the Namespace")
 	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+
+}
+
+//API Method to Update namespace
+func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
+
+	//Added logging
+	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	return n.client.UpdateNamespace(ctx, request)
 
 }
