@@ -279,3 +279,35 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
 
 }
+
+//API Method to Update namespace
+func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
+
+	//Added logging
+	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		//Added logging
+		log.Error("Update Namespace API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
+	}
+
+	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   account,
+		Namespace: request.Namespace.Id,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		return n.client.UpdateNamespace(ctx, request)
+	}
+
+	//Added logging
+	log.Error("Update Namespace API Method: The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+
+}
