@@ -52,7 +52,7 @@ module.exports = {
   ],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
   styleResources: {
-    less: ["~/assets/main.less"]
+    css: ["~/assets/main.css"]
   },
   axios: {
     proxy: true

@@ -1,6 +1,6 @@
 <template>
   <v-app id="dashboard">
-    <v-app-bar app color="#104e83" clipped-left>
+    <v-app-bar app clipped-left>
       <Header />
     </v-app-bar>
     <Sider />
@@ -24,7 +24,7 @@ export default {
   components: {
     Header,
     Sider,
-    InfinimeshFooter
+    InfinimeshFooter,
   },
   mounted() {
     this.$store.dispatch("devices/getNamespaces");
@@ -36,8 +36,8 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>

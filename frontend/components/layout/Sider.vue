@@ -4,7 +4,6 @@
     clipped
     permanent
     expand-on-hover
-    color="#104e83"
     mini-variant-width="64"
   >
     <v-list nav dark>
@@ -46,24 +45,24 @@ export default {
         {
           title: "Device Registry",
           icon: "mdi-cloud-outline",
-          link: "devices"
+          link: "devices",
         },
         {
           title: "Accounts",
           icon: "mdi-account-group",
-          link: "accounts"
+          link: "accounts",
         },
         {
           title: "Namespaces",
           icon: "mdi-folder-multiple-outline",
-          link: "namespaces"
-        }
-      ]
+          link: "namespaces",
+        },
+      ],
     };
   },
   computed: {
     pagesFiltered() {
-      return this.pages.filter(page => this.allowedScope(page.link));
+      return this.pages.filter((page) => this.allowedScope(page.link));
     },
     user() {
       return this.$store.getters.loggedInUser;
@@ -74,13 +73,13 @@ export default {
       },
       set(val) {
         this.$router.push({ name: val[0] });
-      }
-    }
+      },
+    },
   },
   methods: {
     allowedScope(scope) {
       return this.$store.getters["window/hasAccess"](scope);
-    }
-  }
+    },
+  },
 };
 </script>
