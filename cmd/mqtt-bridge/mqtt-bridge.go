@@ -229,6 +229,7 @@ func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}
 	for message := range backChannel {
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
+		fmt.Printf("m.subpath %v :", m.SubPath)
 		topic := fqTopic(m.DeviceID, m.SubPath)
 		fmt.Println("Publish to topic ", topic, "of client", deviceID)
 		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
