@@ -36,6 +36,7 @@ import (
 )
 
 var repo node.Repo
+var n node.NamespaceController
 
 func init() {
 	dgURL := os.Getenv("DGRAPH_URL")
@@ -355,6 +356,46 @@ func TestDeleteNamespace(t *testing.T) {
 	//Not doing time validation as its difficult to get the time when the delete was initiated
 	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
 
+}
+
+func TestUpdateNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	//Create a New Namespace
+	ns, err := repo.CreateNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the Namespace
+	err = repo.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:                   ns,
+			Name:                 NewName,
+			Markfordeletion:      true,
+			Deleteinitiationtime: time.Now().Format(time.RFC3339),
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "MarkforDeletion", "Deleteinitiationtime"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Namespace Details
+	respGet, err := repo.GetNamespaceID(ctx, ns)
+	require.NoError(t, err)
+
+	//Validate the updated Namespace
+	require.NoError(t, err)
+	require.EqualValues(t, NewName, respGet.Name)
+	require.EqualValues(t, true, respGet.Markfordeletion)
+
+	//Delete the Namesapce created using namespace controller
+	err = repo.SoftDeleteNamespace(ctx, ns)
+	require.NoError(t, err)
 }
 
 /*//Test to check API Endpoints

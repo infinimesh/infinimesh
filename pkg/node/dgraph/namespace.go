@@ -371,23 +371,22 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 
 	//Loop through the field masks and update the required fields
 	for _, field := range namespace.FieldMask.Paths {
-		switch field {
-		//Including all comibnations of case
-		case "name", "Name", "NAME":
+		switch strings.ToLower(field) {
+		case "name":
 			m.Set = append(m.Set, &api.NQuad{
 				Subject:     namespace.Namespace.Id,
 				Predicate:   "name",
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Name}},
 			})
-		case "markfordeletion", "markforDeletion", "markForDeletion", "MarkForDeletion", "MARKFORDELETION":
+		case "markfordeletion":
 			m.Set = append(m.Set, &api.NQuad{
 				Subject:     namespace.Namespace.Id,
 				Predicate:   "markfordeletion",
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
 			})
-		case "deleteinitiationtime", "deleteinitiationTime", "deleteInitiationTime", "DeleteInitiationTime", "DELETEINITIATIONTIME":
+		case "deleteinitiationtime":
 			m.Set = append(m.Set, &api.NQuad{
 				Subject:     namespace.Namespace.Id,
 				Predicate:   "deleteinitiationtime",
