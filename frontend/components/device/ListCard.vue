@@ -39,8 +39,8 @@ export default Vue.component("device-list-card", {
   props: {
     device: {
       required: true,
-      type: Object
-    }
-  }
+      type: Object,
+    },
+  },
 });
 </script>

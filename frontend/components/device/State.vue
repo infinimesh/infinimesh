@@ -5,7 +5,9 @@
         <h1 class="lead">{{ title }}</h1>
       </a-col>
       <a-col :span="4" :offset="8" v-if="editable && !active_edit">
-        <a-button type="primary" icon="edit" @click="active_edit = true">Edit</a-button>
+        <a-button type="primary" icon="edit" @click="active_edit = true"
+          >Edit</a-button
+        >
       </a-col>
     </a-row>
     <p>
@@ -22,7 +24,9 @@
     <pre v-html="state.data" v-else />
     <a-row v-if="active_edit">
       <a-col :span="10">
-        <a-button type="primary" icon="close" @click="active_edit = false">Cancel</a-button>
+        <a-button type="primary" icon="close" @click="active_edit = false"
+          >Cancel</a-button
+        >
       </a-col>
       <a-col :span="10" :offset="2" style="text-align: right">
         <a-popconfirm
@@ -129,7 +133,7 @@ export default Vue.component("device-state", {
 });
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 pre {
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
@@ -138,7 +142,7 @@ pre {
   width: 95%;
 }
 textarea {
-  background: @primary-color-dark;
+  background: var(--primary-color)-dark;
   width: 95%;
   font-family: monospace, monospace;
 }

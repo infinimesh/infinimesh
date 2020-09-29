@@ -1,11 +1,15 @@
 body {
   /* Basic variables */
   --primary-color: #104e83;
-  --primary-color-secondary: white;
+  --secondary-color: white;
   --line-color: var(--primary-color);
 
   --success-color: #52c41a;
+  --danger-color: #6f475b;
   --switch-color: #5d8eb7;
+
+  --icon-color: var(--secondary-color);
+  --icon-color-dark: var(--line-color);
 
   --btn-default-border: white;
   --btn-group-border: white;
@@ -13,7 +17,7 @@ body {
   /* Border styles */
   --border-muted: solid 1px rgba(255, 255, 255, 0.5) !important;
   --shadow-color: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
-  --border-color-split: var(--primary-color-secondary);
+  --border-color-split: var(--secondary-color);
   --border-radius-base: 0.5rem;
   --border-radius-sm: 0.5rem;
   --border-color-base: white;
@@ -40,13 +44,19 @@ strong {
 }
 
 /* AntDesign Classes Overloads */
+
+/* AntDesign Buttons */
+.ant-btn {
+  border-color: transparent !important;
+}
 .ant-btn-primary {
   border-color: var(--btn-default-border);
 }
-
 .ant-btn-success {
-  background-color: var(--success-color);
-  border-color: transparent;
+  background-color: var(--success-color) !important;
+}
+.ant-btn-danger {
+  background-color: var(--danger-color);
 }
 
 .ant-popover-inner {
@@ -76,4 +86,41 @@ strong {
 
 .ant-pagination-item-active a {
   color: black !important;
+}
+
+/* Ant Card overloads */
+.ant-card {
+  background: var(--primary-color) !important;
+  border-radius: var(--border-radius-base) !important;
+}
+
+.ant-card .ant-card-head-title {
+  color: var(--heading-color);
+}
+.ant-card .ant-card-extra {
+  color: var(--heading-color);
+}
+.ant-card .ant-card-body {
+  color: var(--text-color);
+}
+
+/* Ant Drawer overloads */
+.ant-drawer-header {
+  background: var(--primary-color) !important;
+}
+.ant-drawer-title {
+  color: var(--text-color) !important;
+}
+.ant-drawer-close {
+  color: var(--text-color) !important;
+}
+
+/* Vuetify overloads */
+.v-navigation-drawer {
+  background: var(--primary-color) !important;
+}
+
+.v-list-item--active {
+  color: var(--secondary-color) !important;
+  opacity: 0.5;
 }

@@ -6,7 +6,7 @@
           <v-row justify="center">
             <h1>infinimesh</h1>
           </v-row>
-          <v-row justify="center" style="color: rgba(0, 0, 0, 0.65);"
+          <v-row justify="center" style="color: rgba(0, 0, 0, 0.65)"
             >Welcome to infinimesh. Log in with your username and
             password.</v-row
           >
@@ -21,17 +21,17 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your username!'
-                        }
-                      ]
-                    }
+                          message: 'Please input your username!',
+                        },
+                      ],
+                    },
                   ]"
                   placeholder="Username"
                 >
                   <a-icon
                     slot="prefix"
                     type="user"
-                    style="color: rgba(0,0,0,.25)"
+                    style="color: rgba(0, 0, 0, 0.25)"
                   />
                 </a-input>
               </a-form-item>
@@ -43,10 +43,10 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your Password!'
-                        }
-                      ]
-                    }
+                          message: 'Please input your Password!',
+                        },
+                      ],
+                    },
                   ]"
                   type="password"
                   placeholder="Password"
@@ -54,7 +54,7 @@
                   <a-icon
                     slot="prefix"
                     type="lock"
-                    style="color: rgba(0,0,0,.25)"
+                    style="color: rgba(0, 0, 0, 0.25)"
                   />
                 </a-input>
               </a-form-item>
@@ -75,7 +75,7 @@
 export default {
   data() {
     return {
-      form: this.$form.createForm(this, { name: "login" })
+      form: this.$form.createForm(this, { name: "login" }),
     };
   },
   methods: {
@@ -85,20 +85,20 @@ export default {
         if (!err) {
           try {
             let res = await this.$auth.loginWith("local", {
-              data: values
+              data: values,
             });
             this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
               placement: "bottomRight",
               duration: 10,
-              ...e.response.data
+              ...e.response.data,
             });
           }
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -108,11 +108,8 @@ export default {
   min-height: 500px;
   width: 100%;
 }
-</style>
-
-<style lang="less" scoped>
 h1 {
-  color: @line-color;
+  color: var(--line-color);
   font-family: Exo;
 }
 </style>

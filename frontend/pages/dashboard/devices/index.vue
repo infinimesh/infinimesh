@@ -45,11 +45,11 @@ export default {
   name: "devicesTable",
   components: {
     DeviceAdd,
-    DeviceListCard
+    DeviceListCard,
   },
   data() {
     return {
-      addDeviceActive: false
+      addDeviceActive: false,
     };
   },
   computed: {
@@ -57,7 +57,7 @@ export default {
       deep: true,
       get() {
         return this.$store.state.devices.pool;
-      }
+      },
     },
     poolCols: {
       deep: true,
@@ -105,42 +105,42 @@ export default {
           i += div - 1;
         }
         return res;
-      }
+      },
     },
     gridSize() {
       return this.$store.state.window.gridSize;
-    }
+    },
   },
   methods: {
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
-        error: err => {
+        error: (err) => {
           this.$notification.error({
             message: "Failed to create the device",
             description: `Response: ${err.response.data.message}`,
             placement: "bottomRight",
-            duration: 10
+            duration: 10,
           });
         },
         always: () => {
           this.addDeviceActive = false;
-        }
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 .create-form {
-  border-radius: @border-radius-base;
-  background: @primary-color-dark;
-  border: @border-base;
+  border-radius: var(--border-radius-base);
+  background: var(--primary-color)-dark;
+  border: var(--border-base);
   min-height: 8rem;
   cursor: pointer;
 }
 .create-form .anticon {
-  color: @icon-color-dark;
+  color: var(--icon-color-dark);
 }
 </style>

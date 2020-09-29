@@ -51,9 +51,7 @@ module.exports = {
     "@nuxtjs/vuetify"
   ],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
-  styleResources: {
-    css: ["~/assets/main.css"]
-  },
+  css: ["@/assets/main.css"],
   axios: {
     proxy: true
   },

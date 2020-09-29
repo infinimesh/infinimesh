@@ -10,7 +10,8 @@
             type="primary"
             icon="plus"
             @click="createAccountDrawerVisible = true"
-          >Create Account</a-button>
+            >Create Account</a-button
+          >
         </a-row>
         <account-add
           :active="createAccountDrawerVisible"
@@ -33,12 +34,17 @@
           </span>
           <span slot="enabled" slot-scope="enabled">
             <a-row type="flex" justify="space-around">
-              <a-icon type="bulb" :style="{color: enabled ? 'green' : 'red', fontSize: '24px' }" />
+              <a-icon
+                type="bulb"
+                :style="{ color: enabled ? 'green' : 'red', fontSize: '24px' }"
+              />
             </a-row>
           </span>
           <span slot="actions" slot-scope="text, account">
             <a-space>
-              <a-button type="link" @click="resetAccountPassword(account)">Reset password</a-button>
+              <a-button type="link" @click="resetAccountPassword(account)"
+                >Reset password</a-button
+              >
               <account-reset-password
                 v-if="selectedAccount"
                 :active="resetAccountPasswordVisible"
@@ -49,10 +55,9 @@
 
               <a-divider type="vertical" />
 
-              <a-button
-                type="link"
-                @click="toogleAccount(account)"
-              >{{ account.enabled ? 'Disable' : 'Enable' }}</a-button>
+              <a-button type="link" @click="toogleAccount(account)">{{
+                account.enabled ? "Disable" : "Enable"
+              }}</a-button>
 
               <a-divider type="vertical" />
 
@@ -227,15 +232,13 @@ export default {
 .ant-empty-description {
   color: lightgrey !important;
 }
-</style>
-<style lang="less">
 table.accounts-table {
   border-collapse: collapse;
 }
 .accounts-table > table,
 th,
 td {
-  border-bottom: 1px solid @primary-color !important;
+  border-bottom: 1px solid var(--primary-color) !important;
   color: black;
 }
 </style>

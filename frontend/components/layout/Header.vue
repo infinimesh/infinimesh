@@ -36,7 +36,7 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      }
+      },
     },
     namespace: {
       get() {
@@ -44,14 +44,14 @@ export default {
       },
       set(val) {
         this.$store.dispatch("devices/setNamespace", val);
-      }
+      },
     },
     namespaces: {
       deep: true,
       get() {
         return this.$store.state.devices.namespaces;
-      }
-    }
+      },
+    },
   },
   mounted() {
     this.namespace = this.$store.state.auth.user.default_namespace.id;
@@ -59,8 +59,8 @@ export default {
   methods: {
     toggleCollapsed() {
       this.menu = !this.menu;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -93,9 +93,10 @@ div.user {
   color: white;
   text-align: left;
 }
-</style>
 
-<style lang="less" scoped>
+.nav-button {
+  color: var(--secondary-color);
+}
 .nav-button:hover {
   cursor: pointer;
   opacity: 0.5;
@@ -104,8 +105,9 @@ div.user {
 }
 .infini-nav {
   max-height: 64px;
+  background: var(--primary-color);
 }
 .infini-nav .menu-control {
-  font-size: @font-size-xl !important;
+  font-size: var(--font-size-xl) !important;
 }
 </style>
