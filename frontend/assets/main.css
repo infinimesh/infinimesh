@@ -50,7 +50,7 @@ strong {
   border-color: transparent !important;
 }
 .ant-btn-primary {
-  border-color: var(--btn-default-border);
+  background-color: var(--primary-color) !important;
 }
 .ant-btn-success {
   background-color: var(--success-color) !important;
