@@ -22,7 +22,13 @@
             </h1>
           </transition>
         </a-col>
-        <a-col :xs="1" :sm="1" :md="1" :xl="{ span: 1, offset: 1 }" :xxl="{ span: 1, offset: 1 }">
+        <a-col
+          :xs="1"
+          :sm="1"
+          :md="1"
+          :xl="{ span: 1, offset: 1 }"
+          :xxl="{ span: 1, offset: 1 }"
+        >
           <a-row type="flex" justify="end">
             <a-tooltip
               :title="
@@ -57,7 +63,9 @@
                 <a-row v-if="device.tags && device.tags.length">
                   <p>
                     Tags:
-                    <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
+                    <a-tag v-for="tag in device.tags" :key="tag">{{
+                      tag
+                    }}</a-tag>
                   </p>
                 </a-row>
                 <a-row v-else type="flex" justify="center" class="muted">
@@ -72,12 +80,23 @@
               </template>
             </a-card>
             <a-card title="Actions" key="actions" v-if="device" hoverable>
-              <device-actions :device-id="device.id" @delete="handleDeviceDelete" />
+              <device-actions
+                :device-id="device.id"
+                @delete="handleDeviceDelete"
+              />
             </a-card>
-            <a-card title="State" key="state" v-if="device && device.state" hoverable>
+            <a-card
+              title="State"
+              key="state"
+              v-if="device && device.state"
+              hoverable
+            >
               <a-row>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
-                  <device-state title="Reported" :state="device.state.shadow.reported" />
+                  <device-state
+                    title="Reported"
+                    :state="device.state.shadow.reported"
+                  />
                 </a-col>
                 <a-col :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12">
                   <device-state
@@ -167,13 +186,11 @@ export default {
           this.$notification.error({
             message: "Device wasn't found",
             description: "Redirecting...",
-            placement: "bottomRight",
           });
         } else if (res.response.status == 403) {
           this.$notification.error({
             message: "You have no access to this device",
             description: "Redirecting...",
-            placement: "bottomRight",
           });
         }
         this.$router.push({ name: "dashboard-devices" });
@@ -229,7 +246,6 @@ export default {
           this.$notification.error({
             message: "Error deleting device",
             description: e.response.data.message,
-            placement: "bottomRight",
           });
         });
     },

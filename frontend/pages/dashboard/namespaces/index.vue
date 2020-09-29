@@ -72,7 +72,6 @@ export default {
       this.$notification.warning({
         message: "Coming soon",
         description: `Can't delete ${namespace.name}(${namespace.id})`,
-        placement: "bottomRight",
       });
     },
   },
@@ -83,15 +82,13 @@ export default {
 .ant-empty-description {
   color: lightgrey !important;
 }
-</style>
-<style lang="less">
 table.namespaces-table {
   border-collapse: collapse;
 }
 .namespaces-table > table,
 th,
 td {
-  border-bottom: 1px solid @primary-color !important;
+  border-bottom: 1px solid var(--primary-color) !important;
   color: black;
 }
 </style>

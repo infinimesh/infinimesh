@@ -1,21 +1,40 @@
 <template>
-  <a-menu mode="vertical" v-model="route" id="menu">
-    <a-menu-item :key="page.link" v-for="page in pagesFiltered">
-      <a-icon :type="page.icon" />
-      <span>{{page.title}}</span>
-    </a-menu-item>
-    <a-sub-menu key="user">
-      <span slot="title">
-        <a-icon type="user" />
-        <span>
-          <b>{{ user.name }}</b>
-        </span>
-      </span>
-      <a-menu-item key="logout">
-        <a @click="$store.dispatch('logout')">Log Out</a>
-      </a-menu-item>
-    </a-sub-menu>
-  </a-menu>
+  <v-navigation-drawer
+    app
+    clipped
+    permanent
+    expand-on-hover
+    mini-variant-width="64"
+  >
+    <v-list nav dark>
+      <v-list-item
+        link
+        :key="page.link"
+        v-for="page in pagesFiltered"
+        :nuxt="true"
+        :to="page.link"
+      >
+        <v-list-item-icon>
+          <v-icon>{{ page.icon }}</v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>{{ page.title }}</v-list-item-title>
+      </v-list-item>
+      <v-list-group no-action prepend-icon="mdi-account-circle-outline">
+        <template v-slot:activator>
+          <v-list-item-title
+            ><span>
+              <b>{{ user.name }}</b>
+            </span></v-list-item-title
+          >
+        </template>
+        <v-list-item>
+          <v-list-item-title>
+            <a @click="$store.dispatch('logout')">Log Out</a>
+          </v-list-item-title>
+        </v-list-item>
+      </v-list-group>
+    </v-list>
+  </v-navigation-drawer>
 </template>
 
 <script>
@@ -23,12 +42,20 @@ export default {
   data() {
     return {
       pages: [
-        { title: "Device Registry", icon: "cloud", link: "dashboard-devices" },
-        { title: "Accounts", icon: "idcard", link: "dashboard-accounts" },
+        {
+          title: "Device Registry",
+          icon: "mdi-cloud-outline",
+          link: "devices",
+        },
+        {
+          title: "Accounts",
+          icon: "mdi-account-group",
+          link: "accounts",
+        },
         {
           title: "Namespaces",
-          icon: "folder-open",
-          link: "dashboard-namespaces",
+          icon: "mdi-folder-multiple-outline",
+          link: "namespaces",
         },
       ],
     };
@@ -56,9 +83,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-#menu {
-  height: 100%;
-}
-</style>

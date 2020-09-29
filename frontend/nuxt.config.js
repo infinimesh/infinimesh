@@ -47,12 +47,11 @@ module.exports = {
   buildModules: [
     "@nuxt/typescript-build",
     "@nuxtjs/style-resources",
-    "@nuxtjs/color-mode"
+    "@nuxtjs/color-mode",
+    "@nuxtjs/vuetify"
   ],
   modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
-  styleResources: {
-    less: ["~/assets/main.less"]
-  },
+  css: ["@/assets/main.css"],
   axios: {
     proxy: true
   },
