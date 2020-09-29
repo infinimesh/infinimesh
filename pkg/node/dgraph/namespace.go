@@ -20,7 +20,9 @@ package dgraph
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -335,4 +337,70 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	}
 
 	return err
+}
+
+//UpdateNamespace is a method to Udpdate details of an Namespace
+func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error) {
+
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	q := `query namespaceExists($namespaceid: string) {
+                exists(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
+                  uid
+                }
+              }
+             `
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$namespaceid": namespace.Namespace.Id})
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Exists) == 0 {
+		return errors.New("The Namespace is not found")
+	}
+
+	//Loop through the field masks and update the required fields
+	for _, field := range namespace.FieldMask.Paths {
+		switch field {
+		//Including all comibnations of case
+		case "name", "Name", "NAME":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "name",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Name}},
+			})
+		case "markfordeletion", "markforDeletion", "markForDeletion", "MarkForDeletion", "MARKFORDELETION":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "markfordeletion",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
+			})
+		case "deleteinitiationtime", "deleteinitiationTime", "deleteInitiationTime", "DeleteInitiationTime", "DELETEINITIATIONTIME":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "deleteinitiationtime",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Deleteinitiationtime}},
+			})
+		}
+	}
+
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

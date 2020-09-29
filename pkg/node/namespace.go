@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -31,6 +32,8 @@ import (
 type NamespaceController struct {
 	Repo Repo
 }
+
+var a AccountController
 
 //CreateNamespace is a method for creating Namespace
 func (n *NamespaceController) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
@@ -156,9 +159,36 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 
 //UpdateNamespace is a method to delete access to a Namespace for a account
 func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
-	err = n.Repo.DeletePermissionInNamespace(ctx, request.Namespace.Name, request.Namespace.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to update permission")
+
+	//Get the metadata from the context
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Aborted, "Failed to get account details")
 	}
+
+	//Check for Authentication
+	requestorID := md.Get("requestorID")
+	if requestorID == nil {
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
+	}
+
+	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   requestorID[0],
+		Namespace: request.Namespace.Id,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if resp.GetDecision().GetValue() {
+		err = n.Repo.UpdateNamespace(ctx, request)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "Failed to update Namespace")
+		}
+	} else {
+		return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to update the Namespace")
+	}
+
 	return &nodepb.UpdateNamespaceResponse{}, nil
 }

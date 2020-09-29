@@ -22,6 +22,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -286,28 +287,9 @@ func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.Upda
 	//Added logging
 	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("Update Namespace API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.Namespace.Id,
-		Action:    nodepb.Action_WRITE,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if resp.GetDecision().GetValue() {
-		return n.client.UpdateNamespace(ctx, request)
-	}
-
-	//Added logging
-	log.Error("Update Namespace API Method: The Account is not allowed to access the Namespace")
-	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+	return n.client.UpdateNamespace(ctx, request)
 
 }
