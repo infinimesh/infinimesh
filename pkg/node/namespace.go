@@ -235,8 +235,8 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			}
 		} else {
 			//Added logging
-			log.Error("Failed to Revoke as the Namespace is not marked for deletion", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Failed to Revoke as the Namespace is not marked for deletion")
+			log.Error("Failed to Revoke as the Namespace is not marked for deletion")
+			return nil, status.Error(codes.FailedPrecondition, "Failed to Revoke as the Namespace is not marked for deletion")
 		}
 
 	}
