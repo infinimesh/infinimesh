@@ -42,12 +42,17 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 
 	log := n.Log.Named("Create Namespace Controller")
 	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Name))
+	log.Info("Function Invoked", zap.String("Namespace ", request.Name))
 
 	id, err := n.Repo.CreateNamespace(ctx, request.GetName())
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to create namespace")
+		//Added logging
+		log.Error("Failed to create Namespace", zap.String("Name", request.Name), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Failed to create Namespace")
 	}
+
+	//Added logging
+	log.Info("Namespace Created", zap.String("Namespace ID", id))
 
 	return &nodepb.Namespace{
 		Id:   id,
@@ -57,11 +62,20 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 
 //ListNamespaces is a method for Listing all the Namespaces
 func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
+
+	log := n.Log.Named("List Namespaces Controller")
+	//Added logging
+	log.Info("Function Invoked")
+
 	namespaces, err := n.Repo.ListNamespaces(ctx)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed list namespaces")
+		//Added logging
+		log.Error("Failed to list Namespaces", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	//Added logging
+	log.Info("List Namespaces successful")
 	return &nodepb.ListNamespacesResponse{
 		Namespaces: namespaces,
 	}, nil

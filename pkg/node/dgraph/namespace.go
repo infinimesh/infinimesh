@@ -33,6 +33,107 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+//CreateNamespace is a method to create Namespaces
+func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
+	ns := &Namespace{
+		Node: Node{
+			Type: "namespace",
+			UID:  "_:namespace",
+		},
+		Name:                 name,
+		MarkForDeletion:      false,
+		DeleteInitiationTime: "0000-01-01T00:00:00Z",
+	}
+
+	txn := s.Dg.NewTxn()
+	js, err := json.Marshal(&ns)
+	if err != nil {
+		return "", err
+	}
+
+	assigned, err := txn.Mutate(ctx, &api.Mutation{
+		SetJson:   js,
+		CommitNow: true,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return assigned.GetUids()["namespace"], nil
+}
+
+//GetNamespace is a method to get the namespace based on Name
+func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
+	const q = `query getNamespaces($namespace: string) {
+                     namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
+	               	uid
+					name
+					markfordeletion
+					deleteinitiationtime
+	             }
+                   }`
+
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespace": namespacename})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	if len(resultSet.Namespaces) > 0 {
+		return &nodepb.Namespace{
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
+		}, nil
+	}
+
+	return nil, errors.New("The Namespace is not found")
+}
+
+//GetNamespaceID is a method to get the namespace based on ID
+func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
+	const q = `query getNamespaces($namespaceid: string) {
+                     namespaces(func: uid($namespaceid)) @filter(eq(type, "namespace"))  {
+						uid
+						name
+						markfordeletion
+						deleteinitiationtime
+	             }
+                   }`
+
+	res, err := s.Dg.NewReadOnlyTxn().QueryWithVars(ctx, q, map[string]string{"$namespaceid": namespaceID})
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		Namespaces []*Namespace `json:"namespaces"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	if len(resultSet.Namespaces) > 0 {
+		return &nodepb.Namespace{
+			Id:                   resultSet.Namespaces[0].UID,
+			Name:                 resultSet.Namespaces[0].Name,
+			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
+			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
+		}, nil
+	}
+
+	return nil, errors.New("The Namespace is not found")
+}
+
 //ListNamespaces is a method to List details of all Namespaces
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{

@@ -102,8 +102,6 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
 
-		//Added logging
-		log.Info("Create Namespace API Method: Namespace Created", zap.String("Namespace ID", ns.Id))
 		return &nodepb.Namespace{
 			Id:   ns.Id,
 			Name: ns.Name,
