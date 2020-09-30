@@ -251,7 +251,12 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
 
 	//Added logging
-	log.Info("Delete Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Delete Namespace API Method: Function Invoked",
+		zap.String("Account ID", ctx.Value("account_id").(string)),
+		zap.String("Namespace", request.Namespaceid),
+		zap.Bool("HardDelete Flag", request.Harddelete),
+		zap.Bool("RevokeDelete Flag", request.Revokedelete),
+	)
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
