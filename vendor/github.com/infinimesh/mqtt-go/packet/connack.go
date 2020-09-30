@@ -18,16 +18,13 @@
 package packet
 
 import (
-	"encoding/binary"
 	"io"
 )
 
-type RecieveMaximum struct {
-	RecieveMaximumID    int
-	RecieveMaximumValue uint16
-}
 type ConnAckProperties struct {
-	RecieveMaximum RecieveMaximum
+	PropertiesLength int
+	RecieveMaximum   uint16
+	AssignedClientID string
 }
 
 type ConnAckControlPacket struct {
@@ -42,7 +39,11 @@ type ConnAckVariableHeader struct {
 }
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
-	p.FixedHeader.RemainingLength = 5
+	if len(p.VariableHeader.ConnAckProperties.AssignedClientID) > 0 {
+		p.FixedHeader.RemainingLength = 3 + len(p.VariableHeader.ConnAckProperties.AssignedClientID) + 1
+	} else {
+		p.FixedHeader.RemainingLength = 3
+	}
 	var nWritten int64
 	nWritten, err = p.FixedHeader.WriteTo(w)
 	n += nWritten
@@ -63,12 +64,47 @@ func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return
 	}
-	buf = make([]byte, 1)
-	buf[0] = byte(c.ConnAckProperties.RecieveMaximum.RecieveMaximumID)
-	bytesWritten, err = w.Write(buf)
+	if len(c.ConnAckProperties.AssignedClientID) > 0 {
+		c.ConnAckProperties.PropertiesLength = 3
+		buf = make([]byte, 1)
+		buf[0] = byte(c.ConnAckProperties.PropertiesLength)
+		bytesWritten, err = w.Write(buf)
+		n += int64(bytesWritten)
+		if err != nil {
+			return
+		}
+		buf = make([]byte, 1)
+		buf[0] = byte(ASSIGNED_CLIENT_ID)
+		bytesWritten, err = w.Write(buf)
+		n += int64(bytesWritten)
+		if err != nil {
+			return
+		}
+		buf = make([]byte, len(c.ConnAckProperties.AssignedClientID))
+		buf = []byte(c.ConnAckProperties.AssignedClientID)
+		bytesWritten, err = w.Write(buf)
+		n += int64(bytesWritten)
+		if err != nil {
+			return
+		}
+	} else {
+		c.ConnAckProperties.PropertiesLength = 0
+		buf = make([]byte, 1)
+		buf[0] = byte(c.ConnAckProperties.PropertiesLength)
+		bytesWritten, err = w.Write(buf)
+		n += int64(bytesWritten)
+		if err != nil {
+			return
+		}
+	}
+	/*
+		buf = make([]byte, 1)
+		buf[0] = byte(c.ConnAckProperties.RecieveMaximum.RecieveMaximumID)
+		bytesWritten, err = w.Write(buf)
 
-	buf = make([]byte, 2)
-	binary.BigEndian.PutUint16(buf, c.ConnAckProperties.RecieveMaximum.RecieveMaximumValue)
-	bytesWritten, err = w.Write(buf)
+		buf = make([]byte, 2)
+		binary.BigEndian.PutUint16(buf, c.ConnAckProperties.RecieveMaximum.RecieveMaximumValue)
+		bytesWritten, err = w.Write(buf)
+	*/
 	return
 }
