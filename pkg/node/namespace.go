@@ -89,7 +89,7 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 	namespace, err := n.Repo.GetNamespaceID(ctx, request.GetNamespace())
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed get namespace")
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return namespace, nil

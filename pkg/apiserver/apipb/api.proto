@@ -251,13 +251,13 @@ service Namespaces {
   rpc DeleteNamespace(infinimesh.node.DeleteNamespaceRequest)
       returns (infinimesh.node.DeleteNamespaceResponse) {
     option (google.api.http) = {
-      delete : "/namespaces/{namespace_id}"
+      delete : "/namespaces/{namespaceid}"
     };
   };
   rpc UpdateNamespace(infinimesh.node.UpdateNamespaceRequest)
       returns (infinimesh.node.UpdateNamespaceResponse) {
     option (google.api.http) = {
-      patch : "/namespaces/{namespace_id}"
+      patch : "/namespaces/{namespace.id}"
     };
   };
 }
