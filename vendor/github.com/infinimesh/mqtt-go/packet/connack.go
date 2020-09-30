@@ -40,7 +40,7 @@ type ConnAckVariableHeader struct {
 
 func (p *ConnAckControlPacket) WriteTo(w io.Writer) (n int64, err error) {
 	if len(p.VariableHeader.ConnAckProperties.AssignedClientID) > 0 {
-		p.FixedHeader.RemainingLength = 3 + len(p.VariableHeader.ConnAckProperties.AssignedClientID) + 1
+		p.FixedHeader.RemainingLength = 3 + len(p.VariableHeader.ConnAckProperties.AssignedClientID) + 3
 	} else {
 		p.FixedHeader.RemainingLength = 3
 	}
@@ -65,7 +65,7 @@ func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		return
 	}
 	if len(c.ConnAckProperties.AssignedClientID) > 0 {
-		c.ConnAckProperties.PropertiesLength = 3
+		c.ConnAckProperties.PropertiesLength = 4 + len(c.ConnAckProperties.AssignedClientID)
 		buf = make([]byte, 1)
 		buf[0] = byte(c.ConnAckProperties.PropertiesLength)
 		bytesWritten, err = w.Write(buf)
@@ -75,6 +75,13 @@ func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		}
 		buf = make([]byte, 1)
 		buf[0] = byte(ASSIGNED_CLIENT_ID)
+		bytesWritten, err = w.Write(buf)
+		n += int64(bytesWritten)
+		if err != nil {
+			return
+		}
+		buf = make([]byte, 2)
+		buf[1] = byte(len(c.ConnAckProperties.AssignedClientID))
 		bytesWritten, err = w.Write(buf)
 		n += int64(bytesWritten)
 		if err != nil {
