@@ -189,7 +189,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		zap.Bool("RevokeDelete Flag", request.Revokedelete),
 	)
 
-	if request.Revokedelete {
+	if !request.Revokedelete {
 		//Action to perform when delete is issued instead of revoke
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
