@@ -154,6 +154,9 @@ strong {
   color: var(--secondary-color) !important;
   opacity: 0.5;
 }
+.v-list-item__title a {
+  color: var(--secondary-color) !important;
+}
 
 .v-application {
   background: var(--background-color) !important;
