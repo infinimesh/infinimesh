@@ -65,7 +65,7 @@ func (c *ConnAckVariableHeader) WriteTo(w io.Writer) (n int64, err error) {
 		return
 	}
 	if len(c.ConnAckProperties.AssignedClientID) > 0 {
-		c.ConnAckProperties.PropertiesLength = 4 + len(c.ConnAckProperties.AssignedClientID)
+		c.ConnAckProperties.PropertiesLength = 3 + len(c.ConnAckProperties.AssignedClientID)
 		buf = make([]byte, 1)
 		buf[0] = byte(c.ConnAckProperties.PropertiesLength)
 		bytesWritten, err = w.Write(buf)
