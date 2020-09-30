@@ -259,7 +259,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
-		zap.Any("Field Masks", request.FieldMask.Paths),
+		zap.Any("Field Masks", request.FieldMask),
 	)
 
 	//Get the metadata from the context
