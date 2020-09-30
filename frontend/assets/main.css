@@ -90,6 +90,14 @@ strong {
   background-color: var(--danger-color);
 }
 
+.ant-popover-buttons .ant-btn {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.ant-popover-buttons .ant-btn-primary {
+  color: white !important;
+}
+
 .ant-popover-inner {
   border: var(--border-muted);
   box-shadow: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
