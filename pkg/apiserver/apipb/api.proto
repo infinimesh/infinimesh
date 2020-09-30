@@ -252,12 +252,14 @@ service Namespaces {
       returns (infinimesh.node.DeleteNamespaceResponse) {
     option (google.api.http) = {
       delete : "/namespaces/{namespaceid}"
+      body : "*"
     };
   };
   rpc UpdateNamespace(infinimesh.node.UpdateNamespaceRequest)
       returns (infinimesh.node.UpdateNamespaceResponse) {
     option (google.api.http) = {
       patch : "/namespaces/{namespace.id}"
+      body : "namespace"
     };
   };
 }
