@@ -69,7 +69,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to create user", zap.String("Name", request.Account.Name), zap.Error(err))
+		log.Error("Failed to create User", zap.String("Name", request.Account.Name), zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -273,8 +273,8 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	accounts, err := s.Repo.ListAccounts(ctx)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to list accounts", zap.Error(err))
-		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list accounts")
+		log.Error("Failed to list Accounts", zap.Error(err))
+		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
 	}
 
 	//Added logging
