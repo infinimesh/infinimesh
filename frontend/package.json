@@ -40,6 +40,7 @@
     "node-sass": "^4.14.1"
   },
   "resolutions": {
-    "cryptiles": "^4.1.2"
+    "cryptiles": "^4.1.2",
+    "hoek": "^4.2.1"
   }
 }
