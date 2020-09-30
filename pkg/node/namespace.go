@@ -185,8 +185,8 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespaceid),
-		zap.String("Hardelete Flag", request.Namespaceid),
-		zap.String("RevokeDelete Flag", request.Namespaceid),
+		zap.Bool("Hardelete Flag", request.Harddelete),
+		zap.Bool("RevokeDelete Flag", request.Revokedelete),
 	)
 
 	if !request.Revokedelete {
