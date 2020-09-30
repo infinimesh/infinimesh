@@ -68,6 +68,9 @@ strong {
   font-size: 2rem;
   color: var(--line-color);
 }
+.lead-dark {
+  color: var(--secondary-color) !important;
+}
 
 /* AntDesign Classes Overloads */
 
