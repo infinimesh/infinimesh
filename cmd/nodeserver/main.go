@@ -80,7 +80,7 @@ func main() {
 	objectController := &node.ObjectController{
 		Repo:   repo,
 		Dgraph: dg,
-		Log:    log.Named("server"),
+		Log:    log.Named("objectController"),
 	}
 
 	accountController := &node.AccountController{
@@ -91,6 +91,7 @@ func main() {
 
 	namespaceController := &node.NamespaceController{
 		Repo: repo,
+		Log:  log.Named("namespaceController"),
 	}
 
 	nodepb.RegisterObjectServiceServer(srv, objectController)
