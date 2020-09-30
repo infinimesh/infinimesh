@@ -15,7 +15,6 @@
           <a-row
             class="create-form"
             v-if="device.type && device.type == 'create-form'"
-            :style="deviceCreateFormStyle"
             type="flex"
             justify="center"
             align="middle"
@@ -31,33 +30,7 @@
               @add="handleDeviceAdd"
             />
           </a-row>
-          <nuxt-link v-else :to="{ name: 'dashboard-devices-id', params: { id: device.id } }">
-            <a-card :hoverable="true" :bordered="false" :ref="`device-card-${device.id}`">
-              <template slot="title">{{ device.name }}</template>
-              <template slot="extra">
-                <b class="muted">{{ device.id }}</b>
-                <a-tooltip
-                  :title="
-                    device.enabled ? 'Device enabled' : 'Device is not enabled'
-                  "
-                  placement="bottom"
-                >
-                  <a-icon
-                    type="bulb"
-                    :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
-                    theme="filled"
-                  />
-                </a-tooltip>
-              </template>
-              <template>
-                <a-row v-if="device.tags.length">
-                  Tags:
-                  <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
-                </a-row>
-                <a-row v-else type="flex" justify="center" class="muted">No tags were provided</a-row>
-              </template>
-            </a-card>
-          </nuxt-link>
+          <device-list-card :device="device" v-else />
         </div>
       </a-col>
     </a-row>
@@ -66,11 +39,13 @@
 
 <script>
 import DeviceAdd from "@/components/device/Add.vue";
+import DeviceListCard from "@/components/device/ListCard.vue";
 
 export default {
   name: "devicesTable",
   components: {
     DeviceAdd,
+    DeviceListCard,
   },
   data() {
     return {
@@ -132,24 +107,6 @@ export default {
         return res;
       },
     },
-    deviceCreateFormStyle() {
-      return {
-        "--device-card-height": this.deviceCardHeight,
-      };
-    },
-    deviceCardHeight: {
-      deep: true,
-      get() {
-        if (this.$refs.length) {
-          return this.$refs.reduce((curr, el) => {
-            if (el < curr) curr = el.clientHeight;
-            return curr;
-          }, 1000);
-        } else {
-          return "8rem";
-        }
-      },
-    },
     gridSize() {
       return this.$store.state.window.gridSize;
     },
@@ -162,7 +119,6 @@ export default {
           this.$notification.error({
             message: "Failed to create the device",
             description: `Response: ${err.response.data.message}`,
-            placement: "bottomRight",
             duration: 10,
           });
         },
@@ -176,22 +132,14 @@ export default {
 </script>
 
 <style scoped>
-#root {
-  padding: 10px;
-}
-</style>
-<style lang="less" scoped>
-.muted {
-  color: @primary-color-dark;
-}
 .create-form {
-  border-radius: @border-radius-base;
-  background: @primary-color-dark;
-  border: @border-base;
-  min-height: var(--device-card-height);
+  border-radius: var(--border-radius-base);
+  background: var(--primary-color)-dark;
+  border: var(--border-base);
+  min-height: 8rem;
   cursor: pointer;
 }
 .create-form .anticon {
-  color: @icon-color-dark;
+  color: var(--icon-color-dark);
 }
 </style>

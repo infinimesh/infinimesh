@@ -27,6 +27,7 @@
     "@nuxt/types": "^2.14.3",
     "@nuxt/typescript-build": "^2.0.2",
     "@nuxtjs/color-mode": "^1.0.3",
+    "@nuxtjs/vuetify": "^1.11.2",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "@vue/eslint-config-typescript": "^5.1.0",

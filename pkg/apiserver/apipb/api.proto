@@ -248,6 +248,18 @@ service Namespaces {
       delete : "/namespaces/{namespace}/permissions/{account_id}"
     };
   };
+  rpc DeleteNamespace(infinimesh.node.DeleteNamespaceRequest)
+      returns (infinimesh.node.DeleteNamespaceResponse) {
+    option (google.api.http) = {
+      delete : "/namespaces/{namespace_id}"
+    };
+  };
+  rpc UpdateNamespace(infinimesh.node.UpdateNamespaceRequest)
+      returns (infinimesh.node.UpdateNamespaceResponse) {
+    option (google.api.http) = {
+      patch : "/namespaces/{namespace_id}"
+    };
+  };
 }
 
 message CreateNamespacePermissionRequest {

@@ -746,7 +746,7 @@ var file_pkg_apiserver_apipb_api_proto_rawDesc = []byte{
 	0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x44, 0x65,
 	0x6c, 0x65, 0x74, 0x65, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x22, 0x16, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x10, 0x2a, 0x0e, 0x2f, 0x6f, 0x62, 0x6a,
-	0x65, 0x63, 0x74, 0x73, 0x2f, 0x7b, 0x75, 0x69, 0x64, 0x7d, 0x32, 0xdf, 0x06, 0x0a, 0x0a, 0x4e,
+	0x65, 0x63, 0x74, 0x73, 0x2f, 0x7b, 0x75, 0x69, 0x64, 0x7d, 0x32, 0xf5, 0x08, 0x0a, 0x0a, 0x4e,
 	0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x73, 0x12, 0x6e, 0x0a, 0x0f, 0x43, 0x72, 0x65,
 	0x61, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x27, 0x2e, 0x69,
 	0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x43,
@@ -800,23 +800,40 @@ var file_pkg_apiserver_apipb_api_proto_rawDesc = []byte{
 	0x73, 0x65, 0x22, 0x38, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x32, 0x2a, 0x30, 0x2f, 0x6e, 0x61, 0x6d,
 	0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x73, 0x2f, 0x7b, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61,
 	0x63, 0x65, 0x7d, 0x2f, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x73, 0x2f,
-	0x7b, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x42, 0xed, 0x01, 0x0a,
-	0x12, 0x63, 0x6f, 0x6d, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e,
-	0x61, 0x70, 0x69, 0x42, 0x08, 0x41, 0x70, 0x69, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a,
-	0x05, 0x61, 0x70, 0x69, 0x70, 0x62, 0x92, 0x41, 0xc2, 0x01, 0x12, 0x85, 0x01, 0x0a, 0x17, 0x49,
-	0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x20, 0x49, 0x6f, 0x54, 0x20, 0x50, 0x6c,
-	0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x19, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x20, 0x4e, 0x61,
-	0x74, 0x69, 0x76, 0x65, 0x20, 0x49, 0x6f, 0x54, 0x20, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72,
-	0x6d, 0x22, 0x48, 0x0a, 0x0a, 0x49, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x12,
-	0x1a, 0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x74,
-	0x65, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x69, 0x6f, 0x1a, 0x1e, 0x65, 0x6e, 0x67,
-	0x69, 0x6e, 0x65, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x40, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x74,
-	0x65, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x69, 0x6f, 0x32, 0x05, 0x30, 0x2e, 0x30,
-	0x2e, 0x39, 0x1a, 0x11, 0x61, 0x70, 0x69, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65,
-	0x73, 0x68, 0x2e, 0x69, 0x6f, 0x2a, 0x01, 0x02, 0x32, 0x10, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x6a, 0x73, 0x6f, 0x6e, 0x3a, 0x10, 0x61, 0x70, 0x70, 0x6c,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x6a, 0x73, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x7b, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x7d, 0x12, 0x88, 0x01, 0x0a,
+	0x0f, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65,
+	0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f,
+	0x64, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x28, 0x2e, 0x69, 0x6e, 0x66, 0x69,
+	0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65,
+	0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x22, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x1c, 0x2a, 0x1a, 0x2f, 0x6e, 0x61,
+	0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x73, 0x2f, 0x7b, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x5f, 0x69, 0x64, 0x7d, 0x12, 0x88, 0x01, 0x0a, 0x0f, 0x55, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x27, 0x2e, 0x69, 0x6e,
+	0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x28, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73,
+	0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4e, 0x61, 0x6d,
+	0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x22,
+	0x82, 0xd3, 0xe4, 0x93, 0x02, 0x1c, 0x32, 0x1a, 0x2f, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x73, 0x2f, 0x7b, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x5f, 0x69,
+	0x64, 0x7d, 0x42, 0xed, 0x01, 0x0a, 0x12, 0x63, 0x6f, 0x6d, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e,
+	0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x61, 0x70, 0x69, 0x42, 0x08, 0x41, 0x70, 0x69, 0x50, 0x72,
+	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x05, 0x61, 0x70, 0x69, 0x70, 0x62, 0x92, 0x41, 0xc2, 0x01,
+	0x12, 0x85, 0x01, 0x0a, 0x17, 0x49, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x20,
+	0x49, 0x6f, 0x54, 0x20, 0x50, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x19, 0x43, 0x6c,
+	0x6f, 0x75, 0x64, 0x20, 0x4e, 0x61, 0x74, 0x69, 0x76, 0x65, 0x20, 0x49, 0x6f, 0x54, 0x20, 0x50,
+	0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x22, 0x48, 0x0a, 0x0a, 0x49, 0x6e, 0x66, 0x69, 0x6e,
+	0x69, 0x6d, 0x65, 0x73, 0x68, 0x12, 0x1a, 0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x69,
+	0x6e, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x65, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x69,
+	0x6f, 0x1a, 0x1e, 0x65, 0x6e, 0x67, 0x69, 0x6e, 0x65, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x40, 0x69,
+	0x6e, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x65, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x69,
+	0x6f, 0x32, 0x05, 0x30, 0x2e, 0x30, 0x2e, 0x39, 0x1a, 0x11, 0x61, 0x70, 0x69, 0x2e, 0x69, 0x6e,
+	0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x69, 0x6f, 0x2a, 0x01, 0x02, 0x32, 0x10,
+	0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x6a, 0x73, 0x6f, 0x6e,
+	0x3a, 0x10, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x6a, 0x73,
+	0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -864,25 +881,29 @@ var file_pkg_apiserver_apipb_api_proto_goTypes = []interface{}{
 	(*nodepb.ListNamespacesRequest)(nil),                // 28: infinimesh.node.ListNamespacesRequest
 	(*nodepb.ListPermissionsRequest)(nil),               // 29: infinimesh.node.ListPermissionsRequest
 	(*nodepb.DeletePermissionRequest)(nil),              // 30: infinimesh.node.DeletePermissionRequest
-	(*registrypb.CreateResponse)(nil),                   // 31: infinimesh.deviceregistry.CreateResponse
-	(*registrypb.UpdateResponse)(nil),                   // 32: infinimesh.deviceregistry.UpdateResponse
-	(*registrypb.GetResponse)(nil),                      // 33: infinimesh.deviceregistry.GetResponse
-	(*registrypb.ListResponse)(nil),                     // 34: infinimesh.deviceregistry.ListResponse
-	(*registrypb.DeleteResponse)(nil),                   // 35: infinimesh.deviceregistry.DeleteResponse
-	(*shadowpb.GetResponse)(nil),                        // 36: infinimesh.shadow.GetResponse
-	(*shadowpb.PatchDesiredStateResponse)(nil),          // 37: infinimesh.shadow.PatchDesiredStateResponse
-	(*shadowpb.StreamReportedStateChangesResponse)(nil), // 38: infinimesh.shadow.StreamReportedStateChangesResponse
-	(*nodepb.Account)(nil),                              // 39: infinimesh.node.Account
-	(*nodepb.CreateUserAccountResponse)(nil),            // 40: infinimesh.node.CreateUserAccountResponse
-	(*nodepb.UpdateAccountResponse)(nil),                // 41: infinimesh.node.UpdateAccountResponse
-	(*nodepb.ListAccountsResponse)(nil),                 // 42: infinimesh.node.ListAccountsResponse
-	(*nodepb.DeleteAccountResponse)(nil),                // 43: infinimesh.node.DeleteAccountResponse
-	(*nodepb.ListObjectsResponse)(nil),                  // 44: infinimesh.node.ListObjectsResponse
-	(*nodepb.DeleteObjectResponse)(nil),                 // 45: infinimesh.node.DeleteObjectResponse
-	(*nodepb.Namespace)(nil),                            // 46: infinimesh.node.Namespace
-	(*nodepb.ListNamespacesResponse)(nil),               // 47: infinimesh.node.ListNamespacesResponse
-	(*nodepb.ListPermissionsResponse)(nil),              // 48: infinimesh.node.ListPermissionsResponse
-	(*nodepb.DeletePermissionResponse)(nil),             // 49: infinimesh.node.DeletePermissionResponse
+	(*nodepb.DeleteNamespaceRequest)(nil),               // 31: infinimesh.node.DeleteNamespaceRequest
+	(*nodepb.UpdateNamespaceRequest)(nil),               // 32: infinimesh.node.UpdateNamespaceRequest
+	(*registrypb.CreateResponse)(nil),                   // 33: infinimesh.deviceregistry.CreateResponse
+	(*registrypb.UpdateResponse)(nil),                   // 34: infinimesh.deviceregistry.UpdateResponse
+	(*registrypb.GetResponse)(nil),                      // 35: infinimesh.deviceregistry.GetResponse
+	(*registrypb.ListResponse)(nil),                     // 36: infinimesh.deviceregistry.ListResponse
+	(*registrypb.DeleteResponse)(nil),                   // 37: infinimesh.deviceregistry.DeleteResponse
+	(*shadowpb.GetResponse)(nil),                        // 38: infinimesh.shadow.GetResponse
+	(*shadowpb.PatchDesiredStateResponse)(nil),          // 39: infinimesh.shadow.PatchDesiredStateResponse
+	(*shadowpb.StreamReportedStateChangesResponse)(nil), // 40: infinimesh.shadow.StreamReportedStateChangesResponse
+	(*nodepb.Account)(nil),                              // 41: infinimesh.node.Account
+	(*nodepb.CreateUserAccountResponse)(nil),            // 42: infinimesh.node.CreateUserAccountResponse
+	(*nodepb.UpdateAccountResponse)(nil),                // 43: infinimesh.node.UpdateAccountResponse
+	(*nodepb.ListAccountsResponse)(nil),                 // 44: infinimesh.node.ListAccountsResponse
+	(*nodepb.DeleteAccountResponse)(nil),                // 45: infinimesh.node.DeleteAccountResponse
+	(*nodepb.ListObjectsResponse)(nil),                  // 46: infinimesh.node.ListObjectsResponse
+	(*nodepb.DeleteObjectResponse)(nil),                 // 47: infinimesh.node.DeleteObjectResponse
+	(*nodepb.Namespace)(nil),                            // 48: infinimesh.node.Namespace
+	(*nodepb.ListNamespacesResponse)(nil),               // 49: infinimesh.node.ListNamespacesResponse
+	(*nodepb.ListPermissionsResponse)(nil),              // 50: infinimesh.node.ListPermissionsResponse
+	(*nodepb.DeletePermissionResponse)(nil),             // 51: infinimesh.node.DeletePermissionResponse
+	(*nodepb.DeleteNamespaceResponse)(nil),              // 52: infinimesh.node.DeleteNamespaceResponse
+	(*nodepb.UpdateNamespaceResponse)(nil),              // 53: infinimesh.node.UpdateNamespaceResponse
 }
 var file_pkg_apiserver_apipb_api_proto_depIdxs = []int32{
 	1,  // 0: infinimesh.api.TokenRequest.ruleset:type_name -> infinimesh.api.RestrictionRule
@@ -914,32 +935,36 @@ var file_pkg_apiserver_apipb_api_proto_depIdxs = []int32{
 	6,  // 26: infinimesh.api.Namespaces.CreatePermission:input_type -> infinimesh.api.CreateNamespacePermissionRequest
 	29, // 27: infinimesh.api.Namespaces.ListPermissions:input_type -> infinimesh.node.ListPermissionsRequest
 	30, // 28: infinimesh.api.Namespaces.DeletePermission:input_type -> infinimesh.node.DeletePermissionRequest
-	31, // 29: infinimesh.api.Devices.Create:output_type -> infinimesh.deviceregistry.CreateResponse
-	32, // 30: infinimesh.api.Devices.Update:output_type -> infinimesh.deviceregistry.UpdateResponse
-	33, // 31: infinimesh.api.Devices.Get:output_type -> infinimesh.deviceregistry.GetResponse
-	34, // 32: infinimesh.api.Devices.List:output_type -> infinimesh.deviceregistry.ListResponse
-	35, // 33: infinimesh.api.Devices.Delete:output_type -> infinimesh.deviceregistry.DeleteResponse
-	36, // 34: infinimesh.api.States.Get:output_type -> infinimesh.shadow.GetResponse
-	37, // 35: infinimesh.api.States.PatchDesiredState:output_type -> infinimesh.shadow.PatchDesiredStateResponse
-	38, // 36: infinimesh.api.States.StreamReportedStateChanges:output_type -> infinimesh.shadow.StreamReportedStateChangesResponse
-	39, // 37: infinimesh.api.Accounts.SelfAccount:output_type -> infinimesh.node.Account
-	2,  // 38: infinimesh.api.Accounts.Token:output_type -> infinimesh.api.TokenResponse
-	40, // 39: infinimesh.api.Accounts.CreateUserAccount:output_type -> infinimesh.node.CreateUserAccountResponse
-	39, // 40: infinimesh.api.Accounts.GetAccount:output_type -> infinimesh.node.Account
-	41, // 41: infinimesh.api.Accounts.UpdateAccount:output_type -> infinimesh.node.UpdateAccountResponse
-	42, // 42: infinimesh.api.Accounts.ListAccounts:output_type -> infinimesh.node.ListAccountsResponse
-	43, // 43: infinimesh.api.Accounts.DeleteAccount:output_type -> infinimesh.node.DeleteAccountResponse
-	44, // 44: infinimesh.api.Objects.ListObjects:output_type -> infinimesh.node.ListObjectsResponse
-	10, // 45: infinimesh.api.Objects.CreateObject:output_type -> infinimesh.node.Object
-	45, // 46: infinimesh.api.Objects.DeleteObject:output_type -> infinimesh.node.DeleteObjectResponse
-	46, // 47: infinimesh.api.Namespaces.CreateNamespace:output_type -> infinimesh.node.Namespace
-	46, // 48: infinimesh.api.Namespaces.GetNamespace:output_type -> infinimesh.node.Namespace
-	47, // 49: infinimesh.api.Namespaces.ListNamespaces:output_type -> infinimesh.node.ListNamespacesResponse
-	8,  // 50: infinimesh.api.Namespaces.CreatePermission:output_type -> infinimesh.api.CreateNamespacePermissionResponse
-	48, // 51: infinimesh.api.Namespaces.ListPermissions:output_type -> infinimesh.node.ListPermissionsResponse
-	49, // 52: infinimesh.api.Namespaces.DeletePermission:output_type -> infinimesh.node.DeletePermissionResponse
-	29, // [29:53] is the sub-list for method output_type
-	5,  // [5:29] is the sub-list for method input_type
+	31, // 29: infinimesh.api.Namespaces.DeleteNamespace:input_type -> infinimesh.node.DeleteNamespaceRequest
+	32, // 30: infinimesh.api.Namespaces.UpdateNamespace:input_type -> infinimesh.node.UpdateNamespaceRequest
+	33, // 31: infinimesh.api.Devices.Create:output_type -> infinimesh.deviceregistry.CreateResponse
+	34, // 32: infinimesh.api.Devices.Update:output_type -> infinimesh.deviceregistry.UpdateResponse
+	35, // 33: infinimesh.api.Devices.Get:output_type -> infinimesh.deviceregistry.GetResponse
+	36, // 34: infinimesh.api.Devices.List:output_type -> infinimesh.deviceregistry.ListResponse
+	37, // 35: infinimesh.api.Devices.Delete:output_type -> infinimesh.deviceregistry.DeleteResponse
+	38, // 36: infinimesh.api.States.Get:output_type -> infinimesh.shadow.GetResponse
+	39, // 37: infinimesh.api.States.PatchDesiredState:output_type -> infinimesh.shadow.PatchDesiredStateResponse
+	40, // 38: infinimesh.api.States.StreamReportedStateChanges:output_type -> infinimesh.shadow.StreamReportedStateChangesResponse
+	41, // 39: infinimesh.api.Accounts.SelfAccount:output_type -> infinimesh.node.Account
+	2,  // 40: infinimesh.api.Accounts.Token:output_type -> infinimesh.api.TokenResponse
+	42, // 41: infinimesh.api.Accounts.CreateUserAccount:output_type -> infinimesh.node.CreateUserAccountResponse
+	41, // 42: infinimesh.api.Accounts.GetAccount:output_type -> infinimesh.node.Account
+	43, // 43: infinimesh.api.Accounts.UpdateAccount:output_type -> infinimesh.node.UpdateAccountResponse
+	44, // 44: infinimesh.api.Accounts.ListAccounts:output_type -> infinimesh.node.ListAccountsResponse
+	45, // 45: infinimesh.api.Accounts.DeleteAccount:output_type -> infinimesh.node.DeleteAccountResponse
+	46, // 46: infinimesh.api.Objects.ListObjects:output_type -> infinimesh.node.ListObjectsResponse
+	10, // 47: infinimesh.api.Objects.CreateObject:output_type -> infinimesh.node.Object
+	47, // 48: infinimesh.api.Objects.DeleteObject:output_type -> infinimesh.node.DeleteObjectResponse
+	48, // 49: infinimesh.api.Namespaces.CreateNamespace:output_type -> infinimesh.node.Namespace
+	48, // 50: infinimesh.api.Namespaces.GetNamespace:output_type -> infinimesh.node.Namespace
+	49, // 51: infinimesh.api.Namespaces.ListNamespaces:output_type -> infinimesh.node.ListNamespacesResponse
+	8,  // 52: infinimesh.api.Namespaces.CreatePermission:output_type -> infinimesh.api.CreateNamespacePermissionResponse
+	50, // 53: infinimesh.api.Namespaces.ListPermissions:output_type -> infinimesh.node.ListPermissionsResponse
+	51, // 54: infinimesh.api.Namespaces.DeletePermission:output_type -> infinimesh.node.DeletePermissionResponse
+	52, // 55: infinimesh.api.Namespaces.DeleteNamespace:output_type -> infinimesh.node.DeleteNamespaceResponse
+	53, // 56: infinimesh.api.Namespaces.UpdateNamespace:output_type -> infinimesh.node.UpdateNamespaceResponse
+	31, // [31:57] is the sub-list for method output_type
+	5,  // [5:31] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -1918,6 +1943,8 @@ type NamespacesClient interface {
 	CreatePermission(ctx context.Context, in *CreateNamespacePermissionRequest, opts ...grpc.CallOption) (*CreateNamespacePermissionResponse, error)
 	ListPermissions(ctx context.Context, in *nodepb.ListPermissionsRequest, opts ...grpc.CallOption) (*nodepb.ListPermissionsResponse, error)
 	DeletePermission(ctx context.Context, in *nodepb.DeletePermissionRequest, opts ...grpc.CallOption) (*nodepb.DeletePermissionResponse, error)
+	DeleteNamespace(ctx context.Context, in *nodepb.DeleteNamespaceRequest, opts ...grpc.CallOption) (*nodepb.DeleteNamespaceResponse, error)
+	UpdateNamespace(ctx context.Context, in *nodepb.UpdateNamespaceRequest, opts ...grpc.CallOption) (*nodepb.UpdateNamespaceResponse, error)
 }
 
 type namespacesClient struct {
@@ -1982,6 +2009,24 @@ func (c *namespacesClient) DeletePermission(ctx context.Context, in *nodepb.Dele
 	return out, nil
 }
 
+func (c *namespacesClient) DeleteNamespace(ctx context.Context, in *nodepb.DeleteNamespaceRequest, opts ...grpc.CallOption) (*nodepb.DeleteNamespaceResponse, error) {
+	out := new(nodepb.DeleteNamespaceResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.api.Namespaces/DeleteNamespace", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *namespacesClient) UpdateNamespace(ctx context.Context, in *nodepb.UpdateNamespaceRequest, opts ...grpc.CallOption) (*nodepb.UpdateNamespaceResponse, error) {
+	out := new(nodepb.UpdateNamespaceResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.api.Namespaces/UpdateNamespace", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NamespacesServer is the server API for Namespaces service.
 type NamespacesServer interface {
 	CreateNamespace(context.Context, *nodepb.CreateNamespaceRequest) (*nodepb.Namespace, error)
@@ -1990,6 +2035,8 @@ type NamespacesServer interface {
 	CreatePermission(context.Context, *CreateNamespacePermissionRequest) (*CreateNamespacePermissionResponse, error)
 	ListPermissions(context.Context, *nodepb.ListPermissionsRequest) (*nodepb.ListPermissionsResponse, error)
 	DeletePermission(context.Context, *nodepb.DeletePermissionRequest) (*nodepb.DeletePermissionResponse, error)
+	DeleteNamespace(context.Context, *nodepb.DeleteNamespaceRequest) (*nodepb.DeleteNamespaceResponse, error)
+	UpdateNamespace(context.Context, *nodepb.UpdateNamespaceRequest) (*nodepb.UpdateNamespaceResponse, error)
 }
 
 // UnimplementedNamespacesServer can be embedded to have forward compatible implementations.
@@ -2013,6 +2060,12 @@ func (*UnimplementedNamespacesServer) ListPermissions(context.Context, *nodepb.L
 }
 func (*UnimplementedNamespacesServer) DeletePermission(context.Context, *nodepb.DeletePermissionRequest) (*nodepb.DeletePermissionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePermission not implemented")
+}
+func (*UnimplementedNamespacesServer) DeleteNamespace(context.Context, *nodepb.DeleteNamespaceRequest) (*nodepb.DeleteNamespaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteNamespace not implemented")
+}
+func (*UnimplementedNamespacesServer) UpdateNamespace(context.Context, *nodepb.UpdateNamespaceRequest) (*nodepb.UpdateNamespaceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateNamespace not implemented")
 }
 
 func RegisterNamespacesServer(s *grpc.Server, srv NamespacesServer) {
@@ -2127,6 +2180,42 @@ func _Namespaces_DeletePermission_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Namespaces_DeleteNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(nodepb.DeleteNamespaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServer).DeleteNamespace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.api.Namespaces/DeleteNamespace",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServer).DeleteNamespace(ctx, req.(*nodepb.DeleteNamespaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Namespaces_UpdateNamespace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(nodepb.UpdateNamespaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServer).UpdateNamespace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.api.Namespaces/UpdateNamespace",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServer).UpdateNamespace(ctx, req.(*nodepb.UpdateNamespaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Namespaces_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "infinimesh.api.Namespaces",
 	HandlerType: (*NamespacesServer)(nil),
@@ -2154,6 +2243,14 @@ var _Namespaces_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePermission",
 			Handler:    _Namespaces_DeletePermission_Handler,
+		},
+		{
+			MethodName: "DeleteNamespace",
+			Handler:    _Namespaces_DeleteNamespace_Handler,
+		},
+		{
+			MethodName: "UpdateNamespace",
+			Handler:    _Namespaces_UpdateNamespace_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,34 +1,18 @@
 <template>
-  <a-layout id="dashboard">
-    <a-layout-header class="wide-header">
+  <v-app id="dashboard">
+    <v-app-bar app clipped-left>
       <Header />
-    </a-layout-header>
-    <a-layout class="layout-content">
-      <a-layout-sider
-        v-model="menu_collapsed"
-        :style="{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          zIndex: 99
-        }"
-      >
-        <Sider />
-      </a-layout-sider>
-      <a-layout>
-        <a-layout-content
-          :style="{
-            marginLeft: menu_collapsed ? '80px' : '200px',
-            paddingBottom: '20rem'
-          }"
-        >
-          <nuxt-child />
-        </a-layout-content>
-        <infinimesh-footer />
-      </a-layout>
-    </a-layout>
-  </a-layout>
+    </v-app-bar>
+    <Sider />
+    <v-main>
+      <v-container>
+        <nuxt-child />
+      </v-container>
+    </v-main>
+    <v-footer app>
+      <infinimesh-footer />
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
@@ -57,17 +41,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.wide-header {
-  padding: 0 !important;
-  position: fixed;
-  z-index: 1;
-  width: 100%;
-}
-</style>
-<style lang="less" scoped>
-.layout-content {
-  margin-top: @layout-header-height;
-}
-</style>
