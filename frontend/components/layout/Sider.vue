@@ -45,24 +45,24 @@ export default {
         {
           title: "Device Registry",
           icon: "mdi-cloud-outline",
-          link: "devices",
+          link: "/dashboard/devices"
         },
         {
           title: "Accounts",
           icon: "mdi-account-group",
-          link: "accounts",
+          link: "/dashboard/accounts"
         },
         {
           title: "Namespaces",
           icon: "mdi-folder-multiple-outline",
-          link: "namespaces",
-        },
-      ],
+          link: "/dashboard/namespaces"
+        }
+      ]
     };
   },
   computed: {
     pagesFiltered() {
-      return this.pages.filter((page) => this.allowedScope(page.link));
+      return this.pages.filter(page => this.allowedScope(page.link));
     },
     user() {
       return this.$store.getters.loggedInUser;
@@ -72,14 +72,14 @@ export default {
         return [this.$route.name];
       },
       set(val) {
-        this.$router.push({ name: val[0] });
-      },
-    },
+        this.$router.push(val[0]);
+      }
+    }
   },
   methods: {
     allowedScope(scope) {
       return this.$store.getters["window/hasAccess"](scope);
-    },
-  },
+    }
+  }
 };
 </script>

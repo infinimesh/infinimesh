@@ -46,6 +46,7 @@ body {
 
   --link-color: var(--background-color);
   --logo-color: white;
+  --line-color: white;
 }
 
 .black-white-mode body {
@@ -67,6 +68,9 @@ strong {
 .lead {
   font-size: 2rem;
   color: var(--line-color);
+}
+.lead-dark {
+  color: var(--secondary-color) !important;
 }
 
 /* AntDesign Classes Overloads */
@@ -149,6 +153,9 @@ strong {
 .v-list-item--active {
   color: var(--secondary-color) !important;
   opacity: 0.5;
+}
+.v-list-item__title a {
+  color: var(--secondary-color) !important;
 }
 
 .v-application {

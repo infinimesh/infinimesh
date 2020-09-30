@@ -50,7 +50,11 @@ module.exports = {
     "@nuxtjs/color-mode",
     "@nuxtjs/vuetify"
   ],
-  modules: ["@nuxtjs/axios", "@nuxtjs/auth"],
+  modules: [
+    "@nuxtjs/axios",
+    "@nuxtjs/auth",
+    ["@nuxtjs/pwa", { meta: false, icon: false, manifest: false }]
+  ],
   css: ["@/assets/main.css"],
   axios: {
     proxy: true
