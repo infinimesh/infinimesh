@@ -46,6 +46,7 @@ body {
 
   --link-color: var(--background-color);
   --logo-color: white;
+  --line-color: white;
 }
 
 .black-white-mode body {
