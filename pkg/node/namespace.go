@@ -260,6 +260,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
 	)
+	a.Log = log
 
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
