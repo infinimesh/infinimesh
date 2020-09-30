@@ -142,7 +142,7 @@ pre {
   width: 95%;
 }
 textarea {
-  background: var(--primary-color)-dark;
+  background: var(--secondary-color);
   width: 95%;
   font-family: monospace, monospace;
 }
