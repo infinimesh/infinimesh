@@ -1,6 +1,24 @@
 <template>
-  <a-row type="flex" justify="space-between">
-    <a-col :span="24">
+  <a-row type="flex" :gutter="10">
+    <a-col>
+      <a-popconfirm
+        :title="
+          `Are you sure ${
+            device.enabled ? 'disabling' : 'enabling'
+          } this device?`
+        "
+        ok-text="Yes"
+        cancel-text="No"
+        @confirm="$emit('toogle')"
+      >
+        <a-button
+          :type="device.enabled ? 'danger' : 'success'"
+          icon="switcher"
+          >{{ device.enabled ? "Disable" : "Enable" }}</a-button
+        >
+      </a-popconfirm>
+    </a-col>
+    <a-col>
       <a-popconfirm
         title="Are you sure deleting this device?"
         ok-text="Yes"
@@ -16,7 +34,13 @@
 <script>
 import Vue from "vue";
 
-export default Vue.component("device-actions", {});
+export default Vue.component("device-actions", {
+  props: {
+    device: {
+      required: true
+    }
+  }
+});
 </script>
 
 <style scoped>

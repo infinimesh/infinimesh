@@ -81,8 +81,9 @@
             </a-card>
             <a-card title="Actions" key="actions" v-if="device" hoverable>
               <device-actions
-                :device-id="device.id"
+                :device="device"
                 @delete="handleDeviceDelete"
+                @toogle="handleToogleDevice"
               />
             </a-card>
             <a-card
@@ -130,12 +131,12 @@ export default {
      * Device ID - not required if component is mounted via Router _id
      */
     deviceId: {
-      required: false,
-    },
+      required: false
+    }
   },
   data() {
     return {
-      deviceObject: false,
+      deviceObject: false
     };
   },
   computed: {
@@ -145,7 +146,7 @@ export default {
       },
       set(obj) {
         this.deviceObject = { ...this.deviceObject, ...obj };
-      },
+      }
     },
     deviceStateBulbColor() {
       if (!(this.device && this.device.enabled !== undefined)) {
@@ -155,59 +156,62 @@ export default {
       } else {
         return "#eb2f96";
       }
-    },
+    }
   },
   mounted() {
     this.device = {
-      id: this.deviceId || this.$route.params.id,
+      id: this.deviceId || this.$route.params.id
     };
     // Getting Device data from API
-    this.$axios
-      .get(`/api/devices/${this.device.id}`)
-      .then((res) => {
-        this.device = res.data.device;
-        this.socket = new WebSocket(
-          `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
-            this.device.id
-          }/state/stream`,
-          ["Bearer", this.$auth.getToken("local").split(" ")[1]]
-        );
-        this.socket.onmessage = (msg) => {
-          this.device.state.shadow.reported = JSON.parse(
-            msg.data
-          ).result.reportedState;
-        };
-        window.addEventListener("beforeunload", function (event) {
-          this.socket.close();
-        });
-      })
-      .catch((res) => {
-        if (res.response.status == 404) {
-          this.$notification.error({
-            message: "Device wasn't found",
-            description: "Redirecting...",
-          });
-        } else if (res.response.status == 403) {
-          this.$notification.error({
-            message: "You have no access to this device",
-            description: "Redirecting...",
-          });
-        }
-        this.$router.push({ name: "dashboard-devices" });
-      });
-    this.deviceStateGet();
+    this.refresh();
   },
   methods: {
+    refresh() {
+      this.$axios
+        .get(`/api/devices/${this.device.id}`)
+        .then(res => {
+          this.device = res.data.device;
+          this.socket = new WebSocket(
+            `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
+              this.device.id
+            }/state/stream`,
+            ["Bearer", this.$auth.getToken("local").split(" ")[1]]
+          );
+          this.socket.onmessage = msg => {
+            this.device.state.shadow.reported = JSON.parse(
+              msg.data
+            ).result.reportedState;
+          };
+          window.addEventListener("beforeunload", function(event) {
+            this.socket.close();
+          });
+        })
+        .catch(res => {
+          if (res.response.status == 404) {
+            this.$notification.error({
+              message: "Device wasn't found",
+              description: "Redirecting..."
+            });
+          } else if (res.response.status == 403) {
+            this.$notification.error({
+              message: "You have no access to this device",
+              description: "Redirecting..."
+            });
+          }
+          this.$router.push({ name: "dashboard-devices" });
+        });
+      this.deviceStateGet();
+    },
     /**
      * Obtains device state(s) (desired and reported) and merges them into deviceObject
      */
     async deviceStateGet() {
       await this.$axios
         .get(`/api/devices/${this.device.id}/state`)
-        .then((res) => {
+        .then(res => {
           this.device = {
             ...this.device,
-            state: res.data,
+            state: res.data
           };
         });
     },
@@ -220,12 +224,12 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}/state`,
         method: "patch",
-        data: state,
+        data: state
       })
-        .then((res) => {
+        .then(res => {
           this.deviceStateGet();
         })
-        .catch((res) => {
+        .catch(res => {
           console.log(res);
         })
         .then(() => {
@@ -235,24 +239,50 @@ export default {
     handleDeviceDelete() {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
-        method: "delete",
+        method: "delete"
       })
         .then(() => {
           this.$message.success("Device successfuly deleted!");
           this.$store.dispatch("devices/get");
           this.$router.push({ name: "dashboard-devices" });
         })
-        .catch((e) => {
+        .catch(e => {
           this.$notification.error({
             message: "Error deleting device",
-            description: e.response.data.message,
+            description: e.response.data.message
           });
         });
     },
+    handleToogleDevice() {
+      this.$axios({
+        url: `/api/devices/${this.device.id}`,
+        method: "patch",
+        data: {
+          enabled: !this.device.enabled
+        }
+      })
+        .then(() => {
+          this.$message.success(
+            `Device successfuly ${device.enabled ? "disabled" : "enabled"}!`
+          );
+        })
+        .catch(e => {
+          this.$notification.error({
+            message: `Error ${
+              device.enabled ? "disabling" : "enabling"
+            } device`,
+            description: e.response.data.message
+          });
+        })
+        .then(() => {
+          this.refresh();
+          this.$store.dispatch("devices/get");
+        });
+    }
   },
   validate({ params }) {
     return /0[xX][0-9a-fA-F]+/.test(params.id);
-  },
+  }
 };
 </script>
 

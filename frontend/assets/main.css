@@ -78,6 +78,7 @@ strong {
 /* AntDesign Buttons */
 .ant-btn {
   border-color: transparent !important;
+  color: white !important;
 }
 .ant-btn-primary {
   background-color: var(--primary-color) !important;
@@ -87,6 +88,14 @@ strong {
 }
 .ant-btn-danger {
   background-color: var(--danger-color);
+}
+
+.ant-popover-buttons .ant-btn {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.ant-popover-buttons .ant-btn-primary {
+  color: white !important;
 }
 
 .ant-popover-inner {
