@@ -21,6 +21,7 @@ import (
 	"context"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -31,12 +32,18 @@ import (
 //NamespaceController is a Data type for Namespace Controller file
 type NamespaceController struct {
 	Repo Repo
+	Log  *zap.Logger
 }
 
 var a AccountController
 
 //CreateNamespace is a method for creating Namespace
 func (n *NamespaceController) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
+
+	log := n.Log.Named("Create Namespace Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Account", request.Name))
+
 	id, err := n.Repo.CreateNamespace(ctx, request.GetName())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to create namespace")
