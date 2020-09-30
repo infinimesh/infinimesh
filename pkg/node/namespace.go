@@ -277,6 +277,8 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	log.Info("Temp Logs", zap.Any("MD", md), zap.Any("Requestor ID", requestorID))
+
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Account:   requestorID[0],
