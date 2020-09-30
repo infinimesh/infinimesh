@@ -78,6 +78,7 @@ strong {
 /* AntDesign Buttons */
 .ant-btn {
   border-color: transparent !important;
+  color: white !important;
 }
 .ant-btn-primary {
   background-color: var(--primary-color) !important;
