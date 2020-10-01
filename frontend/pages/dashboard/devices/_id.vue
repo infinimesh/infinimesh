@@ -263,7 +263,9 @@ export default {
       })
         .then(() => {
           this.$message.success(
-            `Device successfuly ${device.enabled ? "disabled" : "enabled"}!`
+            `Device successfuly ${
+              this.device.enabled ? "disabled" : "enabled"
+            }!`
           );
         })
         .catch(e => {
