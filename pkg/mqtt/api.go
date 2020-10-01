@@ -20,6 +20,7 @@ package mqtt
 import "time"
 
 type IncomingMessage struct {
+	ProtoLevel   int
 	SourceTopic  string
 	SourceDevice string
 	Data         []byte
@@ -42,7 +43,6 @@ type Message struct {
 }
 
 type Payload struct {
-	Version   int
 	Timestamp time.Time
 	Message   Message
 }
