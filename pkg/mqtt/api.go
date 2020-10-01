@@ -17,6 +17,8 @@
 
 package mqtt
 
+import "time"
+
 type IncomingMessage struct {
 	SourceTopic  string
 	SourceDevice string
@@ -29,4 +31,19 @@ type OutgoingMessage struct {
 	DeviceID string // "Target" device; does not necessarily have to be the connected device (e.g. sub-device)
 	SubPath  string // Should not start with "/"
 	Data     []byte
+}
+
+type Payload struct {
+	Version   int       `json:version`
+	Timestamp time.Time `json:timestamp`
+	Message   Message   `json:message`
+}
+
+type Topic struct {
+	Name string `json:name`
+	Data []byte `json:byte[]`
+}
+
+type Message struct {
+	Topics []Topic `json:"topics"`
 }
