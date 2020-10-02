@@ -38,9 +38,8 @@ import (
 )
 
 var (
-	dgraphURL         string
-	port              = ":8082"
-	accountController *node.AccountController
+	dgraphURL string
+	port      = ":8082"
 )
 
 func init() {
@@ -84,7 +83,7 @@ func main() {
 		Log:    log.Named("objectController"),
 	}
 
-	accountController = &node.AccountController{
+	accountController := &node.AccountController{
 		Repo:   repo,
 		Dgraph: dg,
 		Log:    log.Named("accountController"),
