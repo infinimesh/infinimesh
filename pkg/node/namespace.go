@@ -261,9 +261,6 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		zap.String("Namespace", request.Namespace.Id),
 	)
 
-	a.Repo = n.Repo
-	a.Log = n.Log
-
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
