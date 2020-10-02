@@ -258,7 +258,7 @@ service Namespaces {
     returns (infinimesh.node.UpdateNamespaceResponse) {
   option (google.api.http) = {
     patch : "/namespaces/{namespace.id}"
-    body : "*"
+    body : "namespace"
   };
 };
 }
