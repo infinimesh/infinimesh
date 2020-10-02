@@ -255,7 +255,6 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 		zap.String("Account ID", ctx.Value("account_id").(string)),
 		zap.String("Namespace", request.Namespaceid),
 		zap.Bool("HardDelete Flag", request.Harddelete),
-		zap.Bool("RevokeDelete Flag", request.Revokedelete),
 	)
 
 	account, ok := ctx.Value("account_id").(string)
@@ -289,6 +288,8 @@ func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.Upda
 
 	//Added logging
 	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	log.Info("Update Namespace API Method:Temp Logs", zap.Any("Request", request))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))

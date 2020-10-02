@@ -186,59 +186,33 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespaceid),
 		zap.Bool("Hardelete Flag", request.Harddelete),
-		zap.Bool("RevokeDelete Flag", request.Revokedelete),
 	)
 
-	if !request.Revokedelete {
-		//Action to perform when delete is issued instead of revoke
-		if request.Harddelete {
-			//Set the datecondition to 14days back date
-			//This is to ensure that records that are older then 14 days or more will be only be deleted.
-			datecondition := time.Now().AddDate(0, 0, -14)
-
-			//Added logging
-			log.Info("Hard Delete Method Invoked")
-			//Invokde Hardelete function with the date conidtion
-			err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
-			if err != nil {
-				//Added logging
-				log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-		} else {
-			//Added logging
-			log.Info("Soft Delete Method Invoked")
-			//Soft delete will mark the record for deletion with the timestamp
-			err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
-			if err != nil {
-				//Added logging
-				log.Error("Failed to Soft delete Namespace", zap.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-		}
-	} else {
-		//Action to perform when revoke is performed
-		ns, err := n.Repo.GetNamespaceID(ctx, request.Namespaceid)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	//Action to perform when delete is issued instead of revoke
+	if request.Harddelete {
+		//Set the datecondition to 14days back date
+		//This is to ensure that records that are older then 14 days or more will be only be deleted.
+		datecondition := time.Now().AddDate(0, 0, -14)
 
 		//Added logging
-		log.Info("Revoke Delete Method Invoked")
-		//Initate Revoke
-		if ns.Markfordeletion {
-			err := n.Repo.RevokeNamespace(ctx, request.Namespaceid)
-			if err != nil {
-				//Added logging
-				log.Error("Failed to Revoke delete Namespace", zap.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
-			}
-		} else {
+		log.Info("Hard Delete Method Invoked")
+		//Invokde Hardelete function with the date conidtion
+		err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+		if err != nil {
 			//Added logging
-			log.Error("Failed to Revoke as the Namespace is not marked for deletion")
-			return nil, status.Error(codes.FailedPrecondition, "Failed to Revoke as the Namespace is not marked for deletion")
+			log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
 		}
-
+	} else {
+		//Added logging
+		log.Info("Soft Delete Method Invoked")
+		//Soft delete will mark the record for deletion with the timestamp
+		err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to Soft delete Namespace", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	if err != nil {
@@ -259,8 +233,11 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
+		zap.Any("FieldMask Paths", request),
 	)
-	a.Log = log
+
+	a.Repo = n.Repo
+	a.Log = n.Log
 
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -277,8 +254,6 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		log.Error("The Account is not authenticated", zap.Error(err))
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
-
-	log.Info("Temp Logs", zap.Any("MD", md), zap.Any("Requestor ID", requestorID))
 
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
@@ -301,7 +276,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		}
 	} else {
 		//Added logging
-		log.Error("The Account is not allowed to update the Namespace", zap.Error(err))
+		log.Error("The Account is not allowed to update the Namespace")
 		return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to update the Namespace")
 	}
 

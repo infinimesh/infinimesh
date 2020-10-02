@@ -384,7 +384,7 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 			Markfordeletion:      true,
 			Deleteinitiationtime: time.Now().Format(time.RFC3339),
 		},
-		FieldMask: &field_mask.FieldMask{
+		NamespaceMask: &field_mask.FieldMask{
 			Paths: []string{"markfordeletion", "deleteinitiationtime"},
 		},
 	})
@@ -472,7 +472,7 @@ func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (e
 			Markfordeletion:      false,
 			Deleteinitiationtime: "0000",
 		},
-		FieldMask: &field_mask.FieldMask{
+		NamespaceMask: &field_mask.FieldMask{
 			Paths: []string{"markfordeletion", "deleteinitiationtime"},
 		},
 	})
@@ -510,7 +510,7 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 	}
 
 	//Loop through the field masks and update the required fields
-	for _, field := range namespace.FieldMask.Paths {
+	for _, field := range namespace.NamespaceMask.Paths {
 		switch strings.ToLower(field) {
 		case "name":
 			m.Set = append(m.Set, &api.NQuad{

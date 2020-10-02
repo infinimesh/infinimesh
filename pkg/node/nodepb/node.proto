@@ -157,7 +157,6 @@ message SetPasswordResponse{
 message DeleteAccountRequest {
   string uid = 1;
   bool harddelete = 2;
-  bool revokedelete = 3;
 }
 
 message DeleteAccountResponse {}
@@ -229,14 +228,13 @@ message Permission {
 message DeleteNamespaceRequest {
   string namespaceid = 1;
   bool harddelete = 2;
-  bool revokedelete = 3;
 }
 
 message DeleteNamespaceResponse{}
 
 message UpdateNamespaceRequest {
   Namespace namespace = 1;
-  google.protobuf.FieldMask fieldMask = 2;
+  google.protobuf.FieldMask namespaceMask = 2;
 }
 
 message UpdateNamespaceResponse {}

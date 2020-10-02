@@ -389,7 +389,7 @@ func TestUpdateNamespace(t *testing.T) {
 			Markfordeletion:      true,
 			Deleteinitiationtime: time.Now().Format(time.RFC3339),
 		},
-		FieldMask: &field_mask.FieldMask{
+		NamespaceMask: &field_mask.FieldMask{
 			Paths: []string{"Name", "MarkforDeletion", "Deleteinitiationtime"},
 		},
 	})
