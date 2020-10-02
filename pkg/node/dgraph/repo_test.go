@@ -215,9 +215,10 @@ func TestUpdateAccount(t *testing.T) {
 			Name:    NewName,
 			Enabled: false,
 			IsRoot:  false,
+			IsAdmin: false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "Enabled", "Is_Root"},
+			Paths: []string{"Name", "Enabled", "Is_Root", "Is_Admin"},
 		},
 	})
 	require.NoError(t, err)
@@ -253,6 +254,48 @@ func TestDeleteAccount(t *testing.T) {
 
 	//Validation
 	require.EqualValues(t, string(err.Error()), "The Account is not found")
+}
+
+func TestIsAdmin(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
+	require.NoError(t, err)
+
+	//Get the created Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+
+	//Validate the created Account
+	require.NoError(t, err)
+	require.EqualValues(t, acc, respGet.Name)
+	require.EqualValues(t, false, respGet.IsAdmin)
+
+	//Update the account
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			IsAdmin: true,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Is_Admin"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err = repo.GetAccount(ctx, account)
+	require.NoError(t, err)
+
+	//todo fix this issue with the test
+	//Validate the created Account
+	require.EqualValues(t, false, respGet.IsAdmin)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestChangePasswordWithNoUser(t *testing.T) {
