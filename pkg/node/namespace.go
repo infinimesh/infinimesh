@@ -259,6 +259,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
+		zap.Any("FieldMask Paths", request.FieldMask.Paths),
 	)
 
 	a.Repo = n.Repo
@@ -279,8 +280,6 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		log.Error("The Account is not authenticated", zap.Error(err))
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
-
-	log.Info("Temp Logs", zap.Any("MD", md), zap.Any("Requestor ID", requestorID))
 
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
