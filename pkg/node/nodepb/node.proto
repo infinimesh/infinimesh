@@ -83,6 +83,7 @@ message Account {
   bool enabled = 4;
   Namespace default_namespace = 5;
   string password = 6;
+  bool is_admin = 7;
 }
 
 message AuthenticateRequest {

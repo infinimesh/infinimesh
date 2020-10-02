@@ -42,6 +42,7 @@ type Account struct {
 	Name string `json:"name,omitempty"`
 
 	IsRoot  bool `json:"isRoot"`
+	IsAdmin bool `json:"isAdmin"`
 	Enabled bool `json:"enabled"`
 
 	AccessTo          []*Object    `json:"access.to,omitempty"`
