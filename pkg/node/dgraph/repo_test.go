@@ -289,9 +289,8 @@ func TestIsAdmin(t *testing.T) {
 	respGet, err = repo.GetAccount(ctx, account)
 	require.NoError(t, err)
 
-	//todo fix this issue with the test
 	//Validate the created Account
-	require.EqualValues(t, false, respGet.IsAdmin)
+	require.EqualValues(t, true, respGet.IsAdmin)
 
 	//Delete the Account created
 	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
