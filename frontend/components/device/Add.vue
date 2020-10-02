@@ -82,7 +82,7 @@
         borderTop: '1px solid #e9e9e9',
         padding: '10px 16px',
         textAlign: 'right',
-        zIndex: 1,
+        zIndex: 1
       }"
       id="deviceAddDrawerActionsRow"
     >
@@ -92,7 +92,10 @@
         class="ant-btn-danger"
         >Reset</a-button
       >
-      <a-button :style="{ marginRight: '8px' }" @click="$emit('cancel')"
+      <a-button
+        :style="{ marginRight: '8px' }"
+        @click="$emit('cancel')"
+        type="primary"
         >Cancel</a-button
       >
       <a-button type="success" @click="handleSubmit">Submit</a-button>
@@ -109,16 +112,16 @@ export default Vue.component("device-add", {
   mixins: [drawerSizeMixin],
   props: {
     active: {
-      required: true,
-    },
+      required: true
+    }
   },
   computed: {
     namespaces() {
       return this.$store.state.devices.namespaces;
-    },
+    }
   },
   watch: {
-    active: "setDefault",
+    active: "setDefault"
   },
   data() {
     return {
@@ -127,7 +130,7 @@ export default Vue.component("device-add", {
         tags: [],
         namespace: "",
         enabled: false,
-        certificate: { pem_data: "" },
+        certificate: { pem_data: "" }
       },
       certificate_tab: "upload",
       rules: {
@@ -137,12 +140,12 @@ export default Vue.component("device-add", {
             min: 4,
             max: 24,
             message:
-              "Device name should be at least 4 and not more than 24 characters long",
+              "Device name should be at least 4 and not more than 24 characters long"
           },
           {
             pattern: /^[a-zA-Z0-9\-_]*$/,
             message:
-              "Device name can contain only alphanumeric characters, hyphens and underscores",
+              "Device name can contain only alphanumeric characters, hyphens and underscores"
           },
           {
             validator: (rule, val, raise) => {
@@ -151,17 +154,17 @@ export default Vue.component("device-add", {
                 raise("f#ck");
               }
             },
-            message: "Device name can't contain only hyphens and underscores",
-          },
+            message: "Device name can't contain only hyphens and underscores"
+          }
         ],
         namespace: [{ required: true, message: "Please select a namespace" }],
         "certificate.pem_data": [
           {
             required: true,
-            message: "Please paste or upload device certificate",
-          },
-        ],
-      },
+            message: "Please paste or upload device certificate"
+          }
+        ]
+      }
     };
   },
   mounted() {
@@ -174,13 +177,13 @@ export default Vue.component("device-add", {
         tags: [],
         namespace: "",
         enabled: false,
-        certificate: { pem_data: "" },
+        certificate: { pem_data: "" }
       };
     },
     handleUploadCertificate(file) {
       const reader = new FileReader();
 
-      reader.onload = (e) => {
+      reader.onload = e => {
         this.device.certificate.pem_data = e.target.result;
         this.certificate_tab = "paste";
       };
@@ -191,14 +194,14 @@ export default Vue.component("device-add", {
     async handleSubmit() {
       let form = this.$refs["deviceAddForm"];
       let errors = [];
-      form.validateField(Object.keys(this.device), (err) => {
+      form.validateField(Object.keys(this.device), err => {
         if (err) {
           errors.push(err);
         }
       });
       if (errors.length === 0) this.$emit("add", this.device);
-    },
-  },
+    }
+  }
 });
 </script>
 

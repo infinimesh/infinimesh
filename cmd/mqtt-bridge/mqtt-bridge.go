@@ -365,7 +365,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write PingResp", err)
 			}
 		case *packet.PublishControlPacket:
-			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap)
+			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
 			if err != nil {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
@@ -400,12 +400,12 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 }
 
-func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int) (map[string]int, error) {
+func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
 	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
 		if val, ok := topicAliasPublishMap[p.VariableHeader.Topic]; ok {
 			if val == p.VariableHeader.PublishProperties.TopicAlias {
-				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 					return topicAliasPublishMap, err
 				}
 			} else {
@@ -413,12 +413,12 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 			}
 		} else {
 			topicAliasPublishMap[p.VariableHeader.Topic] = p.VariableHeader.PublishProperties.TopicAlias
-			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 				return topicAliasPublishMap, err
 			}
 		}
 	} else {
-		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 			return topicAliasPublishMap, err
 		}
 	}
@@ -450,8 +450,9 @@ func TopicChecker(topic string, packetType string) (string, bool) {
 	return "", false
 }
 
-func publishTelemetry(topic string, data []byte, deviceID string) error {
+func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
 	message := mqtt.IncomingMessage{
+		ProtoLevel:   version,
 		SourceTopic:  topic,
 		SourceDevice: deviceID,
 		Data:         data,
@@ -461,11 +462,11 @@ func publishTelemetry(topic string, data []byte, deviceID string) error {
 	if err != nil {
 		return err
 	}
-
 	producer.Input() <- &sarama.ProducerMessage{
 		Topic: kafkaTopicTelemetry,
 		Key:   sarama.StringEncoder(deviceID), // TODO
 		Value: sarama.ByteEncoder(serialized),
 	}
+
 	return nil
 }
