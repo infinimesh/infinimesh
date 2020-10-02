@@ -255,7 +255,6 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 		zap.String("Account ID", ctx.Value("account_id").(string)),
 		zap.String("Namespace", request.Namespaceid),
 		zap.Bool("HardDelete Flag", request.Harddelete),
-		zap.Bool("RevokeDelete Flag", request.Revokedelete),
 	)
 
 	account, ok := ctx.Value("account_id").(string)
