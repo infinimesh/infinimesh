@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -108,19 +109,22 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		},
 		Name:    tempacc.Name,
 		IsRoot:  tempacc.IsRoot,
+		IsAdmin: tempacc.IsAdmin,
 		Enabled: tempacc.Enabled,
 	}
 
 	for _, field := range account.FieldMask.Paths {
-		switch field {
+		switch strings.ToLower(field) {
 		//Including all comibnations of case
-		case "name", "Name", "NAME":
+		case "name":
 			acc.Name = account.Account.Name
-		case "is_root", "is_Root", "Is_Root", "IS_ROOT":
+		case "is_root":
 			acc.IsRoot = account.Account.IsRoot
-		case "enabled", "Enabled", "ENABLED":
+		case "is_admin":
+			acc.IsRoot = account.Account.IsRoot
+		case "enabled":
 			acc.Enabled = account.Account.Enabled
-		case "password", "Password", "PASSWORD":
+		case "password":
 			err = s.SetPassword(ctx, account.Account.Uid, account.Account.Password)
 			if err != nil {
 				return err
