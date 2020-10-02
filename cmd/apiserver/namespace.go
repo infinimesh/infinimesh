@@ -56,7 +56,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 
 	if resp.GetIsRoot() {
 		return n.client.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
-	} else { //go-lint
+	} else {
 		return n.client.ListNamespacesForAccount(ctx, &nodepb.ListNamespacesForAccountRequest{
 			Account: account,
 		})

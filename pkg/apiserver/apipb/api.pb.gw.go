@@ -1273,10 +1273,6 @@ func local_request_Namespaces_DeletePermission_0(ctx context.Context, marshaler 
 
 }
 
-var (
-	filter_Namespaces_DeleteNamespace_0 = &utilities.DoubleArray{Encoding: map[string]int{"namespaceid": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
 func request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.DeleteNamespaceRequest
 	var metadata runtime.ServerMetadata
@@ -1299,11 +1295,15 @@ func request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespaceid", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["harddelete"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "harddelete")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Namespaces_DeleteNamespace_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Harddelete, err = runtime.Bool(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "harddelete", err)
 	}
 
 	msg, err := client.DeleteNamespace(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -1333,11 +1333,15 @@ func local_request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler r
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespaceid", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["harddelete"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "harddelete")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Namespaces_DeleteNamespace_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.Harddelete, err = runtime.Bool(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "harddelete", err)
 	}
 
 	msg, err := server.DeleteNamespace(ctx, &protoReq)
@@ -1346,12 +1350,28 @@ func local_request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler r
 }
 
 var (
-	filter_Namespaces_UpdateNamespace_0 = &utilities.DoubleArray{Encoding: map[string]int{"namespace": 0, "id": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
+	filter_Namespaces_UpdateNamespace_0 = &utilities.DoubleArray{Encoding: map[string]int{"namespace": 0, "id": 1}, Base: []int{1, 2, 1, 0, 0}, Check: []int{0, 1, 2, 3, 2}}
 )
 
 func request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.UpdateNamespaceRequest
 	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Namespace); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
+		_, md := descriptor.ForMessage(protoReq.Namespace)
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		} else {
+			protoReq.FieldMask = fieldMask
+		}
+	}
 
 	var (
 		val string
@@ -1386,6 +1406,22 @@ func request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler runtime
 func local_request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler runtime.Marshaler, server NamespacesServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq nodepb.UpdateNamespaceRequest
 	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Namespace); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
+		_, md := descriptor.ForMessage(protoReq.Namespace)
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		} else {
+			protoReq.FieldMask = fieldMask
+		}
+	}
 
 	var (
 		val string
@@ -2790,7 +2826,7 @@ var (
 
 	pattern_Namespaces_DeletePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "permissions", "account_id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Namespaces_DeleteNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespaceid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_DeleteNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"namespaces", "namespaceid", "harddelete"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_Namespaces_UpdateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace.id"}, "", runtime.AssumeColonVerbOpt(true)))
 )
