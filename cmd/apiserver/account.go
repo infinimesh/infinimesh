@@ -165,10 +165,18 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.UpdateAccount(ctx, request)
+		return res, err
+	}
 
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
@@ -278,9 +286,18 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.DeleteAccount(ctx, request)
+		return res, err
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.DeleteAccount(ctx, request)
 		return res, err
 	}
