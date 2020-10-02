@@ -56,7 +56,7 @@ func init() {
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
 	repo := dgraph.NewDGraphRepo(dg)
-	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false, true)
+	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false, false, true)
 	if err != nil {
 		panic(err)
 	}
@@ -136,7 +136,7 @@ func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
@@ -180,7 +180,7 @@ func TestUpdate(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)

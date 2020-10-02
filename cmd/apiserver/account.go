@@ -190,7 +190,9 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	log.Info("Create Account API Method: Function Invoked",
 		zap.String("Account", request.Account.Name),
 		zap.Bool("Enabled", request.Account.Enabled),
-		zap.Bool("IsRoot", request.Account.IsRoot))
+		zap.Bool("IsRoot", request.Account.IsRoot),
+		zap.Bool("IsAdmin", request.Account.IsAdmin),
+	)
 
 	account, ok := ctx.Value("account_id").(string)
 
@@ -217,6 +219,14 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.CreateUserAccount(ctx, request)
+		return res, err
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.CreateUserAccount(ctx, request)
 		return res, err
 	}

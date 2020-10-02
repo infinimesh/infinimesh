@@ -59,6 +59,25 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
+//IsAdmin is a method that returns if the account has root priviledges or not
+func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdminRequest) (response *nodepb.IsAdminResponse, err error) {
+
+	log := s.Log.Named("IsAdmin Validation Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Account", request.Account))
+
+	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
+	if err != nil {
+		//Added logging
+		log.Error("Could not find account", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Could not find account")
+	}
+
+	//Added logging
+	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsRoot))
+	return &nodepb.IsAdminResponse{IsAdmin: account.IsAdmin}, nil
+}
+
 //CreateUserAccount is a method for creating user account
 func (s *AccountController) CreateUserAccount(ctx context.Context, request *nodepb.CreateUserAccountRequest) (response *nodepb.CreateUserAccountResponse, err error) {
 
@@ -66,7 +85,7 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked", zap.Any("Account", request.Account.Name))
 
-	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.Enabled)
+	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.IsAdmin, request.Account.Enabled)
 	if err != nil {
 		//Added logging
 		log.Error("Failed to create User", zap.String("Name", request.Account.Name), zap.Error(err))
