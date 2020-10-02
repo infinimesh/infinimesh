@@ -58,7 +58,7 @@ func TestAuthorize(t *testing.T) {
 	_, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
-	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, false, true)
 	require.NoError(t, err)
 
 	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
@@ -93,7 +93,7 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 	ctx := context.Background()
 
 	accountname := randomdata.SillyName()
-	account, err := repo.CreateUserAccount(ctx, accountname, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, accountname, "password", false, false, true)
 	require.NoError(t, err)
 
 	ns, err := repo.GetNamespace(ctx, accountname)
@@ -127,7 +127,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, true)
 	require.NoError(t, err)
 
 	//Get Namespace
@@ -170,7 +170,7 @@ func TestChangePassword(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, true)
 	require.NoError(t, err)
 
 	err = repo.SetPassword(ctx, account, "newpassword")
@@ -202,7 +202,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	account, err := repo.CreateUserAccount(ctx, randomName, "password", true, true)
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", true, true, true)
 	require.NoError(t, err)
 
 	//Set new values
@@ -241,7 +241,7 @@ func TestDeleteAccount(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
 	require.NoError(t, err)
 
 	//Delete the Account created

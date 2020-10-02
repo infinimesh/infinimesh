@@ -115,13 +115,12 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	for _, field := range account.FieldMask.Paths {
 		switch strings.ToLower(field) {
-		//Including all comibnations of case
 		case "name":
 			acc.Name = account.Account.Name
 		case "is_root":
 			acc.IsRoot = account.Account.IsRoot
 		case "is_admin":
-			acc.IsRoot = account.Account.IsRoot
+			acc.IsAdmin = account.Account.IsAdmin
 		case "enabled":
 			acc.Enabled = account.Account.Enabled
 		case "password":
@@ -152,7 +151,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 }
 
 //CreateUserAccount is a method to Create User Account
-func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
+func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error) {
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {

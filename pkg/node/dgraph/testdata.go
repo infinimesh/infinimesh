@@ -74,14 +74,14 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	}
 
 	ns := "joe"
-	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, true)
+	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, false, true)
 	if err != nil {
 		fmt.Println("Create Account failed", err)
 		return "", "", err
 	}
 	fmt.Println("User joe: ", joe)
 
-	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false, true)
+	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false, false, true)
 	if err != nil {
 		fmt.Println("Create Account failed", err)
 		return "", "", err
@@ -104,7 +104,7 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 		}
 	}
 
-	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true, true)
+	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true, true, true)
 	if err != nil {
 		fmt.Println("Create Account failed", err)
 		return "", "", err
