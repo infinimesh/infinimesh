@@ -178,9 +178,9 @@ export default {
             ["Bearer", this.$auth.getToken("local").split(" ")[1]]
           );
           this.socket.onmessage = msg => {
-            this.device.state.shadow.reported = JSON.parse(
-              msg.data
-            ).result.reportedState;
+            let response = JSON.parse(msg.data).result;
+            if (response)
+              this.device.state.shadow.reported = response.reportedState;
           };
           window.addEventListener("beforeunload", function(event) {
             this.socket.close();
