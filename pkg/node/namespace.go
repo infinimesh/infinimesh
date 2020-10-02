@@ -35,7 +35,7 @@ type NamespaceController struct {
 	Log  *zap.Logger
 }
 
-var a AccountController
+var a *AccountController
 
 //CreateNamespace is a method for creating Namespace
 func (n *NamespaceController) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
