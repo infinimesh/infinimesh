@@ -246,7 +246,8 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        uid
                        name
                        type
-                       isRoot
+					   isRoot
+					   isAdmin
                        enabled
                        default.namespace {
                          name
