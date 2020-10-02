@@ -56,7 +56,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 
 	if resp.GetIsRoot() {
 		return n.client.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
-	} else {
+	} else { //go-lint
 		return n.client.ListNamespacesForAccount(ctx, &nodepb.ListNamespacesForAccountRequest{
 			Account: account,
 		})
@@ -288,6 +288,8 @@ func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.Upda
 
 	//Added logging
 	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	log.Info("Update Namespace API Method:Temp Logs", zap.Any("Request", request))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))

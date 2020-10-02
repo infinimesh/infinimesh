@@ -276,7 +276,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		}
 	} else {
 		//Added logging
-		log.Error("The Account is not allowed to update the Namespace", zap.Error(err))
+		log.Error("The Account is not allowed to update the Namespace")
 		return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to update the Namespace")
 	}
 
