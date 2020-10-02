@@ -259,7 +259,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
-		zap.String("FieldMask Paths", request.FieldMask.Paths[0]),
+		zap.Any("FieldMask Paths", request),
 	)
 
 	a.Repo = n.Repo
