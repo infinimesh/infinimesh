@@ -281,6 +281,7 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 		Uid:     result.Account[0].UID,
 		Name:    result.Account[0].Name,
 		IsRoot:  result.Account[0].IsRoot,
+		IsAdmin: result.Account[0].IsAdmin,
 		Enabled: result.Account[0].Enabled,
 	}
 
