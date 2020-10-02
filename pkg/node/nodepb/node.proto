@@ -35,7 +35,7 @@ message IsRootResponse { bool is_root = 1; }
 
 message IsAdminRequest { string account = 1; }
 
-message IsAdminResponse { bool is_root = 1; }
+message IsAdminResponse { bool is_admin = 1; }
 
 message IsAuthorizedNamespaceRequest {
   string namespace = 1;
