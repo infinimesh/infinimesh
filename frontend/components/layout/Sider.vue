@@ -45,24 +45,32 @@ export default {
         {
           title: "Device Registry",
           icon: "mdi-cloud-outline",
-          link: "/dashboard/devices"
+          link: "/dashboard/devices",
+          admin: false
         },
         {
           title: "Accounts",
           icon: "mdi-account-group",
-          link: "/dashboard/accounts"
+          link: "/dashboard/accounts",
+          admin: true
         },
         {
           title: "Namespaces",
           icon: "mdi-folder-multiple-outline",
-          link: "/dashboard/namespaces"
+          link: "/dashboard/namespaces",
+          admin: true
         }
       ]
     };
   },
   computed: {
     pagesFiltered() {
-      return this.pages.filter(page => this.allowedScope(page.link));
+      console.log(this.user);
+      return this.pages.filter(
+        page =>
+          this.allowedScope(page.link) &&
+          (!page.admin || this.user.is_admin || this.user.is_root)
+      );
     },
     user() {
       return this.$store.getters.loggedInUser;
