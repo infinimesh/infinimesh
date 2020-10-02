@@ -72,10 +72,19 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
 		return a.client.GetAccount(ctx, request)
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
+		res, err := a.client.GetAccount(ctx, request)
+		return res, err
 	}
 
 	//Added logging
@@ -257,9 +266,18 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.ListAccounts(ctx, request)
+		return res, err
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.ListAccounts(ctx, request)
 		return res, err
 	}
