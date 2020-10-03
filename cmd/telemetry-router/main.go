@@ -141,10 +141,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
 		}
-
-		fmt.Printf("ProtoLevel at router: %v\n", msg.ProtoLevel)
 		if msg.ProtoLevel == 5 {
-			fmt.Printf("ProtoLevel2: %v\n", msg.ProtoLevel)
 			var payload mqtt.Payload
 			err = json.Unmarshal(msg.Data, &payload)
 			fmt.Printf("mqtt5 Payload = %v", payload)
@@ -152,7 +149,6 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
 			}
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
-			fmt.Printf("payload.Message.Topics[0].Data = %v", payload.Message)
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,

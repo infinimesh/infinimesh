@@ -17,8 +17,6 @@
 
 package mqtt
 
-import "time"
-
 type IncomingMessage struct {
 	ProtoLevel   int
 	SourceTopic  string
@@ -33,16 +31,18 @@ type OutgoingMessage struct {
 	SubPath  string // Should not start with "/"
 	Data     []byte
 }
+
+/*
 type Topic struct {
 	Name string
 	Data []byte
 }
 
 type Message struct {
-	Topics []Topic
-}
+	Data []byte
+}*/
 
 type Payload struct {
-	Timestamp time.Time
-	Message   Message
+	Timestamp string
+	Message   []byte
 }
