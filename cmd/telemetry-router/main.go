@@ -151,11 +151,11 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
 			}
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
-			fmt.Printf("payload.Message.Topics[0].Data = %v", payload.Message.Topics[0].Data)
+			fmt.Printf("payload.Message.Topics[0].Data = %v", payload.Message)
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,
-				Value: sarama.ByteEncoder(payload.Message.Topics[0].Data),
+				Value: sarama.ByteEncoder(msg.Data),
 			}
 			s.MarkMessage(message, "")
 		} else if msg.ProtoLevel == 4 {
