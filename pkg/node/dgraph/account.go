@@ -192,6 +192,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 			},
 			Name:    username,
 			IsRoot:  isRoot,
+			IsAdmin: isAdmin,
 			Enabled: enabled,
 			HasCredentials: []*UsernameCredential{
 				{
