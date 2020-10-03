@@ -41,7 +41,8 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
                        uid
                        name
                        enabled
-                       isRoot
+					   isRoot
+					   isAdmin
                      }
                    }`
 
