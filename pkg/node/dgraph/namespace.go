@@ -141,6 +141,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 						uid
 						name
 						markfordeletion
+						deleteinitiationtime
 	             }
                    }`
 
@@ -261,6 +262,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 			uid : uid
 			name : name
 			markfordeletion : markfordeletion
+			deleteinitiationtime : deleteinitiationtime
 		  }
 		}
 	  }`
