@@ -274,14 +274,6 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return res, err
 	}
 
-	//Validate if the account is admin or not
-	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: account,
-	}); err == nil && res.GetIsAdmin() {
-		res, err := a.client.ListAccounts(ctx, request)
-		return res, err
-	}
-
 	//Added logging
 	log.Error("List Accounts API Method: The Account does not have permission to list details")
 	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")

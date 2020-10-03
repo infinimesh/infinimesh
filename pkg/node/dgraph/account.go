@@ -41,7 +41,8 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
                        uid
                        name
                        enabled
-                       isRoot
+					   isRoot
+					   isAdmin
                      }
                    }`
 
@@ -191,6 +192,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 			},
 			Name:    username,
 			IsRoot:  isRoot,
+			IsAdmin: isAdmin,
 			Enabled: enabled,
 			HasCredentials: []*UsernameCredential{
 				{
