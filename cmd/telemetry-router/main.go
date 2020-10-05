@@ -143,7 +143,6 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		}
 		if msg.ProtoLevel == 5 {
 			var payload mqtt.Payload
-			fmt.Printf("payload string value : %v", string(msg.Data))
 			err = json.Unmarshal(msg.Data, &payload)
 			fmt.Printf("mqtt5 Payload = %v", payload)
 			if err != nil {
@@ -153,7 +152,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,
-				Value: sarama.ByteEncoder(payload.Message),
+				Value: sarama.ByteEncoder(payload.Message.Topic[0].Data),
 			}
 			s.MarkMessage(message, "")
 		} else if msg.ProtoLevel == 4 {
