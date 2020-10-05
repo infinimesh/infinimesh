@@ -182,3 +182,9 @@ strong {
 .v-footer {
   background-color: var(--footer-background) !important;
 }
+
+.v-toolbar__content,
+.v-toolbar__extension {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
