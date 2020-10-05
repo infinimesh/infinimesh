@@ -32,17 +32,16 @@ type OutgoingMessage struct {
 	Data     []byte
 }
 
-/*
 type Topic struct {
-	Name string
-	Data []byte
+	Topic string
+	Data  []byte
 }
 
 type Message struct {
-	Data []byte
-}*/
+	Topic []Topic
+}
 
 type Payload struct {
 	Timestamp string
-	Message   string
+	Message   Message
 }
