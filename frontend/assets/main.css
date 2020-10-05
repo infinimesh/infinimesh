@@ -89,6 +89,9 @@ strong {
 .ant-btn-danger {
   background-color: var(--danger-color);
 }
+.ant-btn-link {
+  color: var(--link-color) !important;
+}
 
 .ant-popover-buttons .ant-btn {
   border-color: var(--primary-color) !important;
@@ -152,6 +155,11 @@ strong {
 }
 .ant-drawer-close {
   color: var(--text-color) !important;
+}
+
+/* Ant Table overloads */
+.ant-table-body {
+  background: var(--secondary-color) !important;
 }
 
 /* Vuetify overloads */
