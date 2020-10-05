@@ -44,5 +44,5 @@ type Message struct {
 
 type Payload struct {
 	Timestamp string
-	Message   []byte
+	Message   string
 }
