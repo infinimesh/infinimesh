@@ -153,7 +153,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,
-				Value: sarama.ByteEncoder(msg.Data),
+				Value: sarama.ByteEncoder(payload.Message),
 			}
 			s.MarkMessage(message, "")
 		} else if msg.ProtoLevel == 4 {
