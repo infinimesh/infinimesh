@@ -149,13 +149,13 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			}
 			fmt.Printf("mqtt5 payload %v\n", payload)
 			fmt.Printf("mqtt5 topic = %v\n", payload.Message.Topic)
-			/*target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
+			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,
 				Value: sarama.ByteEncoder(msg.Data),
 			}
-			s.MarkMessage(message, "")*/
+			s.MarkMessage(message, "")
 		} else if msg.ProtoLevel == 4 {
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 
