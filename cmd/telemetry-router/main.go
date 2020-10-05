@@ -143,6 +143,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		}
 		if msg.ProtoLevel == 5 {
 			var payload mqtt.Payload
+			fmt.Printf("payload string value : %v", string(msg.Data))
 			err = json.Unmarshal(msg.Data, &payload)
 			fmt.Printf("mqtt5 Payload = %v", payload)
 			if err != nil {
