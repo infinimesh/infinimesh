@@ -148,7 +148,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
 			}
 			fmt.Printf("mqtt5 payload %v\n", payload)
-			fmt.Printf("mqtt5 topic = %v\n", payload.Message.Topic)
+			fmt.Printf("mqtt5 topic = %v\n", payload.Message.Data)
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
