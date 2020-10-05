@@ -184,7 +184,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	}
 
 	//Added logging
-	log.Info("Authorization check successful for the Account and the Namespace")
+	log.Info("Authorization check successful for the Account and the Namespace", zap.Bool("Decision for Access is", decision))
 	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
