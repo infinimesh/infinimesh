@@ -6,7 +6,9 @@
           <v-row justify="center">
             <h1>infinimesh</h1>
           </v-row>
-          <v-row justify="center" style="color: rgba(0, 0, 0, 0.65)"
+          <v-row
+            justify="center"
+            style="color: var(--logo-color); opacity: 0.65"
             >Welcome to infinimesh. Log in with your username and
             password.</v-row
           >
