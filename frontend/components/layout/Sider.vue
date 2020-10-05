@@ -65,7 +65,6 @@ export default {
   },
   computed: {
     pagesFiltered() {
-      console.log(this.user);
       return this.pages.filter(
         page =>
           this.allowedScope(page.link) &&

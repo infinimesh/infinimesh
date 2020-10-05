@@ -230,7 +230,7 @@ export default {
           this.deviceStateGet();
         })
         .catch(res => {
-          console.log(res);
+          console.error(res);
         })
         .then(() => {
           callback();
