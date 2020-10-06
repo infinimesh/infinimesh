@@ -259,24 +259,11 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 	//Added logging
 	log.Info("List Accounts API Method: Function Invoked", zap.Any("Account ID", ctx.Value("account_id")))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("List Accounts API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	//Validate if the account is root or not
-	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: account,
-	}); err == nil && res.GetIsRoot() {
-		res, err := a.client.ListAccounts(ctx, request)
-		return res, err
-	}
-
-	//Added logging
-	log.Error("List Accounts API Method: The Account does not have permission to list details")
-	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")
+	res, err := a.client.ListAccounts(ctx, request)
+	return res, err
 
 }
 
