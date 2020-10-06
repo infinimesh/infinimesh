@@ -77,9 +77,9 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query listaccountsforadmin($accountid: string) {
-		accounts(func: uid($accountid))  {
+		accounts(func: uid($accountid)) @normalize  {
 		  owns @filter(eq(type, "account")) {
-			uid : uid
+			uid
 		  }
 		}
 	  }`
@@ -99,8 +99,7 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 
 	for _, account := range result.Accounts {
 		accounts = append(accounts, &nodepb.Account{
-			Uid:  account.UID,
-			Name: account.Name,
+			Uid: account.UID,
 		})
 	}
 
