@@ -107,6 +107,12 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked", zap.Any("Account", request.Account.Name))
 
+	//Get metadata and from context and perform validation
+	_, requestorID, err := validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.IsAdmin, request.Account.Enabled)
 	if err != nil {
 		//Added logging
@@ -125,8 +131,15 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 		}
 	}
 
+	if len(request.Account.Owner) > 0 {
+		err := s.Repo.AssignOwner(ctx, requestorID, uid)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	//Added logging
-	log.Info("Infinimesh User Created", zap.String("UserName", request.Account.Name), zap.String("uid", uid))
+	log.Info("Infinimesh User Created", zap.String("UserName", request.Account.Name), zap.String("Account ID", uid), zap.String("Owned by", requestorID))
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
@@ -311,6 +324,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	//Added logging
 	log.Info("Function Invoked")
 
+	//Get metadata and from context and perform validation
 	_, requestorID, err := validation(ctx, log)
 	if err != nil {
 		return nil, err
@@ -379,9 +393,28 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
-	_, _, err = validation(ctx, log)
+	//Get metadata and from context and perform validation
+	_, requestorID, err := validation(ctx, log)
 	if err != nil {
 		return nil, err
+	}
+
+	//Validate if the account is root or not
+	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: requestorID,
+	}); err == nil && !res.GetIsRoot() {
+		//Added logging
+		log.Error("The Account does not have permission to delete another account")
+		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
+	}
+
+	//Validate if the account is admin or not
+	if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: requestorID,
+	}); err == nil && !res.GetIsAdmin() {
+		//Added logging
+		log.Error("The Account does not have permission to delete another account")
+		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
 	}
 
 	//Get account details for validation

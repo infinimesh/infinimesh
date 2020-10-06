@@ -446,3 +446,48 @@ func (s *DGraphRepo) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 
 	return nil
 }
+
+//AssignOwner is a method to delete the Account
+func (s *DGraphRepo) AssignOwner(ctx context.Context, ownerID, acccountID string) (err error) {
+
+	txn := s.Dg.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	q := `query accountExists($accountid: string) {
+                exists(func: uid($accountid)) @filter(eq(type, "account")) {
+                  uid
+                }
+              }
+             `
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$accountid": ownerID})
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return err
+	}
+
+	if len(result.Exists) == 0 {
+		return errors.New("The Account is not found")
+	}
+
+	//Added the owns predicate in teh mutation
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:   ownerID,
+		Predicate: "owns",
+		ObjectId:  acccountID,
+	})
+
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
