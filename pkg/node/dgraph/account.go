@@ -72,7 +72,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 	return accounts, nil
 }
 
-//ListAccountsforAdmin is a method to List details of all Account
+//ListAccountsforAdmin is a method to List accounts owned by an Admin user
 func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID string) (accounts []*nodepb.Account, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
