@@ -71,6 +71,43 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 	return accounts, nil
 }
 
+//ListAccountsforAdmin is a method to List details of all Account
+func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context) (accounts []*nodepb.Account, err error) {
+	txn := s.Dg.NewReadOnlyTxn()
+
+	const q = `query listaccountsforadmin($account: string) {
+		accounts(func: uid($account))  {
+		  owns @filter(eq(type, "account")) {
+			uid : uid
+		  }
+		}
+	  }`
+
+	res, err := txn.Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var result struct {
+		Accounts []*Account `json:"accounts"`
+	}
+
+	if err := json.Unmarshal(res.Json, &result); err != nil {
+		return nil, err
+	}
+
+	for _, account := range result.Accounts {
+		accounts = append(accounts, &nodepb.Account{
+			Uid:     account.UID,
+			Name:    account.Name,
+			IsRoot:  account.IsRoot,
+			Enabled: account.Enabled,
+		})
+	}
+
+	return accounts, nil
+}
+
 //UpdateAccount is a method to Udpdate details of an Account
 func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
 

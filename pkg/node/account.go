@@ -96,7 +96,7 @@ func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdmin
 	}
 
 	//Added logging
-	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsRoot))
+	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsAdmin))
 	return &nodepb.IsAdminResponse{IsAdmin: account.IsAdmin}, nil
 }
 
@@ -333,7 +333,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsAdmin() {
 		//Get the list if the account has admin permissions
-		accounts, err = s.Repo.ListAccounts(ctx)
+		accounts, err = s.Repo.ListAccountsforAdmin(ctx)
 		if err != nil {
 			//Added logging
 			log.Error("Failed to list Accounts", zap.Error(err))
