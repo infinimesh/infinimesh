@@ -339,6 +339,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsRoot() {
 		//Get the list if the account has root permissions
+		log.Info("List Accounts with root privilidges")
 		accounts, err = s.Repo.ListAccounts(ctx)
 		if err != nil {
 			//Added logging
@@ -349,6 +350,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsAdmin() {
 		//Get the list if the account has admin permissions
+		log.Info("List Accounts with admin privilidges")
 		accounts, err = s.Repo.ListAccountsforAdmin(ctx, requestorID)
 		if err != nil {
 			//Added logging
