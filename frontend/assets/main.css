@@ -89,6 +89,9 @@ strong {
 .ant-btn-danger {
   background-color: var(--danger-color);
 }
+.ant-btn-link {
+  color: var(--link-color) !important;
+}
 
 .ant-popover-buttons .ant-btn {
   border-color: var(--primary-color) !important;
@@ -154,6 +157,11 @@ strong {
   color: var(--text-color) !important;
 }
 
+/* Ant Table overloads */
+.ant-table-body {
+  background: var(--secondary-color) !important;
+}
+
 /* Vuetify overloads */
 .v-navigation-drawer {
   background: var(--primary-color) !important;
@@ -173,4 +181,10 @@ strong {
 
 .v-footer {
   background-color: var(--footer-background) !important;
+}
+
+.v-toolbar__content,
+.v-toolbar__extension {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
