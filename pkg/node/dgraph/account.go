@@ -78,7 +78,7 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 
 	const q = `query listaccountsforadmin($accountid: string) {
 		accounts(func: uid($accountid))  {
-		  owns @filter(eq(type, "accountid")) {
+		  owns @filter(eq(type, "account")) {
 			uid : uid
 		  }
 		}
