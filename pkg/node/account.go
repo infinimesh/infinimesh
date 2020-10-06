@@ -324,21 +324,25 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	}); err == nil && res.GetIsRoot() {
 		//Get the list if the account has root permissions
 		accounts, err = s.Repo.ListAccounts(ctx)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to list Accounts", zap.Error(err))
+			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
+		}
 	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
 		Account: requestorID,
 	}); err == nil && res.GetIsAdmin() {
 		//Get the list if the account has admin permissions
 		accounts, err = s.Repo.ListAccounts(ctx)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to list Accounts", zap.Error(err))
+			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
+		}
 	} else {
 		//Added logging
 		log.Error("The Account does not have permission to list details")
 		return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")
-	}
-
-	if err != nil {
-		//Added logging
-		log.Error("Failed to list Accounts", zap.Error(err))
-		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
 	}
 
 	//Added logging
