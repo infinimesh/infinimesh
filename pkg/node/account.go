@@ -349,7 +349,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsAdmin() {
 		//Get the list if the account has admin permissions
-		accounts, err = s.Repo.ListAccountsforAdmin(ctx)
+		accounts, err = s.Repo.ListAccountsforAdmin(ctx, requestorID)
 		if err != nil {
 			//Added logging
 			log.Error("Failed to list Accounts as admin", zap.Error(err))
@@ -404,17 +404,14 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: requestorID,
 	}); err == nil && !res.GetIsRoot() {
-		//Validate if the account is root or not
-		//Added logging
-		log.Error("The Account does not have permission to delete another account")
-		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
-	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: requestorID,
-	}); err == nil && !res.GetIsAdmin() {
-		//Validate if the account is admin or not
-		//Added logging
-		log.Error("The Account does not have permission to delete another account")
-		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
+		if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
+			Account: requestorID,
+		}); err == nil && !res.GetIsAdmin() {
+			//Validate if the account is admin or not
+			//Added logging
+			log.Error("The Account does not have permission to delete another account")
+			return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
+		}
 	}
 
 	//Get account details for validation

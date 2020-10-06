@@ -65,6 +65,7 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 			Name:    account.Name,
 			IsRoot:  account.IsRoot,
 			Enabled: account.Enabled,
+			IsAdmin: account.IsAdmin,
 		})
 	}
 
@@ -72,18 +73,18 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
 }
 
 //ListAccountsforAdmin is a method to List details of all Account
-func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context) (accounts []*nodepb.Account, err error) {
+func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID string) (accounts []*nodepb.Account, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
-	const q = `query listaccountsforadmin($account: string) {
-		accounts(func: uid($account))  {
-		  owns @filter(eq(type, "account")) {
+	const q = `query listaccountsforadmin($accountid: string) {
+		accounts(func: uid($accountid))  {
+		  owns @filter(eq(type, "accountid")) {
 			uid : uid
 		  }
 		}
 	  }`
 
-	res, err := txn.Query(ctx, q)
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$accountid": requestorID})
 	if err != nil {
 		return nil, err
 	}
@@ -98,10 +99,8 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context) (accounts []*node
 
 	for _, account := range result.Accounts {
 		accounts = append(accounts, &nodepb.Account{
-			Uid:     account.UID,
-			Name:    account.Name,
-			IsRoot:  account.IsRoot,
-			Enabled: account.Enabled,
+			Uid:  account.UID,
+			Name: account.Name,
 		})
 	}
 
