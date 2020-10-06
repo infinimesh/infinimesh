@@ -164,6 +164,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	require.NoError(t, err)
 }
 
+/*
 func TestListAccountforAdmin(t *testing.T) {
 	ctx := context.Background()
 
@@ -171,7 +172,7 @@ func TestListAccountforAdmin(t *testing.T) {
 	_, err := repo.ListAccountsforAdmin(ctx, "0x2")
 	require.NoError(t, err)
 
-}
+}*/
 
 func TestChangePassword(t *testing.T) {
 	ctx := context.Background()

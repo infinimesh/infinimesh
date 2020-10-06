@@ -102,6 +102,10 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 		return nil, err
 	}
 
+	if len(result.Accounts) == 0 {
+		return nil, errors.New("The Admin doesnot own any accounts")
+	}
+
 	for _, account := range result.Accounts[0].Owns {
 		accounts = append(accounts, &nodepb.Account{
 			Uid:     account.UID,
