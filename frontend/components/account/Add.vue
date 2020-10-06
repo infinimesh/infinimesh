@@ -40,12 +40,18 @@
         textAlign: 'right',
         zIndex: 1
       }"
-      id="accountAddDrawerActionsRow"
+      class="add-drawer-actions-row"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="setDefault"
+      <a-button
+        :style="{ marginRight: '8px' }"
+        @click="setDefault"
+        class="ant-btn-danger"
         >Reset</a-button
       >
-      <a-button :style="{ marginRight: '8px' }" @click="$emit('cancel')"
+      <a-button
+        :style="{ marginRight: '8px' }"
+        @click="$emit('cancel')"
+        type="primary"
         >Cancel</a-button
       >
       <a-button type="success" @click="handleSubmit">Submit</a-button>
