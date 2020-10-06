@@ -401,19 +401,17 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 		return nil, err
 	}
 
-	//Validate if the account is root or not
 	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: requestorID,
 	}); err == nil && !res.GetIsRoot() {
+		//Validate if the account is root or not
 		//Added logging
 		log.Error("The Account does not have permission to delete another account")
 		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
-	}
-
-	//Validate if the account is admin or not
-	if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
+	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
 		Account: requestorID,
 	}); err == nil && !res.GetIsAdmin() {
+		//Validate if the account is admin or not
 		//Added logging
 		log.Error("The Account does not have permission to delete another account")
 		return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
