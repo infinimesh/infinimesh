@@ -34,10 +34,10 @@ type OutgoingMessage struct {
 
 type Message struct {
 	Topic string
-	Data  string
+	Data  []byte
 }
 
 type Payload struct {
 	Timestamp string
-	Message   Message
+	Message   []Message
 }
