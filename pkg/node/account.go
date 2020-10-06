@@ -134,6 +134,8 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	if len(request.Account.Owner) > 0 {
 		err := s.Repo.AssignOwner(ctx, requestorID, uid)
 		if err != nil {
+			//Added logging
+			log.Error("Failed to assign owner to the account", zap.String("Account", uid), zap.Error(err))
 			return nil, err
 		}
 	}
@@ -340,7 +342,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		accounts, err = s.Repo.ListAccounts(ctx)
 		if err != nil {
 			//Added logging
-			log.Error("Failed to list Accounts", zap.Error(err))
+			log.Error("Failed to list Accounts as root", zap.Error(err))
 			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
 		}
 	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
@@ -350,7 +352,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		accounts, err = s.Repo.ListAccountsforAdmin(ctx)
 		if err != nil {
 			//Added logging
-			log.Error("Failed to list Accounts", zap.Error(err))
+			log.Error("Failed to list Accounts as admin", zap.Error(err))
 			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
 		}
 	} else {
