@@ -78,6 +78,7 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 
 	const q = `query listaccountsforadmin($accountid: string) {
 		accounts(func: uid($accountid))  {
+			
 		  owns @filter(eq(type, "account")) {
 			uid
 			name
@@ -101,9 +102,13 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 		return nil, err
 	}
 
-	for _, account := range result.Accounts {
+	for _, account := range result.Accounts[0].Owns {
 		accounts = append(accounts, &nodepb.Account{
-			Uid: account.UID,
+			Uid:     account.UID,
+			Name:    account.Name,
+			IsRoot:  account.IsRoot,
+			IsAdmin: account.IsAdmin,
+			Enabled: account.Enabled,
 		})
 	}
 
