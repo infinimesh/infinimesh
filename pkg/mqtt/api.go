@@ -34,7 +34,7 @@ type OutgoingMessage struct {
 
 type Message struct {
 	Topic string
-	Data  []byte
+	Data  map[string]interface{}
 }
 
 type Payload struct {
