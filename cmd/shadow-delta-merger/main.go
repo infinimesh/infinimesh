@@ -146,7 +146,7 @@ func main() {
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
 	//consuming subtopic T0(shadow.reported-state.delta-alarm)
-	closeReported, doneReported = runMerger(subtopicReportedState, mergedsubTopicReported, subtopicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
+	closeReportedAlarm, doneReportedAlarm := runMerger(subtopicReportedState, mergedsubTopicReported, subtopicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
 	//fmt.Printf("closeReported, doneReported: %v,%v", closeDesired, doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
@@ -159,8 +159,10 @@ func main() {
 		cancel()
 		closeDesired.Close()
 		closeReported.Close()
+		closeReportedAlarm.Close()
 	}()
 
 	<-doneReported
 	<-doneDesired
+	<-doneReportedAlarm
 }
