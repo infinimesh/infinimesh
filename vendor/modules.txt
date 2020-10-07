@@ -209,6 +209,10 @@ github.com/stretchr/testify/require
 github.com/tmc/grpc-websocket-proxy/wsproxy
 # github.com/tsenart/deadcode v0.0.0-20160724212837-210d2dc333e9
 github.com/tsenart/deadcode
+# github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb
+## explicit
+# github.com/xeipuuv/gojsonschema v1.2.0
+## explicit
 # github.com/yosssi/gmq v0.0.1
 ## explicit
 github.com/yosssi/gmq/mqtt
