@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 export const state = () => ({
   namespace: "",
   namespaces: [],
@@ -10,6 +12,13 @@ export const mutations = {
   },
   namespaces(state, val) {
     state.namespaces = val;
+  },
+  update_namespace(state, ns) {
+    Vue.set(
+      state.namespaces,
+      state.namespaces.findIndex(el => el.id === ns.id),
+      ns
+    );
   },
   pool(state, val) {
     state.pool = val;
@@ -63,6 +72,14 @@ export const actions = {
   setNamespace({ commit, dispatch }, ns) {
     commit("namespace", ns);
     dispatch("get");
+  },
+  async getNamespacePermissions({ commit }, ns) {
+    commit("update_namespace", { ...ns, loading: true });
+    const permissions = await this.$axios.$get(
+      `/api/namespaces/${ns.id}/permissions`
+    );
+    ns = { ...ns, ...permissions };
+    commit("update_namespace", ns);
   }
 };
 
