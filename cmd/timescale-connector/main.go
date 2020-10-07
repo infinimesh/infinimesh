@@ -33,7 +33,8 @@ import (
 )
 
 const (
-	sourceTopic = "shadow.reported-state.delta.computed"
+	sourceTopic    = "shadow.reported-state.delta.computed"
+	sourceSubTopic = "shadow.reported-state.delta-alarm.computed"
 )
 
 var (
@@ -94,7 +95,7 @@ func main() {
 	outer:
 		for {
 
-			err = group.Consume(context.Background(), []string{sourceTopic}, handler)
+			err = group.Consume(context.Background(), []string{sourceTopic, sourceSubTopic}, handler)
 			if err != nil {
 				panic(err)
 			}
