@@ -38,6 +38,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
+	"github.com/xeipuuv/gojsonschema"
 	"google.golang.org/grpc"
 )
 
@@ -487,5 +488,9 @@ func schemaValidation(data []byte, version int) bool {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to deserialize payload")
 	}
-	return true
+
+	loader := gojsonschema.NewGoLoader(payload.Message[0])
+	schemaLoader := gojsonschema.NewReferenceLoader("file://pkg/schema-mqtt5.json")
+	result, err := gojsonschema.Validate(schemaLoader, loader)
+	return result.Valid()
 }
