@@ -44,7 +44,6 @@ var (
 
 	sourceTopic  = "mqtt.messages.incoming"
 	defaultRoute = "mqtt.messages.incoming.dlq"
-	subTopics    = map[string]string{"T0": "shadow.reported-state.delta-alarm"}
 )
 
 func init() {
@@ -141,14 +140,12 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		err := json.Unmarshal(message.Value, &msg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
-			return err
 		}
 		if msg.ProtoLevel == 5 {
 			var payload mqtt.Payload
 			err = json.Unmarshal(msg.Data, &payload)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
-				return err
 			}
 			fmt.Printf("mqtt5 payload %v\n", payload)
 			fmt.Printf("mqtt5 topic = %v and %v\n", payload.Message[0].Data, payload.Message[0].Topic)
@@ -162,6 +159,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				target = topic
 				fmt.Printf("Subtopic found in the message!!, thus sending data to the subtopic")
 			}
+			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,

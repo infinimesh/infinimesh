@@ -51,6 +51,9 @@ type Account struct {
 	DefaultNamespace []*Namespace `json:"default.namespace"`
 
 	HasCredentials []*UsernameCredential `json:"has.credentials,omitempty"`
+
+	Owns    []*Account `json:"owns,omitempty"`
+	OwnedBy []*Account `json:"~owns,omitempty"`
 }
 
 //UsernameCredential Data strcuture for Dgraph database

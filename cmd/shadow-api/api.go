@@ -43,12 +43,10 @@ var (
 
 	topicDesiredDelta = "shadow.desired-state.delta"
 
-	topicReportedFull             = "shadow.reported-state.full"
-	subTopicReportedFull          = "shadow.reported-state.full-alarm"
-	topicReportedDeltaComputed    = "shadow.reported-state.delta.computed"
-	subTopicReportedDeltaComputed = "shadow.reported-state.delta-alarm.computed"
-	topicDesiredFull              = "shadow.desired-state.full"
-	topicDesiredDeltaComputed     = "shadow.desired-state.delta.computed"
+	topicReportedFull          = "shadow.reported-state.full"
+	topicReportedDeltaComputed = "shadow.reported-state.delta.computed"
+	topicDesiredFull           = "shadow.desired-state.full"
+	topicDesiredDeltaComputed  = "shadow.desired-state.delta.computed"
 
 	localStateMtx sync.Mutex
 	localState    = make(map[string]*DeviceState)
@@ -138,9 +136,7 @@ func main() {
 	ps := pubsub.New(10)
 
 	subscribe(consumer, ps, topicReportedFull, "/reported/full")
-	subscribe(consumer, ps, subTopicReportedFull, "/reported/full/alarm")
 	subscribe(consumer, ps, topicReportedDeltaComputed, "/reported/delta")
-	subscribe(consumer, ps, subTopicReportedDeltaComputed, "/reported/delta/alarm")
 	subscribe(consumer, ps, topicDesiredFull, "/desired/full")
 	subscribe(consumer, ps, topicDesiredDeltaComputed, "/desired/delta")
 
