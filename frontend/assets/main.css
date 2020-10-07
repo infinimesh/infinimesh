@@ -13,6 +13,7 @@ body {
   --success-color: #52c41a;
   --danger-color: #6f475b;
   --switch-color: #5d8eb7;
+  --red-color: #eb2f96;
 
   --icon-color: var(--secondary-color);
   --icon-color-dark: var(--line-color);
