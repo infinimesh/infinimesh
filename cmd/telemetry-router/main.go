@@ -160,7 +160,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
 			if topic, found := subTopics[payload.Message[0].Topic]; found {
 				target = topic
-				fmt.Printf("Subtopic found!!, thus sending data to the subtopic")
+				fmt.Printf("Subtopic found in the message!!, thus sending data to the subtopic")
 			}
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
