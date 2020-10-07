@@ -36,6 +36,7 @@
             :pagination="false"
             style="margin: 10px; width: 50%"
             :bordered="true"
+            :locale="{ emptyText: 'No Permissions Found' }"
             :rowKey="(record, index) => `${record.account_id}-${index}`"
           >
             <span slot="action" slot-scope="action">
@@ -74,7 +75,7 @@ const permissions_table_columns = [
   {
     title: "Access",
     dataIndex: "action",
-    width: "10%",
+    width: "15%",
     scopedSlots: { customRender: "action" },
   },
 ];

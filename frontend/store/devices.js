@@ -75,11 +75,15 @@ export const actions = {
   },
   async getNamespacePermissions({ commit }, ns) {
     commit("update_namespace", { ...ns, loading: true });
-    const permissions = await this.$axios.$get(
-      `/api/namespaces/${ns.id}/permissions`
-    );
-    ns = { ...ns, ...permissions };
-    commit("update_namespace", ns);
+    this.$axios
+      .$get(`/api/namespaces/${ns.id}/permissions`)
+      .then(permissions => {
+        ns = { ...ns, ...permissions };
+        commit("update_namespace", ns);
+      })
+      .catch(() => {
+        commit("update_namespace", ns);
+      });
   }
 };
 
