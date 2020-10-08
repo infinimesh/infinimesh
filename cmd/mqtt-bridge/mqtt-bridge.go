@@ -514,10 +514,6 @@ func schemaValidation(data []byte, version int) bool {
 	if version == 4 {
 		return true
 	}
-	/*wd, err := os.Getwd()
-	if err != nil {
-		log.Printf(err.Error())
-	}*/
 	var payload mqtt.Payload
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
