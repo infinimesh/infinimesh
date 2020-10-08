@@ -44,7 +44,6 @@ var (
 
 	sourceTopic  = "mqtt.messages.incoming"
 	defaultRoute = "mqtt.messages.incoming.dlq"
-	subTopics    = map[string]string{"T0": "shadow.reported-state.delta-alarm"}
 )
 
 func init() {
