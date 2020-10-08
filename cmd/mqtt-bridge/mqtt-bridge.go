@@ -482,7 +482,7 @@ func schemaValidation(data []byte, version int) bool {
 	}
 	wd, err := os.Getwd()
 	if err != nil {
-		panic(err.Error())
+		log.Printf(err.Error())
 	}
 	var payload mqtt.Payload
 	err = json.Unmarshal(data, &payload)
@@ -490,10 +490,8 @@ func schemaValidation(data []byte, version int) bool {
 		log.Printf("invalid payload format")
 		return false
 	}
-
-	log.Println("payload.Messsage: ", payload)
 	loader := gojsonschema.NewGoLoader(payload)
-	schemaLoader := gojsonschema.NewReferenceLoader("file://schema-mqtt5.json")
+	schemaLoader := gojsonschema.NewReferenceLoader("file://" + wd + "/schema-mqtt5.json")
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
 		log.Printf("Loading new schema failed %v", err)
