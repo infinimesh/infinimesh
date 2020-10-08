@@ -47,6 +47,7 @@ type DGraphRepo struct {
 	Dg *dgo.Dgraph
 }
 
+//NewDGraphRepo is a method to connect to Dgraph Database
 func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
 	return &DGraphRepo{Dg: dg}
 }
