@@ -490,7 +490,7 @@ func schemaValidation(data []byte, version int) bool {
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
-	filename := "file://" + "/mqtt-bridge/schema-mqtt5.json"
+	filename := "file:///schema-mqtt5.json"
 	log.Printf("json file path: %v", filename)
 	schemaLoader := gojsonschema.NewReferenceLoader(filename)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
