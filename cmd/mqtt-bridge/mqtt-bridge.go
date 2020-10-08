@@ -475,6 +475,41 @@ func publishTelemetry(topic string, data []byte, deviceID string, version int) e
 	return nil
 }
 
+//MQTT5 schema
+const mqtt5Schema = `{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "Timestamp": {
+        "type": "string"
+      },
+      "Message": {
+        "type": "array",
+        "items": [
+          {
+            "type": "object",
+            "properties": {
+              "Topic": {
+                "type": "string"
+              },
+              "Data": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "Topic",
+              "Data"
+            ]
+          }
+        ]
+      }
+    },
+    "required": [
+      "Timestamp",
+      "Message"
+    ]
+  }`
+
 func schemaValidation(data []byte, version int) bool {
 	if version == 4 {
 		return true
@@ -490,9 +525,9 @@ func schemaValidation(data []byte, version int) bool {
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
-	filename := "file:///mqtt-bridge/schema-mqtt5.json"
-	log.Printf("json file path: %v", filename)
-	schemaLoader := gojsonschema.NewReferenceLoader(filename)
+	//filename := "file:///mqtt-bridge/schema-mqtt5.json"
+	//log.Printf("json file path: %v", filename)
+	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
 		log.Printf("Loading new schema failed %v", err)
