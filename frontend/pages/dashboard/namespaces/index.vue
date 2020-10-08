@@ -8,11 +8,13 @@
     <a-row>
       <a-col :span="21" :offset="1">
         <a-table
-          :columns="columns"
+          :columns="namespaces_table_columns"
           :data-source="namespaces"
           :loading="loading"
           rowKey="id"
           class="namespaces-table"
+          :expandRowByClick="true"
+          @expand="loadNamespacePermissions"
         >
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
@@ -24,6 +26,25 @@
               </a-button>
             </a-space>
           </span>
+
+          <a-table
+            slot="expandedRowRender"
+            slot-scope="record"
+            :loading="record.loading"
+            :data-source="record.permissions"
+            :columns="permissions_table_columns"
+            :pagination="false"
+            style="margin: 10px; width: 50%"
+            :bordered="true"
+            :locale="{ emptyText: 'No Permissions Found' }"
+            :rowKey="(record, index) => `${record.account_id}-${index}`"
+          >
+            <span slot="action" slot-scope="action">
+              <a-tag :color="actionColors[action]">
+                {{ action }}
+              </a-tag>
+            </span>
+          </a-table>
         </a-table>
       </a-col>
     </a-row>
@@ -31,7 +52,7 @@
 </template>
 
 <script>
-const columns = [
+const namespaces_table_columns = [
   {
     title: "Title",
     dataIndex: "name",
@@ -41,16 +62,29 @@ const columns = [
   {
     title: "Actions",
     key: "actions",
-    fixed: "right",
     width: "10%",
     scopedSlots: { customRender: "actions" },
+  },
+];
+const permissions_table_columns = [
+  {
+    title: "Account",
+    dataIndex: "account_name",
+    sorter: true,
+  },
+  {
+    title: "Access",
+    dataIndex: "action",
+    width: "15%",
+    scopedSlots: { customRender: "action" },
   },
 ];
 
 export default {
   data() {
     return {
-      columns,
+      namespaces_table_columns,
+      permissions_table_columns,
       loading: false,
     };
   },
@@ -58,6 +92,13 @@ export default {
     namespaces() {
       return this.$store.state.devices.namespaces;
     },
+  },
+  created() {
+    this.actionColors = {
+      WRITE: "#eb2f96",
+      READ: "#52c41a",
+      NONE: "#5d8eb7",
+    };
   },
   mounted() {
     this.getNamespacesPool();
@@ -73,6 +114,12 @@ export default {
         message: "Coming soon",
         description: `Can't delete ${namespace.name}(${namespace.id})`,
       });
+    },
+    loadNamespacePermissions(expanded, ns) {
+      console.log(expanded, ns);
+      if (expanded) {
+        this.$store.dispatch("devices/getNamespacePermissions", ns);
+      }
     },
   },
 };

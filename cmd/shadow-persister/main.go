@@ -35,8 +35,9 @@ import (
 )
 
 const (
-	sourceTopicReported = "shadow.reported-state.full"
-	sourceTopicDesired  = "shadow.desired-state.full"
+	sourceTopicReported    = "shadow.reported-state.full"
+	sourceSubTopicReported = "shadow.reported-state.full-alarm"
+	sourceTopicDesired     = "shadow.desired-state.full"
 )
 
 var (
@@ -94,7 +95,7 @@ func main() {
 	outer:
 		for {
 
-			err = group.Consume(context.Background(), []string{sourceTopicDesired, sourceTopicReported}, handler)
+			err = group.Consume(context.Background(), []string{sourceTopicDesired, sourceTopicReported, sourceSubTopicReported}, handler)
 			if err != nil {
 				panic(err)
 			}
@@ -141,6 +142,11 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 
 		switch message.Topic {
 		case sourceTopicReported:
+			dbErr = h.repo.SetReported(shadow.DeviceState{
+				ID:    string(message.Key),
+				State: stateFromKafka,
+			})
+		case sourceSubTopicReported:
 			dbErr = h.repo.SetReported(shadow.DeviceState{
 				ID:    string(message.Key),
 				State: stateFromKafka,
