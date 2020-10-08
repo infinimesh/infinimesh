@@ -140,14 +140,12 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		err := json.Unmarshal(message.Value, &msg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
-			return err
 		}
 		if msg.ProtoLevel == 5 {
 			var payload mqtt.Payload
 			err = json.Unmarshal(msg.Data, &payload)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
-				return err
 			}
 			subTopicData, err := json.Marshal(payload.Message[0].Data)
 			if err != nil {
@@ -155,6 +153,14 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				return err
 			}
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
+<<<<<<< HEAD
+=======
+			if topic, found := subTopics[payload.Message[0].Topic]; found {
+				target = topic
+				fmt.Printf("Subtopic found in the message!!, thus sending data to the subtopic")
+			}
+			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
+>>>>>>> parent of 4dd515bb... Revert "Merge branch 'infinidev' into IN-21"
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,

@@ -40,7 +40,7 @@
         textAlign: 'right',
         zIndex: 1,
       }"
-      id="accountAddDrawerActionsRow"
+      class="add-drawer-actions-row"
     >
       <a-button
         :style="{ marginRight: '8px' }"
