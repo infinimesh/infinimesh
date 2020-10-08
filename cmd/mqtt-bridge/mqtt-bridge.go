@@ -491,7 +491,9 @@ func schemaValidation(data []byte, version int) bool {
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
-	schemaLoader := gojsonschema.NewReferenceLoader("file://" + wd + "/schema-mqtt5.json")
+	filename := "file://" + wd + "/schema-mqtt5.json"
+	log.Printf("json file path: %v", filename)
+	schemaLoader := gojsonschema.NewReferenceLoader(filename)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
 		log.Printf("Loading new schema failed %v", err)
