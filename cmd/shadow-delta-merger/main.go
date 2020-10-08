@@ -33,18 +33,15 @@ import (
 )
 
 var (
-	consumerGroupReported              = "shadow-reported"
-	consumerGroupDesired               = "shadow-desired"
-	broker                             string
-	topicReportedState                 = "shadow.reported-state.delta"
-	subtopicReportedState              = "shadow.reported-state.delta-alarm"
-	topicDesiredState                  = "shadow.desired-state.delta"
-	mergedTopicReported                = "shadow.reported-state.full"
-	mergedsubTopicReported             = "shadow.reported-state.full-alarm"
-	mergedTopicDesired                 = "shadow.desired-state.full"
-	topicComputedDeltaReportedState    = "shadow.reported-state.delta.computed"
-	subtopicComputedDeltaReportedState = "shadow.reported-state.delta-alarm.computed"
-	topicComputedDeltaDesiredState     = "shadow.desired-state.delta.computed"
+	consumerGroupReported           = "shadow-reported"
+	consumerGroupDesired            = "shadow-desired"
+	broker                          string
+	topicReportedState              = "shadow.reported-state.delta"
+	topicDesiredState               = "shadow.desired-state.delta"
+	mergedTopicReported             = "shadow.reported-state.full"
+	mergedTopicDesired              = "shadow.desired-state.full"
+	topicComputedDeltaReportedState = "shadow.reported-state.delta.computed"
+	topicComputedDeltaDesiredState  = "shadow.desired-state.delta.computed"
 )
 
 func init() {
@@ -145,8 +142,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	closeReported, doneReported := runMerger(topicReportedState, mergedTopicReported, topicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
-	//consuming subtopic T0(shadow.reported-state.delta-alarm)
-	closeReportedAlarm, doneReportedAlarm := runMerger(subtopicReportedState, mergedsubTopicReported, subtopicComputedDeltaReportedState, consumerGroupReported, stopReported, ctx)
 	closeDesired, doneDesired := runMerger(topicDesiredState, mergedTopicDesired, topicComputedDeltaDesiredState, consumerGroupDesired, stopDesired, ctx)
 	//fmt.Printf("closeReported, doneReported: %v,%v", closeDesired, doneDesired)
 	// TODO consume from desired.delta and write to mqtt.messages.outgoing
@@ -159,10 +154,8 @@ func main() {
 		cancel()
 		closeDesired.Close()
 		closeReported.Close()
-		closeReportedAlarm.Close()
 	}()
 
 	<-doneReported
 	<-doneDesired
-	<-doneReportedAlarm
 }

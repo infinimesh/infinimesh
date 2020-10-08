@@ -14,7 +14,7 @@
       ref="accountAddForm"
     >
       <a-form-model-item prop="name" label="Username">
-        <a-input v-model="account.name" />
+        <a-input v-model="account.name" type="email" />
       </a-form-model-item>
       <a-form-model-item prop="password" label="Password">
         <a-input-password
@@ -78,18 +78,11 @@ export default Vue.component("account-add", {
         name: [
           {
             required: true,
-            message: "Please, fill in the username",
+            message: "Please, fill in the user email",
           },
           {
-            min: 4,
-            max: 24,
-            message:
-              "Username should be at least 4 and not more than 24 characters long",
-          },
-          {
-            pattern: /^[a-zA-Z0-9\-_]*$/,
-            message:
-              "Username can contain only alphanumeric characters, hyphens and underscores",
+            type: "email",
+            message: "Should be a valid email address",
           },
         ],
         password: [
