@@ -76,6 +76,10 @@ strong {
 
 /* AntDesign Classes Overloads */
 
+.has-feedback .ant-form-explain {
+  opacity: 0 !important;
+}
+
 /* AntDesign Buttons */
 .ant-btn {
   border-color: transparent !important;
@@ -94,6 +98,7 @@ strong {
   color: var(--link-color) !important;
 }
 
+/* AntDesign Popover */
 .ant-popover-buttons .ant-btn {
   border-color: var(--primary-color) !important;
   color: var(--primary-color) !important;
