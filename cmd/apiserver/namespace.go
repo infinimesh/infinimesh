@@ -77,7 +77,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 	if err != nil {
 		//Added logging
 		log.Error("Create Namespace API Method: Failed to create Namespace", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Create Namespace API Method: Failed to create Namespace")
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging

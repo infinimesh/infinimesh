@@ -54,7 +54,7 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, err
 	}
 
-	//Check is the account is root
+	//Check if the account is root
 	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
@@ -62,15 +62,13 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
-	//Check is the account is admin
+	//Check if the account is admin
 	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
-
-	log.Info("Temporary Logs", zap.Any("requestorID", requestorID), zap.Any("isroot", isroot), zap.Any("isadmin", isadmin))
 
 	var id string
 	//Create the namespace if the account is root or admin
