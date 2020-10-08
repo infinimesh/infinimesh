@@ -28,7 +28,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -480,12 +479,12 @@ func schemaValidation(data []byte, version int) bool {
 	if version == 4 {
 		return true
 	}
-	wd, err := os.Getwd()
+	/*wd, err := os.Getwd()
 	if err != nil {
 		log.Printf(err.Error())
-	}
+	}*/
 	var payload mqtt.Payload
-	err = json.Unmarshal(data, &payload)
+	err := json.Unmarshal(data, &payload)
 	if err != nil {
 		log.Printf("invalid payload format")
 		return false
