@@ -14,7 +14,7 @@
       ref="accountAddForm"
     >
       <a-form-model-item prop="name" label="Username">
-        <a-input v-model="account.name" />
+        <a-input v-model="account.name" type="email" />
       </a-form-model-item>
       <a-form-model-item prop="password" label="Password">
         <a-input-password
@@ -38,14 +38,20 @@
         borderTop: '1px solid #e9e9e9',
         padding: '10px 16px',
         textAlign: 'right',
-        zIndex: 1
+        zIndex: 1,
       }"
-      id="accountAddDrawerActionsRow"
+      class="add-drawer-actions-row"
     >
-      <a-button :style="{ marginRight: '8px' }" @click="setDefault"
+      <a-button
+        :style="{ marginRight: '8px' }"
+        @click="setDefault"
+        class="ant-btn-danger"
         >Reset</a-button
       >
-      <a-button :style="{ marginRight: '8px' }" @click="$emit('cancel')"
+      <a-button
+        :style="{ marginRight: '8px' }"
+        @click="$emit('cancel')"
+        type="primary"
         >Cancel</a-button
       >
       <a-button type="success" @click="handleSubmit">Submit</a-button>
@@ -62,8 +68,8 @@ export default Vue.component("account-add", {
   mixins: [drawerSizeMixin],
   props: {
     active: {
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -72,22 +78,15 @@ export default Vue.component("account-add", {
         name: [
           {
             required: true,
-            message: "Please, fill in the username"
+            message: "Please, fill in the user email",
           },
           {
-            min: 4,
-            max: 24,
-            message:
-              "Username should be at least 4 and not more than 24 characters long"
+            type: "email",
+            message: "Should be a valid email address",
           },
-          {
-            pattern: /^[a-zA-Z0-9\-_]*$/,
-            message:
-              "Username can contain only alphanumeric characters, hyphens and underscores"
-          }
         ],
         password: [
-          { required: true, message: "Fill in the new password, please" }
+          { required: true, message: "Fill in the new password, please" },
         ],
         confirm_password: [
           { required: true, message: "Please, confirm the password" },
@@ -95,14 +94,14 @@ export default Vue.component("account-add", {
             validator: (rule, value, raise) => {
               if (value != this.account.password) raise("oh noo");
             },
-            message: "Passwords don't match"
-          }
-        ]
-      }
+            message: "Passwords don't match",
+          },
+        ],
+      },
     };
   },
   watch: {
-    active: "setDefault"
+    active: "setDefault",
   },
   mounted() {
     this.setDefault();
@@ -112,13 +111,13 @@ export default Vue.component("account-add", {
       this.account = {
         name: "",
         password: "",
-        confirm_password: ""
+        confirm_password: "",
       };
     },
     handleSubmit() {
       let form = this.$refs["accountAddForm"];
       let errors = [];
-      form.validateField(Object.keys(this.account), err => {
+      form.validateField(Object.keys(this.account), (err) => {
         if (err) {
           errors.push(err);
         }
@@ -127,7 +126,7 @@ export default Vue.component("account-add", {
         delete this.account.confirm_password;
         this.$emit("add", { account: this.account });
       }
-    }
-  }
+    },
+  },
 });
 </script>

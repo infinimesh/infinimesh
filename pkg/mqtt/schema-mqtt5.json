@@ -15,12 +15,7 @@
                 "type": "string"
               },
               "Data": {
-                "type": "object",
-                "patternProperties": {
-                  "^S_0": {
-                    "type": "string"
-                  }
-                }
+                "type": "object"
               }
             },
             "required": [

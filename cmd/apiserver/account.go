@@ -213,6 +213,9 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 
 	account, ok := ctx.Value("account_id").(string)
 
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
+
 	if !ok {
 		//Added logging
 		log.Error("Create Account API Method: The Account is not authenticated")
@@ -253,7 +256,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to create another account")
 }
 
-//API Method to List all account
+//API Method to List all account.
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 
 	//Added logging
@@ -266,17 +269,12 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
-	//Validate if the account is root or not
-	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: account,
-	}); err == nil && res.GetIsRoot() {
-		res, err := a.client.ListAccounts(ctx, request)
-		return res, err
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
-	//Added logging
-	log.Error("List Accounts API Method: The Account does not have permission to list details")
-	return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")
+	//Invoke the controller for server
+	res, err := a.client.ListAccounts(ctx, request)
+	return res, err
 
 }
 
@@ -296,23 +294,8 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
-	//Validate if the account is root or not
-	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: account,
-	}); err == nil && res.GetIsRoot() {
-		res, err := a.client.DeleteAccount(ctx, request)
-		return res, err
-	}
+	//Invoke the controller for server
+	res, err := a.client.DeleteAccount(ctx, request)
+	return res, err
 
-	//Validate if the account is admin or not
-	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: account,
-	}); err == nil && res.GetIsAdmin() {
-		res, err := a.client.DeleteAccount(ctx, request)
-		return res, err
-	}
-
-	//Added logging
-	log.Error("Delete Account API Method: The Account does not have permission to delete another account")
-	return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
 }

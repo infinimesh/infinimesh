@@ -73,8 +73,15 @@ strong {
 .lead-dark {
   color: var(--secondary-color) !important;
 }
+.add-drawer-actions-row {
+  background: var(--primary-color);
+}
 
 /* AntDesign Classes Overloads */
+
+.has-feedback .ant-form-explain {
+  opacity: 0 !important;
+}
 
 /* AntDesign Buttons */
 .ant-btn {
@@ -94,6 +101,7 @@ strong {
   color: var(--link-color) !important;
 }
 
+/* AntDesign Popover */
 .ant-popover-buttons .ant-btn {
   border-color: var(--primary-color) !important;
   color: var(--primary-color) !important;
