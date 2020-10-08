@@ -479,16 +479,16 @@ func schemaValidation(data []byte, version int) bool {
 	if version == 4 {
 		return true
 	}
-	/*
-		var payload mqtt.Payload
-		err := json.Unmarshal(data, &payload)
-		if err != nil {
-			log.Printf("invalid payload format")
-			return false
-		}
-	*/
-	log.Println("payload.Messsage: ", data)
-	loader := gojsonschema.NewGoLoader(data)
+
+	var payload mqtt.Payload
+	err := json.Unmarshal(data, &payload)
+	if err != nil {
+		log.Printf("invalid payload format")
+		return false
+	}
+
+	log.Println("payload.Messsage: ", payload)
+	loader := gojsonschema.NewGoLoader(payload)
 	schemaLoader := gojsonschema.NewReferenceLoader("file:../../pkg/mqtt/schema-mqtt5.json")
 	log.Println("schemaLoader:", schemaLoader)
 	result, err := gojsonschema.Validate(schemaLoader, loader)
