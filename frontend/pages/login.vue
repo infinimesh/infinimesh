@@ -1,62 +1,91 @@
 <template>
-  <a-row type="flex" justify="center" class="rootRow" align="middle">
-    <a-col :xs="22" :md="16" :lg="12">
-      <a-row type="flex" justify="center">
-        <h1>infinimesh</h1>
-      </a-row>
-      <a-row
-        type="flex"
-        justify="center"
-        style="color: rgba(0, 0, 0, 0.65);"
-      >Welcome to infinimesh. Log in with your username and password.</a-row>
+  <v-app>
+    <v-container style="margin-top: 100px">
+      <v-row justify="center">
+        <v-col sm="6" md="8" lg="6" cols="24">
+          <v-row justify="center">
+            <h1>infinimesh</h1>
+          </v-row>
+          <v-row
+            justify="center"
+            style="color: var(--logo-color); opacity: 0.65"
+            >Welcome to infinimesh. Log in with your username and
+            password.</v-row
+          >
 
-      <a-row style="margin-top: 1rem">
-        <a-form :form="form" @submit="handleSubmit">
-          <a-form-item>
-            <a-input
-              v-decorator="[
-                'username',
-                {
-                  rules: [
-                    { required: true, message: 'Please input your username!' }
-                  ]
-                }
-              ]"
-              placeholder="Username"
-            >
-              <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
-            </a-input>
-          </a-form-item>
-          <a-form-item>
-            <a-input
-              v-decorator="[
-                'password',
-                {
-                  rules: [
-                    { required: true, message: 'Please input your Password!' }
-                  ]
-                }
-              ]"
-              type="password"
-              placeholder="Password"
-            >
-              <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
-            </a-input>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" html-type="submit" style="width: 100%">Login</a-button>
-          </a-form-item>
-        </a-form>
-      </a-row>
-    </a-col>
-  </a-row>
+          <v-row style="margin-top: 1rem">
+            <a-form :form="form" @submit="handleSubmit" style="width: 100%">
+              <a-form-item>
+                <a-input
+                  v-decorator="[
+                    'username',
+                    {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please input your username!'
+                        }
+                      ]
+                    }
+                  ]"
+                  placeholder="Username"
+                >
+                  <a-icon
+                    slot="prefix"
+                    type="user"
+                    style="color: rgba(0, 0, 0, 0.25)"
+                  />
+                </a-input>
+              </a-form-item>
+              <a-form-item>
+                <a-input
+                  v-decorator="[
+                    'password',
+                    {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please input your Password!'
+                        }
+                      ]
+                    }
+                  ]"
+                  type="password"
+                  placeholder="Password"
+                >
+                  <a-icon
+                    slot="prefix"
+                    type="lock"
+                    style="color: rgba(0, 0, 0, 0.25)"
+                  />
+                </a-input>
+              </a-form-item>
+              <a-form-item>
+                <a-button type="primary" html-type="submit" style="width: 100%"
+                  >Login</a-button
+                >
+              </a-form-item>
+            </a-form>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-footer app>
+      <infinimesh-footer />
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
+import InfinimeshFooter from "@/components/generic/footer.vue";
+
 export default {
+  components: {
+    InfinimeshFooter
+  },
   data() {
     return {
-      form: this.$form.createForm(this, { name: "login" }),
+      form: this.$form.createForm(this, { name: "login" })
     };
   },
   methods: {
@@ -66,20 +95,19 @@ export default {
         if (!err) {
           try {
             let res = await this.$auth.loginWith("local", {
-              data: values,
+              data: values
             });
             this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
-              placement: "bottomRight",
               duration: 10,
-              ...e.response.data,
+              ...e.response.data
             });
           }
         }
       });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -89,10 +117,8 @@ export default {
   min-height: 500px;
   width: 100%;
 }
-</style>
-
-<style lang="less" scoped>
 h1 {
-  color: @line-color;
+  color: var(--logo-color);
+  font-family: Exo;
 }
 </style>

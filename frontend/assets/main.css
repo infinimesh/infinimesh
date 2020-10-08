@@ -1,0 +1,191 @@
+/* Basic variables and Color Schemes */
+body {
+  --primary-color: #104e83;
+  --secondary-color: white;
+
+  --line-color: var(--primary-color);
+  --link-color: var(--primary-color);
+
+  --background-color: white;
+  --footer-background: #f5f5f5;
+  --footer-text-color: black;
+
+  --success-color: #52c41a;
+  --danger-color: #6f475b;
+  --switch-color: #5d8eb7;
+  --red-color: #eb2f96;
+
+  --icon-color: var(--secondary-color);
+  --icon-color-dark: var(--line-color);
+
+  --btn-default-border: white;
+  --btn-group-border: white;
+
+  /* Border styles */
+  --border-muted: solid 1px rgba(255, 255, 255, 0.5) !important;
+  --shadow-color: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+  --border-color-split: var(--secondary-color);
+  --border-radius-base: 0.5rem;
+  --border-radius-sm: 0.5rem;
+  --border-color-base: white;
+  --border-base: 1px dashed var(--line-color);
+
+  /* Font style */
+  --text-color: white;
+  --heading-color: white;
+  --font-size-xl: 25px;
+  --font-weight-default: 500;
+  --font-family-default: Exo;
+
+  --logo-color: var(--primary-color);
+}
+
+.dark-mode body {
+  --background-color: #0f3358;
+  --footer-background: #104e83;
+  --footer-text-color: white;
+
+  --link-color: var(--background-color);
+  --logo-color: white;
+  --line-color: white;
+}
+
+.black-white-mode body {
+  --primary-color: black;
+  --footer-background: var(--background-color);
+}
+
+a {
+  color: var(--link-color) !important;
+}
+
+/* Custom tags */
+strong {
+  color: black;
+  font-style: bold;
+}
+
+/* Custom classes */
+.lead {
+  font-size: 2rem;
+  color: var(--line-color);
+}
+.lead-dark {
+  color: var(--secondary-color) !important;
+}
+
+/* AntDesign Classes Overloads */
+
+/* AntDesign Buttons */
+.ant-btn {
+  border-color: transparent !important;
+  color: white !important;
+}
+.ant-btn-primary {
+  background-color: var(--primary-color) !important;
+}
+.ant-btn-success {
+  background-color: var(--success-color) !important;
+}
+.ant-btn-danger {
+  background-color: var(--danger-color);
+}
+.ant-btn-link {
+  color: var(--link-color) !important;
+}
+
+.ant-popover-buttons .ant-btn {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+.ant-popover-buttons .ant-btn-primary {
+  color: white !important;
+}
+
+.ant-popover-inner {
+  border: var(--border-muted);
+  box-shadow: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ant-popover-arrow {
+  border-right: var(--border-muted);
+  border-bottom: var(--border-muted);
+  box-shadow: 3px 3px 7px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ant-drawer-title {
+  font-size: var(--font-size-xl);
+  font-family: var(--font-family-default) !important;
+  font-weight: var(--font-weight-default) !important;
+}
+
+.ant-empty-description {
+  color: white;
+}
+
+.ant-select-selection-selected-value {
+  color: black;
+}
+
+.ant-pagination-item-active a {
+  color: black !important;
+}
+
+/* Ant Card overloads */
+.ant-card {
+  background: var(--primary-color) !important;
+  border-radius: var(--border-radius-base) !important;
+}
+
+.ant-card .ant-card-head-title {
+  color: var(--heading-color);
+}
+.ant-card .ant-card-extra {
+  color: var(--heading-color);
+}
+.ant-card .ant-card-body {
+  color: var(--text-color);
+}
+
+/* Ant Drawer overloads */
+.ant-drawer-header {
+  background: var(--primary-color) !important;
+}
+.ant-drawer-title {
+  color: var(--text-color) !important;
+}
+.ant-drawer-close {
+  color: var(--text-color) !important;
+}
+
+/* Ant Table overloads */
+.ant-table-body {
+  background: var(--secondary-color) !important;
+}
+
+/* Vuetify overloads */
+.v-navigation-drawer {
+  background: var(--primary-color) !important;
+}
+
+.v-list-item--active {
+  color: var(--secondary-color) !important;
+  opacity: 0.5;
+}
+.v-list-item__title a {
+  color: var(--secondary-color) !important;
+}
+
+.v-application {
+  background: var(--background-color) !important;
+}
+
+.v-footer {
+  background-color: var(--footer-background) !important;
+}
+
+.v-toolbar__content,
+.v-toolbar__extension {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}

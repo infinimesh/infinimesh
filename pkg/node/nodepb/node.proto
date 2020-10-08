@@ -33,6 +33,10 @@ message IsRootRequest { string account = 1; }
 
 message IsRootResponse { bool is_root = 1; }
 
+message IsAdminRequest { string account = 1; }
+
+message IsAdminResponse { bool is_admin = 1; }
+
 message IsAuthorizedNamespaceRequest {
   string namespace = 1;
   string account = 2;
@@ -83,6 +87,7 @@ message Account {
   bool enabled = 4;
   Namespace default_namespace = 5;
   string password = 6;
+  bool is_admin = 7;
 }
 
 message AuthenticateRequest {
@@ -171,17 +176,18 @@ service AccountService {
 
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc IsAuthorized(IsAuthorizedRequest) returns (IsAuthorizedResponse);
-  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest)
-      returns (IsAuthorizedNamespaceResponse);
+  rpc IsAuthorizedNamespace(IsAuthorizedNamespaceRequest) returns (IsAuthorizedNamespaceResponse);
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
-  rpc AuthorizeNamespace(AuthorizeNamespaceRequest)
-      returns (AuthorizeNamespaceResponse);
+  rpc AuthorizeNamespace(AuthorizeNamespaceRequest) returns (AuthorizeNamespaceResponse);
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
+  rpc IsAdmin(IsAdminRequest) returns (IsAdminResponse);
 }
 
 message Namespace {
   string id = 1;
   string name = 2;
+  bool markfordeletion = 3;
+	string deleteinitiationtime = 4;
 }
 
 message CreateNamespaceRequest {
@@ -232,6 +238,13 @@ message DeleteNamespaceRequest {
 
 message DeleteNamespaceResponse{}
 
+message UpdateNamespaceRequest {
+  Namespace namespace = 1;
+  google.protobuf.FieldMask namespaceMask = 2;
+}
+
+message UpdateNamespaceResponse {}
+
 service ObjectService {
   rpc CreateObject(CreateObjectRequest) returns (Object);
   rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
@@ -246,4 +259,5 @@ service Namespaces {
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
   rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
   rpc DeleteNamespace(DeleteNamespaceRequest) returns (DeleteNamespaceResponse);
+  rpc UpdateNamespace(UpdateNamespaceRequest) returns (UpdateNamespaceResponse);
 }

@@ -16,6 +16,7 @@
     "@nuxtjs/auth": "^4.9.1",
     "@nuxtjs/axios": "^5.12.2",
     "@nuxtjs/proxy": "^2.0.1",
+    "@nuxtjs/pwa": "^3.0.2",
     "@nuxtjs/style-resources": "^1.0.0",
     "ant-design-vue": "^1.6.5",
     "less": "^2.7.3",
@@ -27,6 +28,7 @@
     "@nuxt/types": "^2.14.3",
     "@nuxt/typescript-build": "^2.0.2",
     "@nuxtjs/color-mode": "^1.0.3",
+    "@nuxtjs/vuetify": "^1.11.2",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "@vue/eslint-config-typescript": "^5.1.0",
@@ -36,5 +38,9 @@
     "eslint-loader": "^2.1.1",
     "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^4.14.1"
+  },
+  "resolutions": {
+    "cryptiles": "^4.1.2",
+    "hoek": "^4.2.1"
   }
 }

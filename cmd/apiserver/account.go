@@ -72,10 +72,19 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
 		return a.client.GetAccount(ctx, request)
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
+		res, err := a.client.GetAccount(ctx, request)
+		return res, err
 	}
 
 	//Added logging
@@ -165,10 +174,18 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.UpdateAccount(ctx, request)
+		return res, err
+	}
 
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.UpdateAccount(ctx, request)
 		return res, err
 	}
@@ -190,7 +207,9 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	log.Info("Create Account API Method: Function Invoked",
 		zap.String("Account", request.Account.Name),
 		zap.Bool("Enabled", request.Account.Enabled),
-		zap.Bool("IsRoot", request.Account.IsRoot))
+		zap.Bool("IsRoot", request.Account.IsRoot),
+		zap.Bool("IsAdmin", request.Account.IsAdmin),
+	)
 
 	account, ok := ctx.Value("account_id").(string)
 
@@ -221,6 +240,14 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 		return res, err
 	}
 
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
+		res, err := a.client.CreateUserAccount(ctx, request)
+		return res, err
+	}
+
 	//Added logging
 	log.Error("Create Account API Method: The Account does not have permission to create another account")
 	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to create another account")
@@ -239,6 +266,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
@@ -268,9 +296,18 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
+	//Validate if the account is root or not
 	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: account,
 	}); err == nil && res.GetIsRoot() {
+		res, err := a.client.DeleteAccount(ctx, request)
+		return res, err
+	}
+
+	//Validate if the account is admin or not
+	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
+		Account: account,
+	}); err == nil && res.GetIsAdmin() {
 		res, err := a.client.DeleteAccount(ctx, request)
 		return res, err
 	}

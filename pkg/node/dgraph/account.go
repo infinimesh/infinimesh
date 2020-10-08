@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
@@ -40,7 +41,8 @@ func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Accou
                        uid
                        name
                        enabled
-                       isRoot
+					   isRoot
+					   isAdmin
                      }
                    }`
 
@@ -108,19 +110,21 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		},
 		Name:    tempacc.Name,
 		IsRoot:  tempacc.IsRoot,
+		IsAdmin: tempacc.IsAdmin,
 		Enabled: tempacc.Enabled,
 	}
 
 	for _, field := range account.FieldMask.Paths {
-		switch field {
-		//Including all comibnations of case
-		case "name", "Name", "NAME":
+		switch strings.ToLower(field) {
+		case "name":
 			acc.Name = account.Account.Name
-		case "is_root", "is_Root", "Is_Root", "IS_ROOT":
+		case "is_root":
 			acc.IsRoot = account.Account.IsRoot
-		case "enabled", "Enabled", "ENABLED":
+		case "is_admin":
+			acc.IsAdmin = account.Account.IsAdmin
+		case "enabled":
 			acc.Enabled = account.Account.Enabled
-		case "password", "Password", "PASSWORD":
+		case "password":
 			err = s.SetPassword(ctx, account.Account.Uid, account.Account.Password)
 			if err != nil {
 				return err
@@ -148,7 +152,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 }
 
 //CreateUserAccount is a method to Create User Account
-func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error) {
+func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error) {
 	txn := s.Dg.NewTxn()
 
 	q := `query userExists($name: string) {
@@ -188,6 +192,7 @@ func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password s
 			},
 			Name:    username,
 			IsRoot:  isRoot,
+			IsAdmin: isAdmin,
 			Enabled: enabled,
 			HasCredentials: []*UsernameCredential{
 				{
@@ -246,7 +251,8 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        uid
                        name
                        type
-                       isRoot
+					   isRoot
+					   isAdmin
                        enabled
                        default.namespace {
                          name
@@ -277,13 +283,15 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 		Uid:     result.Account[0].UID,
 		Name:    result.Account[0].Name,
 		IsRoot:  result.Account[0].IsRoot,
+		IsAdmin: result.Account[0].IsAdmin,
 		Enabled: result.Account[0].Enabled,
 	}
 
 	if len(result.Account[0].DefaultNamespace) == 1 {
 		account.DefaultNamespace = &nodepb.Namespace{
-			Name: result.Account[0].DefaultNamespace[0].Name,
-			Id:   result.Account[0].DefaultNamespace[0].UID,
+			Name:            result.Account[0].DefaultNamespace[0].Name,
+			Id:              result.Account[0].DefaultNamespace[0].UID,
+			Markfordeletion: false,
 		}
 	}
 

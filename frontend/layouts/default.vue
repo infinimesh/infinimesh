@@ -11,6 +11,9 @@ export default {
       window.addEventListener("resize", this.onWindowResize);
       this.onWindowResize();
     });
+    this.$notification.config({
+      placement: "bottomRight",
+    });
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onWindowResize);
@@ -19,10 +22,10 @@ export default {
     onWindowResize() {
       this.$store.dispatch("window/set", {
         height: window.innerHeight,
-        width: window.innerWidth
+        width: window.innerWidth,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

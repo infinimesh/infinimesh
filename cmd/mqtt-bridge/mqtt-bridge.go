@@ -28,16 +28,17 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
+	"github.com/spf13/viper"
+	"github.com/xeipuuv/gojsonschema"
+	"google.golang.org/grpc"
 )
 
 var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error {
@@ -227,8 +228,10 @@ func main() {
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
+		fmt.Printf("Inside reading backchannel")
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
+		fmt.Printf("m.subpath : %v", m.SubPath)
 		topic := fqTopic(m.DeviceID, m.SubPath)
 		fmt.Println("Publish to topic ", topic, "of client", deviceID)
 		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
@@ -321,6 +324,9 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		VariableHeader: packet.ConnAckVariableHeader{},
 	}
 
+	if len(connectPacket.ConnectPayload.ClientID) <= 0 {
+		resp.VariableHeader.ConnAckProperties.AssignedClientID = deviceID
+	}
 	// Only open Back-channel after conn packet was received
 
 	// Create empty subscription
@@ -359,7 +365,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write PingResp", err)
 			}
 		case *packet.PublishControlPacket:
-			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap)
+			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
 			if err != nil {
 				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
@@ -370,9 +376,15 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				ps.AddSub(backChannel, sub.Topic)
-				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-				fmt.Println("Added Subscription", sub.Topic, deviceID)
+				subTopic, validTopic := TopicChecker(sub.Topic, "sub")
+				if validTopic {
+					ps.AddSub(backChannel, subTopic)
+					go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
+					fmt.Println("Added Subscription", subTopic, deviceID)
+				} else {
+					fmt.Println("Invalid Subscribed Topic")
+					_ = c.Close()
+				}
 			}
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
@@ -388,12 +400,12 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	}
 }
 
-func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int) (map[string]int, error) {
+func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
 	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
 		if val, ok := topicAliasPublishMap[p.VariableHeader.Topic]; ok {
 			if val == p.VariableHeader.PublishProperties.TopicAlias {
-				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 					return topicAliasPublishMap, err
 				}
 			} else {
@@ -401,12 +413,12 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 			}
 		} else {
 			topicAliasPublishMap[p.VariableHeader.Topic] = p.VariableHeader.PublishProperties.TopicAlias
-			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 				return topicAliasPublishMap, err
 			}
 		}
 	} else {
-		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID); err != nil {
+		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
 			return topicAliasPublishMap, err
 		}
 	}
@@ -420,22 +432,67 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 	return topicAliasPublishMap, nil
 }
 
-func publishTelemetry(topic string, data []byte, deviceID string) error {
-	message := mqtt.IncomingMessage{
-		SourceTopic:  topic,
-		SourceDevice: deviceID,
-		Data:         data,
+/*TopicChecker: to validate the subscribed topic name
+  input : topic name string
+  output : bool
+*/
+func TopicChecker(topic string, packetType string) (string, bool) {
+	if packetType == "sub" {
+		state := strings.Split(topic, "/")
+		if state[3] == "desired" && state[4] == "delta" {
+			return topic, true
+		} else if state[3] == "desired" && state[4] == "#" {
+			topicAltered := state[0] + "/" + state[1] + "/" + state[2] + "/" + state[3] + "/delta"
+			return topicAltered, true
+		}
+		return "", false
 	}
+	return "", false
+}
 
-	serialized, err := json.Marshal(&message)
-	if err != nil {
-		return err
-	}
+func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
+	valid := schemaValidation(data, version)
+	if valid {
+		message := mqtt.IncomingMessage{
+			ProtoLevel:   version,
+			SourceTopic:  topic,
+			SourceDevice: deviceID,
+			Data:         data,
+		}
 
-	producer.Input() <- &sarama.ProducerMessage{
-		Topic: kafkaTopicTelemetry,
-		Key:   sarama.StringEncoder(deviceID), // TODO
-		Value: sarama.ByteEncoder(serialized),
+		serialized, err := json.Marshal(&message)
+		if err != nil {
+			return err
+		}
+		producer.Input() <- &sarama.ProducerMessage{
+			Topic: kafkaTopicTelemetry,
+			Key:   sarama.StringEncoder(deviceID), // TODO
+			Value: sarama.ByteEncoder(serialized),
+		}
+	} else {
+		fmt.Println("Payload schema invalid")
 	}
 	return nil
+}
+
+func schemaValidation(data []byte, version int) bool {
+	if version == 4 {
+		return true
+	}
+	var payload mqtt.Payload
+	err := json.Unmarshal(data, &payload)
+	if err != nil {
+		log.Printf("Failed to deserialize payload")
+		return false
+	}
+	log.Println("payload.Messsage: ", payload.Message[0])
+	loader := gojsonschema.NewGoLoader(payload.Message[0])
+	schemaLoader := gojsonschema.NewReferenceLoader("file:../../pkg/mqtt/")
+	log.Println("schemaLoader: ", schemaLoader)
+	result, err := gojsonschema.Validate(schemaLoader, loader)
+	if err != nil {
+		log.Printf("Schema validation failed")
+		return false
+	}
+	return result.Valid()
 }

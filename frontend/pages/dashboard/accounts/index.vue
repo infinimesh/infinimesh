@@ -10,7 +10,8 @@
             type="primary"
             icon="plus"
             @click="createAccountDrawerVisible = true"
-          >Create Account</a-button>
+            >Create Account</a-button
+          >
         </a-row>
         <account-add
           :active="createAccountDrawerVisible"
@@ -31,14 +32,35 @@
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
           </span>
+          <span slot="is_root" slot-scope="is_root">
+            <a-row type="flex" justify="space-around">
+              <a-icon
+                :type="is_root ? 'check-circle' : 'close-circle'"
+                :style="{ color: is_root ? 'green' : 'red', fontSize: '24px' }"
+              />
+            </a-row>
+          </span>
+          <span slot="is_admin" slot-scope="is_admin">
+            <a-row type="flex" justify="space-around">
+              <a-icon
+                :type="is_admin ? 'check-circle' : 'close-circle'"
+                :style="{ color: is_admin ? 'green' : 'red', fontSize: '24px' }"
+              />
+            </a-row>
+          </span>
           <span slot="enabled" slot-scope="enabled">
             <a-row type="flex" justify="space-around">
-              <a-icon type="bulb" :style="{color: enabled ? 'green' : 'red', fontSize: '24px' }" />
+              <a-icon
+                type="bulb"
+                :style="{ color: enabled ? 'green' : 'red', fontSize: '24px' }"
+              />
             </a-row>
           </span>
           <span slot="actions" slot-scope="text, account">
             <a-space>
-              <a-button type="link" @click="resetAccountPassword(account)">Reset password</a-button>
+              <a-button type="link" @click="resetAccountPassword(account)"
+                >Reset password</a-button
+              >
               <account-reset-password
                 v-if="selectedAccount"
                 :active="resetAccountPasswordVisible"
@@ -49,10 +71,9 @@
 
               <a-divider type="vertical" />
 
-              <a-button
-                type="link"
-                @click="toogleAccount(account)"
-              >{{ account.enabled ? 'Disable' : 'Enable' }}</a-button>
+              <a-button type="link" @click="toogleAccount(account)">{{
+                account.enabled ? "Disable" : "Enable"
+              }}</a-button>
 
               <a-divider type="vertical" />
 
@@ -76,28 +97,42 @@ const columns = [
     title: "Username",
     dataIndex: "name",
     sorter: true,
-    scopedSlots: { customRender: "name" },
+    scopedSlots: { customRender: "name" }
+  },
+  {
+    title: "Root",
+    dataIndex: "is_root",
+    sorter: true,
+    width: "7%",
+    scopedSlots: { customRender: "is_root" }
+  },
+  {
+    title: "Admin",
+    dataIndex: "is_admin",
+    sorter: true,
+    width: "7%",
+    scopedSlots: { customRender: "is_admin" }
   },
   {
     title: "Enabled",
     dataIndex: "enabled",
     sorter: true,
-    width: "10%",
-    scopedSlots: { customRender: "enabled" },
+    width: "7%",
+    scopedSlots: { customRender: "enabled" }
   },
   {
     title: "Actions",
     key: "actions",
     fixed: "right",
     width: "15%",
-    scopedSlots: { customRender: "actions" },
-  },
+    scopedSlots: { customRender: "actions" }
+  }
 ];
 
 export default {
   components: {
     AccountAdd,
-    AccountResetPassword,
+    AccountResetPassword
   },
   data() {
     return {
@@ -108,7 +143,7 @@ export default {
       createAccountDrawerVisible: false,
 
       resetAccountPasswordVisible: false,
-      selectedAccount: null,
+      selectedAccount: null
     };
   },
   mounted() {
@@ -120,12 +155,12 @@ export default {
       vm.loading = true;
       vm.$axios
         .get("/api/accounts")
-        .then((res) => (vm.accounts = res.data.accounts))
-        .catch((e) => {
+        .then(res => (vm.accounts = res.data.accounts))
+        .catch(e => {
           if (e.response.status == 403) {
             vm.$notification.error({
               message: "Oops",
-              description: e.response.data.message,
+              description: e.response.data.message
             });
             vm.$store.commit("window/noAccess", "dashboard-accounts");
             vm.$router.push({ name: "dashboard-devices" });
@@ -137,17 +172,16 @@ export default {
       const vm = this;
       this.$axios({
         url: `/api/accounts/${account.uid}`,
-        method: "delete",
+        method: "delete"
       })
         .then(() => {
           vm.$message.success("Account successfuly deleted!");
           vm.getAccountsPool();
         })
-        .catch((e) => {
+        .catch(e => {
           vm.$notification.error({
             message: "Error deleting account " + account.name,
-            description: e.response.data.message,
-            placement: "bottomRight",
+            description: e.response.data.message
           });
         });
     },
@@ -155,7 +189,7 @@ export default {
       this.updateAccount(
         account.uid,
         {
-          enabled: !account.enabled,
+          enabled: !account.enabled
         },
         `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`,
         `Error ${account.enabled ? "disabling" : "enabling"} account`
@@ -166,22 +200,20 @@ export default {
       vm.$axios({
         method: "post",
         url: "/api/accounts",
-        data: account,
+        data: account
       })
         .then(() => {
           vm.$notification.success({
-            message: "Account created successfuly",
-            placement: "bottomRight",
+            message: "Account created successfuly"
           });
           vm.createAccountDrawerVisible = false;
           vm.getAccountsPool();
         })
-        .catch((err) => {
+        .catch(err => {
           this.$notification.error({
             message: "Failed to create an account",
             description: `Response: ${err.response.data.message}`,
-            placement: "bottomRight",
-            duration: 10,
+            duration: 10
           });
         });
     },
@@ -191,17 +223,16 @@ export default {
       vm.$axios({
         method: "patch",
         url: `/api/accounts/${id}`,
-        data: data,
+        data: data
       })
         .then(() => {
           vm.$message.success(success);
           vm.getAccountsPool();
         })
-        .catch((e) => {
+        .catch(e => {
           vm.$notification.error({
             message: error,
-            description: e.response.data.message,
-            placement: "bottomRight",
+            description: e.response.data.message
           });
         })
         .then(() => (vm.loading = false));
@@ -218,8 +249,8 @@ export default {
         "Password changed successfuly",
         "Reset password failed"
       );
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -227,15 +258,13 @@ export default {
 .ant-empty-description {
   color: lightgrey !important;
 }
-</style>
-<style lang="less">
 table.accounts-table {
   border-collapse: collapse;
 }
 .accounts-table > table,
 th,
 td {
-  border-bottom: 1px solid @primary-color !important;
+  border-bottom: 1px solid var(--primary-color) !important;
   color: black;
 }
 </style>

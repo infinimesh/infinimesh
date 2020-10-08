@@ -20,6 +20,7 @@ package dgraph
 import (
 	"context"
 	"testing"
+	"time"
 
 	"os"
 
@@ -35,6 +36,7 @@ import (
 )
 
 var repo node.Repo
+var n node.NamespaceController
 
 func init() {
 	dgURL := os.Getenv("DGRAPH_URL")
@@ -56,7 +58,7 @@ func TestAuthorize(t *testing.T) {
 	_, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
-	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, false, true)
 	require.NoError(t, err)
 
 	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
@@ -91,7 +93,7 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 	ctx := context.Background()
 
 	accountname := randomdata.SillyName()
-	account, err := repo.CreateUserAccount(ctx, accountname, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, accountname, "password", false, false, true)
 	require.NoError(t, err)
 
 	ns, err := repo.GetNamespace(ctx, accountname)
@@ -125,7 +127,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, true)
 	require.NoError(t, err)
 
 	//Get Namespace
@@ -168,7 +170,7 @@ func TestChangePassword(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, true)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, true)
 	require.NoError(t, err)
 
 	err = repo.SetPassword(ctx, account, "newpassword")
@@ -200,7 +202,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	account, err := repo.CreateUserAccount(ctx, randomName, "password", true, true)
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", true, true, true)
 	require.NoError(t, err)
 
 	//Set new values
@@ -213,9 +215,10 @@ func TestUpdateAccount(t *testing.T) {
 			Name:    NewName,
 			Enabled: false,
 			IsRoot:  false,
+			IsAdmin: false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "Enabled", "Is_Root"},
+			Paths: []string{"Name", "Enabled", "Is_Root", "Is_Admin"},
 		},
 	})
 	require.NoError(t, err)
@@ -239,7 +242,7 @@ func TestDeleteAccount(t *testing.T) {
 	acc := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false)
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -251,6 +254,47 @@ func TestDeleteAccount(t *testing.T) {
 
 	//Validation
 	require.EqualValues(t, string(err.Error()), "The Account is not found")
+}
+
+func TestIsAdmin(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
+	require.NoError(t, err)
+
+	//Get the created Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+
+	//Validate the created Account
+	require.NoError(t, err)
+	require.EqualValues(t, acc, respGet.Name)
+	require.EqualValues(t, false, respGet.IsAdmin)
+
+	//Update the account
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			IsAdmin: true,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Is_Admin"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err = repo.GetAccount(ctx, account)
+	require.NoError(t, err)
+
+	//Validate the created Account
+	require.EqualValues(t, true, respGet.IsAdmin)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 func TestChangePasswordWithNoUser(t *testing.T) {
@@ -330,24 +374,81 @@ func TestDeletePermissionOnNamespace(t *testing.T) {
 func TestDeleteNamespace(t *testing.T) {
 	ctx := context.Background()
 
+	//Random name for the namespace
+	ns := randomdata.SillyName()
+
 	//Create Namespace
-	nsID, err := repo.CreateNamespace(ctx, "Test12345")
+	nsID, err := repo.CreateNamespace(ctx, ns)
 	require.NoError(t, err)
 
 	//Mark the Namespace for deletion
 	err = repo.SoftDeleteNamespace(ctx, nsID)
 	require.NoError(t, err)
 
-	//Delete the Namespace marked for deletion
-	err = repo.HardDeleteNamespace(ctx, nsID)
+	//Delete the Namespace marked for deletion - Will not work for test
+	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, -14).Format(time.RFC3339))
+
+	//Try to fetch the delete account
+	nsNew, err := repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Validation for Soft delete
+	require.EqualValues(t, ns, nsNew.Name)
+	require.EqualValues(t, true, nsNew.Markfordeletion)
+	//Not doing time validation as its difficult to get the time when the delete was initiated
+	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
+
+	err = repo.RevokeNamespace(ctx, nsID)
 	require.NoError(t, err)
 
 	//Try to fetch the delete account
-	_, err = repo.GetNamespaceID(ctx, nsID)
+	nsNew, err = repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
 
-	//Validation
-	require.EqualValues(t, string(err.Error()), "The Namespace is not found")
+	//Validation for revoke
+	require.EqualValues(t, false, nsNew.Markfordeletion)
+	require.EqualValues(t, nsNew.Deleteinitiationtime, "0000-01-01T00:00:00Z")
 
+}
+
+func TestUpdateNamespace(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	//Create a New Namespace
+	ns, err := repo.CreateNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the Namespace
+	err = repo.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:                   ns,
+			Name:                 NewName,
+			Markfordeletion:      true,
+			Deleteinitiationtime: time.Now().Format(time.RFC3339),
+		},
+		NamespaceMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "MarkforDeletion", "Deleteinitiationtime"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Namespace Details
+	respGet, err := repo.GetNamespaceID(ctx, ns)
+	require.NoError(t, err)
+
+	//Validate the updated Namespace
+	require.NoError(t, err)
+	require.EqualValues(t, NewName, respGet.Name)
+	require.EqualValues(t, true, respGet.Markfordeletion)
+
+	//Delete the Namesapce created using namespace controller
+	err = repo.SoftDeleteNamespace(ctx, ns)
+	require.NoError(t, err)
 }
 
 /*//Test to check API Endpoints

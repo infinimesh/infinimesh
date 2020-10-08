@@ -22,6 +22,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -101,8 +102,6 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
 		}
 
-		//Added logging
-		log.Info("Create Namespace API Method: Namespace Created", zap.String("Namespace ID", ns.Id))
 		return &nodepb.Namespace{
 			Id:   ns.Id,
 			Name: ns.Name,
@@ -252,7 +251,11 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.DeleteNamespaceRequest) (response *nodepb.DeleteNamespaceResponse, err error) {
 
 	//Added logging
-	log.Info("Delete Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Delete Namespace API Method: Function Invoked",
+		zap.String("Account ID", ctx.Value("account_id").(string)),
+		zap.String("Namespace", request.Namespaceid),
+		zap.Bool("HardDelete Flag", request.Harddelete),
+	)
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -277,5 +280,20 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 	//Added logging
 	log.Error("Delete Namespace API Method: The Account is not allowed to access the Namespace")
 	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+
+}
+
+//API Method to Update namespace
+func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
+
+	//Added logging
+	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+
+	log.Info("Update Namespace API Method:Temp Logs", zap.Any("Request", request))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	return n.client.UpdateNamespace(ctx, request)
 
 }

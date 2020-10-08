@@ -54,6 +54,7 @@ const (
 	DISCONNECT  = 14
 )
 const (
+	ASSIGNED_CLIENT_ID                  = 18
 	SESSION_EXPIRY_INTERVAL_ID          = 17
 	SESSION_EXPIRY_INTERVAL_LENGTH      = 4
 	RECIEVE_MAXIMUM_ID                  = 33

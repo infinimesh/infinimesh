@@ -31,7 +31,7 @@ const (
 
 //Repo Interface to expose methods
 type Repo interface {
-	CreateUserAccount(ctx context.Context, username, password string, isRoot, enabled bool) (uid string, err error)
+	CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error)
 	ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error)
 	UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error)
 	GetAccount(ctx context.Context, accountID string) (account *nodepb.Account, err error)
@@ -56,5 +56,7 @@ type Repo interface {
 	ListPermissionsInNamespace(ctx context.Context, namespaceID string) (permissions []*nodepb.Permission, err error)
 	DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error)
 	SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error)
-	HardDeleteNamespace(ctx context.Context, namespaceID string) (err error)
+	HardDeleteNamespace(ctx context.Context, datecondition string) (err error)
+	RevokeNamespace(ctx context.Context, namespaceID string) (err error)
+	UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error)
 }

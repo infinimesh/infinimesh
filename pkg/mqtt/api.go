@@ -18,6 +18,7 @@
 package mqtt
 
 type IncomingMessage struct {
+	ProtoLevel   int
 	SourceTopic  string
 	SourceDevice string
 	Data         []byte
@@ -29,4 +30,14 @@ type OutgoingMessage struct {
 	DeviceID string // "Target" device; does not necessarily have to be the connected device (e.g. sub-device)
 	SubPath  string // Should not start with "/"
 	Data     []byte
+}
+
+type Message struct {
+	Topic string
+	Data  map[string]interface{}
+}
+
+type Payload struct {
+	Timestamp string
+	Message   []Message
 }
