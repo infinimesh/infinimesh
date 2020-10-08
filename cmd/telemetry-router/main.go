@@ -153,14 +153,6 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 				return err
 			}
 			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
-<<<<<<< HEAD
-=======
-			if topic, found := subTopics[payload.Message[0].Topic]; found {
-				target = topic
-				fmt.Printf("Subtopic found in the message!!, thus sending data to the subtopic")
-			}
-			target := h.router.Route(msg.SourceTopic, msg.SourceDevice)
->>>>>>> parent of 4dd515bb... Revert "Merge branch 'infinidev' into IN-21"
 			h.producer.Input() <- &sarama.ProducerMessage{
 				Key:   sarama.StringEncoder(msg.SourceDevice),
 				Topic: target,
