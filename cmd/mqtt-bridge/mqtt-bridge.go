@@ -479,14 +479,8 @@ func schemaValidation(data []byte, version int) bool {
 	if version == 4 {
 		return true
 	}
-	var msg mqtt.IncomingMessage
-	err := json.Unmarshal(data, &msg)
-	if err != nil {
-		log.Printf("invalid message format")
-		return false
-	}
 	var payload mqtt.Payload
-	err = json.Unmarshal(msg.Data, &payload)
+	err := json.Unmarshal(data, &payload)
 	if err != nil {
 		log.Printf("Failed to deserialize payload")
 		return false
