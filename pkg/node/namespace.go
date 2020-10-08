@@ -44,15 +44,60 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked", zap.String("Namespace ", request.Name))
 
-	id, err := n.Repo.CreateNamespace(ctx, request.GetName())
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = n.Repo
+	a.Log = n.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	//Check is the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
-		log.Error("Failed to create Namespace", zap.String("Name", request.Name), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Failed to create Namespace")
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Check is the account is admin
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	var id string
+	//Create the namespace if the account is root or admin
+	if isroot.GetIsRoot() || isadmin.GetIsAdmin() {
+		log.Info("Create Namespace initiated")
+		id, err = n.Repo.CreateNamespace(ctx, request.GetName())
+		if err != nil {
+			//Added logging
+			log.Error("Failed to create Namespace", zap.String("Name", request.Name), zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to create Namespace")
+		}
+	} else {
+		//Added logging
+		log.Error("The Account does not have permission to create Namespace")
+		return &nodepb.Namespace{}, status.Error(codes.PermissionDenied, "The Account does not have permission to create Namespace")
 	}
 
 	//Added logging
-	log.Info("Namespace Created", zap.String("Namespace ID", id))
+	log.Info("Namespace Created", zap.String("Namespace ID", id), zap.String("Namespace Name", request.GetName()))
+
+	//Assign Permissions to the account that was used to create namespace
+	_, err = a.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
+		Account:   requestorID,
+		Namespace: id,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
+	}
 
 	return &nodepb.Namespace{
 		Id:   id,

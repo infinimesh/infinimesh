@@ -272,7 +272,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
-	//Invoke the controller for server
+	//Invoke the List Account controller for server
 	res, err := a.client.ListAccounts(ctx, request)
 	return res, err
 
