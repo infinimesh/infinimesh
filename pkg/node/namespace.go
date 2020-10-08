@@ -70,6 +70,8 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
+	log.Info("Temporary Logs", zap.Any("requestorID", requestorID), zap.Any("isroot", isroot), zap.Any("isadmin", isadmin))
+
 	var id string
 	//Create the namespace if the account is root or admin
 	if isroot.GetIsRoot() || isadmin.GetIsAdmin() {
