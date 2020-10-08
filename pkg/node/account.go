@@ -40,28 +40,6 @@ type AccountController struct {
 	Repo    Repo
 }
 
-//validation method does the pre-checks for a REST request
-func validation(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string, err error) {
-
-	//Get the metadata from the context
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		//Added logging
-		log.Error("Failed to get metadata from context", zap.Error(err))
-		return nil, "", status.Error(codes.Aborted, "Failed to get metadata from context")
-	}
-
-	//Check for Authentication
-	requestorID := md.Get("requestorID")
-	if requestorID == nil {
-		//Added logging
-		log.Error("The account is not authenticated")
-		return nil, "", status.Error(codes.Unauthenticated, "The account is not authenticated")
-	}
-
-	return md, requestorID[0], nil
-}
-
 //IsRoot is a method that returns if the account has root priviledges or not
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
 
@@ -96,7 +74,7 @@ func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdmin
 	}
 
 	//Added logging
-	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsAdmin))
+	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsRoot))
 	return &nodepb.IsAdminResponse{IsAdmin: account.IsAdmin}, nil
 }
 
@@ -106,12 +84,6 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	log := s.Log.Named("CreateUserAccount Controller")
 	//Added logging
 	log.Info("Function Invoked", zap.Any("Account", request.Account.Name))
-
-	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
-	if err != nil {
-		return nil, err
-	}
 
 	uid, err := s.Repo.CreateUserAccount(ctx, request.Account.Name, request.Account.Password, request.Account.IsRoot, request.Account.IsAdmin, request.Account.Enabled)
 	if err != nil {
@@ -131,17 +103,8 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 		}
 	}
 
-	if len(request.Account.Owner) > 0 {
-		err := s.Repo.AssignOwner(ctx, requestorID, uid)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to assign owner to the account", zap.String("Account", uid), zap.Error(err))
-			return nil, err
-		}
-	}
-
 	//Added logging
-	log.Info("Infinimesh User Created", zap.String("UserName", request.Account.Name), zap.String("Account ID", uid), zap.String("Owned by", requestorID))
+	log.Info("Infinimesh User Created", zap.String("UserName", request.Account.Name), zap.String("uid", uid))
 	return &nodepb.CreateUserAccountResponse{Uid: uid}, nil
 }
 
@@ -326,41 +289,11 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	//Added logging
 	log.Info("Function Invoked")
 
-	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
+	accounts, err := s.Repo.ListAccounts(ctx)
 	if err != nil {
-		return nil, err
-	}
-
-	var accounts []*nodepb.Account
-
-	//Check the account priviledges
-	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: requestorID,
-	}); err == nil && res.GetIsRoot() {
-		//Get the list if the account has root permissions
-		log.Info("List Accounts with root privilidges")
-		accounts, err = s.Repo.ListAccounts(ctx)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to list Accounts as root", zap.Error(err))
-			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
-		}
-	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: requestorID,
-	}); err == nil && res.GetIsAdmin() {
-		//Get the list if the account has admin permissions
-		log.Info("List Accounts with admin privilidges")
-		accounts, err = s.Repo.ListAccountsforAdmin(ctx, requestorID)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to list Accounts as admin", zap.Error(err))
-			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
-		}
-	} else {
 		//Added logging
-		log.Error("The Account does not have permission to list details")
-		return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")
+		log.Error("Failed to list Accounts", zap.Error(err))
+		return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
 	}
 
 	//Added logging
@@ -397,23 +330,20 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
-	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
-	if err != nil {
-		return nil, err
+	//Get the metadata from the context
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		//Added logging
+		log.Error("Failed to get metadata from context", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details")
 	}
 
-	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: requestorID,
-	}); err == nil && !res.GetIsRoot() {
-		if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
-			Account: requestorID,
-		}); err == nil && !res.GetIsAdmin() {
-			//Validate if the account is admin or not
-			//Added logging
-			log.Error("The Account does not have permission to delete another account")
-			return &nodepb.DeleteAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to delete another account")
-		}
+	//Check for Authentication
+	requestorID := md.Get("requestorID")
+	if requestorID == nil {
+		//Added logging
+		log.Error("The account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
 
 	//Get account details for validation

@@ -33,12 +33,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
+	"github.com/spf13/viper"
+	"github.com/xeipuuv/gojsonschema"
+	"google.golang.org/grpc"
 )
 
 var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error {
@@ -451,22 +451,49 @@ func TopicChecker(topic string, packetType string) (string, bool) {
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
-	message := mqtt.IncomingMessage{
-		ProtoLevel:   version,
-		SourceTopic:  topic,
-		SourceDevice: deviceID,
-		Data:         data,
-	}
+	valid := schemaValidation(data, version)
+	if valid {
+		message := mqtt.IncomingMessage{
+			ProtoLevel:   version,
+			SourceTopic:  topic,
+			SourceDevice: deviceID,
+			Data:         data,
+		}
 
-	serialized, err := json.Marshal(&message)
-	if err != nil {
-		return err
+		serialized, err := json.Marshal(&message)
+		if err != nil {
+			return err
+		}
+		producer.Input() <- &sarama.ProducerMessage{
+			Topic: kafkaTopicTelemetry,
+			Key:   sarama.StringEncoder(deviceID), // TODO
+			Value: sarama.ByteEncoder(serialized),
+		}
+	} else {
+		fmt.Println("Payload schema invalid")
 	}
-	producer.Input() <- &sarama.ProducerMessage{
-		Topic: kafkaTopicTelemetry,
-		Key:   sarama.StringEncoder(deviceID), // TODO
-		Value: sarama.ByteEncoder(serialized),
-	}
-
 	return nil
+}
+
+func schemaValidation(data []byte, version int) bool {
+	if version == 4 {
+		return true
+	}
+	/*
+		var payload mqtt.Payload
+		err := json.Unmarshal(data, &payload)
+		if err != nil {
+			log.Printf("Failed to deserialize payload")
+			return false
+		}*/
+	log.Println("payload.Messsage: ", data)
+	loader := gojsonschema.NewGoLoader(data)
+	schemaLoader := gojsonschema.NewReferenceLoader("file:../../pkg/mqtt/schema-mqtt5.json")
+	log.Println("schemaLoader: ", schemaLoader)
+	result, err := gojsonschema.Validate(schemaLoader, loader)
+	if err != nil {
+		log.Printf("Schema validation failed")
+		return false
+	}
+	return result.Valid()
 }

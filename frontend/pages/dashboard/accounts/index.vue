@@ -134,11 +134,6 @@ export default {
     AccountAdd,
     AccountResetPassword
   },
-  computed: {
-    user() {
-      return this.$store.getters.loggedInUser;
-    }
-  },
   data() {
     return {
       columns,
@@ -202,7 +197,6 @@ export default {
     },
     handleAccountAdd(account) {
       const vm = this;
-      account.account.owner = vm.user.uid;
       vm.$axios({
         method: "post",
         url: "/api/accounts",
