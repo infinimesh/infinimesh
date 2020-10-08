@@ -28,17 +28,18 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
+	"github.com/spf13/viper"
+	"github.com/xeipuuv/gojsonschema"
+	"google.golang.org/grpc"
 )
 
 var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error {
@@ -451,22 +452,49 @@ func TopicChecker(topic string, packetType string) (string, bool) {
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
-	message := mqtt.IncomingMessage{
-		ProtoLevel:   version,
-		SourceTopic:  topic,
-		SourceDevice: deviceID,
-		Data:         data,
-	}
+	if schemaValidation(data, version) {
+		message := mqtt.IncomingMessage{
+			ProtoLevel:   version,
+			SourceTopic:  topic,
+			SourceDevice: deviceID,
+			Data:         data,
+		}
 
-	serialized, err := json.Marshal(&message)
-	if err != nil {
-		return err
+		serialized, err := json.Marshal(&message)
+		if err != nil {
+			return err
+		}
+		producer.Input() <- &sarama.ProducerMessage{
+			Topic: kafkaTopicTelemetry,
+			Key:   sarama.StringEncoder(deviceID), // TODO
+			Value: sarama.ByteEncoder(serialized),
+		}
 	}
-	producer.Input() <- &sarama.ProducerMessage{
-		Topic: kafkaTopicTelemetry,
-		Key:   sarama.StringEncoder(deviceID), // TODO
-		Value: sarama.ByteEncoder(serialized),
-	}
-
 	return nil
+}
+
+func schemaValidation(data []byte, version int) bool {
+	if version == 4 {
+		return true
+	}
+	var msg mqtt.IncomingMessage
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "invalid message format")
+		return false
+	}
+	var payload mqtt.Payload
+	err = json.Unmarshal(msg.Data, &payload)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to deserialize payload")
+		return false
+	}
+	loader := gojsonschema.NewGoLoader(payload.Message[0])
+	schemaLoader := gojsonschema.NewReferenceLoader("file://pkg/schema-mqtt5.json")
+	result, err := gojsonschema.Validate(schemaLoader, loader)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Schema validation failed")
+		return false
+	}
+	return result.Valid()
 }

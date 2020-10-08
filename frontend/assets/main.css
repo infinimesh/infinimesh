@@ -73,9 +73,6 @@ strong {
 .lead-dark {
   color: var(--secondary-color) !important;
 }
-.add-drawer-actions-row {
-  background: var(--primary-color);
-}
 
 /* AntDesign Classes Overloads */
 
