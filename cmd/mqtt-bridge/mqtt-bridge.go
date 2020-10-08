@@ -488,7 +488,7 @@ func schemaValidation(data []byte, version int) bool {
 		}*/
 	log.Println("payload.Messsage: ", data)
 	loader := gojsonschema.NewGoLoader(data)
-	schemaLoader := gojsonschema.NewReferenceLoader("file:../../pkg/mqtt/")
+	schemaLoader := gojsonschema.NewReferenceLoader("file:../../pkg/mqtt/schema-mqtt5.json")
 	log.Println("schemaLoader: ", schemaLoader)
 	result, err := gojsonschema.Validate(schemaLoader, loader)
 	if err != nil {
