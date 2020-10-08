@@ -493,7 +493,7 @@ func schemaValidation(data []byte, version int) bool {
 	log.Println("schemaLoader:", schemaLoader)
 	result, err := gojsonschema.Validate(schemaLoader, loader)
 	if err != nil {
-		log.Printf("Schema validation failed")
+		log.Printf("Schema validation failed %v", err)
 		return false
 	}
 	return result.Valid()
