@@ -452,7 +452,8 @@ func TopicChecker(topic string, packetType string) (string, bool) {
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
-	if schemaValidation(data, version) {
+	valid := schemaValidation(data, version)
+	if valid {
 		message := mqtt.IncomingMessage{
 			ProtoLevel:   version,
 			SourceTopic:  topic,
@@ -469,6 +470,8 @@ func publishTelemetry(topic string, data []byte, deviceID string, version int) e
 			Key:   sarama.StringEncoder(deviceID), // TODO
 			Value: sarama.ByteEncoder(serialized),
 		}
+	} else {
+		fmt.Println("Payload schema invalid")
 	}
 	return nil
 }
@@ -490,7 +493,7 @@ func schemaValidation(data []byte, version int) bool {
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload.Message[0])
-	schemaLoader := gojsonschema.NewReferenceLoader("file://pkg/schema-mqtt5.json")
+	schemaLoader := gojsonschema.NewReferenceLoader("file://pkg/mqtt/schema-mqtt5.json")
 	result, err := gojsonschema.Validate(schemaLoader, loader)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Schema validation failed")
