@@ -69,49 +69,20 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 	//Added logging
 	log.Info("Create Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("Create Namespace API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
+	//Invoke the Create Namespace controller for server
+	ns, err := n.client.CreateNamespace(ctx, request)
 	if err != nil {
 		//Added logging
-		log.Error("Create Namespace API Method: Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
-	if resp.GetIsRoot() {
-		// TODO this is not atomic and if the application crashes
-		// between both calls, we'll have a problem. Maybe move it to
-		// one operation into the repo, and do within a txn.
-		ns, err := n.client.CreateNamespace(ctx, request)
-		if err != nil {
-			return nil, err
-		}
-
-		//Assign Permissions to the namespace to the account that was used to create namespace
-		_, err = n.accountClient.AuthorizeNamespace(ctx, &nodepb.AuthorizeNamespaceRequest{
-			Account:   account,
-			Namespace: ns.GetId(),
-			Action:    nodepb.Action_WRITE,
-		})
-		if err != nil {
-			return nil, status.Error(codes.Internal, "Failed to authorize after creating ns")
-		}
-
-		return &nodepb.Namespace{
-			Id:   ns.Id,
-			Name: ns.Name,
-		}, nil
-
+		log.Error("Create Namespace API Method: Failed to create Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Create Namespace API Method: Failed to create Namespace")
 	}
 
 	//Added logging
-	log.Error("Create Namespace API Method: The Account does not have permission to create Namespace")
-	return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to create Namespace")
+	log.Info("Create Namespace API Method: Namespace succesfully created and Account auhtorized to access it")
+	return ns, nil
 }
 
 //API Method to get details of a Namespace
@@ -289,11 +260,18 @@ func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.Upda
 	//Added logging
 	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
 
-	log.Info("Update Namespace API Method:Temp Logs", zap.Any("Request", request))
-
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	return n.client.UpdateNamespace(ctx, request)
+	//Invoke the Update Namespace controller for server
+	ns, err := n.client.UpdateNamespace(ctx, request)
+	if err != nil {
+		//Added logging
+		log.Error("Update Namespace API Method: Failed to update Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Update Namespace API Method: Failed to update Namespace")
+	}
 
+	//Added logging
+	log.Info("Update Namespace API Method: Namespace succesfully updated")
+	return ns, nil
 }
