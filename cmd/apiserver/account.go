@@ -256,7 +256,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 	return &nodepb.CreateUserAccountResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to create another account")
 }
 
-//API Method to List all account
+//API Method to List all account.
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 
 	//Added logging
