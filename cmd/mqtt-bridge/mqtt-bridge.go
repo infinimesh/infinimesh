@@ -492,8 +492,11 @@ func schemaValidation(data []byte, version int) bool {
 		fmt.Fprintf(os.Stderr, "Failed to deserialize payload")
 		return false
 	}
+	fmt.Printf("pmsg %v\n", payload.Message[0])
 	loader := gojsonschema.NewGoLoader(payload.Message[0])
+	fmt.Printf("payload message loader %v\n", loader)
 	schemaLoader := gojsonschema.NewReferenceLoader("file://pkg/mqtt/schema-mqtt5.json")
+	fmt.Printf("Schemaloader %v\n", schemaLoader)
 	result, err := gojsonschema.Validate(schemaLoader, loader)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Schema validation failed")
