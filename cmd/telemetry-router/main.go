@@ -140,14 +140,12 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 		err := json.Unmarshal(message.Value, &msg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to deserialize msg with offset %v", message.Offset)
-			return err
 		}
 		if msg.ProtoLevel == 5 {
 			var payload mqtt.Payload
 			err = json.Unmarshal(msg.Data, &payload)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to deserialize payload with offset %v", message.Offset)
-				return err
 			}
 			subTopicData, err := json.Marshal(payload.Message[0].Data)
 			if err != nil {
