@@ -90,11 +90,13 @@ func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.States_StreamReportedStateChangesServer) (err error) {
 
 	//Added logging
-	log.Info("Stream Reported State Changes API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
+	log.Info("Stream API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
 
 	account, ok := srv.Context().Value("account_id").(string)
 	if !ok {
-		return status.Error(codes.Unauthenticated, "Unauthenticated")
+		//Added logging
+		log.Error("Stream API Method: The Account is not authenticated")
+		return status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
 	resp, err := s.accountClient.IsAuthorized(srv.Context(), &nodepb.IsAuthorizedRequest{
@@ -103,25 +105,33 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 		Action:  nodepb.Action_READ,
 	})
 	if err != nil {
-		return status.Error(codes.PermissionDenied, "Permission denied")
+		return status.Error(codes.PermissionDenied, "Stream API Method: Failed to get Authorization for the Stream")
 	}
 	if !resp.GetDecision().GetValue() {
-		return status.Error(codes.PermissionDenied, "Permission denied")
+		return status.Error(codes.PermissionDenied, "Stream API Method: The account doesnot have permission to start the Stream")
 	}
 
+	//Added logging
+	log.Info("Stream API Method: Streaming started")
 	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {
-		return err
+		//Added logging
+		log.Error("Stream API Method: Failed to start the Stream", zap.Error(err))
+		return status.Error(codes.Unauthenticated, "Failed to start the Stream")
 	}
 
 	for {
 		msg, err := c.Recv()
 		if err != nil {
+			//Added logging
+			log.Error("Stream API Method: Error while receving message", zap.Error(err))
 			return err
 		}
 
 		err = srv.Send(msg)
 		if err != nil {
+			//Added logging
+			log.Error("Stream API Method: Error while sending message", zap.Error(err))
 			return err
 		}
 	}
