@@ -20,6 +20,7 @@ package main
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -33,7 +34,12 @@ type shadowAPI struct {
 	client        shadowpb.ShadowsClient
 }
 
+//Get is a method to get the current state of the device
 func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+
+	//Added logging
+	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
@@ -54,7 +60,12 @@ func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (resp
 	return s.client.Get(ctx, request)
 }
 
+//PatchDesiredState is a method to update the current state of the device
 func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+
+	//Added logging
+	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
@@ -75,7 +86,12 @@ func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 	return s.client.PatchDesiredState(ctx, request)
 }
 
+//StreamReportedStateChanges is a method to get the stream for a device
 func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.States_StreamReportedStateChangesServer) (err error) {
+
+	//Added logging
+	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
+
 	/*
 		account, ok := srv.Context().Value("account_id").(string)
 		if !ok {
@@ -83,9 +99,11 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 		}
 	*/
 
+	account := "root"
+
 	resp, err := s.accountClient.IsAuthorized(srv.Context(), &nodepb.IsAuthorizedRequest{
 		Node:    request.Id,
-		Account: "root",
+		Account: account,
 		Action:  nodepb.Action_READ,
 	})
 	if err != nil {

@@ -230,7 +230,7 @@ func main() {
 	namespaceClient := nodepb.NewNamespacesClient(nodeConn)
 
 	//Added logging
-	log.Info("GRPC API Server", zap.String("Starting GRPC Service", ""))
+	log.Info("GRPC API Server: Starting GRPC Service")
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient, accountClient: accountClient})
 	apipb.RegisterStatesServer(srv, &shadowAPI{client: shadowClient, accountClient: accountClient})
@@ -240,18 +240,18 @@ func main() {
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		//Added logging
-		log.Error("GRPC API Server", zap.String("Unable to start GRPC Service", ""), zap.Error(err))
+		log.Error("GRPC API Server: Unable to start GRPC Service", zap.Error(err))
 		panic(err)
 	}
 
 	//Added logging
-	log.Info("GRPC API Server", zap.String("GRPC Service Started", ""))
+	log.Info("GRPC API Server: GRPC Service Started")
 	reflection.Register(srv)
 
 	err = srv.Serve(listener)
 	if err != nil {
 		//Added logging
-		log.Error("GRPC API Server", zap.String("Unable to start GRPC Service", ""), zap.Error(err))
+		log.Error("GRPC API Server: Unable to start GRPC Service", zap.Error(err))
 		panic(err)
 	}
 
