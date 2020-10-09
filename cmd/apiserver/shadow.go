@@ -38,7 +38,7 @@ type shadowAPI struct {
 func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 
 	//Added logging
-	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Info("Get State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -64,7 +64,7 @@ func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (resp
 func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
 
 	//Added logging
-	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Info("Patch Desired State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -90,7 +90,7 @@ func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.States_StreamReportedStateChangesServer) (err error) {
 
 	//Added logging
-	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
+	log.Info("Stream Reported State Changes API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
 
 	account, ok := srv.Context().Value("account_id").(string)
 	if !ok {
