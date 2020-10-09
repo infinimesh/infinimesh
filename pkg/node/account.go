@@ -40,8 +40,8 @@ type AccountController struct {
 	Repo    Repo
 }
 
-//validation method does the pre-checks for a REST request
-func validation(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string, err error) {
+//Validation method does the pre-checks for a REST request
+func Validation(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string, err error) {
 
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -107,8 +107,8 @@ func (s *AccountController) CreateUserAccount(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked", zap.Any("Account", request.Account.Name))
 
-	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
+	//Get metadata from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	log.Info("Function Invoked")
 
 	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
+	_, requestorID, err := Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}
@@ -398,7 +398,7 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
 
 	//Get metadata and from context and perform validation
-	_, requestorID, err := validation(ctx, log)
+	_, requestorID, err := Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}

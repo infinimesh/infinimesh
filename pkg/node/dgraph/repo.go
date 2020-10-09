@@ -402,14 +402,15 @@ func (s *DGraphRepo) Authorize(ctx context.Context, account, node, action string
 	return nil
 }
 
-func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, account, action string) (decision bool, err error) {
-	if node == account {
+//IsAuthorized is a method to check if the given account has the mentioned action for the node
+func (s *DGraphRepo) IsAuthorized(ctx context.Context, node, accountid, action string) (decision bool, err error) {
+	if node == accountid {
 		return true, nil
 	}
 
 	params := map[string]string{
 		"$device_id": node,
-		"$user_id":   account,
+		"$user_id":   accountid,
 	}
 
 	txn := s.Dg.NewReadOnlyTxn()

@@ -43,7 +43,7 @@ type accountAPI struct {
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 
 	//Added logging
-	log.Info("Self Account API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -64,7 +64,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Get Account API Method: Function Invoked", zap.Any("Account", request.Id))
+	log.Info("Get Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	if !ok {
 		//Added logging
@@ -96,7 +96,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
-	log.Info("Generate Token Method: Function Invoked", zap.String("Account ID", request.Username))
+	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
@@ -205,6 +205,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 
 	//Added logging
 	log.Info("Create Account API Method: Function Invoked",
+		zap.String("Requestor ID", ctx.Value("account_id").(string)),
 		zap.String("Account", request.Account.Name),
 		zap.Bool("Enabled", request.Account.Enabled),
 		zap.Bool("IsRoot", request.Account.IsRoot),
@@ -260,7 +261,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 
 	//Added logging
-	log.Info("List Accounts API Method: Function Invoked", zap.Any("Account ID", ctx.Value("account_id")))
+	log.Info("List Accounts API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -272,7 +273,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
-	//Invoke the controller for server
+	//Invoke the List Account controller for server
 	res, err := a.client.ListAccounts(ctx, request)
 	return res, err
 
@@ -282,7 +283,7 @@ func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccou
 func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAccountRequest) (response *nodepb.DeleteAccountResponse, err error) {
 
 	//Added logging
-	log.Info("Delete Account API Method: Function Invoked", zap.Any("Account ID", ctx.Value("account_id")))
+	log.Info("Delete Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
