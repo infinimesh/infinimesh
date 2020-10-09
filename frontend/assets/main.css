@@ -55,6 +55,16 @@ body {
   --footer-background: var(--background-color);
 }
 
+.progr-mode body {
+  --primary-color: #884087;
+  --secondary-color: yellow;
+  --background-color: rgb(52, 196, 196);
+  --footer-background: pink;
+  --icon-color: red;
+  --danger-color: yellow;
+  --heading-color: lightgreen;
+}
+
 a {
   color: var(--link-color) !important;
 }
