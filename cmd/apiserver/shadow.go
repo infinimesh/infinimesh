@@ -99,7 +99,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 		}
 	*/
 
-	account := "root"
+	account := "0x2"
 
 	resp, err := s.accountClient.IsAuthorized(srv.Context(), &nodepb.IsAuthorizedRequest{
 		Node:    request.Id,
