@@ -92,14 +92,10 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 	//Added logging
 	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
 
-	/*
-		account, ok := srv.Context().Value("account_id").(string)
-		if !ok {
-			return status.Error(codes.Unauthenticated, "Unauthenticated")
-		}
-	*/
-
-	account := "0x2"
+	account, ok := srv.Context().Value("account_id").(string)
+	if !ok {
+		return status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
 
 	resp, err := s.accountClient.IsAuthorized(srv.Context(), &nodepb.IsAuthorizedRequest{
 		Node:    request.Id,

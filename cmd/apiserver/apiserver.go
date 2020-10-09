@@ -167,6 +167,54 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
 }
 
+var jwtAuth = func(ctx context.Context) (context.Context, error) {
+	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	log.Debug("Extracted bearer token", zap.String("token", tokenString))
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Unexpected signing method: %v", t.Header["alg"]))
+		}
+		return jwtSigningSecret, nil
+	})
+	if err != nil {
+		return ctx, err
+	}
+
+	if !token.Valid {
+		return ctx, errors.New("Invalid token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		log.Info("Validated token", zap.Any("claims", claims))
+
+		if accountID, ok := claims[accountIDClaim]; ok {
+
+			if accountIDStr, ok := accountID.(string); ok {
+				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
+				if err != nil {
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+				}
+
+				if !resp.Enabled {
+					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
+				}
+
+				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
+				return newCtx, nil
+			}
+
+		}
+		log.Info("Token does not contain account id field", zap.Any("token", token))
+	}
+
+	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+}
+
 func init() {
 	viper.SetDefault("REGISTRY_HOST", "device-registry:8080")
 	viper.SetDefault("SHADOW_HOST", "shadow-api:8096")
@@ -205,6 +253,7 @@ func main() {
 	}()
 
 	srv := grpc.NewServer(
+		grpc.StreamInterceptor(grpc_auth.StreamServerInterceptor(jwtAuth)),
 		grpc.UnaryInterceptor(jwtAuthInterceptor),
 	)
 
