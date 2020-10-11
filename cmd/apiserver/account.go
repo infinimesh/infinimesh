@@ -83,7 +83,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	return res, err
 }
 
-//Method to get token for an Account
+//Token is method to get token for an Account
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
