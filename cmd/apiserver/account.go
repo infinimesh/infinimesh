@@ -39,7 +39,7 @@ type accountAPI struct {
 	client        nodepb.AccountServiceClient
 }
 
-//API Method to get details of own Account.
+//SelfAccount API Method to get details of own Account.
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 
 	//Added logging
