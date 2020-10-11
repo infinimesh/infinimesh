@@ -68,8 +68,15 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	//Added logging
 	log.Info("Get Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		//Added logging
+		log.Error("Self Account API Method: The Account is not authenticated")
+		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
+	}
+
 	//Added the requestor account id to context metadata so that it can be passed on to the server
-	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
 
 	//Invoke the get Account controller
 	res, err := a.client.GetAccount(ctx, request)
