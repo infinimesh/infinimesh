@@ -288,50 +288,11 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Id))
 
-	//Get metadata and from context and perform validation
-	_, requestorID, err := Validation(ctx, log)
+	account, err := s.Repo.GetAccount(ctx, request.Id)
 	if err != nil {
-		return nil, err
-	}
-
-	var account *nodepb.Account
-
-	//Check the account priviledges
-	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: requestorID,
-	}); err == nil && res.GetIsRoot() {
-		//Get the account with root permissions
-		log.Info("Get Account with root privilidges")
-		account, err = s.Repo.GetAccount(ctx, request.Id)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to get Account details as root", zap.Error(err))
-			return &nodepb.Account{}, status.Error(codes.Internal, "Failed to get Account details")
-		}
-	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: requestorID,
-	}); err == nil && res.GetIsAdmin() {
-		//Get the account with admin permissions
-		log.Info("Get Account with admin privilidges")
-		account, err = s.Repo.GetAccount(ctx, request.Id)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to get Account details as admin", zap.Error(err))
-			return &nodepb.Account{}, status.Error(codes.Internal, "Failed to get Account details")
-		}
-	} else if requestorID == request.Id {
-		//Get the account for self
-		log.Info("Get Account for self")
-		account, err = s.Repo.GetAccount(ctx, requestorID)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to get Account details for self", zap.Error(err))
-			return &nodepb.Account{}, status.Error(codes.Internal, "Failed to get Account details")
-		}
-	} else {
 		//Added logging
-		log.Error("The Account does not have permission to get details", zap.Error(err))
-		return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The Account does not have permission to get details")
+		log.Error("Unable able to get Account", zap.Error(err))
+		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
 	//Added logging
@@ -398,7 +359,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		}
 	} else {
 		//Added logging
-		log.Error("The Account does not have permission to list details", zap.Error(err))
+		log.Error("The Account does not have permission to list details")
 		return &nodepb.ListAccountsResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to list details")
 	}
 
