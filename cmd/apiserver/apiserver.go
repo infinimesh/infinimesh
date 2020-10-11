@@ -31,6 +31,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 
 	"encoding/base64"
@@ -96,6 +97,9 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 		if accountID, ok := claims[accountIDClaim]; ok {
 
 			if accountIDStr, ok := accountID.(string); ok {
+				//Added the requestor account id to context metadata so that it can be passed on to the server
+				ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", accountIDStr)
+
 				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
 				if err != nil {
 					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
