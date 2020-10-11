@@ -52,44 +52,28 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
 	}
 
-	//Added logging
-	log.Info("Self Account API Method: Own Account Details Obtained")
-	return a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the get Account controller
+	res, err := a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
 		Id: account,
 	})
+	return res, err
 }
 
 //API Method to Get Details of an Account
 func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountRequest) (response *nodepb.Account, err error) {
-	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
 	log.Info("Get Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	if !ok {
-		//Added logging
-		log.Error("Get Account API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	//Validate if the account is root or not
-	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: account,
-	}); err == nil && res.GetIsRoot() {
-		return a.client.GetAccount(ctx, request)
-	}
-
-	//Validate if the account is admin or not
-	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: account,
-	}); err == nil && res.GetIsAdmin() {
-		res, err := a.client.GetAccount(ctx, request)
-		return res, err
-	}
-
-	//Added logging
-	log.Error("Get Account API Method: The Account does not have permission to get details")
-	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The Account does not have permission to get details")
+	//Invoke the get Account controller
+	res, err := a.client.GetAccount(ctx, request)
+	return res, err
 }
 
 //Method to get token for an Account
