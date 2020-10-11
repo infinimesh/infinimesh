@@ -87,7 +87,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
-	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", request.Username)
+	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", request.Username))
 
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
