@@ -131,7 +131,6 @@ export default {
       });
     },
     loadNamespacePermissions(expanded, ns) {
-      console.log(expanded, ns);
       if (expanded) {
         this.$store.dispatch("devices/getNamespacePermissions", ns);
       }
