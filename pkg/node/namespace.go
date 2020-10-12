@@ -106,7 +106,7 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
 	}
 
-	//Update teh namespace to make sure that Markfor Deletion is false
+	//Update the namespace to make sure that Markfor Deletion is false after creation
 	_, err = n.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
 		Namespace: &nodepb.Namespace{
 			Id:              id,
@@ -117,7 +117,7 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		},
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
+		return nil, status.Error(codes.Internal, "Failed to update the namespace after creation")
 	}
 
 	return &nodepb.Namespace{
@@ -299,7 +299,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Namespace", request.Namespace.Id),
-		zap.Any("FieldMask Paths", request),
+		zap.Any("FieldMask Paths", request.GetNamespaceMask()),
 	)
 
 	//Get metadata and from context and perform validation
