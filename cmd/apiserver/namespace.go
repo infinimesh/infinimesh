@@ -38,7 +38,7 @@ type namespaceAPI struct {
 func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
 
 	//Added logging
-	log.Info("List Namespaces API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("List Namespaces API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -67,7 +67,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.CreateNamespaceRequest) (response *nodepb.Namespace, err error) {
 
 	//Added logging
-	log.Info("Create Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Create Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -89,7 +89,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 
 	//Added logging
-	log.Info("Get Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Get Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -120,7 +120,7 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.CreateNamespacePermissionRequest) (response *apipb.CreateNamespacePermissionResponse, err error) {
 
 	//Added logging
-	log.Info("Create Permission API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Create Permission API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -159,7 +159,7 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
 
 	//Added logging
-	log.Info("List Permissions API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("List Permissions API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -190,7 +190,7 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.DeletePermissionRequest) (response *nodepb.DeletePermissionResponse, err error) {
 
 	//Added logging
-	log.Info("Delete Permission API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Delete Permission API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -223,7 +223,7 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 
 	//Added logging
 	log.Info("Delete Namespace API Method: Function Invoked",
-		zap.String("Account ID", ctx.Value("account_id").(string)),
+		zap.String("Requestor ID", ctx.Value("account_id").(string)),
 		zap.String("Namespace", request.Namespaceid),
 		zap.Bool("HardDelete Flag", request.Harddelete),
 	)
@@ -258,7 +258,7 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.UpdateNamespaceRequest) (response *nodepb.UpdateNamespaceResponse, err error) {
 
 	//Added logging
-	log.Info("Update Namespace API Method: Function Invoked", zap.String("Account ID", ctx.Value("account_id").(string)))
+	log.Info("Update Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
