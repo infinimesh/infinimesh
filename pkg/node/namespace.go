@@ -53,6 +53,13 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, err
 	}
 
+	//Validated that required data is populated with values
+	if request.Name == "" {
+		//Added logging
+		log.Error("Data Validation for Namespace Creation", zap.String("Error", "The Name cannot not be empty"))
+		return nil, status.Error(codes.FailedPrecondition, "The Name cannot not be empty")
+	}
+
 	//Check if the account is root
 	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
