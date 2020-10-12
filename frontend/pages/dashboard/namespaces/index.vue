@@ -132,10 +132,21 @@ export default {
       this.loading = false;
     },
     deleteNamespace(namespace) {
-      this.$notification.warning({
-        message: "Coming soon",
-        description: `Can't delete ${namespace.name}(${namespace.id})`,
-      });
+      const vm = this;
+      this.$axios({
+        url: `/api/namespaces/${namespace.id}/false`,
+        method: "delete",
+      })
+        .then(() => {
+          vm.$message.success("Namespace successfuly deleted!");
+          vm.getNamespacesPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: "Error deleting namespace " + namespace.name,
+            description: e.response.data.message,
+          });
+        });
     },
     loadNamespacePermissions(expanded, ns) {
       if (expanded) {
