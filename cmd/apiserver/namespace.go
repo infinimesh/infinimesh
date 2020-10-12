@@ -263,12 +263,14 @@ func (n *namespaceAPI) UpdateNamespace(ctx context.Context, request *nodepb.Upda
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
+	log.Info("Temporary Log", zap.Any("Content", ctx), zap.Any("Request", request))
+
 	//Invoke the Update Namespace controller for server
 	ns, err := n.client.UpdateNamespace(ctx, request)
 	if err != nil {
 		//Added logging
 		log.Error("Update Namespace API Method: Failed to update Namespace", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Update Namespace API Method: Failed to update Namespace")
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging

@@ -23,7 +23,6 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
@@ -281,28 +280,19 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		zap.Any("FieldMask Paths", request),
 	)
 
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	//Initialize the Account Controller with Namespace controller data
 	a.Repo = n.Repo
 	a.Log = n.Log
 
-	//Get the metadata from the context
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		//Added logging
-		log.Error("Failed to get Account details", zap.Error(err))
-		return nil, status.Error(codes.Aborted, "Failed to get Account details")
-	}
-
-	//Check for Authentication
-	requestorID := md.Get("requestorID")
-	if requestorID == nil {
-		//Added logging
-		log.Error("The Account is not authenticated", zap.Error(err))
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
-
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   requestorID[0],
+		Account:   requestorID,
 		Namespace: request.Namespace.Id,
 		Action:    nodepb.Action_WRITE,
 	})
@@ -325,7 +315,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to update the Namespace")
 	}
 
-	//Update logging
-	log.Info("Delete Namespace successful")
+	//Added logging
+	log.Info("Update Namespace successful")
 	return &nodepb.UpdateNamespaceResponse{}, nil
 }
