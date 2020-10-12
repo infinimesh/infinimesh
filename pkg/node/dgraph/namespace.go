@@ -528,6 +528,15 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
 			})
+			//Reset the deleteinitiationtime to 00 when markfordeletion is set to false ie. revoke is issued
+			if !namespace.Namespace.Markfordeletion {
+				m.Set = append(m.Set, &api.NQuad{
+					Subject:     namespace.Namespace.Id,
+					Predicate:   "deleteinitiationtime",
+					ObjectId:    namespace.Namespace.Id,
+					ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "0000-01-01T00:00:00Z"}},
+				})
+			}
 		case "deleteinitiationtime":
 			m.Set = append(m.Set, &api.NQuad{
 				Subject:     namespace.Namespace.Id,
