@@ -36,9 +36,6 @@ import (
 //CreateNamespace is a method to create Namespaces
 func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
 
-	//Assign default value to mark for deletion - This is done so that the value is set in DGraph
-	markfordeletion := false
-
 	//JSON for creating the node in Dgraph DB
 	ns := &Namespace{
 		Node: Node{
@@ -46,7 +43,7 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 			UID:  "_:namespace",
 		},
 		Name:                 name,
-		MarkForDeletion:      markfordeletion,
+		MarkForDeletion:      false,
 		DeleteInitiationTime: "0000-01-01T00:00:00Z",
 	}
 
