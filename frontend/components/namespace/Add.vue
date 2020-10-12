@@ -98,7 +98,7 @@ export default Vue.component("namespace-add", {
         }
       });
       if (errors.length === 0) {
-        this.$emit("add", { namespace: this.namespace });
+        this.$emit("add", this.namespace);
       }
     },
   },
