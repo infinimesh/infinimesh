@@ -147,7 +147,7 @@ export default {
     },
     deleteNamespace(namespace) {
       const vm = this;
-      this.$axios({
+      vm.$axios({
         url: `/api/namespaces/${namespace.id}/false`,
         method: "delete",
       })
@@ -158,6 +158,26 @@ export default {
         .catch((e) => {
           vm.$notification.error({
             message: "Error deleting namespace " + namespace.name,
+            description: e.response.data.message,
+          });
+        });
+    },
+    restoreNamespace(namespace) {
+      const vm = this;
+      vm.$axios({
+        url: `/api/namespaces/${namespace.id}`,
+        method: "patch",
+        data: {
+          markfordeletion: false,
+        },
+      })
+        .then(() => {
+          vm.$message.success("Namespace successfuly restored!");
+          vm.getNamespacesPool();
+        })
+        .catch((e) => {
+          vm.$notification.error({
+            message: "Error restoring namespace " + namespace.name,
             description: e.response.data.message,
           });
         });
