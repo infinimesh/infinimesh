@@ -13,7 +13,7 @@
             >Create Namespace</a-button
           >
         </a-row>
-        <account-add
+        <namespace-add
           :active="createNamespaceDrawerVisible"
           @cancel="createNamespaceDrawerVisible = false"
           @add="handleNamespaceAdd"
@@ -67,6 +67,8 @@
 </template>
 
 <script>
+import NamespaceAdd from "@/components/namespace/Add";
+
 const namespaces_table_columns = [
   {
     title: "Title",
@@ -96,11 +98,16 @@ const permissions_table_columns = [
 ];
 
 export default {
+  components: {
+    NamespaceAdd,
+  },
   data() {
     return {
       namespaces_table_columns,
       permissions_table_columns,
       loading: false,
+
+      createNamespaceDrawerVisible: false,
     };
   },
   computed: {
@@ -134,6 +141,28 @@ export default {
       if (expanded) {
         this.$store.dispatch("devices/getNamespacePermissions", ns);
       }
+    },
+    handleNamespaceAdd(namespace) {
+      const vm = this;
+      vm.$axios({
+        method: "post",
+        url: "/api/namespaces",
+        data: namespace,
+      })
+        .then(() => {
+          vm.$notification.success({
+            message: "Namespace created successfuly",
+          });
+          vm.createNamespaceDrawerVisible = false;
+          vm.getNamespacesPool();
+        })
+        .catch((err) => {
+          this.$notification.error({
+            message: "Failed to create a namespace",
+            description: `Response: ${err.response.data.message}`,
+            duration: 10,
+          });
+        });
     },
   },
 };
