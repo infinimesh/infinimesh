@@ -19,16 +19,25 @@
             justify="center"
             align="middle"
           >
-            <a-icon
-              type="plus"
-              style="font-size: 6rem; height: 100%; width: 100%"
-              @click="addDeviceActive = true"
-            />
-            <device-add
-              :active="addDeviceActive"
-              @cancel="addDeviceActive = false"
-              @add="handleDeviceAdd"
-            />
+            <h3
+              v-if="user.default_namespace.id === namespace"
+              style="padding: 15px"
+            >
+              You can't create devices in your root namespace, switch to another
+              one to perform device create.
+            </h3>
+            <template v-else>
+              <a-icon
+                type="plus"
+                style="font-size: 6rem; height: 100%; width: 100%"
+                @click="addDeviceActive = true"
+              />
+              <device-add
+                :active="addDeviceActive"
+                @cancel="addDeviceActive = false"
+                @add="handleDeviceAdd"
+              />
+            </template>
           </a-row>
           <device-list-card :device="device" v-else />
         </div>
@@ -53,6 +62,12 @@ export default {
     };
   },
   computed: {
+    user() {
+      return this.$store.getters.loggedInUser;
+    },
+    namespace() {
+      return this.$store.getters["devices/currentNamespace"];
+    },
     pool: {
       deep: true,
       get() {
