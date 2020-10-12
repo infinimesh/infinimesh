@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -521,12 +522,29 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Name}},
 			})
 		case "markfordeletion":
-			//if the markfordeletion is true then initiate softdelete function
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "markfordeletion",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
+			})
+
 			if namespace.Namespace.Markfordeletion {
-				err = s.SoftDeleteNamespace(ctx, namespace.Namespace.Id)
+				//Update Deleteinitiationtime when markfordeletion is true i.e. Softdelete issued
+				m.Set = append(m.Set, &api.NQuad{
+					Subject:     namespace.Namespace.Id,
+					Predicate:   "deleteinitiationtime",
+					ObjectId:    namespace.Namespace.Id,
+					ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Deleteinitiationtime}},
+				})
 			} else {
-				//if the markfordeletion is false then initiate revoke function
-				err = s.RevokeNamespace(ctx, namespace.Namespace.Id)
+				//Update Deleteinitiationtime when markfordeletion is false i.e. Revoke issued
+				m.Set = append(m.Set, &api.NQuad{
+					Subject:     namespace.Namespace.Id,
+					Predicate:   "deleteinitiationtime",
+					ObjectId:    namespace.Namespace.Id,
+					ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "0000-01-01T00:00:00Z"}},
+				})
 			}
 		case "deleteinitiationtime":
 			m.Set = append(m.Set, &api.NQuad{
