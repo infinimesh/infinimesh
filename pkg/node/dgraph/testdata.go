@@ -38,7 +38,6 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
 	}
 	schema := `
   tags: [string] .
-  fingerprint.algorithm: string .
   name: string @index(exact) .
   username: string @index(exact) .
   enabled: bool @index(bool) .
