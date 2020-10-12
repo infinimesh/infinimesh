@@ -32,6 +32,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//isPermissionSufficient is for checking permission on namespace
 func isPermissionSufficient(required, actual string) bool {
 	switch required {
 	case "WRITE":
