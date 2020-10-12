@@ -228,29 +228,20 @@ func (n *namespaceAPI) DeleteNamespace(ctx context.Context, request *nodepb.Dele
 		zap.Bool("HardDelete Flag", request.Harddelete),
 	)
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("Delete Namespace API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.Namespaceid,
-		Action:    nodepb.Action_WRITE,
-	})
+	//Invoke the Update Namespace controller for server
+	ns, err := n.client.DeleteNamespace(ctx, request)
 	if err != nil {
+		//Added logging
+		log.Error("Delete Namespace API Method: Failed to delete Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if resp.GetDecision().GetValue() {
-		return n.client.DeleteNamespace(ctx, request)
-	}
-
 	//Added logging
-	log.Error("Delete Namespace API Method: The Account is not allowed to access the Namespace")
-	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+	log.Info("Delete Namespace API Method: Namespace succesfully marked for deletion")
+	return ns, nil
 
 }
 

@@ -254,37 +254,78 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		zap.Bool("Hardelete Flag", request.Harddelete),
 	)
 
-	//Action to perform when delete is issued instead of revoke
-	if request.Harddelete {
-		//Set the datecondition to 14days back date
-		//This is to ensure that records that are older then 14 days or more will be only be deleted.
-		datecondition := time.Now().AddDate(0, 0, -14)
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
 
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = n.Repo
+	a.Log = n.Log
+
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
+	if err != nil {
 		//Added logging
-		log.Info("Hard Delete Method Invoked")
-		//Invokde Hardelete function with the date conidtion
-		err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
-		if err != nil {
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Check if the account is admin
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Check if the Account has WRITE access to Namespace
+	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   requestorID,
+		Namespace: request.Namespaceid,
+		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Authorization details for the Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Initiate delete if the account has access
+	if resp.GetDecision().GetValue() && (isroot.GetIsRoot() || isadmin.GetIsAdmin()) {
+		//Action to perform when delete is issued instead of revoke
+		if request.Harddelete {
+			//Set the datecondition to 14days back date
+			//This is to ensure that records that are older then 14 days or more will be only be deleted.
+			datecondition := time.Now().AddDate(0, 0, -14)
+
 			//Added logging
-			log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
+			log.Info("Hard Delete Process Invoked")
+			//Invokde Hardelete function with the date conidtion
+			err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+			if err != nil {
+				//Added logging
+				log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+			//Added logging
+			log.Info("Hard Delete Process Successful")
+		} else {
+			//Added logging
+			log.Info("Soft Delete Method Invoked")
+			//Soft delete will mark the record for deletion with the timestamp
+			err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
+			if err != nil {
+				//Added logging
+				log.Error("Failed to Soft delete Namespace", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
 		}
 	} else {
 		//Added logging
-		log.Info("Soft Delete Method Invoked")
-		//Soft delete will mark the record for deletion with the timestamp
-		err = n.Repo.SoftDeleteNamespace(ctx, request.Namespaceid)
-		if err != nil {
-			//Added logging
-			log.Error("Failed to Soft delete Namespace", zap.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-	}
-
-	if err != nil {
-		//Added logging
-		log.Error("Failed to delete Namespace", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Failed to delete Namespace")
+		log.Error("The Account is not allowed to delete the Namespace")
+		return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to delete the Namespace")
 	}
 
 	//Added logging
@@ -312,6 +353,22 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	a.Repo = n.Repo
 	a.Log = n.Log
 
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Check if the account is admin
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Account:   requestorID,
@@ -324,7 +381,8 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if resp.GetDecision().GetValue() {
+	//Initiate update if the account has access
+	if resp.GetDecision().GetValue() && (isroot.GetIsRoot() || isadmin.GetIsAdmin()) {
 		err = n.Repo.UpdateNamespace(ctx, request)
 		if err != nil {
 			//Added logging
