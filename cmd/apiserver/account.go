@@ -39,7 +39,7 @@ type accountAPI struct {
 	client        nodepb.AccountServiceClient
 }
 
-//API Method to get details of own Account
+//SelfAccount API Method to get details of own Account.
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 
 	//Added logging
@@ -92,11 +92,11 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	return &nodepb.Account{}, status.Error(codes.PermissionDenied, "The Account does not have permission to get details")
 }
 
-//Method to get token for an Account
+//Token is method to get token for an Account
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
-	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", request.Username))
 
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
