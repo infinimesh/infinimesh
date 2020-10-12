@@ -23,7 +23,7 @@ type Node struct {
 	UID  string `json:"uid,omitempty"`
 }
 
-//Namespace Data strcuture for Dgraph database
+//Namespace Data structure for Dgraph database
 type Namespace struct {
 	Node
 	Name                 string `json:"name,omitempty"`
@@ -36,7 +36,7 @@ type Namespace struct {
 	AccessToPermission string    `json:"access.to.namespace|permission,omitempty"`
 }
 
-//Account Data strcuture for Dgraph database
+//Account Data structure for Dgraph database
 type Account struct {
 	Node
 	Name string `json:"name,omitempty"`
@@ -56,7 +56,7 @@ type Account struct {
 	OwnedBy []*Account `json:"~owns,omitempty"`
 }
 
-//UsernameCredential Data strcuture for Dgraph database
+//UsernameCredential Data structure for Dgraph database
 type UsernameCredential struct {
 	Node
 	Username string     `json:"username"`
@@ -65,7 +65,7 @@ type UsernameCredential struct {
 	Account  []*Account `json:"~has.credentials,omitempty"`
 }
 
-//Object Data strcuture for Dgraph database
+//Object Data structure for Dgraph database
 type Object struct {
 	Node
 
