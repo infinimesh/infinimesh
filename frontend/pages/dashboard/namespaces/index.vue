@@ -36,7 +36,21 @@
           </span>
           <span slot="actions" slot-scope="text, namespace">
             <a-space>
-              <a-button type="link" @click="deleteNamespace(namespace)">
+              <a-tooltip
+                v-if="namespace.markfordeletion"
+                :title="`Going to be deleted ${deletionTime(namespace)}`"
+                placement="left"
+              >
+                <a-button type="link" @click="restoreNamespace(namespace)">
+                  <a-icon
+                    type="redo"
+                    style="color: var(--switch-color); font-size: 18px"
+                  />
+                  Restore
+                </a-button>
+              </a-tooltip>
+
+              <a-button v-else type="link" @click="deleteNamespace(namespace)">
                 <a-icon type="delete" style="color: red; font-size: 18px" />
               </a-button>
             </a-space>
@@ -174,6 +188,11 @@ export default {
             duration: 10,
           });
         });
+    },
+    deletionTime(namespace) {
+      let delete_init_date = new Date(namespace.deleteinitiationtime);
+      delete_init_date.setDate(delete_init_date.getDate() + 14);
+      return "on " + delete_init_date;
     },
   },
 };
