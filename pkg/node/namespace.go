@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -100,6 +101,20 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		Account:   requestorID,
 		Namespace: id,
 		Action:    nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
+	}
+
+	//Update teh namespace to make sure that Markfor Deletion is false
+	_, err = n.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:              id,
+			Markfordeletion: false,
+		},
+		NamespaceMask: &field_mask.FieldMask{
+			Paths: []string{"MarkforDeletion"},
+		},
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
