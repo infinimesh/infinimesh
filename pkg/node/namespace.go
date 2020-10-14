@@ -133,36 +133,51 @@ func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodep
 	//Added logging
 	log.Info("Function Invoked")
 
-	namespaces, err := n.Repo.ListNamespaces(ctx)
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
 	if err != nil {
-		//Added logging
-		log.Error("Failed to list Namespaces", zap.Error(err))
+		return nil, err
+	}
+
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = n.Repo
+	a.Log = n.Log
+
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
+	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	var namespaces []*nodepb.Namespace
+	if isroot.GetIsRoot() {
+		//Get the namespaces for root account
+		namespaces, err = n.Repo.ListNamespaces(ctx)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to list Namespaces", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to list Namespaces")
+		}
+	} else {
+		//Check is te account is present
+		_, err := n.Repo.UserExists(ctx, requestorID)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to list Namespaces for the Account", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to list Namespaces for the Account")
+		}
+
+		//Get the namespaces for a specific account
+		namespaces, err = n.Repo.ListNamespacesForAccount(ctx, requestorID)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to list Namespaces for the Account", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to list Namespaces for the Account")
+		}
 	}
 
 	//Added logging
 	log.Info("List Namespaces successful")
-	return &nodepb.ListNamespacesResponse{
-		Namespaces: namespaces,
-	}, nil
-}
-
-//ListNamespacesForAccount is a method for Listing all the Namespaces for a specified account
-func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, request *nodepb.ListNamespacesForAccountRequest) (response *nodepb.ListNamespacesResponse, err error) {
-
-	log := n.Log.Named("List Namespaces for Account Controller")
-	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Account))
-
-	namespaces, err := n.Repo.ListNamespacesForAccount(ctx, request.GetAccount())
-	if err != nil {
-		//Added logging
-		log.Error("Failed to list Namespaces for the Account", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	//Added logging
-	log.Info("List Namespaces for Account successful")
 	return &nodepb.ListNamespacesResponse{
 		Namespaces: namespaces,
 	}, nil
@@ -193,7 +208,7 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 		Action:    nodepb.Action_READ,
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, err
 	}
 
 	if resp.GetDecision().GetValue() {

@@ -40,27 +40,20 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 	//Added logging
 	log.Info("List Namespaces API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("List Namespaces API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	resp, err := n.accountClient.IsRoot(ctx, &nodepb.IsRootRequest{Account: account})
+	//Invoke the Create Namespace controller for server
+	ns, err := n.client.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
 	if err != nil {
 		//Added logging
-		log.Error("List Namespaces API Method: Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+		log.Error("Create Namespace API Method: Failed to create Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if resp.GetIsRoot() {
-		return n.client.ListNamespaces(ctx, &nodepb.ListNamespacesRequest{})
-	} else {
-		return n.client.ListNamespacesForAccount(ctx, &nodepb.ListNamespacesForAccountRequest{
-			Account: account,
-		})
-	}
+	//Added logging
+	log.Info("List Namespaces API Method: Namespace succesfully listed")
+	return ns, nil
 }
 
 //API Method to create a Namespace
@@ -94,7 +87,7 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	//Invoke the Update Namespace controller for server
+	//Invoke the Get Namespace controller for server
 	ns, err := n.client.GetNamespace(ctx, request)
 	if err != nil {
 		//Added logging
