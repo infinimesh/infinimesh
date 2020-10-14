@@ -76,14 +76,14 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	ns := "joe"
 	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, false, true)
 	if err != nil {
-		fmt.Println("Create Account failed", err)
+		fmt.Println("Create Account failed for joe", err)
 		return "", "", err
 	}
 	fmt.Println("User joe: ", joe)
 
 	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false, false, true)
 	if err != nil {
-		fmt.Println("Create Account failed", err)
+		fmt.Println("Create Account failed for hans", err)
 		return "", "", err
 	}
 
@@ -93,13 +93,13 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	{
 		err = repo.AuthorizeNamespace(context.Background(), joe, namespace, nodepb.Action_WRITE)
 		if err != nil {
-			fmt.Println("Authorize Namespace failed", err)
+			fmt.Println("Authorize Namespace failed for joe", err)
 			return "", "", err
 		}
 
 		err = repo.AuthorizeNamespace(context.Background(), hanswurst, namespace, nodepb.Action_WRITE)
 		if err != nil {
-			fmt.Println("Authorize Namespace failed", err)
+			fmt.Println("Authorize Namespace failed for hans", err)
 			return "", "", err
 		}
 	}

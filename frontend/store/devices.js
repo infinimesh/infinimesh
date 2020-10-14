@@ -90,5 +90,6 @@ export const actions = {
 export const getters = {
   get: state => id => {
     return state.pool.filter(el => el.id == id)[0];
-  }
+  },
+  currentNamespace: state => state.namespace
 };

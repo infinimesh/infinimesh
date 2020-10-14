@@ -33,11 +33,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-//CreateNamespace is a method to create Namespaces
+//CreateNamespace is a method to execute Dgraph Query to create Namespaces
 func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id string, err error) {
-
-	//Assign default value to mark for deletion - This is done so that the value is set in DGraph
-	markfordeletion := false
 
 	//JSON for creating the node in Dgraph DB
 	ns := &Namespace{
@@ -46,7 +43,7 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 			UID:  "_:namespace",
 		},
 		Name:                 name,
-		MarkForDeletion:      markfordeletion,
+		MarkForDeletion:      false,
 		DeleteInitiationTime: "0000-01-01T00:00:00Z",
 	}
 
@@ -64,10 +61,21 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 		return "", err
 	}
 
+	//Update the namespace to make sure that Markfor Deletion is false after creation
+	err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:              assigned.GetUids()["namespace"],
+			Markfordeletion: false,
+		},
+		NamespaceMask: &field_mask.FieldMask{
+			Paths: []string{"MarkforDeletion"},
+		},
+	})
+
 	return assigned.GetUids()["namespace"], nil
 }
 
-//GetNamespace is a method to get the namespace based on Name
+//GetNamespace is a method to execute Dgraph Query to get the namespace based on Name
 func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespace: string) {
                      namespaces(func: eq(name, $namespace)) @filter(eq(type, "namespace"))  {
@@ -103,7 +111,7 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 	return nil, errors.New("The Namespace is not found")
 }
 
-//GetNamespaceID is a method to get the namespace based on ID
+//GetNamespaceID is a method to execute Dgraph Query to get the namespace based on ID
 func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (namespace *nodepb.Namespace, err error) {
 	const q = `query getNamespaces($namespaceid: string) {
                      namespaces(func: uid($namespaceid)) @filter(eq(type, "namespace"))  {
@@ -139,7 +147,7 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 	return nil, errors.New("The Namespace is not found")
 }
 
-//ListNamespaces is a method to List details of all Namespaces
+//ListNamespaces is a method to execute Dgraph Query to List details of all Namespaces
 func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.Namespace, err error) {
 	const q = `{
                      namespaces(func: eq(type, "namespace")) {
@@ -175,7 +183,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 	return namespaces, nil
 }
 
-//DeletePermissionInNamespace is a method to delete permissions for a Namespaces for an account
+//DeletePermissionInNamespace is a method to execute Dgraph Query to delete permissions for a Namespaces for an account
 func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceID, accountID string) (err error) {
 	txn := s.Dg.NewTxn()
 	const q = `query deletePermissionInNamespace($namespaceID: string, $accountID: string){
@@ -218,7 +226,7 @@ func (s *DGraphRepo) DeletePermissionInNamespace(ctx context.Context, namespaceI
 	return err
 }
 
-//ListPermissionsInNamespace is a method to list permissions for all accounts for a Namespace
+//ListPermissionsInNamespace is a method to execute Dgraph Query to list permissions for all accounts for a Namespace
 func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid string) (permissions []*nodepb.Permission, err error) {
 	const q = `query listPermissionsInNamespace($namespaceid: string) {
 		accounts(func: uid($namespaceid)) @filter(eq(type, "namespace")) @normalize @cascade  {
@@ -259,7 +267,7 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 }
 
-//ListNamespacesForAccount is a method to list Namespaces for an Account
+//ListNamespacesForAccount is a method to execute Dgraph Query to list Namespaces for an Account
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
 	const q = `query listNamespaces($account: string) {
 		namespaces(func: uid($account)) @normalize @cascade  {
@@ -297,7 +305,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
-//IsAuthorizedNamespace is a method that returns if the access to the namespace for an account is true or false
+//IsAuthorizedNamespace is a method to execute Dgraph Query that returns if the access to the namespace for an account is true or false
 func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error) {
 	acc, err := s.GetAccount(ctx, account)
 	if err != nil {
@@ -352,7 +360,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	return false, nil
 }
 
-//SoftDeleteNamespace is a method that mark the namespace for deletion
+//SoftDeleteNamespace is a method to execute Dgraph Query that mark the namespace for deletion
 func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
@@ -396,7 +404,7 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 	return err
 }
 
-//HardDeleteNamespace is a method that deletes a namespace permantly
+//HardDeleteNamespace is a method to execute Dgraph Query that deletes a namespace permantly
 func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 	var q = `query deleteNodes{
@@ -440,7 +448,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	return err
 }
 
-//RevokeNamespace is a method that nmarks the Namespace from deletion
+//RevokeNamespace is a method to execute Dgraph Query that nmarks the Namespace from deletion
 func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
@@ -484,7 +492,7 @@ func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (e
 	return err
 }
 
-//UpdateNamespace is a method to Udpdate details of an Namespace
+//UpdateNamespace is a method to execute Dgraph Query to Udpdate details of an Namespace
 func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error) {
 
 	txn := s.Dg.NewTxn()
@@ -531,6 +539,24 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: strconv.FormatBool(namespace.Namespace.Markfordeletion)}},
 			})
+
+			if namespace.Namespace.Markfordeletion {
+				//Update Deleteinitiationtime when markfordeletion is true i.e. Softdelete issued
+				m.Set = append(m.Set, &api.NQuad{
+					Subject:     namespace.Namespace.Id,
+					Predicate:   "deleteinitiationtime",
+					ObjectId:    namespace.Namespace.Id,
+					ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: time.Now().Format(time.RFC3339)}},
+				})
+			} else {
+				//Update Deleteinitiationtime when markfordeletion is false i.e. Revoke issued
+				m.Set = append(m.Set, &api.NQuad{
+					Subject:     namespace.Namespace.Id,
+					Predicate:   "deleteinitiationtime",
+					ObjectId:    namespace.Namespace.Id,
+					ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "0000-01-01T00:00:00Z"}},
+				})
+			}
 		case "deleteinitiationtime":
 			m.Set = append(m.Set, &api.NQuad{
 				Subject:     namespace.Namespace.Id,

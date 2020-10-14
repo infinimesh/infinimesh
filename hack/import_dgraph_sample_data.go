@@ -68,7 +68,7 @@ func main() {
 		}
 		fmt.Println("Dgraph Test Data Import Successful")
 		return nil
-	}, retry.Delay(time.Second*2), retry.Attempts(5))
+	}, retry.Delay(time.Second*4), retry.Attempts(5))
 
 	if err != nil {
 		panic(err)

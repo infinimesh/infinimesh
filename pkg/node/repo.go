@@ -39,6 +39,7 @@ type Repo interface {
 	SetPassword(ctx context.Context, account, password string) error
 	DeleteAccount(ctx context.Context, account *nodepb.DeleteAccountRequest) (err error)
 	AssignOwner(ctx context.Context, ownerID, accountID string) (err error)
+	UserExists(ctx context.Context, account string) (exists bool, err error)
 
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	IsAuthorizedNamespace(ctx context.Context, namespace, account string, action nodepb.Action) (decision bool, err error)

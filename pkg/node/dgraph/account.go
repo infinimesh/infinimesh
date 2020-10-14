@@ -32,6 +32,39 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
+//UserExists is a method to check if the user is present in the Dgraph DB
+func (s *DGraphRepo) UserExists(ctx context.Context, account string) (exists bool, err error) {
+
+	txn := s.Dg.NewReadOnlyTxn()
+
+	q := `query userExists($accid: string) {
+		exists(func: uid($accid)) @filter(eq(type, "account") and eq(enabled,"true"))  {
+			uid
+			enabled
+		}
+	}
+	`
+
+	var result struct {
+		Exists []map[string]interface{} `json:"exists"`
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$accid": account})
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(resp.Json, &result)
+	if err != nil {
+		return false, err
+	}
+
+	if len(result.Exists) == 0 {
+		return false, errors.New("Account not found")
+	}
+
+	return true, nil
+}
+
 //ListAccounts is a method to List details of all Account
 func (s *DGraphRepo) ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error) {
 	txn := s.Dg.NewReadOnlyTxn()

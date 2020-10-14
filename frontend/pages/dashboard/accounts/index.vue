@@ -89,35 +89,35 @@ const columns = [
     title: "Username",
     dataIndex: "name",
     sorter: true,
-    scopedSlots: { customRender: "name" },
+    scopedSlots: { customRender: "name" }
   },
   {
     title: "Admin",
     dataIndex: "is_admin",
     sorter: true,
     width: "7%",
-    scopedSlots: { customRender: "is_admin" },
+    scopedSlots: { customRender: "is_admin" }
   },
   {
     title: "Enabled",
     dataIndex: "enabled",
     sorter: true,
     width: "7%",
-    scopedSlots: { customRender: "enabled" },
+    scopedSlots: { customRender: "enabled" }
   },
   {
     title: "Actions",
     key: "actions",
     fixed: "right",
     width: "15%",
-    scopedSlots: { customRender: "actions" },
-  },
+    scopedSlots: { customRender: "actions" }
+  }
 ];
 
 export default {
   components: {
     AccountAdd,
-    AccountResetPassword,
+    AccountResetPassword
   },
   computed: {
     user() {
@@ -133,7 +133,7 @@ export default {
       createAccountDrawerVisible: false,
 
       resetAccountPasswordVisible: false,
-      selectedAccount: null,
+      selectedAccount: null
     };
   },
   mounted() {
@@ -145,12 +145,12 @@ export default {
       vm.loading = true;
       vm.$axios
         .get("/api/accounts")
-        .then((res) => (vm.accounts = res.data.accounts))
-        .catch((e) => {
+        .then(res => (vm.accounts = res.data.accounts))
+        .catch(e => {
           if (e.response.status == 403) {
             vm.$notification.error({
               message: "Oops",
-              description: e.response.data.message,
+              description: e.response.data.message
             });
             vm.$store.commit("window/noAccess", "dashboard-accounts");
             vm.$router.push({ name: "dashboard-devices" });
@@ -162,16 +162,16 @@ export default {
       const vm = this;
       this.$axios({
         url: `/api/accounts/${account.uid}`,
-        method: "delete",
+        method: "delete"
       })
         .then(() => {
           vm.$message.success("Account successfuly deleted!");
           vm.getAccountsPool();
         })
-        .catch((e) => {
+        .catch(e => {
           vm.$notification.error({
             message: "Error deleting account " + account.name,
-            description: e.response.data.message,
+            description: e.response.data.message
           });
         });
     },
@@ -179,7 +179,7 @@ export default {
       this.updateAccount(
         account.uid,
         {
-          enabled: !account.enabled,
+          enabled: !account.enabled
         },
         `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`,
         `Error ${account.enabled ? "disabling" : "enabling"} account`
@@ -191,20 +191,20 @@ export default {
       vm.$axios({
         method: "post",
         url: "/api/accounts",
-        data: account,
+        data: account
       })
         .then(() => {
           vm.$notification.success({
-            message: "Account created successfuly",
+            message: "Account created successfuly"
           });
           vm.createAccountDrawerVisible = false;
           vm.getAccountsPool();
         })
-        .catch((err) => {
+        .catch(err => {
           this.$notification.error({
             message: "Failed to create an account",
             description: `Response: ${err.response.data.message}`,
-            duration: 10,
+            duration: 10
           });
         });
     },
@@ -214,16 +214,16 @@ export default {
       vm.$axios({
         method: "patch",
         url: `/api/accounts/${id}`,
-        data: data,
+        data: data
       })
         .then(() => {
           vm.$message.success(success);
           vm.getAccountsPool();
         })
-        .catch((e) => {
+        .catch(e => {
           vm.$notification.error({
             message: error,
-            description: e.response.data.message,
+            description: e.response.data.message
           });
         })
         .then(() => (vm.loading = false));
@@ -240,8 +240,8 @@ export default {
         "Password changed successfuly",
         "Reset password failed"
       );
-    },
-  },
+    }
+  }
 };
 </script>
 

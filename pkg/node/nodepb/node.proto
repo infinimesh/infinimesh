@@ -256,7 +256,6 @@ service Namespaces {
   rpc CreateNamespace(CreateNamespaceRequest) returns (Namespace);
   rpc GetNamespace(GetNamespaceRequest) returns (Namespace);
   rpc ListNamespaces(ListNamespacesRequest) returns (ListNamespacesResponse);
-  rpc ListNamespacesForAccount(ListNamespacesForAccountRequest) returns (ListNamespacesResponse);
   rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
   rpc DeletePermission(DeletePermissionRequest) returns (DeletePermissionResponse);
   rpc DeleteNamespace(DeleteNamespaceRequest) returns (DeleteNamespaceResponse);
