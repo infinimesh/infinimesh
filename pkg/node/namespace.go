@@ -172,25 +172,52 @@ func (n *NamespaceController) ListNamespacesForAccount(ctx context.Context, requ
 func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 
 	log := n.Log.Named("Get Namespace using name Controller")
+
 	//Added logging
 	log.Info("Function Invoked", zap.String("Namespace", request.Namespace))
 
-	namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
 	if err != nil {
-		//Added logging
-		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, err
+	}
+
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = n.Repo
+	a.Log = n.Log
+
+	//Check if the account has access to Namespace
+	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Account:   requestorID,
+		Namespace: request.GetNamespace(),
+		Action:    nodepb.Action_READ,
+	})
+	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	if resp.GetDecision().GetValue() {
+		namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
+		if err != nil {
+			//Added logging
+			log.Error("Failed to get Namespace", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		//Added logging
+		log.Info("Get Namespace using name successful")
+		return namespace, nil
+	}
+
 	//Added logging
-	log.Info("Get Namespace using name successful")
-	return namespace, nil
+	log.Error("The Account is not allowed to access the Namespace")
+	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
 }
 
-//GetNamespaceID is a method to get details of a Namespace using NamespaceID
+//GetNamespaceID is a method to get details of a Namespace using Namespace ID
 func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 
 	log := n.Log.Named("Get Namespace using ID Controller")
+
 	//Added logging
 	log.Info("Function Invoked", zap.String("Namespace", request.Namespace))
 
@@ -200,7 +227,6 @@ func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodep
 		log.Error("Failed to get Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
 	//Added logging
 	log.Info("Get Namespace using ID successful")
 	return namespace, nil
@@ -376,8 +402,6 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 		Action:    nodepb.Action_WRITE,
 	})
 	if err != nil {
-		//Added logging
-		log.Error("Failed to get Authorization details for the Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

@@ -91,29 +91,20 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 	//Added logging
 	log.Info("Get Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		//Added logging
-		log.Error("Get Namespace API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.GetNamespace(),
-		Action:    nodepb.Action_READ,
-	})
+	//Invoke the Update Namespace controller for server
+	ns, err := n.client.GetNamespace(ctx, request)
 	if err != nil {
+		//Added logging
+		log.Error("Get Namespace API Method: Failed to Get Namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if resp.GetDecision().GetValue() {
-		return n.client.GetNamespace(ctx, request)
-	}
-
 	//Added logging
-	log.Error("Get Namespace API Method: The Account is not allowed to access the Namespace")
-	return nil, status.Error(codes.PermissionDenied, "The Account is not allowed to access the Namespace")
+	log.Info("Get Namespace API Method: Namespace details succesfully obtained")
+	return ns, nil
 }
 
 //API Method to create permissions for ana ccount to access a Namespace
