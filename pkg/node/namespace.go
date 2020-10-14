@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -106,20 +105,6 @@ func (n *NamespaceController) CreateNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Failed to assign permissions to the Account for the Namespace")
 	}
 
-	//Update the namespace to make sure that Markfor Deletion is false after creation
-	_, err = n.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
-		Namespace: &nodepb.Namespace{
-			Id:              id,
-			Markfordeletion: false,
-		},
-		NamespaceMask: &field_mask.FieldMask{
-			Paths: []string{"MarkforDeletion"},
-		},
-	})
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to update the namespace after creation")
-	}
-
 	return &nodepb.Namespace{
 		Id:   id,
 		Name: request.GetName(),
@@ -159,7 +144,7 @@ func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodep
 			return nil, status.Error(codes.Internal, "Failed to list Namespaces")
 		}
 	} else {
-		//Check is te account is present
+		//Check is the account is present
 		_, err := n.Repo.UserExists(ctx, requestorID)
 		if err != nil {
 			//Added logging
