@@ -197,8 +197,13 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 		return nil, err
 	}
 
-	//Only way to get namespace id from name and then send the namespace id for for Authorizaion check
-	ns, _ := n.Repo.GetNamespace(ctx, request.GetNamespace())
+	//This is the only way to get namespace id from name and then send the namespace id for for Authorizaion check
+	namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	//Initialize the Account Controller with Namespace controller data
 	a.Repo = n.Repo
@@ -207,7 +212,7 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 	//Check if the account has access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Account:   requestorID,
-		Namespace: ns.Id,
+		Namespace: namespace.Id,
 		Action:    nodepb.Action_READ,
 	})
 	if err != nil {
@@ -215,12 +220,7 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 	}
 
 	if resp.GetDecision().GetValue() {
-		namespace, err := n.Repo.GetNamespace(ctx, request.GetNamespace())
-		if err != nil {
-			//Added logging
-			log.Error("Failed to get Namespace", zap.Error(err))
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+
 		//Added logging
 		log.Info("Get Namespace using name successful")
 		return namespace, nil
