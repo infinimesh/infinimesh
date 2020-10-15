@@ -242,7 +242,7 @@ func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.Set
 	}
 
 	//Added logging
-	log.Info("Passsed changed sucesssful")
+	log.Info("Password changed sucesssful")
 	return &nodepb.SetPasswordResponse{}, nil
 }
 
