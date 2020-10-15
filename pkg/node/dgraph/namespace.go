@@ -310,7 +310,7 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 	txn := s.Dg.NewReadOnlyTxn()
 
 	const q = `query deleteNodes($namespaceID: string){
-        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
+        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace") and Not eq(name,"root")) {
           uid
         }
       }
@@ -353,7 +353,7 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 	var q = `query deleteNodes{
-        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v")) @normalize {
+        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v") and Not eq(name,"root")) @normalize {
           uid
         owns {
           uid

@@ -298,7 +298,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
 	}
 
 	//Check if the account is admin
@@ -306,7 +306,21 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
+	}
+
+	namespace, err := n.Repo.GetNamespaceID(ctx, request.Namespaceid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Validate that namespace is not root
+	if namespace.Name == "root" {
+		//Added logging
+		log.Error("Cannot delete root Namespace")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Namespace")
 	}
 
 	//Check if the Account has WRITE access to Namespace
