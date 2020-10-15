@@ -293,22 +293,6 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	a.Repo = n.Repo
 	a.Log = n.Log
 
-	//Check if the account is root
-	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
-	if err != nil {
-		//Added logging
-		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
-	//Check if the account is admin
-	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
-	if err != nil {
-		//Added logging
-		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Account:   requestorID,
@@ -322,7 +306,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	}
 
 	//Initiate delete if the account has access
-	if resp.GetDecision().GetValue() && (isroot.GetIsRoot() || isadmin.GetIsAdmin()) {
+	if resp.GetDecision().GetValue() {
 		//Action to perform when delete is issued instead of revoke
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
@@ -382,23 +366,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	a.Repo = n.Repo
 	a.Log = n.Log
 
-	//Check if the account is root
-	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
-	if err != nil {
-		//Added logging
-		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
-	//Check if the account is admin
-	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
-	if err != nil {
-		//Added logging
-		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
-	//Check if the Account has WRITE access to Namespace
+	//Check if the Account has access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Account:   requestorID,
 		Namespace: request.Namespace.Id,
@@ -409,7 +377,7 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	}
 
 	//Initiate update if the account has access
-	if resp.GetDecision().GetValue() && (isroot.GetIsRoot() || isadmin.GetIsAdmin()) {
+	if resp.GetDecision().GetValue() {
 		err = n.Repo.UpdateNamespace(ctx, request)
 		if err != nil {
 			//Added logging

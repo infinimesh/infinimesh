@@ -199,15 +199,33 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 		zap.String("Namespace", request.Namespace),
 		zap.String("Action", request.Action.String()))
 
-	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: request.GetAccount(),
-	})
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: request.Account})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Authorization check failed")
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
-	if root.GetIsRoot() {
+	//Provide access if the account is root
+	if isroot.GetIsRoot() {
 		log.Info("Authorization check successful for the Account and the Namespace as root")
+		return &nodepb.IsAuthorizedNamespaceResponse{
+			Decision: &wrappers.BoolValue{Value: true},
+		}, nil
+	}
+
+	//Check if the account is admin
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: request.Account})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Provide access if the account is admin and action is Write
+	if isadmin.GetIsAdmin() && (request.GetAction().String() == "WRITE") {
+		log.Info("Authorization check successful for the Account and the Namespace as admin")
 		return &nodepb.IsAuthorizedNamespaceResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil

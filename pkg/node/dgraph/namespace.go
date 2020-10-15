@@ -305,61 +305,6 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 	return namespaces, nil
 }
 
-//IsAuthorizedNamespace is a method to execute Dgraph Query that returns if the access to the namespace for an account is true or false
-func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error) {
-	acc, err := s.GetAccount(ctx, account)
-	if err != nil {
-		return false, err
-	}
-
-	if acc.IsRoot {
-		return true, nil
-	}
-
-	params := map[string]string{
-		"$namespaceid": namespaceid,
-		"$user_id":     account,
-	}
-
-	txn := s.Dg.NewReadOnlyTxn()
-
-	const q = `query access($namespaceid: string, $user_id: string){
-		access(func: uid($user_id)) @normalize @cascade {
-		  name
-		  uid
-		  access.to.namespace @filter(uid($namespaceid)) @facets(permission,inherit) {
-			uid
-			name
-			type
-		  }
-		}
-	  }
-`
-
-	res, err := txn.QueryWithVars(ctx, q, params)
-	if err != nil {
-		return false, err
-	}
-	var access struct {
-		Access []Namespace `json:"access"`
-	}
-
-	err = json.Unmarshal(res.Json, &access)
-	if err != nil {
-		return false, err
-	}
-
-	actionValue := strings.Split(action.String(), "_")
-
-	if len(access.Access) > 0 {
-		if isPermissionSufficient(actionValue[0], access.Access[0].AccessToPermission) {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 //SoftDeleteNamespace is a method to execute Dgraph Query that mark the namespace for deletion
 func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
