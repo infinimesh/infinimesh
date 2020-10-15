@@ -215,22 +215,6 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 		}, nil
 	}
 
-	//Check if the account is admin
-	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: request.Account})
-	if err != nil {
-		//Added logging
-		log.Error("Unable to get permissions for the account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
-	}
-
-	//Provide access if the account is admin and action is Write
-	if isadmin.GetIsAdmin() && (request.GetAction().String() == "WRITE") {
-		log.Info("Authorization check successful for the Account and the Namespace as admin")
-		return &nodepb.IsAuthorizedNamespaceResponse{
-			Decision: &wrappers.BoolValue{Value: true},
-		}, nil
-	}
-
 	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespace(), request.GetAccount(), request.GetAction())
 	if err != nil {
 		//Added logging
