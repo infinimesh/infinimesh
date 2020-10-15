@@ -3,7 +3,8 @@ Infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT dev
 
 ## Project status
 Infinimesh is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/InfiniteDevices/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
-All development is open source and completely transparent on GitHub. Our API (REST / gRPC) are considered als beta and may change in future. Infinimesh cloud has already available: 
+All development is open source and completely transparent on GitHub. Our API (REST / gRPC) are considered als beta and may change in future. Infinimesh cloud has already available:  
+  
 **MQTT support for version 3 and 5**  
 **User defined subtopics (MQTT 5)**  
 **State management (digital twin)**  
