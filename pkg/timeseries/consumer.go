@@ -87,11 +87,11 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 			}
 
 			err = h.Repo.CreateDataPoint(context.TODO(), &DataPoint{
-				DeviceID:   string(message.Key),
-				DeviceName: strconv.FormatUint(msg.Version, 10),
-				Property:   property,
-				Timestamp:  msg.Timestamp,
-				Value:      datapointValue,
+				DeviceID:  string(message.Key),
+				MessageID: strconv.FormatUint(msg.Version, 10),
+				Property:  property,
+				Timestamp: msg.Timestamp,
+				Value:     datapointValue,
 			})
 
 		}
