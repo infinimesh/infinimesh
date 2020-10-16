@@ -69,6 +69,10 @@ a {
   color: var(--link-color) !important;
 }
 
+.dark-mode .create-form h3 {
+  color: var(--line-color);
+}
+
 /* Custom tags */
 strong {
   color: black;
