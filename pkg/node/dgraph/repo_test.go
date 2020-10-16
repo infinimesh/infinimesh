@@ -244,6 +244,18 @@ func TestUpdateAccountwithRoot(t *testing.T) {
 	require.EqualValues(t, true, respGet.Enabled) //you cannot update enabled flag for root account
 	require.NoError(t, err)
 
+	//Update the account to disable it for deletion
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			Enabled: false,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Enabled"},
+		},
+	})
+	require.NoError(t, err)
+
 	//Delete the Account created
 	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 	require.NoError(t, err)
@@ -265,12 +277,12 @@ func TestUpdateAccountwithoutRoot(t *testing.T) {
 		Account: &nodepb.Account{
 			Uid:     account,
 			Name:    NewName,
-			Enabled: false,
 			IsRoot:  false,
 			IsAdmin: false,
+			Enabled: false,
 		},
 		FieldMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "Is_Root", "Is_Admin"},
+			Paths: []string{"Name", "Is_Root", "Is_Admin", "Enabled"},
 		},
 	})
 	require.NoError(t, err)
