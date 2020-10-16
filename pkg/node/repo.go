@@ -34,7 +34,7 @@ type Repo interface {
 	CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error)
 	ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error)
 	ListAccountsforAdmin(ctx context.Context, requestorID string) (accounts []*nodepb.Account, err error)
-	UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error)
+	UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest, isself bool) (err error)
 	GetAccount(ctx context.Context, accountID string) (account *nodepb.Account, err error)
 	SetPassword(ctx context.Context, account, password string) error
 	DeleteAccount(ctx context.Context, account *nodepb.DeleteAccountRequest) (err error)

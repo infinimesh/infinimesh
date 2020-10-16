@@ -401,6 +401,15 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
 	}
 
+	//isself is to make sure that you can only update name and password for your own account
+	var isself bool
+	//Check if the account is self account i.e. user trying to update his account
+	if requestorID == request.GetAccount().Uid {
+		//Added logging
+		log.Error("Unable to get permissions for the Account", zap.Error(err))
+		isself = true
+	}
+
 	//Validation to make sure root account cannot be updated
 	if request.Account.IsRoot {
 		//Added logging
@@ -408,8 +417,9 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Account")
 	}
 
+	//Perform update account if the requestor as access
 	if isroot.IsRoot || isadmin.IsAdmin {
-		err = s.Repo.UpdateAccount(ctx, request)
+		err = s.Repo.UpdateAccount(ctx, request, isself)
 		if err != nil {
 			//Added logging
 			log.Error("Failed to update Account", zap.Error(err))

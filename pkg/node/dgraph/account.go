@@ -153,7 +153,7 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 }
 
 //UpdateAccount is a method to Udpdate details of an Account
-func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
+func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest, isself bool) (err error) {
 
 	txn := s.Dg.NewTxn()
 
@@ -171,16 +171,23 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		Enabled: tempacc.Enabled,
 	}
 
+	//Update the account based on the flag isself
+	//isself if true means the requestor id updating its own account
+	//Updating own account means only updating the name and the password
 	for _, field := range account.FieldMask.Paths {
 		switch strings.ToLower(field) {
 		case "name":
 			acc.Name = account.Account.Name
 		case "is_root":
-			acc.IsRoot = account.Account.IsRoot
+			if !isself {
+				acc.IsRoot = account.Account.IsRoot
+			}
 		case "is_admin":
-			acc.IsAdmin = account.Account.IsAdmin
+			if !isself {
+				acc.IsAdmin = account.Account.IsAdmin
+			}
 		case "enabled":
-			if !acc.IsRoot {
+			if !acc.IsRoot || !isself {
 				acc.Enabled = account.Account.Enabled
 			}
 		case "password":

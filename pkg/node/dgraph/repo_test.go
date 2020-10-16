@@ -81,7 +81,7 @@ func TestAuthorize(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -113,7 +113,7 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -156,7 +156,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -199,7 +199,7 @@ func TestChangePassword(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -230,7 +230,7 @@ func TestUpdateAccountwithRoot(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Name", "Enabled", "Is_Root", "Is_Admin"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Get the updated Account Details
@@ -253,7 +253,7 @@ func TestUpdateAccountwithRoot(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -284,7 +284,7 @@ func TestUpdateAccountwithoutRoot(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Name", "Is_Root", "Is_Admin", "Enabled"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Get the updated Account Details
@@ -348,7 +348,7 @@ func TestIsAdmin(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Is_Admin"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Get the updated Account Details
