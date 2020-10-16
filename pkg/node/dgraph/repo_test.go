@@ -134,7 +134,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	nsName, err := repo.GetNamespace(ctx, acc)
 
 	//Create Object
-	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Name)
+	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Id)
 	require.NoError(t, err)
 
 	err = repo.AuthorizeNamespace(ctx, account, nsName.Id, nodepb.Action_WRITE)
