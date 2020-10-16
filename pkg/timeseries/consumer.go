@@ -87,7 +87,7 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 
 			err = h.Repo.CreateDataPoint(context.TODO(), &DataPoint{
 				DeviceID:   string(message.Key),
-				DeviceName: "hardcoded-test",
+				DeviceName: string(msg.Version),
 				Property:   property,
 				Timestamp:  msg.Timestamp,
 				Value:      datapointValue,
