@@ -73,7 +73,7 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 		return "", "", err
 	}
 
-	ns := "joe"
+	//Create user Joe
 	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, false, true)
 	if err != nil {
 		fmt.Println("Create Account failed for joe", err)
@@ -81,12 +81,19 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	}
 	fmt.Println("User joe: ", joe)
 
+	//get namespace for joe
+	ns, err := repo.GetNamespace(context.Background(), "joe")
+	if err != nil {
+		fmt.Println("Get Namespace failed", err)
+		return "", "", err
+	}
+
+	//Create user hanswurst
 	hanswurst, err := repo.CreateUserAccount(context.Background(), "hanswurst", "hanswurst", false, false, true)
 	if err != nil {
 		fmt.Println("Create Account failed for hans", err)
 		return "", "", err
 	}
-
 	fmt.Println("User hanswurst: ", hanswurst)
 
 	// Authorize both users on a shared project
@@ -111,79 +118,79 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	}
 	fmt.Println("Admin: ", admin)
 
-	building, err := repo.CreateObject(context.Background(), "Angerstr 14", "", node.KindAsset, ns)
+	building, err := repo.CreateObject(context.Background(), "Angerstr 14", "", node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	first, err := repo.CreateObject(context.Background(), "First Floor", building, node.KindAsset, ns)
+	first, err := repo.CreateObject(context.Background(), "First Floor", building, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Second Floor", building, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Second Floor", building, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	apartment1Right, err := repo.CreateObject(context.Background(), "Apartment right side", first, node.KindAsset, ns)
+	apartment1Right, err := repo.CreateObject(context.Background(), "Apartment right side", first, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Entrance", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Entrance", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Bathroom", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Bathroom", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Kitchen", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Kitchen", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Bedroom", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Bedroom", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Kinderzimmer", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Kinderzimmer", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Walk-through room", apartment1Right, node.KindAsset, ns)
+	_, err = repo.CreateObject(context.Background(), "Walk-through room", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	livingRoom, err := repo.CreateObject(context.Background(), "Living room", apartment1Right, node.KindAsset, ns)
+	livingRoom, err := repo.CreateObject(context.Background(), "Living room", apartment1Right, node.KindAsset, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Test-device", livingRoom, node.KindDevice, ns)
+	_, err = repo.CreateObject(context.Background(), "Test-device", livingRoom, node.KindDevice, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
 
-	_, err = repo.CreateObject(context.Background(), "Test-device-no-parent", "", node.KindDevice, ns)
+	_, err = repo.CreateObject(context.Background(), "Test-device-no-parent", "", node.KindDevice, ns.Id)
 	if err != nil {
 		fmt.Println("Create Object failed", err)
 		return "", "", err
