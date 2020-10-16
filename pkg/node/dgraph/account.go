@@ -187,7 +187,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 				acc.IsAdmin = account.Account.IsAdmin
 			}
 		case "enabled":
-			if !acc.IsRoot || !isself {
+			if !acc.IsRoot && !isself {
 				acc.Enabled = account.Account.Enabled
 			}
 		case "password":
