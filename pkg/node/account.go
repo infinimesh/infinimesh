@@ -417,7 +417,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		if err != nil {
 			//Added logging
 			log.Error("Failed to update Account", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Failed to update Account"+err.Error())
+			return nil, status.Error(codes.Internal, "Failed to update Account : "+err.Error())
 		}
 	} else {
 		//Added logging
