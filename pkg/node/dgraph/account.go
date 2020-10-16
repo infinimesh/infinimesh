@@ -360,12 +360,23 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 		Enabled: result.Account[0].Enabled,
 	}
 
+	//Added default namespace details is present
 	if len(result.Account[0].DefaultNamespace) == 1 {
 		account.DefaultNamespace = &nodepb.Namespace{
 			Name:            result.Account[0].DefaultNamespace[0].Name,
 			Id:              result.Account[0].DefaultNamespace[0].UID,
 			Markfordeletion: false,
 		}
+	}
+
+	//Added credetnials details is present
+	if len(result.Account[0].HasCredentials) == 1 {
+		account.Username = result.Account[0].HasCredentials[0].Username
+	}
+
+	//Added owner details is present
+	if len(result.Account[0].OwnedBy) == 1 {
+		account.Owner = result.Account[0].OwnedBy[0].UID
 	}
 
 	return account, err

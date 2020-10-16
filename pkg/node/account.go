@@ -412,7 +412,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	log.Info("Validation for Self Account", zap.Bool("Validation Result", isself))
 
 	//Perform update account if the requestor as access
-	if isroot.IsRoot || isadmin.IsAdmin {
+	if isroot.IsRoot || isadmin.IsAdmin || isself {
 		err = s.Repo.UpdateAccount(ctx, request, isself)
 		if err != nil {
 			//Added logging
