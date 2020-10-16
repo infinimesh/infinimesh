@@ -410,13 +410,6 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		isself = true
 	}
 
-	//Validation to make sure root account cannot be updated
-	if request.Account.IsRoot {
-		//Added logging
-		log.Error("Cannot delete root Account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Account")
-	}
-
 	//Perform update account if the requestor as access
 	if isroot.IsRoot || isadmin.IsAdmin {
 		err = s.Repo.UpdateAccount(ctx, request, isself)

@@ -89,6 +89,7 @@ message Account {
   string password = 6;
   bool is_admin = 7;
   string owner = 8;
+  string username = 9;
 }
 
 message AuthenticateRequest {

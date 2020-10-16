@@ -323,7 +323,11 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        default.namespace {
                          name
                          uid
-                       }
+					   }
+					   has.credentials{
+						uid
+						username
+					   }
                      }
                    }`
 
