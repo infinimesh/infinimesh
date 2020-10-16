@@ -29,6 +29,17 @@
         </template>
         <v-list-item>
           <v-list-item-title>
+            <a @click="resetAccountPasswordVisible = true">Reset password</a>
+          </v-list-item-title>
+          <account-reset-password
+            :active="resetAccountPasswordVisible"
+            :account="user"
+            @cancel="resetAccountPasswordVisible = false"
+            @reset="handleResetAccountPassword"
+          />
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>
             <a @click="$store.dispatch('logout')">Log Out</a>
           </v-list-item-title>
         </v-list-item>
@@ -38,35 +49,44 @@
 </template>
 
 <script>
+import AccountResetPassword from "@/components/account/ResetPassword.vue";
+import AccountControlMixin from "@/mixins/account-control";
+
 export default {
+  mixins: [AccountControlMixin],
+  components: {
+    AccountResetPassword,
+  },
   data() {
     return {
+      resetAccountPasswordVisible: false,
+
       pages: [
         {
           title: "Device Registry",
           icon: "mdi-cloud-outline",
           link: "/dashboard/devices",
-          admin: false
+          admin: false,
         },
         {
           title: "Accounts",
           icon: "mdi-account-group",
           link: "/dashboard/accounts",
-          admin: true
+          admin: true,
         },
         {
           title: "Namespaces",
           icon: "mdi-folder-multiple-outline",
           link: "/dashboard/namespaces",
-          admin: true
-        }
-      ]
+          admin: true,
+        },
+      ],
     };
   },
   computed: {
     pagesFiltered() {
       return this.pages.filter(
-        page =>
+        (page) =>
           this.allowedScope(page.link) &&
           (!page.admin || this.user.is_admin || this.user.is_root)
       );
@@ -80,13 +100,25 @@ export default {
       },
       set(val) {
         this.$router.push(val[0]);
-      }
-    }
+      },
+    },
   },
   methods: {
     allowedScope(scope) {
       return this.$store.getters["window/hasAccess"](scope);
-    }
-  }
+    },
+    handleResetAccountPassword(password) {
+      this.resetAccountPasswordVisible = false;
+      this.updateAccount(
+        this.user.uid,
+        { password: password },
+        "",
+        "Reset password failed",
+        () => {
+          this.$message.success("Password changed successfuly");
+        }
+      );
+    },
+  },
 };
 </script>
