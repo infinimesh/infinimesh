@@ -96,6 +96,9 @@ strong {
 .has-feedback .ant-form-explain {
   opacity: 0 !important;
 }
+.has-feedback .ant-input-suffix {
+  padding-right: 0;
+}
 
 /* AntDesign Buttons */
 .ant-btn {
