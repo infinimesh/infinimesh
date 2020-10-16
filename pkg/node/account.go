@@ -379,12 +379,46 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Account.Uid))
 
-	err = s.Repo.UpdateAccount(ctx, request)
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
 
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
-		log.Error("Failed to update account", zap.Error(err))
-		return nil, err
+		log.Error("Unable to get permissions for the Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
+	}
+
+	//Check if the account is admin
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
+	}
+
+	//Validation to make sure root account cannot be updated
+	if request.Account.IsRoot {
+		//Added logging
+		log.Error("Cannot delete root Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Account")
+	}
+
+	if isroot.IsRoot || isadmin.IsAdmin {
+		err = s.Repo.UpdateAccount(ctx, request)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to update Account", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to update Account"+err.Error())
+		}
+	} else {
+		//Added logging
+		log.Error("Update Account API Method: The Account does not have permission to update details")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
 	}
 
 	//Added Logging
@@ -426,25 +460,32 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
 	}
 
-	//Validate that account is not root
+	//Validation to make sure root account cannot be deleted
 	if account.IsRoot {
 		//Added logging
-		log.Error("Cannot delete root account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root account")
+		log.Error("Cannot delete root Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Account")
 	}
 
-	//Validate that account is not enabled
+	//Validation to make sure admin account cannot be deleted
+	if account.IsAdmin {
+		//Added logging
+		log.Error("Cannot delete admin Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled Account")
+	}
+
+	//Validation to make sure enabled account cannot be deleted
 	if account.Enabled {
 		//Added logging
-		log.Error("Cannot delete enabled account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled account")
+		log.Error("Cannot delete enabled Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled Account")
 	}
 
 	//Call the delete query when all the validation pass
 	err = s.Repo.DeleteAccount(ctx, request)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to delete account", zap.Error(err))
+		log.Error("Failed to delete Account", zap.Error(err))
 		return nil, err
 	}
 
