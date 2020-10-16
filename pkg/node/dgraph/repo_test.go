@@ -207,7 +207,7 @@ func TestChangePassword(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestUpdateAccount(t *testing.T) {
+func TestUpdateAccountwithRoot(t *testing.T) {
 	ctx := context.Background()
 
 	randomName := randomdata.SillyName()
@@ -235,11 +235,55 @@ func TestUpdateAccount(t *testing.T) {
 
 	//Get the updated Account Details
 	respGet, err := repo.GetAccount(ctx, account)
+	require.NoError(t, err)
 
 	//Validate the updated Account
-	require.NoError(t, err)
 	require.EqualValues(t, NewName, respGet.Name)
+	require.EqualValues(t, true, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsAdmin)
+	require.EqualValues(t, false, respGet.Enabled) //you cannot update enabled flag for root account
+	require.NoError(t, err)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
+}
+
+func TestUpdateAccountwithoutRoot(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the account
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			Name:    NewName,
+			Enabled: false,
+			IsRoot:  false,
+			IsAdmin: false,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "Is_Root", "Is_Admin"},
+		},
+	})
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+	require.NoError(t, err)
+
+	//Validate the updated Account
+	require.EqualValues(t, true, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsAdmin)
 	require.EqualValues(t, false, respGet.Enabled)
+	require.NoError(t, err)
 
 	//Delete the Account created
 	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
