@@ -386,7 +386,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	}
 
 	//Check if the account is root
-	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
+	isroot, err := s.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the Account", zap.Error(err))
@@ -394,7 +394,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	}
 
 	//Check if the account is admin
-	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	isadmin, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the Account", zap.Error(err))
