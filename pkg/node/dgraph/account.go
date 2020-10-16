@@ -158,7 +158,10 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	txn := s.Dg.NewTxn()
 
 	//Get the data for the Account that is to be modified
-	tempacc, _ := s.GetAccount(ctx, account.Account.Uid)
+	tempacc, err := s.GetAccount(ctx, account.Account.Uid)
+	if err != nil {
+		return err
+	}
 
 	acc := &Account{
 		Node: Node{
