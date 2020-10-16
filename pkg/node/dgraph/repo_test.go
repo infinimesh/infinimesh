@@ -55,13 +55,13 @@ func init() {
 //test for Authorize
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
-	_, err := repo.CreateNamespace(ctx, "default")
+	ns, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
 	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, false, true)
 	require.NoError(t, err)
 
-	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
+	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", ns)
 	require.NoError(t, err)
 
 	err = repo.Authorize(ctx, account, node, "READ", true)
