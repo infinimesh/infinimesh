@@ -423,14 +423,7 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	if err != nil {
 		//Added logging
 		log.Error("Failed to get account details", zap.Error(err))
-		return nil, status.Error(codes.Aborted, "Failed to get account details")
-	}
-
-	//Validate that account is not in the database
-	if account == nil {
-		//Added logging
-		log.Error("The Account was not found")
-		return nil, status.Error(codes.NotFound, "The Account was not found")
+		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
 	}
 
 	//Validate that account is not root

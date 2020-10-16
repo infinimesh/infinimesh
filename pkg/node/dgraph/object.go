@@ -208,7 +208,7 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	// 	return "", errors.New("Invalid namespace")
 	// }
 
-	namespace, err := s.GetNamespace(ctx, namespaceID)
+	namespace, err := s.GetNamespaceID(ctx, namespaceID)
 	if err != nil {
 		return "", errors.New("Invalid namespace")
 	}

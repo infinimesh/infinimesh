@@ -157,30 +157,6 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 
 	txn := s.Dg.NewTxn()
 
-	q := `query userExists($id: string) {
-                exists(func: uid($id)) @filter(eq(type, "account")) {
-                  uid
-                }
-              }
-             `
-
-	var result struct {
-		Exists []map[string]interface{} `json:"exists"`
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$id": account.Account.Uid})
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(resp.Json, &result)
-	if err != nil {
-		return err
-	}
-
-	if len(result.Exists) == 0 {
-		return errors.New("Account not found")
-	}
-
 	//Get the data for the Account that is to be modified
 	tempacc, _ := s.GetAccount(ctx, account.Account.Uid)
 
