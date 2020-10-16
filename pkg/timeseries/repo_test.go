@@ -73,11 +73,11 @@ func init() {
 
 func TestSave(t *testing.T) {
 	err := repo.CreateDataPoint(context.TODO(), &DataPoint{
-		DeviceID:  "test-device-1",
-		MessageID: "test-device-1",
-		Property:  "voltage",
-		Timestamp: time.Now(),
-		Value:     50.0,
+		DeviceID:   "test-device-1",
+		DeviceName: "test-device-1",
+		Property:   "voltage",
+		Timestamp:  time.Now(),
+		Value:      50.0,
 	})
 	require.NoError(t, err)
 }
