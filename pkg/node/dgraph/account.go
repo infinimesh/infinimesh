@@ -328,6 +328,9 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 						uid
 						username
 					   }
+					   ~owns{
+						uid
+					   }
                      }
                    }`
 
