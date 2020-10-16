@@ -26,6 +26,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -163,6 +164,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		return err
 	}
 
+	//Build the account data in json for updating the account
 	acc := &Account{
 		Node: Node{
 			Type: "account",
@@ -181,6 +183,16 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		switch strings.ToLower(field) {
 		case "name":
 			acc.Name = account.Account.Name
+			//If the account name is updated make sure the default Namespace for the account is also updated
+			err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+				Namespace: &nodepb.Namespace{
+					Id:   tempacc.DefaultNamespace.Id,
+					Name: account.Account.Name,
+				},
+				NamespaceMask: &field_mask.FieldMask{
+					Paths: []string{"Name"},
+				},
+			})
 		case "is_root":
 			if !isself {
 				acc.IsRoot = account.Account.IsRoot
