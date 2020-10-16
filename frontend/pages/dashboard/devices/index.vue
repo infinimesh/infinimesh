@@ -19,13 +19,17 @@
             justify="center"
             align="middle"
           >
-            <h3
+            <nuxt-link
               v-if="user.default_namespace.id === namespace"
-              style="padding: 15px"
+              :to="{ name: 'dashboard-namespaces', query: { create: true } }"
+              no-prefetch
             >
-              You can't create devices in your root namespace, switch to another
-              one to perform device create.
-            </h3>
+              <h3 style="padding: 15px">
+                You can't create devices in your root namespace, switch to
+                another one to perform device create. Click here to create new
+                namespace, or switch namespace on top of the page.
+              </h3>
+            </nuxt-link>
             <template v-else>
               <a-icon
                 type="plus"

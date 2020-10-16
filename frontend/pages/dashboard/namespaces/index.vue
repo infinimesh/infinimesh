@@ -138,6 +138,7 @@ export default {
   },
   mounted() {
     this.getNamespacesPool();
+    if (this.$route.query.create) this.createNamespaceDrawerVisible = true;
   },
   methods: {
     async getNamespacesPool() {
