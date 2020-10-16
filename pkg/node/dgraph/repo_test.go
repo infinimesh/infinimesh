@@ -239,9 +239,9 @@ func TestUpdateAccountwithRoot(t *testing.T) {
 
 	//Validate the updated Account
 	require.EqualValues(t, NewName, respGet.Name)
-	require.EqualValues(t, true, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsRoot)
 	require.EqualValues(t, false, respGet.IsAdmin)
-	require.EqualValues(t, false, respGet.Enabled) //you cannot update enabled flag for root account
+	require.EqualValues(t, true, respGet.Enabled) //you cannot update enabled flag for root account
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -280,7 +280,7 @@ func TestUpdateAccountwithoutRoot(t *testing.T) {
 	require.NoError(t, err)
 
 	//Validate the updated Account
-	require.EqualValues(t, true, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsRoot)
 	require.EqualValues(t, false, respGet.IsAdmin)
 	require.EqualValues(t, false, respGet.Enabled)
 	require.NoError(t, err)
