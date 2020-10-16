@@ -302,6 +302,31 @@ func TestUpdateAccountwithoutRoot(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGetAccount(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
+	require.NoError(t, err)
+
+	//Try to fetch the delete account
+	accountDetails, err := repo.GetAccount(ctx, account)
+
+	//Validate the Account Details
+	require.EqualValues(t, acc, accountDetails.Name)
+	require.EqualValues(t, false, accountDetails.Enabled)
+	require.EqualValues(t, false, accountDetails.IsRoot)
+	require.EqualValues(t, false, accountDetails.IsAdmin)
+	require.EqualValues(t, acc, accountDetails.Username)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
+
+}
+
 func TestDeleteAccount(t *testing.T) {
 	ctx := context.Background()
 

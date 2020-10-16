@@ -405,10 +405,11 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	var isself bool
 	//Check if the account is self account i.e. user trying to update his account
 	if requestorID == request.GetAccount().Uid {
-		//Added logging
-		log.Error("Unable to get permissions for the Account", zap.Error(err))
 		isself = true
 	}
+
+	//Added logging
+	log.Info("Validation for Self Account", zap.Bool("Validation Result", isself))
 
 	//Perform update account if the requestor as access
 	if isroot.IsRoot || isadmin.IsAdmin {
