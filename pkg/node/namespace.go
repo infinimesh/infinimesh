@@ -196,9 +196,9 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 
 	//Check if the account has access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   requestorID,
-		Namespace: namespace.Id,
-		Action:    nodepb.Action_READ,
+		Account:     requestorID,
+		Namespaceid: namespace.Id,
+		Action:      nodepb.Action_READ,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to Authorize the user"+err.Error())
@@ -325,9 +325,9 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 
 	//Check if the Account has WRITE access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   requestorID,
-		Namespace: request.Namespaceid,
-		Action:    nodepb.Action_WRITE,
+		Account:     requestorID,
+		Namespaceid: request.Namespaceid,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		//Added logging
@@ -414,9 +414,9 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 
 	//Check if the Account has access to Namespace
 	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   requestorID,
-		Namespace: request.Namespace.Id,
-		Action:    nodepb.Action_WRITE,
+		Account:     requestorID,
+		Namespaceid: request.Namespace.Id,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
