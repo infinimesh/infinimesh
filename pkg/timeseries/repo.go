@@ -31,11 +31,11 @@ type TimeseriesRepo interface {
 }
 
 type DataPoint struct {
-	DeviceID   string
-	DeviceName string
-	Property   string
-	Timestamp  time.Time
-	Value      float64
+	DeviceID  string
+	MessageID string
+	Property  string
+	Timestamp time.Time
+	Value     float64
 }
 
 type timescaleRepo struct {
@@ -70,8 +70,8 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 		return err
 	}
 
-	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, device_name, property, timestamp, value) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
-		datapoint.DeviceID, datapoint.DeviceName, datapoint.Property, datapoint.Timestamp, datapoint.Value,
+	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value,
 	)
 	if err != nil {
 		return err
