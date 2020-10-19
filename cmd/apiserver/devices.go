@@ -42,9 +42,9 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 
 	//Check if the user has access to create the device for the namespace
 	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespace: request.Device.Namespace,
-		Account:   account,
-		Action:    nodepb.Action_WRITE,
+		Namespaceid: request.Device.Namespace,
+		Account:     account,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
@@ -125,9 +125,9 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 
 	//Check if the user has access to the namespace
 	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespace: request.Namespace,
-		Account:   account,
-		Action:    nodepb.Action_READ,
+		Namespaceid: request.Namespace,
+		Account:     account,
+		Action:      nodepb.Action_READ,
 	})
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, "Could not get permission to list device.")

@@ -59,9 +59,9 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 		authorized = resp.Decision.GetValue()
 	} else {
 		resp, err := o.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-			Namespace: request.Namespace,
-			Account:   account,
-			Action:    nodepb.Action_WRITE,
+			Namespaceid: request.Namespace,
+			Account:     account,
+			Action:      nodepb.Action_WRITE,
 		})
 		if err != nil {
 			return nil, err

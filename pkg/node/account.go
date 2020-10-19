@@ -196,7 +196,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Account", request.Account),
-		zap.String("Namespace", request.Namespace),
+		zap.String("Namespace", request.Namespaceid),
 		zap.String("Action", request.Action.String()))
 
 	//Check if the account is root
@@ -215,7 +215,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 		}, nil
 	}
 
-	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespace(), request.GetAccount(), request.GetAction())
+	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespaceid(), request.GetAccount(), request.GetAction())
 	if err != nil {
 		//Added logging
 		log.Error("Authorization check failed for the Account and the Namespace", zap.Error(err))
@@ -475,7 +475,7 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	if account.IsAdmin {
 		//Added logging
 		log.Error("Cannot delete admin Account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete admin Account")
 	}
 
 	//Validation to make sure enabled account cannot be deleted
