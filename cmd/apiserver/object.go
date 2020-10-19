@@ -75,10 +75,10 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 	}
 
 	return o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
-		Parent:    parent,
-		Name:      request.Object.Name,
-		Namespace: request.Namespace,
-		Kind:      request.Object.Kind,
+		Parent:      parent,
+		Name:        request.Object.Name,
+		Namespaceid: request.Namespace,
+		Kind:        request.Object.Kind,
 	})
 }
 

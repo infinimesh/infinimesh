@@ -200,13 +200,9 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	}
 }
 
-//CreateObject is a method to create objects
+//CreateObject is a method execute Dgraph query to create objects
 func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
 	txn := s.Dg.NewTxn()
-
-	// if ok := checkType(ctx, txn, namespaceID, "namespace"); !ok {
-	// 	return "", errors.New("Invalid namespace")
-	// }
 
 	namespace, err := s.GetNamespaceID(ctx, namespaceID)
 	if err != nil {
