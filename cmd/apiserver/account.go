@@ -163,36 +163,23 @@ func (a *accountAPI) UpdateAccount(ctx context.Context, request *nodepb.UpdateAc
 
 	//Added logging
 	log.Info("Update Account API Method: Function Invoked",
-		zap.Any("Account", request.Account.Uid),
-		zap.Any("Name", request.Account.Name))
+		zap.String("Account", request.Account.Uid),
+		zap.Any("FieldMask", request.FieldMask))
 
-	account, ok := ctx.Value("account_id").(string)
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	if !ok {
+	//Invoke the Update Account controller for server
+	res, err := a.client.UpdateAccount(ctx, request)
+	if err != nil {
 		//Added logging
-		log.Error("Update Account API Method: The Account is not authenticated")
-		return nil, status.Error(codes.Unauthenticated, "The Account is not authenticated")
-	}
-
-	//Validate if the account is root or not
-	if res, err := a.client.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: account,
-	}); err == nil && res.GetIsRoot() {
-		res, err := a.client.UpdateAccount(ctx, request)
-		return res, err
-	}
-
-	//Validate if the account is admin or not
-	if res, err := a.client.IsAdmin(ctx, &nodepb.IsAdminRequest{
-		Account: account,
-	}); err == nil && res.GetIsAdmin() {
-		res, err := a.client.UpdateAccount(ctx, request)
-		return res, err
+		log.Error("Update Account API Method: Failed to update Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	//Added logging
-	log.Error("Update Account API Method: The Account does not have permission to update details")
-	return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
+	log.Info("Update Account API Method: Account succesfully updated")
+	return res, nil
 }
 
 //API Method to Create an Account

@@ -26,6 +26,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -153,37 +154,17 @@ func (s *DGraphRepo) ListAccountsforAdmin(ctx context.Context, requestorID strin
 }
 
 //UpdateAccount is a method to Udpdate details of an Account
-func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest) (err error) {
+func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAccountRequest, isself bool) (err error) {
 
 	txn := s.Dg.NewTxn()
 
-	q := `query userExists($id: string) {
-                exists(func: uid($id)) @filter(eq(type, "account")) {
-                  uid
-                }
-              }
-             `
-
-	var result struct {
-		Exists []map[string]interface{} `json:"exists"`
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{"$id": account.Account.Uid})
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(resp.Json, &result)
-	if err != nil {
-		return err
-	}
-
-	if len(result.Exists) == 0 {
-		return errors.New("Account not found")
-	}
-
 	//Get the data for the Account that is to be modified
-	tempacc, _ := s.GetAccount(ctx, account.Account.Uid)
+	tempacc, err := s.GetAccount(ctx, account.Account.Uid)
+	if err != nil {
+		return err
+	}
 
+	//Build the account data in json for updating the account
 	acc := &Account{
 		Node: Node{
 			Type: "account",
@@ -195,16 +176,35 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 		Enabled: tempacc.Enabled,
 	}
 
+	//Update the account based on the flag isself
+	//isself if true means the requestor id updating its own account
+	//Updating own account means only updating the name and the password
 	for _, field := range account.FieldMask.Paths {
 		switch strings.ToLower(field) {
 		case "name":
 			acc.Name = account.Account.Name
+			//If the account name is updated make sure the default Namespace for the account is also updated
+			err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+				Namespace: &nodepb.Namespace{
+					Id:   tempacc.DefaultNamespace.Id,
+					Name: account.Account.Name,
+				},
+				NamespaceMask: &field_mask.FieldMask{
+					Paths: []string{"Name"},
+				},
+			})
 		case "is_root":
-			acc.IsRoot = account.Account.IsRoot
+			if !isself {
+				acc.IsRoot = account.Account.IsRoot
+			}
 		case "is_admin":
-			acc.IsAdmin = account.Account.IsAdmin
+			if !isself {
+				acc.IsAdmin = account.Account.IsAdmin
+			}
 		case "enabled":
-			acc.Enabled = account.Account.Enabled
+			if !acc.IsRoot && !isself {
+				acc.Enabled = account.Account.Enabled
+			}
 		case "password":
 			err = s.SetPassword(ctx, account.Account.Uid, account.Account.Password)
 			if err != nil {
@@ -338,7 +338,14 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
                        default.namespace {
                          name
                          uid
-                       }
+					   }
+					   has.credentials{
+						uid
+						username
+					   }
+					   ~owns{
+						uid
+					   }
                      }
                    }`
 
@@ -368,12 +375,23 @@ func (s *DGraphRepo) GetAccount(ctx context.Context, name string) (account *node
 		Enabled: result.Account[0].Enabled,
 	}
 
+	//Added default namespace details is present
 	if len(result.Account[0].DefaultNamespace) == 1 {
 		account.DefaultNamespace = &nodepb.Namespace{
 			Name:            result.Account[0].DefaultNamespace[0].Name,
 			Id:              result.Account[0].DefaultNamespace[0].UID,
 			Markfordeletion: false,
 		}
+	}
+
+	//Added credetnials details is present
+	if len(result.Account[0].HasCredentials) == 1 {
+		account.Username = result.Account[0].HasCredentials[0].Username
+	}
+
+	//Added owner details is present
+	if len(result.Account[0].OwnedBy) == 1 {
+		account.Owner = result.Account[0].OwnedBy[0].UID
 	}
 
 	return account, err

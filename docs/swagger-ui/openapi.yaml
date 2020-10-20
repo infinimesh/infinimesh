@@ -137,6 +137,8 @@ components:
           type: string
         uid:
           type: string
+        username:
+          type: string
       type: object
     nodeAction:
       default: NONE

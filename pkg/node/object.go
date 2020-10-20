@@ -44,10 +44,10 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 	log.Info("Function Invoked",
 		zap.String("Name", request.Name),
 		zap.String("Kind", request.Kind),
-		zap.String("Namespace", request.Namespace),
+		zap.String("Namespace", request.Namespaceid),
 		zap.String("Parent", request.Parent))
 
-	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespace())
+	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespaceid())
 	if err != nil {
 		//Added logging
 		log.Error("Failed to create Object", zap.String("Name", request.Name), zap.Error(err))

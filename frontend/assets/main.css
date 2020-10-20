@@ -69,6 +69,10 @@ a {
   color: var(--link-color) !important;
 }
 
+.dark-mode .create-form h3 {
+  color: var(--line-color);
+}
+
 /* Custom tags */
 strong {
   color: black;
@@ -91,6 +95,9 @@ strong {
 
 .has-feedback .ant-form-explain {
   opacity: 0 !important;
+}
+.has-feedback .ant-input-suffix {
+  padding-right: 0;
 }
 
 /* AntDesign Buttons */

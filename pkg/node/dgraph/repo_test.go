@@ -55,13 +55,13 @@ func init() {
 //test for Authorize
 func TestAuthorize(t *testing.T) {
 	ctx := context.Background()
-	_, err := repo.CreateNamespace(ctx, "default")
+	ns, err := repo.CreateNamespace(ctx, "default")
 	require.NoError(t, err)
 
 	account, err := repo.CreateUserAccount(ctx, randomdata.SillyName(), "password", false, false, true)
 	require.NoError(t, err)
 
-	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", "default")
+	node, err := repo.CreateObject(ctx, "sample-node", "", "asset", ns)
 	require.NoError(t, err)
 
 	err = repo.Authorize(ctx, account, node, "READ", true)
@@ -81,7 +81,7 @@ func TestAuthorize(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -113,7 +113,7 @@ func TestIsAuthorizedNamespace(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -134,7 +134,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 	nsName, err := repo.GetNamespace(ctx, acc)
 
 	//Create Object
-	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Name)
+	newObj, err := repo.CreateObject(ctx, "sample-node", "", "asset", nsName.Id)
 	require.NoError(t, err)
 
 	err = repo.AuthorizeNamespace(ctx, account, nsName.Id, nodepb.Action_WRITE)
@@ -156,7 +156,7 @@ func TestListInNamespaceForAccount(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -199,7 +199,7 @@ func TestChangePassword(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Enabled", "Is_Root"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Delete the Account created
@@ -207,7 +207,7 @@ func TestChangePassword(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestUpdateAccount(t *testing.T) {
+func TestUpdateAccountwithRoot(t *testing.T) {
 	ctx := context.Background()
 
 	randomName := randomdata.SillyName()
@@ -230,20 +230,101 @@ func TestUpdateAccount(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Name", "Enabled", "Is_Root", "Is_Admin"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Get the updated Account Details
 	respGet, err := repo.GetAccount(ctx, account)
+	require.NoError(t, err)
 
 	//Validate the updated Account
-	require.NoError(t, err)
 	require.EqualValues(t, NewName, respGet.Name)
-	require.EqualValues(t, false, respGet.Enabled)
+	require.EqualValues(t, false, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsAdmin)
+	require.EqualValues(t, true, respGet.Enabled) //you cannot update enabled flag for root account
+	require.NoError(t, err)
+
+	//Update the account to disable it for deletion
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			Enabled: false,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Enabled"},
+		},
+	}, false)
+	require.NoError(t, err)
 
 	//Delete the Account created
 	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 	require.NoError(t, err)
+}
+
+func TestUpdateAccountwithoutRoot(t *testing.T) {
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	account, err := repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
+	require.NoError(t, err)
+
+	//Set new values
+	NewName := randomdata.SillyName()
+
+	//Update the account
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			Name:    NewName,
+			IsRoot:  false,
+			IsAdmin: false,
+			Enabled: false,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "Is_Root", "Is_Admin", "Enabled"},
+		},
+	}, false)
+	require.NoError(t, err)
+
+	//Get the updated Account Details
+	respGet, err := repo.GetAccount(ctx, account)
+	require.NoError(t, err)
+
+	//Validate the updated Account
+	require.EqualValues(t, false, respGet.IsRoot)
+	require.EqualValues(t, false, respGet.IsAdmin)
+	require.EqualValues(t, false, respGet.Enabled)
+	require.NoError(t, err)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
+}
+
+func TestGetAccount(t *testing.T) {
+	ctx := context.Background()
+
+	acc := randomdata.SillyName()
+
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, acc, "password", false, false, false)
+	require.NoError(t, err)
+
+	//Try to fetch the delete account
+	accountDetails, err := repo.GetAccount(ctx, account)
+
+	//Validate the Account Details
+	require.EqualValues(t, acc, accountDetails.Name)
+	require.EqualValues(t, false, accountDetails.Enabled)
+	require.EqualValues(t, false, accountDetails.IsRoot)
+	require.EqualValues(t, false, accountDetails.IsAdmin)
+	require.EqualValues(t, acc, accountDetails.Username)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
+
 }
 
 func TestDeleteAccount(t *testing.T) {
@@ -292,7 +373,7 @@ func TestIsAdmin(t *testing.T) {
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"Is_Admin"},
 		},
-	})
+	}, false)
 	require.NoError(t, err)
 
 	//Get the updated Account Details

@@ -114,9 +114,9 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.Namespace,
-		Action:    nodepb.Action_WRITE,
+		Account:     account,
+		Namespaceid: request.Namespace,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -153,9 +153,9 @@ func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.List
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.Namespace,
-		Action:    nodepb.Action_WRITE,
+		Account:     account,
+		Namespaceid: request.Namespace,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -184,9 +184,9 @@ func (n *namespaceAPI) DeletePermission(ctx context.Context, request *nodepb.Del
 	}
 
 	resp, err := n.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:   account,
-		Namespace: request.Namespace,
-		Action:    nodepb.Action_WRITE,
+		Account:     account,
+		Namespaceid: request.Namespace,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

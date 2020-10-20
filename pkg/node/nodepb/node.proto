@@ -38,7 +38,7 @@ message IsAdminRequest { string account = 1; }
 message IsAdminResponse { bool is_admin = 1; }
 
 message IsAuthorizedNamespaceRequest {
-  string namespace = 1;
+  string namespaceid = 1;
   string account = 2;
   Action Action = 3;
 }
@@ -89,6 +89,7 @@ message Account {
   string password = 6;
   bool is_admin = 7;
   string owner = 8;
+  string username = 9;
 }
 
 message AuthenticateRequest {
@@ -114,7 +115,7 @@ message CreateObjectRequest {
   string name = 1;
   string parent = 2;
   string kind = 3;
-  string namespace = 4;
+  string namespaceid = 4;
 }
 
 message Object {

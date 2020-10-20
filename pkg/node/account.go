@@ -196,24 +196,26 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	//Added logging
 	log.Info("Function Invoked",
 		zap.String("Account", request.Account),
-		zap.String("Namespace", request.Namespace),
+		zap.String("Namespace", request.Namespaceid),
 		zap.String("Action", request.Action.String()))
 
-	root, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
-		Account: request.GetAccount(),
-	})
+	//Check if the account is root
+	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: request.Account})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Authorization check failed")
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
 	}
 
-	if root.GetIsRoot() {
+	//Provide access if the account is root
+	if isroot.GetIsRoot() {
 		log.Info("Authorization check successful for the Account and the Namespace as root")
 		return &nodepb.IsAuthorizedNamespaceResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
 	}
 
-	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespace(), request.GetAccount(), request.GetAction())
+	decision, err := s.Repo.IsAuthorizedNamespace(ctx, request.GetNamespaceid(), request.GetAccount(), request.GetAction())
 	if err != nil {
 		//Added logging
 		log.Error("Authorization check failed for the Account and the Namespace", zap.Error(err))
@@ -240,7 +242,7 @@ func (s *AccountController) SetPassword(ctx context.Context, request *nodepb.Set
 	}
 
 	//Added logging
-	log.Info("Passsed changed sucesssful")
+	log.Info("Password changed sucesssful")
 	return &nodepb.SetPasswordResponse{}, nil
 }
 
@@ -377,12 +379,50 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Account.Uid))
 
-	err = s.Repo.UpdateAccount(ctx, request)
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
 
+	//Check if the account is root
+	isroot, err := s.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
 	if err != nil {
 		//Added logging
-		log.Error("Failed to update account", zap.Error(err))
-		return nil, err
+		log.Error("Unable to get permissions for the Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
+	}
+
+	//Check if the account is admin
+	isadmin, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
+	}
+
+	//isself is to make sure that you can only update name and password for your own account
+	var isself bool
+	//Check if the account is self account i.e. user trying to update his account
+	if requestorID == request.GetAccount().Uid {
+		isself = true
+	}
+
+	//Added logging
+	log.Info("Validation for Self Account", zap.Bool("Validation Result", isself))
+
+	//Perform update account if the requestor as access
+	if isroot.IsRoot || isadmin.IsAdmin || isself {
+		err = s.Repo.UpdateAccount(ctx, request, isself)
+		if err != nil {
+			//Added logging
+			log.Error("Failed to update Account", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Failed to update Account : "+err.Error())
+		}
+	} else {
+		//Added logging
+		log.Error("Update Account API Method: The Account does not have permission to update details")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
 	}
 
 	//Added Logging
@@ -421,35 +461,35 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	if err != nil {
 		//Added logging
 		log.Error("Failed to get account details", zap.Error(err))
-		return nil, status.Error(codes.Aborted, "Failed to get account details")
+		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
 	}
 
-	//Validate that account is not in the database
-	if account == nil {
-		//Added logging
-		log.Error("The Account was not found")
-		return nil, status.Error(codes.NotFound, "The Account was not found")
-	}
-
-	//Validate that account is not root
+	//Validation to make sure root account cannot be deleted
 	if account.IsRoot {
 		//Added logging
-		log.Error("Cannot delete root account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root account")
+		log.Error("Cannot delete root Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Account")
 	}
 
-	//Validate that account is not enabled
+	//Validation to make sure admin account cannot be deleted
+	if account.IsAdmin {
+		//Added logging
+		log.Error("Cannot delete admin Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete admin Account")
+	}
+
+	//Validation to make sure enabled account cannot be deleted
 	if account.Enabled {
 		//Added logging
-		log.Error("Cannot delete enabled account")
-		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled account")
+		log.Error("Cannot delete enabled Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled Account")
 	}
 
 	//Call the delete query when all the validation pass
 	err = s.Repo.DeleteAccount(ctx, request)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to delete account", zap.Error(err))
+		log.Error("Failed to delete Account", zap.Error(err))
 		return nil, err
 	}
 
