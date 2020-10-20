@@ -71,7 +71,7 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 		return err
 	}
 
-	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
 		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value, datapoint.Length,
 	)
 	if err != nil {
