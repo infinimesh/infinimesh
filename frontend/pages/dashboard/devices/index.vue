@@ -11,6 +11,17 @@
           role="separator"
           class="selected-devices-actions-vertical-divider"
         ></div>
+        <a-col :span="4">
+          <a-button
+            type="success"
+            style="margin-right: 5px"
+            @click="toogleAll(true)"
+            >Enable All</a-button
+          >
+          <a-button type="danger" @click="toogleAll(false)"
+            >Disable All</a-button
+          >
+        </a-col>
       </a-row>
     </div>
     <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
@@ -168,6 +179,57 @@ export default {
           this.addDeviceActive = false;
         },
       });
+    },
+    toogleAll(enable) {
+      let vm = this;
+      this.updateAll(
+        () => {
+          return {
+            enabled: enable,
+          };
+        },
+        {
+          success: (response) => {
+            let res = response.reduce(
+              (r, el) => {
+                r[el.status == 200 ? "success" : "fail"]++;
+                return r;
+              },
+              {
+                success: 0,
+                fail: 0,
+              }
+            );
+            vm.$notification.info({
+              message: `${enable ? "Enabled" : "Disabled"} ${
+                response.length
+              } devices`,
+              description: `Result: success - ${res.success}, failed: ${res.fail}.`,
+            });
+          },
+        }
+      );
+    },
+    updateAll(modifier, { success, error }) {
+      let patchPromises = this.pool
+        .filter((d) => this.selectedDevices.includes(d.id))
+        .map((device) => {
+          return this.$axios({
+            url: `/api/devices/${device.id}`,
+            method: "patch",
+            data: modifier(device),
+          });
+        });
+      Promise.all(patchPromises)
+        .then((res) => {
+          if (success) success(res);
+        })
+        .catch((err) => {
+          if (error) error(err);
+        })
+        .then(() => {
+          this.$store.dispatch("devices/get");
+        });
     },
   },
 };
