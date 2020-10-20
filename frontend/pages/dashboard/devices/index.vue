@@ -1,5 +1,18 @@
 <template>
   <div id="devicesTable">
+    <div class="selected-devices-actions" v-if="selectedDevices.length">
+      <a-row type="flex" align="middle">
+        <a-col :span="2">
+          <a-button type="link" @click="selectedDevices = []" icon="close"
+            >Deselect all</a-button
+          >
+        </a-col>
+        <div
+          role="separator"
+          class="selected-devices-actions-vertical-divider"
+        ></div>
+      </a-row>
+    </div>
     <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
       <a-col
         :xs="{ span: 24 }"
@@ -50,6 +63,7 @@
             @deselect="
               (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
             "
+            @select-all="selectedDevices = pool.map((d) => d.id)"
             v-else
           />
         </div>
@@ -169,5 +183,33 @@ export default {
 }
 .create-form .anticon {
   color: var(--icon-color-dark);
+}
+.selected-devices-actions {
+  margin-top: 10px;
+  width: 100%;
+  background: var(--primary-color);
+  border-radius: var(--border-radius-base);
+  color: var(--line-color);
+}
+.selected-devices-actions .ant-btn-link {
+  color: white !important;
+}
+.selected-devices-actions .ant-btn {
+  height: 24px;
+}
+.selected-devices-actions-vertical-divider {
+  box-sizing: border-box;
+  margin: 0 10px;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  font-feature-settings: "tnum", "tnum";
+  background: #e8e8e8;
+  vertical-align: middle;
+  width: 1px;
+  min-height: 32px;
 }
 </style>

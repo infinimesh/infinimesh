@@ -53,6 +53,11 @@
             {{ selected ? "Deselect" : "Select" }}
           </a-button>
         </a-menu-item>
+        <a-menu-item key="select-all">
+          <a-button type="link" @click="$emit('select-all')">
+            Select All
+          </a-button>
+        </a-menu-item>
       </a-menu>
     </a-dropdown>
   </nuxt-link>
