@@ -214,6 +214,8 @@ func main() {
 		for _, device := range reply.Devices {
 			if device.Enabled.Value {
 				possibleIDs = append(possibleIDs, device.Id)
+			} else {
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
 			}
 		}
 
