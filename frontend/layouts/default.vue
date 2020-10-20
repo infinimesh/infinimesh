@@ -7,6 +7,12 @@
 <script>
 export default {
   mounted() {
+    console.log(
+      "%c infinimesh.io %c v0.1.5 %c",
+      "background:#104e83; padding: 1px; border-radius: 3px 0 0 3px; color: #fff; font-size: 18px; font-weight: 500;",
+      "background:#35495e; padding: 1px; border-radius: 0 3px 3px 0; color: #fff; font-size: 18px;",
+      "background:transparent"
+    );
     this.$nextTick(() => {
       window.addEventListener("resize", this.onWindowResize);
       this.onWindowResize();
