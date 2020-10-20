@@ -92,6 +92,7 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 				Property:  property,
 				Timestamp: msg.Timestamp,
 				Value:     datapointValue,
+				Length:    len(message.Value),
 			})
 
 		}

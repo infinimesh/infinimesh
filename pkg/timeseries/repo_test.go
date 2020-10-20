@@ -78,6 +78,7 @@ func TestSave(t *testing.T) {
 		Property:  "voltage",
 		Timestamp: time.Now(),
 		Value:     50.0,
+		Length:    11,
 	})
 	require.NoError(t, err)
 }

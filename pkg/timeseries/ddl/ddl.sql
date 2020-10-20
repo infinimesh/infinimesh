@@ -4,6 +4,7 @@ CREATE TABLE data_points (
   property VARCHAR NOT NULL,
   value DOUBLE PRECISION,
   timestamp TIMESTAMPTZ NOT NULL,
+  message_length INTEGER,
   PRIMARY KEY (device_id, property, timestamp)
 );
 
