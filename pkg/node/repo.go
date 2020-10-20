@@ -49,7 +49,7 @@ type Repo interface {
 
 	CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)
-	ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error)
+	ListForAccount(ctx context.Context, account string, namespaceID string, recurse bool) (inheritedObjects []*nodepb.Object, err error)
 
 	CreateNamespace(ctx context.Context, name string) (id string, err error)
 	GetNamespace(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error) //To be deprecated

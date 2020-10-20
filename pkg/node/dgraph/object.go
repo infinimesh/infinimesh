@@ -29,7 +29,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
-//checkKind is a method to check the kind of the object
+//checkKind is a method to execute Dgraph query to check the kind of the object
 func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) @filter(eq(type, $type)) {
@@ -57,7 +57,7 @@ func checkKind(ctx context.Context, txn *dgo.Txn, uid, _type string) bool { //no
 	return len(result.Object) > 0
 }
 
-//DeleteObject is a method to delete objects
+//DeleteObject is a method to execute Dgraph query to delete objects
 func (s *DGraphRepo) DeleteObject(ctx context.Context, uid string) (err error) {
 	txn := s.Dg.NewTxn()
 
@@ -200,7 +200,7 @@ func addDeletesRecursively(mu *api.Mutation, items []*Object) {
 	}
 }
 
-//CreateObject is a method execute Dgraph query to create objects
+//CreateObject is a method to execute Dgraph query to create objects
 func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error) {
 	txn := s.Dg.NewTxn()
 
@@ -273,8 +273,8 @@ func (s *DGraphRepo) CreateObject(ctx context.Context, name, parentID, kind, nam
 	return a.GetUids()["new"], nil
 }
 
-//ListForAccount is a method to list all the objects for an account
-func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespace string, recurse bool) (inheritedObjects []*nodepb.Object, err error) {
+//ListForAccount is a method to execute Dgraph query to list all the objects for an account
+func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespaceid string, recurse bool) (inheritedObjects []*nodepb.Object, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
 	// TODO recurse?
@@ -288,7 +288,7 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 		depth = 1
 	}
 
-	var q = `query list($account: string, $namespace: string) {
+	var q = `query list($account: string, $namespaceid: string) {
                    var(func: uid($account)) @cascade {
                      access.to.namespace %v {
                        owns {
@@ -315,8 +315,8 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
                    }
                   }`
 
-	if namespace != "" {
-		q = fmt.Sprintf(q, "@filter(eq(name,$namespace))", depth)
+	if namespaceid != "" {
+		q = fmt.Sprintf(q, "@filter(uid($namespaceid) and eq(type,namespace))", depth)
 	} else {
 		q = fmt.Sprintf(q, "", depth)
 	}
@@ -329,8 +329,8 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 	}
 
 	params := map[string]string{
-		"$account":   account,
-		"$namespace": namespace,
+		"$account":     account,
+		"$namespaceid": namespaceid,
 	}
 
 	res, err := txn.QueryWithVars(ctx, q, params)
