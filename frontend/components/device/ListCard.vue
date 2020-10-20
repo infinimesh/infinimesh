@@ -5,6 +5,7 @@
         :hoverable="true"
         :bordered="false"
         :ref="`device-card-${device.id}`"
+        :class="selected ? 'card-selected' : ''"
       >
         <template slot="title">{{ device.name }}</template>
         <template slot="extra">
@@ -36,14 +37,25 @@
           <nuxt-link
             :to="{ name: 'dashboard-devices-id', params: { id: device.id } }"
           >
-            <a-button type="link">
-              Open
-            </a-button>
+            <a-button type="link"> Open </a-button>
           </nuxt-link>
         </a-menu-item>
-        <a-menu-item key="2">
+        <a-menu-item key="toogle">
           <a-button type="link" @click="handleToogleDevice(false)">
             {{ device.enabled ? "Disable" : "Enable" }}
+          </a-button>
+        </a-menu-item>
+        <a-menu-item key="toogle-selection">
+          <a-button
+            type="link"
+            @click="$emit((selected ? 'de' : '') + 'select', device.id)"
+          >
+            {{ selected ? "Deselect" : "Select" }}
+          </a-button>
+        </a-menu-item>
+        <a-menu-item key="select-all">
+          <a-button type="link" @click="$emit('select-all')">
+            Select All
           </a-button>
         </a-menu-item>
       </a-menu>
@@ -60,8 +72,21 @@ export default Vue.component("device-list-card", {
   props: {
     device: {
       required: true,
-      type: Object
-    }
-  }
+      type: Object,
+    },
+    selected: {
+      required: false,
+      default: false,
+      type: Boolean,
+    },
+  },
 });
 </script>
+
+<style scoped>
+.card-selected {
+  -webkit-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  -moz-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+}
+</style>

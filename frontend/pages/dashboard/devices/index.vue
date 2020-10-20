@@ -1,5 +1,29 @@
 <template>
   <div id="devicesTable">
+    <div class="selected-devices-actions" v-if="selectedDevices.length">
+      <a-row type="flex" align="middle">
+        <a-col :span="2">
+          <a-button type="link" @click="selectedDevices = []" icon="close"
+            >Deselect all</a-button
+          >
+        </a-col>
+        <div
+          role="separator"
+          class="selected-devices-actions-vertical-divider"
+        ></div>
+        <a-col :span="4">
+          <a-button
+            type="success"
+            style="margin-right: 5px"
+            @click="toogleAll(true)"
+            >Enable All</a-button
+          >
+          <a-button type="danger" @click="toogleAll(false)"
+            >Disable All</a-button
+          >
+        </a-col>
+      </a-row>
+    </div>
     <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
       <a-col
         :xs="{ span: 24 }"
@@ -43,7 +67,16 @@
               />
             </template>
           </a-row>
-          <device-list-card :device="device" v-else />
+          <device-list-card
+            :device="device"
+            :selected="selectedDevices.includes(device.id)"
+            @select="(id) => selectedDevices.push(id)"
+            @deselect="
+              (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
+            "
+            @select-all="selectedDevices = pool.map((d) => d.id)"
+            v-else
+          />
         </div>
       </a-col>
     </a-row>
@@ -63,6 +96,7 @@ export default {
   data() {
     return {
       addDeviceActive: false,
+      selectedDevices: [],
     };
   },
   computed: {
@@ -146,6 +180,57 @@ export default {
         },
       });
     },
+    toogleAll(enable) {
+      let vm = this;
+      this.updateAll(
+        () => {
+          return {
+            enabled: enable,
+          };
+        },
+        {
+          success: (response) => {
+            let res = response.reduce(
+              (r, el) => {
+                r[el.status == 200 ? "success" : "fail"]++;
+                return r;
+              },
+              {
+                success: 0,
+                fail: 0,
+              }
+            );
+            vm.$notification.info({
+              message: `${enable ? "Enabled" : "Disabled"} ${
+                response.length
+              } devices`,
+              description: `Result: success - ${res.success}, failed: ${res.fail}.`,
+            });
+          },
+        }
+      );
+    },
+    updateAll(modifier, { success, error }) {
+      let patchPromises = this.pool
+        .filter((d) => this.selectedDevices.includes(d.id))
+        .map((device) => {
+          return this.$axios({
+            url: `/api/devices/${device.id}`,
+            method: "patch",
+            data: modifier(device),
+          });
+        });
+      Promise.all(patchPromises)
+        .then((res) => {
+          if (success) success(res);
+        })
+        .catch((err) => {
+          if (error) error(err);
+        })
+        .then(() => {
+          this.$store.dispatch("devices/get");
+        });
+    },
   },
 };
 </script>
@@ -160,5 +245,33 @@ export default {
 }
 .create-form .anticon {
   color: var(--icon-color-dark);
+}
+.selected-devices-actions {
+  margin-top: 10px;
+  width: 100%;
+  background: var(--primary-color);
+  border-radius: var(--border-radius-base);
+  color: var(--line-color);
+}
+.selected-devices-actions .ant-btn-link {
+  color: white !important;
+}
+.selected-devices-actions .ant-btn {
+  height: 24px;
+}
+.selected-devices-actions-vertical-divider {
+  box-sizing: border-box;
+  margin: 0 10px;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  font-feature-settings: "tnum", "tnum";
+  background: #e8e8e8;
+  vertical-align: middle;
+  width: 1px;
+  min-height: 32px;
 }
 </style>
