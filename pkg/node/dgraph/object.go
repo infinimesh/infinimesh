@@ -279,8 +279,7 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 
 	// TODO recurse?
 
-	fmt.Println("LIST FOR ACCOUNT")
-
+	//Decide the depth of recurssion for the object heirarchy
 	var depth int
 	if recurse {
 		depth = 10
@@ -288,6 +287,7 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 		depth = 1
 	}
 
+	//Dgrph Query to get the object heirachy from the namespace
 	var q = `query list($account: string, $namespaceid: string) {
                    var(func: uid($account)) @cascade {
                      access.to.namespace %v {
@@ -345,7 +345,7 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 
 	var roots []Object
 
-	// Access grants
+	//Give access to the newly created objects
 	for _, accessObject := range result.Inherited {
 
 		var isRoot = true
@@ -359,7 +359,6 @@ func (s *DGraphRepo) ListForAccount(ctx context.Context, account string, namespa
 		}
 
 		if isRoot {
-			fmt.Println(accessObject.Name, " is root")
 			roots = append(roots, accessObject)
 		}
 
