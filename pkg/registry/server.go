@@ -25,6 +25,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -246,19 +247,19 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 
 	//Update the device details based on the data available.
 	for _, field := range request.FieldMask.GetPaths() {
-		switch field {
+		switch strings.ToLower(field) {
 
 		//Update the device details
-		case "enabled", "Enabled", "ENABLED":
+		case "enabled":
 			d.Enabled = request.Device.GetEnabled().Value
-		case "tags", "Tags", "TAGS":
+		case "tags":
 			d.Tags = request.Device.Tags
-		case "name", "Name", "NAME":
+		case "name":
 			if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
 				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
 			}
 			d.Name = request.Device.Name
-		case "certificate", "Certificate", "CERTIFICATE":
+		case "certificate":
 			//Pre-check for updating certificates
 			if request.Device.Certificate == nil {
 				return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
