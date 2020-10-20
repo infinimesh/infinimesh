@@ -43,7 +43,15 @@
               />
             </template>
           </a-row>
-          <device-list-card :device="device" v-else />
+          <device-list-card
+            :device="device"
+            :selected="selectedDevices.includes(device.id)"
+            @select="(id) => selectedDevices.push(id)"
+            @deselect="
+              (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
+            "
+            v-else
+          />
         </div>
       </a-col>
     </a-row>
@@ -63,6 +71,7 @@ export default {
   data() {
     return {
       addDeviceActive: false,
+      selectedDevices: [],
     };
   },
   computed: {
