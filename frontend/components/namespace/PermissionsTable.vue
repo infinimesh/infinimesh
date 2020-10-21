@@ -91,13 +91,13 @@ const permissions_table_columns = [
   {
     title: "Access",
     dataIndex: "action",
-    width: "20%",
+    width: "15%",
     scopedSlots: { customRender: "action" },
   },
   {
     title: "Actions",
     key: "actions",
-    width: "10%",
+    width: "15%",
     scopedSlots: { customRender: "actions" },
   },
 ];
