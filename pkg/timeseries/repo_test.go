@@ -74,7 +74,7 @@ func init() {
 func TestSave(t *testing.T) {
 	err := repo.CreateDataPoint(context.TODO(), &DataPoint{
 		DeviceID:  "test-device-1",
-		MessageID: "test-device-1",
+		MessageID: uint64(2),
 		Property:  "voltage",
 		Timestamp: time.Now(),
 		Value:     50.0,
