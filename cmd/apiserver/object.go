@@ -42,7 +42,11 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	parent := request.Parent.Value
+	var parent string
+	if request.Parent.Value != "" {
+		parent = request.Parent.Value
+	}
+
 	//Invoke the List Objects controller for server
 	obj, err := o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
 		Parent:      parent,
