@@ -1,6 +1,6 @@
 CREATE TABLE data_points (
   device_id VARCHAR NOT NULL,
-  message_id VARCHAR NOT NULL,
+  message_id BIGINT NOT NULL,
   property VARCHAR NOT NULL,
   value DOUBLE PRECISION,
   timestamp TIMESTAMPTZ NOT NULL,

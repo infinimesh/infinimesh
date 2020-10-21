@@ -32,7 +32,7 @@ type TimeseriesRepo interface {
 
 type DataPoint struct {
 	DeviceID  string
-	MessageID string
+	MessageID uint64
 	Property  string
 	Timestamp time.Time
 	Value     float64
