@@ -43,7 +43,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
 	var parent string
-	if request.Parent.Value != "" {
+	if request.Parent != nil {
 		parent = request.Parent.Value
 	}
 
