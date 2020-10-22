@@ -80,11 +80,10 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	var messageLength float32
 	err = row.Scan(&messageLength)
 	if err != nil {
-		tx.Rollback()
-	} else {
-		//adding existing message length to datapoint length
-		datapoint.Length += messageLength
-	}
+		_ = tx.Rollback()
+		return err
+	} //adding existing message length to datapoint length
+	datapoint.Length += messageLength
 	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
 		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value, datapoint.Length,
 	)
