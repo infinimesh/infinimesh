@@ -23,6 +23,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -40,26 +41,20 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 	//Added logging
 	log.Info("Create Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	//Check if the user has access to create the device for the namespace
-	resp, err := d.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespaceid: request.Device.Namespace,
-		Account:     account,
-		Action:      nodepb.Action_WRITE,
-	})
+	//Invoke the Update Account controller for server
+	res, err := d.client.Create(ctx, request)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Could not get permission to create device.")
-	}
-	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device.")
+		//Added logging
+		log.Error("Create Device API Method: Failed to update Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	//Create the device if the user has access
-	return d.client.Create(ctx, request)
+	//Added logging
+	log.Info("Create Device API Method: Device succesfully created")
+	return res, nil
 }
 
 func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
@@ -67,26 +62,20 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 	//Added logging
 	log.Info("Update Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
-	}
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
-	//Check if the user has access to update the device
-	resp, err := d.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
-		Node:    request.Device.Id,
-		Account: account,
-		Action:  nodepb.Action_WRITE,
-	})
+	//Invoke the Update Account controller for server
+	res, err := d.client.Update(ctx, request)
 	if err != nil {
-		return nil, status.Error(codes.PermissionDenied, "Could not get permission to update device.")
-	}
-	if !resp.GetDecision().GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to update device.")
+		//Added logging
+		log.Error("Update Device API Method: Failed to update Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	//Update the device if the user has access
-	return d.client.Update(ctx, request)
+	//Added logging
+	log.Info("Update Device API Method: Device succesfully updated")
+	return res, nil
 }
 
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {

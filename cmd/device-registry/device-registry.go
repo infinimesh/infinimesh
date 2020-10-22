@@ -66,6 +66,7 @@ func main() {
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
 	server := registry.NewServer(dg)
+	server.Log = log.Named("deviceController")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
