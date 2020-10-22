@@ -49,6 +49,7 @@ type Server struct {
 	dgo *dgo.Dgraph
 
 	repo node.Repo
+	dr   DGraphRepo
 }
 
 func NewServer(dg *dgo.Dgraph) *Server {
@@ -403,52 +404,9 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 	}, nil
 }
 
+//List is a method that list details of the all devices
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	txn := s.dgo.NewReadOnlyTxn()
-
-	const q = `query list($namespaceid: string){
-		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
-		  owns {
-			OBJs as uid
-		  } @filter(eq(kind, "device"))
-		}
-
-		nodes(func: uid(OBJs)) @recurse {
-		  children{}
-		  uid
-		  name
-		  kind
-		  enabled
-		  tags
-		}
-	  }`
-
-	vars := map[string]string{
-		"$namespaceid": request.Namespace,
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, vars)
-	if err != nil {
-		return nil, err
-	}
-
-	var res struct {
-		Nodes []Device `json:"nodes"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	var devices []*registrypb.Device
-	for _, device := range res.Nodes {
-		devices = append(devices, toProto(&device))
-	}
-
-	return &registrypb.ListResponse{
-		Devices: devices,
-	}, nil
+	return s.dr.List(ctx, request)
 }
 
 func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {

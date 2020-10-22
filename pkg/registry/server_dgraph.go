@@ -18,6 +18,10 @@
 package registry
 
 import (
+	"context"
+	"encoding/json"
+
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/dgraph-io/dgo"
@@ -26,4 +30,53 @@ import (
 //DGraphRepo is a Data type for executing Dgraph Query
 type DGraphRepo struct {
 	Dg *dgo.Dgraph
+}
+
+//List is a method to execute Dgraph Query to List details of all Devices
+func (dr *DGraphRepo) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	txn := dr.Dg.NewReadOnlyTxn()
+
+	const q = `query list($namespaceid: string){
+		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
+		  owns {
+			OBJs as uid
+		  } @filter(eq(kind, "device"))
+		}
+
+		nodes(func: uid(OBJs)) @recurse {
+		  children{}
+		  uid
+		  name
+		  kind
+		  enabled
+		  tags
+		}
+	  }`
+
+	vars := map[string]string{
+		"$namespaceid": request.Namespace,
+	}
+
+	resp, err := txn.QueryWithVars(ctx, q, vars)
+	if err != nil {
+		return nil, err
+	}
+
+	var res struct {
+		Nodes []Device `json:"nodes"`
+	}
+
+	err = json.Unmarshal(resp.Json, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	var devices []*registrypb.Device
+	for _, device := range res.Nodes {
+		devices = append(devices, toProto(&device))
+	}
+
+	return &registrypb.ListResponse{
+		Devices: devices,
+	}, nil
 }
