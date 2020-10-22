@@ -31,6 +31,7 @@ const (
 
 //Repo Interface to expose methods
 type Repo interface {
+	//Accounts
 	CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error)
 	ListAccounts(ctx context.Context) (accounts []*nodepb.Account, err error)
 	ListAccountsforAdmin(ctx context.Context, requestorID string) (accounts []*nodepb.Account, err error)
@@ -41,16 +42,19 @@ type Repo interface {
 	AssignOwner(ctx context.Context, ownerID, accountID string) (err error)
 	UserExists(ctx context.Context, account string) (exists bool, err error)
 
+	//Authorizations
 	IsAuthorized(ctx context.Context, target, who, action string) (decision bool, err error)
 	IsAuthorizedNamespace(ctx context.Context, namespaceid, account string, action nodepb.Action) (decision bool, err error)
 	Authorize(ctx context.Context, account, node, action string, inherit bool) (err error)
 	AuthorizeNamespace(ctx context.Context, account, namespaceID string, action nodepb.Action) (err error)
 	Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error)
 
+	//Objects
 	CreateObject(ctx context.Context, name, parentID, kind, namespaceID string) (id string, err error)
 	DeleteObject(ctx context.Context, uid string) (err error)
 	ListForAccount(ctx context.Context, account string, namespaceID string, recurse bool) (inheritedObjects []*nodepb.Object, err error)
 
+	//Namespaces
 	CreateNamespace(ctx context.Context, name string) (id string, err error)
 	GetNamespace(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error) //To be deprecated
 	GetNamespaceID(ctx context.Context, uid string) (namespace *nodepb.Namespace, err error)

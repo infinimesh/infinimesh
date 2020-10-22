@@ -49,7 +49,6 @@ type Server struct {
 	dgo *dgo.Dgraph
 
 	repo node.Repo
-	dr   DGraphRepo
 }
 
 func NewServer(dg *dgo.Dgraph) *Server {
@@ -406,7 +405,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 
 //List is a method that list details of the all devices
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	return s.dr.List(ctx, request)
+	return s.List(ctx, request)
 }
 
 func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {

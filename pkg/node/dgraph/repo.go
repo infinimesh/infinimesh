@@ -45,6 +45,7 @@ func isPermissionSufficient(required, actual string) bool {
 	}
 }
 
+//DGraphRepo is a Data type for executing Dgraph Query
 type DGraphRepo struct {
 	Dg *dgo.Dgraph
 }

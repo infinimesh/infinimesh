@@ -22,19 +22,11 @@ import (
 	"encoding/json"
 
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
-	"github.com/dgraph-io/dgo"
 )
 
-//DGraphRepo is a Data type for executing Dgraph Query
-type DGraphRepo struct {
-	Dg *dgo.Dgraph
-}
-
-//List is a method to execute Dgraph Query to List details of all Devices
-func (dr *DGraphRepo) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	txn := dr.Dg.NewReadOnlyTxn()
+//ListQ is a method to execute Dgraph Query to List details of all Devices
+func (s *Server) ListQ(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+	txn := s.dgo.NewReadOnlyTxn()
 
 	const q = `query list($namespaceid: string){
 		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
