@@ -44,6 +44,7 @@ import (
 	"encoding/base64"
 )
 
+//Server is a Data type for Device Controller file
 type Server struct {
 	dgo *dgo.Dgraph
 
