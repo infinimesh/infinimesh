@@ -21,11 +21,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
-
-	"io/ioutil"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -69,6 +68,7 @@ func init() {
 		fmt.Printf("Error during DDL import: %v. Ignoring\n", err)
 	}
 	txn.Commit()
+
 }
 
 func TestSave(t *testing.T) {
@@ -78,7 +78,7 @@ func TestSave(t *testing.T) {
 		Property:  "voltage",
 		Timestamp: time.Now(),
 		Value:     50.0,
-		Length:    11,
+		Length:    12.0,
 	})
 	require.NoError(t, err)
 }
