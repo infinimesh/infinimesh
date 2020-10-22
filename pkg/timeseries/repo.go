@@ -33,6 +33,7 @@ const (
 
 type TimeseriesRepo interface {
 	CreateDataPoint(ctx context.Context, datapoint *DataPoint) error
+	ReadExistingDatapoint(ctx context.Context, deviceID string, messageID uint64) (float32, error)
 }
 
 type DataPoint struct {
@@ -75,16 +76,7 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	if err != nil {
 		return err
 	}
-	//converting datapoint length to kb
-	datapoint.Length = datapoint.Length / sizeKB
-	row := tx.QueryRow("SELECT message_length FROM DATA_POINTS where device_id= $1 ORDER BY timestamp DESC LIMIT 1", datapoint.DeviceID)
-	var messageLength float32
-	err = row.Scan(&messageLength)
-	if err != nil {
-		fmt.Printf("no existing rows %v", err)
-	} //adding existing message length to datapoint length
-	datapoint.Length += messageLength
-	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
+	_, err = tx.Exec("INSERT INTO DATA_POINTS_TEST (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
 		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value, datapoint.Length,
 	)
 	if err != nil {
@@ -96,4 +88,23 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 		return err
 	}
 	return nil
+}
+
+func (t *timescaleRepo) ReadExistingDatapoint(ctx context.Context, deviceID string, messageID uint64) (float32, error) {
+	tx, err := t.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return 0, err
+	}
+	row := tx.QueryRow("SELECT message_length FROM DATA_POINTS_TEST where device_id= $1 and message_id= $2 ORDER BY timestamp DESC LIMIT 1", deviceID, messageID)
+	var messageLength float32
+	err = row.Scan(&messageLength)
+	if err != nil {
+		fmt.Printf("no existing rows %v", err)
+		return 0, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+	return messageLength, nil
 }
