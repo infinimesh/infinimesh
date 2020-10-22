@@ -67,19 +67,24 @@
             <a-card key="details" v-if="device" hoverable>
               <a-row slot="title" type="flex" justify="space-between">
                 <a-col :span="3"> Details </a-col>
-                <a-col :span="2">
-                  <a-button
-                    type="success"
-                    icon="save"
-                    @click="active_edit = false"
-                    v-if="active_edit"
-                    >Save</a-button
-                  >
+                <a-col :span="5" v-if="active_edit">
+                  <a-space>
+                    <a-button
+                      type="primary"
+                      icon="close"
+                      @click="active_edit = false"
+                      >Cancel</a-button
+                    >
+                    <a-button type="success" icon="save" @click="patchDevice"
+                      >Save</a-button
+                    >
+                  </a-space>
+                </a-col>
+                <a-col :span="2" v-else>
                   <a-button
                     type="primary"
                     icon="edit"
                     @click="active_edit = true"
-                    v-else
                     >Edit</a-button
                   >
                 </a-col>
@@ -177,12 +182,6 @@ export default {
       active_edit: false,
     };
   },
-  watch: {
-    active_edit() {
-      console.log(this.active_edit);
-      console.dir(this.deviceObject);
-    },
-  },
   computed: {
     device: {
       get() {
@@ -210,6 +209,27 @@ export default {
     this.refresh();
   },
   methods: {
+    patchDevice() {
+      this.active_edit = false;
+      this.handleDeviceUpdate(
+        {
+          name: this.device.name,
+          tags: this.device.tags,
+        },
+        {
+          refresh: true,
+          success: () => {
+            this.$message.success(`Device successfuly updated!`);
+          },
+          error: (e) => {
+            this.$notification.error({
+              message: `Error updating device`,
+              description: e.response.data.message,
+            });
+          },
+        }
+      );
+    },
     validate({ params }) {
       return /0[xX][0-9a-fA-F]+/.test(params.id);
     },
