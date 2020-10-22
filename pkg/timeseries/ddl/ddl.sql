@@ -1,4 +1,4 @@
-CREATE TABLE data_points_test (
+CREATE TABLE data_points (
   device_id VARCHAR NOT NULL,
   message_id BIGINT NOT NULL,
   property VARCHAR NOT NULL,
