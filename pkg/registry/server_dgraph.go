@@ -37,7 +37,7 @@ import (
 //CreateQ is a method to execute Dgraph Query to Create a new Device
 func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
 	txn := s.dgo.NewTxn()
-	defer txn.Discard(ctx)
+	defer txn.Discard(ctx) // nolint
 
 	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
 		return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
