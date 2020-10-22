@@ -143,12 +143,12 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
 
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
-
 	randomName := randomdata.SillyName()
 
 	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
@@ -188,12 +188,13 @@ func TestCreateGet(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	ctx := context.Background()
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
 
 	randomName := randomdata.SillyName()
 
 	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
@@ -266,7 +267,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
