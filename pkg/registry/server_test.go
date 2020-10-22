@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 
+	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
@@ -61,9 +63,15 @@ func init() {
 		panic(err)
 	}
 
+	log, err := logger.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+
 	userID = user
 
 	server = NewServer(dg)
+	server.Log = log.Named("Device Registry Test")
 }
 
 func TestList(t *testing.T) {
@@ -134,6 +142,9 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 
 func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
+
 	randomName := randomdata.SillyName()
 
 	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
@@ -146,7 +157,7 @@ func TestCreateGet(t *testing.T) {
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomName, ns.Id),
 	}
-	response, err := server.Create(context.Background(), request)
+	response, err := server.Create(ctx, request)
 	require.NoError(t, err)
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
