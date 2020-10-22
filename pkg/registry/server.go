@@ -405,7 +405,7 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 
 //List is a method that list details of the all devices
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	return s.List(ctx, request)
+	return s.ListQ(ctx, request)
 }
 
 func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
