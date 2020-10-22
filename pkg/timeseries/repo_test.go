@@ -83,7 +83,7 @@ func TestSave(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	messageLength, err := repo.ReadExistingDatapoint(context.TODO(), "test-device-1", 2)
+	messageLength, err := repo.ReadExistingDatapoint(context.TODO(), "test-device-1")
 	err = repo.CreateDataPoint(context.TODO(), &DataPoint{
 		DeviceID:  "test-device-1",
 		MessageID: uint64(2),

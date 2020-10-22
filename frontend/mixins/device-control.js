@@ -88,27 +88,41 @@ export default {
         });
     },
     handleToogleDevice(refresh = true) {
+      this.handleDeviceUpdate(
+        {
+          enabled: !this.device.enabled
+        },
+        {
+          refresh: refresh,
+          success: () => {
+            this.$message.success(
+              `Device successfuly ${
+                this.device.enabled ? "disabled" : "enabled"
+              }!`
+            );
+          },
+          error: () => {
+            this.$notification.error({
+              message: `Error ${
+                device.enabled ? "disabling" : "enabling"
+              } device`,
+              description: e.response.data.message
+            });
+          }
+        }
+      );
+    },
+    handleDeviceUpdate(data, { refresh, success, error }) {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
         method: "patch",
-        data: {
-          enabled: !this.device.enabled
-        }
+        data: data
       })
         .then(() => {
-          this.$message.success(
-            `Device successfuly ${
-              this.device.enabled ? "disabled" : "enabled"
-            }!`
-          );
+          if (success) success();
         })
         .catch(e => {
-          this.$notification.error({
-            message: `Error ${
-              device.enabled ? "disabling" : "enabling"
-            } device`,
-            description: e.response.data.message
-          });
+          if (error) error(e);
         })
         .then(() => {
           if (refresh) this.refresh();

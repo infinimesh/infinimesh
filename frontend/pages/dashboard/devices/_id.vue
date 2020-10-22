@@ -16,11 +16,17 @@
           :xxl="{ span: 12, offset: 1 }"
         >
           <transition name="fade">
-            <h1 class="lead" v-if="device">
+            <h1 class="lead" v-if="device && !active_edit">
               {{ device.name }}
               <span class="muted">{{ device.id }}</span>
             </h1>
           </transition>
+          <a-input
+            v-show="active_edit"
+            placeholder="Enter new device name"
+            style="width: 50%; margin-bottom: 16px; font-size: 2rem"
+            v-model="device.name"
+          />
         </a-col>
         <a-col
           :xs="1"
@@ -58,8 +64,41 @@
           :xxl="{ span: 14, offset: 1 }"
         >
           <transition-group name="slide">
-            <a-card title="Details" key="details" v-if="device" hoverable>
-              <template>
+            <a-card key="details" v-if="device" hoverable>
+              <a-row slot="title" type="flex" justify="space-between">
+                <a-col :span="3"> Details </a-col>
+                <a-col :span="5" v-if="active_edit">
+                  <a-space>
+                    <a-button
+                      type="primary"
+                      icon="close"
+                      @click="active_edit = false"
+                      >Cancel</a-button
+                    >
+                    <a-button type="success" icon="save" @click="patchDevice"
+                      >Save</a-button
+                    >
+                  </a-space>
+                </a-col>
+                <a-col :span="2" v-else>
+                  <a-button
+                    type="primary"
+                    icon="edit"
+                    @click="active_edit = true"
+                    >Edit</a-button
+                  >
+                </a-col>
+              </a-row>
+              <template v-if="active_edit">
+                <a-select
+                  mode="tags"
+                  :token-separators="[',']"
+                  v-model="device.tags"
+                  style="min-width: 50%; margin: 15px 0"
+                  placeholder="Enter a comma-separated list of tags, e.g. tag1, tag2"
+                />
+              </template>
+              <template v-else>
                 <a-row v-if="device.tags && device.tags.length">
                   <p>
                     Tags:
@@ -134,12 +173,13 @@ export default {
      * Device ID - not required if component is mounted via Router _id
      */
     deviceId: {
-      required: false
-    }
+      required: false,
+    },
   },
   data() {
     return {
-      deviceObject: false
+      deviceObject: false,
+      active_edit: false,
     };
   },
   computed: {
@@ -149,7 +189,7 @@ export default {
       },
       set(obj) {
         this.deviceObject = { ...this.deviceObject, ...obj };
-      }
+      },
     },
     deviceStateBulbColor() {
       if (!(this.device && this.device.enabled !== undefined)) {
@@ -159,20 +199,41 @@ export default {
       } else {
         return "#eb2f96";
       }
-    }
+    },
   },
   mounted() {
     this.device = {
-      id: this.deviceId || this.$route.params.id
+      id: this.deviceId || this.$route.params.id,
     };
     // Getting Device data from API
     this.refresh();
   },
   methods: {
+    patchDevice() {
+      this.active_edit = false;
+      this.handleDeviceUpdate(
+        {
+          name: this.device.name,
+          tags: this.device.tags,
+        },
+        {
+          refresh: true,
+          success: () => {
+            this.$message.success(`Device successfuly updated!`);
+          },
+          error: (e) => {
+            this.$notification.error({
+              message: `Error updating device`,
+              description: e.response.data.message,
+            });
+          },
+        }
+      );
+    },
     validate({ params }) {
       return /0[xX][0-9a-fA-F]+/.test(params.id);
-    }
-  }
+    },
+  },
 };
 </script>
 
