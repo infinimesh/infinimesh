@@ -536,3 +536,28 @@ func (s *Server) DeleteQ(ctx context.Context, request *registrypb.DeleteRequest)
 
 	return &registrypb.DeleteResponse{}, nil
 }
+
+// TODO make registrypb.Device have multiple certs, ... we also ignore valid_to for now
+func toProto(device *Device) *registrypb.Device {
+	res := &registrypb.Device{
+		Id:      device.UID,
+		Name:    device.Name,
+		Enabled: &wrappers.BoolValue{Value: device.Enabled},
+		Tags:    device.Tags,
+		// TODO cert etc
+	}
+
+	if len(device.OwnedBy) > 0 {
+		res.Namespace = device.OwnedBy[0].Name
+	}
+
+	if len(device.Certificates) > 0 {
+		res.Certificate = &registrypb.Certificate{
+			PemData:              device.Certificates[0].PemData,
+			Algorithm:            device.Certificates[0].Algorithm,
+			FingerprintAlgorithm: device.Certificates[0].FingerprintAlgorithm,
+			Fingerprint:          device.Certificates[0].Fingerprint,
+		}
+	}
+	return res
+}

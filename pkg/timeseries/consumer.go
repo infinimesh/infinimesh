@@ -59,7 +59,11 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 		}
 
 		fmt.Println("got msg", string(message.Value))
-
+		datapointLength := float32(len(message.Value)) / sizeKB
+		oldLength, err := h.Repo.ReadExistingDatapoint(context.TODO(), string(message.Key), msg.Version)
+		if err != nil {
+			datapointLength += oldLength
+		}
 		flatJSON, err := flatten.FlattenString(string(msg.State), "", flatten.DotStyle)
 		if err != nil {
 			h.Log.Info("Failed to flatten", zap.Error(err))
@@ -84,14 +88,13 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 					datapointValue = 0
 				}
 			}
-
 			err = h.Repo.CreateDataPoint(context.TODO(), &DataPoint{
 				DeviceID:  string(message.Key),
 				MessageID: msg.Version,
 				Property:  property,
 				Timestamp: msg.Timestamp,
 				Value:     datapointValue,
-				Length:    float32(len(message.Value)),
+				Length:    datapointLength,
 			})
 
 		}
