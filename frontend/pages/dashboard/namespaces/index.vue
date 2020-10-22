@@ -56,24 +56,12 @@
             </a-space>
           </span>
 
-          <a-table
-            slot="expandedRowRender"
-            slot-scope="record"
-            :loading="record.loading"
-            :data-source="record.permissions"
-            :columns="permissions_table_columns"
-            :pagination="false"
-            style="margin: 10px; width: 50%"
-            :bordered="true"
-            :locale="{ emptyText: 'No Permissions Found' }"
-            :rowKey="(record, index) => `${record.account_id}-${index}`"
-          >
-            <span slot="action" slot-scope="action">
-              <a-tag :color="actionColors[action]">
-                {{ action }}
-              </a-tag>
-            </span>
-          </a-table>
+          <span slot="expandedRowRender" slot-scope="record">
+            <namespace-permissions-table
+              :namespace="record"
+              @refresh="loadNamespacePermissions(true, record)"
+            />
+          </span>
         </a-table>
       </a-col>
     </a-row>
@@ -82,6 +70,7 @@
 
 <script>
 import NamespaceAdd from "@/components/namespace/Add";
+import NamespacePermissionsTable from "@/components/namespace/PermissionsTable";
 
 const namespaces_table_columns = [
   {
@@ -97,28 +86,15 @@ const namespaces_table_columns = [
     scopedSlots: { customRender: "actions" },
   },
 ];
-const permissions_table_columns = [
-  {
-    title: "Account",
-    dataIndex: "account_name",
-    sorter: true,
-  },
-  {
-    title: "Access",
-    dataIndex: "action",
-    width: "15%",
-    scopedSlots: { customRender: "action" },
-  },
-];
 
 export default {
   components: {
     NamespaceAdd,
+    NamespacePermissionsTable,
   },
   data() {
     return {
       namespaces_table_columns,
-      permissions_table_columns,
       loading: false,
 
       createNamespaceDrawerVisible: false,
@@ -128,13 +104,6 @@ export default {
     namespaces() {
       return this.$store.state.devices.namespaces;
     },
-  },
-  created() {
-    this.actionColors = {
-      WRITE: "#eb2f96",
-      READ: "#52c41a",
-      NONE: "#5d8eb7",
-    };
   },
   mounted() {
     this.getNamespacesPool();
