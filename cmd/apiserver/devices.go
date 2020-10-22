@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -35,6 +36,10 @@ type deviceAPI struct {
 }
 
 func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateRequest) (response *registrypb.CreateResponse, err error) {
+
+	//Added logging
+	log.Info("Create Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -58,6 +63,10 @@ func (d *deviceAPI) Create(ctx context.Context, request *registrypb.CreateReques
 }
 
 func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
+
+	//Added logging
+	log.Info("Update Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -81,6 +90,10 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 }
 
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
+
+	//Added logging
+	log.Info("Get Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -106,6 +119,10 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 
 }
 func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
+
+	//Added logging
+	log.Info("List Devices API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
@@ -141,6 +158,10 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	return list, err
 }
 func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
+
+	//Added logging
+	log.Info("Delete Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
