@@ -20,6 +20,7 @@ package timeseries
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -80,7 +81,7 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	var messageLength float32
 	err = row.Scan(&messageLength)
 	if err != nil {
-		_ = tx.Rollback()
+		fmt.Printf("no existing rows %v", err)
 	} //adding existing message length to datapoint length
 	datapoint.Length += messageLength
 	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
