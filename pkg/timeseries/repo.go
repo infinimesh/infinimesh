@@ -27,10 +27,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	sizeKB = 1 << (10 * 1)
-)
-
 type TimeseriesRepo interface {
 	CreateDataPoint(ctx context.Context, datapoint *DataPoint) error
 	ReadExistingDatapoint(ctx context.Context, deviceID string) (float32, error)
