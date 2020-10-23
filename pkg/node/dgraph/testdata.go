@@ -72,6 +72,7 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 		fmt.Println("Create Namespace failed", err)
 		return "", "", err
 	}
+	fmt.Println("Namespace: ", namespace)
 
 	//Create user Joe
 	joe, err := repo.CreateUserAccount(context.Background(), "joe", "test123", false, false, true)
@@ -195,10 +196,6 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 		fmt.Println("Create Object failed", err)
 		return "", "", err
 	}
-
-	fmt.Println("User: ", joe)
-
-	// result := repo.Authorize(context.Background(), joe, apartment1Right, "WRITE", true)
 
 	return joe, admin, err
 }

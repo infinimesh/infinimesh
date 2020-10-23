@@ -138,12 +138,12 @@ func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent strin
 func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bool {
 	q := `query devices($fingerprint: string){
 		devices(func: eq(fingerprint, $fingerprint)) @normalize {
-		  ~certificates {
-			uid : uid
-		  }
+			~certificates {
+				uid : uid
+			}
 		}
-	  }
-		`
+	}
+	`
 
 	vars := map[string]string{
 		"$fingerprint": base64.StdEncoding.EncodeToString(fingerprint),
@@ -154,9 +154,7 @@ func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bo
 	}
 
 	var result struct {
-		Devices []struct {
-			UID string `json:"uid"`
-		} `json:"devices"`
+		Nodes []*Node `json:"devices"`
 	}
 
 	err = json.Unmarshal(resp.Json, &result)
@@ -164,7 +162,7 @@ func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bo
 		return false
 	}
 
-	return len(result.Devices) > 0
+	return len(result.Nodes) > 0
 }
 
 func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint

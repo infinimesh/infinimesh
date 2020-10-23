@@ -76,7 +76,7 @@ func init() {
 
 func TestList(t *testing.T) {
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x2"}))
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0xa"}))
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
 		Namespace: "0x4",
@@ -95,7 +95,7 @@ func TestList(t *testing.T) {
 
 func TestListForAccount(t *testing.T) {
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0xeab1"}))
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x6"}))
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
 		Namespace: "0xeab0",
@@ -168,7 +168,7 @@ func TestCreateGet(t *testing.T) {
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
 	// Get
-	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
+	respGet, err := server.Get(ctx, &registrypb.GetRequest{
 		Id: response.Device.Id,
 	})
 	require.NoError(t, err)
@@ -178,13 +178,13 @@ func TestCreateGet(t *testing.T) {
 	require.EqualValues(t, request.Device.Certificate.Algorithm, respGet.Device.Certificate.Algorithm)
 
 	// Get by fingerprint
-	respFP, err := server.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+	respFP, err := server.GetByFingerprint(ctx, &registrypb.GetByFingerprintRequest{
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
 	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name, Namespace: ns.Name})
 
-	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
 
