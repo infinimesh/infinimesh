@@ -76,7 +76,7 @@ func init() {
 
 func TestList(t *testing.T) {
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x8"}))
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0xa"}))
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
 		Namespace: "0x1",
