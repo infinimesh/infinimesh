@@ -68,7 +68,6 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 		if err != nil {
 			h.Log.Info("Failed to flatten", zap.Error(err))
 		}
-
 		flat := make(map[string]interface{})
 		err = json.Unmarshal([]byte(flatJSON), &flat)
 		if err != nil {
