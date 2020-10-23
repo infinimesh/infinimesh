@@ -79,7 +79,7 @@ func TestList(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0xa"}))
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: "0x4",
+		Namespace: "0x1",
 	})
 	require.NoError(t, err)
 	var found int
@@ -98,8 +98,8 @@ func TestListForAccount(t *testing.T) {
 	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x6"}))
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: "0xeab0",
-		Account:   "0xeab1",
+		Namespace: "0x1",
+		Account:   "0x6",
 	})
 	require.NoError(t, err)
 	var found int
