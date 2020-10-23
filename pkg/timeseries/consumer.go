@@ -31,6 +31,10 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 )
 
+const (
+	sizeKB = 1 << (10 * 1)
+)
+
 type Consumer struct {
 	Log  *zap.Logger
 	Repo TimeseriesRepo
@@ -62,13 +66,14 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 		datapointLength := float32(len(message.Value)) / sizeKB
 		oldLength, err := h.Repo.ReadExistingDatapoint(context.TODO(), string(message.Key))
 		if err != nil {
-			datapointLength += oldLength
+			h.Log.Error("Error occured while reading old message length", zap.Error(err))
+		} else {
+			datapointLength = datapointLength + oldLength
 		}
 		flatJSON, err := flatten.FlattenString(string(msg.State), "", flatten.DotStyle)
 		if err != nil {
 			h.Log.Info("Failed to flatten", zap.Error(err))
 		}
-
 		flat := make(map[string]interface{})
 		err = json.Unmarshal([]byte(flatJSON), &flat)
 		if err != nil {
