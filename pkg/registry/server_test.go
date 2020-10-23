@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 
@@ -35,6 +36,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 
+	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 )
 
@@ -61,9 +63,15 @@ func init() {
 		panic(err)
 	}
 
+	log, err := logger.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+
 	userID = user
 
 	server = NewServer(dg)
+	server.Log = log.Named("Device Registry Test")
 }
 
 func TestList(t *testing.T) {
@@ -134,10 +142,13 @@ AX99IKELzVTsndkfF8mLVWZr1Oob7soTVXfOI/VBn1e+3qkUrK94JYtYj04=
 
 func TestCreateGet(t *testing.T) {
 	ctx := context.Background()
+
 	randomName := randomdata.SillyName()
 
 	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
 
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
@@ -146,7 +157,7 @@ func TestCreateGet(t *testing.T) {
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomName, ns.Id),
 	}
-	response, err := server.Create(context.Background(), request)
+	response, err := server.Create(ctx, request)
 	require.NoError(t, err)
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
@@ -183,6 +194,8 @@ func TestUpdate(t *testing.T) {
 	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
 	require.NoError(t, err)
 
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
 
@@ -190,12 +203,12 @@ func TestUpdate(t *testing.T) {
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomName, ns.Id),
 	}
-	response, err := server.Create(context.Background(), request)
+	response, err := server.Create(ctx, request)
 	require.NoError(t, err)
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
 	// Get the device
-	respGet, err := server.Get(context.Background(), &registrypb.GetRequest{
+	respGet, err := server.Get(ctx, &registrypb.GetRequest{
 		Id: response.Device.Id,
 	})
 
@@ -207,7 +220,7 @@ func TestUpdate(t *testing.T) {
 	require.EqualValues(t, request.Device.Certificate.Algorithm, respGet.Device.Certificate.Algorithm)
 
 	// Get by fingerprint
-	respFP, err := server.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+	respFP, err := server.GetByFingerprint(ctx, &registrypb.GetByFingerprintRequest{
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
@@ -220,7 +233,7 @@ func TestUpdate(t *testing.T) {
 	NewTag := []string{"d"}
 
 	//Update the device
-	_, err = server.Update(context.Background(), &registrypb.UpdateRequest{
+	_, err = server.Update(ctx, &registrypb.UpdateRequest{
 		Device: &registrypb.Device{
 			Id:      response.Device.Id,
 			Name:    NewName,
@@ -234,7 +247,7 @@ func TestUpdate(t *testing.T) {
 	require.NoError(t, err)
 
 	// Get the updated device details
-	respGet, err = server.Get(context.Background(), &registrypb.GetRequest{
+	respGet, err = server.Get(ctx, &registrypb.GetRequest{
 		Id: response.Device.Id,
 	})
 	require.NoError(t, err)
@@ -244,7 +257,7 @@ func TestUpdate(t *testing.T) {
 	require.EqualValues(t, NewName, respGet.Device.Name)
 	require.EqualValues(t, []string{"d", "c", "b", "a"}, respGet.Device.Tags)
 
-	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
 
@@ -253,20 +266,22 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	ctx := context.Background()
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
-	response, err := server.Create(context.Background(), request)
+	response, err := server.Create(ctx, request)
 	require.NoError(t, err)
 	require.NotEmpty(t, response.Device.Certificate.Fingerprint)
 
-	_, err = server.Delete(context.Background(), &registrypb.DeleteRequest{
+	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
 
 	require.NoError(t, err)
 
-	_, err = server.Get(context.Background(), &registrypb.GetRequest{
+	_, err = server.Get(ctx, &registrypb.GetRequest{
 		Id: response.Device.Id,
 	})
 	require.Error(t, err)
