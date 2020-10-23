@@ -76,41 +76,89 @@ func init() {
 
 func TestList(t *testing.T) {
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0xa"}))
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", true, false, true)
+	require.NoError(t, err)
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	// Create
+	request := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName, ns.Id),
+	}
+	resp, err := server.Create(ctx, request)
+	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: "0x1",
+		Namespace: ns.Id,
 	})
 	require.NoError(t, err)
 	var found int
 	for _, device := range response.Devices {
-		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" {
+		if device.Name == randomName {
 			found++
 		}
 	}
 
 	//Assert needs to revaluated
-	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, 1, "Devices with both parent or no parent have to be returned")
+
+	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
+		Id: resp.Device.Id,
+	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 func TestListForAccount(t *testing.T) {
 
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x6"}))
+	ctx := context.Background()
+
+	randomName := randomdata.SillyName()
+
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	require.NoError(t, err)
+
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
+	// Create
+	request := &registrypb.CreateRequest{
+		Device: sampleDevice(randomName, ns.Id),
+	}
+	resp, err := server.Create(ctx, request)
+	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: "0x1",
-		Account:   "0x6",
+		Namespace: ns.Id,
+		Account:   accid,
 	})
 	require.NoError(t, err)
 	var found int
 	for _, device := range response.Devices {
-		if device.Name == "Test-device-no-parent" || device.Name == "Test-device" || device.Name == "Smartmeter" {
+		if device.Name == randomName {
 			found++
 		}
 	}
 
 	//Assert needs to revaluated
-	require.EqualValues(t, found, found, "Devices with both parent or no parent have to be returned")
+	require.EqualValues(t, found, 1, "Devices with both parent or no parent have to be returned")
+
+	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
+		Id: resp.Device.Id,
+	})
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 func sampleDevice(name string, namespaceid string) *registrypb.Device {

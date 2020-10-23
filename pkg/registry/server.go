@@ -270,7 +270,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 
 	//If Account is root provide all access
 	if isRoot.IsRoot {
-		return s.List(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
+		return s.ListQ(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
 	}
 
 	//Check if the non root user has access to the namespace
