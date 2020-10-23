@@ -199,7 +199,7 @@ func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetBy
 	return resp, nil
 }
 
-//Get is a method for get FringerPrint for a Device
+//Get is a method for get details for a Device
 func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 
 	resp, err := s.GetQ(ctx, request)
