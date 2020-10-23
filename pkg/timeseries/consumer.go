@@ -59,10 +59,10 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 		}
 
 		fmt.Println("got msg", string(message.Value))
-		datapointLength := float32(len(message.Value)) / sizeKB
+		datapointLength := float32(len(message.Value) / sizeKB)
 		oldLength, err := h.Repo.ReadExistingDatapoint(context.TODO(), string(message.Key))
 		if err != nil {
-			datapointLength += oldLength
+			datapointLength = datapointLength + oldLength
 		}
 		flatJSON, err := flatten.FlattenString(string(msg.State), "", flatten.DotStyle)
 		if err != nil {
