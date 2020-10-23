@@ -134,16 +134,12 @@ func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent strin
 	return len(result.Object) > 0
 }
 
-func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bool { //nolint
+//FingerprintExists is a method to execute Dgraph Query to check if the finger print is present in the DB
+func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bool {
 	q := `query devices($fingerprint: string){
 		devices(func: eq(fingerprint, $fingerprint)) @normalize {
 		  ~certificates {
 			uid : uid
-			name : name
-			enabled : enabled
-			~owns {
-			  namespace: name
-			}
 		  }
 		}
 	  }
@@ -159,10 +155,7 @@ func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bo
 
 	var result struct {
 		Devices []struct {
-			UID       string `json:"uid"`
-			Name      string `json:"name"`
-			Enabled   bool   `json:"enabled"`
-			Namespace string `json:"namespace"`
+			UID string `json:"uid"`
 		} `json:"devices"`
 	}
 

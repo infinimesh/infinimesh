@@ -75,7 +75,10 @@ func init() {
 }
 
 func TestList(t *testing.T) {
-	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
+
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x3"}))
+
+	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
 		Namespace: "0x4",
 	})
 	require.NoError(t, err)
@@ -91,7 +94,10 @@ func TestList(t *testing.T) {
 }
 
 func TestListForAccount(t *testing.T) {
-	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
+
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{"requestorid": "0x2"}))
+
+	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
 		Namespace: "0xeab0",
 		Account:   "0xeab1",
 	})
