@@ -250,9 +250,6 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
       uid : uid
       name : name
       enabled : enabled
-      ~owns {
-        namespace: name
-      }
     }
   }
 }

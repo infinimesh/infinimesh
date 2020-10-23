@@ -91,7 +91,7 @@ func TestList(t *testing.T) {
 }
 
 func TestListForAccount(t *testing.T) {
-	response, err := server.ListForAccount(context.Background(), &registrypb.ListDevicesRequest{
+	response, err := server.List(context.Background(), &registrypb.ListDevicesRequest{
 		Namespace: "0xeab0",
 		Account:   "0xeab1",
 	})
