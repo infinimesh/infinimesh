@@ -97,6 +97,14 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 	}
 	fmt.Println("User hanswurst: ", hanswurst)
 
+	//Create root and admin user
+	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true, true, true)
+	if err != nil {
+		fmt.Println("Create Account failed", err)
+		return "", "", err
+	}
+	fmt.Println("Admin: ", admin)
+
 	// Authorize both users on a shared project
 	{
 		err = repo.AuthorizeNamespace(context.Background(), joe, namespace, nodepb.Action_WRITE)
@@ -111,13 +119,6 @@ func ImportStandardSet(repo node.Repo) (userID string, adminID string, err error
 			return "", "", err
 		}
 	}
-
-	admin, err := repo.CreateUserAccount(context.Background(), "admin", "admin123", true, true, true)
-	if err != nil {
-		fmt.Println("Create Account failed", err)
-		return "", "", err
-	}
-	fmt.Println("Admin: ", admin)
 
 	building, err := repo.CreateObject(context.Background(), "Angerstr 14", "", node.KindAsset, ns.Id)
 	if err != nil {
