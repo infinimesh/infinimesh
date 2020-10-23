@@ -131,7 +131,7 @@ func TestListForAccount(t *testing.T) {
 	ns, err := server.repo.GetNamespace(ctx, randomName)
 	require.NoError(t, err)
 
-	// Create
+	// Create the device
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomName, ns.Id),
 	}
