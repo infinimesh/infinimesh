@@ -273,7 +273,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 		return s.ListQ(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
 	}
 
-	//Check if the non root user has access to the namespace
+	//Check if the non-root user has access to the namespace
 	authresp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
 		Namespaceid: request.Namespace,
 		Account:     requestorID,
