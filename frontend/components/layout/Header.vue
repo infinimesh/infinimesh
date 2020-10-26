@@ -48,6 +48,11 @@ export default {
       },
       set(val) {
         this.$store.dispatch("devices/setNamespace", val);
+        if (this.$route.name != "dashboard-devices") {
+          this.$router.push({
+            name: "dashboard-devices",
+          });
+        }
       },
     },
     namespaces: {
