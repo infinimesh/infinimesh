@@ -200,7 +200,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 		zap.String("Action", request.Action.String()))
 
 	//Check if the account is root
-	isroot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: request.Account})
+	isroot, err := s.IsRoot(ctx, &nodepb.IsRootRequest{Account: request.Account})
 	if err != nil {
 		//Added logging
 		log.Error("Unable to get permissions for the account", zap.Error(err))

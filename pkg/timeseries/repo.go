@@ -27,13 +27,9 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	sizeKB = 1 << (10 * 1)
-)
-
 type TimeseriesRepo interface {
 	CreateDataPoint(ctx context.Context, datapoint *DataPoint) error
-	ReadExistingDatapoint(ctx context.Context, deviceID string, messageID uint64) (float32, error)
+	ReadExistingDatapoint(ctx context.Context, deviceID string) (float32, error)
 }
 
 type DataPoint struct {
@@ -90,12 +86,12 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	return nil
 }
 
-func (t *timescaleRepo) ReadExistingDatapoint(ctx context.Context, deviceID string, messageID uint64) (float32, error) {
+func (t *timescaleRepo) ReadExistingDatapoint(ctx context.Context, deviceID string) (float32, error) {
 	tx, err := t.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return 0, err
 	}
-	row := tx.QueryRow("SELECT message_length FROM DATA_POINTS where device_id= $1 and message_id= $2 ORDER BY timestamp DESC LIMIT 1", deviceID, messageID)
+	row := tx.QueryRow("SELECT message_length FROM DATA_POINTS where device_id= $1 ORDER BY timestamp DESC LIMIT 1", deviceID)
 	var messageLength float32
 	err = row.Scan(&messageLength)
 	if err != nil {

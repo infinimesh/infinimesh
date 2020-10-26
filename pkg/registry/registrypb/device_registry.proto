@@ -93,6 +93,5 @@ service Devices {
   rpc GetByFingerprint(GetByFingerprintRequest) returns (GetByFingerprintResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc List(ListDevicesRequest) returns (ListResponse);
-  rpc ListForAccount(ListDevicesRequest) returns (ListResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
 }

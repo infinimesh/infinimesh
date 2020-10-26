@@ -372,7 +372,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	}
 
 	//Added logging
-	log.Info("Delete Namespace successful")
+	log.Info("Namespace successfully deleted")
 	return &nodepb.DeleteNamespaceResponse{}, nil
 }
 
@@ -437,6 +437,6 @@ func (n *NamespaceController) UpdateNamespace(ctx context.Context, request *node
 	}
 
 	//Added logging
-	log.Info("Update Namespace successful")
+	log.Info("Namespace successfully updated")
 	return &nodepb.UpdateNamespaceResponse{}, nil
 }
