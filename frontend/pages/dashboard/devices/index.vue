@@ -20,7 +20,14 @@
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
         </template>
+
         <template v-if="selectedDevices.length">
+          <a-col>
+            <a-button type="link" @click="selectedDevices = []" icon="close"
+              >Deselect all
+            </a-button>
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
           <a-col>
             <a-button
               type="success"
@@ -33,9 +40,13 @@
             </a-button>
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
+        </template>
+        <template v-else>
           <a-col>
-            <a-button type="link" @click="selectedDevices = []" icon="close"
-              >Deselect all
+            <a-button
+              type="success"
+              @click="selectedDevices = pool.map((d) => d.id)"
+              >Select All
             </a-button>
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
