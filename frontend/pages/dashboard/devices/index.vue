@@ -2,7 +2,7 @@
   <div id="devicesTable">
     <div class="selected-devices-actions" v-if="selectedDevices.length">
       <a-row type="flex" align="middle">
-        <a-col :span="2">
+        <a-col :xxl="2" :xl="4">
           <a-button type="link" @click="selectedDevices = []" icon="close"
             >Deselect all</a-button
           >
@@ -11,7 +11,7 @@
           role="separator"
           class="selected-devices-actions-vertical-divider"
         ></div>
-        <a-col :span="4">
+        <a-col :xxl="4" :xl="6">
           <a-button
             type="success"
             style="margin-right: 5px"
