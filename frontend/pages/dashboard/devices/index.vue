@@ -1,58 +1,59 @@
 <template>
   <div id="devicesTable">
-    <div class="tile-bar">
-      <a-row type="flex" align="middle" style="padding: 0 10px">
-        <template>
-          <a-col :span="5">
-            <a-input placeholder="Search device..." style="height: 90%" />
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-          <a-col>
-            <a-row type="flex" justify="center">
-              <a-col>
-                <a-switch
-                  id="group-by-tags-switch"
-                  un-checked-children="Group by tags"
-                  checked-children="Whole registry"
-                />
-              </a-col>
-            </a-row>
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-        </template>
+    <a-row
+      type="flex"
+      style="padding: 4px 10px"
+      class="tile-bar"
+      align="middle"
+    >
+      <template>
+        <a-col>
+          <a-input
+            placeholder="Search device..."
+            class="devices-search-input"
+          />
+        </a-col>
+        <a-col>
+          <a-row type="flex" justify="center">
+            <a-col>
+              <a-switch
+                id="group-by-tags-switch"
+                un-checked-children="Group by tags"
+                checked-children="Whole registry"
+              />
+            </a-col>
+          </a-row>
+        </a-col>
+      </template>
 
-        <template v-if="selectedDevices.length">
-          <a-col>
-            <a-button type="link" @click="selectedDevices = []" icon="close"
-              >Deselect all
-            </a-button>
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-          <a-col>
-            <a-button
-              type="success"
-              style="margin-right: 5px"
-              @click="toogleAll(true)"
-              >Enable All
-            </a-button>
-            <a-button type="danger" @click="toogleAll(false)"
-              >Disable All
-            </a-button>
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-        </template>
-        <template v-else>
-          <a-col>
-            <a-button
-              type="success"
-              @click="selectedDevices = pool.map((d) => d.id)"
-              >Select All
-            </a-button>
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-        </template>
-      </a-row>
-    </div>
+      <template v-if="selectedDevices.length">
+        <a-col>
+          <a-button type="link" @click="selectedDevices = []" icon="close"
+            >Deselect all
+          </a-button>
+        </a-col>
+        <a-col>
+          <a-button
+            type="success"
+            style="margin-right: 5px"
+            @click="toogleAll(true)"
+            >Enable All
+          </a-button>
+          <a-button type="danger" @click="toogleAll(false)"
+            >Disable All
+          </a-button>
+        </a-col>
+      </template>
+      <template v-else>
+        <a-col>
+          <a-button
+            type="success"
+            @click="selectedDevices = pool.map((d) => d.id)"
+            >Select All
+          </a-button>
+        </a-col>
+      </template>
+    </a-row>
     <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
       <a-col
         :xs="{ span: 24 }"
@@ -284,35 +285,36 @@ export default {
   margin-top: 10px;
   width: 100%;
   background: var(--primary-color);
+  /* border-radius: 100px; */
   border-radius: var(--border-radius-base);
   color: var(--line-color);
+  min-height: 32px;
 }
 .tile-bar .ant-btn-link {
   color: white !important;
 }
 .tile-bar .ant-btn {
   height: 90%;
-}
-.tile-bar-vertical-divider {
-  box-sizing: border-box;
-  margin: 0 10px;
-  padding: 0;
-  color: rgba(0, 0, 0, 0.65);
-  font-size: 14px;
-  font-variant: tabular-nums;
-  line-height: 1.5;
-  list-style: none;
-  font-feature-settings: "tnum", "tnum";
-  background: #e8e8e8;
-  vertical-align: middle;
-  width: 1px;
-  min-height: 32px;
+  border-radius: 100px;
 }
 #group-by-tags-switch {
-  /* background-color: rgb(160, 160, 160); */
   background-color: var(--switch-color);
 }
 #group-by-tags-switch.ant-switch-checked {
   background-color: var(--success-color);
+}
+.devices-search-input {
+  height: 90%;
+  border-radius: 100px;
+  min-width: 256px;
+}
+@media (max-width: 768px) {
+  .tile-bar > [class*="ant-col"] {
+    margin-top: 3px;
+    margin-bottom: 3px;
+  }
+}
+.tile-bar > .ant-col + .ant-col {
+  margin-left: 15px;
 }
 </style>
