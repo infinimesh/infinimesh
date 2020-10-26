@@ -23,7 +23,7 @@
           <div role="separator" class="tile-bar-vertical-divider"></div>
         </template>
         <template>
-          <a-col :xxl="2" :xl="4">
+          <a-col>
             <a-row type="flex" justify="center">
               <a-col>
                 <a-switch
@@ -33,6 +33,10 @@
                 ></a-switch>
               </a-col>
             </a-row>
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
+          <a-col :span="5">
+            <a-input placeholder="Search device..." style="height: 90%" />
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
         </template>
@@ -276,7 +280,7 @@ export default {
   color: white !important;
 }
 .tile-bar .ant-btn {
-  height: 32px;
+  height: 90%;
 }
 .tile-bar-vertical-divider {
   box-sizing: border-box;
