@@ -1,27 +1,41 @@
 <template>
   <div id="devicesTable">
-    <div class="selected-devices-actions" v-if="selectedDevices.length">
+    <div class="tile-bar">
       <a-row type="flex" align="middle">
-        <a-col :xxl="2" :xl="4">
-          <a-button type="link" @click="selectedDevices = []" icon="close"
-            >Deselect all</a-button
-          >
-        </a-col>
-        <div
-          role="separator"
-          class="selected-devices-actions-vertical-divider"
-        ></div>
-        <a-col :xxl="4" :xl="6">
-          <a-button
-            type="success"
-            style="margin-right: 5px"
-            @click="toogleAll(true)"
-            >Enable All</a-button
-          >
-          <a-button type="danger" @click="toogleAll(false)"
-            >Disable All</a-button
-          >
-        </a-col>
+        <template v-if="selectedDevices.length">
+          <a-col>
+            <a-button type="link" @click="selectedDevices = []" icon="close"
+              >Deselect all</a-button
+            >
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
+          <a-col>
+            <a-button
+              type="success"
+              style="margin-right: 5px"
+              @click="toogleAll(true)"
+              >Enable All</a-button
+            >
+            <a-button type="danger" @click="toogleAll(false)"
+              >Disable All</a-button
+            >
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
+        </template>
+        <template>
+          <a-col :xxl="2" :xl="4">
+            <a-row type="flex" justify="center">
+              <a-col>
+                <a-switch
+                  id="group-by-tags-switch"
+                  un-checked-children="Group by tags"
+                  checked-children="Whole registry"
+                ></a-switch>
+              </a-col>
+            </a-row>
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
+        </template>
       </a-row>
     </div>
     <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
@@ -73,6 +87,7 @@
             </template>
           </a-row>
           <device-list-card
+            v-else
             :device="device"
             :selected="selectedDevices.includes(device.id)"
             @select="(id) => selectedDevices.push(id)"
@@ -80,7 +95,6 @@
               (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
             "
             @select-all="selectedDevices = pool.map((d) => d.id)"
-            v-else
           />
         </div>
       </a-col>
@@ -251,20 +265,20 @@ export default {
 .create-form .anticon {
   color: var(--icon-color-dark);
 }
-.selected-devices-actions {
+.tile-bar {
   margin-top: 10px;
   width: 100%;
   background: var(--primary-color);
   border-radius: var(--border-radius-base);
   color: var(--line-color);
 }
-.selected-devices-actions .ant-btn-link {
+.tile-bar .ant-btn-link {
   color: white !important;
 }
-.selected-devices-actions .ant-btn {
-  height: 24px;
+.tile-bar .ant-btn {
+  height: 32px;
 }
-.selected-devices-actions-vertical-divider {
+.tile-bar-vertical-divider {
   box-sizing: border-box;
   margin: 0 10px;
   padding: 0;
@@ -278,5 +292,12 @@ export default {
   vertical-align: middle;
   width: 1px;
   min-height: 32px;
+}
+#group-by-tags-switch {
+  /* background-color: rgb(160, 160, 160); */
+  background-color: var(--switch-color);
+}
+#group-by-tags-switch.ant-switch-checked {
+  background-color: var(--success-color);
 }
 </style>
