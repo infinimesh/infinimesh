@@ -35,6 +35,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
+//Server is a data strcuture for shadow server
 type Server struct {
 	Repo         Repo
 	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
@@ -44,6 +45,7 @@ type Server struct {
 	PubSub *pubsub.PubSub
 }
 
+//Get is a method to get a device state
 func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 
 	log := s.Log.Named("Get State Controller")
@@ -109,6 +111,7 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 	return response, nil
 }
 
+//PatchDesiredState is a method to patch a message to a device state
 func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
 
 	log := s.Log.Named("Patch Desired State Controller")
@@ -134,10 +137,11 @@ func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.Pa
 	return &shadowpb.PatchDesiredStateResponse{}, nil
 }
 
+//StreamReportedStateChanges is a method to start streaming of data from a device
 func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
 
 	log := s.Log.Named("Stream State Controller")
-	log.Info("Function Invoked", zap.String("Device", request.Id))
+	log.Info("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
 
 	// TODO validate request/Id
 
@@ -151,7 +155,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEvents := request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
 	defer func() {
-		fmt.Println("Dferer")
+		fmt.Println("Defer")
 		go func() {
 			s.PubSub.Unsub(events)
 		}()
@@ -175,7 +179,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 	defer func() {
-		fmt.Println("defer2")
+		fmt.Println("Defer2")
 		go func() {
 			s.PubSub.Unsub(eventsDesired)
 		}()
