@@ -30,6 +30,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
+	"go.uber.org/zap"
 
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
@@ -38,29 +39,34 @@ type Server struct {
 	Repo         Repo
 	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
 	ProduceTopic string
+	Log          *zap.Logger
 
 	PubSub *pubsub.PubSub
 }
 
-func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+
+	log := s.Log.Named("Get State Controller")
+	log.Info("Function Invoked", zap.String("Device", request.Id))
+
 	response = &shadowpb.GetResponse{
 		Shadow: &shadowpb.Shadow{},
 	}
 
 	// TODO fetch device from registry, 404 if not found
 
-	reportedState, err := s.Repo.GetReported(req.Id)
+	reportedState, err := s.Repo.GetReported(request.Id)
 	if err != nil {
-		reportedState.ID = req.Id
+		reportedState.ID = request.Id
 		reportedState.State = DeviceStateMessage{
 			Version: uint64(0),
 			State:   json.RawMessage([]byte("{}")),
 		}
 	}
 
-	desiredState, err := s.Repo.GetDesired(req.Id)
+	desiredState, err := s.Repo.GetDesired(request.Id)
 	if err != nil {
-		desiredState.ID = req.Id
+		desiredState.ID = request.Id
 		desiredState.State = DeviceStateMessage{
 			Version: uint64(0),
 			State:   json.RawMessage([]byte("{}")),
@@ -103,19 +109,23 @@ func (s *Server) Get(context context.Context, req *shadowpb.GetRequest) (respons
 	return response, nil
 }
 
-func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+
+	log := s.Log.Named("Patch Desired State Controller")
+	log.Info("Function Invoked", zap.String("Device", request.Id))
+
 	// TODO sanity-check request
 
 	var marshaler jsonpb.Marshaler
 	var b bytes.Buffer
-	err = marshaler.Marshal(&b, req.GetData())
+	err = marshaler.Marshal(&b, request.GetData())
 	if err != nil {
 		return nil, err
 	}
 
 	_, _, err = s.Producer.SendMessage(&sarama.ProducerMessage{
 		Topic: s.ProduceTopic,
-		Key:   sarama.StringEncoder(req.GetId()),
+		Key:   sarama.StringEncoder(request.GetId()),
 		Value: sarama.ByteEncoder(b.Bytes()),
 	})
 	if err != nil {
@@ -125,6 +135,10 @@ func (s *Server) PatchDesiredState(context context.Context, req *shadowpb.PatchD
 }
 
 func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
+
+	log := s.Log.Named("Stream State Controller")
+	log.Info("Function Invoked", zap.String("Device", request.Id))
+
 	// TODO validate request/Id
 
 	var subPathReported string

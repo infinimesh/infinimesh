@@ -34,6 +34,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	log1 "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
@@ -115,6 +116,15 @@ func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath strin
 }
 
 func main() {
+
+	log1, err := log1.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = log1.Sync()
+	}()
+
 	repo, err := shadow.NewRedisRepo(dbAddr)
 	if err != nil {
 		panic(err)
@@ -157,6 +167,7 @@ func main() {
 			Producer:     producer,
 			ProduceTopic: topicDesiredDelta,
 			PubSub:       ps,
+			Log:          log1.Named("shadowController"),
 		}
 
 		shadowpb.RegisterShadowsServer(srv, serverHandler)
