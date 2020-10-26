@@ -142,6 +142,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	log := s.Log.Named("Stream State Controller")
 	log.Info("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
+	fmt.Println("Functin Invoked")
 
 	// TODO validate request/Id
 
