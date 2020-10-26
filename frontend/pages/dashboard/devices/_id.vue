@@ -99,7 +99,7 @@
                 />
               </template>
               <template v-else>
-                <a-row v-if="device.tags.length">
+                <a-row v-if="device.tags && device.tags.length">
                   <a-col :span="2">Tags:</a-col>
                   <a-col :span="22">
                     <a-tag
