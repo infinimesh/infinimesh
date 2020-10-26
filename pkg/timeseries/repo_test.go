@@ -21,11 +21,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
-
-	"io/ioutil"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -54,7 +53,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
 	ddl, err := ioutil.ReadFile("./ddl/ddl.sql")
 	if err != nil {
 		panic(err)
@@ -69,15 +67,33 @@ func init() {
 		fmt.Printf("Error during DDL import: %v. Ignoring\n", err)
 	}
 	txn.Commit()
+
 }
 
 func TestSave(t *testing.T) {
 	err := repo.CreateDataPoint(context.TODO(), &DataPoint{
 		DeviceID:  "test-device-1",
-		MessageID: "test-device-1",
+		MessageID: uint64(2),
 		Property:  "voltage",
 		Timestamp: time.Now(),
 		Value:     50.0,
+		Length:    12.0,
 	})
+	require.NoError(t, err)
+}
+
+func TestRead(t *testing.T) {
+	messageLength, err := repo.ReadExistingDatapoint(context.TODO(), "test-device-1")
+	fmt.Println(messageLength)
+
+	err = repo.CreateDataPoint(context.TODO(), &DataPoint{
+		DeviceID:  "test-device-1",
+		MessageID: uint64(2),
+		Property:  "voltage",
+		Timestamp: time.Now(),
+		Value:     50.0,
+		Length:    12.0 + messageLength,
+	})
+
 	require.NoError(t, err)
 }

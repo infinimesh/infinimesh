@@ -28,52 +28,76 @@
           :loading="loading"
           rowKey="id"
           class="namespaces-table"
-          :expandRowByClick="true"
           @expand="loadNamespacePermissions"
         >
-          <span slot="name" slot-scope="name">
-            <b>{{ name }}</b>
+          <span slot="name" slot-scope="name, namespace">
+            <a-input
+              v-if="namespace.editable"
+              style="width: 50%"
+              :default-value="namespace.name"
+              @change="$store.commit('devices/update_namespace', namespace)"
+              placeholder="Enter new name"
+            />
+            <b v-else>{{ name }}</b>
           </span>
           <span slot="actions" slot-scope="text, namespace">
             <a-space>
-              <a-tooltip
-                v-if="namespace.markfordeletion"
-                :title="`Going to be deleted ${deletionTime(namespace)}`"
-                placement="left"
-              >
-                <a-button type="link" @click="restoreNamespace(namespace)">
-                  <a-icon
-                    type="redo"
-                    style="color: var(--switch-color); font-size: 18px"
-                  />
-                  Restore
+              <template v-if="namespace.editable">
+                <a-button type="link" @click="renameNamespace(namespace)">
+                  <a-icon type="save" style="font-size: 18px" />
                 </a-button>
-              </a-tooltip>
+                <a-button
+                  type="link"
+                  v-if="namespace.editable"
+                  @click="getNamespacesPool"
+                >
+                  <a-icon type="close" style="color: red; font-size: 18px" />
+                </a-button>
+              </template>
+              <template v-else>
+                <a-button
+                  type="link"
+                  style="font-size: 18px"
+                  @click="
+                    $store.commit('devices/update_namespace', {
+                      ...namespace,
+                      editable: true,
+                    })
+                  "
+                >
+                  <a-icon type="edit" />
+                </a-button>
 
-              <a-button v-else type="link" @click="deleteNamespace(namespace)">
-                <a-icon type="delete" style="color: red; font-size: 18px" />
-              </a-button>
+                <a-tooltip
+                  v-if="namespace.markfordeletion"
+                  :title="`Going to be deleted ${deletionTime(namespace)}`"
+                  placement="left"
+                >
+                  <a-button type="link" @click="restoreNamespace(namespace)">
+                    <a-icon
+                      type="redo"
+                      style="color: var(--switch-color); font-size: 18px"
+                    />
+                    Restore
+                  </a-button>
+                </a-tooltip>
+                <a-button
+                  v-else
+                  type="link"
+                  @click="deleteNamespace(namespace)"
+                >
+                  <a-icon type="delete" style="color: red; font-size: 18px" />
+                </a-button>
+              </template>
             </a-space>
           </span>
 
-          <a-table
-            slot="expandedRowRender"
-            slot-scope="record"
-            :loading="record.loading"
-            :data-source="record.permissions"
-            :columns="permissions_table_columns"
-            :pagination="false"
-            style="margin: 10px; width: 50%"
-            :bordered="true"
-            :locale="{ emptyText: 'No Permissions Found' }"
-            :rowKey="(record, index) => `${record.account_id}-${index}`"
-          >
-            <span slot="action" slot-scope="action">
-              <a-tag :color="actionColors[action]">
-                {{ action }}
-              </a-tag>
-            </span>
-          </a-table>
+          <span slot="expandedRowRender" slot-scope="record">
+            <namespace-permissions-table
+              :namespace="record"
+              @refresh="loadNamespacePermissions(true, record)"
+            />
+          </span>
         </a-table>
       </a-col>
     </a-row>
@@ -82,6 +106,7 @@
 
 <script>
 import NamespaceAdd from "@/components/namespace/Add";
+import NamespacePermissionsTable from "@/components/namespace/PermissionsTable";
 
 const namespaces_table_columns = [
   {
@@ -97,28 +122,15 @@ const namespaces_table_columns = [
     scopedSlots: { customRender: "actions" },
   },
 ];
-const permissions_table_columns = [
-  {
-    title: "Account",
-    dataIndex: "account_name",
-    sorter: true,
-  },
-  {
-    title: "Access",
-    dataIndex: "action",
-    width: "15%",
-    scopedSlots: { customRender: "action" },
-  },
-];
 
 export default {
   components: {
     NamespaceAdd,
+    NamespacePermissionsTable,
   },
   data() {
     return {
       namespaces_table_columns,
-      permissions_table_columns,
       loading: false,
 
       createNamespaceDrawerVisible: false,
@@ -129,13 +141,6 @@ export default {
       return this.$store.state.devices.namespaces;
     },
   },
-  created() {
-    this.actionColors = {
-      WRITE: "#eb2f96",
-      READ: "#52c41a",
-      NONE: "#5d8eb7",
-    };
-  },
   mounted() {
     this.getNamespacesPool();
     if (this.$route.query.create) this.createNamespaceDrawerVisible = true;
@@ -145,6 +150,43 @@ export default {
       this.loading = true;
       await this.$store.dispatch("devices/getNamespaces");
       this.loading = false;
+    },
+    updateNamespace(ns_id, patch, { success, error, always }) {
+      this.$axios({
+        url: `/api/namespaces/${ns_id}`,
+        method: "patch",
+        data: patch,
+      })
+        .then((res) => {
+          if (success) success(res);
+        })
+        .catch((e) => {
+          if (error) error(e);
+        })
+        .then(() => {
+          if (always) always();
+        });
+    },
+    renameNamespace(ns) {
+      const vm = this;
+      vm.updateNamespace(
+        ns.id,
+        { name: ns.name },
+        {
+          success: () => {
+            vm.$message.success("Namespace successfuly renamed!");
+          },
+          error: (e) => {
+            vm.$notification.error({
+              message: "Error renaming namespace " + namespace.name,
+              description: e.response.data.message,
+            });
+          },
+          always: () => {
+            vm.getNamespacesPool();
+          },
+        }
+      );
     },
     deleteNamespace(namespace) {
       const vm = this;
@@ -165,23 +207,26 @@ export default {
     },
     restoreNamespace(namespace) {
       const vm = this;
-      vm.$axios({
-        url: `/api/namespaces/${namespace.id}`,
-        method: "patch",
-        data: {
+      this.updateNamespace(
+        namespace.id,
+        {
           markfordeletion: false,
         },
-      })
-        .then(() => {
-          vm.$message.success("Namespace successfuly restored!");
-          vm.getNamespacesPool();
-        })
-        .catch((e) => {
-          vm.$notification.error({
-            message: "Error restoring namespace " + namespace.name,
-            description: e.response.data.message,
-          });
-        });
+        {
+          success: () => {
+            vm.$message.success("Namespace successfuly restored!");
+          },
+          error: (e) => {
+            vm.$notification.error({
+              message: "Error restoring namespace " + namespace.name,
+              description: e.response.data.message,
+            });
+          },
+          always: () => {
+            vm.getNamespacesPool();
+          },
+        }
+      );
     },
     loadNamespacePermissions(expanded, ns) {
       if (expanded) {

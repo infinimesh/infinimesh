@@ -47,6 +47,49 @@ func (s *ObjectController) CreateObject(ctx context.Context, request *nodepb.Cre
 		zap.String("Namespace", request.Namespaceid),
 		zap.String("Parent", request.Parent))
 
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = s.Repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	if request.Name == "" {
+		return nil, status.Error(codes.FailedPrecondition, "Please provide Object name")
+	}
+
+	// If a parent is given, we need permission on the parent. otherwise, we need permission on the namespace as it's created without a parent
+	var authorized bool
+	if request.Parent != "" {
+		resp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+			Node:    request.Parent,
+			Account: requestorID,
+			Action:  nodepb.Action_WRITE,
+		})
+		if err != nil {
+			return nil, err
+		}
+		authorized = resp.Decision.GetValue()
+	} else {
+		resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+			Namespaceid: request.Namespaceid,
+			Account:     requestorID,
+			Action:      nodepb.Action_WRITE,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		authorized = resp.Decision.GetValue()
+	}
+
+	if !authorized {
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create Objects")
+	}
+
 	id, err := s.Repo.CreateObject(ctx, request.GetName(), request.GetParent(), request.GetKind(), request.GetNamespaceid())
 	if err != nil {
 		//Added logging
@@ -65,6 +108,29 @@ func (s *ObjectController) DeleteObject(ctx context.Context, request *nodepb.Del
 	log := s.Log.Named("Delete Object Controller")
 	//Added logging
 	log.Info("Function Invoked", zap.String("Account", request.Uid))
+
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = s.Repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.GetUid(),
+		Account: requestorID,
+		Action:  nodepb.Action_WRITE,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !resp.Decision.GetValue() {
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to access the resource")
+	}
 
 	err = s.Repo.DeleteObject(ctx, request.GetUid())
 	if err != nil {
@@ -88,10 +154,20 @@ func (s *ObjectController) ListObjects(ctx context.Context, request *nodepb.List
 		zap.String("Namespace", request.Namespace),
 		zap.Bool("Recurse", request.Recurse))
 
+	//Initialize the Account Controller with Namespace controller data
+	a.Repo = s.Repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, _, err = Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
 	objects, err := s.Repo.ListForAccount(ctx, request.Account, request.Namespace, request.Recurse)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to list accounts", zap.Error(err))
+		log.Error("Failed to list Objects for the Account", zap.Error(err))
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}

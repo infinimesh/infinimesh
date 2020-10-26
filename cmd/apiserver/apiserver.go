@@ -75,8 +75,6 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
-	log.Debug("Extracted bearer token", zap.String("token", tokenString))
-
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Unexpected signing method: %v", t.Header["alg"]))

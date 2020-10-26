@@ -19,9 +19,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
@@ -34,84 +35,76 @@ type objectAPI struct {
 }
 
 func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjectRequest) (response *nodepb.Object, err error) {
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
-	}
 
-	if request.Object == nil || request.Object.Name == "" {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid object given.")
-	}
+	//Added logging
+	log.Info("Create Object API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
-	// If a parent is given, we need permission on the parent. otherwise, we need permission on the namespace as it's created without a parent
-	var authorized bool
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
 	var parent string
 	if request.Parent != nil {
 		parent = request.Parent.Value
-		resp, err := o.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
-			Node:    request.Parent.GetValue(),
-			Account: account,
-			Action:  nodepb.Action_WRITE,
-		})
-		if err != nil {
-			return nil, err
-		}
-		authorized = resp.Decision.GetValue()
-	} else {
-		resp, err := o.accountClient.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-			Namespaceid: request.Namespace,
-			Account:     account,
-			Action:      nodepb.Action_WRITE,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		authorized = resp.Decision.GetValue()
 	}
 
-	if !authorized {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create object.")
-	}
-
-	return o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
+	//Invoke the List Objects controller for server
+	obj, err := o.objectClient.CreateObject(ctx, &nodepb.CreateObjectRequest{
 		Parent:      parent,
 		Name:        request.Object.Name,
 		Namespaceid: request.Namespace,
 		Kind:        request.Object.Kind,
 	})
+
+	if err != nil {
+		//Added logging
+		log.Error("Create Object API Method: Failed to creat Object", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Added logging
+	log.Info("Create Object API Method: Create Object succesful")
+	return obj, nil
+
 }
 
 func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
+
+	//Added logging
+	log.Info("List Objects API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the List Objects controller for server
+	obj, err := o.objectClient.ListObjects(ctx, &nodepb.ListObjectsRequest{Account: ctx.Value("account_id").(string), Namespace: request.GetNamespace(), Recurse: request.Recurse})
+	if err != nil {
+		//Added logging
+		log.Error("List Objects API Method: Failed to list Objects", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	fmt.Println("rec?", request.Recurse)
-
-	// This request automatically runs in the scope of the user, no need to call IsAuthorized
-	return o.objectClient.ListObjects(ctx, &nodepb.ListObjectsRequest{Account: account, Namespace: request.GetNamespace(), Recurse: request.Recurse})
+	//Added logging
+	log.Info("List Objects API Method: List Objects succesfull")
+	return obj, nil
 }
 
 func (o *objectAPI) DeleteObject(ctx context.Context, request *nodepb.DeleteObjectRequest) (response *nodepb.DeleteObjectResponse, err error) {
-	account, ok := ctx.Value("account_id").(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "The account is not authenticated.")
-	}
 
-	resp, err := o.accountClient.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
-		Node:    request.GetUid(),
-		Account: account,
-		Action:  nodepb.Action_WRITE,
-	})
+	//Added logging
+	log.Info("Delete Object API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the Delete Object controller for server
+	obj, err := o.objectClient.DeleteObject(ctx, request)
 	if err != nil {
-		return nil, err
+		//Added logging
+		log.Error("Delete Object API Method: Failed to delete Object", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if !resp.Decision.GetValue() {
-		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to access the resource.")
-	}
-
-	return o.objectClient.DeleteObject(ctx, request)
+	//Added logging
+	log.Info("Delete Object API Method: Delete Object succesfull")
+	return obj, nil
 }

@@ -61,7 +61,7 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		}
 
 		if len(enabled) == 0 {
-			return fmt.Errorf("no devices found for fingerprint %X\n", digest)
+			return fmt.Errorf("There are no enabled devices found for fingerprint %X", digest)
 		}
 
 		fmt.Printf("Verified connection with fingerprint [%v]. There are %v enabled devices with this fingerprint.\n", digest, len(enabled))
@@ -214,6 +214,8 @@ func main() {
 		for _, device := range reply.Devices {
 			if device.Enabled.Value {
 				possibleIDs = append(possibleIDs, device.Id)
+			} else {
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
 			}
 		}
 

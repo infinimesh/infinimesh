@@ -20,6 +20,7 @@ package timeseries
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -28,14 +29,16 @@ import (
 
 type TimeseriesRepo interface {
 	CreateDataPoint(ctx context.Context, datapoint *DataPoint) error
+	ReadExistingDatapoint(ctx context.Context, deviceID string) (float32, error)
 }
 
 type DataPoint struct {
 	DeviceID  string
-	MessageID string
+	MessageID uint64
 	Property  string
 	Timestamp time.Time
 	Value     float64
+	Length    float32
 }
 
 type timescaleRepo struct {
@@ -69,9 +72,8 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	if err != nil {
 		return err
 	}
-
-	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value) VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
-		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value,
+	_, err = tx.Exec("INSERT INTO DATA_POINTS (device_id, message_id, property, timestamp, value, message_length) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
+		datapoint.DeviceID, datapoint.MessageID, datapoint.Property, datapoint.Timestamp, datapoint.Value, datapoint.Length,
 	)
 	if err != nil {
 		return err
@@ -81,6 +83,24 @@ func (t *timescaleRepo) CreateDataPoint(ctx context.Context, datapoint *DataPoin
 	if err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func (t *timescaleRepo) ReadExistingDatapoint(ctx context.Context, deviceID string) (float32, error) {
+	tx, err := t.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return 0, err
+	}
+	row := tx.QueryRow("SELECT message_length FROM DATA_POINTS where device_id= $1 ORDER BY timestamp DESC LIMIT 1", deviceID)
+	var messageLength float32
+	err = row.Scan(&messageLength)
+	if err != nil {
+		fmt.Printf("no existing rows %v", err)
+		return 0, err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+	return messageLength, nil
 }

@@ -21,34 +21,32 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
-	"fmt"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/golang/protobuf/ptypes/wrappers"
-
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/dgraph-io/dgo"
-	"github.com/dgraph-io/dgo/protos/api"
-
-	"encoding/base64"
 )
 
+//Server is a Data type for Device Controller file
 type Server struct {
 	dgo *dgo.Dgraph
 
 	repo node.Repo
+	Log  *zap.Logger
 }
 
+//NewServer is a method to create the Dgraph Server for Device registry
 func NewServer(dg *dgo.Dgraph) *Server {
 	return &Server{
 		dgo: dg,
@@ -57,6 +55,8 @@ func NewServer(dg *dgo.Dgraph) *Server {
 		},
 	}
 }
+
+var a node.AccountController
 
 func (s *Server) getFingerprint(pemCert []byte, certType string) (fingerprint []byte, err error) {
 	pemBlock, _ := pem.Decode(pemCert)
@@ -80,537 +80,264 @@ func sha256Sum(c []byte) []byte {
 	return s.Sum(nil)
 }
 
+//Create is a method for creating Devices
 func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) (*registrypb.CreateResponse, error) {
-	txn := s.dgo.NewTxn()
-	defer txn.Discard(ctx) // nolint
-	if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
-		return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
-	}
 
-	ns, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
+	log := s.Log.Named("Create Device Controller")
+
+	//Added logging
+	log.Info("Function Invoked",
+		zap.String("Device Name", request.Device.Name),
+		zap.String("Namespace", request.Device.Namespace),
+		zap.Bool("Enabled", request.Device.Enabled.Value),
+	)
+
+	_, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "The Namespace provided is not found.")
+		log.Error("Data Validation for Device Creation", zap.String("Error", "The Namespace cannot not be empty"))
+		return nil, status.Error(codes.FailedPrecondition, "The Namespace cannot not be empty")
 	}
 
 	if request.Device.Certificate == nil {
-		return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
+		log.Error("Data Validation for Device Creation", zap.String("Error", "No certificate provided"))
+		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
 	}
 
-	fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
 	if err != nil {
-		return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
+		return nil, err
 	}
 
-	//To check if the fingerprint already exists, in this case creating new device is not permissible
-	if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
-		return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
-	}
-
-	var enabled bool
-	if request.Device.Enabled != nil {
-		enabled = request.Device.Enabled.GetValue()
-	}
-
-	d := &Device{
-		Object: dgraph.Object{
-			Node: dgraph.Node{
-				UID:  "_:new",
-				Type: "object",
-			},
-			Name: request.Device.Name,
-			Kind: node.KindDevice,
-		},
-		Enabled: enabled,
-		Tags:    request.Device.Tags,
-		Certificates: []*X509Cert{
-			&X509Cert{
-				PemData:              request.Device.Certificate.PemData,
-				Algorithm:            request.Device.Certificate.Algorithm,
-				Fingerprint:          fp,
-				FingerprintAlgorithm: "sha256",
-			},
-		},
-	}
-
-	js, err := json.Marshal(d)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to create device")
-	}
-
-	mutRes, err := txn.Mutate(ctx, &api.Mutation{
-		SetJson: js,
+	//Check if the user has access to create the device for the namespace
+	authresp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Namespaceid: request.Device.Namespace,
+		Account:     requestorID,
+		Action:      nodepb.Action_WRITE,
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
+	}
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to create Device")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device")
 	}
 
-	newUID := mutRes.GetUids()["new"]
-
-	nsMut := &api.NQuad{
-		Subject:   ns.GetId(),
-		Predicate: "owns",
-		ObjectId:  newUID,
-	}
-
-	_, err = txn.Mutate(ctx, &api.Mutation{
-		Set: []*api.NQuad{
-			nsMut,
-		},
-		CommitNow: true,
-	})
+	resp, err := s.CreateQ(ctx, request)
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
+		//Added logging
+		log.Error("Failed to create Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	request.Device.Certificate.Fingerprint = fp
-	request.Device.Certificate.FingerprintAlgorithm = "sha256"
-
-	return &registrypb.CreateResponse{
-		Device: &registrypb.Device{
-			Id:          newUID,
-			Name:        request.Device.Name,
-			Enabled:     request.Device.Enabled,
-			Tags:        request.Device.Tags,
-			Namespace:   request.Device.Namespace,
-			Certificate: request.Device.Certificate,
-		},
-	}, nil
+	//Added logging
+	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
+	return resp, nil
 }
 
-// TODO tags can currently only be added due to the non-idempotent behavior of dgraph with list types
+//Update is a method for updating Devices details
 func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) (response *registrypb.UpdateResponse, err error) {
-	txn := s.dgo.NewTxn()
 
-	//Query to get the device details from the Dgraph DB
-	const q = `query devices($id: string){
-		device(func: uid($id)) @filter(eq(kind, "device")) {
-		  uid
-		  name
-		  ~owns {
-			uid
-		  }
-		  tags
-		  enabled
-		  certificates {
-			uid
-			pem_data
-			algorithm
-			fingerprint
-			fingerprint.algorithm
-		  }
-		}
-	  }`
+	log := s.Log.Named("Update Device Controller")
 
-	//Execute the Query to get device details
-	resp, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$id": request.Device.Id,
+	//Added logging
+	log.Info("Function Invoked",
+		zap.String("Device", request.Device.Id),
+		zap.Any("FieldMask", request.GetFieldMask()),
+	)
+
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	//Check if the user has access to update the device
+	authresp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Device.Id,
+		Account: requestorID,
+		Action:  nodepb.Action_WRITE,
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
+	}
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to create Device")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device")
 	}
 
-	var result struct {
-		Devices []Device `json:"device"`
-	}
-
-	err = json.Unmarshal(resp.Json, &result)
+	resp, err := s.UpdateQ(ctx, request)
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
+		//Added logging
+		log.Error("Failed to update Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if len(result.Devices) != 1 {
-		return nil, status.Error(codes.NotFound, "Device not found")
-	}
-
-	d := &Device{
-		Object: dgraph.Object{
-			Node: dgraph.Node{
-				UID: result.Devices[0].UID,
-			},
-			Name: result.Devices[0].Name,
-		},
-		Enabled: result.Devices[0].Enabled,
-		Tags:    result.Devices[0].Tags,
-		Certificates: []*X509Cert{
-			&X509Cert{
-				Node: dgraph.Node{
-					UID: result.Devices[0].Certificates[0].UID,
-				},
-				PemData:              result.Devices[0].Certificates[0].PemData,
-				Algorithm:            result.Devices[0].Certificates[0].Algorithm,
-				Fingerprint:          result.Devices[0].Certificates[0].Fingerprint,
-				FingerprintAlgorithm: result.Devices[0].Certificates[0].FingerprintAlgorithm,
-			},
-		},
-	}
-
-	//Update the device details based on the data available.
-	for _, field := range request.FieldMask.GetPaths() {
-		switch field {
-
-		//Update the device details
-		case "enabled", "Enabled", "ENABLED":
-			d.Enabled = request.Device.GetEnabled().Value
-		case "tags", "Tags", "TAGS":
-			d.Tags = request.Device.Tags
-		case "name", "Name", "NAME":
-			if exists := dgraph.NameExists(ctx, txn, request.Device.Name, request.Device.Namespace, ""); exists {
-				return nil, status.Error(codes.FailedPrecondition, "The device name exists already. Please provide a different name.")
-			}
-			d.Name = request.Device.Name
-		case "certificate", "Certificate", "CERTIFICATE":
-			//Pre-check for updating certificates
-			if request.Device.Certificate == nil {
-				return nil, status.Error(codes.FailedPrecondition, "No certificate provided.")
-			}
-
-			fp, err := s.getFingerprint([]byte(request.Device.Certificate.PemData), request.Device.Certificate.Algorithm)
-			if err != nil {
-				return nil, status.Error(codes.FailedPrecondition, "Invalid Certificate is provided.")
-			}
-
-			//To check if the fingerprint already exists, in this case creating new device is not permissible
-			if exists := dgraph.FingerprintExists(ctx, txn, fp); exists {
-				return nil, status.Error(codes.FailedPrecondition, "Certificate already exists. Please provide a different certificate.")
-			}
-
-			//update the certificate
-			d.Certificates[0].PemData = request.Device.Certificate.PemData
-			d.Certificates[0].Algorithm = request.Device.Certificate.Algorithm
-			d.Certificates[0].Fingerprint = request.Device.Certificate.Fingerprint
-			d.Certificates[0].FingerprintAlgorithm = request.Device.Certificate.FingerprintAlgorithm
-		}
-	}
-
-	js, err := json.Marshal(&d)
-	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
-	}
-
-	_, err = txn.Mutate(ctx, &api.Mutation{
-		SetJson:   js,
-		CommitNow: true,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
-	}
-
-	return &registrypb.UpdateResponse{}, nil
+	//Added logging
+	log.Info("Device successfully updated")
+	return resp, nil
 }
 
+//GetByFingerprint is a method for get FringerPrint for a Device
 func (s *Server) GetByFingerprint(ctx context.Context, request *registrypb.GetByFingerprintRequest) (*registrypb.GetByFingerprintResponse, error) {
-	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query devices($fingerprint: string){
-  devices(func: eq(fingerprint, $fingerprint)) @normalize {
-    ~certificates {
-      uid : uid
-      name : name
-      enabled : enabled
-      ~owns {
-        namespace: name
-      }
-    }
-  }
-}
-  `
-
-	vars := map[string]string{
-		"$fingerprint": base64.StdEncoding.EncodeToString(request.Fingerprint),
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, vars)
+	resp, err := s.GetByFingerprintQ(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	var res struct {
-		Devices []struct {
-			Uid       string `json:"uid"`
-			Name      string `json:"name"`
-			Enabled   bool   `json:"enabled"`
-			Namespace string `json:"namespace"`
-		} `json:"devices"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	var devices []*registrypb.Device
-	for _, device := range res.Devices {
-		devices = append(devices, &registrypb.Device{
-			Id:        device.Uid,
-			Name:      device.Name,
-			Namespace: device.Namespace,
-			Enabled:   &wrappers.BoolValue{Value: device.Enabled},
-		})
-	}
-
-	return &registrypb.GetByFingerprintResponse{
-		Devices: devices,
-	}, nil
+	return resp, nil
 }
 
+//Get is a method for get details for a Device
 func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
-	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query devices($id: string){
-  device(func: uid($id)) @filter(eq(kind, "device")) {
-    uid
-    name
-    tags
-    enabled
-    certificates {
-      pem_data
-      algorithm
-      fingerprint
-      fingerprint.algorithm
-    }
-    ~owns {
-      name
-    }
-  }
-}`
+	log := s.Log.Named("Get Device Controller")
 
-	vars := map[string]string{
-		"$id": request.Id,
-	}
+	//Added logging
+	log.Info("Function Invoked", zap.String("Device", request.Id))
 
-	resp, err := txn.QueryWithVars(ctx, q, vars)
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}
 
-	var res struct {
-		Devices []*Device `json:"device"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
+	//Check if the user has access to get the device details
+	authresp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Id,
+		Account: requestorID,
+		Action:  nodepb.Action_READ,
+	})
 	if err != nil {
-		return nil, err
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
 	}
 
-	if len(res.Devices) == 0 {
-		return &registrypb.GetResponse{}, status.Error(codes.NotFound, "Device not found")
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to get Device list")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to get Device list")
 	}
 
-	return &registrypb.GetResponse{
-		Device: toProto(res.Devices[0]),
-	}, nil
+	resp, err := s.GetQ(ctx, request)
+	if err != nil {
+		log.Error("Failed to Get Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	log.Info("Get Device details successsful")
+	return resp, nil
 }
 
+//List is a method that list all Devices for a specific Namespace
 func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query list($namespaceid: string){
-		var(func: uid($namespaceid)) @filter(eq(type, "namespace")) {
-		  owns {
-			OBJs as uid
-		  } @filter(eq(kind, "device"))
-		}
+	log := s.Log.Named("List Device Controller")
 
-		nodes(func: uid(OBJs)) @recurse {
-		  children{}
-		  uid
-		  name
-		  kind
-		  enabled
-		  tags
-		}
-	  }`
+	//Added logging
+	log.Info("Function Invoked", zap.String("Account", request.Account), zap.String("Namespace", request.Namespace))
 
-	vars := map[string]string{
-		"$namespaceid": request.Namespace,
-	}
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
 
-	resp, err := txn.QueryWithVars(ctx, q, vars)
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}
 
-	var res struct {
-		Nodes []Device `json:"nodes"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
+	isRoot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: requestorID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var devices []*registrypb.Device
-	for _, device := range res.Nodes {
-		devices = append(devices, toProto(&device))
+	//If Account is root provide all access
+	if isRoot.IsRoot {
+		return s.ListQ(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
 	}
 
-	return &registrypb.ListResponse{
-		Devices: devices,
-	}, nil
+	//Check if the non-root user has access to the namespace
+	authresp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+		Namespaceid: request.Namespace,
+		Account:     requestorID,
+		Action:      nodepb.Action_READ,
+	})
+	if err != nil {
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
+	}
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to list Devices")
+		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to list Devices")
+	}
+
+	resp, err := s.ListForAccountQ(ctx, request)
+	if err != nil {
+		log.Error("Failed to list Devices", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	log.Info("List Devices successsful")
+	return resp, nil
 }
 
-func (s *Server) ListForAccount(ctx context.Context, request *registrypb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
-	txn := s.dgo.NewReadOnlyTxn()
-
-	// TODO direct access!
-
-	var q = `query list($account: string, $namespaceid: string){
-		var(func: uid($account)) {
-		  access.to.namespace %v {
-			owns {
-			  OBJs as uid
-			} @filter(eq(kind, "device"))
-		  }
-		}
-
-		nodes(func: uid(OBJs)) @recurse {
-		  children{} 
-		  uid
-		  name
-		  kind
-		  enabled
-		  tags
-		  ~owns {
-			name
-		  }
-		}
-	  }`
-
-	if request.Namespace != "" {
-		q = fmt.Sprintf(q, "@filter(uid($namespaceid))")
-	} else {
-		q = fmt.Sprintf(q, "")
-	}
-
-	vars := map[string]string{
-		"$account":     request.Account,
-		"$namespaceid": request.Namespace,
-	}
-
-	resp, err := txn.QueryWithVars(ctx, q, vars)
-	if err != nil {
-		return nil, err
-	}
-
-	var res struct {
-		Nodes []Device `json:"nodes"`
-	}
-
-	err = json.Unmarshal(resp.Json, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	var devices []*registrypb.Device
-	for _, device := range res.Nodes {
-		devices = append(devices, toProto(&device))
-	}
-
-	return &registrypb.ListResponse{
-		Devices: devices,
-	}, nil
-}
-
-// TODO make registrypb.Device have multiple certs, ... we also ignore valid_to for now
-func toProto(device *Device) *registrypb.Device {
-	res := &registrypb.Device{
-		Id:      device.UID,
-		Name:    device.Name,
-		Enabled: &wrappers.BoolValue{Value: device.Enabled},
-		Tags:    device.Tags,
-		// TODO cert etc
-	}
-
-	if len(device.OwnedBy) == 1 {
-		res.Namespace = device.OwnedBy[0].Name
-	}
-
-	if len(device.Certificates) > 0 {
-		res.Certificate = &registrypb.Certificate{
-			PemData:              device.Certificates[0].PemData,
-			Algorithm:            device.Certificates[0].Algorithm,
-			FingerprintAlgorithm: device.Certificates[0].FingerprintAlgorithm,
-			Fingerprint:          device.Certificates[0].Fingerprint,
-		}
-	}
-	return res
-}
-
+//Delete is a method that deletes a Device
 func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) (response *registrypb.DeleteResponse, err error) {
-	txn := s.dgo.NewTxn()
-	m := &api.Mutation{CommitNow: true}
 
-	//Query to get the device to be deleted with all the related edges
-	const q = `query delete($device: string){
-		objects(func: uid($device)) @filter(eq(kind, "device")) {
-			uid
-		  ~owns {
-			uid
-		  }
-		  ~children {
-			uid
-		  }
-		 certificates {
-			uid
-        type
-		  }
-		}
-	  }`
+	log := s.Log.Named("Delete Device Controller")
 
-	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$device": request.Id})
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to delete node "+err.Error())
-	}
+	//Added logging
+	log.Info("Function Invoked", zap.String("Device", request.Id))
 
-	var result struct {
-		//Get the Device edge details from the query response and build JSON
-		Objects []*Device `json:"objects"`
-	}
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
 
-	err = json.Unmarshal(res.Json, &result)
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(result.Objects) != 1 {
-		return nil, status.Error(codes.NotFound, "The Device is not found")
-	}
-
-	//Append edge if there is a owns edge
-	if len(result.Objects[0].OwnedBy) == 1 {
-		m.Del = append(m.Del, &api.NQuad{
-			Subject:   result.Objects[0].OwnedBy[0].UID,
-			Predicate: "owns",
-			ObjectId:  request.Id,
-		})
-	}
-
-	//Append edge if there is a children edge
-	if len(result.Objects[0].Parent) == 1 {
-		m.Del = append(m.Del, &api.NQuad{
-			Subject:   result.Objects[0].Parent[0].UID,
-			Predicate: "children",
-			ObjectId:  request.Id,
-		})
-	}
-
-	//Delete all the edges appended in mutation m
-	dgo.DeleteEdges(m, request.Id, "_STAR_ALL")
-
-	//Append node if there is a certificate edge to delete the certificate node
-	if len(result.Objects[0].Certificates) == 1 {
-		m.Del = append(m.Del, &api.NQuad{
-			Subject:     result.Objects[0].Certificates[0].UID,
-			Predicate:   "_STAR_ALL",
-			ObjectId:    "_STAR_ALL",
-			ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: "_STAR_ALL"}},
-		})
-	}
-
-	_, err = txn.Mutate(context.Background(), m)
+	//Check if the user has access to delete the device
+	authresp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Id,
+		Account: requestorID,
+		Action:  nodepb.Action_WRITE,
+	})
 	if err != nil {
-		return nil, err
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
 	}
 
-	return &registrypb.DeleteResponse{}, nil
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to delete the device")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to delete the device")
+	}
+
+	resp, err := s.DeleteQ(ctx, request)
+	if err != nil {
+		log.Error("Failed to delete Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	log.Info("Devices deleted successsful")
+	return resp, nil
 }
