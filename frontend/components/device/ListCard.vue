@@ -23,8 +23,15 @@
         </template>
         <template>
           <a-row v-if="device.tags.length">
-            Tags:
-            <a-tag v-for="tag in device.tags" :key="tag">{{ tag }}</a-tag>
+            <a-col :span="3">Tags:</a-col>
+            <a-col :span="21">
+              <a-tag
+                v-for="tag in device.tags"
+                :key="tag"
+                style="margin-bottom: 5px"
+                >{{ tag }}</a-tag
+              >
+            </a-col>
           </a-row>
           <a-row v-else type="flex" justify="center" class="muted"
             >No tags were provided</a-row

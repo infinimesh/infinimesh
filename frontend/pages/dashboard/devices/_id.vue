@@ -99,13 +99,16 @@
                 />
               </template>
               <template v-else>
-                <a-row v-if="device.tags && device.tags.length">
-                  <p>
-                    Tags:
-                    <a-tag v-for="tag in device.tags" :key="tag">{{
-                      tag
-                    }}</a-tag>
-                  </p>
+                <a-row v-if="device.tags.length">
+                  <a-col :span="2">Tags:</a-col>
+                  <a-col :span="22">
+                    <a-tag
+                      v-for="tag in device.tags"
+                      :key="tag"
+                      style="margin-bottom: 5px"
+                      >{{ tag }}</a-tag
+                    >
+                  </a-col>
                 </a-row>
                 <a-row v-else type="flex" justify="center" class="muted">
                   <p>No tags were provided</p>
