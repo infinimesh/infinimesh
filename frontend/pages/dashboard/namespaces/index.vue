@@ -115,6 +115,19 @@ export default {
       await this.$store.dispatch("devices/getNamespaces");
       this.loading = false;
     },
+    updateNamespace(ns_id, patch, { success, error }) {
+      this.$axios({
+        url: `/api/namespaces/${ns_id}`,
+        method: "patch",
+        data: patch,
+      })
+        .then((res) => {
+          if (success) success(res);
+        })
+        .catch((e) => {
+          if (error) error(e);
+        });
+    },
     deleteNamespace(namespace) {
       const vm = this;
       vm.$axios({
@@ -134,23 +147,24 @@ export default {
     },
     restoreNamespace(namespace) {
       const vm = this;
-      vm.$axios({
-        url: `/api/namespaces/${namespace.id}`,
-        method: "patch",
-        data: {
+      this.updateNamespace(
+        namespace.id,
+        {
           markfordeletion: false,
         },
-      })
-        .then(() => {
-          vm.$message.success("Namespace successfuly restored!");
-          vm.getNamespacesPool();
-        })
-        .catch((e) => {
-          vm.$notification.error({
-            message: "Error restoring namespace " + namespace.name,
-            description: e.response.data.message,
-          });
-        });
+        {
+          success: () => {
+            vm.$message.success("Namespace successfuly restored!");
+            vm.getNamespacesPool();
+          },
+          error: (e) => {
+            vm.$notification.error({
+              message: "Error restoring namespace " + namespace.name,
+              description: e.response.data.message,
+            });
+          },
+        }
+      );
     },
     loadNamespacePermissions(expanded, ns) {
       if (expanded) {
