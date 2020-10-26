@@ -155,6 +155,8 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	topicEvents := request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
+	fmt.Println(topicEvents)
+	fmt.Println(events)
 	defer func() {
 		fmt.Println("Defer")
 		go func() {
