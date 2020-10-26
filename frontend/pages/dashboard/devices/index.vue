@@ -49,9 +49,14 @@
               no-prefetch
             >
               <h3 style="padding: 15px">
-                You can't create devices in your root namespace, switch to
-                another one to perform device create. Click here to create new
-                namespace, or switch namespace on top of the page.
+                <p>
+                  You can't create devices in your root namespace, switch to
+                  another one to perform device create.
+                </p>
+                <p>
+                  Click here to create new namespace, or switch namespace on top
+                  of the page.
+                </p>
               </h3>
             </nuxt-link>
             <template v-else>
