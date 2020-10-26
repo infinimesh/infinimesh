@@ -1,28 +1,12 @@
 <template>
   <div id="devicesTable">
     <div class="tile-bar">
-      <a-row type="flex" align="middle">
-        <template v-if="selectedDevices.length">
-          <a-col>
-            <a-button type="link" @click="selectedDevices = []" icon="close"
-              >Deselect all</a-button
-            >
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-          <a-col>
-            <a-button
-              type="success"
-              style="margin-right: 5px"
-              @click="toogleAll(true)"
-              >Enable All</a-button
-            >
-            <a-button type="danger" @click="toogleAll(false)"
-              >Disable All</a-button
-            >
-          </a-col>
-          <div role="separator" class="tile-bar-vertical-divider"></div>
-        </template>
+      <a-row type="flex" align="middle" style="padding: 0 10px">
         <template>
+          <a-col :span="5">
+            <a-input placeholder="Search device..." style="height: 90%" />
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
           <a-col>
             <a-row type="flex" justify="center">
               <a-col>
@@ -30,13 +14,29 @@
                   id="group-by-tags-switch"
                   un-checked-children="Group by tags"
                   checked-children="Whole registry"
-                ></a-switch>
+                />
               </a-col>
             </a-row>
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
-          <a-col :span="5">
-            <a-input placeholder="Search device..." style="height: 90%" />
+        </template>
+        <template v-if="selectedDevices.length">
+          <a-col>
+            <a-button
+              type="success"
+              style="margin-right: 5px"
+              @click="toogleAll(true)"
+              >Enable All
+            </a-button>
+            <a-button type="danger" @click="toogleAll(false)"
+              >Disable All
+            </a-button>
+          </a-col>
+          <div role="separator" class="tile-bar-vertical-divider"></div>
+          <a-col>
+            <a-button type="link" @click="selectedDevices = []" icon="close"
+              >Deselect all
+            </a-button>
           </a-col>
           <div role="separator" class="tile-bar-vertical-divider"></div>
         </template>
