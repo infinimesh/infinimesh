@@ -73,6 +73,22 @@
             style="border-radius: 100px; height: 24px"
             >Select All
           </a-button>
+
+          <device-pool
+            :div="div"
+            :selected="selectedDevices"
+            :pool="pool.filter((d) => d.tags.includes(tag))"
+            @select="(id) => selectedDevices.push(id)"
+            @deselect="
+              (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
+            "
+            @select-all="selectedDevices = pool.map((d) => d.id)"
+            style="
+              background-color: var(--secondary-color);
+              border-radius: var(--border-radius-base);
+              padding-bottom: 10px;
+            "
+          />
         </a-collapse-panel>
       </a-collapse>
     </template>
