@@ -54,73 +54,57 @@
         </a-col>
       </template>
     </a-row>
-    <a-row :gutter="{ md: 10, lg: 10, xl: 10, xxl: 10 }" type="flex" id="root">
-      <a-col
-        :xs="{ span: 24 }"
-        :ms="{ span: 12 }"
-        :md="{ span: 12 }"
-        :lg="{ span: 8 }"
-        :xl="{ span: 8 }"
-        :xxl="{ span: 6 }"
-        v-for="(col, i) in poolCols"
-        :key="i"
+    <device-pool
+      :div="div"
+      :selected="selectedDevices"
+      :pool="mainPool"
+      @select="(id) => selectedDevices.push(id)"
+      @deselect="(id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)"
+      @select-all="selectedDevices = pool.map((d) => d.id)"
+    >
+      <a-row
+        class="create-form"
+        type="flex"
+        justify="center"
+        align="middle"
+        slot="device-create-form"
       >
-        <div style="padding-top: 10px" v-for="device in col" :key="device.id">
-          <a-row
-            class="create-form"
-            v-if="device.type && device.type == 'create-form'"
-            type="flex"
-            justify="center"
-            align="middle"
-          >
-            <nuxt-link
-              v-if="user.default_namespace.id === namespace"
-              :to="{ name: 'dashboard-namespaces', query: { create: true } }"
-              no-prefetch
-            >
-              <h3 style="padding: 15px">
-                <p>
-                  You can't create devices in your root namespace, switch to
-                  another one to perform device create.
-                </p>
-                <p>
-                  Click here to create new namespace, or switch namespace on top
-                  of the page.
-                </p>
-              </h3>
-            </nuxt-link>
-            <template v-else>
-              <a-icon
-                type="plus"
-                style="font-size: 6rem; height: 100%; width: 100%"
-                @click="addDeviceActive = true"
-              />
-              <device-add
-                :active="addDeviceActive"
-                @cancel="addDeviceActive = false"
-                @add="handleDeviceAdd"
-              />
-            </template>
-          </a-row>
-          <device-list-card
-            v-else
-            :device="device"
-            :selected="selectedDevices.includes(device.id)"
-            @select="(id) => selectedDevices.push(id)"
-            @deselect="
-              (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
-            "
-            @select-all="selectedDevices = pool.map((d) => d.id)"
+        <nuxt-link
+          v-if="user.default_namespace.id === namespace"
+          :to="{ name: 'dashboard-namespaces', query: { create: true } }"
+          no-prefetch
+        >
+          <h3 style="padding: 15px">
+            <p>
+              You can't create devices in your root namespace, switch to another
+              one to perform device create.
+            </p>
+            <p>
+              Click here to create new namespace, or switch namespace on top of
+              the page.
+            </p>
+          </h3>
+        </nuxt-link>
+        <template v-else>
+          <a-icon
+            type="plus"
+            style="font-size: 6rem; height: 100%; width: 100%"
+            @click="addDeviceActive = true"
           />
-        </div>
-      </a-col>
-    </a-row>
+          <device-add
+            :active="addDeviceActive"
+            @cancel="addDeviceActive = false"
+            @add="handleDeviceAdd"
+          />
+        </template>
+      </a-row>
+    </device-pool>
   </div>
 </template>
 
 <script>
+import DevicePool from "@/components/device/Pool.vue";
 import DeviceAdd from "@/components/device/Add.vue";
-import DeviceListCard from "@/components/device/ListCard.vue";
 
 const divs = {
   xs: 1,
@@ -135,13 +119,18 @@ export default {
   name: "devicesTable",
   components: {
     DeviceAdd,
-    DeviceListCard,
+    DevicePool,
   },
   data() {
     return {
       addDeviceActive: false,
       selectedDevices: [],
     };
+  },
+  watch: {
+    selectedDevices() {
+      this.selectedDevices.filter((e, i, self) => self.indexOf(e) === i);
+    },
   },
   computed: {
     user() {
@@ -156,11 +145,10 @@ export default {
         return this.$store.state.devices.pool;
       },
     },
-    poolCols: {
+    mainPool: {
       deep: true,
       get() {
-        let pool = [{ type: "create-form" }, ...this.pool];
-        return this.splitIntoCols(this.div, pool);
+        return [{ type: "create-form" }, ...this.pool];
       },
     },
     div() {
@@ -168,23 +156,6 @@ export default {
     },
   },
   methods: {
-    splitIntoCols(div, pool) {
-      if (!pool.length) return pool;
-      if (div == 1) {
-        return [pool];
-      }
-      let res = new Array(div);
-      for (let i = 0; i < div; i++) {
-        res[i] = new Array();
-      }
-      for (let i = 0; i <= pool.length; i++) {
-        for (let j = 0; j < div && i + j < pool.length; j++) {
-          res[j].push(pool[i + j]);
-        }
-        i += div - 1;
-      }
-      return res;
-    },
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
