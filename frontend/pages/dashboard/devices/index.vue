@@ -3,7 +3,7 @@
     <a-row
       type="flex"
       style="padding: 4px 10px"
-      class="tile-bar"
+      class="tile-bar tile-bar-transparent"
       align="middle"
     >
       <template>
@@ -122,6 +122,15 @@
 import DeviceAdd from "@/components/device/Add.vue";
 import DeviceListCard from "@/components/device/ListCard.vue";
 
+const divs = {
+  xs: 1,
+  sm: 2,
+  md: 2,
+  lg: 3,
+  xl: 3,
+  xxl: 4,
+};
+
 export default {
   name: "devicesTable",
   components: {
@@ -152,33 +161,7 @@ export default {
       get() {
         let pool = [{ type: "create-form" }, ...this.pool];
         if (!pool.length) return pool;
-        let div = 1;
-        switch (this.gridSize) {
-          case "xs": {
-            div = 1;
-            break;
-          }
-          case "sm": {
-            div = 2;
-            break;
-          }
-          case "md": {
-            div = 2;
-            break;
-          }
-          case "lg": {
-            div = 3;
-            break;
-          }
-          case "xl": {
-            div = 3;
-            break;
-          }
-          case "xxl": {
-            div = 4;
-            break;
-          }
-        }
+        let div = this.div;
         if (div == 1) {
           return [pool];
         }
@@ -195,8 +178,8 @@ export default {
         return res;
       },
     },
-    gridSize() {
-      return this.$store.state.window.gridSize;
+    div() {
+      return divs[this.$store.state.window.gridSize];
     },
   },
   methods: {
@@ -285,10 +268,12 @@ export default {
   margin-top: 10px;
   width: 100%;
   background: var(--primary-color);
-  /* border-radius: 100px; */
   border-radius: var(--border-radius-base);
   color: var(--line-color);
   min-height: 32px;
+}
+.tile-bar-transparent {
+  background: none;
 }
 .tile-bar .ant-btn-link {
   color: white !important;
