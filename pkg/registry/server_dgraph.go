@@ -294,7 +294,7 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
 }
 
 //GetQ is a method to execute Dgraph Query to Get details of a specific Device
-func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest, isadmin bool) (response *registrypb.GetResponse, err error) {
+func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest, accesstocert bool) (response *registrypb.GetResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
 	var q = `query devices($id: string){
@@ -310,7 +310,7 @@ func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest, isadm
   }
 }`
 
-	if isadmin {
+	if accesstocert {
 		q = fmt.Sprintf(q, `certificates {
 			pem_data
 			algorithm
