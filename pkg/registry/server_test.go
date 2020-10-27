@@ -199,7 +199,7 @@ func TestCreateGet(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
 	require.NoError(t, err)
 
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
@@ -245,7 +245,7 @@ func TestUpdate(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
 	require.NoError(t, err)
 
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
@@ -321,7 +321,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x4"}))
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
