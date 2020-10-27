@@ -188,6 +188,11 @@ strong {
   background: var(--secondary-color) !important;
 }
 
+/* Ant Collapse overloads */
+.ant-collapse-arrow {
+  color: var(--text-color) !important;
+}
+
 /* Vuetify overloads */
 .v-navigation-drawer {
   background: var(--primary-color) !important;

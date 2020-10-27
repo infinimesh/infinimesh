@@ -20,6 +20,7 @@
                 id="group-by-tags-switch"
                 un-checked-children="Group by tags"
                 checked-children="Whole registry"
+                v-model="groupByTags"
               />
             </a-col>
           </a-row>
@@ -54,6 +55,27 @@
         </a-col>
       </template>
     </a-row>
+    <template v-if="groupByTags">
+      <a-collapse :bordered="false" accordion class="tags-collapse-tiles-wrap">
+        <a-collapse-panel
+          v-for="tag in tags"
+          :key="tag"
+          class="tags-collapse-tile-wrap"
+        >
+          <span
+            slot="header"
+            style="color: var(--text-color); font-size: 18px"
+            >{{ tag }}</span
+          >
+          <a-button
+            type="success"
+            slot="extra"
+            style="border-radius: 100px; height: 24px"
+            >Select All
+          </a-button>
+        </a-collapse-panel>
+      </a-collapse>
+    </template>
     <device-pool
       :div="div"
       :selected="selectedDevices"
@@ -125,6 +147,7 @@ export default {
     return {
       addDeviceActive: false,
       selectedDevices: [],
+      groupByTags: false,
     };
   },
   watch: {
@@ -133,6 +156,12 @@ export default {
     },
   },
   computed: {
+    tags() {
+      return this.pool.reduce((r, el) => {
+        el.tags.forEach((t) => r.add(t));
+        return r;
+      }, new Set());
+    },
     user() {
       return this.$store.getters.loggedInUser;
     },
@@ -249,7 +278,7 @@ export default {
   background: none;
 }
 .tile-bar .ant-btn-link {
-  color: white !important;
+  color: var(--line-color) !important;
 }
 .tile-bar .ant-btn {
   height: 90%;
@@ -263,6 +292,7 @@ export default {
 }
 .devices-search-input {
   height: 90%;
+  border: 1px solid var(--primary-color);
   border-radius: 100px;
   min-width: 256px;
 }
@@ -274,5 +304,19 @@ export default {
 }
 .tile-bar > .ant-col + .ant-col {
   margin-left: 15px;
+}
+.tags-collapse-tiles-wrap {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.tags-collapse-tile-wrap {
+  border-radius: var(--border-radius-base);
+  background: var(--primary-color);
+}
+.tags-collapse-tile-wrap:last-child {
+  border-radius: var(--border-radius-base);
+}
+.ant-collapse-borderless {
+  background-color: var(--secondary-color) !important;
 }
 </style>
