@@ -321,7 +321,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x4"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
