@@ -58,6 +58,7 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 			if device.Enabled.Value {
 				enabled = append(enabled, device)
 			}
+			deviceStatusMap[device.Id] = device.Enabled.Value
 		}
 
 		if len(enabled) == 0 {
@@ -89,6 +90,7 @@ var (
 	kafkaTopicBackChannel string
 	tlsCertFile           string
 	tlsKeyFile            string
+	deviceStatusMap       map[string]bool
 
 	ps *pubsub.PubSub
 )
@@ -109,6 +111,7 @@ func init() {
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 
+	deviceStatusMap = make(map[string]bool)
 }
 
 func readBackchannelFromKafka() {
@@ -225,6 +228,10 @@ func main() {
 
 	}
 
+}
+
+func changeDeviceStatus(deviceID string, deviceStatus bool) {
+	deviceStatusMap[deviceID] = deviceStatus
 }
 
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
@@ -349,6 +356,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 	for {
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
+
 		if err != nil {
 			if err == io.EOF {
 				fmt.Printf("Client closed connection.\n")
@@ -367,9 +375,13 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write PingResp", err)
 			}
 		case *packet.PublishControlPacket:
-			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
-			if err != nil {
-				fmt.Printf("Failed to handle Publish packet: %v.", err)
+			if deviceStatusMap[deviceID] {
+				topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
+				if err != nil {
+					fmt.Printf("Failed to handle Publish packet: %v.", err)
+				}
+			} else {
+				_ = c.Close()
 			}
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
