@@ -11,7 +11,21 @@
           <a-input
             placeholder="Search device..."
             class="devices-search-input"
-          />
+            :allowClear="true"
+            v-model="searchQuery"
+          >
+            <a-select
+              slot="addonBefore"
+              class="device-search-prefix"
+              v-model="searchKey"
+            >
+              <a-select-option value="all"> Everywhere </a-select-option>
+              <a-select-option value="name"> Names </a-select-option>
+              <a-select-option value="id"> IDs </a-select-option>
+              <a-select-option value="tags"> Tags </a-select-option>
+              <a-select-option value="namespace"> Namespace </a-select-option>
+            </a-select>
+          </a-input>
         </a-col>
         <a-col>
           <a-row type="flex" justify="center">
@@ -185,11 +199,17 @@ export default {
       selectedDevices: [],
       groupByTags: false,
       tagsCollapseActive: "",
+      searchKey: "all",
+      searchQuery: "",
     };
   },
   watch: {
     selectedDevices() {
       this.selectedDevices.filter((e, i, self) => self.indexOf(e) === i);
+    },
+    searchQuery() {
+      let lower = this.searchQuery.toLowerCase();
+      if (lower !== this.searchQuery) this.searchQuery = lower;
     },
   },
   computed: {
@@ -209,6 +229,36 @@ export default {
       deep: true,
       get() {
         return this.$store.state.devices.pool;
+      },
+    },
+    suggested: {
+      deep: true,
+      get() {
+        if (this.searchQuery === "") {
+          return this.pool;
+        }
+        let searchable;
+        if (this.searchKey == "all") {
+          searchable = (device) => {
+            return [
+              device.id,
+              device.name,
+              device.namespace,
+              device.tags.join(","),
+            ]
+              .join("|")
+              .toLowerCase();
+          };
+        } else {
+          searchable = (device) => device[this.searchKey].toLowerCase();
+        }
+        return this.pool
+          .map((d) => {
+            d.searchable = searchable(d);
+            return d;
+          })
+          .filter((d) => d.searchable.indexOf(this.searchQuery) !== -1)
+          .sort((d) => -d.searchable.indexOf(this.searchQuery));
       },
     },
     mainPool: {
@@ -330,8 +380,8 @@ export default {
 .devices-search-input {
   height: 90%;
   border: 1px solid var(--primary-color);
-  border-radius: 100px;
   min-width: 256px;
+  border-radius: 100px;
 }
 @media (max-width: 768px) {
   .tile-bar > [class*="ant-col"] {
@@ -355,5 +405,20 @@ export default {
 }
 .ant-collapse-borderless {
   background-color: var(--secondary-color) !important;
+}
+</style>
+<style>
+.devices-search-input
+  > .ant-input-group
+  > .ant-input-affix-wrapper:not(:first-child)
+  .ant-input {
+  border-radius: 0 100px 100px 0 !important;
+}
+.device-search-prefix {
+  height: 90%;
+}
+.devices-search-input > .ant-input-group > .ant-input:first-child,
+.ant-input-group-addon:first-child {
+  border-radius: 100px 0 0 100px !important;
 }
 </style>
