@@ -2,7 +2,7 @@
   <div id="devicesTable">
     <div class="selected-devices-actions" v-if="selectedDevices.length">
       <a-row type="flex" align="middle">
-        <a-col :span="2">
+        <a-col :xxl="2" :xl="4">
           <a-button type="link" @click="selectedDevices = []" icon="close"
             >Deselect all</a-button
           >
@@ -11,7 +11,7 @@
           role="separator"
           class="selected-devices-actions-vertical-divider"
         ></div>
-        <a-col :span="4">
+        <a-col :xxl="4" :xl="6">
           <a-button
             type="success"
             style="margin-right: 5px"
@@ -49,9 +49,14 @@
               no-prefetch
             >
               <h3 style="padding: 15px">
-                You can't create devices in your root namespace, switch to
-                another one to perform device create. Click here to create new
-                namespace, or switch namespace on top of the page.
+                <p>
+                  You can't create devices in your root namespace, switch to
+                  another one to perform device create.
+                </p>
+                <p>
+                  Click here to create new namespace, or switch namespace on top
+                  of the page.
+                </p>
               </h3>
             </nuxt-link>
             <template v-else>

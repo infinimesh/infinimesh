@@ -1,8 +1,12 @@
 <template>
   <v-row class="infini-nav" align="center" justify="space-between">
     <v-col sm="6" md="5" lg="3" xl="3">
-      <span class="logo">infinimesh</span></v-col
-    >
+      <span class="logo"
+        >infinimesh{{
+          $colorMode.preference.includes("hallo") ? " 🎃" : ""
+        }}</span
+      >
+    </v-col>
     <v-col class="d-none d-lg-block" lg="1" xl="1">
       <v-row>
         <v-col class="nav-button" cols="5" @click="$router.go(-1)">
@@ -36,7 +40,7 @@ export default {
       },
       set(val) {
         this.$store.dispatch("window/toggleMenu", val);
-      }
+      },
     },
     namespace: {
       get() {
@@ -44,14 +48,19 @@ export default {
       },
       set(val) {
         this.$store.dispatch("devices/setNamespace", val);
-      }
+        if (this.$route.name != "dashboard-devices") {
+          this.$router.push({
+            name: "dashboard-devices",
+          });
+        }
+      },
     },
     namespaces: {
       deep: true,
       get() {
         return this.$store.state.devices.namespaces;
-      }
-    }
+      },
+    },
   },
   mounted() {
     this.namespace = this.$store.state.auth.user.default_namespace.id;
@@ -59,8 +68,8 @@ export default {
   methods: {
     toggleCollapsed() {
       this.menu = !this.menu;
-    }
-  }
+    },
+  },
 };
 </script>
 
