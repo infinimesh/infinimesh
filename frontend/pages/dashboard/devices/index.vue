@@ -56,7 +56,12 @@
       </template>
     </a-row>
     <template v-if="groupByTags">
-      <a-collapse :bordered="false" accordion class="tags-collapse-tiles-wrap">
+      <a-collapse
+        :bordered="false"
+        accordion
+        class="tags-collapse-tiles-wrap"
+        :activeKey="tagsCollapseActive"
+      >
         <a-collapse-panel
           v-for="tag in tags"
           :key="tag"
@@ -106,6 +111,12 @@
       @select="(id) => selectedDevices.push(id)"
       @deselect="(id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)"
       @select-all="selectedDevices = pool.map((d) => d.id)"
+      @tag-clicked="
+        (tag) => {
+          groupByTags = true;
+          tagsCollapseActive = tag;
+        }
+      "
     >
       <a-row
         class="create-form"
@@ -171,6 +182,7 @@ export default {
       addDeviceActive: false,
       selectedDevices: [],
       groupByTags: false,
+      tagsCollapseActive: "",
     };
   },
   watch: {

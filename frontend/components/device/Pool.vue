@@ -22,6 +22,7 @@
           @select="(id) => $emit('select', id)"
           @deselect="(id) => $emit('deselect', id)"
           @select-all="$emit('select-all')"
+          @tag-clicked="(tag) => $emit('tag-clicked', tag)"
         />
       </div>
     </a-col>
