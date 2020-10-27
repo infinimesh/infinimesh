@@ -230,9 +230,10 @@ func main() {
 
 }
 
+/*
 func changeDeviceStatus(deviceID string, deviceStatus bool) {
 	deviceStatusMap[deviceID] = deviceStatus
-}
+}*/
 
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
