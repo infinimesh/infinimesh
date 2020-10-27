@@ -294,26 +294,32 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
 }
 
 //GetQ is a method to execute Dgraph Query to Get details of a specific Device
-func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
+func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest, isadmin bool) (response *registrypb.GetResponse, err error) {
 	txn := s.dgo.NewReadOnlyTxn()
 
-	const q = `query devices($id: string){
+	var q = `query devices($id: string){
   device(func: uid($id)) @filter(eq(kind, "device")) {
     uid
     name
     tags
     enabled
-    certificates {
-      pem_data
-      algorithm
-      fingerprint
-      fingerprint.algorithm
-    }
+    %v
     ~owns {
       name
     }
   }
 }`
+
+	if isadmin {
+		q = fmt.Sprintf(q, `certificates {
+			pem_data
+			algorithm
+			fingerprint
+			fingerprint.algorithm
+		  }`)
+	} else {
+		q = fmt.Sprintf(q, "")
+	}
 
 	vars := map[string]string{
 		"$id": request.Id,
