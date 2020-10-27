@@ -67,17 +67,24 @@
             style="color: var(--text-color); font-size: 18px"
             >{{ tag }}</span
           >
-          <a-button
-            type="success"
-            slot="extra"
-            style="border-radius: 100px; height: 24px"
-            >Select All
-          </a-button>
+          <div slot="extra" @click="(e) => e.stopPropagation()">
+            <a-button
+              type="success"
+              style="border-radius: 100px; height: 24px"
+              @click="
+                selectedDevices.push(
+                  ...pool.filter((d) => d.tags.includes(tag)).map((d) => d.id)
+                )
+              "
+              >Select All
+            </a-button>
+          </div>
 
           <device-pool
             :div="div"
             :selected="selectedDevices"
             :pool="pool.filter((d) => d.tags.includes(tag))"
+            :grouped="true"
             @select="(id) => selectedDevices.push(id)"
             @deselect="
               (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
