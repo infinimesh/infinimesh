@@ -37,10 +37,10 @@
           <a-button
             type="success"
             style="margin-right: 5px"
-            @click="toogleAll(true)"
+            @click="toogleSelected(true)"
             >Enable All
           </a-button>
-          <a-button type="danger" @click="toogleAll(false)"
+          <a-button type="danger" @click="toogleSelected(false)"
             >Disable All
           </a-button>
         </a-col>
@@ -49,7 +49,7 @@
         <a-col>
           <a-button
             type="success"
-            @click="selectedDevices = pool.map((d) => d.id)"
+            @click="selectedDevices = suggested.map((d) => d.id)"
             >Select All
           </a-button>
         </a-col>
@@ -78,7 +78,9 @@
               style="border-radius: 100px; height: 24px"
               @click="
                 selectedDevices.push(
-                  ...pool.filter((d) => d.tags.includes(tag)).map((d) => d.id)
+                  ...suggested
+                    .filter((d) => d.tags.includes(tag))
+                    .map((d) => d.id)
                 )
               "
               >Select All
@@ -88,13 +90,13 @@
           <device-pool
             :div="div"
             :selected="selectedDevices"
-            :pool="pool.filter((d) => d.tags.includes(tag))"
+            :pool="suggested.filter((d) => d.tags.includes(tag))"
             :grouped="true"
             @select="(id) => selectedDevices.push(id)"
             @deselect="
               (id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)
             "
-            @select-all="selectedDevices = pool.map((d) => d.id)"
+            @select-all="selectedDevices = suggested.map((d) => d.id)"
             style="
               background-color: var(--secondary-color);
               border-radius: var(--border-radius-base);
@@ -110,7 +112,7 @@
       :pool="mainPool"
       @select="(id) => selectedDevices.push(id)"
       @deselect="(id) => selectedDevices.splice(selectedDevices.indexOf(id), 1)"
-      @select-all="selectedDevices = pool.map((d) => d.id)"
+      @select-all="selectedDevices = suggested.map((d) => d.id)"
       @tag-clicked="
         (tag) => {
           groupByTags = true;
@@ -212,7 +214,7 @@ export default {
     mainPool: {
       deep: true,
       get() {
-        return [{ type: "create-form" }, ...this.pool];
+        return [{ type: "create-form" }, ...this.suggested];
       },
     },
     div() {
@@ -235,9 +237,9 @@ export default {
         },
       });
     },
-    toogleAll(enable) {
+    toogleSelected(enable) {
       let vm = this;
-      this.updateAll(
+      this.updateSelected(
         () => {
           return {
             enabled: enable,
@@ -265,7 +267,7 @@ export default {
         }
       );
     },
-    updateAll(modifier, { success, error }) {
+    updateSelected(modifier, { success, error }) {
       let patchPromises = this.pool
         .filter((d) => this.selectedDevices.includes(d.id))
         .map((device) => {
