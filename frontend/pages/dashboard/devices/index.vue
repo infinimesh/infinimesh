@@ -210,6 +210,18 @@ export default {
     searchQuery() {
       let lower = this.searchQuery.toLowerCase();
       if (lower !== this.searchQuery) this.searchQuery = lower;
+
+      if (this.searchQuery.includes(":")) {
+        let new_key;
+        let colon = this.searchQuery.indexOf(":");
+        if (
+          ["all", "name", "id", "tags", "namespace"].includes(
+            (new_key = this.searchQuery.slice(0, colon))
+          )
+        )
+          this.searchKey = new_key;
+        this.searchQuery = this.searchQuery.slice(colon + 1);
+      }
     },
   },
   computed: {
