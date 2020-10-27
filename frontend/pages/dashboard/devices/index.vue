@@ -160,22 +160,7 @@ export default {
       deep: true,
       get() {
         let pool = [{ type: "create-form" }, ...this.pool];
-        if (!pool.length) return pool;
-        let div = this.div;
-        if (div == 1) {
-          return [pool];
-        }
-        let res = new Array(div);
-        for (let i = 0; i < div; i++) {
-          res[i] = new Array();
-        }
-        for (let i = 0; i <= pool.length; i++) {
-          for (let j = 0; j < div && i + j < pool.length; j++) {
-            res[j].push(pool[i + j]);
-          }
-          i += div - 1;
-        }
-        return res;
+        return this.splitIntoCols(this.div, pool);
       },
     },
     div() {
@@ -183,6 +168,23 @@ export default {
     },
   },
   methods: {
+    splitIntoCols(div, pool) {
+      if (!pool.length) return pool;
+      if (div == 1) {
+        return [pool];
+      }
+      let res = new Array(div);
+      for (let i = 0; i < div; i++) {
+        res[i] = new Array();
+      }
+      for (let i = 0; i <= pool.length; i++) {
+        for (let j = 0; j < div && i + j < pool.length; j++) {
+          res[j].push(pool[i + j]);
+        }
+        i += div - 1;
+      }
+      return res;
+    },
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
