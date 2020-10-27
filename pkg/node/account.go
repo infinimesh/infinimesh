@@ -408,6 +408,23 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		isself = true
 	}
 
+	if isadmin.IsAdmin { //Get List of accounts owned by admin
+		adminOwnedAcc, _ := s.ListAccounts(ctx, &nodepb.ListAccountsRequest{})
+
+		//For Admin user the account to be updated should be owned by the Admin
+		for i := 0; i < len(adminOwnedAcc.Accounts); i++ {
+			if adminOwnedAcc.Accounts[i].Uid == request.Account.Uid {
+				break
+			}
+
+			if i == len(adminOwnedAcc.Accounts) {
+				//Added logging
+				log.Error("The Account does not have permission to update details")
+				return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
+			}
+		}
+	}
+
 	//Added logging
 	log.Info("Validation for Self Account", zap.Bool("Validation Result", isself))
 
@@ -421,7 +438,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		}
 	} else {
 		//Added logging
-		log.Error("Update Account API Method: The Account does not have permission to update details")
+		log.Error("The Account does not have permission to update details")
 		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
 	}
 
