@@ -417,7 +417,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 				break
 			}
 
-			if i == len(adminOwnedAcc.Accounts) {
+			if (i + 1) == len(adminOwnedAcc.Accounts) {
 				//Added logging
 				log.Error("The Account does not have permission to update details")
 				return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
