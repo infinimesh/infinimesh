@@ -1435,6 +1435,7 @@ paths:
         - Objects
 servers:
   - url: 'http://localhost:8081'
+  - url: 'https://api.infinimesh.dev/'
   - url: 'https://api.infinimesh.io/'
 security:
   - bearerAuth: []
