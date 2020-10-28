@@ -40,6 +40,7 @@ type Repo interface {
 	SetPassword(ctx context.Context, account, password string) error
 	DeleteAccount(ctx context.Context, account *nodepb.DeleteAccountRequest) (err error)
 	AssignOwner(ctx context.Context, ownerID, accountID string) (err error)
+	RemoveOwner(ctx context.Context, ownerID, accountID string) (err error)
 	UserExists(ctx context.Context, account string) (exists bool, err error)
 
 	//Authorizations

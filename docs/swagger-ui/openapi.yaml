@@ -228,6 +228,8 @@ components:
         uid:
           type: string
       type: object
+    nodeOwnershipResponse:
+      type: object
     nodeUpdateAccountResponse:
       type: object
     nodeUpdateNamespaceResponse:
@@ -867,6 +869,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeUpdateAccountResponse'
+          description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
+      tags:
+        - Accounts
+  '/accounts/{accountid}/owner/{ownerid}':
+    delete:
+      operationId: Accounts_RemoveOwner
+      parameters:
+        - in: path
+          name: accountid
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ownerid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeOwnershipResponse'
+          description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
+      tags:
+        - Accounts
+    put:
+      operationId: Accounts_AssignOwner
+      parameters:
+        - in: path
+          name: accountid
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ownerid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/nodeOwnershipResponse'
           description: A successful response.
         default:
           content:

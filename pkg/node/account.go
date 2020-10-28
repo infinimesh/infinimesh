@@ -76,8 +76,8 @@ func (s *AccountController) IsOwnedbyAdmin(ctx context.Context, log *zap.Logger,
 
 		if (i + 1) == len(adminOwnedAcc.Accounts) {
 			//Added logging
-			log.Error("The Account does not have permission to update details")
-			return false, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
+			log.Error("The Account is not owned by the Admin")
+			return false, status.Error(codes.PermissionDenied, "The Account is not owned by the Admin")
 		}
 	}
 
@@ -532,4 +532,139 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 	//Added Logging
 	log.Info("Delete Account successful")
 	return &nodepb.DeleteAccountResponse{}, nil
+}
+
+//AssignOwner is a method that assigns an Admin to an account
+func (s *AccountController) AssignOwner(ctx context.Context, request *nodepb.OwnershipRequest) (response *nodepb.OwnershipResponse, err error) {
+
+	log := s.Log.Named("Assign Owner Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Ownerid), zap.String("Account", request.Accountid))
+
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: requestorID,
+	}); err == nil && !res.GetIsRoot() {
+		if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
+			Account: requestorID,
+		}); err == nil && !res.GetIsAdmin() {
+			//Validate if the account is admin or not
+			//Added logging
+			log.Error("The Account does not have permission to assign owner to the Account")
+			return &nodepb.OwnershipResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to assign owner to the Account")
+		}
+	}
+
+	//Get account details for validation
+	account, err := s.Repo.GetAccount(ctx, request.Accountid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get account details", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
+	}
+
+	//Get account details for validation
+	owner, err := s.Repo.GetAccount(ctx, request.Ownerid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get account details", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
+	}
+
+	//Validation to make sure root account cannot be deleted
+	if account.IsRoot {
+		//Added logging
+		log.Error("Cannot assign to root Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot assign to root Account")
+	}
+
+	//Validation to make sure the new owner is admin
+	if owner.IsAdmin {
+		//Added logging
+		log.Error("Cannot assign owner as the Account is not admin Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot assign owner as the Account is not admin Account")
+	}
+
+	//Check if the account is owned by the admin
+	_, err = s.IsOwnedbyAdmin(ctx, log, requestorID, request.Accountid)
+	if err != nil {
+		return nil, err
+	}
+
+	//Call the Assign Owner query when all the validation pass
+	err = s.Repo.AssignOwner(ctx, request.Ownerid, request.Accountid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to assign owner to the Account", zap.Error(err))
+		return nil, err
+	}
+
+	//Added Logging
+	log.Info("Assign Owner successful")
+	return &nodepb.OwnershipResponse{}, nil
+}
+
+//RemoveOwner is a method that assigns an Admin to an account
+func (s *AccountController) RemoveOwner(ctx context.Context, request *nodepb.OwnershipRequest) (response *nodepb.OwnershipResponse, err error) {
+
+	log := s.Log.Named("Remove Owner Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Ownerid), zap.String("Account", request.Accountid))
+
+	//Get metadata and from context and perform validation
+	_, requestorID, err := Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
+		Account: requestorID,
+	}); err == nil && !res.GetIsRoot() {
+		if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
+			Account: requestorID,
+		}); err == nil && !res.GetIsAdmin() {
+			//Validate if the account is admin or not
+			//Added logging
+			log.Error("The Account does not have permission to assign owner to the Account")
+			return &nodepb.OwnershipResponse{}, status.Error(codes.PermissionDenied, "The Account does not have permission to assign owner to the Account")
+		}
+	}
+
+	//Get account details for validation
+	account, err := s.Repo.GetAccount(ctx, request.Accountid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get account details", zap.Error(err))
+		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
+	}
+
+	//Validation to make sure root account cannot be deleted
+	if account.IsRoot {
+		//Added logging
+		log.Error("Cannot remove owner from root Account")
+		return nil, status.Error(codes.FailedPrecondition, "Cannot remove owner from root Account")
+	}
+
+	//Check if the account is owned by the admin
+	_, err = s.IsOwnedbyAdmin(ctx, log, requestorID, request.Accountid)
+	if err != nil {
+		return nil, err
+	}
+
+	//Call the Remove Owner query when all the validation pass
+	err = s.Repo.RemoveOwner(ctx, request.Ownerid, request.Accountid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to delete Account", zap.Error(err))
+		return nil, err
+	}
+
+	//Added Logging
+	log.Info("Remove Owner successful")
+	return &nodepb.OwnershipResponse{}, nil
 }
