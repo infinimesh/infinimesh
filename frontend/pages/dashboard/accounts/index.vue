@@ -49,30 +49,38 @@
             </a-row>
           </span>
           <span slot="actions" slot-scope="text, account">
-            <a-space>
-              <a-button type="link" @click="resetAccountPassword(account)"
-                >Reset password</a-button
-              >
-              <account-reset-password
-                v-if="selectedAccount"
-                :active="resetAccountPasswordVisible"
-                :account="selectedAccount"
-                @cancel="resetAccountPasswordVisible = false"
-                @reset="handleResetAccountPassword"
-              />
-
-              <a-divider type="vertical" />
-
-              <a-button type="link" @click="toogleAccount(account)">{{
-                account.enabled ? "Disable" : "Enable"
-              }}</a-button>
-
-              <a-divider type="vertical" />
-
-              <a-button type="link" @click="deleteAccount(account)">
-                <a-icon type="delete" style="color: red; font-size: 18px" />
-              </a-button>
-            </a-space>
+            <a-dropdown :trigger="['click']">
+              <a-button type="link" icon="menu" />
+              <a-menu slot="overlay">
+                <a-menu-item>
+                  <a-button type="link" @click="resetAccountPassword(account)"
+                    >Reset password</a-button
+                  >
+                </a-menu-item>
+                <a-menu-item @click="toogleAdmin(account)" v-if="user.is_root">
+                  <a-button type="link">
+                    {{ account.is_admin ? "Make not Admin" : "Make Admin" }}
+                  </a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="link" @click="toogleAccount(account)">{{
+                    account.enabled ? "Disable" : "Enable"
+                  }}</a-button>
+                </a-menu-item>
+                <a-menu-item>
+                  <a-button type="link" @click="deleteAccount(account)">
+                    Delete
+                  </a-button>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
+            <account-reset-password
+              v-if="selectedAccount"
+              :active="resetAccountPasswordVisible"
+              :account="selectedAccount"
+              @cancel="resetAccountPasswordVisible = false"
+              @reset="handleResetAccountPassword"
+            />
           </span>
         </a-table>
       </a-col>
@@ -111,7 +119,7 @@ const columns = [
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "15%",
+    width: "7%",
     scopedSlots: { customRender: "actions" },
   },
 ];
@@ -143,6 +151,19 @@ export default {
     this.getAccountsPool();
   },
   methods: {
+    console(args) {
+      console.log(args);
+    },
+    toogleAdmin(account) {
+      this.updateAccount(
+        account.uid,
+        { is_admin: !account.is_admin },
+        `User ${account.name} is now ${account.is_admin ? "not " : ""}Admin`,
+        `Failed to make user ${account.name} ${
+          account.is_admin ? "" : "not "
+        }admin`
+      );
+    },
     resetAccountPassword(account) {
       this.selectedAccount = account;
       this.resetAccountPasswordVisible = true;
