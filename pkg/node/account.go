@@ -62,6 +62,30 @@ func Validation(ctx context.Context, log *zap.Logger) (md metadata.MD, acc strin
 	return md, requestorID[0], nil
 }
 
+//IsOwnedbyAdmin is a method to validation if the account is owned by admin or not
+func (s *AccountController) IsOwnedbyAdmin(ctx context.Context, log *zap.Logger, requestorID string, accountID string) (isowned bool, err error) {
+
+	//Get List of accounts owned by admin
+	adminOwnedAcc, _ := s.ListAccounts(ctx, &nodepb.ListAccountsRequest{})
+
+	//For Admin user the account to be updated should be owned by the Admin
+	for i := 0; i < len(adminOwnedAcc.Accounts); i++ {
+		if adminOwnedAcc.Accounts[i].Uid == accountID {
+			break
+		}
+
+		if (i + 1) == len(adminOwnedAcc.Accounts) {
+			//Added logging
+			log.Error("The Account does not have permission to update details")
+			return false, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
+		}
+	}
+
+	//Added logging
+	log.Info("Validation for Admin Owned Account", zap.Bool("Validation Result", true))
+	return true, nil
+}
+
 //IsRoot is a method that returns if the account has root priviledges or not
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
 
@@ -408,21 +432,10 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		isself = true
 	}
 
-	if isadmin.IsAdmin { //Get List of accounts owned by admin
-		adminOwnedAcc, _ := s.ListAccounts(ctx, &nodepb.ListAccountsRequest{})
-
-		//For Admin user the account to be updated should be owned by the Admin
-		for i := 0; i < len(adminOwnedAcc.Accounts); i++ {
-			if adminOwnedAcc.Accounts[i].Uid == request.Account.Uid {
-				break
-			}
-
-			if (i + 1) == len(adminOwnedAcc.Accounts) {
-				//Added logging
-				log.Error("The Account does not have permission to update details")
-				return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
-			}
-		}
+	//Check if the account is owned by the admin
+	_, err = s.IsOwnedbyAdmin(ctx, log, requestorID, request.Account.Uid)
+	if err != nil {
+		return nil, err
 	}
 
 	//Added logging
