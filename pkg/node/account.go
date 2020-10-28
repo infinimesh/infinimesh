@@ -515,6 +515,12 @@ func (s *AccountController) DeleteAccount(ctx context.Context, request *nodepb.D
 		return nil, status.Error(codes.FailedPrecondition, "Cannot delete enabled Account")
 	}
 
+	//Check if the account is owned by the admin
+	_, err = s.IsOwnedbyAdmin(ctx, log, requestorID, request.Uid)
+	if err != nil {
+		return nil, err
+	}
+
 	//Call the delete query when all the validation pass
 	err = s.Repo.DeleteAccount(ctx, request)
 	if err != nil {
