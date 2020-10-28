@@ -530,7 +530,7 @@ func (s *DGraphRepo) AssignOwner(ctx context.Context, ownerID, acccountID string
 	return nil
 }
 
-//RemoveOwner is a method to delete the Account
+//RemoveOwner is a method to delete the Account.
 func (s *DGraphRepo) RemoveOwner(ctx context.Context, ownerID, acccountID string) (err error) {
 
 	txn := s.Dg.NewTxn()
