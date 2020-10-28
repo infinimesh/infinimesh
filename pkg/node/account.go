@@ -90,8 +90,6 @@ func (s *AccountController) IsOwnedbyAdmin(ctx context.Context, log *zap.Logger,
 func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRequest) (response *nodepb.IsRootResponse, err error) {
 
 	log := s.Log.Named("IsRoot Validation Controller")
-	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Account))
 
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
 	if err != nil {
@@ -101,7 +99,7 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	}
 
 	//Added logging
-	log.Info("Validation for Root Account", zap.Bool("Validation Result", account.IsRoot))
+	log.Info("Validation for Root Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsRoot))
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
@@ -109,8 +107,6 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdminRequest) (response *nodepb.IsAdminResponse, err error) {
 
 	log := s.Log.Named("IsAdmin Validation Controller")
-	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Account))
 
 	account, err := s.Repo.GetAccount(ctx, request.GetAccount())
 	if err != nil {
@@ -120,7 +116,7 @@ func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdmin
 	}
 
 	//Added logging
-	log.Info("Validation for Admin Account", zap.Bool("Validation Result", account.IsAdmin))
+	log.Info("Validation for Admin Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsAdmin))
 	return &nodepb.IsAdminResponse{IsAdmin: account.IsAdmin}, nil
 }
 
@@ -624,10 +620,10 @@ func (s *AccountController) RemoveOwner(ctx context.Context, request *nodepb.Own
 
 	if res, err := s.IsRoot(ctx, &nodepb.IsRootRequest{
 		Account: requestorID,
-	}); err == nil && !res.GetIsRoot() {
+	}); err == nil && !res.IsRoot {
 		if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
 			Account: requestorID,
-		}); err == nil && !res.GetIsAdmin() {
+		}); err == nil && !res.IsAdmin {
 			//Validate if the account is admin or not
 			//Added logging
 			log.Error("The Account does not have permission to assign owner to the Account")
@@ -636,11 +632,19 @@ func (s *AccountController) RemoveOwner(ctx context.Context, request *nodepb.Own
 	}
 
 	//Get account details for validation
+	_, err = s.Repo.GetAccount(ctx, request.Ownerid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get account details", zap.Error(err))
+		return nil, err
+	}
+
+	//Get account details for validation
 	account, err := s.Repo.GetAccount(ctx, request.Accountid)
 	if err != nil {
 		//Added logging
 		log.Error("Failed to get account details", zap.Error(err))
-		return nil, status.Error(codes.Aborted, "Failed to get account details"+err.Error())
+		return nil, err
 	}
 
 	//Validation to make sure root account cannot be deleted
@@ -660,7 +664,7 @@ func (s *AccountController) RemoveOwner(ctx context.Context, request *nodepb.Own
 	err = s.Repo.RemoveOwner(ctx, request.Ownerid, request.Accountid)
 	if err != nil {
 		//Added logging
-		log.Error("Failed to delete Account", zap.Error(err))
+		log.Error("Failed to remove owner from the Account", zap.Error(err))
 		return nil, err
 	}
 
