@@ -155,9 +155,6 @@ export default {
     this.getAccountsPool();
   },
   methods: {
-    console(args) {
-      console.log(args);
-    },
     toogleAdmin(account) {
       this.updateAccount(
         account.uid,
