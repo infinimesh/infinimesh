@@ -32,6 +32,7 @@
           :loading="loading"
           row-key="id"
           :expand-row-by-click="true"
+          :show-header="false"
           class="namespaces-table"
           @expand="loadNamespacePermissions"
         >
@@ -76,7 +77,9 @@
 
                   <a-tooltip
                     v-if="namespace.markfordeletion"
-                    :title="`Going to be deleted ${deletionTime(namespace)}`"
+                    :title="`Going to be deleted ${deletionTime(
+                      namespace
+                    )}, click to restore`"
                     placement="left"
                   >
                     <a-button type="link" @click="restoreNamespace(namespace)">
@@ -84,16 +87,20 @@
                         type="redo"
                         style="color: var(--switch-color); font-size: 18px"
                       />
-                      Restore
                     </a-button>
                   </a-tooltip>
-                  <a-button
+                  <a-tooltip
                     v-else
-                    type="link"
-                    @click="deleteNamespace(namespace)"
+                    placement="left"
+                    title="Namespace and its devices won't be deleted immeadeatly, but after two weeks"
                   >
-                    <a-icon type="delete" style="color: red; font-size: 18px" />
-                  </a-button>
+                    <a-button type="link" @click="deleteNamespace(namespace)">
+                      <a-icon
+                        type="delete"
+                        style="color: red; font-size: 18px"
+                      />
+                    </a-button>
+                  </a-tooltip>
                 </template>
               </a-space>
             </div>
