@@ -24,7 +24,7 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
   info : {
     title : "Infinimesh IoT Platform"
     description : "Cloud Native IoT Platform"
-    version : "0.0.9"
+    version : "0.0.10"
     contact : {
       name : "Infinimesh"
       url : "https://infinitedevices.io"
