@@ -377,7 +377,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		if err != nil {
 			//Added logging
 			log.Error("Failed to list Accounts as admin", zap.Error(err))
-			return &nodepb.ListAccountsResponse{}, err
+			return &nodepb.ListAccountsResponse{}, status.Error(codes.OK, err.Error())
 		}
 	} else {
 		//Added logging
