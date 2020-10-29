@@ -26,7 +26,8 @@
           :columns="namespaces_table_columns"
           :data-source="namespaces"
           :loading="loading"
-          rowKey="id"
+          row-key="id"
+          :expand-row-by-click="true"
           class="namespaces-table"
           @expand="loadNamespacePermissions"
         >
@@ -41,55 +42,57 @@
             <b v-else>{{ name }}</b>
           </span>
           <span slot="actions" slot-scope="text, namespace">
-            <a-space>
-              <template v-if="namespace.editable">
-                <a-button type="link" @click="renameNamespace(namespace)">
-                  <a-icon type="save" style="font-size: 18px" />
-                </a-button>
-                <a-button
-                  type="link"
-                  v-if="namespace.editable"
-                  @click="getNamespacesPool"
-                >
-                  <a-icon type="close" style="color: red; font-size: 18px" />
-                </a-button>
-              </template>
-              <template v-else>
-                <a-button
-                  type="link"
-                  style="font-size: 18px"
-                  @click="
-                    $store.commit('devices/update_namespace', {
-                      ...namespace,
-                      editable: true,
-                    })
-                  "
-                >
-                  <a-icon type="edit" />
-                </a-button>
-
-                <a-tooltip
-                  v-if="namespace.markfordeletion"
-                  :title="`Going to be deleted ${deletionTime(namespace)}`"
-                  placement="left"
-                >
-                  <a-button type="link" @click="restoreNamespace(namespace)">
-                    <a-icon
-                      type="redo"
-                      style="color: var(--switch-color); font-size: 18px"
-                    />
-                    Restore
+            <div @click="(e) => e.stopPropagation()">
+              <a-space>
+                <template v-if="namespace.editable">
+                  <a-button type="link" @click="renameNamespace(namespace)">
+                    <a-icon type="save" style="font-size: 18px" />
                   </a-button>
-                </a-tooltip>
-                <a-button
-                  v-else
-                  type="link"
-                  @click="deleteNamespace(namespace)"
-                >
-                  <a-icon type="delete" style="color: red; font-size: 18px" />
-                </a-button>
-              </template>
-            </a-space>
+                  <a-button
+                    type="link"
+                    v-if="namespace.editable"
+                    @click="getNamespacesPool"
+                  >
+                    <a-icon type="close" style="color: red; font-size: 18px" />
+                  </a-button>
+                </template>
+                <template v-else>
+                  <a-button
+                    type="link"
+                    style="font-size: 18px"
+                    @click="
+                      $store.commit('devices/update_namespace', {
+                        ...namespace,
+                        editable: true,
+                      })
+                    "
+                  >
+                    <a-icon type="edit" />
+                  </a-button>
+
+                  <a-tooltip
+                    v-if="namespace.markfordeletion"
+                    :title="`Going to be deleted ${deletionTime(namespace)}`"
+                    placement="left"
+                  >
+                    <a-button type="link" @click="restoreNamespace(namespace)">
+                      <a-icon
+                        type="redo"
+                        style="color: var(--switch-color); font-size: 18px"
+                      />
+                      Restore
+                    </a-button>
+                  </a-tooltip>
+                  <a-button
+                    v-else
+                    type="link"
+                    @click="deleteNamespace(namespace)"
+                  >
+                    <a-icon type="delete" style="color: red; font-size: 18px" />
+                  </a-button>
+                </template>
+              </a-space>
+            </div>
           </span>
 
           <span slot="expandedRowRender" slot-scope="record">
