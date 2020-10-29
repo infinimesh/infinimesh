@@ -199,8 +199,7 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: request.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     request.Device.Enabled.Value,
-			FingerPrint: request.Device.Certificate.Fingerprint,
+			Enabled: request.Device.Enabled.Value,
 		},
 	})
 	if err != nil {
