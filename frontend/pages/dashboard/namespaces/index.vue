@@ -1,26 +1,30 @@
 <template>
   <div id="namespacesTable">
-    <a-row type="flex" align="middle">
-      <a-col :span="12" :offset="1">
-        <h1 class="lead">Namespaces</h1>
-      </a-col>
-      <a-col :span="3" :offset="6">
-        <a-row type="flex" justify="end">
-          <a-button
-            type="primary"
-            icon="plus"
-            @click="createNamespaceDrawerVisible = true"
-            >Create Namespace</a-button
-          >
+    <a-row>
+      <a-col :span="21" :offset="1">
+        <a-row type="flex" align="middle" justify="space-between">
+          <a-col>
+            <h1 class="lead">Namespaces</h1>
+          </a-col>
+          <a-col>
+            <a-row type="flex" justify="end">
+              <a-button
+                type="primary"
+                icon="plus"
+                @click="createNamespaceDrawerVisible = true"
+                >Create Namespace</a-button
+              >
+            </a-row>
+            <namespace-add
+              :active="createNamespaceDrawerVisible"
+              @cancel="createNamespaceDrawerVisible = false"
+              @add="handleNamespaceAdd"
+            />
+          </a-col>
         </a-row>
-        <namespace-add
-          :active="createNamespaceDrawerVisible"
-          @cancel="createNamespaceDrawerVisible = false"
-          @add="handleNamespaceAdd"
-        />
       </a-col>
     </a-row>
-    <a-row>
+    <a-row style="margin-top: 10px">
       <a-col :span="21" :offset="1">
         <a-table
           :columns="namespaces_table_columns"
