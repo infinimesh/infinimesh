@@ -233,7 +233,23 @@ func (s *Server) Get(ctx context.Context, request *registrypb.GetRequest) (respo
 		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to get Device list")
 	}
 
-	resp, err := s.GetQ(ctx, request)
+	//Get isRoot value for the account
+	isRoot, err := a.IsRoot(ctx, &nodepb.IsRootRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	//Get isAdmin value for the account
+	isadmin, err := a.IsAdmin(ctx, &nodepb.IsAdminRequest{Account: requestorID})
+	if err != nil {
+		//Added logging
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Unable to get permissions for the account")
+	}
+
+	resp, err := s.GetQ(ctx, request, (isadmin.IsAdmin || isRoot.IsRoot))
 	if err != nil {
 		log.Error("Failed to Get Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())

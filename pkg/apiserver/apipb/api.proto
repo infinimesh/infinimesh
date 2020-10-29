@@ -172,6 +172,20 @@ rpc DeleteAccount(infinimesh.node.DeleteAccountRequest)
     delete : "/accounts/{uid}"
   };
 };
+
+rpc AssignOwner(infinimesh.node.OwnershipRequest)
+    returns (infinimesh.node.OwnershipResponse) {
+  option (google.api.http) = {
+    put : "/accounts/{accountid}/owner/{ownerid}"
+  };
+};
+
+rpc RemoveOwner(infinimesh.node.OwnershipRequest)
+    returns (infinimesh.node.OwnershipResponse) {
+  option (google.api.http) = {
+    delete : "/accounts/{accountid}/owner/{ownerid}"
+  };
+};
 }
 
 message ListObjectsRequest {

@@ -142,7 +142,6 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	log := s.Log.Named("Stream State Controller")
 	log.Info("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
-	fmt.Println("Functin Invoked")
 
 	// TODO validate request/Id
 
@@ -158,7 +157,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	fmt.Println(topicEvents)
 	fmt.Println(events)
 	defer func() {
-		fmt.Println("Defer")
+
 		go func() {
 			s.PubSub.Unsub(events)
 		}()
@@ -169,7 +168,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 		}
 
-		fmt.Println("Drained channel")
+		log.Info("Drained Reported Channel")
 	}()
 
 	var subPathDesired string
@@ -182,7 +181,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 	defer func() {
-		fmt.Println("Defer2")
+
 		go func() {
 			s.PubSub.Unsub(eventsDesired)
 		}()
@@ -193,12 +192,11 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 		}
 
-		fmt.Println("Drained channel")
+		log.Info("Drained Desired Channel")
 	}()
 outer:
 	for {
 
-		fmt.Println("Vor select")
 		select {
 		case reportedEvent := <-events:
 			value, err := toProto(reportedEvent)

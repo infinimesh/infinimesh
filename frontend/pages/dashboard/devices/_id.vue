@@ -67,7 +67,7 @@
             <a-card key="details" v-if="device" hoverable>
               <a-row slot="title" type="flex" justify="space-between">
                 <a-col :span="3"> Details </a-col>
-                <a-col :span="5" v-if="active_edit">
+                <a-col :xxl="5" :lg="6" :md="9" :sm="10" v-if="active_edit">
                   <a-space>
                     <a-button
                       type="primary"
@@ -80,7 +80,7 @@
                     >
                   </a-space>
                 </a-col>
-                <a-col :span="2" v-else>
+                <a-col :lg="2" :md="3" :sm="4" v-else>
                   <a-button
                     type="primary"
                     icon="edit"
@@ -99,7 +99,7 @@
                 />
               </template>
               <template v-else>
-                <a-row v-if="device.tags.length">
+                <a-row v-if="device.tags && device.tags.length">
                   <a-col :span="2">Tags:</a-col>
                   <a-col :span="22">
                     <a-tag

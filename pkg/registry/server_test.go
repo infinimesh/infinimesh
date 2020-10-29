@@ -199,7 +199,7 @@ func TestCreateGet(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
 	require.NoError(t, err)
 
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
@@ -245,7 +245,7 @@ func TestUpdate(t *testing.T) {
 
 	randomName := randomdata.SillyName()
 
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
 	require.NoError(t, err)
 
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))

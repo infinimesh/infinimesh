@@ -27,6 +27,8 @@ export const mutations = {
 
 export const actions = {
   async get({ commit, state, rootState }) {
+    if (window.nuxt) window.$nuxt.$loading.start();
+
     let ns = "";
     if (state.namespaces.length) {
       ns = state.namespaces.filter(el => el.id == state.namespace)[0].id;
@@ -40,6 +42,8 @@ export const actions = {
       }
     });
     commit("pool", devices.devices);
+
+    if (window.$nuxt) window.$nuxt.$loading.finish();
   },
   /**
    *

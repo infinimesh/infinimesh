@@ -37,6 +37,13 @@ message IsAdminRequest { string account = 1; }
 
 message IsAdminResponse { bool is_admin = 1; }
 
+message OwnershipRequest { 
+  string ownerid = 1; 
+  string accountid = 2; 
+}
+
+message OwnershipResponse { }
+
 message IsAuthorizedNamespaceRequest {
   string namespaceid = 1;
   string account = 2;
@@ -183,6 +190,8 @@ service AccountService {
   rpc AuthorizeNamespace(AuthorizeNamespaceRequest) returns (AuthorizeNamespaceResponse);
   rpc IsRoot(IsRootRequest) returns (IsRootResponse);
   rpc IsAdmin(IsAdminRequest) returns (IsAdminResponse);
+  rpc AssignOwner(OwnershipRequest) returns (OwnershipResponse);
+	rpc RemoveOwner(OwnershipRequest) returns (OwnershipResponse);
 }
 
 message Namespace {

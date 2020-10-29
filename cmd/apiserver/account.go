@@ -287,3 +287,33 @@ func (a *accountAPI) DeleteAccount(ctx context.Context, request *nodepb.DeleteAc
 	return res, err
 
 }
+
+//API Method to Assign Owner to an Account
+func (a *accountAPI) AssignOwner(ctx context.Context, request *nodepb.OwnershipRequest) (response *nodepb.OwnershipResponse, err error) {
+
+	//Added logging
+	log.Info("Assign Owner API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the controller for server
+	res, err := a.client.AssignOwner(ctx, request)
+	return res, err
+
+}
+
+//API Method to Remove Owner from an Account
+func (a *accountAPI) RemoveOwner(ctx context.Context, request *nodepb.OwnershipRequest) (response *nodepb.OwnershipResponse, err error) {
+
+	//Added logging
+	log.Info("Remove Owner API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the controller for server
+	res, err := a.client.RemoveOwner(ctx, request)
+	return res, err
+
+}
