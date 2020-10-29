@@ -34,6 +34,7 @@ type NamespaceController struct {
 	Log  *zap.Logger
 }
 
+//Account controller to get access to method for Account validation
 var a AccountController
 
 //CreateNamespace is a method for creating Namespace
