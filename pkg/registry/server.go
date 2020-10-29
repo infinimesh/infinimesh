@@ -195,24 +195,21 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("Failed to update Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+		Id: request.Device.Id,
+		Repo: &repopb.Repo{
+			Enabled:     request.Device.Enabled.Value,
+			FingerPrint: request.Device.Certificate.Fingerprint,
+		},
+	})
 	if err != nil {
-		log.Info("Device status not stored in repo", zap.String("DeviceId", request.Device.Id))
+		log.Info("Device status not updated in repo", zap.String("DeviceId", request.Device.Id))
 	}
-	/*
-		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
-			Id: request.Device.Id,
-			Repo: &repopb.Repo{
-				Enabled:     request.Device.Enabled.Value,
-				FingerPrint: request.Device.Certificate.Fingerprint,
-			},
-		})
-		if err != nil {
-			log.Info("Device status not updated in repo", zap.String("DeviceId", request.Device.Id))
-		}
-		if reso.Status {
-			log.Info("Device status updated in repo")
-		}
-	*/
+	if reso.Status {
+		log.Info("Device status updated in repo")
+	}
+
 	//Added logging
 	log.Info("Device successfully updated")
 	return resp, nil
