@@ -232,6 +232,7 @@ export default {
       }, new Set());
     },
     user() {
+      if (!this.$store.getters.loggedInUser) return { default_namespace: {} };
       return this.$store.getters.loggedInUser;
     },
     namespace() {
