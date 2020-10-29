@@ -69,6 +69,9 @@ func main() {
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
 	rep, err := repo.NewRedisRepo(dbAddr)
+	if err != nil {
+		log.Fatal("Failed to connect to redis", zap.Error(err))
+	}
 	repServ := repo.Server{
 		Repo: rep,
 		Log:  log.Named("RepoController"),
