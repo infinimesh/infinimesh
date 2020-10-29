@@ -60,6 +60,13 @@
                     style="color: rgba(0, 0, 0, 0.25)"
                   />
                 </a-input>
+                <a-progress
+                  v-if="login_progress"
+                  :percent="100"
+                  status="active"
+                  :show-info="false"
+                  class="login-progress"
+                ></a-progress>
               </a-form-item>
               <a-form-item>
                 <a-button type="primary" html-type="submit" style="width: 100%"
@@ -86,12 +93,14 @@ export default {
   },
   data() {
     return {
+      login_progress: false,
       form: this.$form.createForm(this, { name: "login" }),
     };
   },
   methods: {
     handleSubmit(e) {
       e.preventDefault();
+      this.login_progress = true;
       this.form.validateFields(async (err, values) => {
         if (!err) {
           try {
@@ -106,6 +115,7 @@ export default {
             });
           }
         }
+        this.login_progress = false;
       });
     },
   },
@@ -121,5 +131,14 @@ export default {
 h1 {
   color: var(--logo-color);
   font-family: Exo;
+}
+.login-progress {
+  height: 18px;
+}
+</style>
+<style>
+.login-progress > .ant-progress-success-bg,
+.ant-progress-bg {
+  background-color: var(--primary-color);
 }
 </style>
