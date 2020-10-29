@@ -112,7 +112,7 @@
             "
             @select-all="selectedDevices = suggested.map((d) => d.id)"
             style="
-              background-color: var(--secondary-color);
+              background-color: var(--background-color);
               border-radius: var(--border-radius-base);
               padding-bottom: 10px;
             "
