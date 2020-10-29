@@ -366,7 +366,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		if err != nil {
 			//Added logging
 			log.Error("Failed to list Accounts as root", zap.Error(err))
-			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
+			return &nodepb.ListAccountsResponse{}, err
 		}
 	} else if res, err := s.IsAdmin(ctx, &nodepb.IsAdminRequest{
 		Account: requestorID,
@@ -377,7 +377,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		if err != nil {
 			//Added logging
 			log.Error("Failed to list Accounts as admin", zap.Error(err))
-			return &nodepb.ListAccountsResponse{}, status.Error(codes.Internal, "Failed to list Accounts")
+			return &nodepb.ListAccountsResponse{}, err
 		}
 	} else {
 		//Added logging
