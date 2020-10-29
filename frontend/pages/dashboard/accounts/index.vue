@@ -32,16 +32,21 @@
           :loading="loading"
           rowKey="uid"
           class="accounts-table"
+          :show-header="false"
+          :scroll="{ x: true }"
         >
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
           </span>
           <span slot="is_admin" slot-scope="is_admin">
             <a-row type="flex" justify="space-around">
-              <a-icon
-                :type="is_admin ? 'check-circle' : 'close-circle'"
-                :style="{ color: is_admin ? 'green' : 'red', fontSize: '24px' }"
-              />
+              <a-tooltip>
+                <span slot="title">
+                  User <u v-if="is_admin"> has </u
+                  ><template v-else> has <u>no</u></template> admin rights
+                </span>
+                {{ is_admin ? "Admin" : "User" }}
+              </a-tooltip>
             </a-row>
           </span>
           <span slot="enabled" slot-scope="enabled">
@@ -109,21 +114,18 @@ const columns = [
     title: "Admin",
     dataIndex: "is_admin",
     sorter: true,
-    width: "12%",
     scopedSlots: { customRender: "is_admin" },
   },
   {
     title: "Enabled",
     dataIndex: "enabled",
     sorter: true,
-    width: "12%",
     scopedSlots: { customRender: "enabled" },
   },
   {
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "7%",
     scopedSlots: { customRender: "actions" },
   },
 ];
@@ -183,6 +185,9 @@ export default {
 </script>
 
 <style>
+.accounts-table .ant-table td {
+  white-space: nowrap;
+}
 .ant-empty-description {
   color: lightgrey !important;
 }
