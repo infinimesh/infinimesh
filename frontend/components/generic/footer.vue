@@ -1,19 +1,17 @@
 <template>
-  <v-container id="footer">
-    <v-row justify="center">
-      <v-col :sm="9" :md="6" :lg="5" :xl="4" class="footer-text">
-        ©2020 —
-        <strong>InfiniteDevices GmbH</strong>
-        - source code at
-        <a href="https://www.github.com/infinimesh/infinimesh" target="_new">
-          <strong>GitHub</strong>
-        </a>
-      </v-col>
-      <v-col :sm="3" :md="3" :lg="2" :xl="2">
-        <themePicker />
-      </v-col>
-    </v-row>
-  </v-container>
+  <a-row id="footer" type="flex" justify="center" align="middle">
+    <a-col :xs="{ span: 20, offset: 2 }" :sm="18">
+      ©2020 —
+      <strong>InfiniteDevices GmbH</strong>
+      - source code at
+      <a href="https://www.github.com/infinimesh/infinimesh" target="_new">
+        <strong>GitHub</strong>
+      </a>
+    </a-col>
+    <a-col :xs="1" :sm="2">
+      <themePicker />
+    </a-col>
+  </a-row>
 </template>
 
 <script>
@@ -31,6 +29,7 @@ export default InfinimeshFooter;
 
 <style scoped>
 #footer {
+  width: 90%;
   color: var(--footer-text-color) !important;
   text-align: center;
 }
