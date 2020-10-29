@@ -49,9 +49,10 @@ type Server struct {
 }
 
 //NewServer is a method to create the Dgraph Server for Device registry
-func NewServer(dg *dgo.Dgraph) *Server {
+func NewServer(dg *dgo.Dgraph, rep1 repo.Server) *Server {
 	return &Server{
 		dgo: dg,
+		rep: rep1,
 		repo: &dgraph.DGraphRepo{
 			Dg: dg,
 		},
@@ -136,12 +137,11 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		log.Error("Failed to create Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
-		Id: resp.Device.Id,
+		Id: request.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     resp.Device.Enabled.Value,
-			FingerPrint: resp.Device.Certificate.Fingerprint,
+			Enabled:     request.Device.Enabled.Value,
+			FingerPrint: request.Device.Certificate.Fingerprint,
 		},
 	})
 	if err != nil {
