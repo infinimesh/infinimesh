@@ -105,14 +105,14 @@ const columns = [
     title: "Admin",
     dataIndex: "is_admin",
     sorter: true,
-    width: "7%",
+    width: "12%",
     scopedSlots: { customRender: "is_admin" },
   },
   {
     title: "Enabled",
     dataIndex: "enabled",
     sorter: true,
-    width: "7%",
+    width: "12%",
     scopedSlots: { customRender: "enabled" },
   },
   {
