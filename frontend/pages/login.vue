@@ -1,19 +1,20 @@
 <template>
   <v-app>
     <v-container style="margin-top: 100px">
-      <v-row justify="center">
-        <v-col sm="6" md="8" lg="6" cols="24">
-          <v-row justify="center">
+      <a-row type="flex" justify="center">
+        <a-col sm="6" md="8" lg="6">
+          <a-row type="flex" justify="center">
             <h1>infinimesh</h1>
-          </v-row>
-          <v-row
+          </a-row>
+          <a-row
+            type="flex"
             justify="center"
-            style="color: var(--logo-color); opacity: 0.65"
+            style="color: var(--logo-color); opacity: 0.65; text-align: center"
             >Welcome to infinimesh. Log in with your username and
-            password.</v-row
+            password.</a-row
           >
 
-          <v-row style="margin-top: 1rem">
+          <a-row style="margin-top: 1rem">
             <a-form :form="form" @submit="handleSubmit" style="width: 100%">
               <a-form-item>
                 <a-input
@@ -23,10 +24,10 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your username!'
-                        }
-                      ]
-                    }
+                          message: 'Please input your username!',
+                        },
+                      ],
+                    },
                   ]"
                   placeholder="Username"
                 >
@@ -45,10 +46,10 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your Password!'
-                        }
-                      ]
-                    }
+                          message: 'Please input your Password!',
+                        },
+                      ],
+                    },
                   ]"
                   type="password"
                   placeholder="Password"
@@ -66,9 +67,9 @@
                 >
               </a-form-item>
             </a-form>
-          </v-row>
-        </v-col>
-      </v-row>
+          </a-row>
+        </a-col>
+      </a-row>
     </v-container>
     <v-footer app>
       <infinimesh-footer />
@@ -81,11 +82,11 @@ import InfinimeshFooter from "@/components/generic/footer.vue";
 
 export default {
   components: {
-    InfinimeshFooter
+    InfinimeshFooter,
   },
   data() {
     return {
-      form: this.$form.createForm(this, { name: "login" })
+      form: this.$form.createForm(this, { name: "login" }),
     };
   },
   methods: {
@@ -95,19 +96,19 @@ export default {
         if (!err) {
           try {
             let res = await this.$auth.loginWith("local", {
-              data: values
+              data: values,
             });
             this.$router.push("/dashboard/devices");
           } catch (e) {
             this.$notification.error({
               duration: 10,
-              ...e.response.data
+              ...e.response.data,
             });
           }
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
