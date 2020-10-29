@@ -410,13 +410,16 @@ export default {
 }
 .tags-collapse-tile-wrap {
   border-radius: var(--border-radius-base);
-  background: var(--primary-color);
+  background-color: var(--primary-color);
 }
 .tags-collapse-tile-wrap:last-child {
   border-radius: var(--border-radius-base);
 }
 .ant-collapse-borderless {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--background-color) !important;
+}
+.ant-collapse-borderless > .ant-collapse-item {
+  border-bottom: 1px solid var(--background-color);
 }
 </style>
 <style>
