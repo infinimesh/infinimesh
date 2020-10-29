@@ -1,4 +1,5 @@
 //--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io
 //
@@ -194,6 +195,10 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("Failed to update Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	if err != nil {
+		log.Info("Device status not stored in repo", zap.String("DeviceId", request.Device.Id))
+	}
+
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: request.Device.Id,
 		Repo: &repopb.Repo{
@@ -201,9 +206,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			FingerPrint: request.Device.Certificate.Fingerprint,
 		},
 	})
-	if err != nil {
-		log.Info("Device status not stored in repo", zap.String("DeviceId", request.Device.Id))
-	}
 
 	if err != nil {
 		log.Info("Device status not updated in repo", zap.String("DeviceId", request.Device.Id))
