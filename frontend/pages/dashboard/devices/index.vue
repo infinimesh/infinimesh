@@ -391,7 +391,7 @@ export default {
 }
 .devices-search-input {
   height: 90%;
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--background-color);
   min-width: 256px;
   border-radius: 100px;
 }
