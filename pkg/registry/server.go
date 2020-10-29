@@ -32,6 +32,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/infinimesh/infinimesh/pkg/repo"
+	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
@@ -40,8 +42,8 @@ import (
 
 //Server is a Data type for Device Controller file
 type Server struct {
-	dgo *dgo.Dgraph
-
+	dgo  *dgo.Dgraph
+	rep  repo.Server
 	repo node.Repo
 	Log  *zap.Logger
 }
@@ -135,6 +137,16 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+		Id: resp.Device.Id,
+		Repo: &repopb.Repo{
+			Enabled:     resp.Device.Enabled.Value,
+			FingerPrint: resp.Device.Certificate.Fingerprint,
+		},
+	})
+	if err != nil {
+		log.Info("Device status not stored in repo", zap.String("DeviceId", resp.Device.Id))
+	}
 	//Added logging
 	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
 	return resp, nil
@@ -181,6 +193,20 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		//Added logging
 		log.Error("Failed to update Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+		Id: request.Device.Id,
+		Repo: &repopb.Repo{
+			Enabled:     request.Device.Enabled.Value,
+			FingerPrint: request.Device.Certificate.Fingerprint,
+		},
+	})
+	if err != nil {
+		log.Info("Device status not stored in repo", zap.String("DeviceId", request.Device.Id))
+	}
+
+	if err != nil {
+		log.Info("Device status not updated in repo", zap.String("DeviceId", request.Device.Id))
 	}
 
 	//Added logging
@@ -354,6 +380,16 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	res, err := s.rep.DeleteDeviceState(ctx, &repopb.DeleteDeviceStateRequest{
+		Id: request.Id,
+	})
+
+	if err != nil {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id), zap.Error(err))
+	}
+	if !res.Status {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id))
+	}
 	log.Info("Devices deleted successsful")
 	return resp, nil
 }
