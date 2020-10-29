@@ -762,7 +762,7 @@ info:
     url: 'https://infinitedevices.io'
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
-  version: 0.0.9
+  version: 0.0.10
 openapi: 3.0.0
 paths:
   /account:
@@ -994,7 +994,7 @@ paths:
       operationId: Devices_List
       parameters:
         - in: query
-          name: namespace
+          name: namespaceid
           required: false
           schema:
             type: string
