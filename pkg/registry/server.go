@@ -195,14 +195,14 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Info("Fetching existing device state from redis")
+	log.Info("Fetching existing device state from dgraph", zap.String("Device Id", request.Device.Id))
 
 	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, false)
 	if err != nil {
 		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
-			Id: request.Device.Id,
+			Id: repData.Device.Id,
 			Repo: &repopb.Repo{
 				Enabled:     repData.Device.Enabled.Value,
 				FingerPrint: repData.Device.Certificate.Fingerprint,
