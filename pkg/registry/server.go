@@ -194,19 +194,19 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("Failed to update Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
 	log.Info("Fetching existing device state from redis")
-	repData, err := s.rep.Get(ctx, &repopb.GetRequest{
-		Id: request.Device.Id,
-	})
+
+	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, false)
 	if err != nil {
-		log.Info("Fetching existing data unsuccessful and could not update device state")
+		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 			Id: request.Device.Id,
 			Repo: &repopb.Repo{
-				Enabled:     repData.Repo.Enabled,
-				FingerPrint: repData.Repo.FingerPrint,
-				NamespaceID: repData.Repo.NamespaceID,
+				Enabled:     repData.Device.Enabled.Value,
+				FingerPrint: repData.Device.Certificate.Fingerprint,
+				NamespaceID: repData.Device.Namespace,
 			},
 		})
 		if err != nil {
