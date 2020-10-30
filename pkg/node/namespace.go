@@ -349,7 +349,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			//Invokde Hardelete function with the date conidtion
 			err = n.Repo.HardDeleteNamespace(ctx, datecondition)
 			if err != nil {
-				if status.Code(err) == 5 { //5 is the error code for NotFound in GRPC
+				if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
 					//Added logging
 					log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
 					return nil, status.Error(codes.Internal, err.Error())
