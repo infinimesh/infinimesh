@@ -1,4 +1,5 @@
 //--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io
 //
@@ -32,6 +33,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/infinimesh/infinimesh/pkg/repo"
+	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
@@ -40,16 +43,17 @@ import (
 
 //Server is a Data type for Device Controller file
 type Server struct {
-	dgo *dgo.Dgraph
-
+	dgo  *dgo.Dgraph
+	rep  repo.Server
 	repo node.Repo
 	Log  *zap.Logger
 }
 
 //NewServer is a method to create the Dgraph Server for Device registry
-func NewServer(dg *dgo.Dgraph) *Server {
+func NewServer(dg *dgo.Dgraph, rep1 repo.Server) *Server {
 	return &Server{
 		dgo: dg,
+		rep: rep1,
 		repo: &dgraph.DGraphRepo{
 			Dg: dg,
 		},
@@ -134,7 +138,16 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		log.Error("Failed to create Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+		Id: request.Device.Id,
+		Repo: &repopb.Repo{
+			Enabled:     request.Device.Enabled.Value,
+			FingerPrint: request.Device.Certificate.Fingerprint,
+		},
+	})
+	if err != nil {
+		log.Info("Device status not stored in repo", zap.String("DeviceId", resp.Device.Id))
+	}
 	//Added logging
 	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
 	return resp, nil
@@ -175,7 +188,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("The Account does not have permission to create Device")
 		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device")
 	}
-
 	resp, err := s.UpdateQ(ctx, request)
 	if err != nil {
 		//Added logging
@@ -183,6 +195,29 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	log.Info("Fetching existing device state from dgraph", zap.String("Device Id", request.Device.Id))
+
+	//to fetch fingerprint from dgraph with admin role
+	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, true)
+	if err != nil {
+		log.Error("Failed to Get Device", zap.Error(err))
+	} else {
+		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
+		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+			Id: request.Device.Id,
+			Repo: &repopb.Repo{
+				Enabled:     repData.Device.Enabled.Value,
+				FingerPrint: repData.Device.Certificate.Fingerprint,
+				NamespaceID: repData.Device.Namespace,
+			},
+		})
+		if err != nil {
+			log.Info("Device status not updated in redis", zap.String("DeviceId", request.Device.Id))
+		}
+		if reso.Status {
+			log.Info("Device status updated in redis")
+		}
+	}
 	//Added logging
 	log.Info("Device successfully updated")
 	return resp, nil
@@ -354,6 +389,16 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	res, err := s.rep.DeleteDeviceState(ctx, &repopb.DeleteDeviceStateRequest{
+		Id: request.Id,
+	})
+
+	if err != nil {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id), zap.Error(err))
+	}
+	if !res.Status {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id))
+	}
 	log.Info("Devices deleted successsful")
 	return resp, nil
 }
