@@ -139,10 +139,10 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
-		Id: request.Device.Id,
+		Id: resp.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     request.Device.Enabled.Value,
-			FingerPrint: request.Device.Certificate.Fingerprint,
+			Enabled:     resp.Device.Enabled.Value,
+			FingerPrint: resp.Device.Certificate.Fingerprint,
 		},
 	})
 	if err != nil {
