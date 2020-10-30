@@ -246,9 +246,6 @@ export default {
   font-family: Exo;
   font-weight: 500;
 }
-.muted {
-  opacity: 0.7;
-}
 
 .slide-leave-active,
 .slide-enter-active {

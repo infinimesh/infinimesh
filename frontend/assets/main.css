@@ -87,6 +87,9 @@ strong {
 .lead-dark {
   color: var(--secondary-color) !important;
 }
+.muted {
+  opacity: 0.7;
+}
 .add-drawer-actions-row {
   background: var(--primary-color);
 }
