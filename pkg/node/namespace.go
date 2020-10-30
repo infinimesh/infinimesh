@@ -342,12 +342,12 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
 			//This is to ensure that records that are older then 14 days or more will be only be deleted.
-			datecondition := time.Now().AddDate(0, 0, -14)
+			datecondition := time.Now().AddDate(0, 0, -14).Format(time.RFC3339)
 
 			//Added logging
 			log.Info("Hard Delete Process Invoked")
 			//Invokde Hardelete function with the date conidtion
-			err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+			err = n.Repo.HardDeleteNamespace(ctx, datecondition)
 			if err != nil {
 				//Added logging
 				log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
