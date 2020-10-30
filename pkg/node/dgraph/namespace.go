@@ -383,7 +383,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	}
 
 	if len(result.Nodes) < 1 {
-		return status.Error(codes.OK, "There are no namespace scheduled for hard deletion")
+		return status.Error(codes.NotFound, "There are no namespace scheduled for hard deletion")
 	}
 
 	for _, item := range result.Nodes {
