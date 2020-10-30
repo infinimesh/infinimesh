@@ -47,8 +47,9 @@ export default {
         return this.$store.state.devices.namespace;
       },
       set(val) {
+        let old = this.namespace;
         this.$store.dispatch("devices/setNamespace", val);
-        if (this.$route.name != "dashboard-devices") {
+        if (this.$route.name != "dashboard-devices" && old != "") {
           this.$router.push({
             name: "dashboard-devices",
           });
