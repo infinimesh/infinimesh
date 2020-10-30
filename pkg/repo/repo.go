@@ -2,6 +2,7 @@ package repo
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -63,6 +64,7 @@ func (r *redisRepo) getState(devID string) (d DeviceState, err error) {
 
 	bytes, err := redis.Bytes(conn.Do("GET", devID))
 	if err != nil {
+		log.Printf("Error occured while deleting device status from redis " + err.Error())
 		return DeviceState{}, err
 	}
 
@@ -81,6 +83,7 @@ func (r *redisRepo) setState(d DeviceState) (err error) {
 
 	err = conn.Send("SET", d.ID, bytes)
 	if err != nil {
+		log.Printf("Error occured while saving device status in redis " + err.Error())
 		return err
 	}
 	return nil
@@ -91,6 +94,7 @@ func (r *redisRepo) deleteState(devID string) (err error) {
 
 	_, err = redis.Bytes(conn.Do("DEL", devID))
 	if err != nil {
+		log.Printf("Error occured while deleting device status from redis " + err.Error())
 		return err
 	}
 	return nil
