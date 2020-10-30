@@ -197,12 +197,14 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 
 	log.Info("Fetching existing device state from dgraph", zap.String("Device Id", request.Device.Id))
 
-	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, false)
+	//to fetch fingerprint from dgraph with admin role
+	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, true)
 	if err != nil {
 		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
+		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
-			Id: repData.Device.Id,
+			Id: request.Device.Id,
 			Repo: &repopb.Repo{
 				Enabled:     repData.Device.Enabled.Value,
 				FingerPrint: repData.Device.Certificate.Fingerprint,
@@ -210,10 +212,10 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 			},
 		})
 		if err != nil {
-			log.Info("Device status not updated in repo", zap.String("DeviceId", request.Device.Id))
+			log.Info("Device status not updated in redis", zap.String("DeviceId", request.Device.Id))
 		}
 		if reso.Status {
-			log.Info("Device status updated in repo")
+			log.Info("Device status updated in redis")
 		}
 	}
 	//Added logging
