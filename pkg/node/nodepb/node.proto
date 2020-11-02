@@ -39,7 +39,7 @@ message IsAdminResponse { bool is_admin = 1; }
 
 message OwnershipRequest { 
   string ownerid = 1; 
-  string accountid = 2; 
+  string accountid = 2;
 }
 
 message OwnershipResponse { }
