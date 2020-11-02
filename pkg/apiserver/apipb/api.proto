@@ -24,7 +24,7 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
   info : {
     title : "Infinimesh IoT Platform"
     description : "Cloud Native IoT Platform"
-    version : "0.0.11"
+    version : "0.0.10"
     contact : {
       name : "Infinimesh"
       url : "https://infinitedevices.io"
@@ -62,7 +62,7 @@ message RestrictionRule {
 
 message TokenResponse { string token = 1; }
 
-message ListDevicesRequest { string namespace = 1; }
+message ListDevicesRequest { string namespaceid = 1; }
 
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)

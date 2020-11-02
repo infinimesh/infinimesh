@@ -112,7 +112,7 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
 	//Invoke the List Device controller for server
-	list, err := d.client.List(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespace, Account: ctx.Value("account_id").(string)})
+	list, err := d.client.List(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespaceid, Account: ctx.Value("account_id").(string)})
 	if err != nil {
 		//Added logging
 		log.Error("List Device API Method: Failed to list Devices", zap.Error(err))
