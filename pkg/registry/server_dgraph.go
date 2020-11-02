@@ -370,7 +370,7 @@ func (s *Server) ListQ(ctx context.Context, request *registrypb.ListDevicesReque
 	  }`
 
 	vars := map[string]string{
-		"$namespaceid": request.Namespace,
+		"$namespaceid": request.Namespaceid,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -425,7 +425,7 @@ func (s *Server) ListForAccountQ(ctx context.Context, request *registrypb.ListDe
 		}
 	  }`
 
-	if request.Namespace != "" {
+	if request.Namespaceid != "" {
 		q = fmt.Sprintf(q, "@filter(uid($namespaceid))")
 	} else {
 		q = fmt.Sprintf(q, "")
@@ -433,7 +433,7 @@ func (s *Server) ListForAccountQ(ctx context.Context, request *registrypb.ListDe
 
 	vars := map[string]string{
 		"$account":     request.Account,
-		"$namespaceid": request.Namespace,
+		"$namespaceid": request.Namespaceid,
 	}
 
 	resp, err := txn.QueryWithVars(ctx, q, vars)
@@ -563,4 +563,46 @@ func toProto(device *Device) *registrypb.Device {
 		}
 	}
 	return res
+}
+
+//AssignOwnerDevicesQ is a method to delete the Account
+func (s *Server) AssignOwnerDevicesQ(ctx context.Context, request *registrypb.OwnershipRequestDevices) (err error) {
+
+	txn := s.dgo.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	//Added the owns predicate in teh mutation
+	m.Set = append(m.Set, &api.NQuad{
+		Subject:   request.Ownerid,
+		Predicate: "owns",
+		ObjectId:  request.Deviceid,
+	})
+
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//RemoveOwnerDevicesQ is a method to delete the Account.
+func (s *Server) RemoveOwnerDevicesQ(ctx context.Context, request *registrypb.OwnershipRequestDevices) (err error) {
+
+	txn := s.dgo.NewTxn()
+	m := &api.Mutation{CommitNow: true}
+
+	//Added the owns predicate in teh mutation
+	m.Del = append(m.Del, &api.NQuad{
+		Subject:   request.Ownerid,
+		Predicate: "owns",
+		ObjectId:  request.Deviceid,
+	})
+
+	_, err = txn.Mutate(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
