@@ -72,7 +72,7 @@ var lsDeviceCmd = &cobra.Command{
 		}
 
 		response, err := deviceClient.List(ctx, &apipb.ListDevicesRequest{
-			Namespaceid: getNamespace(),
+			Namespace: getNamespace(),
 		})
 		if err != nil {
 			fmt.Println("grpc: failed to fetch data", err)
