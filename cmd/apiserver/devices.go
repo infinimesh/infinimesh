@@ -112,7 +112,7 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
 
 	//Invoke the List Device controller for server
-	list, err := d.client.List(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespaceid, Account: ctx.Value("account_id").(string)})
+	list, err := d.client.List(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespaceid, Account: ctx.Value("account_id").(string)})
 	if err != nil {
 		//Added logging
 		log.Error("List Device API Method: Failed to list Devices", zap.Error(err))
@@ -143,5 +143,49 @@ func (d *deviceAPI) Delete(ctx context.Context, request *registrypb.DeleteReques
 
 	//Added logging
 	log.Info("Delete Device API Method: Device deleted successfully")
+	return resp, nil
+}
+
+//API Method to Assign a Owner to a Device
+func (d *deviceAPI) AssignOwnerDevices(ctx context.Context, request *registrypb.OwnershipRequestDevices) (response *registrypb.OwnershipResponseDevices, err error) {
+
+	//Added logging
+	log.Info("Assign Owner Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the Delete Device controller for server
+	resp, err := d.client.AssignOwnerDevices(ctx, request)
+	if err != nil {
+		//Added logging
+		log.Error("Assign Owner Device API Method: Failed to list Devices", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Added logging
+	log.Info("Assign Owner Device API Method: Owner Assigned successfully")
+	return resp, nil
+}
+
+//API Method to Remove a Owner to a Device
+func (d *deviceAPI) RemoveOwnerDevices(ctx context.Context, request *registrypb.OwnershipRequestDevices) (response *registrypb.OwnershipResponseDevices, err error) {
+
+	//Added logging
+	log.Info("Remove Owner Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+
+	//Added the requestor account id to context metadata so that it can be passed on to the server
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
+
+	//Invoke the Delete Device controller for server
+	resp, err := d.client.RemoveOwnerDevices(ctx, request)
+	if err != nil {
+		//Added logging
+		log.Error("Remove Owner Device API Method: Failed to list Devices", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Added logging
+	log.Info("Remove Owner Device API Method: Owner Removed successfully")
 	return resp, nil
 }

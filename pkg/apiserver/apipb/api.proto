@@ -62,7 +62,7 @@ message RestrictionRule {
 
 message TokenResponse { string token = 1; }
 
-message ListDevicesRequest { string namespace = 1; }
+message ListDevicesRequest { string namespaceid = 1; }
 
 service Devices {
   rpc Create(infinimesh.deviceregistry.CreateRequest)
@@ -97,6 +97,19 @@ service Devices {
       delete : "/devices/{id}"
     };
   }
+  rpc AssignOwnerDevices(infinimesh.deviceregistry.OwnershipRequestDevices)
+    returns (infinimesh.deviceregistry.OwnershipResponseDevices) {
+  option (google.api.http) = {
+    put : "/devices/{deviceid}/owner/{ownerid}"
+  };
+};
+
+rpc RemoveOwnerDevices(infinimesh.deviceregistry.OwnershipRequestDevices)
+    returns (infinimesh.deviceregistry.OwnershipResponseDevices) {
+  option (google.api.http) = {
+    delete : "/devices/{deviceid}/owner/{ownerid}"
+  };
+};
 }
 
 service States {

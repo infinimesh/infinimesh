@@ -46,6 +46,9 @@
             />
             <b v-else>{{ name }}</b>
           </span>
+          <span slot="id" slot-scope="id" v-if="user.is_admin || user.is_root">
+            <b class="muted">{{ id }}</b>
+          </span>
           <span slot="actions" slot-scope="text, namespace">
             <div @click="(e) => e.stopPropagation()">
               <a-space>
@@ -130,6 +133,12 @@ const namespaces_table_columns = [
     scopedSlots: { customRender: "name" },
   },
   {
+    title: "ID",
+    dataIndex: "id",
+    sorter: true,
+    scopedSlots: { customRender: "id" },
+  },
+  {
     title: "Actions",
     key: "actions",
     width: "10%",
@@ -151,6 +160,9 @@ export default {
     };
   },
   computed: {
+    user() {
+      return this.$store.getters.loggedInUser;
+    },
     namespaces() {
       return this.$store.state.devices.namespaces;
     },

@@ -112,7 +112,7 @@ func TestList(t *testing.T) {
 	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: ns.Id,
+		Namespaceid: ns.Id,
 	})
 	require.NoError(t, err)
 	var found int
@@ -155,8 +155,8 @@ func TestListForAccount(t *testing.T) {
 	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: ns.Id,
-		Account:   accid,
+		Namespaceid: ns.Id,
+		Account:     accid,
 	})
 	require.NoError(t, err)
 	var found int

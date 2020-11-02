@@ -38,6 +38,13 @@
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
           </span>
+          <span
+            slot="uid"
+            slot-scope="uid"
+            v-if="user.is_admin || user.is_root"
+          >
+            <b class="muted">{{ uid }}</b>
+          </span>
           <span slot="is_admin" slot-scope="is_admin">
             <a-row type="flex" justify="space-around">
               <a-tooltip>
@@ -109,6 +116,12 @@ const columns = [
     dataIndex: "name",
     sorter: true,
     scopedSlots: { customRender: "name" },
+  },
+  {
+    title: "ID",
+    dataIndex: "uid",
+    sorter: true,
+    scopedSlots: { customRender: "uid" },
   },
   {
     title: "Admin",

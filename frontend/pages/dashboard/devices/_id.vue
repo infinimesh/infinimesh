@@ -22,9 +22,9 @@
             </h1>
           </transition>
           <a-input
-            v-show="active_edit"
+            v-if="device && active_edit"
             placeholder="Enter new device name"
-            style="width: 50%; margin-bottom: 16px; font-size: 2rem"
+            class="device-name-input"
             v-model="device.name"
           />
         </a-col>
@@ -210,6 +210,13 @@ export default {
     };
     // Getting Device data from API
     this.refresh();
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.refresh,
+    });
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
   },
   methods: {
     patchDevice() {
@@ -240,14 +247,20 @@ export default {
 };
 </script>
 
+<style scoped>
+.device-name-input {
+  width: 50%;
+  margin-bottom: 16px;
+  font-size: 1.7rem;
+  padding: 0 !important;
+  line-height: normal !important;
+}
+</style>
 <style>
 #device {
   overflow: hidden;
   font-family: Exo;
   font-weight: 500;
-}
-.muted {
-  opacity: 0.7;
 }
 
 .slide-leave-active,
