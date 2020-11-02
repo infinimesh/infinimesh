@@ -483,6 +483,24 @@ func (s *Server) RemoveOwnerDevices(ctx context.Context, request *registrypb.Own
 		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to remove owner from the device")
 	}
 
+	//Check if the device is a valid device
+	_, err = s.Get(ctx, &registrypb.GetRequest{
+		Id: request.Deviceid,
+	})
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Check if the namespace is a valid namespace
+	_, err = s.repo.GetNamespaceID(ctx, request.Ownerid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	err = s.RemoveOwnerDevicesQ(ctx, request)
 	if err != nil {
 		log.Error("Failed to remove owner from the Device", zap.Error(err))

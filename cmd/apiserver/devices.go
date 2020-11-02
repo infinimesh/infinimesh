@@ -164,7 +164,7 @@ func (d *deviceAPI) AssignOwnerDevices(ctx context.Context, request *registrypb.
 	}
 
 	//Added logging
-	log.Info("Assign Owner Device API Method: Device deleted successfully")
+	log.Info("Assign Owner Device API Method: Owner Assigned successfully")
 	return resp, nil
 }
 
@@ -186,6 +186,6 @@ func (d *deviceAPI) RemoveOwnerDevices(ctx context.Context, request *registrypb.
 	}
 
 	//Added logging
-	log.Info("Remove Owner Device API Method: Device deleted successfully")
+	log.Info("Remove Owner Device API Method: Owner Removed successfully")
 	return resp, nil
 }

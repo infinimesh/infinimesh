@@ -571,7 +571,7 @@ func (s *Server) AssignOwnerDevicesQ(ctx context.Context, request *registrypb.Ow
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
-	//Added the owns predicate in teh mutation
+	//Added the owns predicate in the mutation
 	m.Set = append(m.Set, &api.NQuad{
 		Subject:   request.Ownerid,
 		Predicate: "owns",
@@ -592,7 +592,7 @@ func (s *Server) RemoveOwnerDevicesQ(ctx context.Context, request *registrypb.Ow
 	txn := s.dgo.NewTxn()
 	m := &api.Mutation{CommitNow: true}
 
-	//Added the owns predicate in teh mutation
+	//Added the owns predicate in the mutation
 	m.Del = append(m.Del, &api.NQuad{
 		Subject:   request.Ownerid,
 		Predicate: "owns",
