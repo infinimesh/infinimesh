@@ -4,7 +4,8 @@ export const state = () => ({
   gridSize: "xs",
   menu: true,
   noAccessScopes: [],
-  topAction: undefined
+  topAction: undefined,
+  versionTag: undefined
 });
 
 export const mutations = {
@@ -63,6 +64,15 @@ export const actions = {
   setGrid(state, size) {
     state.commit("setGridSize", size);
     state.commit("setMenu", ["xs", "sm"].includes(size));
+  },
+  setVersion(state, release) {
+    console.log(
+      `%c infinimesh.io %c ${release.tag_name} %c`,
+      "background:#104e83; padding: 1px; border-radius: 3px 0 0 3px; color: #fff; font-size: 18px; font-weight: 500;",
+      "background:#35495e; padding: 1px; border-radius: 0 3px 3px 0; color: #fff; font-size: 18px;",
+      "background:transparent"
+    );
+    state.versionTag = release;
   }
 };
 

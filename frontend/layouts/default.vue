@@ -5,14 +5,19 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   mounted() {
-    console.log(
-      "%c infinimesh.io %c v0.1.5 %c",
-      "background:#104e83; padding: 1px; border-radius: 3px 0 0 3px; color: #fff; font-size: 18px; font-weight: 500;",
-      "background:#35495e; padding: 1px; border-radius: 0 3px 3px 0; color: #fff; font-size: 18px;",
-      "background:transparent"
-    );
+    axios
+      .get("https://api.github.com/repos/InfiniteDevices/infinimesh/releases")
+      .then((res) => {
+        this.$store.dispatch("window/setVersion", res.data[0]);
+      })
+      .catch(() => {
+        console.error("Can't get release tag from GitHub");
+      });
+
     this.$nextTick(() => {
       window.addEventListener("resize", this.onWindowResize);
       this.onWindowResize();
