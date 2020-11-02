@@ -45,11 +45,11 @@ func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
-	viper.SetDefault("DB_ADDR", ":6379")
+	viper.SetDefault("DB_ADDR2", ":6379")
 
 	dgraphURL = viper.GetString("DGRAPH_HOST")
 	port = viper.GetString("PORT")
-	dbAddr = viper.GetString("DB_ADDR")
+	dbAddr = viper.GetString("DB_ADDR2")
 }
 
 func main() {
@@ -70,9 +70,9 @@ func main() {
 
 	rep, err := repo.NewRedisRepo(dbAddr)
 	if err != nil {
-		log.Fatal("Failed to connect to redis", zap.Error(err))
+		log.Fatal("Failed to connect to redis2", zap.Error(err))
 	}
-	repServ := repo.Server{
+	repServ := &repo.Server{
 		Repo: rep,
 		Log:  log.Named("RepoController"),
 	}
