@@ -3,10 +3,17 @@ export const state = () => ({
   height: 0,
   gridSize: "xs",
   menu: true,
-  noAccessScopes: []
+  noAccessScopes: [],
+  topAction: undefined
 });
 
 export const mutations = {
+  setTopAction(state, action) {
+    state.topAction = action;
+  },
+  unsetTopAction(state) {
+    state.topAction = undefined;
+  },
   setHeight(state, height) {
     state.height = height;
   },
