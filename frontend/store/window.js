@@ -1,3 +1,5 @@
+import { version } from "less";
+
 export const state = () => ({
   width: 0,
   height: 0,
@@ -5,7 +7,7 @@ export const state = () => ({
   menu: true,
   noAccessScopes: [],
   topAction: undefined,
-  versionTag: undefined
+  release: undefined
 });
 
 export const mutations = {
@@ -33,6 +35,9 @@ export const mutations = {
   },
   noAccess(state, scope) {
     state.noAccessScopes.push(scope);
+  },
+  setRelease(state, release) {
+    state.release = release;
   }
 };
 
@@ -72,7 +77,7 @@ export const actions = {
       "background:#35495e; padding: 1px; border-radius: 0 3px 3px 0; color: #fff; font-size: 18px;",
       "background:transparent"
     );
-    state.versionTag = release;
+    state.commit("setRelease", release);
   }
 };
 
@@ -90,5 +95,6 @@ export const getters = {
   },
   hasAccess: state => scope => {
     return !state.noAccessScopes.includes(scope);
-  }
+  },
+  release: state => state.release
 };

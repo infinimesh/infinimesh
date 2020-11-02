@@ -1,10 +1,13 @@
 <template>
   <a-row id="footer" type="flex" justify="center" align="middle">
     <a-col :xs="{ span: 20, offset: 2 }" :sm="18">
+      <a v-if="release" :href="release.html_url" target="_blank"
+        ><strong> infinimesh {{ release.tag_name }}</strong></a
+      >
       ©2020 —
       <strong>InfiniteDevices GmbH</strong>
       - source code at
-      <a href="https://www.github.com/infinimesh/infinimesh" target="_new">
+      <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
         <strong>GitHub</strong>
       </a>
     </a-col>
@@ -21,6 +24,14 @@ import themePicker from "@/components/generic/themePicker";
 const InfinimeshFooter = Vue.component("infinimesh-footer", {
   components: {
     themePicker,
+  },
+  computed: {
+    release: {
+      deep: true,
+      get() {
+        return this.$store.getters["window/release"];
+      },
+    },
   },
 });
 
