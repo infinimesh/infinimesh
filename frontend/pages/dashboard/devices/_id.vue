@@ -210,6 +210,13 @@ export default {
     };
     // Getting Device data from API
     this.refresh();
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.refresh,
+    });
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
   },
   methods: {
     patchDevice() {
