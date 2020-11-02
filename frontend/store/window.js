@@ -74,6 +74,7 @@ class WrongGridSizeException {
 }
 
 export const getters = {
+  topAction: state => state.topAction,
   menu(state) {
     return state.menu;
   },
