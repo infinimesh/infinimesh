@@ -72,7 +72,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to redis2", zap.Error(err))
 	}
-	repServ := &repo.Server{
+	repServ := repo.Server{
 		Repo: rep,
 		Log:  log.Named("RepoController"),
 	}
