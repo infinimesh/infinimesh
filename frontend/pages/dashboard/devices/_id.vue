@@ -20,13 +20,13 @@
               {{ device.name }}
               <span class="muted">{{ device.id }}</span>
             </h1>
-            <a-input
-              v-else-if="device && active_edit"
-              placeholder="Enter new device name"
-              class="device-name-input"
-              v-model="device.name"
-            />
           </transition>
+          <a-input
+            v-if="device && active_edit"
+            placeholder="Enter new device name"
+            class="device-name-input"
+            v-model="device.name"
+          />
         </a-col>
         <a-col
           :xs="1"
