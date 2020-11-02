@@ -79,7 +79,7 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 	return res, nil
 }
 
-//API Method to Get a Device
+//API Method to Get a Device.
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 
 	//Added logging
