@@ -33,20 +33,18 @@
           <a-row v-if="device.tags.length">
             <a-col :span="4" :xl="3">Tags:</a-col>
             <a-col :span="20" :xl="21">
-              <div>
-                <a-tag
-                  v-for="tag in device.tags"
-                  :key="tag"
-                  style="margin-bottom: 5px"
-                  @click.left.exact="
-                    (e) => {
-                      e.stopPropagation();
-                      $emit('tag-clicked', tag);
-                    }
-                  "
-                  >{{ tag }}
-                </a-tag>
-              </div>
+              <a-tag
+                v-for="tag in device.tags"
+                :key="tag"
+                style="margin-bottom: 5px"
+                @click.left.exact="
+                  (e) => {
+                    e.stopPropagation();
+                    $emit('tag-clicked', tag);
+                  }
+                "
+                >{{ tag }}
+              </a-tag>
             </a-col>
           </a-row>
           <a-row v-else type="flex" justify="center" class="muted"
