@@ -5,7 +5,6 @@ import Vue from "vue";
 import Vuex from "vuex";
 import Antd from "ant-design-vue";
 import vuetify from "vuetify";
-import jestConfig from "~/jest.config";
 
 describe("Dashboard", () => {
   let wrapper;
