@@ -530,3 +530,18 @@ func (s *Server) RemoveOwnerDevices(ctx context.Context, request *registrypb.Own
 	log.Info("Remove Owner to Device successsful")
 	return &registrypb.OwnershipResponseDevices{}, nil
 }
+
+//return device status from repo
+func (s *Server) GetDeviceStatus(ctx context.Context, request *registrypb.GetDeviceStatusRequest) (response *registrypb.GetDeviceStatusResponse, err error) {
+	log := s.Log.Named("Get Device Status Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Deviceid), zap.String("Device", request.Deviceid))
+
+	//Initialize the Account Controller with Device controller data
+	resp, err := s.rep.Get(ctx, &repopb.GetRequest{Id: request.Deviceid})
+	if err != nil {
+		log.Error("Failed to read device status from redis", zap.Error(err))
+		return &registrypb.GetDeviceStatusResponse{Status: false}, err
+	}
+	return &registrypb.GetDeviceStatusResponse{Status: resp.Repo.Enabled}, nil
+}

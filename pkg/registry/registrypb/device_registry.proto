@@ -93,6 +93,13 @@ message OwnershipRequestDevices {
 
 message OwnershipResponseDevices { }
 
+message GetDeviceStatusRequest{
+  string deviceid = 1;
+}
+
+message GetDeviceStatusResponse{
+  bool status = 1;
+}
 
 service Devices {
   rpc Create(CreateRequest) returns (CreateResponse);
@@ -103,4 +110,5 @@ service Devices {
   rpc Delete(DeleteRequest) returns (DeleteResponse);
   rpc AssignOwnerDevices(OwnershipRequestDevices) returns (OwnershipResponseDevices);
 	rpc RemoveOwnerDevices(OwnershipRequestDevices) returns (OwnershipResponseDevices);
+  rpc GetDeviceStatus(GetDeviceStatusRequest) returns (GetDeviceStatusResponse);
 }
