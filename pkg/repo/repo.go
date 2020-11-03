@@ -64,12 +64,15 @@ func (r *redisRepo) getState(devID string) (d DeviceState, err error) {
 
 	bytes, err := redis.Bytes(conn.Do("GET", devID))
 	if err != nil {
-		log.Printf("Error occured while deleting device status from redis " + err.Error())
+		log.Printf("Error occured while getting device status from redis " + err.Error())
 		return DeviceState{}, err
 	}
-
 	err = json.Unmarshal(bytes, &d)
-	return d, err
+	if err != nil {
+		log.Printf("Error occured while unmarshalling the device status " + err.Error())
+		return DeviceState{}, err
+	}
+	return d, nil
 }
 
 func (r *redisRepo) setState(d DeviceState) (err error) {
