@@ -105,8 +105,9 @@ export default Vue.component("device-list-card", {
 
 <style scoped>
 .card-selected {
-  -webkit-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
-  -moz-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
-  box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  --card-selected-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  -webkit-box-shadow: var(--card-selected-shadow);
+  -moz-box-shadow: var(--card-selected-shadow);
+  box-shadow: var(--card-selected-shadow);
 }
 </style>
