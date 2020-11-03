@@ -8,7 +8,7 @@
         :bordered="false"
         :ref="`device-card-${device.id}`"
         :class="selected ? 'card-selected' : ''"
-        @click.exact="
+        @click.left.exact="
           $router.push({
             name: 'dashboard-devices-id',
             params: { id: device.id },
@@ -38,7 +38,7 @@
                   v-for="tag in device.tags"
                   :key="tag"
                   style="margin-bottom: 5px"
-                  @click="
+                  @click.left.exact="
                     (e) => {
                       e.stopPropagation();
                       $emit('tag-clicked', tag);
