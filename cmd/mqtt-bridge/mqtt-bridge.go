@@ -358,7 +358,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	for {
 		deviceStatus, err := rep.Get(context.Background(), &repopb.GetRequest{Id: deviceID})
 		if err != nil {
-			log.Printf("device status doesn't exist in redis")
+			fmt.Printf("device status doesn't exist in redis %v\n", err)
 		} else {
 			if !deviceStatus.Repo.Enabled {
 				_ = c.Close()
