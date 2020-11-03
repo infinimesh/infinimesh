@@ -35,6 +35,7 @@
           :show-header="false"
           class="namespaces-table"
           @expand="loadNamespacePermissions"
+          :scroll="{ x: true }"
         >
           <span slot="name" slot-scope="name, namespace">
             <a-input
