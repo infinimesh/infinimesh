@@ -29,15 +29,5 @@ export default {
   mounted() {
     this.$store.dispatch("devices/getNamespaces");
   },
-  computed: {
-    menu_collapsed: {
-      get() {
-        return this.$store.getters["window/menu"];
-      },
-      set(val) {
-        this.$store.dispatch("window/toggleMenu", val);
-      },
-    },
-  },
 };
 </script>
