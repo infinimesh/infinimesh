@@ -1,52 +1,58 @@
 <template>
   <a-dropdown :trigger="['contextmenu']">
-    <a-card
-      :hoverable="true"
-      :bordered="false"
-      :ref="`device-card-${device.id}`"
-      :class="selected ? 'card-selected' : ''"
-      @click="
-        $router.push({
-          name: 'dashboard-devices-id',
-          params: { id: device.id },
-        })
-      "
+    <div
+      @click.meta.exact="$emit((selected ? 'de' : '') + 'select', device.id)"
     >
-      <template slot="title">{{ device.name }}</template>
-      <template slot="extra">
-        <b class="muted">{{ device.id }}</b>
-        <a-tooltip
-          :title="device.enabled ? 'Device enabled' : 'Device is not enabled'"
-          placement="bottom"
-        >
-          <a-icon
-            type="bulb"
-            :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
-            theme="filled"
-          />
-        </a-tooltip>
-      </template>
-      <template>
-        <a-row v-if="device.tags.length">
-          <a-col :span="4" :xl="3">Tags:</a-col>
-          <a-col :span="20" :xl="21">
-            <div @click="(e) => e.stopPropagation()">
+      <a-card
+        :hoverable="true"
+        :bordered="false"
+        :ref="`device-card-${device.id}`"
+        :class="selected ? 'card-selected' : ''"
+        @click.left.exact="
+          $router.push({
+            name: 'dashboard-devices-id',
+            params: { id: device.id },
+          })
+        "
+      >
+        <template slot="title">{{ device.name }}</template>
+        <template slot="extra">
+          <b class="muted">{{ device.id }}</b>
+          <a-tooltip
+            :title="device.enabled ? 'Device enabled' : 'Device is not enabled'"
+            placement="bottom"
+          >
+            <a-icon
+              type="bulb"
+              :style="{ color: device.enabled ? '#52c41a' : '#eb2f96' }"
+              theme="filled"
+            />
+          </a-tooltip>
+        </template>
+        <template>
+          <a-row v-if="device.tags.length">
+            <a-col :span="4" :xl="3">Tags:</a-col>
+            <a-col :span="20" :xl="21">
               <a-tag
                 v-for="tag in device.tags"
                 :key="tag"
                 style="margin-bottom: 5px"
-                @click="$emit('tag-clicked', tag)"
+                @click.left.exact="
+                  (e) => {
+                    e.stopPropagation();
+                    $emit('tag-clicked', tag);
+                  }
+                "
                 >{{ tag }}
               </a-tag>
-            </div>
-          </a-col>
-        </a-row>
-        <a-row v-else type="flex" justify="center" class="muted"
-          >No tags were provided</a-row
-        >
-      </template>
-    </a-card>
-
+            </a-col>
+          </a-row>
+          <a-row v-else type="flex" justify="center" class="muted"
+            >No tags were provided</a-row
+          >
+        </template>
+      </a-card>
+    </div>
     <a-menu slot="overlay">
       <a-menu-item key="open">
         <nuxt-link
@@ -99,8 +105,9 @@ export default Vue.component("device-list-card", {
 
 <style scoped>
 .card-selected {
-  -webkit-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
-  -moz-box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
-  box-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  --card-selected-shadow: 20px 15px 10px 5px rgba(0, 0, 0, 0.7);
+  -webkit-box-shadow: var(--card-selected-shadow);
+  -moz-box-shadow: var(--card-selected-shadow);
+  box-shadow: var(--card-selected-shadow);
 }
 </style>

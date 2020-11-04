@@ -580,7 +580,7 @@ func (s *AccountController) AssignOwner(ctx context.Context, request *nodepb.Own
 	}
 
 	//Validation to make sure the new owner is admin
-	if owner.IsAdmin {
+	if !owner.IsAdmin {
 		//Added logging
 		log.Error("Cannot assign owner as the Account is not admin Account")
 		return nil, status.Error(codes.FailedPrecondition, "Cannot assign owner as the Account is not admin Account")

@@ -1,26 +1,30 @@
 <template>
   <div id="accountsTable">
-    <a-row type="flex" align="middle">
-      <a-col :span="12" :offset="1">
-        <h1 class="lead">Accounts</h1>
-      </a-col>
-      <a-col :span="3" :offset="6">
-        <a-row type="flex" justify="end">
-          <a-button
-            type="primary"
-            icon="plus"
-            @click="createAccountDrawerVisible = true"
-            >Create Account</a-button
-          >
+    <a-row>
+      <a-col :span="21" :offset="1">
+        <a-row type="flex" align="middle" justify="space-between">
+          <a-col>
+            <h1 class="lead">Accounts</h1>
+          </a-col>
+          <a-col>
+            <a-row type="flex" justify="end">
+              <a-button
+                type="primary"
+                icon="plus"
+                @click="createAccountDrawerVisible = true"
+                >Create Account</a-button
+              >
+            </a-row>
+            <account-add
+              :active="createAccountDrawerVisible"
+              @cancel="createAccountDrawerVisible = false"
+              @add="handleAccountAdd"
+            />
+          </a-col>
         </a-row>
-        <account-add
-          :active="createAccountDrawerVisible"
-          @cancel="createAccountDrawerVisible = false"
-          @add="handleAccountAdd"
-        />
       </a-col>
     </a-row>
-    <a-row>
+    <a-row style="margin-top: 10px">
       <a-col :span="21" :offset="1">
         <a-table
           :columns="columns"
@@ -28,16 +32,28 @@
           :loading="loading"
           rowKey="uid"
           class="accounts-table"
+          :show-header="false"
+          :scroll="{ x: true }"
         >
           <span slot="name" slot-scope="name">
             <b>{{ name }}</b>
           </span>
+          <span
+            slot="uid"
+            slot-scope="uid"
+            v-if="user.is_admin || user.is_root"
+          >
+            <b class="muted">{{ uid }}</b>
+          </span>
           <span slot="is_admin" slot-scope="is_admin">
             <a-row type="flex" justify="space-around">
-              <a-icon
-                :type="is_admin ? 'check-circle' : 'close-circle'"
-                :style="{ color: is_admin ? 'green' : 'red', fontSize: '24px' }"
-              />
+              <a-tooltip>
+                <span slot="title">
+                  User <u v-if="is_admin"> has </u
+                  ><template v-else> has <u>no</u></template> admin rights
+                </span>
+                {{ is_admin ? "Admin" : "User" }}
+              </a-tooltip>
             </a-row>
           </span>
           <span slot="enabled" slot-scope="enabled">
@@ -102,24 +118,27 @@ const columns = [
     scopedSlots: { customRender: "name" },
   },
   {
+    title: "ID",
+    dataIndex: "uid",
+    sorter: true,
+    scopedSlots: { customRender: "uid" },
+  },
+  {
     title: "Admin",
     dataIndex: "is_admin",
     sorter: true,
-    width: "7%",
     scopedSlots: { customRender: "is_admin" },
   },
   {
     title: "Enabled",
     dataIndex: "enabled",
     sorter: true,
-    width: "7%",
     scopedSlots: { customRender: "enabled" },
   },
   {
     title: "Actions",
     key: "actions",
     fixed: "right",
-    width: "7%",
     scopedSlots: { customRender: "actions" },
   },
 ];
@@ -151,9 +170,6 @@ export default {
     this.getAccountsPool();
   },
   methods: {
-    console(args) {
-      console.log(args);
-    },
     toogleAdmin(account) {
       this.updateAccount(
         account.uid,
@@ -182,6 +198,9 @@ export default {
 </script>
 
 <style>
+.accounts-table .ant-table td {
+  white-space: nowrap;
+}
 .ant-empty-description {
   color: lightgrey !important;
 }

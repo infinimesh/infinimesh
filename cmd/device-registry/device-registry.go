@@ -30,23 +30,26 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/registry"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/infinimesh/infinimesh/pkg/repo"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 )
 
 var (
-	port string
-
+	port      string
 	dgraphURL string
+	dbAddr    string
 )
 
 func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
+	viper.SetDefault("DB_ADDR2", ":6379")
 
 	dgraphURL = viper.GetString("DGRAPH_HOST")
 	port = viper.GetString("PORT")
+	dbAddr = viper.GetString("DB_ADDR2")
 }
 
 func main() {
@@ -65,7 +68,17 @@ func main() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	server := registry.NewServer(dg)
+	rep, err := repo.NewRedisRepo(dbAddr)
+	if err != nil {
+		log.Fatal("Failed to connect to redis2", zap.Error(err))
+	}
+	repServ := repo.Server{
+		Repo: rep,
+		Log:  log.Named("RepoController"),
+	}
+
+	server := registry.NewServer(dg, repServ)
+
 	server.Log = log.Named("deviceController")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
@@ -74,6 +87,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	registrypb.RegisterDevicesServer(s, server)
+
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatal("Failed to serve gRPC", zap.Error(err))

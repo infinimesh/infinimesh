@@ -78,6 +78,8 @@ components:
             $ref: '#/components/schemas/deviceregistryDevice'
           type: array
       type: object
+    deviceregistryOwnershipResponseDevices:
+      type: object
     deviceregistryUpdateResponse:
       type: object
     infinimeshapiCreateObjectRequest:
@@ -762,7 +764,7 @@ info:
     url: 'https://infinitedevices.io'
   description: Cloud Native IoT Platform
   title: Infinimesh IoT Platform
-  version: 0.0.9
+  version: 0.0.10
 openapi: 3.0.0
 paths:
   /account:
@@ -994,7 +996,7 @@ paths:
       operationId: Devices_List
       parameters:
         - in: query
-          name: namespace
+          name: namespaceid
           required: false
           schema:
             type: string
@@ -1057,6 +1059,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryUpdateResponse'
+          description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
+      tags:
+        - Devices
+  '/devices/{deviceid}/owner/{ownerid}':
+    delete:
+      operationId: Devices_RemoveOwnerDevices
+      parameters:
+        - in: path
+          name: deviceid
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ownerid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
+          description: A successful response.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+          description: An unexpected error response
+      tags:
+        - Devices
+    put:
+      operationId: Devices_AssignOwnerDevices
+      parameters:
+        - in: path
+          name: deviceid
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ownerid
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
           description: A successful response.
         default:
           content:

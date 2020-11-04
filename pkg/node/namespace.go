@@ -34,6 +34,7 @@ type NamespaceController struct {
 	Log  *zap.Logger
 }
 
+//Account controller to get access to method for Account validation
 var a AccountController
 
 //CreateNamespace is a method for creating Namespace
@@ -341,16 +342,21 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
 			//This is to ensure that records that are older then 14 days or more will be only be deleted.
-			datecondition := time.Now().AddDate(0, 0, -14)
+			datecondition := time.Now().AddDate(0, 0, -14).Format(time.RFC3339)
 
 			//Added logging
 			log.Info("Hard Delete Process Invoked")
 			//Invokde Hardelete function with the date conidtion
-			err = n.Repo.HardDeleteNamespace(ctx, datecondition.String())
+			err = n.Repo.HardDeleteNamespace(ctx, datecondition)
 			if err != nil {
-				//Added logging
-				log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-				return nil, status.Error(codes.Internal, err.Error())
+				if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
+					//Added logging
+					log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+					return nil, status.Error(codes.Internal, err.Error())
+				} else {
+					log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+					return nil, status.Error(codes.Internal, err.Error())
+				}
 			}
 			//Added logging
 			log.Info("Hard Delete Process Successful")

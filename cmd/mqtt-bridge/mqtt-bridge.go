@@ -58,7 +58,6 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 			if device.Enabled.Value {
 				enabled = append(enabled, device)
 			}
-			deviceStatusMap[device.Id] = device.Enabled.Value
 		}
 
 		if len(enabled) == 0 {
@@ -90,13 +89,14 @@ var (
 	kafkaTopicBackChannel string
 	tlsCertFile           string
 	tlsKeyFile            string
-	deviceStatusMap       map[string]bool
+	dbAddr                string
 
 	ps *pubsub.PubSub
 )
 
 func init() {
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
+	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "mqtt.messages.incoming")
 	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
@@ -110,8 +110,8 @@ func init() {
 	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
+	dbAddr = viper.GetString("DB_ADDR2")
 
-	deviceStatusMap = make(map[string]bool)
 }
 
 func readBackchannelFromKafka() {
@@ -356,6 +356,15 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	topicAliasPublishMap = make(map[string]int)
 
 	for {
+		deviceStatus, err := client.GetDeviceStatus(context.Background(), &registrypb.GetDeviceStatusRequest{Deviceid: deviceID})
+		if err != nil {
+			fmt.Printf("device status doesn't exist in redis %v\n", err)
+		} else {
+			if !deviceStatus.Status {
+				_ = c.Close()
+				break
+			}
+		}
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 
 		if err != nil {
@@ -376,14 +385,11 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write PingResp", err)
 			}
 		case *packet.PublishControlPacket:
-			if deviceStatusMap[deviceID] {
-				topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
-				if err != nil {
-					fmt.Printf("Failed to handle Publish packet: %v.", err)
-				}
-			} else {
-				_ = c.Close()
+			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
+			if err != nil {
+				fmt.Printf("Failed to handle Publish packet: %v.", err)
 			}
+
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)

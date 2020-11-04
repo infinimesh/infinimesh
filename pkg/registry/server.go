@@ -1,4 +1,5 @@
 //--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Copyright 2018 Infinite Devices GmbH
 // www.infinimesh.io
 //
@@ -32,6 +33,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/infinimesh/infinimesh/pkg/repo"
+	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 
@@ -40,16 +43,17 @@ import (
 
 //Server is a Data type for Device Controller file
 type Server struct {
-	dgo *dgo.Dgraph
-
+	dgo  *dgo.Dgraph
+	rep  repo.Server
 	repo node.Repo
 	Log  *zap.Logger
 }
 
 //NewServer is a method to create the Dgraph Server for Device registry
-func NewServer(dg *dgo.Dgraph) *Server {
+func NewServer(dg *dgo.Dgraph, rep1 repo.Server) *Server {
 	return &Server{
 		dgo: dg,
+		rep: rep1,
 		repo: &dgraph.DGraphRepo{
 			Dg: dg,
 		},
@@ -134,7 +138,16 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		log.Error("Failed to create Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
+	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+		Id: resp.Device.Id,
+		Repo: &repopb.Repo{
+			Enabled:     resp.Device.Enabled.Value,
+			FingerPrint: resp.Device.Certificate.Fingerprint,
+		},
+	})
+	if err != nil {
+		log.Info("Device status not stored in repo", zap.String("DeviceId", resp.Device.Id))
+	}
 	//Added logging
 	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
 	return resp, nil
@@ -175,7 +188,6 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("The Account does not have permission to create Device")
 		return nil, status.Error(codes.PermissionDenied, "The account does not have permission to create device")
 	}
-
 	resp, err := s.UpdateQ(ctx, request)
 	if err != nil {
 		//Added logging
@@ -183,6 +195,29 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	log.Info("Fetching existing device state from dgraph", zap.String("Device Id", request.Device.Id))
+
+	//to fetch fingerprint from dgraph with admin role
+	repData, err := s.GetQ(ctx, &registrypb.GetRequest{Id: request.Device.Id}, true)
+	if err != nil {
+		log.Error("Failed to Get Device", zap.Error(err))
+	} else {
+		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
+		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
+			Id: request.Device.Id,
+			Repo: &repopb.Repo{
+				Enabled:     repData.Device.Enabled.Value,
+				FingerPrint: repData.Device.Certificate.Fingerprint,
+				NamespaceID: repData.Device.Namespace,
+			},
+		})
+		if err != nil {
+			log.Info("Device status not updated in redis", zap.String("DeviceId", request.Device.Id))
+		}
+		if reso.Status {
+			log.Info("Device status updated in redis")
+		}
+	}
 	//Added logging
 	log.Info("Device successfully updated")
 	return resp, nil
@@ -265,7 +300,7 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 	log := s.Log.Named("List Device Controller")
 
 	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Account), zap.String("Namespace", request.Namespace))
+	log.Info("Function Invoked", zap.String("Account", request.Account), zap.String("Namespace", request.Namespaceid))
 
 	//Initialize the Account Controller with Device controller data
 	a.Repo = s.repo
@@ -286,12 +321,12 @@ func (s *Server) List(ctx context.Context, request *registrypb.ListDevicesReques
 
 	//If Account is root provide all access
 	if isRoot.IsRoot {
-		return s.ListQ(ctx, &registrypb.ListDevicesRequest{Namespace: request.Namespace})
+		return s.ListQ(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.Namespaceid})
 	}
 
 	//Check if the non-root user has access to the namespace
 	authresp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Namespaceid: request.Namespace,
+		Namespaceid: request.Namespaceid,
 		Account:     requestorID,
 		Action:      nodepb.Action_READ,
 	})
@@ -354,6 +389,159 @@ func (s *Server) Delete(ctx context.Context, request *registrypb.DeleteRequest) 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	res, err := s.rep.DeleteDeviceState(ctx, &repopb.DeleteDeviceStateRequest{
+		Id: request.Id,
+	})
+
+	if err != nil {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id), zap.Error(err))
+	}
+	if !res.Status {
+		log.Info("Device status not deleted from repo", zap.String("DeviceId", request.Id))
+	}
 	log.Info("Devices deleted successsful")
 	return resp, nil
+}
+
+//AssignOwnerDevices is a method that adds the owner from namespace
+func (s *Server) AssignOwnerDevices(ctx context.Context, request *registrypb.OwnershipRequestDevices) (response *registrypb.OwnershipResponseDevices, err error) {
+
+	log := s.Log.Named("Assign Owner Device Controller")
+
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Ownerid), zap.String("Device", request.Deviceid))
+
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	//Check if the user has access to delete the device
+	authresp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Deviceid,
+		Account: requestorID,
+		Action:  nodepb.Action_WRITE,
+	})
+	if err != nil {
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
+	}
+
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to add owner to the device")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to add owner to the device")
+	}
+
+	err = s.AssignOwnerDevicesQ(ctx, request)
+	if err != nil {
+		log.Error("Failed to add owner to the Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//ToDO to add the redis updation here
+
+	log.Info("Assign Owner to Device successsful")
+	return &registrypb.OwnershipResponseDevices{}, nil
+}
+
+//RemoveOwnerDevices is a method that removes the owner from namespace
+func (s *Server) RemoveOwnerDevices(ctx context.Context, request *registrypb.OwnershipRequestDevices) (response *registrypb.OwnershipResponseDevices, err error) {
+
+	log := s.Log.Named("Remove Owner Device Controller")
+
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Ownerid), zap.String("Device", request.Deviceid))
+
+	//Initialize the Account Controller with Device controller data
+	a.Repo = s.repo
+	a.Log = s.Log
+
+	//Get metadata from context and perform validation
+	_, requestorID, err := node.Validation(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+
+	//Check if the user has access to delete the device
+	authresp, err := a.IsAuthorized(ctx, &nodepb.IsAuthorizedRequest{
+		Node:    request.Deviceid,
+		Account: requestorID,
+		Action:  nodepb.Action_WRITE,
+	})
+	if err != nil {
+		log.Error("Unable to get permissions for the account", zap.Error(err))
+		return nil, status.Error(codes.PermissionDenied, "Unable to get permissions for the account")
+	}
+
+	//Check if the device is a valid device
+	_, err = s.Get(ctx, &registrypb.GetRequest{
+		Id: request.Deviceid,
+	})
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Check if the namespace is a valid namespace
+	_, err = s.repo.GetNamespaceID(ctx, request.Ownerid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if !authresp.GetDecision().GetValue() {
+		log.Error("The Account does not have permission to remove owner from the device")
+		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to remove owner from the device")
+	}
+
+	//Check if the device is a valid device
+	_, err = s.Get(ctx, &registrypb.GetRequest{
+		Id: request.Deviceid,
+	})
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//Check if the namespace is a valid namespace
+	_, err = s.repo.GetNamespaceID(ctx, request.Ownerid)
+	if err != nil {
+		//Added logging
+		log.Error("Failed to get Namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = s.RemoveOwnerDevicesQ(ctx, request)
+	if err != nil {
+		log.Error("Failed to remove owner from the Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	//ToDO to add the redis updation here
+
+	log.Info("Remove Owner to Device successsful")
+	return &registrypb.OwnershipResponseDevices{}, nil
+}
+
+//return device status from repo
+func (s *Server) GetDeviceStatus(ctx context.Context, request *registrypb.GetDeviceStatusRequest) (response *registrypb.GetDeviceStatusResponse, err error) {
+	log := s.Log.Named("Get Device Status Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Deviceid), zap.String("Device", request.Deviceid))
+
+	//Initialize the Account Controller with Device controller data
+	resp, err := s.rep.Get(ctx, &repopb.GetRequest{Id: request.Deviceid})
+	if err != nil {
+		log.Error("Failed to read device status from redis", zap.Error(err))
+		return &registrypb.GetDeviceStatusResponse{Status: false}, err
+	}
+	return &registrypb.GetDeviceStatusResponse{Status: resp.Repo.Enabled}, nil
 }

@@ -38,7 +38,7 @@ export const actions = {
 
     const devices = await this.$axios.$get("/api/devices", {
       params: {
-        namespace: ns
+        namespaceid: ns
       }
     });
     commit("pool", devices.devices);

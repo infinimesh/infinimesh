@@ -35,6 +35,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/infinimesh/infinimesh/pkg/repo"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
@@ -45,11 +46,23 @@ var (
 	userID string
 )
 
+var rep1 repo.Repo
+
 func init() {
 	dgURL := os.Getenv("DGRAPH_URL")
 	if dgURL == "" {
 		dgURL = "localhost:9080"
 	}
+	dbURL := os.Getenv("DB_ADDR")
+	if dbURL == "" {
+		dbURL = ":6379"
+	}
+	r, err := repo.NewRedisRepo(dbURL)
+	if err != nil {
+		panic(err)
+	}
+	rep1 = r
+
 	conn, err := grpc.Dial(dgURL, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
@@ -57,8 +70,8 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	repo := dgraph.NewDGraphRepo(dg)
-	user, err := repo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false, false, true)
+	drepo := dgraph.NewDGraphRepo(dg)
+	user, err := drepo.CreateUserAccount(context.Background(), randomdata.SillyName(), "test12345", false, false, true)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +83,10 @@ func init() {
 
 	userID = user
 
-	server = NewServer(dg)
+	server = NewServer(dg, repo.Server{
+		Repo: rep1,
+		Log:  log.Named("RepoController"),
+	})
 	server.Log = log.Named("Device Registry Test")
 }
 
@@ -96,7 +112,7 @@ func TestList(t *testing.T) {
 	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: ns.Id,
+		Namespaceid: ns.Id,
 	})
 	require.NoError(t, err)
 	var found int
@@ -139,8 +155,8 @@ func TestListForAccount(t *testing.T) {
 	require.NoError(t, err)
 
 	response, err := server.List(ctx, &registrypb.ListDevicesRequest{
-		Namespace: ns.Id,
-		Account:   accid,
+		Namespaceid: ns.Id,
+		Account:     accid,
 	})
 	require.NoError(t, err)
 	var found int

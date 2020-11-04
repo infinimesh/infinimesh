@@ -112,7 +112,7 @@
             "
             @select-all="selectedDevices = suggested.map((d) => d.id)"
             style="
-              background-color: var(--secondary-color);
+              background-color: var(--background-color);
               border-radius: var(--border-radius-base);
               padding-bottom: 10px;
             "
@@ -232,6 +232,7 @@ export default {
       }, new Set());
     },
     user() {
+      if (!this.$store.getters.loggedInUser) return { default_namespace: {} };
       return this.$store.getters.loggedInUser;
     },
     namespace() {
@@ -391,7 +392,7 @@ export default {
 }
 .devices-search-input {
   height: 90%;
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--background-color);
   min-width: 256px;
   border-radius: 100px;
 }
@@ -410,13 +411,16 @@ export default {
 }
 .tags-collapse-tile-wrap {
   border-radius: var(--border-radius-base);
-  background: var(--primary-color);
+  background-color: var(--primary-color);
 }
 .tags-collapse-tile-wrap:last-child {
   border-radius: var(--border-radius-base);
 }
 .ant-collapse-borderless {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--background-color) !important;
+}
+.ant-collapse-borderless > .ant-collapse-item {
+  border-bottom: 1px solid var(--background-color);
 }
 </style>
 <style>

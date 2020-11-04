@@ -7,13 +7,18 @@ export default {
         .get("/api/accounts")
         .then(res => (vm.accounts = res.data.accounts))
         .catch(e => {
-          if (e.response.status == 403) {
+          if (e.response.status === 403) {
             vm.$notification.error({
               message: "Oops",
               description: e.response.data.message
             });
             vm.$store.commit("window/noAccess", "dashboard-accounts");
             vm.$router.push({ name: "dashboard-devices" });
+          } else if (e.response.status === 500) {
+            vm.$notification.error({
+              message: "Internal Server Error",
+              description: e.response.data.message
+            });
           }
         })
         .then(() => (vm.loading = false));

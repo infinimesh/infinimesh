@@ -7,15 +7,22 @@
         }}</span
       >
     </v-col>
-    <v-col class="d-none d-lg-block" lg="1" xl="1">
-      <v-row>
-        <v-col class="nav-button" cols="5" @click="$router.go(-1)">
+    <v-col cols="1">
+      <a-row type="flex" justify="space-between" align="middle" :gutter="5">
+        <a-col class="nav-button" @click="$router.go(-1)" v-if="show_nav_btns">
           <a-icon type="left" />
-        </v-col>
-        <v-col class="nav-button" cols="5" :offset="14" @click="$router.go(1)">
+        </a-col>
+        <a-col
+          v-if="top_action"
+          class="nav-button"
+          @click="top_action.callback"
+        >
+          <a-icon :type="top_action.icon" style="font-size: 1.3rem" />
+        </a-col>
+        <a-col class="nav-button" @click="$router.go(1)" v-if="show_nav_btns">
           <a-icon type="right" />
-        </v-col>
-      </v-row>
+        </a-col>
+      </a-row>
     </v-col>
     <v-col sm="5" md="5" lg="3" xl="3">
       <a-select style="width: 100%" v-model="namespace">
@@ -42,13 +49,20 @@ export default {
         this.$store.dispatch("window/toggleMenu", val);
       },
     },
+    show_nav_btns() {
+      return ["lg", "xl", "xxl"].includes(this.$store.state.window.gridSize);
+    },
+    top_action() {
+      return this.$store.getters["window/topAction"];
+    },
     namespace: {
       get() {
         return this.$store.state.devices.namespace;
       },
       set(val) {
+        let old = this.namespace;
         this.$store.dispatch("devices/setNamespace", val);
-        if (this.$route.name != "dashboard-devices") {
+        if (this.$route.name != "dashboard-devices" && old != "") {
           this.$router.push({
             name: "dashboard-devices",
           });
