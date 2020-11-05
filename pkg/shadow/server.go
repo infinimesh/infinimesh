@@ -204,7 +204,7 @@ outer:
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Reported Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				ReportedState: value,
 			})
@@ -218,7 +218,7 @@ outer:
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Desired Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				DesiredState: value,
 			})
