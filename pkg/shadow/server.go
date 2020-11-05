@@ -153,6 +153,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	}
 	log.Info("streaming requested by : ", zap.String("Request ID :", request.Id))
 	topicEvents := "devices/" + request.Id + subPathReported
+	s.PubSub = pubsub.New(10)
 	events := s.PubSub.Sub(topicEvents)
 	fmt.Println(topicEvents)
 	fmt.Println(events)
