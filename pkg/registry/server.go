@@ -138,11 +138,14 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		log.Error("Failed to create Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	namespaces := []string{}
+	namespaces = append(namespaces, resp.Device.Namespace)
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: resp.Device.Id,
 		Repo: &repopb.Repo{
 			Enabled:     resp.Device.Enabled.Value,
 			FingerPrint: resp.Device.Certificate.Fingerprint,
+			NamespaceID: namespaces,
 		},
 	})
 	if err != nil {
@@ -203,12 +206,14 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
 		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
+		namespaces := []string{}
+		namespaces = append(namespaces, repData.Device.Namespace)
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 			Id: request.Device.Id,
 			Repo: &repopb.Repo{
 				Enabled:     repData.Device.Enabled.Value,
 				FingerPrint: repData.Device.Certificate.Fingerprint,
-				NamespaceID: repData.Device.Namespace,
+				NamespaceID: namespaces,
 			},
 		})
 		if err != nil {
@@ -442,9 +447,15 @@ func (s *Server) AssignOwnerDevices(ctx context.Context, request *registrypb.Own
 		log.Error("Failed to add owner to the Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	//ToDO to add the redis updation here
-
+	//reading existing data from redis
+	resp, err := s.rep.AddDeviceOwnerState(ctx, &repopb.AddDeviceOwnerRequest{Id: requestorID, NamespaceID: request.Ownerid})
+	if err != nil {
+		log.Error("Failed to add device owner in Redis", zap.Error(err))
+	}
+	if !resp.Status {
+		log.Info("Device owner can not be updated in Redis")
+	}
+	log.Info("Device owner added to redis successfully")
 	log.Info("Assign Owner to Device successsful")
 	return &registrypb.OwnershipResponseDevices{}, nil
 }
@@ -526,6 +537,15 @@ func (s *Server) RemoveOwnerDevices(ctx context.Context, request *registrypb.Own
 	}
 
 	//ToDO to add the redis updation here
+	resp, err := s.rep.RemoveDeviceOwnerState(ctx, &repopb.RemoveDeviceOwnerRequest{
+		Id:          request.Deviceid,
+		NamespaceID: request.Ownerid})
+	if err != nil {
+		log.Error("Failed to remove device owner from redis", zap.Error(err))
+	}
+	if !resp.Status {
+		log.Info("Device owner state couldn't be removed from redis")
+	}
 
 	log.Info("Remove Owner to Device successsful")
 	return &registrypb.OwnershipResponseDevices{}, nil
