@@ -147,12 +147,12 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	var subPathReported string
 	if request.OnlyDelta {
-		subPathReported = "/state/reported/delta"
+		subPathReported = "state/reported/delta"
 	} else {
-		subPathReported = "/state/reported/full"
+		subPathReported = "state/reported/full"
 	}
 	log.Info("streaming requested by : ", zap.String("Request ID :", request.Id))
-	topicEvents := "devices/" + request.Id + subPathReported
+	topicEvents := request.Id + subPathReported
 	s.PubSub = pubsub.New(10)
 	events := s.PubSub.Sub(topicEvents)
 	fmt.Println(topicEvents)
@@ -174,12 +174,12 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	var subPathDesired string
 	if request.OnlyDelta {
-		subPathDesired = "/state/desired/delta"
+		subPathDesired = "state/desired/delta"
 	} else {
-		subPathDesired = "/state/desired/full"
+		subPathDesired = "state/desired/full"
 	}
 
-	topicEventsDesired := "devices/" + request.Id + subPathDesired
+	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 	defer func() {
 
