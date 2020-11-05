@@ -152,9 +152,8 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 		subPathReported = "state/reported/full"
 	}
 	log.Info("streaming requested by : ", zap.String("Request ID :", request.Id))
-	topicEvents := request.Id + subPathReported
-	s.PubSub = pubsub.New(10)
-	events := s.PubSub.Sub(topicEvents)
+	topicEvents := "devices/" + request.Id + "/" + subPathReported
+	events := s.PubSub.Sub()
 	fmt.Println(topicEvents)
 	fmt.Println(events)
 	defer func() {
