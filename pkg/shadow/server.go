@@ -147,12 +147,12 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	var subPathReported string
 	if request.OnlyDelta {
-		subPathReported = "/reported/delta"
+		subPathReported = "/state/reported/delta"
 	} else {
-		subPathReported = "/reported/full"
+		subPathReported = "/state/reported/full"
 	}
-
-	topicEvents := request.Id + subPathReported
+	log.Info("streaming requested by : ", zap.String("Request ID :", request.Id))
+	topicEvents := "devices/" + request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
 	fmt.Println(topicEvents)
 	fmt.Println(events)
@@ -173,12 +173,12 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	var subPathDesired string
 	if request.OnlyDelta {
-		subPathDesired = "/desired/delta"
+		subPathDesired = "/state/desired/delta"
 	} else {
-		subPathDesired = "/desired/full"
+		subPathDesired = "/state/desired/full"
 	}
 
-	topicEventsDesired := request.Id + subPathDesired
+	topicEventsDesired := "devices/" + request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 	defer func() {
 
@@ -257,8 +257,7 @@ func toProto(event interface{}) (result *shadowpb.VersionedValue, err error) {
 			Data:      &value,
 			Timestamp: ts, // TODO
 		}, nil
-	} else {
-		return nil, errors.New("Failed type assertion")
 	}
+	return nil, errors.New("Failed type assertion")
 
 }
