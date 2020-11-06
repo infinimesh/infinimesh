@@ -146,7 +146,7 @@ func main() {
 	ps := pubsub.New(10)
 
 	subscribe(consumer, ps, topicReportedFull, "/reported/full")
-	subscribe(consumer, ps, topicReportedDeltaComputed, "/reported/delta")
+	subscribe(consumer, ps, topicReportedDeltaComputed, "_reported-delta")
 	subscribe(consumer, ps, topicDesiredFull, "/desired/full")
 	subscribe(consumer, ps, topicDesiredDeltaComputed, "/desired/delta")
 
