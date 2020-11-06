@@ -32,6 +32,7 @@ import (
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	"go.uber.org/zap"
 
+	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
@@ -178,8 +179,10 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 		subPathDesired = "state/desired/full"
 	}
 
-	topicEventsDesired := request.Id + subPathDesired
+	topicEventsDesired := "devices/" + request.Id + "/" + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
+	fmt.Println(topicEventsDesired)
+	fmt.Println(eventsDesired)
 	defer func() {
 
 		go func() {
@@ -196,9 +199,10 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	}()
 outer:
 	for {
-
+		log.Info("Looping through reported stream")
 		select {
 		case reportedEvent := <-events:
+			log.Info("Inside reported event reading")
 			value, err := toProto(reportedEvent)
 			if err != nil {
 				fmt.Println(err)
@@ -213,6 +217,7 @@ outer:
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
+			log.Info("Inside desired event reading")
 			value, err := toProto(desiredEvent)
 			if err != nil {
 				fmt.Println(err)
@@ -238,6 +243,7 @@ outer:
 
 func toProto(event interface{}) (result *shadowpb.VersionedValue, err error) {
 	var value structpb.Value
+	fmt.Printf("Messages unmarshalled : %v", event.(*mqtt.OutgoingMessage))
 	if raw, ok := event.(*DeviceStateMessage); ok {
 		var u jsonpb.Unmarshaler
 		err = u.Unmarshal(bytes.NewReader(raw.State), &value)
