@@ -92,7 +92,6 @@ func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath strin
 					fmt.Printf("Invalid message on topic"+topic+" at offset %v, err=%v\n", message.Offset, err)
 					continue
 				}
-				fmt.Printf("Messages %v published to %v", deltaMsg.State, string(message.Key)+subPath)
 				ps.Pub(&deltaMsg, string(message.Key)+subPath)
 
 				d := DeviceState(deltaMsg.State)
@@ -146,7 +145,7 @@ func main() {
 	ps := pubsub.New(10)
 
 	subscribe(consumer, ps, topicReportedFull, "/reported/full")
-	subscribe(consumer, ps, topicReportedDeltaComputed, "_reported-delta")
+	subscribe(consumer, ps, topicReportedDeltaComputed, "/reported/delta")
 	subscribe(consumer, ps, topicDesiredFull, "/desired/full")
 	subscribe(consumer, ps, topicDesiredDeltaComputed, "/desired/delta")
 
@@ -179,7 +178,7 @@ func main() {
 
 	r := httprouter.New()
 	r.HandlerFunc("GET", "/:id", handler)
-	err = http.ListenAndServe(":8084", r)
+	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		panic(err)
 	}
