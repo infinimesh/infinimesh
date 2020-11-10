@@ -177,7 +177,7 @@ func main() {
 	}()
 
 	r := httprouter.New()
-	r.HandlerFunc("GET", "/:id", handler)
+	r.HandlerFunc("GET", "/devices/:id/state/stream", handler)
 	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		panic(err)
