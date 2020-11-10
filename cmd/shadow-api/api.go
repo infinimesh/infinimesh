@@ -198,6 +198,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := strings.TrimPrefix(r.URL.Path, "/")
+	fmt.Printf("Url Path: %v and Id: %v\n", r.URL.Path, id)
 
 	ch := make(chan *DeviceState, 10)
 
