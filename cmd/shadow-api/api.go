@@ -177,7 +177,7 @@ func main() {
 	}()
 
 	r := httprouter.New()
-	r.HandlerFunc("GET", "/devices/:id/state/stream?only_delta=:bool", handler)
+	r.HandlerFunc(http.MethodGet, "/devices/0x13921", handler)
 	err = http.ListenAndServe(":8084", r)
 	if err != nil {
 		panic(err)
@@ -196,8 +196,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
 		return
 	}
-
-	id := strings.TrimPrefix(r.URL.Path, "/")
+	fmt.Printf("Url Path: %v \n", r.URL.Path)
+	id := strings.TrimPrefix(r.URL.Path, "/devices/")
 	fmt.Printf("Url Path: %v and Id: %v\n", r.URL.Path, id)
 
 	ch := make(chan *DeviceState, 10)
