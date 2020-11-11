@@ -175,7 +175,7 @@ func main() {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
-
+	fmt.Println("outside the loop")
 	r := httprouter.New()
 	r.HandlerFunc(http.MethodGet, "/devices/{id}/state/stream", handler)
 	err = http.ListenAndServe(":8084", r)
@@ -185,7 +185,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json") //text/event-stream
+	w.Header().Set("Content-Type", "text/event-stream") //text/event-stream
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
