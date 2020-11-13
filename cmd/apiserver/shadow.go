@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -123,6 +124,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 
 	for {
 		msg, err := c.Recv()
+		fmt.Printf("msg recieved at apiserver %v", msg)
 		if err != nil {
 			//Added logging
 			log.Error("Stream API Method: Error while receving message", zap.Error(err))
