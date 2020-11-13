@@ -175,9 +175,8 @@ func main() {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
-	fmt.Println("outside the loop")
 	r := httprouter.New()
-	r.HandlerFunc(http.MethodGet, "/devices/{id}/state/stream", handler)
+	r.HandlerFunc(http.MethodGet, "/:id", handler)
 	err = http.ListenAndServe(":8084", r)
 	if err != nil {
 		panic(err)

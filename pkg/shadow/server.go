@@ -151,7 +151,6 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	} else {
 		subPathReported = "/reported/full"
 	}
-	log.Info("streaming requested by : ", zap.String("Request ID :", request.Id))
 	topicEvents := request.Id + subPathReported
 
 	events := s.PubSub.Sub(topicEvents)
