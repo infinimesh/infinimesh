@@ -29,6 +29,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
+//shadowAPI data strcuture
 type shadowAPI struct {
 	accountClient nodepb.AccountServiceClient
 	client        shadowpb.ShadowsClient
