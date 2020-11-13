@@ -93,7 +93,7 @@ func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath strin
 					fmt.Printf("Invalid message on topic"+topic+" at offset %v, err=%v\n", message.Offset, err)
 					continue
 				}
-				log.Println("Publish message to", zap.String(string(message.Key), subPath), zap.String(string(message.Key), string(message.Value)))
+				log.Println("Publish message to", zap.String(string(message.Key), subPath), zap.String(string(message.Key), string(deltaMsg.State)))
 				ps.Pub(&deltaMsg, string(message.Key)+subPath)
 
 				d := DeviceState(deltaMsg.State)

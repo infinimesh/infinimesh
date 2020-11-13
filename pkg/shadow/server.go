@@ -195,15 +195,16 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	}()
 outer:
 	for {
-
+		log.Info("Looping through reported stream")
 		select {
 		case reportedEvent := <-events:
+			log.Info("Inside reported event reading")
 			value, err := toProto(reportedEvent)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Reported Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				ReportedState: value,
 			})
@@ -212,12 +213,13 @@ outer:
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
+			log.Info("Inside desired event reading")
 			value, err := toProto(desiredEvent)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Desired Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				DesiredState: value,
 			})
@@ -256,8 +258,6 @@ func toProto(event interface{}) (result *shadowpb.VersionedValue, err error) {
 			Data:      &value,
 			Timestamp: ts, // TODO
 		}, nil
-	} else {
-		return nil, errors.New("Failed type assertion")
 	}
-
+	return nil, errors.New("Failed type assertion")
 }
