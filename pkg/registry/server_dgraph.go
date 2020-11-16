@@ -83,7 +83,7 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 		SetJson: js,
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create object: %v", err))
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create device: %v", err))
 	}
 
 	newUID := mutRes.GetUids()["new"]
@@ -94,6 +94,7 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 		ObjectId:  newUID,
 	}
 
+	//Added the owns predicate from Namespace to new created device
 	_, err = txn.Mutate(ctx, &api.Mutation{
 		Set: []*api.NQuad{
 			nsMut,
@@ -101,7 +102,7 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 		CommitNow: true,
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create device: %v", err))
+		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to create predicate for Namespace and Device : %v", err))
 	}
 
 	request.Device.Certificate.Fingerprint = fp
