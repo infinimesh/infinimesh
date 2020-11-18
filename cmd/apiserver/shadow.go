@@ -19,7 +19,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -114,18 +113,20 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 	}
 
 	//Added logging
-	log.Info("Stream API Method: Streaming started", zap.String("Device ID", request.Id))
+	log.Debug("Stream API Method: Streaming started", zap.String("Device ID", request.Id))
 
+	log.Debug("Stream API Method: Temporary Logs1", zap.Any("Context", srv.Context))
 	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {
 		//Added logging
 		log.Error("Stream API Method: Failed to start the Stream", zap.Error(err))
 		return status.Error(codes.Unauthenticated, "Failed to start the Stream")
 	}
+	log.Debug("Stream API Method: Temporary Logs2", zap.Any("Context", srv.Context))
 
 	for {
 		msg, err := c.Recv()
-		fmt.Printf("msg recieved at apiserver %v", msg)
+		log.Debug("Stream API Method: Temporary Logs3", zap.Any("Message", msg))
 		if err != nil {
 			//Added logging
 			log.Error("Stream API Method: Error while receving message", zap.Error(err))
