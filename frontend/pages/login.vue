@@ -97,6 +97,15 @@ export default {
       form: this.$form.createForm(this, { name: "login" }),
     };
   },
+  mounted() {
+    this.$notification.info({
+      placement: "bottomRight",
+      duration: 0,
+      message: "No account yet? Please contact us! Click here",
+      bottom: "42px",
+      onClick: () => window.open("https://infinitedevices.de/en/contact/", "target-new")
+    })
+  },
   methods: {
     handleSubmit(e) {
       e.preventDefault();
