@@ -31,7 +31,6 @@ import (
 	"github.com/cskr/pubsub"
 	"github.com/julienschmidt/httprouter"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
