@@ -22,7 +22,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -154,7 +153,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEvents := request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
 
-	log.Debug("Streaming Details", zap.String("Topic Events", topicEvents), zap.Any("Events", events))
+	log.Debug("Reported Streaming Details", zap.String("Topic Events", topicEvents), zap.Any("Events", events))
 
 	defer func() {
 
@@ -180,8 +179,9 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
-	fmt.Println(topicEventsDesired)
-	fmt.Println(eventsDesired)
+
+	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired), zap.Any("Events", eventsDesired))
+
 	defer func() {
 
 		go func() {
@@ -198,13 +198,13 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	}()
 outer:
 	for {
-		log.Debug("Looping through reported stream")
+		log.Debug("Looping through Stream")
 		select {
 		case reportedEvent := <-events:
 			log.Debug("Inside reported event reading")
 			value, err := toProto(reportedEvent, log)
 			if err != nil {
-				fmt.Println(err)
+				log.Error("Unable to Marshal data", zap.Error(err))
 				break outer
 			}
 
@@ -214,14 +214,14 @@ outer:
 				ReportedState: value,
 			})
 			if err != nil {
-				fmt.Println(err)
+				log.Error("Unable to Marshal data", zap.Error(err))
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
 			log.Debug("Inside desired event reading")
 			value, err := toProto(desiredEvent, log)
 			if err != nil {
-				fmt.Println(err)
+				log.Error("Unable to send Desired data", zap.Error(err))
 				break outer
 			}
 
@@ -231,7 +231,7 @@ outer:
 				DesiredState: value,
 			})
 			if err != nil {
-				fmt.Println(err)
+				log.Error("Unable to send Desired data", zap.Error(err))
 				break outer
 			}
 		case <-srv.Context().Done():
