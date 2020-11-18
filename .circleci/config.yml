@@ -27,22 +27,17 @@ jobs:
   build-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/infinimesh/frontend/
     steps:
-      - checkout:
-          path: ~/infinimesh/frontend/
-      - run:
-          name: hmmm
-          command: pwd && ls -l
+      - checkout
       - run:
           name: deps
-          command: yarn
+          command: cd frontend && yarn
       - run:
           name: lint
-          command: yarn run lint
+          command: cd frontend && yarn run lint
       - run:
           name: build
-          command: yarn run build
+          command: cd frontend && yarn run build
   tests:
     docker:
       - image: circleci/golang:1.11
@@ -64,22 +59,17 @@ jobs:
   tests-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/infinimesh/frontend/
     steps:
-      - checkout:
-          path: ~/infinimesh/frontend/
-      - run:
-          name: hmmm
-          command: pwd && ls -l
+      - checkout
       - run:
           name: deps
-          command: yarn
+          command: cd frontend && yarn
       - run:
           name: lint
-          command: yarn run lint
+          command: cd frontend && yarn run lint
       - run:
           name: tests
-          command: yarn test
+          command: cd frontend && yarn test
 workflows:
   version: 2
   all:
