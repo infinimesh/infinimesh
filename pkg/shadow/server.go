@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
@@ -79,7 +78,7 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 
 	var reportedValue structpb.Value
 	if err := u.Unmarshal(bytes.NewReader(reportedState.State.State), &reportedValue); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to unmarshal reported JSON from database: %v\n", err)
+		log.Error("Failed to unmarshal reported JSON from database", zap.Error(err))
 	} else {
 		ts, err := ptypes.TimestampProto(reportedState.State.Timestamp)
 		if err != nil {
@@ -94,7 +93,7 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 
 	var desiredValue structpb.Value
 	if err := u.Unmarshal(bytes.NewReader(desiredState.State.State), &desiredValue); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to unmarshal JSON from database: %v\n", err)
+		log.Error("Failed to unmarshal desired JSON from database", zap.Error(err))
 	} else {
 		ts, err := ptypes.TimestampProto(desiredState.State.Timestamp)
 		if err != nil {
@@ -115,7 +114,7 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
 
 	log := s.Log.Named("Patch Desired State Controller")
-	log.Info("Function Invoked", zap.String("Device", request.Id))
+	log.Debug("Function Invoked", zap.String("Device", request.Id))
 
 	// TODO sanity-check request
 
@@ -141,7 +140,7 @@ func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.Pa
 func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
 
 	log := s.Log.Named("Stream State Controller")
-	log.Info("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
+	log.Debug("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
 
 	// TODO validate request/Id
 
@@ -151,10 +150,12 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	} else {
 		subPathReported = "/reported/full"
 	}
-	topicEvents := request.Id + subPathReported
 
+	topicEvents := request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
-	fmt.Printf("topicEvents %v and %v\n", topicEvents, events)
+
+	log.Debug("Streaming Details", zap.String("Topic Events", topicEvents), zap.Any("Events", events))
+
 	defer func() {
 
 		go func() {
@@ -193,20 +194,22 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 		}
 
-		log.Info("Drained Desired Channel")
+		log.Debug("Drained Desired Channel")
 	}()
 outer:
 	for {
-		log.Info("Looping through reported stream")
+		log.Debug("Looping through reported stream")
 		select {
 		case reportedEvent := <-events:
-			log.Info("Inside reported event reading")
-			value, err := toProto(reportedEvent)
+			log.Debug("Inside reported event reading")
+			value, err := toProto(reportedEvent, log)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-			fmt.Printf("Server Reported Value : %v", value)
+
+			log.Debug("Reported", zap.Any("Reported Value", value))
+
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				ReportedState: value,
 			})
@@ -215,13 +218,15 @@ outer:
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
-			log.Info("Inside desired event reading")
-			value, err := toProto(desiredEvent)
+			log.Debug("Inside desired event reading")
+			value, err := toProto(desiredEvent, log)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-			fmt.Printf("Server Desired Value : %v", value)
+
+			log.Debug("Desired", zap.Any("Desired Value", value))
+
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				DesiredState: value,
 			})
@@ -230,7 +235,7 @@ outer:
 				break outer
 			}
 		case <-srv.Context().Done():
-			fmt.Println("DONE")
+			log.Debug("Streaming is Done")
 			break outer
 
 		}
@@ -239,19 +244,19 @@ outer:
 	return nil
 }
 
-func toProto(event interface{}) (result *shadowpb.VersionedValue, err error) {
+func toProto(event interface{}, log *zap.Logger) (result *shadowpb.VersionedValue, err error) {
 	var value structpb.Value
 	if raw, ok := event.(*DeviceStateMessage); ok {
 		var u jsonpb.Unmarshaler
 		err = u.Unmarshal(bytes.NewReader(raw.State), &value)
 		if err != nil {
-			fmt.Println("Failed to unmarshal jsonpb: ", err)
+			log.Error("Failed to unmarshal jsonpb", zap.Error(err))
 			return nil, err
 		}
 
 		ts, err := ptypes.TimestampProto(raw.Timestamp)
 		if err != nil {
-			fmt.Println("Invalid timestamp", err)
+			log.Error("Invalid timestamp", zap.Error(err))
 			return nil, err
 		}
 
