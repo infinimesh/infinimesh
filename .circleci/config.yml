@@ -27,7 +27,7 @@ jobs:
   build-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/project/frontend/frontend
+    working_directory: ~/infinimesh/frontend/
     steps:
       - checkout
       - run:
@@ -63,7 +63,7 @@ jobs:
   tests-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/project/frontend/frontend
+    working_directory: ~/infinimesh/frontend/
     steps:
       - checkout
       - run:
