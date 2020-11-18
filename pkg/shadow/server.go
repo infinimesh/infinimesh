@@ -204,7 +204,7 @@ outer:
 			log.Debug("Inside reported event reading")
 			value, err := toProto(reportedEvent, log)
 			if err != nil {
-				log.Error("Unable to Marshal data", zap.Error(err))
+				log.Error("Unable to Unmarshal data", zap.Error(err))
 				break outer
 			}
 
@@ -214,14 +214,14 @@ outer:
 				ReportedState: value,
 			})
 			if err != nil {
-				log.Error("Unable to Marshal data", zap.Error(err))
+				log.Error("Unable to send Reported data", zap.Error(err))
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
 			log.Debug("Inside desired event reading")
 			value, err := toProto(desiredEvent, log)
 			if err != nil {
-				log.Error("Unable to send Desired data", zap.Error(err))
+				log.Error("Unable to Unmarshal data", zap.Error(err))
 				break outer
 			}
 
