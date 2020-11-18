@@ -40,7 +40,7 @@ type shadowAPI struct {
 func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 
 	//Added logging
-	log.Info("Get State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Get State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -66,7 +66,7 @@ func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (resp
 func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
 
 	//Added logging
-	log.Info("Patch Desired State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Patch Desired State API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -92,7 +92,7 @@ func (s *shadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv apipb.States_StreamReportedStateChangesServer) (err error) {
 
 	//Added logging
-	log.Info("Stream API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
+	log.Debug("Stream API Method: Function Invoked", zap.String("Requestor ID", srv.Context().Value("account_id").(string)))
 
 	account, ok := srv.Context().Value("account_id").(string)
 	if !ok {
@@ -114,7 +114,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 	}
 
 	//Added logging
-	log.Info("Stream API Method: Streaming started")
+	log.Info("Stream API Method: Streaming started", zap.String("Device ID", request.Id))
 
 	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {
