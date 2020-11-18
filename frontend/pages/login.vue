@@ -24,7 +24,7 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your username!',
+                          message: 'Please input your E-Mail',
                         },
                       ],
                     },
@@ -46,7 +46,7 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your Password!',
+                          message: 'Please input your password',
                         },
                       ],
                     },
