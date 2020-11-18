@@ -27,7 +27,7 @@ jobs:
   build-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/project/frontend
+    working_directory: ~/frontend
     steps:
       - checkout
       - run:
@@ -79,3 +79,4 @@ workflows:
       - build
       - build-frontend
       - tests
+      - tests-frontend
