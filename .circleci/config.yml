@@ -27,7 +27,7 @@ jobs:
   build-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/
+    working_directory: ~/project/
     steps:
       - checkout
       - run:
@@ -63,9 +63,12 @@ jobs:
   tests-frontend:
     docker:
       - image: circleci/node:latest
-    working_directory: ~/frontend
+    working_directory: ~/project/frontend
     steps:
       - checkout
+      - run:
+          name: hmmm
+          command: pwd && ls -lR
       - run:
           name: deps
           command: yarn
