@@ -543,7 +543,7 @@ func (s *Server) GetDeviceStatus(ctx context.Context, request *registrypb.GetDev
 	resp, err := s.rep.Get(ctx, &repopb.GetRequest{Id: request.Deviceid})
 	if err != nil {
 		log.Error("Failed to read device status from redis", zap.Error(err))
-		return &registrypb.GetDeviceStatusResponse{Status: false}, err
+		return &registrypb.GetDeviceStatusResponse{Status: true}, err
 	}
 	return &registrypb.GetDeviceStatusResponse{Status: resp.Repo.Enabled}, nil
 }
