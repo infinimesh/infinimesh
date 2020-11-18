@@ -93,7 +93,7 @@ func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath strin
 					fmt.Printf("Invalid message on topic"+topic+" at offset %v, err=%v\n", message.Offset, err)
 					continue
 				}
-				log.Println("Publish message to", zap.String(string(message.Key), subPath), zap.String(string(message.Key), string(deltaMsg.State)))
+
 				ps.Pub(&deltaMsg, string(message.Key)+subPath)
 
 				d := DeviceState(deltaMsg.State)
@@ -177,9 +177,8 @@ func main() {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
-
 	r := httprouter.New()
-	r.HandlerFunc("GET", "/:id", handler)
+	r.HandlerFunc(http.MethodGet, "/:id", handler)
 	err = http.ListenAndServe(":8084", r)
 	if err != nil {
 		panic(err)
@@ -187,7 +186,7 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Content-Type", "text/event-stream") //text/event-stream
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -198,8 +197,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
 		return
 	}
-
-	id := strings.TrimPrefix(r.URL.Path, "/")
+	fmt.Printf("Url Path: %v \n", r.URL.Path)
+	id := strings.TrimPrefix(r.URL.Path, "/devices/")
+	fmt.Printf("Url Path: %v and Id: %v\n", r.URL.Path, id)
 
 	ch := make(chan *DeviceState, 10)
 

@@ -96,12 +96,14 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		zap.Bool("Enabled", request.Device.Enabled.Value),
 	)
 
+	//Data Validation for namespace
 	_, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
 	if err != nil {
 		log.Error("Data Validation for Device Creation", zap.String("Error", "The Namespace cannot not be empty"))
 		return nil, status.Error(codes.FailedPrecondition, "The Namespace cannot not be empty")
 	}
 
+	//Data Validation for certificate
 	if request.Device.Certificate == nil {
 		log.Error("Data Validation for Device Creation", zap.String("Error", "No certificate provided"))
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")

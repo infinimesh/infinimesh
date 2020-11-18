@@ -115,6 +115,7 @@ func (s *shadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 
 	//Added logging
 	log.Info("Stream API Method: Streaming started")
+
 	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {
 		//Added logging
