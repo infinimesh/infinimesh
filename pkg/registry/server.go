@@ -96,12 +96,14 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		zap.Bool("Enabled", request.Device.Enabled.Value),
 	)
 
+	//Data Validation for namespace
 	_, err := s.repo.GetNamespaceID(ctx, request.Device.Namespace)
 	if err != nil {
 		log.Error("Data Validation for Device Creation", zap.String("Error", "The Namespace cannot not be empty"))
 		return nil, status.Error(codes.FailedPrecondition, "The Namespace cannot not be empty")
 	}
 
+	//Data Validation for certificate
 	if request.Device.Certificate == nil {
 		log.Error("Data Validation for Device Creation", zap.String("Error", "No certificate provided"))
 		return nil, status.Error(codes.FailedPrecondition, "No certificate provided")
@@ -529,4 +531,19 @@ func (s *Server) RemoveOwnerDevices(ctx context.Context, request *registrypb.Own
 
 	log.Info("Remove Owner to Device successsful")
 	return &registrypb.OwnershipResponseDevices{}, nil
+}
+
+//return device status from repo
+func (s *Server) GetDeviceStatus(ctx context.Context, request *registrypb.GetDeviceStatusRequest) (response *registrypb.GetDeviceStatusResponse, err error) {
+	log := s.Log.Named("Get Device Status Controller")
+	//Added logging
+	log.Info("Function Invoked", zap.String("Owner", request.Deviceid), zap.String("Device", request.Deviceid))
+
+	//Initialize the Account Controller with Device controller data
+	resp, err := s.rep.Get(ctx, &repopb.GetRequest{Id: request.Deviceid})
+	if err != nil {
+		log.Error("Failed to read device status from redis", zap.Error(err))
+		return &registrypb.GetDeviceStatusResponse{Status: true}, err
+	}
+	return &registrypb.GetDeviceStatusResponse{Status: resp.Repo.Enabled}, nil
 }

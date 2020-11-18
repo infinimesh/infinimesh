@@ -95,7 +95,7 @@ func (r *redisRepo) deleteState(devID string) (err error) {
 	conn := r.pool.Get()
 	defer conn.Close()
 
-	_, err = redis.Bytes(conn.Do("DEL", devID))
+	_, err = redis.Int64(conn.Do("DEL", devID))
 	if err != nil {
 		log.Printf("Error occured while deleting device status from redis " + err.Error())
 		return err

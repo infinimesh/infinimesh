@@ -35,7 +35,6 @@ import (
 	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
@@ -82,7 +81,6 @@ var (
 	kafkaClient sarama.Client
 	producer    sarama.AsyncProducer
 	client      registrypb.DevicesClient
-	rep         repopb.ReposClient
 	debug       bool
 
 	deviceRegistryHost    string
@@ -91,12 +89,14 @@ var (
 	kafkaTopicBackChannel string
 	tlsCertFile           string
 	tlsKeyFile            string
+	dbAddr                string
 
 	ps *pubsub.PubSub
 )
 
 func init() {
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
+	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
 	viper.SetDefault("KAFKA_TOPIC", "mqtt.messages.incoming")
 	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
@@ -110,6 +110,7 @@ func init() {
 	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
+	dbAddr = viper.GetString("DB_ADDR2")
 
 }
 
@@ -158,7 +159,6 @@ func main() {
 		panic(err)
 	}
 	client = registrypb.NewDevicesClient(conn)
-	rep = repopb.NewReposClient(conn)
 
 	conf := sarama.NewConfig()
 	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
@@ -356,12 +356,13 @@ func handleConn(c net.Conn, deviceIDs []string) {
 	topicAliasPublishMap = make(map[string]int)
 
 	for {
-		deviceStatus, err := rep.Get(context.Background(), &repopb.GetRequest{Id: deviceID})
+		deviceStatus, err := client.GetDeviceStatus(context.Background(), &registrypb.GetDeviceStatusRequest{Deviceid: deviceID})
 		if err != nil {
 			fmt.Printf("device status doesn't exist in redis %v\n", err)
 		} else {
-			if !deviceStatus.GetRepo().Enabled {
+			if !deviceStatus.Status {
 				_ = c.Close()
+				break
 			}
 		}
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)

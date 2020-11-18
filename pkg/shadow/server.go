@@ -49,7 +49,7 @@ type Server struct {
 func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 
 	log := s.Log.Named("Get State Controller")
-	log.Info("Function Invoked", zap.String("Device", request.Id))
+	log.Debug("Function Invoked", zap.String("Device", request.Id))
 
 	response = &shadowpb.GetResponse{
 		Shadow: &shadowpb.Shadow{},
@@ -151,11 +151,10 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	} else {
 		subPathReported = "/reported/full"
 	}
-
 	topicEvents := request.Id + subPathReported
+
 	events := s.PubSub.Sub(topicEvents)
-	fmt.Println(topicEvents)
-	fmt.Println(events)
+	fmt.Printf("topicEvents %v and %v\n", topicEvents, events)
 	defer func() {
 
 		go func() {
@@ -180,6 +179,8 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
+	fmt.Println(topicEventsDesired)
+	fmt.Println(eventsDesired)
 	defer func() {
 
 		go func() {
@@ -196,15 +197,16 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	}()
 outer:
 	for {
-
+		log.Info("Looping through reported stream")
 		select {
 		case reportedEvent := <-events:
+			log.Info("Inside reported event reading")
 			value, err := toProto(reportedEvent)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Reported Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				ReportedState: value,
 			})
@@ -213,12 +215,13 @@ outer:
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
+			log.Info("Inside desired event reading")
 			value, err := toProto(desiredEvent)
 			if err != nil {
 				fmt.Println(err)
 				break outer
 			}
-
+			fmt.Printf("Server Desired Value : %v", value)
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
 				DesiredState: value,
 			})
@@ -257,8 +260,7 @@ func toProto(event interface{}) (result *shadowpb.VersionedValue, err error) {
 			Data:      &value,
 			Timestamp: ts, // TODO
 		}, nil
-	} else {
-		return nil, errors.New("Failed type assertion")
 	}
+	return nil, errors.New("Failed type assertion")
 
 }

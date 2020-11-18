@@ -1,0 +1,31 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: harddeletenamespace1
+spec:
+  schedule: "0/1 0 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: harddelete
+            image: curlimages/curl
+            envFrom:
+            - secretRef:
+                name: my-infinimesh-root-account
+            command:
+            - /bin/sh
+            args:
+            - -c
+            - echo START;
+              printenv;
+              echo $MY_INFINIMESH_APISERVER_REST_SERVICE_HOST; 
+              temptoken=`(curl --location --request POST 'https://'"$MY_INFINIMESH_APISERVER_REST_SERVICE_HOST"'/account/token' --header 'Content-Type:application/json' --data-raw '{"password":"'"$password"'","username":"'"$username"'"}' | sed -n '/ *"token":*"/ { s///; s/".*//; p; }')`; 
+              token=`echo "${temptoken:1}"`;
+              echo $token; 
+              curl -X DELETE https://api.infinimesh.dev/namespaces/0xeab0/true -H 'Authorization:bearer '"$token"''; 
+              echo END;
+          restartPolicy: OnFailure
