@@ -49,7 +49,7 @@ type Server struct {
 func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 
 	log := s.Log.Named("Get State Controller")
-	log.Info("Function Invoked", zap.String("Device", request.Id))
+	log.Debug("Function Invoked", zap.String("Device", request.Id))
 
 	response = &shadowpb.GetResponse{
 		Shadow: &shadowpb.Shadow{},

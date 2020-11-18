@@ -90,7 +90,7 @@ var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.U
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		log.Info("GRPC API Server: Validated token Function Invoked", zap.Any("Claims", claims))
+		log.Debug("GRPC API Server: Validated token Function Invoked", zap.Any("Claims", claims))
 
 		if accountID, ok := claims[accountIDClaim]; ok {
 
