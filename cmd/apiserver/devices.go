@@ -83,7 +83,7 @@ func (d *deviceAPI) Update(ctx context.Context, request *registrypb.UpdateReques
 func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (response *registrypb.GetResponse, err error) {
 
 	//Added logging
-	log.Info("Get Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Get Device API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -97,7 +97,7 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 	}
 
 	//Added logging
-	log.Info("Get Device API Method: Device succesfully created")
+	log.Debug("Get Device API Method: Device Details succesfully obtained")
 	return res, nil
 
 }
@@ -106,7 +106,7 @@ func (d *deviceAPI) Get(ctx context.Context, request *registrypb.GetRequest) (re
 func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest) (response *registrypb.ListResponse, err error) {
 
 	//Added logging
-	log.Info("List Devices API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("List Devices API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -120,7 +120,7 @@ func (d *deviceAPI) List(ctx context.Context, request *apipb.ListDevicesRequest)
 	}
 
 	//Added logging
-	log.Info("List Device API Method: Device succesfully listed")
+	log.Debug("List Device API Method: Device succesfully listed")
 	return list, nil
 }
 

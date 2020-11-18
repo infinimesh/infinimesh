@@ -43,7 +43,7 @@ type accountAPI struct {
 func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (response *nodepb.Account, err error) {
 
 	//Added logging
-	log.Info("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Self Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {
@@ -53,7 +53,7 @@ func (a *accountAPI) SelfAccount(ctx context.Context, request *empty.Empty) (res
 	}
 
 	//Added logging
-	log.Info("Self Account API Method: Own Account Details Obtained")
+	log.Debug("Self Account API Method: Own Account Details Obtained")
 	return a.client.GetAccount(ctx, &nodepb.GetAccountRequest{
 		Id: account,
 	})
@@ -64,7 +64,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 	account, ok := ctx.Value("account_id").(string)
 
 	//Added logging
-	log.Info("Get Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Get Account API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	if !ok {
 		//Added logging
@@ -96,7 +96,7 @@ func (a *accountAPI) GetAccount(ctx context.Context, request *nodepb.GetAccountR
 func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (response *apipb.TokenResponse, err error) {
 
 	//Added logging
-	log.Info("Generate Token Method: Function Invoked", zap.String("Requestor ID", request.Username))
+	log.Debug("Generate Token Method: Function Invoked", zap.String("Requestor ID", request.Username))
 
 	resp, err := a.client.Authenticate(ctx, &nodepb.AuthenticateRequest{Username: request.GetUsername(), Password: request.GetPassword()})
 	if err != nil {
@@ -136,7 +136,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		}
 
 		//Added logging
-		log.Info("Generate Token Method: Get Token for the Authenticated User")
+		log.Debug("Generate Token Method: Get Token for the Authenticated User")
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
@@ -149,7 +149,7 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 		}
 
 		//Added logging
-		log.Info("Generate Token Method: Token generation successful")
+		log.Debug("Generate Token Method: Token generation successful")
 		return &apipb.TokenResponse{Token: tokenString}, nil
 	}
 
@@ -248,7 +248,7 @@ func (a *accountAPI) CreateUserAccount(ctx context.Context, request *nodepb.Crea
 func (a *accountAPI) ListAccounts(ctx context.Context, request *nodepb.ListAccountsRequest) (response *nodepb.ListAccountsResponse, err error) {
 
 	//Added logging
-	log.Info("List Accounts API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("List Accounts API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {

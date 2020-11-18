@@ -82,7 +82,7 @@ func (s *AccountController) IsOwnedbyAdmin(ctx context.Context, log *zap.Logger,
 	}
 
 	//Added logging
-	log.Info("Validation for Admin Owned Account", zap.Bool("Validation Result", true))
+	log.Debug("Validation for Admin Owned Account", zap.Bool("Validation Result", true))
 	return true, nil
 }
 
@@ -99,7 +99,7 @@ func (s *AccountController) IsRoot(ctx context.Context, request *nodepb.IsRootRe
 	}
 
 	//Added logging
-	log.Info("Validation for Root Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsRoot))
+	log.Debug("Validation for Root Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsRoot))
 	return &nodepb.IsRootResponse{IsRoot: account.IsRoot}, nil
 }
 
@@ -116,7 +116,7 @@ func (s *AccountController) IsAdmin(ctx context.Context, request *nodepb.IsAdmin
 	}
 
 	//Added logging
-	log.Info("Validation for Admin Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsAdmin))
+	log.Debug("Validation for Admin Account", zap.String("Account", request.Account), zap.Bool("Validation Result", account.IsAdmin))
 	return &nodepb.IsAdminResponse{IsAdmin: account.IsAdmin}, nil
 }
 
@@ -170,7 +170,7 @@ func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nod
 
 	log := s.Log.Named("Authorize Namespace Controller")
 	//Added logging
-	log.Info("Function Invoked",
+	log.Debug("Function Invoked",
 		zap.String("Account", request.Account),
 		zap.String("Namespace", request.Namespace),
 		zap.String("Action", request.Action.String()))
@@ -183,7 +183,7 @@ func (s *AccountController) AuthorizeNamespace(ctx context.Context, request *nod
 	}
 
 	//Added logging
-	log.Info("Account Authorized to Access Namespace")
+	log.Debug("Account Authorized to Access Namespace")
 	return &nodepb.AuthorizeNamespaceResponse{}, nil
 }
 
@@ -205,7 +205,7 @@ func (s *AccountController) Authorize(ctx context.Context, request *nodepb.Autho
 	}
 
 	//Added logging
-	log.Info("Account Authorized to Access Node")
+	log.Debug("Account Authorized to Access Node")
 	return &nodepb.AuthorizeResponse{}, nil
 }
 
@@ -214,7 +214,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 
 	log := s.Log.Named("Is Authorize Namespace Controller")
 	//Added logging
-	log.Info("Function Invoked",
+	log.Debug("Function Invoked",
 		zap.String("Account", request.Account),
 		zap.String("Namespace", request.Namespaceid),
 		zap.String("Action", request.Action.String()))
@@ -229,7 +229,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 
 	//Provide access if the account is root
 	if isroot.GetIsRoot() {
-		log.Info("Authorization check successful for the Account and the Namespace as root")
+		log.Debug("Authorization check successful for the Account and the Namespace as root")
 		return &nodepb.IsAuthorizedNamespaceResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
@@ -243,7 +243,7 @@ func (s *AccountController) IsAuthorizedNamespace(ctx context.Context, request *
 	}
 
 	//Added logging
-	log.Info("Authorization check successful for the Account and the Namespace", zap.Bool("Decision for Access is", decision))
+	log.Debug("Authorization check successful for the Account and the Namespace", zap.Bool("Decision for Access is", decision))
 	return &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
@@ -271,7 +271,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 
 	log := s.Log.Named("Is Authorized Controller")
 	//Added logging
-	log.Info("Function Invoked",
+	log.Debug("Function Invoked",
 		zap.String("Account", request.Account),
 		zap.String("Node", request.Node),
 		zap.String("Action", request.Action.String()))
@@ -285,7 +285,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 
 	if root.GetIsRoot() {
 		//Added logging
-		log.Info("Authorization check successful for the Account and the Node as root account")
+		log.Debug("Authorization check successful for the Account and the Node as root account")
 		return &nodepb.IsAuthorizedResponse{
 			Decision: &wrappers.BoolValue{Value: true},
 		}, nil
@@ -299,7 +299,7 @@ func (s *AccountController) IsAuthorized(ctx context.Context, request *nodepb.Is
 	}
 
 	//Added logging
-	log.Info("Authorization check successful for the Account and the Node")
+	log.Debug("Authorization check successful for the Account and the Node")
 	return &nodepb.IsAuthorizedResponse{Decision: &wrappers.BoolValue{Value: decision}}, nil
 }
 
@@ -308,7 +308,7 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 
 	log := s.Log.Named("Get Account Controller")
 	//Added logging
-	log.Info("Function Invoked", zap.String("Account", request.Id))
+	log.Debug("Function Invoked", zap.String("Account", request.Id))
 
 	account, err := s.Repo.GetAccount(ctx, request.Id)
 	if err != nil {
@@ -318,7 +318,7 @@ func (s *AccountController) GetAccount(ctx context.Context, request *nodepb.GetA
 	}
 
 	//Added logging
-	log.Info("Account details obtained")
+	log.Debug("Account details obtained")
 	return account, nil
 }
 
@@ -346,7 +346,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 
 	log := s.Log.Named("List Accounts Controller")
 	//Added logging
-	log.Info("Function Invoked")
+	log.Debug("Function Invoked")
 
 	//Get metadata and from context and perform validation
 	_, requestorID, err := Validation(ctx, log)
@@ -361,7 +361,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsRoot() {
 		//Get the list if the account has root permissions
-		log.Info("List Accounts with root privilidges")
+		log.Debug("List Accounts with root privilidges")
 		accounts, err = s.Repo.ListAccounts(ctx)
 		if err != nil {
 			//Added logging
@@ -372,7 +372,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 		Account: requestorID,
 	}); err == nil && res.GetIsAdmin() {
 		//Get the list if the account has admin permissions
-		log.Info("List Accounts with admin privilidges")
+		log.Debug("List Accounts with dmin privilidges")
 		accounts, err = s.Repo.ListAccountsforAdmin(ctx, requestorID)
 		if err != nil {
 			//Added logging
@@ -386,7 +386,7 @@ func (s *AccountController) ListAccounts(ctx context.Context, request *nodepb.Li
 	}
 
 	//Added logging
-	log.Info("List Account successful")
+	log.Debug("List Account successful")
 	return &nodepb.ListAccountsResponse{
 		Accounts: accounts,
 	}, nil

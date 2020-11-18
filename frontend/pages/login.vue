@@ -24,7 +24,7 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your username!',
+                          message: 'Please input your E-Mail',
                         },
                       ],
                     },
@@ -46,7 +46,7 @@
                       rules: [
                         {
                           required: true,
-                          message: 'Please input your Password!',
+                          message: 'Please input your password',
                         },
                       ],
                     },
@@ -96,6 +96,15 @@ export default {
       login_progress: false,
       form: this.$form.createForm(this, { name: "login" }),
     };
+  },
+  mounted() {
+    this.$notification.info({
+      placement: "bottomRight",
+      duration: 0,
+      message: "No account yet? Please contact us! Click here",
+      bottom: "42px",
+      onClick: () => window.open("https://infinitedevices.de/en/contact/", "target-new")
+    })
   },
   methods: {
     handleSubmit(e) {

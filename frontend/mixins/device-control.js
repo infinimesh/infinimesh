@@ -9,7 +9,10 @@ export default {
             `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
               this.device.id
             }/state/stream`,
-            ["Bearer", this.$auth.getToken("local").split(" ")[1]]
+            this.$auth
+              .getToken("local")
+              .replace("bearer", "Bearer")
+              .split(" ")
           );
           this.socket.onmessage = msg => {
             let response = JSON.parse(msg.data).result;

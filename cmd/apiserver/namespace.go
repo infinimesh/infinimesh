@@ -38,7 +38,7 @@ type namespaceAPI struct {
 func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListNamespacesRequest) (response *nodepb.ListNamespacesResponse, err error) {
 
 	//Added logging
-	log.Info("List Namespaces API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("List Namespaces API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -52,7 +52,7 @@ func (n *namespaceAPI) ListNamespaces(ctx context.Context, request *nodepb.ListN
 	}
 
 	//Added logging
-	log.Info("List Namespaces API Method: Namespace succesfully listed")
+	log.Debug("List Namespaces API Method: Namespace succesfully listed")
 	return ns, nil
 }
 
@@ -82,7 +82,7 @@ func (n *namespaceAPI) CreateNamespace(ctx context.Context, request *nodepb.Crea
 func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetNamespaceRequest) (response *nodepb.Namespace, err error) {
 
 	//Added logging
-	log.Info("Get Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("Get Namespace API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -96,7 +96,7 @@ func (n *namespaceAPI) GetNamespace(ctx context.Context, request *nodepb.GetName
 	}
 
 	//Added logging
-	log.Info("Get Namespace API Method: Namespace details succesfully obtained")
+	log.Debug("Get Namespace API Method: Namespace details succesfully obtained")
 	return ns, nil
 }
 
@@ -143,7 +143,7 @@ func (n *namespaceAPI) CreatePermission(ctx context.Context, request *apipb.Crea
 func (n *namespaceAPI) ListPermissions(ctx context.Context, request *nodepb.ListPermissionsRequest) (response *nodepb.ListPermissionsResponse, err error) {
 
 	//Added logging
-	log.Info("List Permissions API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("List Permissions API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	account, ok := ctx.Value("account_id").(string)
 	if !ok {

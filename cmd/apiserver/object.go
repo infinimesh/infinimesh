@@ -70,7 +70,7 @@ func (o *objectAPI) CreateObject(ctx context.Context, request *apipb.CreateObjec
 func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsRequest) (response *nodepb.ListObjectsResponse, err error) {
 
 	//Added logging
-	log.Info("List Objects API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
+	log.Debug("List Objects API Method: Function Invoked", zap.String("Requestor ID", ctx.Value("account_id").(string)))
 
 	//Added the requestor account id to context metadata so that it can be passed on to the server
 	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", ctx.Value("account_id").(string))
@@ -84,7 +84,7 @@ func (o *objectAPI) ListObjects(ctx context.Context, request *apipb.ListObjectsR
 	}
 
 	//Added logging
-	log.Info("List Objects API Method: List Objects succesfull")
+	log.Debug("List Objects API Method: List Objects succesfull")
 	return obj, nil
 }
 

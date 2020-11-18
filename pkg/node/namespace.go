@@ -117,7 +117,7 @@ func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodep
 
 	log := n.Log.Named("List Namespaces Controller")
 	//Added logging
-	log.Info("Function Invoked")
+	log.Debug("Function Invoked")
 
 	//Get metadata and from context and perform validation
 	_, requestorID, err := Validation(ctx, log)
@@ -163,7 +163,7 @@ func (n *NamespaceController) ListNamespaces(ctx context.Context, request *nodep
 	}
 
 	//Added logging
-	log.Info("List Namespaces successful")
+	log.Debug("List Namespaces successful")
 	return &nodepb.ListNamespacesResponse{
 		Namespaces: namespaces,
 	}, nil
@@ -175,7 +175,7 @@ func (n *NamespaceController) GetNamespace(ctx context.Context, request *nodepb.
 	log := n.Log.Named("Get Namespace using name Controller")
 
 	//Added logging
-	log.Info("Function Invoked", zap.String("Namespace", request.Namespace))
+	log.Debug("Function Invoked", zap.String("Namespace", request.Namespace))
 
 	//Get metadata and from context and perform validation
 	_, requestorID, err := Validation(ctx, log)
@@ -223,7 +223,7 @@ func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodep
 	log := n.Log.Named("Get Namespace using ID Controller")
 
 	//Added logging
-	log.Info("Function Invoked", zap.String("Namespace", request.Namespace))
+	log.Debug("Function Invoked", zap.String("Namespace", request.Namespace))
 
 	namespace, err := n.Repo.GetNamespaceID(ctx, request.GetNamespace())
 	if err != nil {
@@ -232,7 +232,7 @@ func (n *NamespaceController) GetNamespaceID(ctx context.Context, request *nodep
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	//Added logging
-	log.Info("Get Namespace using ID successful")
+	log.Debug("Get Namespace using ID successful")
 	return namespace, nil
 }
 
@@ -241,7 +241,7 @@ func (n *NamespaceController) ListPermissions(ctx context.Context, request *node
 
 	log := n.Log.Named("List Permissions Controller")
 	//Added logging
-	log.Info("Function Invoked", zap.String("Namespace", request.Namespace))
+	log.Debug("Function Invoked", zap.String("Namespace", request.Namespace))
 
 	permissions, err := n.Repo.ListPermissionsInNamespace(ctx, request.Namespace)
 	if err != nil {
@@ -251,7 +251,7 @@ func (n *NamespaceController) ListPermissions(ctx context.Context, request *node
 	}
 
 	//Added logging
-	log.Info("List Permissions successful")
+	log.Debug("List Permissions successful")
 	return &nodepb.ListPermissionsResponse{Permissions: permissions}, nil
 }
 
