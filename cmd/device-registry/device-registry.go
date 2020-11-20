@@ -74,7 +74,7 @@ func main() {
 		log.Error("Failed to connect to redis2", zap.Error(err))
 		rep, err = repo.NewRedisRepo("infinimesh-cloud-redis-device-details-0:6379")
 		if err != nil {
-			log.Error("Failed to connect to redis2 on cloud", zap.Error(err))
+			log.Error("Failed to connect to redisdb on cloud", zap.Error(err))
 		}
 	}
 	repServ := repo.Server{
