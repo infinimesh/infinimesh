@@ -45,9 +45,10 @@ func newPool(server string) *redis.Pool {
 }
 
 func NewRedisRepo(addr string) (repo Repo, err error) {
-	return &redisRepo{
+	repConn := &redisRepo{
 		pool: newPool(addr),
-	}, nil
+	}
+	return repConn, repConn.pool.Get().Err()
 }
 func (r *redisRepo) SetDeviceStatus(d DeviceState) (err error) {
 	return r.setState(d)
@@ -61,7 +62,6 @@ func (r *redisRepo) DeleteDeviceStatus(id string) (err error) {
 func (r *redisRepo) getState(devID string) (d DeviceState, err error) {
 	conn := r.pool.Get()
 	defer conn.Close()
-
 	bytes, err := redis.Bytes(conn.Do("GET", devID))
 	if err != nil {
 		log.Printf("Error occured while getting device status from redis " + err.Error())
