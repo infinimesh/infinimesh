@@ -318,7 +318,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	}
 
 	//Validate that namespace is not root
-	if namespace.Name == "root" {
+	if namespace.Name == "root" && !request.Harddelete {
 		//Added logging
 		log.Error("Cannot delete root Namespace")
 		return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Namespace")
