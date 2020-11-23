@@ -487,7 +487,7 @@ func TestDeleteNamespace(t *testing.T) {
 	require.NoError(t, err)
 
 	//Delete the Namespace marked for deletion - Will not work for test
-	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, int(nsNew.RetentionPeriod)).Format(time.RFC3339))
+	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, -int(nsNew.RetentionPeriod)).Format(time.RFC3339))
 
 	//Try to fetch the deleted namespace
 	nsNew, err = repo.GetNamespaceID(ctx, nsID)
@@ -608,10 +608,6 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 
 	//Try to fetch the deleted namespace
 	nsNew, err = repo.GetNamespaceID(ctx, nsID)
-	require.NoError(t, err)
-
-	//Delete the Account created
-	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 	require.NoError(t, err)
 
 	//Validation for revoke
