@@ -338,10 +338,6 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 
-	//Create account for test
-	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
-	require.NoError(t, err)
-
 	//Set metadata for context
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
 	request := &registrypb.CreateRequest{
