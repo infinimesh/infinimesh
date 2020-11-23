@@ -337,7 +337,16 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
+
+	randomName := randomdata.SillyName()
+
+	//Create account for test
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, false, true)
+	require.NoError(t, err)
+
+	//Set metadata for context
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
 	request := &registrypb.CreateRequest{
 		Device: sampleDevice(randomdata.SillyName(), "0x1"),
 	}
@@ -355,6 +364,9 @@ func TestDelete(t *testing.T) {
 		Id: response.Device.Id,
 	})
 	require.Error(t, err)
+
+	//Delete the Account created
+	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
 /*

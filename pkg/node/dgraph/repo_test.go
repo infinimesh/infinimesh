@@ -562,15 +562,15 @@ for the endpoints which does not happen in above tests
 func TestDeleteNamespaceGRPC(t *testing.T) {
 	ctx := context.Background()
 
+	//Random name for the namespace
+	ns := randomdata.SillyName()
+
 	// Create Account
 	account, err := repo.CreateUserAccount(ctx, ns, "password", true, false, true)
 	require.NoError(t, err)
 
 	//Set the metadata for the context
 	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": account}))
-
-	//Random name for the namespace
-	ns := randomdata.SillyName()
 
 	//Create Namespace
 	nsID, err := repo.CreateNamespace(ctx, ns)
