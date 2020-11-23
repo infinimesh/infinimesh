@@ -57,7 +57,7 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
   fingerprint: string @index(exact) .
   certificates: uid @reverse .
   password: password .`
-	fmt.Println("Apply schema ", schema)
+	fmt.Println("Apply Dgraph schema ", schema)
 	return dg.Alter(context.Background(), &api.Operation{
 		Schema: schema,
 	})
