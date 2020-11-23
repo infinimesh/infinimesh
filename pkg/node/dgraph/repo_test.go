@@ -576,7 +576,7 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	nsID, err := repo.CreateNamespace(ctx, ns)
 	require.NoError(t, err)
 
-	//Try to fetch the namespace before delete
+	//Try to fetch the namespace before delete.
 	nsNew, err := repo.GetNamespaceID(ctx, nsID)
 	require.NoError(t, err)
 
