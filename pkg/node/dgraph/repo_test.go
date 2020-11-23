@@ -562,8 +562,12 @@ for the endpoints which does not happen in above tests
 func TestDeleteNamespaceGRPC(t *testing.T) {
 	ctx := context.Background()
 
+	// Create Account
+	account, err := repo.CreateUserAccount(ctx, ns, "password", true, false, true)
+	require.NoError(t, err)
+
 	//Set the metadata for the context
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": account}))
 
 	//Random name for the namespace
 	ns := randomdata.SillyName()
@@ -602,8 +606,12 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	err = repo.RevokeNamespace(ctx, nsID)
 	require.NoError(t, err)
 
-	//Try to fetch the delete account
+	//Try to fetch the deleted namespace
 	nsNew, err = repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
 	require.NoError(t, err)
 
 	//Validation for revoke
