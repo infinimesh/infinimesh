@@ -198,7 +198,8 @@ message Namespace {
   string id = 1;
   string name = 2;
   bool markfordeletion = 3;
-	string deleteinitiationtime = 4;
+  string deleteinitiationtime = 4;
+  int32 RetentionPeriod= 5;
 }
 
 message CreateNamespaceRequest {

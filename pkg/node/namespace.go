@@ -342,7 +342,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		if request.Harddelete {
 			//Set the datecondition to 14days back date
 			//This is to ensure that records that are older then 14 days or more will be only be deleted.
-			datecondition := time.Now().AddDate(0, 0, -14).Format(time.RFC3339)
+			datecondition := time.Now().AddDate(0, 0, -int(namespace.RetentionPeriod)).Format(time.RFC3339)
 
 			//Added logging
 			log.Info("Hard Delete Process Invoked")

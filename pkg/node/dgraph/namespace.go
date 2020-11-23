@@ -45,6 +45,7 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 		Name:                 name,
 		MarkForDeletion:      false,
 		DeleteInitiationTime: "0000-01-01T00:00:00Z",
+		RetentionPeriod:      14,
 	}
 
 	txn := s.Dg.NewTxn()
@@ -83,6 +84,7 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 					name
 					markfordeletion
 					deleteinitiationtime
+					retentionperiod
 	             }
                    }`
 
@@ -119,6 +121,7 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 						name
 						markfordeletion
 						deleteinitiationtime
+						retentionperiod
 	             }
                    }`
 
@@ -155,6 +158,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 						name
 						markfordeletion
 						deleteinitiationtime
+						retentionperiod
 	             }
                    }`
 
@@ -276,6 +280,7 @@ func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID str
 			name : name
 			markfordeletion : markfordeletion
 			deleteinitiationtime : deleteinitiationtime
+			retentionperiod: retentionperiod
 		  }
 		}
 	  }`
@@ -508,6 +513,13 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 				Predicate:   "deleteinitiationtime",
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Deleteinitiationtime}},
+			})
+		case "retentionperiod":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "retentionperiod",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_IntVal{IntVal: int64(namespace.Namespace.RetentionPeriod)}},
 			})
 		}
 	}
