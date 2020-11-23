@@ -207,6 +207,9 @@ components:
       type: object
     nodeNamespace:
       properties:
+        RetentionPeriod:
+          format: int32
+          type: integer
         deleteinitiationtime:
           type: string
         id:
@@ -776,10 +779,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeAccount'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -793,6 +802,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/apiTokenRequest'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/apiTokenRequest'
         required: true
       responses:
         '200':
@@ -800,10 +812,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/apiTokenResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/apiTokenResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -818,10 +836,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeListAccountsResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeListAccountsResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -834,6 +858,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/nodeCreateUserAccountRequest'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/nodeCreateUserAccountRequest'
         required: true
       responses:
         '200':
@@ -841,10 +868,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeCreateUserAccountResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeCreateUserAccountResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -864,6 +897,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/nodeAccount'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/nodeAccount'
         required: true
       responses:
         '200':
@@ -871,10 +907,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeUpdateAccountResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeUpdateAccountResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -900,10 +942,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeOwnershipResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeOwnershipResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -928,10 +976,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeOwnershipResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeOwnershipResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -952,10 +1006,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeAccount'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeAccount'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -982,10 +1042,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeDeleteAccountResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeDeleteAccountResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1006,10 +1072,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryListResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryListResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1022,6 +1094,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/deviceregistryCreateRequest'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/deviceregistryCreateRequest'
         required: true
       responses:
         '200':
@@ -1029,10 +1104,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryCreateResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryCreateResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1052,6 +1133,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/deviceregistryDevice'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/deviceregistryDevice'
         required: true
       responses:
         '200':
@@ -1059,10 +1143,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryUpdateResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryUpdateResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1088,10 +1178,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1116,10 +1212,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryOwnershipResponseDevices'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1140,10 +1242,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/deviceregistryDeleteResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/deviceregistryDeleteResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1163,10 +1271,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/infinimeshdeviceregistryGetResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1187,10 +1301,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/infinimeshshadowGetResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/infinimeshshadowGetResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1209,6 +1329,9 @@ paths:
           application/json:
             schema:
               type: object
+          text/event-stream:
+            schema:
+              type: object
         required: true
       responses:
         '200':
@@ -1216,10 +1339,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/shadowPatchDesiredStateResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1253,10 +1382,23 @@ paths:
                       #/components/schemas/shadowStreamReportedStateChangesResponse
                 title: Stream result of shadowStreamReportedStateChangesResponse
                 type: object
+            text/event-stream:
+              schema:
+                properties:
+                  error:
+                    $ref: '#/components/schemas/runtimeStreamError'
+                  result:
+                    $ref: >-
+                      #/components/schemas/shadowStreamReportedStateChangesResponse
+                title: Stream result of shadowStreamReportedStateChangesResponse
+                type: object
           description: A successful response.(streaming responses)
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1271,10 +1413,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeListNamespacesResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeListNamespacesResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1287,6 +1435,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/nodeCreateNamespaceRequest'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/nodeCreateNamespaceRequest'
         required: true
       responses:
         '200':
@@ -1294,10 +1445,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeNamespace'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeNamespace'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1317,6 +1474,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/nodeNamespace'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/nodeNamespace'
         required: true
       responses:
         '200':
@@ -1324,10 +1484,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeUpdateNamespaceResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeUpdateNamespaceResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1354,10 +1520,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeDeleteNamespaceResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeDeleteNamespaceResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1378,10 +1550,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeNamespace'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeNamespace'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1402,10 +1580,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeListPermissionsResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeListPermissionsResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1431,10 +1615,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeDeletePermissionResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeDeletePermissionResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1458,6 +1648,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/infinimeshapiPermission'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/infinimeshapiPermission'
         required: true
       responses:
         '200':
@@ -1465,10 +1658,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/apiCreateNamespacePermissionResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/apiCreateNamespacePermissionResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1495,10 +1694,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeListObjectsResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeListObjectsResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1511,6 +1716,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
+          text/event-stream:
+            schema:
+              $ref: '#/components/schemas/infinimeshapiCreateObjectRequest'
         required: true
       responses:
         '200':
@@ -1518,10 +1726,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeObject'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeObject'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1542,10 +1756,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/nodeDeleteObjectResponse'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/nodeDeleteObjectResponse'
           description: A successful response.
         default:
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeError'
+            text/event-stream:
               schema:
                 $ref: '#/components/schemas/runtimeError'
           description: An unexpected error response
@@ -1553,7 +1773,6 @@ paths:
         - Objects
 servers:
   - url: 'http://localhost:8081'
-  - url: 'https://api.infinimesh.dev/'
   - url: 'https://api.infinimesh.io/'
 security:
   - bearerAuth: []

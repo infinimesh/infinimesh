@@ -30,7 +30,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
+	"github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/node"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
@@ -50,6 +52,10 @@ func init() {
 
 	dg := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 	repo = NewDGraphRepo(dg)
+
+	n.Repo = repo
+	log, err := log.NewProdOrDev()
+	n.Log = log.Named("Repo Test Node Server")
 }
 
 //test for Authorize
@@ -472,15 +478,19 @@ func TestDeleteNamespace(t *testing.T) {
 	nsID, err := repo.CreateNamespace(ctx, ns)
 	require.NoError(t, err)
 
+	//Try to fetch the namespace before delete
+	nsNew, err := repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
 	//Mark the Namespace for deletion
 	err = repo.SoftDeleteNamespace(ctx, nsID)
 	require.NoError(t, err)
 
 	//Delete the Namespace marked for deletion - Will not work for test
-	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, -14).Format(time.RFC3339))
+	err = repo.HardDeleteNamespace(ctx, time.Now().AddDate(0, 0, int(nsNew.RetentionPeriod)).Format(time.RFC3339))
 
-	//Try to fetch the delete account
-	nsNew, err := repo.GetNamespaceID(ctx, nsID)
+	//Try to fetch the deleted namespace
+	nsNew, err = repo.GetNamespaceID(ctx, nsID)
 	require.NoError(t, err)
 
 	//Validation for Soft delete
@@ -540,6 +550,66 @@ func TestUpdateNamespace(t *testing.T) {
 	//Delete the Namesapce created using namespace controller
 	err = repo.SoftDeleteNamespace(ctx, ns)
 	require.NoError(t, err)
+}
+
+/*
+Below Tests invoke the GRPC Endpoints rather then the direct Dgraph Methods
+The Benefit is that below test will go through the validation required for
+for the endpoints which does not happen in above tests
+*/
+
+//TestDeleteNamespaceGRPC Endpoint check for delete namespace
+func TestDeleteNamespaceGRPC(t *testing.T) {
+	ctx := context.Background()
+
+	//Set the metadata for the context
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
+
+	//Random name for the namespace
+	ns := randomdata.SillyName()
+
+	//Create Namespace
+	nsID, err := repo.CreateNamespace(ctx, ns)
+	require.NoError(t, err)
+
+	//Try to fetch the namespace before delete
+	nsNew, err := repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Invoke Soft Delete to mark the namespace for deletion
+	_, err = n.DeleteNamespace(ctx, &nodepb.DeleteNamespaceRequest{
+		Namespaceid: nsID,
+		Harddelete:  false,
+	})
+	require.NoError(t, err)
+
+	//HardDelete the Namespace marked for deletion - Will not work for test
+	_, err = n.DeleteNamespace(ctx, &nodepb.DeleteNamespaceRequest{
+		Namespaceid: nsID,
+		Harddelete:  true,
+	})
+
+	//Try to fetch the deleted namespace
+	nsNew, err = repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Validation for Soft delete
+	require.EqualValues(t, ns, nsNew.Name)
+	require.EqualValues(t, true, nsNew.Markfordeletion)
+	//Not doing time validation as its difficult to get the time when the delete was initiated
+	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
+
+	err = repo.RevokeNamespace(ctx, nsID)
+	require.NoError(t, err)
+
+	//Try to fetch the delete account
+	nsNew, err = repo.GetNamespaceID(ctx, nsID)
+	require.NoError(t, err)
+
+	//Validation for revoke
+	require.EqualValues(t, false, nsNew.Markfordeletion)
+	require.EqualValues(t, nsNew.Deleteinitiationtime, "0000-01-01T00:00:00Z")
+
 }
 
 /*//Test to check API Endpoints

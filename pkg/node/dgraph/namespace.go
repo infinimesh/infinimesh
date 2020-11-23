@@ -144,6 +144,7 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 			Name:                 resultSet.Namespaces[0].Name,
 			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
 			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
+			RetentionPeriod:      resultSet.Namespaces[0].RetentionPeriod,
 		}, nil
 	}
 
@@ -359,7 +360,8 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	txn := s.Dg.NewReadOnlyTxn()
 	var q = `query deleteNodes{
         nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v") and Not eq(name,"root")) @normalize {
-          uid
+		  uid
+		  retentionperiod
         owns {
           uid
         }
@@ -379,7 +381,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	}
 
 	var result struct {
-		Nodes []*Node `json:"nodes"`
+		Nodes []*Namespace `json:"nodes"`
 	}
 
 	err = json.Unmarshal(res.Json, &result)
