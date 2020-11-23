@@ -563,7 +563,7 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	ctx := context.Background()
 
 	//Set the metadata for the context
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x2"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
 
 	//Random name for the namespace
 	ns := randomdata.SillyName()
