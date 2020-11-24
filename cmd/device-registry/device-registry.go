@@ -45,12 +45,11 @@ func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
-	//viper.SetDefault("DB_ADDR2", ":6379")
+	viper.SetDefault("DB_ADDR2", ":6379")
 
 	dgraphURL = viper.GetString("DGRAPH_HOST")
 	port = viper.GetString("PORT")
-	//dbAddr = viper.GetString("DB_ADDR2")
-	dbAddr = "redisdb2-0.redisdb2.default.svc.cluster.local:6379"
+	dbAddr = viper.GetString("DB_ADDR2")
 }
 
 func main() {
