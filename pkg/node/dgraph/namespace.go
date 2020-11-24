@@ -399,50 +399,6 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	return err
 }
 
-//RevokeNamespace is a method to execute Dgraph Query that nmarks the Namespace from deletion
-func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (err error) {
-	txn := s.Dg.NewReadOnlyTxn()
-
-	const q = `query revokeNodes($namespaceID: string){
-        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
-          uid
-        }
-      }
-      `
-
-	res, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$namespaceID": namespaceID,
-	})
-	if err != nil {
-		return err
-	}
-
-	var result struct {
-		Nodes []*Node `json:"nodes"`
-	}
-
-	err = json.Unmarshal(res.Json, &result)
-	if err != nil {
-		return err
-	}
-
-	if len(result.Nodes) != 1 {
-		return status.Error(codes.NotFound, "The Namespace is not found")
-	}
-
-	err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
-		Namespace: &nodepb.Namespace{
-			Id:                   namespaceID,
-			Markfordeletion:      false,
-			Deleteinitiationtime: "0000",
-		},
-		NamespaceMask: &field_mask.FieldMask{
-			Paths: []string{"markfordeletion", "deleteinitiationtime"},
-		},
-	})
-	return err
-}
-
 //UpdateNamespace is a method to execute Dgraph Query to Udpdate details of an Namespace
 func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error) {
 
