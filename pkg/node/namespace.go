@@ -340,24 +340,53 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 	if resp.GetDecision().GetValue() && (isroot.GetIsRoot() || isadmin.GetIsAdmin()) {
 		//Action to perform when delete is issued instead of revoke
 		if request.Harddelete {
-			//Set the datecondition to 14days back date
-			//This is to ensure that records that are older then 14 days or more will be only be deleted.
-			datecondition := time.Now().AddDate(0, 0, -14).Format(time.RFC3339)
 
-			//Added logging
-			log.Info("Hard Delete Process Invoked")
-			//Invokde Hardelete function with the date conidtion
-			err = n.Repo.HardDeleteNamespace(ctx, datecondition)
+			response, err := n.Repo.GetRetentionPeriods(ctx)
 			if err != nil {
-				if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
-					//Added logging
-					log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-					return nil, status.Error(codes.Internal, err.Error())
+				//Added logging
+				log.Error("Unable to get Retention Period for Hard Delete process", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			if !(len(response) > 0) {
+				//Added logging
+				log.Error("No Retention Period obtained for hard Delete", zap.Error(err))
+				return nil, status.Error(codes.Internal, err.Error())
+			}
+
+			//Remove Duplicate values from the response
+			resMap := map[int]bool{}
+			rententionPeriod := []int{}
+			for v := range response {
+				if resMap[response[v]] == true {
 				} else {
-					log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-					return nil, status.Error(codes.Internal, err.Error())
+					resMap[response[v]] = true
+					rententionPeriod = append(rententionPeriod, response[v])
 				}
 			}
+
+			for _, rp := range rententionPeriod {
+
+				//Set the datecondition as per the retnetion period for each namespace
+				//This is to ensure that records that are older then rentention period or more will be only be deleted.
+				datecondition := time.Now().AddDate(0, 0, -rp).Format(time.RFC3339)
+
+				//Added logging
+				log.Info("Hard Delete Process Invoked")
+				//Invokde Hardelete function with the date conidtion
+				err = n.Repo.HardDeleteNamespace(ctx, datecondition)
+				if err != nil {
+					if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
+						//Added logging
+						log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+						return nil, status.Error(codes.Internal, err.Error())
+					} else {
+						log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
+						return nil, status.Error(codes.Internal, err.Error())
+					}
+				}
+			}
+
 			//Added logging
 			log.Info("Hard Delete Process Successful")
 		} else {

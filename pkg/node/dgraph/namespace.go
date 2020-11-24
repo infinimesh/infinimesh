@@ -274,7 +274,7 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 //ListNamespacesForAccount is a method to execute Dgraph Query to list Namespaces for an Account
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
-	const q = `query listNamespaces($account: string) {
+	const q = `query listNamespacesforAccount($account: string) {
 		namespaces(func: uid($account)) @normalize @cascade  {
 		  access.to.namespace @filter(eq(type, "namespace") and Not eq(name,"root")) @facets(NOT eq(permission,"NONE")) {
 			uid : uid
@@ -487,4 +487,36 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 	}
 
 	return nil
+}
+
+//GetRetentionPeriods is a method to get all the different retention periods for the namespaces
+func (s *DGraphRepo) GetRetentionPeriods(ctx context.Context) (retentionperiod []int, err error) {
+	const q = `query GetRetentionPeriods {
+		node(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") and Not eq(name,"root")) {
+			uid
+			retentionperiod
+		}
+    }`
+
+	res, err := s.Dg.NewReadOnlyTxn().Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		RPdetails []struct {
+			Namespaceid     string `json:"uid"`
+			Retentionperiod int    `json:"retentionperiod"`
+		} `json:"node"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, rp := range resultSet.RPdetails {
+		retentionperiod = append(retentionperiod, rp.Retentionperiod)
+	}
+
+	return retentionperiod, nil
 }
