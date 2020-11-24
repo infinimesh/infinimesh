@@ -57,7 +57,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	log.Info("Connecting to dgraph", zap.String("URL", dgraphURL))
 	conn, err := grpc.Dial(dgraphURL, grpc.WithInsecure())
 	if err != nil {
