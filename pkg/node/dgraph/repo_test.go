@@ -499,6 +499,18 @@ func TestDeleteNamespace(t *testing.T) {
 	//Not doing time validation as its difficult to get the time when the delete was initiated
 	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
 
+	//Issue Revoke using the Update the Namespace
+	err = repo.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:              nsID,
+			Markfordeletion: false,
+		},
+		NamespaceMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "MarkforDeletion"},
+		},
+	})
+	require.NoError(t, err)
+
 	//Try to fetch the delete account
 	nsNew, err = repo.GetNamespaceID(ctx, nsID)
 	require.NoError(t, err)
@@ -599,6 +611,18 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	require.EqualValues(t, true, nsNew.Markfordeletion)
 	//Not doing time validation as its difficult to get the time when the delete was initiated
 	//require.EqualValues(t, nsNew.Deleteinitiationtime, ns)
+
+	//Issue Revoke using the Update the Namespace
+	err = repo.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
+		Namespace: &nodepb.Namespace{
+			Id:              nsID,
+			Markfordeletion: false,
+		},
+		NamespaceMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "MarkforDeletion"},
+		},
+	})
+	require.NoError(t, err)
 
 	//Try to fetch the deleted namespace
 	nsNew, err = repo.GetNamespaceID(ctx, nsID)
