@@ -575,7 +575,7 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	ns := randomdata.SillyName()
 
 	// Create Account
-	account, err := repo.CreateUserAccount(ctx, ns, "password", true, false, true)
+	account, err := repo.CreateUserAccount(ctx, ns, "password", false, true, true)
 	require.NoError(t, err)
 
 	//Set the metadata for the context
@@ -583,6 +583,9 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 
 	//Create Namespace
 	nsID, err := repo.CreateNamespace(ctx, ns)
+	require.NoError(t, err)
+
+	err = repo.Authorize(ctx, account, nsID, "WRITE", true)
 	require.NoError(t, err)
 
 	//Try to fetch the namespace before delete.
@@ -619,7 +622,7 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 			Markfordeletion: false,
 		},
 		NamespaceMask: &field_mask.FieldMask{
-			Paths: []string{"Name", "MarkforDeletion"},
+			Paths: []string{"MarkforDeletion"},
 		},
 	})
 	require.NoError(t, err)
@@ -632,6 +635,22 @@ func TestDeleteNamespaceGRPC(t *testing.T) {
 	require.EqualValues(t, false, nsNew.Markfordeletion)
 	require.EqualValues(t, nsNew.Deleteinitiationtime, "0000-01-01T00:00:00Z")
 
+	//Update the account to remove priviledges
+	err = repo.UpdateAccount(context.Background(), &nodepb.UpdateAccountRequest{
+		Account: &nodepb.Account{
+			Uid:     account,
+			Enabled: false,
+			IsAdmin: false,
+		},
+		FieldMask: &field_mask.FieldMask{
+			Paths: []string{"Name", "Enabled", "Is_Root", "Is_Admin"},
+		},
+	}, false)
+	require.NoError(t, err)
+
+	//Delete the Account created
+	err = repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: account})
+	require.NoError(t, err)
 }
 
 /*//Test to check API Endpoints
