@@ -45,12 +45,11 @@ func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("DGRAPH_HOST", "localhost:9080")
-	//viper.SetDefault("DB_ADDR2", ":6379")
+	viper.SetDefault("DB_ADDR2", ":6379")
 
 	dgraphURL = viper.GetString("DGRAPH_HOST")
 	port = viper.GetString("PORT")
-	//dbAddr = viper.GetString("DB_ADDR2")
-	dbAddr = "infinimesh-cloud-redis-device-details:6379"
+	dbAddr = viper.GetString("DB_ADDR2")
 }
 
 func main() {
@@ -71,12 +70,7 @@ func main() {
 
 	rep, err := repo.NewRedisRepo(dbAddr)
 	if err != nil {
-		log.Error("Failed to connect to redis2", zap.Error(err))
-		rep, err = repo.NewRedisRepo("my-infinimesh-redis-device-details:6379")
-		if err != nil {
-			log.Error("Failed to connect to redisdb on cloud", zap.Error(err))
-		}
-
+		log.Fatal("Failed to connect to redis2 with db addr", zap.Error(err))
 	}
 	repServ := repo.Server{
 		Repo: rep,
