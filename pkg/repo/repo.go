@@ -45,9 +45,10 @@ func newPool(server string) *redis.Pool {
 }
 
 func NewRedisRepo(addr string) (repo Repo, err error) {
-	return &redisRepo{
+	repConn := &redisRepo{
 		pool: newPool(addr),
-	}, nil
+	}
+	return repConn, repConn.pool.Get().Err()
 }
 func (r *redisRepo) SetDeviceStatus(d DeviceState) (err error) {
 	return r.setState(d)
