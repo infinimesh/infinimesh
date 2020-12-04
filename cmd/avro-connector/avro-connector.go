@@ -40,7 +40,6 @@ const (
 )
 
 var (
-	addr          string
 	broker        string
 	avroClient    avropb.AvroreposClient
 	consumerGroup string
