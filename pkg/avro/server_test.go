@@ -17,14 +17,9 @@
 
 package avro
 
+/*
 import (
-	"context"
-	"fmt"
-	"testing"
-
 	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
-	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
 )
 
 var (
@@ -39,6 +34,7 @@ func init() {
 	stateClient = avropb.NewAvroreposClient(conn)
 }
 
+
 func TestSetGet(t *testing.T) {
 	// gRPC client usage
 	response, err := stateClient.SetDeviceState(context.TODO(), &avropb.SaveDeviceStateRequest{DeviceId: "0x1",
@@ -50,3 +46,4 @@ func TestSetGet(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println("device status updated", response.GetStatus())
 }
+*/
