@@ -99,12 +99,14 @@ export default {
   },
   mounted() {
     this.$notification.info({
+      key: "not-registered",
       placement: "bottomRight",
       duration: 0,
       message: "No account yet? Please contact us! Click here",
       bottom: "42px",
-      onClick: () => window.open("https://infinitedevices.de/en/contact/", "target-new")
-    })
+      onClick: () =>
+        window.open("https://infinitedevices.de/en/contact/", "target-new"),
+    });
   },
   methods: {
     handleSubmit(e) {
@@ -115,6 +117,10 @@ export default {
           try {
             let res = await this.$auth.loginWith("local", {
               data: values,
+            });
+            this.$notification.info({
+              key: "not-registered",
+              duration: 1,
             });
             this.$router.push("/dashboard/devices");
           } catch (e) {
