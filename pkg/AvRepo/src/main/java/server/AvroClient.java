@@ -58,7 +58,7 @@ public class AvroClient {
                     .setNamespaceId("0x3")
     								.setDs(DeviceState.newBuilder()
     										.setDesiredState(ByteString.EMPTY)
-    										.setReportedState(ByteString.EMPTY)
+    										.setReportedState(ByteString.copyFromUtf8("I am first one"))
     										.build()
     										)
     								.build();

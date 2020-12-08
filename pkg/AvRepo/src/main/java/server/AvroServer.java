@@ -17,7 +17,6 @@
 //--------------------------------------------------------------------------
 */
 
-
 package main.java.server;
 
 import java.io.File;
@@ -25,15 +24,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 
+import com.google.api.client.util.DateTime;
+
+import org.apache.commons.logging.Log;
+import org.apache.hadoop.util.Time;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
+import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.DatumWriter;
+import org.apache.avro.reflect.ReflectDatumWriter;
+import org.apache.avro.specific.SpecificDatumWriter;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -114,31 +120,38 @@ public class AvroServer {
         }
         private Boolean saveDatoToAvroFile(SaveDeviceStateRequest req) throws IOException{
           // Serialize ds1, ds2 to disk
-          Schema schema = null;
+          /*Schema schema = null;
           try{
             schema = new Parser().parse(new File("pkg//AvRepo//src//main//java//schema//DeviceState.avsc"));
           }
           catch(FileNotFoundException e){
             log.error(e.getMessage());
             return false;
-          }
+          }*/
           //Construct via builder
           DeviceState ds = DeviceState.newBuilder()
                           .setDeviceId(req.getDeviceId())
-                          .setNamespaceId(req.getNamespaceId())
+                          .setNamespaceId(req.getNamespaceId()) 
                           .setReportedState(req.getDs().getReportedState().toString())
                           .setDesiredState(req.getDs().getDesiredState().toString())
                           .build();
           
-          File theDir = new File("pkg//AvRepo//"+req.getNamespaceId()+"//"+dateFormat.format(date));
+          File theDir = new File("pkg//AvRepo//"+req.getNamespaceId()+"//"+req.getDeviceId()+"//"+dateFormat.format(date)+"//"+LocalDateTime.now().getHour());
           if (!theDir.exists()){
             theDir.mkdirs();
           }
-          File toWriteFile = new File(theDir+"//"+req.getDeviceId()+".avro");    
-          DatumWriter<DeviceState> datumWriter = new GenericDatumWriter<DeviceState>(schema);        
+          File toWriteFile = new File(theDir+"//"+"device_state.avro");    
+          DatumWriter<DeviceState> datumWriter = new ReflectDatumWriter<DeviceState>(DeviceState.class);        
           DataFileWriter<DeviceState> dataFileWriter = new DataFileWriter<DeviceState>(datumWriter);
           try{
-            dataFileWriter.create(ds.getSchema(), toWriteFile);
+            dataFileWriter.setMeta("version", 1);
+            dataFileWriter.setMeta("creator", "Infinimesh-Avro");
+            dataFileWriter.setCodec(CodecFactory.deflateCodec(5));
+            if (toWriteFile.exists()){
+              dataFileWriter.appendTo(toWriteFile);
+            }else{
+              dataFileWriter.create(ds.getSchema(), toWriteFile);
+            }
             dataFileWriter.append(ds);
             dataFileWriter.close();
           }
