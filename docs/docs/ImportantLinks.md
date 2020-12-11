@@ -1,4 +1,4 @@
-Important Links
+If find important links related to the Infinimesh Product.
 
 ## API Documentation
 You can find swagger docs for the API server [here](https://infinitedevices.github.io/infinimesh/swagger-ui/)
