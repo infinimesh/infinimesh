@@ -2,7 +2,7 @@ This page gives you details on how to use the Infinimesh UI. Please see below im
 
 Main Page UI:
 
-![Main Page](https://github.com/InfiniteDevices/infinimesh/blob/master/docs/docs/Images/Main%20Page.png?raw=true)
+![Main Page](Images/Main%20Page.png?raw=true)
 
 The UI has below tabs on the main page:
 
