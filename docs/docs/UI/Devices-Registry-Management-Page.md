@@ -8,7 +8,7 @@ Device Registry is also console "home" page.
 
 As you sign in to Console, first you would see this
 
-![Tabs](Images/device-registry/initial.jpg?raw=true)
+![Device](Images/device-registry/initial.jpg?raw=true)
 
 1. Navigation: back and forward
 2. Current Namespace Selector. Since user default namespace is not made for devices, you won't be able to see and create any devices here.
@@ -19,7 +19,7 @@ As you sign in to Console, first you would see this
 
 ## Actual Devices Management
 
-![Tabs](Images/device-registry/selected.jpg?raw=true)
+![Device Selected](Images/device-registry/selected.jpg?raw=true)
 
 Here you can see a bunch of devices. These are "TestFlight" namespace devices.
 At this page you can already perform some actions with this devices.
@@ -30,7 +30,7 @@ At this page you can already perform some actions with this devices.
 
 You can invoke context menu by right-clicking any device card.
 
-![Tabs](Images/device-registry/context-menu.jpg?raw=true)
+![Device Context](Images/device-registry/context-menu.jpg?raw=true)
 
 ### Select
 
@@ -55,7 +55,7 @@ You can see prefix with selector here, possible options are:
 * Tags -  Filter devices containing given tag | Key: tags
 * Namespace - Yet useless | Key: namespace
 
-![Tabs](Images/device-registry/search.jpg?raw=true)
+![Device Search](Images/device-registry/search.jpg?raw=true)
 
 As you could see, every search mode has **key**.
 It's used to switch search mode by typing. For example, if you would type id:0xf into search-box, search mode will be automaticaly switched to IDs and you'll filter device containing 0xf in ID.
@@ -65,7 +65,7 @@ It's used to switch search mode by typing. For example, if you would type id:0xf
 In order to find devices faster, you could use **group by tags** functionality.
 Just toogle **group by tags** switch([**Mark 6**](#device-registry-management-page)) and you'll get your device grouped:
 
-![Tabs](Images/device-registry/grouped.jpg?raw=true)
+![Device Grouped](Images/device-registry/grouped.jpg?raw=true)
 
 * Click on **Whole Registry** switch(**Mark 1**) to stop grouping by tags.
 
@@ -81,7 +81,7 @@ If current namespace is not the user default one, you can create a new device by
 
 This show you **Device Creation Drawer**:
 
-![Tabs](Images/device-registry/create-device-drawer.jpg?raw=true)
+![Device Drawer](Images/device-registry/create-device-drawer.jpg?raw=true)
 
 > **Mark 3**: Specify some tags to make it able to search, sort and group devices easier. (See: [Group by tags](#group-by-tags))
 
