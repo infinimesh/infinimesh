@@ -17,8 +17,8 @@ You can find Themes Selector at the Console Footer
 infinimesh Console currently has only three common color schemes:
 
 1. Blue-White -- default
-    ![Tabs](Images/miscellaneous/default.jpg?raw=true)
+    ![Tabs](Images/miscellaneous/themes/default.jpg?raw=true)
 2. Dark Blue(Night)
-    ![Tabs](Images/miscellaneous/night.jpg?raw=true)
+    ![Tabs](Images/miscellaneous/themes/night.jpg?raw=true)
 3. Black and White
-    ![Tabs](Images/miscellaneous/black-and-white.jpg?raw=true)
+    ![Tabs](Images/miscellaneous/themes/black-and-white.jpg?raw=true)
