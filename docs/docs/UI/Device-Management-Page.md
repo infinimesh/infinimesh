@@ -6,7 +6,7 @@ Here you can manage particular device.
 
 As you click on any device you'll get to this page.
 
-![Tabs](Images/device-registry/base.jpg?raw=true)
+![Tabs](Images/device/base.jpg?raw=true)
 
 **Mark 1** - Refresh device data button.
 
