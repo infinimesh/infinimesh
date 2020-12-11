@@ -10,7 +10,7 @@ As you click on any device you'll get to this page.
 
 **Mark 1** - Refresh device data button.
 
-**Mark 2** - Bulb color shows if device is enabled(green) or disabled(red), acts same at [Device Registry Page](Devices-Registry-Management-Page.md)
+**Mark 2** - Bulb color shows if device is enabled(green) or disabled(red), acts same at [Device Registry Page](UI/Devices-Registry-Management-Page.md)
 
 **Mark 3** - Device name
 

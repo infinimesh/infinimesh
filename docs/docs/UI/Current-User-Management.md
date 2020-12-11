@@ -12,5 +12,5 @@ It's expandable by clicking:
 
 After expanding for now you can:
 
-1. [**Reset Password**](Miscellaneous.md#reset-password)
+1. [**Reset Password**](UI/Miscellaneous.md#reset-password)
 2. Log out - which will bring you back to login page.
