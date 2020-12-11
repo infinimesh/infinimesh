@@ -2,7 +2,7 @@ This page gives you details on how to use the Infinimesh UI. Please see below im
 
 Main Page UI:
 
-![Main Page](Images/Main%20Page.png?raw=true)
+![Main Page](Images/MainPage.png?raw=true)
 
 The UI has below tabs on the main page:
 
@@ -25,7 +25,7 @@ This tab is used to :
  - Update a Device
  - Delete a Device
  
- ![Tabs](Images/Device Registry Main.png?raw=true)
+ ![Tabs](Images/DeviceRegistryMain.png?raw=true)
  
  ### Create a device
  
@@ -35,7 +35,7 @@ This tab is used to :
  2. Click on the plus icon to create a device
  3. This will bring up a side panel for creating device
  
-  ![Tabs](Images/Create Device.png?raw=true)
+  ![Tabs](Images/CreateDevice.png?raw=true)
  
  4. Fill the details as follows:
  
