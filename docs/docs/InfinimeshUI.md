@@ -1,84 +1,10 @@
-This page gives you details on how to use the Infinimesh UI. Please see below image which shows the main pagr for the product Infinimesh.
-
-Main Page UI:
-
-![Main Page](Images/MainPage.png?raw=true)
-
-The UI has below tabs on the main page:
-
-1. Device Registry Tab
-2. Accounts Tab
-3. Namespace Tab
-4. User Account Tab
-
-Tabs:
-
-![Tabs](Images/Tabs.png?raw=true)
-
-## Device Registry Tab
-
-This tab is used to :
- - Create a device
- - Search a Delete
- - View Devices
- - View Device Details
- - Update a Device
- - Delete a Device
- 
- ![Tabs](Images/DeviceRegistryMain.png?raw=true)
- 
- ### Create a device
- 
- Steps:
- 
- 1. Select a Namespace in the drop down in the top right corner (Make sure the default account namespace is not selected.)
- 2. Click on the plus icon to create a device
- 3. This will bring up a side panel for creating device
- 
-  ![Tabs](Images/CreateDevice.png?raw=true)
- 
- 4. Fill the details as follows:
- 
- ```
-    - Name : Enter the name of the device 
-    - Namespace : Select the Namespace where you want to create the device
-    - Tags: Provide tags for the device
-    - Enabled: Click to enable the device
-    - Certificate: Provide the certificate for the device. This can be done in two ways
-      - Either you paste a signed certificate text or
-      - Upload a signed certificate
- ```
-    > For certificate creation please refer this link <TODO: Provide a link>
- 
- 5. Click on the Submit button.
- 6. You should get a message that the device was created successfully.
-  
- ### Search a Device
- 
- Steps:
- 
- 1. Click on the Search field to search a device
- 
- ![Tabs](Images/SearchDevice.png?raw=true)
- 
- 2. Enter the Search Criteria and press enter button.
- 
-  SearchCriteria1:
-  
-  ![Tabs](Images/SearchCriteria1.png?raw=true)
-  
-  SearchCriteria2:
-  
-  ![Tabs](Images/SearchCriteria2.png?raw=true)
- 
- 
 # Namespaces Management
 
 Here you can find all namespaces you have rights(at least READ) to.
 
 ## First look
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/namespaces/table.jpg|alt=initial]]
+![Tabs](Images/namespaces/table.jpg?raw=true)
 
 As you can see whole page, except [**Create namespace**](#create-namespace) button, is just a table.
 
@@ -119,7 +45,10 @@ On top of the page, you can see **Create namespace** button, by clicking on it, 
 You don't need any special data to create a namespace: just name.
 
 
---------
+
+---------------
+
+
 
 # Device Registry Management
 
@@ -131,7 +60,7 @@ Device Registry is also console "home" page.
 
 As you sign in to Console, first you would see this
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/initial.jpg|alt=initial]]
+![Tabs](Images/device-registry/initial.jpg?raw=true)
 
 1. Navigation: back and forward
 2. Current Namespace Selector. Since user default namespace is not made for devices, you won't be able to see and create any devices here.
@@ -142,7 +71,7 @@ As you sign in to Console, first you would see this
 
 ## Actual Devices Management
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/selected.jpg|alt=selected]]
+![Tabs](Images/device-registry/selected.jpg?raw=true)
 
 Here you can see a bunch of devices. These are "TestFlight" namespace devices.
 At this page you can already perform some actions with this devices.
@@ -153,7 +82,7 @@ At this page you can already perform some actions with this devices.
 
 You can invoke context menu by right-clicking any device card.
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/context-menu.jpg|alt=context_menu]]
+![Tabs](Images/device-registry/context-menu.jpg?raw=true)
 
 ### Select
 
@@ -178,7 +107,7 @@ You can see prefix with selector here, possible options are:
 * Tags -  Filter devices containing given tag | Key: tags
 * Namespace - Yet useless | Key: namespace
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/search.jpg|alt=search]]
+![Tabs](Images/device-registry/search.jpg?raw=true)
 
 As you could see, every search mode has **key**.
 It's used to switch search mode by typing. For example, if you would type id:0xf into search-box, search mode will be automaticaly switched to IDs and you'll filter device containing 0xf in ID.
@@ -188,7 +117,7 @@ It's used to switch search mode by typing. For example, if you would type id:0xf
 In order to find devices faster, you could use **group by tags** functionality.
 Just toogle **group by tags** switch([**Mark 6**](#device-registry-management-page)) and you'll get your device grouped:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/grouped.jpg|alt=grouped]]
+![Tabs](Images/device-registry/grouped.jpg?raw=true)
 
 * Click on **Whole Registry** switch(**Mark 1**) to stop grouping by tags.
 
@@ -204,14 +133,16 @@ If current namespace is not the user default one, you can create a new device by
 
 This show you **Device Creation Drawer**:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device-registry/create-device-drawer.jpg|alt=create]]
+![Tabs](Images/device-registry/create-device-drawer.jpg?raw=true)
 
 > **Mark 3**: Specify some tags to make it able to search, sort and group devices easier. (See: [Group by tags](#group-by-tags))
 
 You would need to upload **unique** certificate in order to subscribe to your device MQTT messages.
 You can do it either by clicking on **Mark 2** to upload `.crt` file or switching to `Paste` mode via **Mark 1** to paste your certificate from clipboard.
 
----------
+
+---------------
+
 
 # Device Management
 
@@ -221,7 +152,7 @@ Here you can manage particular device.
 
 As you click on any device you'll get to this page.
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device/base.jpg|alt=base]]
+![Tabs](Images/device-registry/base.jpg?raw=true)
 
 **Mark 1** - Refresh device data button.
 
@@ -237,13 +168,14 @@ As you click on any device you'll get to this page.
 
 After clicking on **Edit** button(**Mark 5**), you'll be able to edit device name and tags:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device/edit-mode.jpg|alt=edit_mode]]
+![Tabs](Images/device-registry/edit-mode.jpg?raw=true)
+
 
 ## State Card
 
 After scrolling little bit down, you can see the Device State Card. It has two columns: **Reported** and **Desired** state:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device/state-base.jpg|alt=state_base]]
+![Tabs](Images/device-registry/state-base.jpg?raw=true)
 
 **Mark 1 - Reported** state is the state received from the device.
 Here you can see a last report timestamp and "version" - order number(**Marks 3 and 2**)
@@ -252,10 +184,13 @@ Same for **Desired**(**Mark 4**) and **Marks 5 and 6** for desired state version
 
 By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mode(JSON editor - **Mark 1** below) - this is the data to be sent to the device.
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/device/state-edit-mode.jpg|alt=state_edit_mode]]
+![Tabs](Images/device-registry/state-edit-mode.jpg?raw=true)
 
 
--------
+
+---------------
+
+
 
 # Accounts Management
 
@@ -263,7 +198,7 @@ Here you can find all user accounts you have rights(at least READ) to.
 
 ## First look
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/accounts/table.jpg|alt=initial]]
+![Tabs](Images/accounts/table.jpg?raw=true)
 
 As you can see whole page, except [**Create Account**](#create-account) button, is just a table.
 Is consists of 5 columns:
@@ -279,10 +214,14 @@ Is consists of 5 columns:
 
 On top of the page, you can see [**Create Account**](#create-account) button, by clicking on it, you would get a drawer open:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/accounts/create-account-drawer.jpg|alt=create]]
+![Tabs](Images/accounts/create-account-drawer.jpg?raw=true)
 
 
-------
+
+
+---------------
+
+
 
 # Current User Account Management
 
@@ -292,8 +231,8 @@ So by hovering your pointer on Sider, you will see menu with all available pages
 
 It's expandable by clicking:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/current-user/sider.jpg|alt=initial]]
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/current-user/sider-expanded.jpg|alt=expanded]]
+![Tabs](Images/current-user/sider.jpg.jpg?raw=true)
+![Tabs](Images/current-user/sider-expanded.jpg?raw=true)
 
 After expanding for now you can:
 
@@ -301,7 +240,10 @@ After expanding for now you can:
 2. Log out - which will bring you back to login page.
 
 
------
+
+---------------
+
+
 
 # Miscellaneous
 
@@ -311,21 +253,21 @@ Here you can read about little tweaks or components being used across console.
 
 Modal window with usual form:
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/miscellaneous/reset-password.jpg|alt=reset-password]]
+![Tabs](Images/miscellaneous/reset-password.jpg?raw=true)
 
 ## Themes Selector
 
 You can find Themes Selector at the Console Footer
 
-[[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/miscellaneous/themes-selector.jpg|alt=themes-selector]]
+![Tabs](Images/miscellaneous/themes-selector.jpg?raw=true)
 
 infinimesh Console currently has only three common color schemes:
 
 1. Blue-White -- default
-    [[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/miscellaneous/themes/default.png|alt=default]]
+    ![Tabs](Images/miscellaneous/default.jpg?raw=true)
 2. Dark Blue(Night)
-    [[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/miscellaneous/themes/night.png|alt=night]]
+    ![Tabs](Images/miscellaneous/night.jpg?raw=true)
 3. Black and White
-    [[https://github.com/slntopp/infinimesh-frontend-doc/blob/master/images/miscellaneous/themes/black-and-white.png|alt=black-and-white]]
+    ![Tabs](Images/miscellaneous/black-and-white.jpg?raw=true)
 
 
