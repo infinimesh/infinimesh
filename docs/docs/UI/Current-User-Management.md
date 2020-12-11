@@ -6,8 +6,9 @@ So by hovering your pointer on Sider, you will see menu with all available pages
 
 It's expandable by clicking:
 
-![Tabs](Images/current-user/sider.jpg.jpg?raw=true)
-![Tabs](Images/current-user/sider-expanded.jpg?raw=true)
+![Current User Sider](Images/current-user/sider.jpg?raw=true)
+
+![Current User Sider Expanded](Images/current-user/sider-expanded.jpg?raw=true)
 
 After expanding for now you can:
 
