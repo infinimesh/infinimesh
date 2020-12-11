@@ -14,7 +14,7 @@ Is consists of 5 columns:
  4. Type (User, Admin or Root)
  5. State - enabled(green) or disabled(red)
  6. Actions Button
-    By clicking on it you would get a Context Menu, where you can [**Reset Password**](UI/Miscellaneous.md#reset-password), toogle(enable/disable) and delete account
+    By clicking on it you would get a Context Menu, where you can [**Reset Password**](Miscellaneous.md#reset-password), toggle(enable/disable) and delete account
 
 ## Create Account
 

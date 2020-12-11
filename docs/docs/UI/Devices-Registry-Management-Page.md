@@ -13,9 +13,9 @@ As you sign in to Console, first you would see this
 1. Navigation: back and forward
 2. Current Namespace Selector. Since user default namespace is not made for devices, you won't be able to see and create any devices here.
 3. Device Registry - This Page
-4. See [Accounts](https://github.com/slntopp/infinimesh-frontend-doc/wiki/Accounts-Management-Page)
-5. See [Namespaces](https://github.com/slntopp/infinimesh-frontend-doc/wiki/Namespaces-Management-Page)
-6. See [Account Management](https://github.com/slntopp/infinimesh-frontend-doc/wiki/Current-User-Management)
+4. See [Accounts](Accounts-Management-Page.md)
+5. See [Namespaces](Namespaces-Management-Page.md)
+6. See [Account Management](Current-User-Management.md)
 
 ## Actual Devices Management
 
@@ -24,7 +24,7 @@ As you sign in to Console, first you would see this
 Here you can see a bunch of devices. These are "TestFlight" namespace devices.
 At this page you can already perform some actions with this devices.
 
-> Clicking on any of these cards will lead you to [**Device Management Page**](https://github.com/slntopp/infinimesh-frontend-doc/wiki/Device-Management-Page)
+> Clicking on any of these cards will lead you to [**Device Management Page**](Device-Management-Page.md)
 
 ### Context menu
 
