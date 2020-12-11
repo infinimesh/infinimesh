@@ -50,10 +50,28 @@ This tab is used to :
  ```
     > For certificate creation please refer this link <TODO: Provide a link>
  
-  5. Click on the Submit button.
-  6. You should get a message that the device was created successfully.
+ 5. Click on the Submit button.
+ 6. You should get a message that the device was created successfully.
   
  ### Search a Device
+ 
+ Steps:
+ 
+ 1. Click on the Search field to search a device
+ 
+ ![Tabs](Images/SearchDevice.png?raw=true)
+ 
+ 2. Enter the Search Criteria and press enter button.
+ 
+  SearchCriteria1:
+  
+  ![Tabs](Images/SearchCriteria1.png?raw=true)
+  
+  SearchCriteria2:
+  
+  ![Tabs](Images/SearchCriteria2.png?raw=true)
+ 
+ 
  ### View Devices
  ### View Device Details
  ### Update a Device
