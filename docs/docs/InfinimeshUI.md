@@ -4,3 +4,7 @@ This page gives you details on how to use the Infinimesh UI. The UI has below ta
 2. Accounts Tab
 3. Namespace Tabs
 4. User Details
+
+Main Page UI:
+
+![Main Page](https://github.com/InfiniteDevices/infinimesh/blob/master/docs/docs/Images/Main%20Page.png)
