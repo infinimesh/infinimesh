@@ -1,6 +1,6 @@
 # Quick start
 ## Install CLI
-Infinimesh features a CLI to interact with our API.
+Infinimesh features a CLI to interact with Infinimesh API.
 Install it automatically with our install script:
 ```
 curl https://raw.githubusercontent.com/infinimesh/infinimesh/master/godownloader.sh | BINDIR=$HOME/bin bash
