@@ -1,10 +1,12 @@
-This page gives you details on how to use the Infinimesh UI. The UI has below tabs on tha main page:
+This page gives you details on how to use the Infinimesh UI. Please see below image which shows the main pagr for the product Infinimesh.
+
+Main Page UI:
+
+![Main Page](https://github.com/InfiniteDevices/infinimesh/blob/master/docs/docs/Images/Main%20Page.png)
+
+The UI has below tabs on the main page:
 
 1. Device Tab
 2. Accounts Tab
 3. Namespace Tabs
 4. User Details
-
-Main Page UI:
-
-![Main Page](https://github.com/InfiniteDevices/infinimesh/blob/master/docs/docs/Images/Main%20Page.png)
