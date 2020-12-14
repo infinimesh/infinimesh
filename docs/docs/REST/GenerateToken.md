@@ -25,7 +25,6 @@ Steps:
 Example:
 
 Sample Request Body:
-
     ```
     {
         "password": "Enter Password here",
@@ -34,7 +33,6 @@ Sample Request Body:
     ```
 
 Sample Response:
-
     ```
     {
         "token": "Authentiction_Token"
