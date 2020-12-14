@@ -6,11 +6,11 @@ Infinite Devices GmbH is a young start-up from Magdeburg that develops and marke
 
 <!-- display the social media buttons in your README -->
 
-[![Twitter][1.1]][1]
-[![Facebook][2.1]][2]
-[![Instagram][3.1]][3]
-[![LinkedIn][4.1]][4]
-[![GitHub][5.1]][5]
+[![Twitter][1.1]][1] <pad>&nbsp;</pad>
+[![Facebook][2.1]][2] <pad>&nbsp;</pad>
+[![Instagram][3.1]][3] <pad>&nbsp;</pad>
+[![LinkedIn][4.1]][4] <pad>&nbsp;</pad>
+[![GitHub][5.1]][5] <pad>&nbsp;</pad>
 
 
 
