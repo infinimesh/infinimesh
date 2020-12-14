@@ -54,21 +54,21 @@ Sample Request Body:
 Sample Response:
 ```
 {
-device:{
-certificate:{
-algorithm:"string"
-fingerprint:"string"
-fingerprintAlgorithm:"string"
-pem_data:"string"
-}
-enabled:false
-id:"string"
-name:"string"
-namespace:"string"
-tags:[
-"string"
-]
-}
+  "device": {
+    "certificate": {
+      "algorithm": "string",
+      "fingerprint": "string",
+      "fingerprintAlgorithm": "string",
+      "pem_data": "string"
+    },
+    "enabled": false,
+    "id":"string"
+    "name": "string",
+    "namespace": "string",
+    "tags": [
+      "string"
+    ]
+  }
 }
 ```
 
