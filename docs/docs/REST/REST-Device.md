@@ -12,8 +12,6 @@ The Device Registry Endpoint allows you to mange devices for the applications. B
 | GET | /devices/{id} | Get details of a specific device |
 | DELETE | /devices/{id} | Delete a specific device |
 
-> Request unauthenticated with bearer
-
 ## How to create a device
 
 Pre-Requisites: 
