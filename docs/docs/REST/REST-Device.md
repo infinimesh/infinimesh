@@ -4,7 +4,7 @@ The Device Registry Endpoint allows you to mange devices for the applications. B
 
 | Endpoints | Purpose of the Endpoint |
 |-----------|-------------------------|
-| /devices?namespaceid=<namespaceid> | Get details of all devices |
+| /devices?namespaceid={namespaceid} | Get details of all devices |
 | /devices | Create a device |
 | /devices/{device.id} | Update a device |
 | /devices/{deviceid}/owner/{ownerid} | Add an owner to the device |
