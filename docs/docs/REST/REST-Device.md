@@ -5,10 +5,10 @@ The Device Registry Endpoint allows you to mange devices for the applications. B
 | HTTP Request | Endpoints | Purpose of the Endpoint |
 |--------------|-----------|-------------------------|
 | POST | /devices | Create a device |
-| GET | /devices?namespaceid={namespaceid} | Get details of all devices |
+| GET | /devices/{id} | Get details of a specific device |
 | PATCH | /devices/{device.id} | Update a device |
 | DELETE | /devices/{id} | Delete a specific device |
-| GET | /devices/{id} | Get details of a specific device |
+| GET | /devices?namespaceid={namespaceid} | Get details of all devices |
 | PUT | /devices/{deviceid}/owner/{ownerid} | Add an owner to the device |
 | DELETE | /devices/{deviceid}/owner/{ownerid} | Remove an owner from the device |
 
@@ -251,3 +251,42 @@ Response Format:
    ]
 }
 ```
+
+## How to update a device's owner
+
+Pre-Requisites: 
+
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+2. You need a namesapce with a valid device in it
+
+Steps:
+
+1. REST Request Details for for Updating a Device
+   
+   - REST Endpoint: **<URL>/devices/{deviceid}/owner/{ownerid}**
+   > URL is the domain for the environment E.g. console.infinimesh.dummy
+   - Request Path Parameters: **deviceid should be a valid device id and the ownerid should be a valid user account in infinimesh**
+   - Request Type: **PUT**
+   - Request Header: **Authorization: bearer Authentication_Token**
+
+2. Once the above REST Request is send with the required path parameters to the endpoint, an HTTP 200 reponse is receive if the device update was successful. Otherwise you will get an error with the reason why the update was not successfull.
+
+## How to remove a device's owner
+
+Pre-Requisites: 
+
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+2. You need a namesapce with a valid device in it
+
+Steps:
+
+1. REST Request Details for for Deleting a Device
+   
+   - REST Endpoint: **<URL>/devices/{deviceid}/owner/{ownerid}**
+   > URL is the domain for the environment E.g. console.infinimesh.dummy
+   - Request Path Parameters: **deviceid should be a valid device id and the ownerid should be a valid user account in infinimesh**
+   - Request Type: **DELETE**
+   - Request Header: **Authorization: bearer Authentication_Token**
+
+2. Once the above REST Request is send with the required path parameter to the endpoint, the specific owner will be removed from the device and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the update was not successfull.
+
