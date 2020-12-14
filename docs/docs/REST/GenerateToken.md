@@ -40,6 +40,6 @@ Sample Response:
 ```
 
 3. The token received in response will be used for all the other REST request. The token has to be set in the REST Request header. Below are the details:
-   - Request Header: **Authorization: bearer Authentiction_Token**
+   - Request Header: **Authorization: bearer Authentication_Token**
 
 
