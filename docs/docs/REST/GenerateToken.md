@@ -14,7 +14,8 @@ Steps:
 
 1. REST Request Details for Token generation
    
-   - REST Endpoint: **{{URL}}/account/token**
+   - REST Endpoint: **<URL>/account/token**
+   > URL is the domain for the environment E.g. console.infinimesh.dummy
    - Request Type: **POST**
    - Request Header: **Content-Type: application/json**
    - Request Body: **Content in JSON format**
