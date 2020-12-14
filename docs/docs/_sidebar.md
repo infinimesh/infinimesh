@@ -1,6 +1,7 @@
 - Getting started
 
   - [Home Page](homepage.md)
+  
   - [UI Guide](UI/InfinimeshUI.md)
     1. [Devices Registry Management](UI/Devices-Registry-Management-Page.md)
        1. [Device Management](UI/Device-Management-Page.md)
@@ -10,9 +11,11 @@
     5. [Common tweaks](UI/Miscellaneous.md)</ol>
  
   - [REST API Guide](REST/REST.md)
-    1. [Devices Registry Management](UI/REST-Device.md)
-    2. [Accounts Management](UI/REST-Accounts.md)
-    3. [Namespaces Management](UI/REST-Namespace.md)
-    4. [User Account Management](UI/REST-User.md)
+    1. [Pre-Requisites](REST/GenerateToken.md)
+    2. [Devices Registry Management](REST/REST-Device.md)
+    3. [Accounts Management](REST/REST-Accounts.md)
+    4. [Namespaces Management](REST/REST-Namespace.md)
+    5. [User Account Management](REST/REST-User.md)
+
   - [Important Links](ImportantLinks.md)
   - [About Us](AboutUs.md)
