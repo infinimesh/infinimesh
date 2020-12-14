@@ -32,5 +32,5 @@ Infinite Devices GmbH is a young start-up from Magdeburg that develops and marke
 [1]: http://www.twitter.com/infinitedevices
 [2]: http://www.facebook.com/infinitedevices
 [3]: https://www.instagram.com/infinitedevices
-[4]: http://www.github.com/infinitedevices
+[4]: http://www.linkedin.com/company/infinimesh-io/
 [5]: http://www.github.com/infinitedevices
