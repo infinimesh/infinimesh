@@ -19,11 +19,11 @@ Infinite Devices GmbH is a young start-up from Magdeburg that develops and marke
 
 <!-- icons with padding -->
 
-[1.1]: http://i.imgur.com/tXSoThF.png (twitter icon)
-[2.1]: http://i.imgur.com/P3YfQoD.png (facebook icon)
-[3.1]: http://i.imgur.com/J5de1Gn.png (instagram icon)
-[4.1]: http://i.imgur.com/0o48UoR.png (linkedin icon)
-[5.1]: http://i.imgur.com/0o48UoR.png (github icon)
+[1.1]: Images/Twitter.png (twitter icon)
+[2.1]: Images/Facebook.png (facebook icon)
+[3.1]: Images/Insta.png (instagram icon)
+[4.1]: Images/LinkedIn.png (linkedin icon)
+[5.1]: Images/GitHub.png (github icon)
 
 
 <!-- links to your social media accounts -->
