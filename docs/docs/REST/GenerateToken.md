@@ -20,7 +20,7 @@ Steps:
    - Request Header: **Content-Type: application/json**
    - Request Body: **Content in JSON format**
 
-2. Once the above REST Request is send to the endpoint, a token will be generated and sent back in JSON format.
+2. Once the above REST Request is send with the required JSON body to the endpoint, a token will be generated and sent back in JSON format.
 
 Example:
 

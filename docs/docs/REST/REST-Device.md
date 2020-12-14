@@ -2,54 +2,76 @@
 
 The Device Registry Endpoint allows you to mange devices for the applications. Below are the endpoints avaiable:
 
-| Endpoints | Purpose of the Endpoint |
-|-----------|-------------------------|
-| /devices?namespaceid={namespaceid} | Get details of all devices |
-| /devices | Create a device |
-| /devices/{device.id} | Update a device |
-| /devices/{deviceid}/owner/{ownerid} | Add an owner to the device |
-| /devices/{deviceid}/owner/{ownerid} | Remove an owner from the device |
-| /devices/{id} | Get details of a specific device |
-| /devices/{id} | Delete a specific device |
+| HTTP Request | Endpoints | Purpose of the Endpoint |
+|--------------|-----------|-------------------------|
+| GET | /devices?namespaceid={namespaceid} | Get details of all devices |
+| POST | /devices | Create a device |
+| PATCH | /devices/{device.id} | Update a device |
+| PUT | /devices/{deviceid}/owner/{ownerid} | Add an owner to the device |
+| DELETE | /devices/{deviceid}/owner/{ownerid} | Remove an owner from the device |
+| GET | /devices/{id} | Get details of a specific device |
+| DELETE | /devices/{id} | Delete a specific device |
 
 > Request unauthenticated with bearer
 
-## How to obtain the Token 
+## How to create a device
 
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications
+2. you need a namesapce created
 
 Steps:
 
 1. REST Request Details for Token generation
    
-   - REST Endpoint: **<URL>/account/token**
+   - REST Endpoint: **<URL>/devices**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
    - Request Type: **POST**
    - Request Header: **Content-Type: application/json**
    - Request Body: **Content in JSON format**
 
-2. Once the above REST Request is send to the endpoint, a token will be generated and sent back in JSON format.
-
-Example:
-
 Sample Request Body:
 ```
 {
-"password": "Enter Password here",
-"username": "Enter UserID here"
+  "device": {
+    "certificate": {
+      "algorithm": "string",
+      "fingerprint": "string",
+      "fingerprintAlgorithm": "string",
+      "pem_data": "string"
+    },
+    "enabled": false,
+    "name": "string",
+    "namespace": "string",
+    "tags": [
+      "string"
+    ]
+  }
 }
 ```
+
+2. Once the above REST Request is send with the required JSON body to the endpoint, a device will be created and JSON response will be send back.
 
 Sample Response:
 ```
 {
-"token": "Authentiction_Token"
+device:{
+certificate:{
+algorithm:"string"
+fingerprint:"string"
+fingerprintAlgorithm:"string"
+pem_data:"string"
+}
+enabled:false
+id:"string"
+name:"string"
+namespace:"string"
+tags:[
+"string"
+]
+}
 }
 ```
-
-3. The token received in response will be used for all the other REST request. The token has to be set in the REST Request header. Below are the details:
-   - Request Header: **Authorization: bearer Authentiction_Token**
 
 
