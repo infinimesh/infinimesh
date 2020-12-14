@@ -9,7 +9,7 @@
     4. [Current User Account Management](UI/Current-User-Management.md)
     5. [Common tweaks](UI/Miscellaneous.md)</ol>
  
-  - [REST API Guide](REST.md)
+  - [REST API Guide](REST/REST.md)
     1. [Devices Registry Management](UI/REST-Device.md)
     2. [Accounts Management](UI/REST-Accounts.md)
     3. [Namespaces Management](UI/REST-Namespace.md)
