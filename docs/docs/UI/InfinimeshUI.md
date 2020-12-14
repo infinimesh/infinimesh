@@ -1,6 +1,6 @@
 # Welcome to the infinimesh Frontend Wiki
 
-Here you find some notes about Infinimesh console usage and navigation
+Here you find some notes about infinimesh console usage and navigation
 
 ## Table of Contents
 
