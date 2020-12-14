@@ -21,7 +21,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for Token generation
+1. REST Request Details for for Creating a Device
    
    - REST Endpoint: **<URL>/devices**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
