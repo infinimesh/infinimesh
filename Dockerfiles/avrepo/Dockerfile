@@ -1,10 +1,9 @@
 FROM openjdk:8
-ADD ./pkg /avrepo/ 
-WORKDIR /avrepo
+ADD . /go/src/github.com/infinimesh/infinimesh/AvRepo
+WORKDIR /go/src/github.com/infinimesh/infinimesh
 
-COPY target/lib /app/lib
-COPY target/AvRepo-0.0.1-SNAPSHOT.jar /app/avrepo-server.jar
+COPY /go/src/github.com/infinimesh/infinimesh/AvRepo/target/AvRepo-0.0.1-SNAPSHOT.jar  /avrepo-server.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/avrepo-server.jar"]
+ENTRYPOINT ["java", "-jar", "/avrepo-server.jar"]
  
