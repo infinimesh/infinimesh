@@ -1,5 +1,4 @@
 FROM openjdk:8
- 
 ADD ./pkg /avrepo/ 
 WORKDIR /avrepo
 
