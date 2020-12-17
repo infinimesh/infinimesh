@@ -19,7 +19,7 @@ The Device Registry Endpoint allows you to mange devices for the applications. B
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -80,7 +80,7 @@ Sample Response:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a device in it
+2. You need a namespace with a device in it
 
 Steps:
 
@@ -120,7 +120,7 @@ Response Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a valid device in it
+2. You need a namespace with a valid device in it
 
 Steps:
 
@@ -175,7 +175,7 @@ Below is an example of an update JSON request which will update the device with 
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a valid device in it
+2. You need a namespace with a valid device in it
 
 Steps:
 
@@ -194,7 +194,7 @@ Steps:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a device in it
+2. You need a namespace with a device in it
 
 Steps:
 
@@ -202,11 +202,11 @@ Steps:
    
    - REST Endpoint: **<URL>/devices?namespaceid={namespaceid}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
-   - Request Query String Parameters: **namespaceid should be a valid namesapce id**
+   - Request Query String Parameters: **namespaceid should be a valid namespace id**
    - Request Type: **GET**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required querystring parameters to the endpoint, it returns all the devices present in the specified namesapce.
+2. Once the above REST Request is send with the required querystring parameters to the endpoint, it returns all the devices present in the specified namespace.
 
 Response Format:
 ```
@@ -236,7 +236,7 @@ Response Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a valid device in it
+2. You need a namespace with a valid device in it
 
 Steps:
 
@@ -255,7 +255,7 @@ Steps:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce with a valid device in it
+2. You need a namespace with a valid device in it
 
 Steps:
 

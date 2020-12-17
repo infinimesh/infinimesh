@@ -1,4 +1,4 @@
-# Device Registry Endpoint
+# Namespace Endpoint
 
 The Namespace Endpoint allows you to mange namesapces for the applications. Below are the endpoints avaiable:
 
@@ -56,7 +56,7 @@ Sample Response:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce
+2. You need a namespace
 
 Steps:
 
@@ -64,7 +64,7 @@ Steps:
    
    - REST Endpoint: **<URL>/namespaces/{namespace}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
-   - Request Path Parameters: **namespace should be a valid namesapce name**
+   - Request Path Parameters: **namespace should be a valid namespace name**
    - Request Type: **GET**
    - Request Header: **Authorization: bearer Authentication_Token**
 
@@ -74,7 +74,7 @@ Response Format:
 ```
 {
   "deleteinitiationtime":"string"
-  "id::"string"
+  "id":"string"
   "markfordeletion":false
   "name":"string"
 }
@@ -85,7 +85,7 @@ Response Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -111,7 +111,7 @@ Request Body Format:
 
 Sample Request Body:
 
-Below is an example of an update JSON request which will update the namesapce with ID 0x000. The fields it will update are Name and Markfordeletion.
+Below is an example of an update JSON request which will update the namespace with ID 0x000. The fields it will update are Name and Markfordeletion.
 ```
 {
   "id": "0x000",
@@ -124,12 +124,12 @@ Below is an example of an update JSON request which will update the namesapce wi
 
 ## How to Soft delete a Namespace 
 
-> Note: Soft delete will mark the namespace for deletion and will only actually delete the namesapce from the Dgraph database.
+> Note: Soft delete will mark the namespace for deletion and will only actually delete the namespace from the Dgraph database.
 
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -137,12 +137,12 @@ Steps:
    
    - REST Endpoint: **<URL>/namespaces/{namespaceid}/{harddelete}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
-   - Request Path Parameters: **namespaceid should be a valid namesapce id**
+   - Request Path Parameters: **namespaceid should be a valid namespace id**
                               **hardelete should be a set to false for soft delete**
    - Request Type: **DELETE**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required path parameter to the endpoint, the specific namesapce will be marked for deletion and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the deletion was not successful.
+2. Once the above REST Request is send with the required path parameter to the endpoint, the specific namespace will be marked for deletion and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the deletion was not successful.
 
 ## How to Hard delete a Namespace 
 
@@ -151,7 +151,7 @@ Steps:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -171,7 +171,7 @@ Steps:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -182,7 +182,7 @@ Steps:
    - Request Type: **GET**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required querystring parameters to the endpoint, it returns all the devices present in the specified namesapce.
+2. Once the above REST Request is send with the required querystring parameters to the endpoint, it returns all the devices present in the specified namespace.
 
 Response Format:
 ```
@@ -203,7 +203,7 @@ Response Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -236,7 +236,7 @@ Response Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -265,7 +265,7 @@ Request Body Format:
 Pre-Requisites: 
 
 1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
-2. You need a namesapce 
+2. You need a namespace 
 
 Steps:
 
@@ -287,5 +287,5 @@ Request Body Format:
 
 > Note: Possible values for action field are "NONE", "READ" and "WRITE".
 
-2. Once the above REST Request is send with the required path parameter to the endpoint, the specific user will be removed from the namesapce and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the request was not successful.
+2. Once the above REST Request is send with the required path parameter to the endpoint, the specific user will be removed from the namespace and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the request was not successful.
 
