@@ -14,7 +14,7 @@ The Device Registry Endpoint allows you to mange devices for the applications. B
 
 
 
-## How to create a device
+## How to create a Device
 
 Pre-Requisites: 
 
@@ -23,7 +23,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Creating a Device
+1. REST Request Details for Creating a Device
    
    - REST Endpoint: **<URL>/devices**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -75,7 +75,7 @@ Sample Response:
 }
 ```
 
-## How to get a device data
+## How to get a Device data
 
 Pre-Requisites: 
 
@@ -84,7 +84,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for getting a Device data
+1. REST Request Details for getting a Device data
    
    - REST Endpoint: **<URL>/devices/{id}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -115,7 +115,7 @@ Response Format:
 }
 ```
 
-## How to update a device
+## How to update a Device
 
 Pre-Requisites: 
 
@@ -124,7 +124,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Updating a Device
+1. REST Request Details for Updating a Device
    
    - REST Endpoint: **<URL>/devices/{device.id}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -155,7 +155,7 @@ Request Body Format:
 
 Sample Request Body:
 
-Below is an eample of an update JSON request which will update the device with ID 0x000. The fields it will update are Name, Namespace, Status (enable field) and Tags.
+Below is an example of an update JSON request which will update the device with ID 0x000. The fields it will update are Name, Namespace, Status (enable field) and Tags.
 ```
 {
   "enabled": true,
@@ -168,9 +168,9 @@ Below is an eample of an update JSON request which will update the device with I
 }
 ```
 
-2. Once the above REST Request is send with the required JSON body to the endpoint, an HTTP 200 reposne is receive if the device update was successful. Otherwise you will get an error with the reason why the update was not successfull.
+2. Once the above REST Request is send with the required JSON body to the endpoint, an HTTP 200 reposne is receive if the device update was successful. Otherwise you will get an error with the reason why the update was not successful.
 
-## How to delete a device
+## How to delete a Device
 
 Pre-Requisites: 
 
@@ -179,7 +179,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Deleting a Device
+1. REST Request Details for Deleting a Device
    
    - REST Endpoint: **<URL>/devices/{id}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -187,30 +187,9 @@ Steps:
    - Request Type: **DELETE**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required path parameter to the endpoint, the specific device will be deleted and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the update was not successfull.
+2. Once the above REST Request is send with the required path parameter to the endpoint, the specific device will be deleted and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the deletion was not successful.
 
-Sample Response:
-```
-{
-  "device": {
-    "certificate": {
-      "algorithm": "string",
-      "fingerprint": "string",
-      "fingerprintAlgorithm": "string",
-      "pem_data": "string"
-    },
-    "enabled": false,
-    "id":"string"
-    "name": "string",
-    "namespace": "string",
-    "tags": [
-      "string"
-    ]
-  }
-}
-```
-
-## How to get all devices data
+## How to get all Devices data
 
 Pre-Requisites: 
 
@@ -219,7 +198,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Gettnig all Devices
+1. REST Request Details for Getting all Devices
    
    - REST Endpoint: **<URL>/devices?namespaceid={namespaceid}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -252,7 +231,7 @@ Response Format:
 }
 ```
 
-## How to update a device's owner
+## How to update a Device's owner
 
 Pre-Requisites: 
 
@@ -261,7 +240,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Updating a Device
+1. REST Request Details for Updating a Device
    
    - REST Endpoint: **<URL>/devices/{deviceid}/owner/{ownerid}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -269,9 +248,9 @@ Steps:
    - Request Type: **PUT**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required path parameters to the endpoint, an HTTP 200 reponse is receive if the device update was successful. Otherwise you will get an error with the reason why the update was not successfull.
+2. Once the above REST Request is send with the required path parameters to the endpoint, an HTTP 200 reponse is receive if the device update was successful. Otherwise you will get an error with the reason why the request was not successful.
 
-## How to remove a device's owner
+## How to remove a Device's owner
 
 Pre-Requisites: 
 
@@ -280,7 +259,7 @@ Pre-Requisites:
 
 Steps:
 
-1. REST Request Details for for Deleting a Device
+1. REST Request Details for Deleting a Device
    
    - REST Endpoint: **<URL>/devices/{deviceid}/owner/{ownerid}**
    > URL is the domain for the environment E.g. console.infinimesh.dummy
@@ -288,5 +267,5 @@ Steps:
    - Request Type: **DELETE**
    - Request Header: **Authorization: bearer Authentication_Token**
 
-2. Once the above REST Request is send with the required path parameter to the endpoint, the specific owner will be removed from the device and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the update was not successfull.
+2. Once the above REST Request is send with the required path parameter to the endpoint, the specific owner will be removed from the device and an HTTP 200 response will be received. Otherwise you will get an error with the reason why the request was not successful.
 
