@@ -6,8 +6,7 @@ The Accounts Endpoint allows you to mange user accounts for the applications. Be
 |--------------|-----------|-------------------------|
 | POST | /accounts | Create an user account |
 | GET | /accounts/{id} | Get details of a specific account |
-| PATCH | 
-/accounts/{account.uid} | Update an account |
+| PATCH | /accounts/{account.uid} | Update an account |
 | DELETE | /accounts/{uid} | Delete a specific account |
 | GET | /accounts | Get details of all user accounts |
 | GET | /account | Get details of current user |
