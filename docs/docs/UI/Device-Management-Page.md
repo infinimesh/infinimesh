@@ -32,6 +32,15 @@ After scrolling little bit down, you can see the Device State Card. It has two c
 ![Device State](Images/device/state-base.jpg?raw=true)
 
 **Mark 1 - Reported** state is the state received from the device.
+
+Device state can be sent using Eclipse mosquitto_pub.
+
+MQTT version 3.1.1/3.1 client
+Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{\"ping\": \"test\”}"
+
+MQTT version 5 client
+Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{"Timestamp":"","Message":[{"Topic":"T0","Data":{"ping":"test"}}]}"
+
 Here you can see a last report timestamp and "version" - order number(**Marks 3 and 2**)
 
 Same for **Desired**(**Mark 4**) and **Marks 5 and 6** for desired state version and timestamp.
@@ -39,3 +48,10 @@ Same for **Desired**(**Mark 4**) and **Marks 5 and 6** for desired state version
 By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mode(JSON editor - **Mark 1** below) - this is the data to be sent to the device.
 
 ![Device State Edit Mode](Images/device/state-edit-mode.jpg?raw=true)
+
+Desired State can be subscribed using Eclipse mosquitto_sub.
+
+mosquitto_sub --cafile cert.pem --cert test.crt \
+         --key test.key  -t "devices/{device_id}/state/desired/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883
+
+
