@@ -7,7 +7,7 @@ Here you can manage particular device.
 you can see the Device State Card after selecting your device on UI.
 It has two columns: **Reported** and **Desired** state:
 
-![Device State](docs/UI/Images/device/state-base.jpg?raw=true)
+![Device State](../UI/Images/device/state-base.jpg?raw=true)
 
 **Mark 1 - Reported** state is the state received from the device.
 
@@ -16,14 +16,16 @@ Here you can see a last report timestamp and "version" - order number(**Marks 3 
 Device state can be reported using Eclipse **mosquitto_pub**.
 
 **MQTT version 3.1.1/3.1 client**
+
 Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{\"ping\": \"test\”}"
 
 **MQTT version 5 client**
+
 Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{"Timestamp":"","Message":[{"Topic":"T0","Data":{"ping":"test"}}]}"
 
 By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mode(JSON editor - **Mark 1** below) - this is the data to be sent to the device.
 
-![Device State Edit Mode](Images/device/state-edit-mode.jpg?raw=true)
+![Device State Edit Mode](../UI/Images/device/state-edit-mode.jpg?raw=true)
 
 **Desired** State can be subscribed using Eclipse **mosquitto_sub**
 
