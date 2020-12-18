@@ -24,7 +24,6 @@ After clicking on **Edit** button(**Mark 5**), you'll be able to edit device nam
 
 ![Device Edit](Images/device/edit-mode.jpg?raw=true)
 
-
 ## State Card
 
 After scrolling little bit down, you can see the Device State Card. It has two columns: **Reported** and **Desired** state:

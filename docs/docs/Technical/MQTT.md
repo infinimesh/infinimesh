@@ -1,33 +1,11 @@
-# Device Management
+# Device State Management
 
 Here you can manage particular device.
 
-## First look
-
-As you click on any device you'll get to this page.
-
-![Device Base](Images/device/base.jpg?raw=true)
-
-**Mark 1** - Refresh device data button.
-
-**Mark 2** - Bulb color shows if device is enabled(green) or disabled(red), acts same at [Device Registry Page](UI/Devices-Registry-Management-Page.md)
-
-**Mark 3** - Device name
-
-**Mark 4** - Device ID
-
-**Mark 5** - Enter Edit Mode
-
-## Edit Mode
-
-After clicking on **Edit** button(**Mark 5**), you'll be able to edit device name and tags:
-
-![Device Edit](Images/device/edit-mode.jpg?raw=true)
-
-
 ## State Card
 
-After scrolling little bit down, you can see the Device State Card. It has two columns: **Reported** and **Desired** state:
+you can see the Device State Card after selecting your device on UI.
+It has two columns: **Reported** and **Desired** state:
 
 ![Device State](Images/device/state-base.jpg?raw=true)
 
@@ -52,4 +30,5 @@ By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mo
 mosquitto_sub --cafile cert.pem --cert test.crt \
          --key test.key  -t "devices/{device_id}/state/desired/full" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883
 
+Note : Information on cafile, cert and key creation can be found under [Device Certificate Creation](Technical/CertificateCreation.md)
 
