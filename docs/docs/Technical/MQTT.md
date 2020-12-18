@@ -7,7 +7,7 @@ Here you can manage particular device.
 you can see the Device State Card after selecting your device on UI.
 It has two columns: **Reported** and **Desired** state:
 
-![Device State](Images/device/state-base.jpg?raw=true)
+![Device State](docs/UI/Images/device/state-base.jpg?raw=true)
 
 **Mark 1 - Reported** state is the state received from the device.
 
@@ -25,7 +25,7 @@ By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mo
 
 ![Device State Edit Mode](Images/device/state-edit-mode.jpg?raw=true)
 
-**Desired** State can be subscribed using Eclipse **mosquitto_sub**.
+**Desired** State can be subscribed using Eclipse **mosquitto_sub**
 
 mosquitto_sub --cafile cert.pem --cert test.crt \
          --key test.key  -t "devices/{device_id}/state/desired/full" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883
