@@ -17,8 +17,10 @@
     4. [Namespaces Management](REST/REST-Namespace.md)
     5. [User Account Management](REST/REST-User.md)
 
-  - [Yechnical Guide](Technical/TechGuide.md)
-    1. [Pre-Requisites](Technical/MQTT.md)
+  - [Technical Guide](Technical/TechGuide.md)
+    1. [Device Certificate Creation](Technical/CertificateCreation.md)
+    2. [MQTT Bridge](Technical/MQTT.md)
+
 
   - [Important Links](ImportantLinks.md)
   - [About Us](AboutUs.md)
