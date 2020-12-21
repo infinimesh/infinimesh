@@ -55,6 +55,7 @@ func NewDGraphRepo(dg *dgo.Dgraph) node.Repo {
 	return &DGraphRepo{Dg: dg}
 }
 
+//checkType is a method to type the type of the object
 func checkType(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
 	q := `query object($_uid: string, $type: string) {
                 object(func: uid($_uid)) @filter(eq(type, $type)) {
@@ -82,6 +83,7 @@ func checkType(ctx context.Context, txn *dgo.Txn, uid, _type string) bool {
 	return len(result.Object) > 0
 }
 
+//NameExists is a method to check if the object name already exists
 func NameExists(ctx context.Context, txn *dgo.Txn, name, namespace, parent string) bool { //nolint
 	var q string
 	if parent == "" {
@@ -165,6 +167,7 @@ func FingerprintExists(ctx context.Context, txn *dgo.Txn, fingerprint []byte) bo
 	return len(result.Nodes) > 0
 }
 
+//CheckExists is a method to check if the object already exists
 func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	q := `query object($_uid: string) {
                 object(func: uid($_uid)) {
@@ -191,6 +194,7 @@ func CheckExists(ctx context.Context, txn *dgo.Txn, uid string) bool { //nolint
 	return len(result.Object) > 0
 }
 
+//AuthorizeNamespace is a method to authorize a user to a namespace
 func (s *DGraphRepo) AuthorizeNamespace(ctx context.Context, account, namespaceID string, action nodepb.Action) (err error) {
 	txn := s.Dg.NewTxn()
 
@@ -283,6 +287,7 @@ func (s *DGraphRepo) IsAuthorizedNamespace(ctx context.Context, namespaceid, acc
 	return false, nil
 }
 
+//Authenticate is a method to authenticate the user credentials
 func (s *DGraphRepo) Authenticate(ctx context.Context, username, password string) (success bool, uid string, defaultNamespace string, err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 
@@ -385,6 +390,7 @@ func (s *DGraphRepo) SetPassword(ctx context.Context, accountid, password string
 
 }
 
+//Authorize is a method to give access to the user
 func (s *DGraphRepo) Authorize(ctx context.Context, account, node, action string, inherit bool) (err error) {
 	txn := s.Dg.NewTxn()
 

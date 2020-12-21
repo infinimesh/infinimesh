@@ -148,6 +148,7 @@ func fqTopic(deviceID, subPath string) string {
 }
 
 func main() {
+
 	serverCert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
 	if err != nil {
 		log.Println(err)
@@ -160,6 +161,7 @@ func main() {
 	}
 	client = registrypb.NewDevicesClient(conn)
 
+	fmt.Printf("KAFKA HOST :%v\n", kafkaHost)
 	conf := sarama.NewConfig()
 	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
 	if err != nil {

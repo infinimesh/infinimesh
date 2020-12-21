@@ -45,6 +45,7 @@ func (s *DGraphRepo) CreateNamespace(ctx context.Context, name string) (id strin
 		Name:                 name,
 		MarkForDeletion:      false,
 		DeleteInitiationTime: "0000-01-01T00:00:00Z",
+		RetentionPeriod:      14,
 	}
 
 	txn := s.Dg.NewTxn()
@@ -83,6 +84,7 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 					name
 					markfordeletion
 					deleteinitiationtime
+					retentionperiod
 	             }
                    }`
 
@@ -119,6 +121,7 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 						name
 						markfordeletion
 						deleteinitiationtime
+						retentionperiod
 	             }
                    }`
 
@@ -141,6 +144,7 @@ func (s *DGraphRepo) GetNamespaceID(ctx context.Context, namespaceID string) (na
 			Name:                 resultSet.Namespaces[0].Name,
 			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
 			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
+			RetentionPeriod:      resultSet.Namespaces[0].RetentionPeriod,
 		}, nil
 	}
 
@@ -155,6 +159,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 						name
 						markfordeletion
 						deleteinitiationtime
+						retentionperiod
 	             }
                    }`
 
@@ -269,13 +274,14 @@ func (s *DGraphRepo) ListPermissionsInNamespace(ctx context.Context, namespaceid
 
 //ListNamespacesForAccount is a method to execute Dgraph Query to list Namespaces for an Account
 func (s *DGraphRepo) ListNamespacesForAccount(ctx context.Context, accountID string) (namespaces []*nodepb.Namespace, err error) {
-	const q = `query listNamespaces($account: string) {
+	const q = `query listNamespacesforAccount($account: string) {
 		namespaces(func: uid($account)) @normalize @cascade  {
 		  access.to.namespace @filter(eq(type, "namespace") and Not eq(name,"root")) @facets(NOT eq(permission,"NONE")) {
 			uid : uid
 			name : name
 			markfordeletion : markfordeletion
 			deleteinitiationtime : deleteinitiationtime
+			retentionperiod: retentionperiod
 		  }
 		}
 	  }`
@@ -393,50 +399,6 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 	return err
 }
 
-//RevokeNamespace is a method to execute Dgraph Query that nmarks the Namespace from deletion
-func (s *DGraphRepo) RevokeNamespace(ctx context.Context, namespaceID string) (err error) {
-	txn := s.Dg.NewReadOnlyTxn()
-
-	const q = `query revokeNodes($namespaceID: string){
-        nodes(func: uid($namespaceID)) @filter(eq(type,"namespace")) {
-          uid
-        }
-      }
-      `
-
-	res, err := txn.QueryWithVars(ctx, q, map[string]string{
-		"$namespaceID": namespaceID,
-	})
-	if err != nil {
-		return err
-	}
-
-	var result struct {
-		Nodes []*Node `json:"nodes"`
-	}
-
-	err = json.Unmarshal(res.Json, &result)
-	if err != nil {
-		return err
-	}
-
-	if len(result.Nodes) != 1 {
-		return status.Error(codes.NotFound, "The Namespace is not found")
-	}
-
-	err = s.UpdateNamespace(ctx, &nodepb.UpdateNamespaceRequest{
-		Namespace: &nodepb.Namespace{
-			Id:                   namespaceID,
-			Markfordeletion:      false,
-			Deleteinitiationtime: "0000",
-		},
-		NamespaceMask: &field_mask.FieldMask{
-			Paths: []string{"markfordeletion", "deleteinitiationtime"},
-		},
-	})
-	return err
-}
-
 //UpdateNamespace is a method to execute Dgraph Query to Udpdate details of an Namespace
 func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.UpdateNamespaceRequest) (err error) {
 
@@ -509,6 +471,13 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 				ObjectId:    namespace.Namespace.Id,
 				ObjectValue: &api.Value{Val: &api.Value_DefaultVal{DefaultVal: namespace.Namespace.Deleteinitiationtime}},
 			})
+		case "retentionperiod":
+			m.Set = append(m.Set, &api.NQuad{
+				Subject:     namespace.Namespace.Id,
+				Predicate:   "retentionperiod",
+				ObjectId:    namespace.Namespace.Id,
+				ObjectValue: &api.Value{Val: &api.Value_IntVal{IntVal: int64(namespace.Namespace.RetentionPeriod)}},
+			})
 		}
 	}
 
@@ -518,4 +487,36 @@ func (s *DGraphRepo) UpdateNamespace(ctx context.Context, namespace *nodepb.Upda
 	}
 
 	return nil
+}
+
+//GetRetentionPeriods is a method to get all the different retention periods for the namespaces
+func (s *DGraphRepo) GetRetentionPeriods(ctx context.Context) (retentionperiod []int, err error) {
+	const q = `query GetRetentionPeriods {
+		node(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") and Not eq(name,"root")) {
+			uid
+			retentionperiod
+		}
+    }`
+
+	res, err := s.Dg.NewReadOnlyTxn().Query(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSet struct {
+		RPdetails []struct {
+			Namespaceid     string `json:"uid"`
+			Retentionperiod int    `json:"retentionperiod"`
+		} `json:"node"`
+	}
+
+	if err := json.Unmarshal(res.Json, &resultSet); err != nil {
+		return nil, err
+	}
+
+	for _, rp := range resultSet.RPdetails {
+		retentionperiod = append(retentionperiod, rp.Retentionperiod)
+	}
+
+	return retentionperiod, nil
 }
