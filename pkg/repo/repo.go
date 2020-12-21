@@ -25,7 +25,6 @@ type redisRepo struct {
 
 func newPool(server string) *redis.Pool {
 	return &redis.Pool{
-
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 
@@ -62,7 +61,6 @@ func (r *redisRepo) DeleteDeviceStatus(id string) (err error) {
 func (r *redisRepo) getState(devID string) (d DeviceState, err error) {
 	conn := r.pool.Get()
 	defer conn.Close()
-
 	bytes, err := redis.Bytes(conn.Do("GET", devID))
 	if err != nil {
 		log.Printf("Error occured while getting device status from redis " + err.Error())

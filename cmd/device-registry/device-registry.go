@@ -69,13 +69,12 @@ func main() {
 
 	rep, err := repo.NewRedisRepo(dbAddr)
 	if err != nil {
-		log.Fatal("Failed to connect to redis2", zap.Error(err))
+		log.Fatal("Failed to connect to redis2 with db addr", zap.Error(err))
 	}
 	repServ := repo.Server{
 		Repo: rep,
 		Log:  log.Named("RepoController"),
 	}
-
 	server := registry.NewServer(dg, repServ)
 
 	server.Log = log.Named("deviceController")
