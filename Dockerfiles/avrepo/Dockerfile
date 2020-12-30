@@ -1,10 +1,9 @@
 FROM openjdk:8
- 
-ADD ./pkg /avrepo/ 
-WORKDIR /avrepo
-COPY target/lib /app/lib
-COPY target/AvRepo-0.0.1-SNAPSHOT.jar /app/avrepo-server.jar
 
+ADD ./pkg/AvRepo/target /avrepo/ 
+RUN ls
+WORKDIR /avrepo/
+RUN ls
+COPY . avrepo-server.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/avrepo-server.jar"]
- 
+ENTRYPOINT ["java", "-jar", "/avrepo-server.jar"]
