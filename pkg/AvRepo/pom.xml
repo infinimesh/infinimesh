@@ -34,7 +34,7 @@
         <archive>
           <manifest>
             <addClasspath>true</addClasspath>
-            <classpathPrefix>target/</classpathPrefix>
+            <classpathPrefix>lib/</classpathPrefix>
             <mainClass>main.java.server.AvroServer</mainClass>
           </manifest>
         </archive>
