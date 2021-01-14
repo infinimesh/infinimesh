@@ -143,6 +143,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			_, dbErr = avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
+				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
 					ReportedState: stateFromKafka.State,
 					DesiredState:  nil,
@@ -151,6 +152,7 @@ func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Consu
 			_, dbErr = avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
+				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
 					ReportedState: nil,
 					DesiredState:  stateFromKafka.State,

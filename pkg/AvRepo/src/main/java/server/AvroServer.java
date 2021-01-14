@@ -131,20 +131,21 @@ public class AvroServer {
           //Construct via builder
           DeviceState ds = DeviceState.newBuilder()
                           .setDeviceId(req.getDeviceId())
+                          .setVersion(req.getVersion())
                           .setNamespaceId(req.getNamespaceId()) 
                           .setReportedState(req.getDs().getReportedState().toString())
                           .setDesiredState(req.getDs().getDesiredState().toString())
                           .build();
           
-          File theDir = new File("pkg//AvRepo//"+req.getNamespaceId()+"//"+req.getDeviceId()+"//"+dateFormat.format(date)+"//"+LocalDateTime.now().getHour());
+          File theDir = new File("//avrepo//data//"+req.getNamespaceId()+"//"+req.getDeviceId()+"//"+dateFormat.format(date)+"//"+LocalDateTime.now().getHour());
           if (!theDir.exists()){
             theDir.mkdirs();
           }
-          File toWriteFile = new File(theDir+"//"+"device_state.avro");    
+          File toWriteFile = new File(theDir+"//"+"device_state_"+req.getDeviceId()+".avro");    
           DatumWriter<DeviceState> datumWriter = new ReflectDatumWriter<DeviceState>(DeviceState.class);        
           DataFileWriter<DeviceState> dataFileWriter = new DataFileWriter<DeviceState>(datumWriter);
           try{
-            dataFileWriter.setMeta("version", 1);
+            //dataFileWriter.setMeta("version", req.getVersion());
             dataFileWriter.setMeta("creator", "Infinimesh-Avro");
             dataFileWriter.setCodec(CodecFactory.deflateCodec(5));
             if (toWriteFile.exists()){

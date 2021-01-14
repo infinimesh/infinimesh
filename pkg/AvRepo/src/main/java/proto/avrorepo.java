@@ -40,13 +40,14 @@ public final class avrorepo {
     java.lang.String[] descriptorData = {
       "\n\016avrorepo.proto\022\005proto\":\n\013DeviceState\022\025" +
       "\n\rreportedState\030\003 \001(\014\022\024\n\014desiredState\030\004 " +
-      "\001(\014\"_\n\026SaveDeviceStateRequest\022\020\n\010deviceI" +
-      "d\030\001 \001(\t\022\023\n\013namespaceId\030\002 \001(\t\022\036\n\002ds\030\003 \001(\013" +
-      "2\022.proto.DeviceState\")\n\027SaveDeviceStateR" +
-      "esponse\022\016\n\006status\030\001 \001(\0102^\n\tAvrorepos\022Q\n\016" +
-      "SetDeviceState\022\035.proto.SaveDeviceStateRe" +
-      "quest\032\036.proto.SaveDeviceStateResponse\"\000B" +
-      "\035\n\017main.java.protoB\010avrorepoP\001b\006proto3"
+      "\001(\014\"p\n\026SaveDeviceStateRequest\022\020\n\010deviceI" +
+      "d\030\001 \001(\t\022\023\n\013namespaceId\030\002 \001(\t\022\017\n\007version\030" +
+      "\003 \001(\004\022\036\n\002ds\030\004 \001(\0132\022.proto.DeviceState\")\n" +
+      "\027SaveDeviceStateResponse\022\016\n\006status\030\001 \001(\010" +
+      "2^\n\tAvrorepos\022Q\n\016SetDeviceState\022\035.proto." +
+      "SaveDeviceStateRequest\032\036.proto.SaveDevic" +
+      "eStateResponse\"\000B\035\n\017main.java.protoB\010avr" +
+      "orepoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -63,7 +64,7 @@ public final class avrorepo {
     internal_static_proto_SaveDeviceStateRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_proto_SaveDeviceStateRequest_descriptor,
-        new java.lang.String[] { "DeviceId", "NamespaceId", "Ds", });
+        new java.lang.String[] { "DeviceId", "NamespaceId", "Version", "Ds", });
     internal_static_proto_SaveDeviceStateResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_proto_SaveDeviceStateResponse_fieldAccessorTable = new

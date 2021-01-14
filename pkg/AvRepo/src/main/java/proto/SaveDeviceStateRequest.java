@@ -62,7 +62,12 @@ private static final long serialVersionUID = 0L;
             namespaceId_ = s;
             break;
           }
-          case 26: {
+          case 24: {
+
+            version_ = input.readUInt64();
+            break;
+          }
+          case 34: {
             main.java.proto.DeviceState.Builder subBuilder = null;
             if (ds_ != null) {
               subBuilder = ds_.toBuilder();
@@ -183,10 +188,21 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int DS_FIELD_NUMBER = 3;
+  public static final int VERSION_FIELD_NUMBER = 3;
+  private long version_;
+  /**
+   * <code>uint64 version = 3;</code>
+   * @return The version.
+   */
+  @java.lang.Override
+  public long getVersion() {
+    return version_;
+  }
+
+  public static final int DS_FIELD_NUMBER = 4;
   private main.java.proto.DeviceState ds_;
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>.proto.DeviceState ds = 4;</code>
    * @return Whether the ds field is set.
    */
   @java.lang.Override
@@ -194,7 +210,7 @@ private static final long serialVersionUID = 0L;
     return ds_ != null;
   }
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>.proto.DeviceState ds = 4;</code>
    * @return The ds.
    */
   @java.lang.Override
@@ -202,7 +218,7 @@ private static final long serialVersionUID = 0L;
     return ds_ == null ? main.java.proto.DeviceState.getDefaultInstance() : ds_;
   }
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>.proto.DeviceState ds = 4;</code>
    */
   @java.lang.Override
   public main.java.proto.DeviceStateOrBuilder getDsOrBuilder() {
@@ -229,8 +245,11 @@ private static final long serialVersionUID = 0L;
     if (!getNamespaceIdBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, namespaceId_);
     }
+    if (version_ != 0L) {
+      output.writeUInt64(3, version_);
+    }
     if (ds_ != null) {
-      output.writeMessage(3, getDs());
+      output.writeMessage(4, getDs());
     }
     unknownFields.writeTo(output);
   }
@@ -247,9 +266,13 @@ private static final long serialVersionUID = 0L;
     if (!getNamespaceIdBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, namespaceId_);
     }
+    if (version_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeUInt64Size(3, version_);
+    }
     if (ds_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(3, getDs());
+        .computeMessageSize(4, getDs());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -270,6 +293,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getDeviceId())) return false;
     if (!getNamespaceId()
         .equals(other.getNamespaceId())) return false;
+    if (getVersion()
+        != other.getVersion()) return false;
     if (hasDs() != other.hasDs()) return false;
     if (hasDs()) {
       if (!getDs()
@@ -290,6 +315,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getDeviceId().hashCode();
     hash = (37 * hash) + NAMESPACEID_FIELD_NUMBER;
     hash = (53 * hash) + getNamespaceId().hashCode();
+    hash = (37 * hash) + VERSION_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getVersion());
     if (hasDs()) {
       hash = (37 * hash) + DS_FIELD_NUMBER;
       hash = (53 * hash) + getDs().hashCode();
@@ -431,6 +459,8 @@ private static final long serialVersionUID = 0L;
 
       namespaceId_ = "";
 
+      version_ = 0L;
+
       if (dsBuilder_ == null) {
         ds_ = null;
       } else {
@@ -465,6 +495,7 @@ private static final long serialVersionUID = 0L;
       main.java.proto.SaveDeviceStateRequest result = new main.java.proto.SaveDeviceStateRequest(this);
       result.deviceId_ = deviceId_;
       result.namespaceId_ = namespaceId_;
+      result.version_ = version_;
       if (dsBuilder_ == null) {
         result.ds_ = ds_;
       } else {
@@ -525,6 +556,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getNamespaceId().isEmpty()) {
         namespaceId_ = other.namespaceId_;
         onChanged();
+      }
+      if (other.getVersion() != 0L) {
+        setVersion(other.getVersion());
       }
       if (other.hasDs()) {
         mergeDs(other.getDs());
@@ -710,18 +744,49 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private long version_ ;
+    /**
+     * <code>uint64 version = 3;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public long getVersion() {
+      return version_;
+    }
+    /**
+     * <code>uint64 version = 3;</code>
+     * @param value The version to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersion(long value) {
+      
+      version_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>uint64 version = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVersion() {
+      
+      version_ = 0L;
+      onChanged();
+      return this;
+    }
+
     private main.java.proto.DeviceState ds_;
     private com.google.protobuf.SingleFieldBuilderV3<
         main.java.proto.DeviceState, main.java.proto.DeviceState.Builder, main.java.proto.DeviceStateOrBuilder> dsBuilder_;
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      * @return Whether the ds field is set.
      */
     public boolean hasDs() {
       return dsBuilder_ != null || ds_ != null;
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      * @return The ds.
      */
     public main.java.proto.DeviceState getDs() {
@@ -732,7 +797,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public Builder setDs(main.java.proto.DeviceState value) {
       if (dsBuilder_ == null) {
@@ -748,7 +813,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public Builder setDs(
         main.java.proto.DeviceState.Builder builderForValue) {
@@ -762,7 +827,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public Builder mergeDs(main.java.proto.DeviceState value) {
       if (dsBuilder_ == null) {
@@ -780,7 +845,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public Builder clearDs() {
       if (dsBuilder_ == null) {
@@ -794,7 +859,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public main.java.proto.DeviceState.Builder getDsBuilder() {
       
@@ -802,7 +867,7 @@ private static final long serialVersionUID = 0L;
       return getDsFieldBuilder().getBuilder();
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     public main.java.proto.DeviceStateOrBuilder getDsOrBuilder() {
       if (dsBuilder_ != null) {
@@ -813,7 +878,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>.proto.DeviceState ds = 3;</code>
+     * <code>.proto.DeviceState ds = 4;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         main.java.proto.DeviceState, main.java.proto.DeviceState.Builder, main.java.proto.DeviceStateOrBuilder> 

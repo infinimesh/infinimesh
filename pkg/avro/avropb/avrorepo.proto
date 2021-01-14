@@ -32,7 +32,8 @@ message DeviceState{
 message SaveDeviceStateRequest{
     string deviceId = 1;
     string namespaceId = 2;
-    DeviceState ds = 3;
+    uint64 version = 3;
+    DeviceState ds = 4;
 }
 message SaveDeviceStateResponse{
     bool status = 1;

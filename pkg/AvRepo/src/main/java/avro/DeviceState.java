@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 
 @org.apache.avro.specific.AvroGenerated
 public class DeviceState extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -8613838954591493434L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"DeviceState\",\"namespace\":\"main.java.avro\",\"fields\":[{\"name\":\"NamespaceId\",\"type\":\"string\"},{\"name\":\"DeviceId\",\"type\":\"string\"},{\"name\":\"ReportedState\",\"type\":[\"null\",\"string\"]},{\"name\":\"DesiredState\",\"type\":[\"null\",\"string\"]}]}");
+  private static final long serialVersionUID = -1518784519916194692L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"DeviceState\",\"namespace\":\"main.java.avro\",\"fields\":[{\"name\":\"NamespaceId\",\"type\":\"string\"},{\"name\":\"DeviceId\",\"type\":\"string\"},{\"name\":\"Version\",\"type\":\"long\"},{\"name\":\"ReportedState\",\"type\":[\"null\",\"string\"]},{\"name\":\"DesiredState\",\"type\":[\"null\",\"string\"]}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -73,6 +73,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
 
    private java.lang.CharSequence NamespaceId;
    private java.lang.CharSequence DeviceId;
+   private long Version;
    private java.lang.CharSequence ReportedState;
    private java.lang.CharSequence DesiredState;
 
@@ -87,12 +88,14 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
    * All-args constructor.
    * @param NamespaceId The new value for NamespaceId
    * @param DeviceId The new value for DeviceId
+   * @param Version The new value for Version
    * @param ReportedState The new value for ReportedState
    * @param DesiredState The new value for DesiredState
    */
-  public DeviceState(java.lang.CharSequence NamespaceId, java.lang.CharSequence DeviceId, java.lang.CharSequence ReportedState, java.lang.CharSequence DesiredState) {
+  public DeviceState(java.lang.CharSequence NamespaceId, java.lang.CharSequence DeviceId, java.lang.Long Version, java.lang.CharSequence ReportedState, java.lang.CharSequence DesiredState) {
     this.NamespaceId = NamespaceId;
     this.DeviceId = DeviceId;
+    this.Version = Version;
     this.ReportedState = ReportedState;
     this.DesiredState = DesiredState;
   }
@@ -104,8 +107,9 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
     switch (field$) {
     case 0: return NamespaceId;
     case 1: return DeviceId;
-    case 2: return ReportedState;
-    case 3: return DesiredState;
+    case 2: return Version;
+    case 3: return ReportedState;
+    case 4: return DesiredState;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -116,8 +120,9 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
     switch (field$) {
     case 0: NamespaceId = (java.lang.CharSequence)value$; break;
     case 1: DeviceId = (java.lang.CharSequence)value$; break;
-    case 2: ReportedState = (java.lang.CharSequence)value$; break;
-    case 3: DesiredState = (java.lang.CharSequence)value$; break;
+    case 2: Version = (java.lang.Long)value$; break;
+    case 3: ReportedState = (java.lang.CharSequence)value$; break;
+    case 4: DesiredState = (java.lang.CharSequence)value$; break;
     default: throw new IndexOutOfBoundsException("Invalid index: " + field$);
     }
   }
@@ -154,6 +159,23 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
    */
   public void setDeviceId(java.lang.CharSequence value) {
     this.DeviceId = value;
+  }
+
+  /**
+   * Gets the value of the 'Version' field.
+   * @return The value of the 'Version' field.
+   */
+  public long getVersion() {
+    return Version;
+  }
+
+
+  /**
+   * Sets the value of the 'Version' field.
+   * @param value the value to set.
+   */
+  public void setVersion(long value) {
+    this.Version = value;
   }
 
   /**
@@ -233,6 +255,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
 
     private java.lang.CharSequence NamespaceId;
     private java.lang.CharSequence DeviceId;
+    private long Version;
     private java.lang.CharSequence ReportedState;
     private java.lang.CharSequence DesiredState;
 
@@ -255,13 +278,17 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
         this.DeviceId = data().deepCopy(fields()[1].schema(), other.DeviceId);
         fieldSetFlags()[1] = other.fieldSetFlags()[1];
       }
-      if (isValidValue(fields()[2], other.ReportedState)) {
-        this.ReportedState = data().deepCopy(fields()[2].schema(), other.ReportedState);
+      if (isValidValue(fields()[2], other.Version)) {
+        this.Version = data().deepCopy(fields()[2].schema(), other.Version);
         fieldSetFlags()[2] = other.fieldSetFlags()[2];
       }
-      if (isValidValue(fields()[3], other.DesiredState)) {
-        this.DesiredState = data().deepCopy(fields()[3].schema(), other.DesiredState);
+      if (isValidValue(fields()[3], other.ReportedState)) {
+        this.ReportedState = data().deepCopy(fields()[3].schema(), other.ReportedState);
         fieldSetFlags()[3] = other.fieldSetFlags()[3];
+      }
+      if (isValidValue(fields()[4], other.DesiredState)) {
+        this.DesiredState = data().deepCopy(fields()[4].schema(), other.DesiredState);
+        fieldSetFlags()[4] = other.fieldSetFlags()[4];
       }
     }
 
@@ -279,13 +306,17 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
         this.DeviceId = data().deepCopy(fields()[1].schema(), other.DeviceId);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.ReportedState)) {
-        this.ReportedState = data().deepCopy(fields()[2].schema(), other.ReportedState);
+      if (isValidValue(fields()[2], other.Version)) {
+        this.Version = data().deepCopy(fields()[2].schema(), other.Version);
         fieldSetFlags()[2] = true;
       }
-      if (isValidValue(fields()[3], other.DesiredState)) {
-        this.DesiredState = data().deepCopy(fields()[3].schema(), other.DesiredState);
+      if (isValidValue(fields()[3], other.ReportedState)) {
+        this.ReportedState = data().deepCopy(fields()[3].schema(), other.ReportedState);
         fieldSetFlags()[3] = true;
+      }
+      if (isValidValue(fields()[4], other.DesiredState)) {
+        this.DesiredState = data().deepCopy(fields()[4].schema(), other.DesiredState);
+        fieldSetFlags()[4] = true;
       }
     }
 
@@ -370,6 +401,45 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /**
+      * Gets the value of the 'Version' field.
+      * @return The value.
+      */
+    public long getVersion() {
+      return Version;
+    }
+
+
+    /**
+      * Sets the value of the 'Version' field.
+      * @param value The value of 'Version'.
+      * @return This builder.
+      */
+    public main.java.avro.DeviceState.Builder setVersion(long value) {
+      validate(fields()[2], value);
+      this.Version = value;
+      fieldSetFlags()[2] = true;
+      return this;
+    }
+
+    /**
+      * Checks whether the 'Version' field has been set.
+      * @return True if the 'Version' field has been set, false otherwise.
+      */
+    public boolean hasVersion() {
+      return fieldSetFlags()[2];
+    }
+
+
+    /**
+      * Clears the value of the 'Version' field.
+      * @return This builder.
+      */
+    public main.java.avro.DeviceState.Builder clearVersion() {
+      fieldSetFlags()[2] = false;
+      return this;
+    }
+
+    /**
       * Gets the value of the 'ReportedState' field.
       * @return The value.
       */
@@ -384,9 +454,9 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       * @return This builder.
       */
     public main.java.avro.DeviceState.Builder setReportedState(java.lang.CharSequence value) {
-      validate(fields()[2], value);
+      validate(fields()[3], value);
       this.ReportedState = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[3] = true;
       return this;
     }
 
@@ -395,7 +465,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       * @return True if the 'ReportedState' field has been set, false otherwise.
       */
     public boolean hasReportedState() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[3];
     }
 
 
@@ -405,7 +475,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       */
     public main.java.avro.DeviceState.Builder clearReportedState() {
       ReportedState = null;
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[3] = false;
       return this;
     }
 
@@ -424,9 +494,9 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       * @return This builder.
       */
     public main.java.avro.DeviceState.Builder setDesiredState(java.lang.CharSequence value) {
-      validate(fields()[3], value);
+      validate(fields()[4], value);
       this.DesiredState = value;
-      fieldSetFlags()[3] = true;
+      fieldSetFlags()[4] = true;
       return this;
     }
 
@@ -435,7 +505,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       * @return True if the 'DesiredState' field has been set, false otherwise.
       */
     public boolean hasDesiredState() {
-      return fieldSetFlags()[3];
+      return fieldSetFlags()[4];
     }
 
 
@@ -445,7 +515,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       */
     public main.java.avro.DeviceState.Builder clearDesiredState() {
       DesiredState = null;
-      fieldSetFlags()[3] = false;
+      fieldSetFlags()[4] = false;
       return this;
     }
 
@@ -456,8 +526,9 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
         DeviceState record = new DeviceState();
         record.NamespaceId = fieldSetFlags()[0] ? this.NamespaceId : (java.lang.CharSequence) defaultValue(fields()[0]);
         record.DeviceId = fieldSetFlags()[1] ? this.DeviceId : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.ReportedState = fieldSetFlags()[2] ? this.ReportedState : (java.lang.CharSequence) defaultValue(fields()[2]);
-        record.DesiredState = fieldSetFlags()[3] ? this.DesiredState : (java.lang.CharSequence) defaultValue(fields()[3]);
+        record.Version = fieldSetFlags()[2] ? this.Version : (java.lang.Long) defaultValue(fields()[2]);
+        record.ReportedState = fieldSetFlags()[3] ? this.ReportedState : (java.lang.CharSequence) defaultValue(fields()[3]);
+        record.DesiredState = fieldSetFlags()[4] ? this.DesiredState : (java.lang.CharSequence) defaultValue(fields()[4]);
         return record;
       } catch (org.apache.avro.AvroMissingFieldException e) {
         throw e;
@@ -494,6 +565,8 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
 
     out.writeString(this.DeviceId);
 
+    out.writeLong(this.Version);
+
     if (this.ReportedState == null) {
       out.writeIndex(0);
       out.writeNull();
@@ -521,6 +594,8 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
 
       this.DeviceId = in.readString(this.DeviceId instanceof Utf8 ? (Utf8)this.DeviceId : null);
 
+      this.Version = in.readLong();
+
       if (in.readIndex() != 1) {
         in.readNull();
         this.ReportedState = null;
@@ -536,7 +611,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
       }
 
     } else {
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 5; i++) {
         switch (fieldOrder[i].pos()) {
         case 0:
           this.NamespaceId = in.readString(this.NamespaceId instanceof Utf8 ? (Utf8)this.NamespaceId : null);
@@ -547,6 +622,10 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
           break;
 
         case 2:
+          this.Version = in.readLong();
+          break;
+
+        case 3:
           if (in.readIndex() != 1) {
             in.readNull();
             this.ReportedState = null;
@@ -555,7 +634,7 @@ public class DeviceState extends org.apache.avro.specific.SpecificRecordBase imp
           }
           break;
 
-        case 3:
+        case 4:
           if (in.readIndex() != 1) {
             in.readNull();
             this.DesiredState = null;

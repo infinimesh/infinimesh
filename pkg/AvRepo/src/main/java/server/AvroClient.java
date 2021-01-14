@@ -56,6 +56,7 @@ public class AvroClient {
     SaveDeviceStateRequest request = SaveDeviceStateRequest.newBuilder()
                     .setDeviceId("0x1321")
                     .setNamespaceId("0x3")
+                    .setVersion(1)
     								.setDs(DeviceState.newBuilder()
     										.setDesiredState(ByteString.EMPTY)
     										.setReportedState(ByteString.copyFromUtf8("I am first one"))

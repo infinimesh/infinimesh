@@ -32,17 +32,23 @@ public interface SaveDeviceStateRequestOrBuilder extends
       getNamespaceIdBytes();
 
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>uint64 version = 3;</code>
+   * @return The version.
+   */
+  long getVersion();
+
+  /**
+   * <code>.proto.DeviceState ds = 4;</code>
    * @return Whether the ds field is set.
    */
   boolean hasDs();
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>.proto.DeviceState ds = 4;</code>
    * @return The ds.
    */
   main.java.proto.DeviceState getDs();
   /**
-   * <code>.proto.DeviceState ds = 3;</code>
+   * <code>.proto.DeviceState ds = 4;</code>
    */
   main.java.proto.DeviceStateOrBuilder getDsOrBuilder();
 }
