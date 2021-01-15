@@ -37,21 +37,22 @@ import (
 const (
 	sourceTopicReported = "shadow.reported-state.full"
 	sourceTopicDesired  = "shadow.desired-state.full"
+	consumerGroup       = "avro-persister"
 )
 
 var (
-	broker        string
-	avroClient    avropb.AvroreposClient
-	consumerGroup string
+	broker     string
+	avroClient avropb.AvroreposClient
 )
 
 func init() {
 	sarama.Logger = log.New(os.Stdout, "", log.Ltime)
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
+	viper.SetDefault("AVRO_HOST", "localhost:50054")
 	viper.SetDefault("KAFKA_CONSUMER_GROUP", "avro-persister")
 	viper.AutomaticEnv()
 	broker = viper.GetString("KAFKA_HOST")
-	consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
+	//consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
 }
 
 type handler struct {
@@ -70,7 +71,7 @@ func main() {
 	// gRPC client initialization
 	conn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalln("unable to connect to localhost:3000")
+		log.Fatalln("unable to connect to localhost:50054")
 	}
 	defer conn.Close()
 
