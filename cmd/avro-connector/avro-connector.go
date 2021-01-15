@@ -19,17 +19,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"encoding/json"
-
 	"github.com/Shopify/sarama"
+	"github.com/infinimesh/infinimesh/pkg/avro"
 	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -55,14 +52,13 @@ func init() {
 	//consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
 }
 
-type handler struct {
-}
-
 func main() {
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
 	config.Version = sarama.V2_0_0_0
+	config.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
+	config.Producer.Retry.Max = 10
 
 	client, err := sarama.NewClient([]string{broker}, config)
 	if err != nil {
@@ -82,7 +78,11 @@ func main() {
 		panic(err)
 	}
 
-	//handler := &handler{repo: repo}
+	handler := &avro.Consumer{
+		SourceTopicReported: sourceTopicReported,
+		SourceTopicDesired:  sourceTopicDesired,
+		ConsumerGroup:       consumerGroup,
+	}
 
 	c := make(chan os.Signal, 1)
 
@@ -94,7 +94,7 @@ func main() {
 	outer:
 		for {
 
-			err = group.Consume(context.Background(), []string{sourceTopicDesired, sourceTopicReported}, nil)
+			err = group.Consume(context.Background(), []string{sourceTopicDesired, sourceTopicReported}, handler)
 			if err != nil {
 				panic(err)
 			}
@@ -115,56 +115,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func (h *handler) Setup(s sarama.ConsumerGroupSession) error {
-	fmt.Println("Rebalance, assigned partitions:", s.Claims())
-	return nil
-}
-
-func (h *handler) Cleanup(s sarama.ConsumerGroupSession) error {
-	return nil
-}
-
-func (h *handler) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for message := range claim.Messages() {
-
-		fmt.Println("got msg", string(message.Value))
-
-		var stateFromKafka shadow.DeviceStateMessage
-		if err := json.Unmarshal(message.Value, &stateFromKafka); err != nil {
-			fmt.Println("Failed to deserialize message with offset ", message.Offset)
-			continue
-		}
-
-		var dbErr error
-
-		switch message.Topic {
-		case sourceTopicReported:
-			_, dbErr = avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
-				DeviceId:    string(message.Key),
-				NamespaceId: string(message.Key),
-				Version:     stateFromKafka.Version,
-				Ds: &avropb.DeviceState{
-					ReportedState: stateFromKafka.State,
-					DesiredState:  nil,
-				}})
-		case sourceTopicDesired:
-			_, dbErr = avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
-				DeviceId:    string(message.Key),
-				NamespaceId: string(message.Key),
-				Version:     stateFromKafka.Version,
-				Ds: &avropb.DeviceState{
-					ReportedState: nil,
-					DesiredState:  stateFromKafka.State,
-				}})
-		}
-		// FIXME ignore errors for now
-		if dbErr != nil {
-			fmt.Println("Failed to persist message with offset", message.Offset, dbErr)
-		}
-
-		s.MarkMessage(message, "")
-	}
-	return nil
 }
