@@ -13,7 +13,7 @@ import (
 
 type Consumer struct {
 	Log                 *zap.Logger
-	avroClient          avropb.AvroreposClient
+	AvroClient          avropb.AvroreposClient
 	SourceTopicReported string
 	SourceTopicDesired  string
 	ConsumerGroup       string
@@ -43,7 +43,7 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 
 		switch message.Topic {
 		case h.SourceTopicReported:
-			_, dbErr = h.avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
+			_, dbErr = h.AvroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
 				Version:     stateFromKafka.Version,
@@ -52,7 +52,7 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 					//DesiredState:,
 				}})
 		case h.SourceTopicDesired:
-			_, dbErr = h.avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
+			_, dbErr = h.AvroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
 				Version:     stateFromKafka.Version,

@@ -27,6 +27,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/infinimesh/infinimesh/pkg/avro"
 	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
+	log1 "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -53,6 +54,14 @@ func init() {
 }
 
 func main() {
+	log1, err := log1.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = log1.Sync()
+	}()
+
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
@@ -82,6 +91,8 @@ func main() {
 		SourceTopicReported: sourceTopicReported,
 		SourceTopicDesired:  sourceTopicDesired,
 		ConsumerGroup:       consumerGroup,
+		AvroClient:          avroClient,
+		Log:                 log1.Named("Avro Connector Controller"),
 	}
 
 	c := make(chan os.Signal, 1)
