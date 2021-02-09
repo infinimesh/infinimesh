@@ -49,7 +49,7 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
 					ReportedState: stateFromKafka.State,
-					DesiredState:  nil,
+					//DesiredState:,
 				}})
 		case h.SourceTopicDesired:
 			_, dbErr = h.avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
@@ -57,8 +57,8 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 				NamespaceId: string(message.Key),
 				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
-					ReportedState: nil,
-					DesiredState:  stateFromKafka.State,
+					//ReportedState:,
+					DesiredState: stateFromKafka.State,
 				}})
 		}
 		// FIXME ignore errors for now
