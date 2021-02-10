@@ -40,6 +40,7 @@ const (
 
 var (
 	broker     string
+	avroHost   string
 	avroClient avropb.AvroreposClient
 )
 
@@ -50,6 +51,7 @@ func init() {
 	viper.SetDefault("KAFKA_CONSUMER_GROUP", "avro-persister")
 	viper.AutomaticEnv()
 	broker = viper.GetString("KAFKA_HOST")
+	avroHost = viper.GetString("AVRO_HOST")
 	//consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
 }
 
@@ -74,7 +76,7 @@ func main() {
 		panic(err)
 	}
 	// gRPC client initialization
-	conn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+	conn, err := grpc.Dial(avroHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalln("unable to connect to localhost:50054")
 	}
