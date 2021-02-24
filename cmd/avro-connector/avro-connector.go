@@ -27,6 +27,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/infinimesh/infinimesh/pkg/avro"
 	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
+	log1 "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
@@ -39,6 +40,7 @@ const (
 
 var (
 	broker     string
+	avroHost   string
 	avroClient avropb.AvroreposClient
 )
 
@@ -49,10 +51,19 @@ func init() {
 	viper.SetDefault("KAFKA_CONSUMER_GROUP", "avro-persister")
 	viper.AutomaticEnv()
 	broker = viper.GetString("KAFKA_HOST")
+	avroHost = viper.GetString("AVRO_HOST")
 	//consumerGroup = viper.GetString("KAFKA_CONSUMER_GROUP")
 }
 
 func main() {
+	log1, err := log1.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = log1.Sync()
+	}()
+
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
@@ -65,7 +76,7 @@ func main() {
 		panic(err)
 	}
 	// gRPC client initialization
-	conn, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+	conn, err := grpc.Dial(avroHost, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalln("unable to connect to localhost:50054")
 	}
@@ -82,6 +93,8 @@ func main() {
 		SourceTopicReported: sourceTopicReported,
 		SourceTopicDesired:  sourceTopicDesired,
 		ConsumerGroup:       consumerGroup,
+		AvroClient:          avroClient,
+		Log:                 log1.Named("Avro Connector Controller"),
 	}
 
 	c := make(chan os.Signal, 1)

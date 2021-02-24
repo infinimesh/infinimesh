@@ -13,7 +13,7 @@ import (
 
 type Consumer struct {
 	Log                 *zap.Logger
-	avroClient          avropb.AvroreposClient
+	AvroClient          avropb.AvroreposClient
 	SourceTopicReported string
 	SourceTopicDesired  string
 	ConsumerGroup       string
@@ -43,22 +43,22 @@ func (h *Consumer) ConsumeClaim(s sarama.ConsumerGroupSession, claim sarama.Cons
 
 		switch message.Topic {
 		case h.SourceTopicReported:
-			_, dbErr = h.avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
+			_, dbErr = h.AvroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
 				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
 					ReportedState: stateFromKafka.State,
-					DesiredState:  nil,
+					//DesiredState:,
 				}})
 		case h.SourceTopicDesired:
-			_, dbErr = h.avroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
+			_, dbErr = h.AvroClient.SetDeviceState(context.Background(), &avropb.SaveDeviceStateRequest{
 				DeviceId:    string(message.Key),
 				NamespaceId: string(message.Key),
 				Version:     stateFromKafka.Version,
 				Ds: &avropb.DeviceState{
-					ReportedState: nil,
-					DesiredState:  stateFromKafka.State,
+					//ReportedState:,
+					DesiredState: stateFromKafka.State,
 				}})
 		}
 		// FIXME ignore errors for now
