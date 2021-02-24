@@ -63,7 +63,7 @@ module.exports = {
     "/api": {
       target: process.env.APISERVER_URL, // This will be defined on start
       pathRewrite: {
-        "^/api": "/"
+        "^/api/": "/"
       }
     }
   },
