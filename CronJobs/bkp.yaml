@@ -1,0 +1,147 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  creationTimestamp: "2020-11-05T18:54:00Z"
+  name: harddeletenamespace
+  namespace: default
+  resourceVersion: "1724165348"
+  selfLink: /apis/batch/v1beta1/namespaces/default/cronjobs/harddeletenamespace
+  uid: 30144ae5-c735-42a8-bdbb-a31e8816ee5b
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - -c
+            - echo START; sudo apt install jq; temptoken=`(curl --location --request
+              POST 'https://api.infinimesh.dev/account/token' --header 'Content-Type:application/json'
+              --data-raw '{"password":"'"$password"'","username":"'"$username"'"}'
+              | sed -n '/ *"token":*"/ { s///; s/".*//; p; }')`; token=`echo "${temptoken:1}"`;
+              echo $token; curl -X DELETE https://api.infinimesh.dev/namespaces/0xeab0/true
+              -H 'Authorization:bearer '"$token"''; echo END;
+            command:
+            - /bin/sh
+            envFrom:
+            - secretRef:
+                name: my-infinimesh-root-account
+            image: curlimages/curl
+            imagePullPolicy: Always
+            name: harddelete
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+  schedule: 0 0 * * *
+  successfulJobsHistoryLimit: 2
+  suspend: false
+status:
+  active:
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609372800
+    namespace: default
+    resourceVersion: "1617031395"
+    uid: 62ca8a62-ff5e-46ab-879e-3ac678c4f15f
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609459200
+    namespace: default
+    resourceVersion: "1623915290"
+    uid: 3fcc169d-06c5-4124-8ffd-c790c22fcff1
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609545600
+    namespace: default
+    resourceVersion: "1630829451"
+    uid: 8db56bb9-899a-4ddf-892a-838987193a97
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609632000
+    namespace: default
+    resourceVersion: "1637767186"
+    uid: 8da7c33f-06a8-4d48-8de2-e489dfd2194a
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609718400
+    namespace: default
+    resourceVersion: "1644730896"
+    uid: 908b90be-bf46-4e47-8e3d-55c93e2f178e
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609804800
+    namespace: default
+    resourceVersion: "1651743096"
+    uid: 2672ed67-080e-4a29-9fdf-6a83a76fd9b4
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609891200
+    namespace: default
+    resourceVersion: "1658785077"
+    uid: a6d93dc8-2aec-4a35-be8b-019ba2400fc2
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1609977600
+    namespace: default
+    resourceVersion: "1665926285"
+    uid: f3966f63-18f8-4a78-b665-0d87c4566764
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610064000
+    namespace: default
+    resourceVersion: "1673094027"
+    uid: f4adc16f-a2db-40ec-a4a0-564015912af2
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610150400
+    namespace: default
+    resourceVersion: "1680347484"
+    uid: 9185bfc5-c7d9-4da7-8bd5-def56efcbfad
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610236800
+    namespace: default
+    resourceVersion: "1687720306"
+    uid: 9fc475ff-71c0-4a47-94f8-3a04e274611c
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610323200
+    namespace: default
+    resourceVersion: "1695131903"
+    uid: 864316d7-d83b-4545-8ca8-a47a3446f118
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610409600
+    namespace: default
+    resourceVersion: "1702666220"
+    uid: c81ee374-14c0-41c5-9fcb-4206e0454843
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610496000
+    namespace: default
+    resourceVersion: "1709934094"
+    uid: 07e6a1e6-194e-4861-bf83-66fae33f07d9
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610582400
+    namespace: default
+    resourceVersion: "1717045736"
+    uid: 99a042f0-2555-4fbe-890d-35a57d824551
+  - apiVersion: batch/v1
+    kind: Job
+    name: harddeletenamespace-1610668800
+    namespace: default
+    resourceVersion: "1724165343"
+    uid: a23341c9-ad1a-4d27-8336-1f9be6e6ea46
+  lastScheduleTime: "2021-01-15T00:00:00Z"
