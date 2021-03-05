@@ -284,7 +284,9 @@ export default {
     },
     deletionTime(namespace) {
       let delete_init_date = new Date(namespace.deleteinitiationtime);
-      delete_init_date.setDate(delete_init_date.getDate() + 14);
+      delete_init_date.setDate(
+        delete_init_date.getDate() + namespace.RetentionPeriod
+      );
       return "on " + delete_init_date;
     },
   },
