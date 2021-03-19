@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 )
 
@@ -310,6 +311,8 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 		return nil, status.Error(codes.Internal, "Unable to get permissions for the Account")
 	}
 
+	var resp *nodepb.IsAuthorizedNamespaceResponse
+
 	if !request.Harddelete {
 		namespace, err := n.Repo.GetNamespaceID(ctx, request.Namespaceid)
 		if err != nil {
@@ -324,18 +327,20 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			log.Error("Cannot delete root Namespace")
 			return nil, status.Error(codes.FailedPrecondition, "Cannot delete root Namespace")
 		}
-	}
 
-	//Check if the Account has WRITE access to Namespace
-	resp, err := a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
-		Account:     requestorID,
-		Namespaceid: request.Namespaceid,
-		Action:      nodepb.Action_WRITE,
-	})
-	if err != nil {
-		//Added logging
-		log.Error("Failed to get Authorization details for the Namespace", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		//Check if the Account has WRITE access to Namespace
+		resp, err = a.IsAuthorizedNamespace(ctx, &nodepb.IsAuthorizedNamespaceRequest{
+			Account:     requestorID,
+			Namespaceid: request.Namespaceid,
+			Action:      nodepb.Action_WRITE,
+		})
+		if err != nil {
+			//Added logging
+			log.Error("Failed to get Authorization details for the Namespace", zap.Error(err))
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	} else {
+		resp = &nodepb.IsAuthorizedNamespaceResponse{Decision: &wrappers.BoolValue{Value: true}}
 	}
 
 	//Initiate delete if the account has access
@@ -352,7 +357,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 
 			if !(len(response) > 0) {
 				//Added logging
-				log.Error("No Retention Period obtained for hard Delete", zap.Error(err))
+				log.Error("No Retention Period obtained for Hard Delete", zap.Error(err))
 				return nil, status.Error(codes.Internal, err.Error())
 			}
 
