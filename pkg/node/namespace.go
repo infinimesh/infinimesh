@@ -19,6 +19,7 @@ package node
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"go.uber.org/zap"
@@ -363,25 +364,25 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 
 			//Remove Duplicate values from the response
 			resMap := map[int]bool{}
-			rententionPeriod := []int{}
+			retentionPeriod := []int{}
 			for v := range response {
 				if resMap[response[v]] == true {
 				} else {
 					resMap[response[v]] = true
-					rententionPeriod = append(rententionPeriod, response[v])
+					retentionPeriod = append(retentionPeriod, response[v])
 				}
 			}
 
-			for _, rp := range rententionPeriod {
+			for _, rp := range retentionPeriod {
 
 				//Set the datecondition as per the retnetion period for each namespace
 				//This is to ensure that records that are older then rentention period or more will be only be deleted.
 				datecondition := time.Now().AddDate(0, 0, -rp).Format(time.RFC3339)
 
 				//Added logging
-				log.Info("Hard Delete Process Invoked")
+				log.Info("Hard Delete Process Invoked for Retention Period: " + strconv.Itoa(rp))
 				//Invokde Hardelete function with the date conidtion
-				err = n.Repo.HardDeleteNamespace(ctx, datecondition)
+				err = n.Repo.HardDeleteNamespace(ctx, datecondition, rp)
 				if err != nil {
 					if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
 						//Added logging
@@ -395,7 +396,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			}
 
 			//Added logging
-			log.Info("Hard Delete Process Successful")
+			log.Info("Hard Delete Process Successful for all retention Periods.")
 		} else {
 			//Added logging
 			log.Info("Soft Delete Method Invoked")
