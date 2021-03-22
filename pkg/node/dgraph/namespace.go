@@ -356,10 +356,10 @@ func (s *DGraphRepo) SoftDeleteNamespace(ctx context.Context, namespaceID string
 }
 
 //HardDeleteNamespace is a method to execute Dgraph Query that deletes a namespace permantly
-func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string) (err error) {
+func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition string, rp int) (err error) {
 	txn := s.Dg.NewReadOnlyTxn()
 	var q = `query deleteNodes{
-        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND lt(deleteinitiationtime,"%v") and Not eq(name,"root")) @normalize {
+        nodes(func: eq(type,"namespace")) @filter(eq(markfordeletion,"true") AND eq(retentionperiod,rp) AND lt(deleteinitiationtime,"%v") and Not eq(name,"root")) @normalize {
           uid
         owns {
           uid
