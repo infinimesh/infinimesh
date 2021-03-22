@@ -396,7 +396,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 			}
 
 			//Added logging
-			log.Info("Hard Delete Process Successful for all retention Periods.")
+			log.Info("Hard Delete Process Successful for all retention periods")
 		} else {
 			//Added logging
 			log.Info("Soft Delete Method Invoked")
