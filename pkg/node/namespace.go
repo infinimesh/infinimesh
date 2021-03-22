@@ -382,7 +382,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 				//Added logging
 				log.Info("Hard Delete Process Invoked for Retention Period: " + strconv.Itoa(rp))
 				//Invokde Hardelete function with the date conidtion
-				err = n.Repo.HardDeleteNamespace(ctx, datecondition, rp)
+				err = n.Repo.HardDeleteNamespace(ctx, datecondition, strconv.Itoa(rp))
 				if err != nil {
 					if status.Code(err) != 5 { //5 is the error code for NotFound in GRPC
 						//Added logging
