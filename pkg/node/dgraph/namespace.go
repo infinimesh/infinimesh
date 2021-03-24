@@ -367,6 +367,9 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
         }
       }
       `
+	if len(rp) < 0 {
+		return status.Error(codes.Internal, "The retention period is not set")
+	}
 
 	if datecondition != "" {
 		q = fmt.Sprintf(q, datecondition)
