@@ -183,6 +183,7 @@ func (s *DGraphRepo) ListNamespaces(ctx context.Context) (namespaces []*nodepb.N
 			Name:                 namespace.Name,
 			Markfordeletion:      namespace.MarkForDeletion,
 			Deleteinitiationtime: namespace.DeleteInitiationTime,
+			RetentionPeriod:      namespace.RetentionPeriod,
 		})
 	}
 
