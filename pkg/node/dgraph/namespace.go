@@ -107,6 +107,7 @@ func (s *DGraphRepo) GetNamespace(ctx context.Context, namespacename string) (na
 			Name:                 resultSet.Namespaces[0].Name,
 			Markfordeletion:      resultSet.Namespaces[0].MarkForDeletion,
 			Deleteinitiationtime: resultSet.Namespaces[0].DeleteInitiationTime,
+			RetentionPeriod:      resultSet.Namespaces[0].RetentionPeriod,
 		}, nil
 	}
 
