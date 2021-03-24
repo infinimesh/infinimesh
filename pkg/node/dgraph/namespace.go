@@ -374,7 +374,7 @@ func (s *DGraphRepo) HardDeleteNamespace(ctx context.Context, datecondition stri
 		q = fmt.Sprintf(q, "")
 	}
 
-	res, err := txn.Query(ctx, q)
+	res, err := txn.QueryWithVars(ctx, q, map[string]string{"$rp": rp})
 	if err != nil {
 		return err
 	}
