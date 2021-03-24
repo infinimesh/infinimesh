@@ -1,5 +1,5 @@
 
-Infinite Devices GmbH is a young start-up from Magdeburg that develops and markets the IoT platform infinimesh. Powered by infinimesh, our SmartCountr access management solution enables reliable entry and exit control in highly frequented buildings.
+Infinite Devices GmbH is a young start-up based in Magdeburg that develops and markets the IoT platform infinimesh. Powered by infinimesh, our SmartCountr access management solution enables reliable entry and exit control in highly frequented buildings.
 
 ## Contact Us
 <!-- Please don't remove this: Grab your social icons from https://github.com/carlsednaoui/gitsocial -->
