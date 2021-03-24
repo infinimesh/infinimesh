@@ -390,7 +390,7 @@ func (n *NamespaceController) DeleteNamespace(ctx context.Context, request *node
 						return nil, status.Error(codes.Internal, err.Error())
 					} else {
 						log.Error("Failed to complete Hard delete Namespace process", zap.Error(err))
-						return nil, status.Error(codes.Internal, err.Error())
+						//return nil, status.Error(codes.Internal, err.Error())
 					}
 				}
 			}
