@@ -4,9 +4,9 @@ The Device States Endpoints allows you to manage the states of devices. Below ar
 
 | HTTP Request | Endpoints | Purpose of the Endpoint |
 |--------------|-----------|-------------------------|
-| GET | /devices/{id}/state
+| GET | /devices/{device.id}/state
 | PATCH | /devices/{device.id}/state
-| GET | /devices/{id}/state/stream
+| GET | /devices/{device.id}/state/stream
 
 ## How to GET the Device State
 
@@ -53,7 +53,7 @@ Steps:
 
 1. REST Request Details to get the device reported state streaming
 
-   - REST Endpoint: **<URL>/devices/{id}/state/stream
+   - REST Endpoint: **<URL>/devices/{device.id}/state/stream
    > URL is the domain for the environment E.g. console.infinimesh.dummy
    - Request Path Parameters: **id should be a valid device id**
    - Request Type: **GET**
@@ -61,4 +61,4 @@ Steps:
 
 2. Once the above REST Request is send with the correct device id and correct token, the specific device reported state will be streamed and HTTP 200 response will be recieved. Otherwise you will get an error with the reason why the streaming was not successful.
 
-curl request for streaming : curl -X GET "https://<URL>/devices/<device id>/state/stream?only_delta=false" -H "Authorization: Bearer <Authentication_Token>"
+curl request for streaming : curl -X GET "https://URL/devices/device.id/state/stream?only_delta=false" -H "Authorization: Bearer Authentication_Token"
