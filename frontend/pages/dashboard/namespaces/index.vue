@@ -170,7 +170,14 @@ export default {
   },
   mounted() {
     this.getNamespacesPool();
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.getNamespacesPool,
+    });
     if (this.$route.query.create) this.createNamespaceDrawerVisible = true;
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
   },
   methods: {
     async getNamespacesPool() {
