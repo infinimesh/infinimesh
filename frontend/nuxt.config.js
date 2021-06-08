@@ -45,7 +45,6 @@ module.exports = {
     }
   },
   buildModules: [
-    "@nuxt/typescript-build",
     "@nuxtjs/style-resources",
     "@nuxtjs/color-mode",
     "@nuxtjs/vuetify"
