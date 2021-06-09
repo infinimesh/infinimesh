@@ -118,7 +118,7 @@ services:
     depends_on:
       - alpha
     environment:
-      - DGRAPH_HOST=server:9080
+      - DGRAPH_HOST=alpha:9080
   # dgraph
   zero:
     image: dgraph/dgraph:v1.0.14
