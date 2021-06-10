@@ -19,16 +19,11 @@
     "@nuxtjs/proxy": "^2.0.1",
     "@nuxtjs/pwa": "^3.0.2",
     "@nuxtjs/style-resources": "^1.0.0",
-    "ant-design-vue": "^1.7.5",
-    "css-what": "^5.0.1",
-    "glob-parent": "^5.1.2",
-    "normalize-url": "^4.5.1",
     "nuxt": "^2.15.6",
-    "postcss": "^8.2.10",
-    "trim-newlines": "^3.0.1",
     "typeface-exo": "1.1.13"
   },
   "devDependencies": {
+    "ant-design-vue": "^1.7.5",
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@nuxt/types": "^2.14.3",
@@ -47,7 +42,12 @@
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "node-sass": "^6.0.0",
-    "vue-jest": "^3.0.7"
+    "vue-jest": "^3.0.7",
+    "css-what": "^5.0.1",
+    "glob-parent": "^5.1.2",
+    "normalize-url": "^4.5.1",
+    "postcss": "^8.2.10",
+    "trim-newlines": "^4.0.1"
   },
   "resolutions": {
     "cryptiles": "^4.1.2",
