@@ -23,7 +23,7 @@
     "less": "^2.7.3",
     "less-loader": "^4.1.0",
     "nuxt": "^2.15.6",
-    "trim-newlines": "^3.0.1",
+    "trim-newlines": "^4.0.1",
     "typeface-exo": "1.1.13"
   },
   "devDependencies": {
