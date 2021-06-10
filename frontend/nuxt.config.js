@@ -41,7 +41,10 @@ module.exports = {
       }
     },
     loaders: {
-      less: { lessOptions: { javascriptEnabled: true } }
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {}
+      }
     }
   },
   buildModules: [
@@ -54,7 +57,10 @@ module.exports = {
     "@nuxtjs/auth",
     ["@nuxtjs/pwa", { meta: false, icon: false, manifest: false }]
   ],
-  css: ["@/assets/main.css"],
+  css: [
+    "@/assets/main.css",
+    { src: "ant-design-vue/dist/antd.less", lang: "less" }
+  ],
   axios: {
     proxy: true
   },
