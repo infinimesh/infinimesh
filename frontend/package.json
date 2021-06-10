@@ -19,7 +19,7 @@
     "@nuxtjs/proxy": "^2.0.1",
     "@nuxtjs/pwa": "^3.0.2",
     "@nuxtjs/style-resources": "^1.0.0",
-    "ant-design-vue": "^1.6.5",
+    "ant-design-vue": "^1.7.5",
     "less": "^2.7.3",
     "less-loader": "^4.1.0",
     "nuxt": "^2.15.6",
