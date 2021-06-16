@@ -20,7 +20,7 @@ FILENAME=$1
 if [ ! -z $FILENAME ] 
 then
     openssl genrsa -out $FILENAME.key 4096
-    openssl req -new -x509 -sha256 -key $FILENAME.key -out $FILENAME.crt -days 365 -subj "/C=/ST=/L=/O=/CN=/emailAddress="
+    openssl req -new -x509 -sha256 -key $FILENAME.key -out $FILENAME.crt -days 365 -subj "/C=/ST=/L=/O=/CN=/emailAddress=/"
 else
     echo "Please set <filename> without extension for first argument without blank spaces.";
     echo "./cert.sh <filename>";
