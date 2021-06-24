@@ -1,9 +1,9 @@
-# Infinimesh Community IoT Platform
-Infinimesh community is a opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
+# infinimesh.community IoT Platform
+infinimesh.community is a opinionated multi-tenant hyperscale Internet of Things platform to connect IoT devices fast and securely with minimal TCO. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. The infinimesh.community IoT platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-Infinimesh community is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
-All development is open source and completely transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. Infinimesh community cloud has already available:  
+infinimesh.community is always under development - we never stop to make the best IoT and AIoT platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
+All development for infinimesh.community is open source and transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. infinimesh community (cloud) has already available:  
   
 **MQTT support for version 3 and 5**   
 **State management (digital twin)**  
@@ -17,7 +17,7 @@ All development is open source and completely transparent on GitHub. Our API's (
 A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s). 
 
 # Documentation  
-Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
+The [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_shield)
@@ -99,7 +99,7 @@ The cafile path may vary depending on your operating system.
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_large)
 
-Copyright 2018, The infinimesh team
+Copyright 2018 - 2021, The infinimesh.community team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
