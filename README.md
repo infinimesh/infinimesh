@@ -1,18 +1,18 @@
-# Infinimesh Platform
-Infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
+# Infinimesh Community IoT Platform
+Infinimesh community is a opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-Infinimesh is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
-All development is open source and completely transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. Infinimesh cloud has already available:  
+Infinimesh community is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
+All development is open source and completely transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. Infinimesh community cloud has already available:  
   
-**MQTT support for version 3 and 5**  
-**User defined subtopics (MQTT 5)**  
+**MQTT support for version 3 and 5**   
 **State management (digital twin)**  
 **Graph-based permission management (multi-dimensional permissons at data layer)**  
 **TLS 1.2 / 1.3 support**  
 **Device-to-Cloud and Cloud-to-Device messages**  
-**Integrated persistence data layer**  
-**REST-API SQL engine**
+**Integrated persistence data layer as .avro**
+**Enhanced UI**
+**k8s and docker environments**
 
 A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s). 
 
