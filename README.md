@@ -17,7 +17,7 @@ All development for infinimesh.community is open source and transparent on GitHu
 A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s). 
 
 # Documentation  
-The [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
+Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) 
