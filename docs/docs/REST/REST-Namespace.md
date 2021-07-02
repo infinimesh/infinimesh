@@ -19,7 +19,7 @@ The Namespace Endpoint allows you to mange namesapces for the applications. Belo
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 
 Steps:
 
@@ -55,7 +55,7 @@ Sample Response:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace
 
 Steps:
@@ -84,7 +84,7 @@ Response Format:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -128,7 +128,7 @@ Below is an example of an update JSON request which will update the namespace wi
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -150,7 +150,7 @@ Steps:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -170,7 +170,7 @@ Steps:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -202,7 +202,7 @@ Response Format:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -235,7 +235,7 @@ Response Format:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:
@@ -264,7 +264,7 @@ Request Body Format:
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a namespace 
 
 Steps:

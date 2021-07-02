@@ -12,7 +12,7 @@ The Device States Endpoints allows you to manage the states of devices. Below ar
 
 Pre-Requisites: 
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a device id for which you want to see the current state
 
 Steps:
@@ -29,7 +29,7 @@ Steps:
 
 ## How to PATCH the desired Device State
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a device id to which you want to patch the desired state
 
 Steps:
@@ -46,7 +46,7 @@ Steps:
 
 ## How to get the device reported state streaming
 
-1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinitedevices.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
+1. You need valid user credentials for the applications to obtain token (Refer [here](https://infinimesh.github.io/infinimesh/docs/#/REST/GenerateToken#how-to-obtain-the-token) on how to generate a token)
 2. You need a device id to which you want to stream the device reported state
 
 Steps:
