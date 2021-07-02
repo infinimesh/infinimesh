@@ -58,7 +58,7 @@ services:
     ports:
       - "8070:8080"
     environment:
-      - DGRAPH_HOST=server:9080
+      - DGRAPH_HOST=alpha:9080
       - "DB_ADDR2=10.233.72.9:6379"
     restart: unless-stopped
   shadow-delta-merger:
@@ -91,7 +91,7 @@ services:
       - "8082:80"
     image: quay.io/infinimesh/frontend:infinidev
     environment:
-      - "APISERVER_URL=apiserver-rest:8081"
+      - "APISERVER_URL=http://apiserver-rest:8081"
   apiserver:
     ports:
       - "8080:8080"
@@ -118,7 +118,7 @@ services:
     depends_on:
       - alpha
     environment:
-      - DGRAPH_HOST=server:9080
+      - DGRAPH_HOST=alpha:9080
   # dgraph
   zero:
     image: dgraph/dgraph:v1.0.14

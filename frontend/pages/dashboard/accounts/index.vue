@@ -168,6 +168,13 @@ export default {
   },
   mounted() {
     this.getAccountsPool();
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.getAccountsPool,
+    });
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
   },
   methods: {
     toogleAdmin(account) {

@@ -4,7 +4,7 @@
       <a v-if="release" :href="release.html_url" target="_blank"
         ><strong> infinimesh {{ release.tag_name }}</strong></a
       >
-      ©2020 —
+      ©2021 —
       <strong>InfiniteDevices GmbH</strong>
       - source code at
       <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">

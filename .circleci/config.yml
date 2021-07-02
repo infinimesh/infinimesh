@@ -34,10 +34,10 @@ jobs:
           command: cd frontend && yarn
       - run:
           name: lint
-          command: cd frontend && yarn run lint
+          command: cd frontend && yarn lint
       - run:
           name: build
-          command: cd frontend && yarn run build
+          command: cd frontend && yarn build
   tests:
     docker:
       - image: circleci/golang:1.11
@@ -66,7 +66,7 @@ jobs:
           command: cd frontend && yarn
       - run:
           name: lint
-          command: cd frontend && yarn run lint
+          command: cd frontend && yarn lint
       - run:
           name: tests
           command: cd frontend && yarn test

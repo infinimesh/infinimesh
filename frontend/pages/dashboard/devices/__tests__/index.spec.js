@@ -42,7 +42,7 @@ describe("Devices Registry", () => {
         topAction: undefined,
         release: {
           html_url:
-            "https://github.com/InfiniteDevices/infinimesh/releases/tag/v0.1.5",
+            "https://github.com/infinimesh/infinimesh/releases/tag/v0.1.5",
           tag_name: "v0.1.5"
         }
       },

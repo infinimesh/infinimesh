@@ -1,18 +1,18 @@
-# Infinimesh Platform
-Infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
+# infinimesh.community IoT Platform
+infinimesh.community is a opinionated multi-tenant hyperscale Internet of Things platform to connect IoT devices fast and securely with minimal TCO. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. The infinimesh.community IoT platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-Infinimesh is always under development - we never stop to make the best IoT and AI platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/InfiniteDevices/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
-All development is open source and completely transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. Infinimesh cloud has already available:  
+infinimesh.community is always under development - we never stop to make the best IoT and AIoT platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
+All development for infinimesh.community is open source and transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. infinimesh.community (cloud) has already available:  
   
-**MQTT support for version 3 and 5**  
-**User defined subtopics (MQTT 5)**  
+**MQTT support for version 3 and 5**   
 **State management (digital twin)**  
 **Graph-based permission management (multi-dimensional permissons at data layer)**  
 **TLS 1.2 / 1.3 support**  
 **Device-to-Cloud and Cloud-to-Device messages**  
-**Integrated persistence data layer**  
-**REST-API SQL engine**
+**Integrated persistence data layer as .avro**  
+**Enhanced UI**  
+**k8s and docker environments**
 
 A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s). 
 
@@ -20,23 +20,11 @@ A kubernetes operator is also available, which is in an early stage. The simples
 Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
 ## Build status
-[![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_shield)
+[![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinimesh/infinimesh)](https://goreportcard.com/report/github.com/infinimesh/infinimesh)
 
-| Docker Image  | Build status  |
-| ------------- |---------------|
-| Kubernetes Operator | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/operator/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/operator) |
-| App (Web UI) | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/frontend/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/frontend) |
-| API Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver-rest/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver-rest) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/apiserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/apiserver) |
-| Node Server | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/nodeserver/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/nodeserver) |
-| Device Registry | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/device-registry/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/device-registry) |
-| Telemetry Router | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/telemetry-router/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/telemetry-router) |
-| MQTT-Bridge | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/mqtt-bridge/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/mqtt-bridge) |
-| Shadow Subsystem | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-delta-merger/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-delta-merger) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-api/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-api) [![Docker Repository on Quay](https://quay.io/repository/infinimesh/shadow-persister/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/shadow-persister) |
-| timescale-connector | [![Docker Repository on Quay](https://quay.io/repository/infinimesh/timescale-connector/status "Docker Repository on Quay")](https://quay.io/repository/infinimesh/timescale-connector)|
-
 ## API Documentation
-You can find swagger docs for the API server [here](https://infinitedevices.github.io/infinimesh/swagger-ui/)
+You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
 
 ## Community
 You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity) or join us in our CNCF channel [#infinimesh](https://cloud-native.slack.com/archives/C01EP6QRJTD).
@@ -99,7 +87,7 @@ The cafile path may vary depending on your operating system.
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_large)
 
-Copyright 2018, The infinimesh team
+Copyright 2018 - 2021, The infinimesh.community team
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
