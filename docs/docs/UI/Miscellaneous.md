@@ -1,6 +1,6 @@
 # Miscellaneous
 
-Here you can read about little tweaks or components being used across console.
+Here you can read about little tweaks or components being used across Infinimesh console.
 
 ## Reset Password
 

@@ -17,7 +17,7 @@ Device state can be reported using Eclipse **mosquitto_pub**.
 
 **MQTT version 3.1.1/3.1 client**
 
-Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{\"ping\": \"test\”}"
+Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883 -m "{\"ping\": \"test\”}"
 
 **MQTT version 5 client**
 

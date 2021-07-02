@@ -105,7 +105,10 @@ export default {
       message: "No account yet? Please contact us! Click here",
       bottom: "42px",
       onClick: () =>
-        window.open("https://infinitedevices.de/en/contact/", "target-new"),
+        window.open(
+          "https://infinitedevices.de/infinimesh-cloud-registration/",
+          "target-new"
+        ),
     });
   },
   methods: {

@@ -13,9 +13,10 @@
   - [REST API Guide](REST/REST.md)
     1. [Pre-Requisites](REST/GenerateToken.md)
     2. [Devices Registry Management](REST/REST-Device.md)
-    3. [Accounts Management](REST/REST-Accounts.md)
-    4. [Namespaces Management](REST/REST-Namespace.md)
-    5. [User Account Management](REST/REST-User.md)
+    3. [Devices State Management](REST/REST-DeviceState.md)
+    4. [Accounts Management](REST/REST-Accounts.md)
+    5. [Namespaces Management](REST/REST-Namespace.md)
+    6. [User Account Management](REST/REST-User.md)
 
   - [Technical Guide](Technical/TechGuide.md)
     1. [Device Certificate Creation](Technical/CertificateCreation.md)
