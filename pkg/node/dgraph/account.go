@@ -232,7 +232,7 @@ func (s *DGraphRepo) UpdateAccount(ctx context.Context, account *nodepb.UpdateAc
 	return nil
 }
 
-//CreateUserAccount is a method to Create User Account
+//CreateUserAccount is a method to Create User Account for Infinimesh
 func (s *DGraphRepo) CreateUserAccount(ctx context.Context, username, password string, isRoot, isAdmin, enabled bool) (uid string, err error) {
 	txn := s.Dg.NewTxn()
 

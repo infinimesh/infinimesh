@@ -447,7 +447,7 @@ func (s *AccountController) UpdateAccount(ctx context.Context, request *nodepb.U
 		}
 	} else {
 		//Added logging
-		log.Error("The Account does not have permission to update details")
+		log.Error("The Account does not have permission to Update details")
 		return nil, status.Error(codes.PermissionDenied, "The Account does not have permission to update details")
 	}
 

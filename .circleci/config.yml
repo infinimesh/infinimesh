@@ -26,7 +26,7 @@ jobs:
           command: task build
   build-frontend:
     docker:
-      - image: circleci/node:latest
+      - image: circleci/node:14.17.0
     steps:
       - checkout
       - run:
@@ -58,7 +58,7 @@ jobs:
           command: docker exec -e TIMESERIES_URL="postgres://postgres:postgres@timescaledb/postgres?sslmode=disable" -e DB_ADDR="redis:6379" -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && CGO_ENABLED=0 go run -mod=vendor hack/import_dgraph_sample_data.go -drop && go test -mod=vendor ./...'
   tests-frontend:
     docker:
-      - image: circleci/node:latest
+      - image: circleci/node:14.17.0
     steps:
       - checkout
       - run:
