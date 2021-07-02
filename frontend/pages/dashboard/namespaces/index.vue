@@ -96,7 +96,7 @@
                   <a-tooltip
                     v-else
                     placement="left"
-                    title="Namespace and its devices won't be deleted immeadeatly, but after two weeks"
+                    title="Namespace and its devices won't be deleted immediately, but after two weeks"
                   >
                     <a-button type="link" @click="deleteNamespace(namespace)">
                       <a-icon
@@ -170,7 +170,14 @@ export default {
   },
   mounted() {
     this.getNamespacesPool();
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.getNamespacesPool,
+    });
     if (this.$route.query.create) this.createNamespaceDrawerVisible = true;
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
   },
   methods: {
     async getNamespacesPool() {

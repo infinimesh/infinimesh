@@ -18,7 +18,7 @@ module.exports = {
       { rel: "icon", type: "image/png", href: "/favicon.png" }
     ]
   },
-  plugins: ["@/plugins/ant-design-vue", "@/plugins/typeface-exo"],
+  plugins: ["@/plugins/ant-design-vue"],
   /*
    ** Customize the progress bar color
    */
@@ -41,11 +41,13 @@ module.exports = {
       }
     },
     loaders: {
-      less: { lessOptions: { javascriptEnabled: true } }
+      less: {
+        javascriptEnabled: true,
+        modifyVars: {}
+      }
     }
   },
   buildModules: [
-    "@nuxt/typescript-build",
     "@nuxtjs/style-resources",
     "@nuxtjs/color-mode",
     "@nuxtjs/vuetify"
@@ -55,7 +57,11 @@ module.exports = {
     "@nuxtjs/auth",
     ["@nuxtjs/pwa", { meta: false, icon: false, manifest: false }]
   ],
-  css: ["@/assets/main.css"],
+  css: [
+    "@/assets/main.css",
+    "typeface-exo/index.css",
+    { src: "ant-design-vue/dist/antd.less", lang: "less" }
+  ],
   axios: {
     proxy: true
   },

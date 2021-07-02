@@ -10,7 +10,7 @@ import axios from "axios";
 export default {
   mounted() {
     axios
-      .get("https://api.github.com/repos/InfiniteDevices/infinimesh/releases")
+      .get("https://api.github.com/repos/infinimesh/infinimesh/releases")
       .then((res) => {
         this.$store.dispatch("window/setVersion", res.data[0]);
       })
