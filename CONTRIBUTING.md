@@ -175,8 +175,7 @@ Full example
 
 Here's an example workflow:
 
-Preparing your Fork
-^^^^^^^^^^^^^^^^^^^
+***Preparing your Fork***
 
 1. Click 'Fork' on Github, creating e.g. ``yourname/infinimesh``.
 2. Clone your project: ``git clone git@github.com:yourname/infinimesh``.
@@ -184,8 +183,7 @@ Preparing your Fork
 4. Install Go for your operating system => https://golang.org/doc/install
 5. Create a branch: ``git checkout -b foo 0.1``.
 
-Making your Changes
-^^^^^^^^^^^^^^^^^^^
+***Making your Changes***
 
 1. Add changelog entry crediting yourself.
 2. Write tests expecting the correct/fixed functionality; make sure they fail.
@@ -193,8 +191,7 @@ Making your Changes
 4. Run tests again, making sure they pass.
 5. Commit your changes: ``git commit -m "I did awesome work, tested and it works!"``
 
-Creating Pull Requests
-^^^^^^^^^^^^^^^^^^^^^^
+***Creating Pull Requests***
 
 1. Push your commit to get it back up to your fork: ``git push --set-upstream origin foo``
 2. Visit Github, click handy "Pull request" button that it will make upon
