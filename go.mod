@@ -11,7 +11,7 @@ require (
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 	github.com/cskr/pubsub v1.0.2
 	github.com/dgraph-io/dgo v0.0.0-20181226155115-a20f509ade83
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/eapache/go-resiliency v1.1.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
