@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
     working_directory: /go/src/github.com/infinimesh/infinimesh
@@ -40,7 +40,7 @@ jobs:
           command: cd frontend && yarn build
   tests:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
     working_directory: /go/src/github.com/infinimesh/infinimesh

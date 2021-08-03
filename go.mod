@@ -1,6 +1,6 @@
 module github.com/infinimesh/infinimesh
 
-go 1.14
+go 1.16
 
 require (
 	github.com/Pallinder/go-randomdata v1.1.0
@@ -16,7 +16,6 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/glog v0.0.0-20210429001901-424d2337a529
 	github.com/golang/protobuf v1.5.2
