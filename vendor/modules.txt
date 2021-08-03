@@ -34,7 +34,6 @@ github.com/dgraph-io/dgo/protos/api
 github.com/dgraph-io/dgo/y
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 ## explicit
-github.com/dgrijalva/jwt-go
 # github.com/eapache/go-resiliency v1.1.0
 ## explicit
 github.com/eapache/go-resiliency/breaker
@@ -54,6 +53,9 @@ github.com/fatih/color
 github.com/fsnotify/fsnotify
 # github.com/gogo/protobuf v1.2.0
 ## explicit
+# github.com/golang-jwt/jwt v3.2.2+incompatible
+## explicit
+github.com/golang-jwt/jwt
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
 github.com/golang/glog
