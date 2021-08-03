@@ -187,7 +187,7 @@ func main() {
 	go readBackchannelFromKafka()
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
-		timeout := time.Second * 15
+		timeout := time.Second * 30
 		errChannel := make(chan error, 2)
 		go func() {
 			errChannel <- conn.(*tls.Conn).Handshake()
