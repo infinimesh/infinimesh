@@ -32,8 +32,6 @@ github.com/davecgh/go-spew/spew
 github.com/dgraph-io/dgo
 github.com/dgraph-io/dgo/protos/api
 github.com/dgraph-io/dgo/y
-# github.com/dgrijalva/jwt-go v3.2.0+incompatible
-## explicit
 # github.com/eapache/go-resiliency v1.1.0
 ## explicit
 github.com/eapache/go-resiliency/breaker
