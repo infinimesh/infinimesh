@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
