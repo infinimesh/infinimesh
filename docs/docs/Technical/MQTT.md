@@ -32,5 +32,5 @@ By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mo
 mosquitto_sub --cafile cert.pem --cert test.crt \
          --key test.key  -t "devices/{device_id}/state/desired/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883
 
-Note : Information on cafile, cert and key creation can be found under [Device Certificate Creation](Technical/CertificateCreation.md)
+Note : Information on cafile, cert and key creation can be found under [Device Certificate Creation](./CertificateCreation.md)
 
