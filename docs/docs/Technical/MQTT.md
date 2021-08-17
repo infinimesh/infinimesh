@@ -17,11 +17,21 @@ Device state can be reported using Eclipse **mosquitto_pub**.
 
 **MQTT version 3.1.1/3.1 client**
 
-Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883 -m "{\"ping\": \"test\”}"
+Example: 
+```shell
+mosquitto_pub --cafile cert.pem --cert test.crt --key test.key \
+         -t "devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud \
+         --tls-version tlsv1.2 -V mqttv311 -d -p 8883 -m "{\"ping\": \"test\"}"
+```
 
 **MQTT version 5 client**
 
-Example : mosquitto_pub --cafile cert.pem --cert test.crt --key test.key  -t “devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m "{"Timestamp":"","Message":[{"Topic":"T0","Data":{"ping":"test"}}]}"
+Example:
+```shell
+mosquitto_pub --cafile cert.pem --cert test.crt --key test.key \
+         -t "devices/{device_id}/state/reported/delta" -h mqtt.api.infinimesh.cloud \
+         --tls-version tlsv1.2 -V mqttv5 -d -p 8883 -m '{"Timestamp":"","Message":[{"Topic":"T0","Data":{"ping":"test"}}]}'
+```
 
 By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mode(JSON editor - **Mark 1** below) - this is the data to be sent to the device.
 
@@ -29,8 +39,11 @@ By clicking on **Edit** button(**Mark 7**) - you enter **Desired** state edit mo
 
 **Desired** State can be subscribed using Eclipse **mosquitto_sub**
 
+```shell
 mosquitto_sub --cafile cert.pem --cert test.crt \
-         --key test.key  -t "devices/{device_id}/state/desired/delta" -h mqtt.api.infinimesh.cloud  --tls-version tlsv1.2 -V mqttv311 -d -p 8883
+         --key test.key  -t "devices/{device_id}/state/desired/delta" -h mqtt.api.infinimesh.cloud \
+         --tls-version tlsv1.2 -V mqttv311 -d -p 8883
+```
 
 Note : Information on cafile, cert and key creation can be found under [Device Certificate Creation](./CertificateCreation.md)
 
