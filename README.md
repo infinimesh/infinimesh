@@ -2,8 +2,10 @@
 infinimesh.community is a opinionated multi-tenant hyperscale Internet of Things platform to connect IoT devices fast and securely with minimal TCO. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. The infinimesh.community IoT platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
 ## Project status
-infinimesh.community is always under development - we never stop to make the best IoT and AIoT platform in the world. If you feel really adventurous, check out [InfiniDev branch](https://github.com/infinimesh/infinimesh/tree/infinidev), there is the place all magic happens - with unexpected results.
-All development for infinimesh.community is open source and transparent on GitHub. Our API's (REST / gRPC) are considered als beta and may change in future. infinimesh.community (cloud) has already available:  
+infinimesh.community is always under development - we never stop to make the best IoT and AIoT platform in the world. All development for infinimesh.community is open sourced, dual-licensed (Commons Clause and Apache v2.0) and transparent on GitHub. Read more why we have choosen dual-licensing at [Medium](https://2pk03.medium.com/why-we-use-commons-clause-for-infinimesh-c1a1f8bacb4d).  
+
+
+Our API's (REST / gRPC) are considered als beta and may change in future. infinimesh.community (cloud) has already available:  
   
 **MQTT support for version 3 and 5**   
 **State management (digital twin)**  
