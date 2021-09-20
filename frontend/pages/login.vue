@@ -97,7 +97,6 @@ export default {
       form: this.$form.createForm(this, { name: "login" }),
     };
   },
-  },
   methods: {
     handleSubmit(e) {
       e.preventDefault();
