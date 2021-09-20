@@ -1,5 +1,5 @@
-# infinimesh Platform By  Infinite Devices
+# infinimesh cloud native IoT platform
 
 infinimesh is an opinionated multi-tenant hyperscale Platform to connect IoT devices securely. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. Infinimesh Platform is open source and fully kubernetes compliant.
 
-<p align="center"><a href="https://infinimesh.de/">Infinite Devices</a></p>
+<p align="center"><a href="https://infinimesh.github.io/website/">infinimesh open source project</a></p>

@@ -5,7 +5,7 @@
         ><strong> infinimesh {{ release.tag_name }}</strong></a
       >
       ©2021 —
-      <strong>InfiniteDevices GmbH</strong>
+      <strong>The infinimesh team</strong>
       - source code at
       <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
         <strong>GitHub</strong>

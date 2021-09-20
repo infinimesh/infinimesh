@@ -2,7 +2,7 @@
   "name": "console.infinimesh.app",
   "version": "1.0.0",
   "description": "Console Infinimesh UI",
-  "author": "Infinite Devices",
+  "author": "infinimesh",
   "private": true,
   "scripts": {
     "dev": "nuxt",

@@ -22,6 +22,4 @@
     1. [Device Certificate Creation](Technical/CertificateCreation.md)
     2. [MQTT Bridge](Technical/MQTT.md)
 
-
   - [Important Links](ImportantLinks.md)
-  - [About Us](AboutUs.md)

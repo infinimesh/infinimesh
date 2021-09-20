@@ -97,19 +97,6 @@ export default {
       form: this.$form.createForm(this, { name: "login" }),
     };
   },
-  mounted() {
-    this.$notification.info({
-      key: "not-registered",
-      placement: "bottomRight",
-      duration: 0,
-      message: "No account yet? Please contact us! Click here",
-      bottom: "42px",
-      onClick: () =>
-        window.open(
-          "https://infinitedevices.de/infinimesh-cloud-registration/",
-          "target-new"
-        ),
-    });
   },
   methods: {
     handleSubmit(e) {
