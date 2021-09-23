@@ -5,12 +5,12 @@
     "description": "Cloud Native IoT Platform",
     "version": "0.0.8",
     "contact": {
-      "name": "Infinite Devices GmbH.",
-      "url": "https://www.infinitedevices.io",
-      "email": "engineering@infinitedevices.io"
+      "name": "infinimesh team",
+      "url": "https://infinimesh.github.io/website/",
+      "email": ".."
     }
   },
-  "host": "api.infinimesh.io",
+  "host": "http://localhost:8081",
   "schemes": [
     "https"
   ],
