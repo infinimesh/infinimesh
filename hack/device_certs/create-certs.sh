@@ -1,6 +1,6 @@
 #!/bin/bash
 #--------------------------------------------------------------------------
-# Copyright 2018-2021 Infinite Devices GmbH
+# Copyright 2018-2021
 # www.infinimesh.io
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
