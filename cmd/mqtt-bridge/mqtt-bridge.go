@@ -399,7 +399,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				subTopic, validTopic := TopicChecker(sub.Topic, "sub")
+				subTopic, validTopic := TopicChecker(sub.Topic, deviceID, "sub")
 				if validTopic {
 					ps.AddSub(backChannel, subTopic)
 					go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
@@ -459,9 +459,12 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
   input : topic name string
   output : bool
 */
-func TopicChecker(topic string, packetType string) (string, bool) {
+func TopicChecker(topic, deviceId, packetType string) (string, bool) {
 	if packetType == "sub" {
 		state := strings.Split(topic, "/")
+		if state[1] == "+" {
+			state[1] = deviceId
+		}
 		if state[3] == "desired" && state[4] == "delta" {
 			return topic, true
 		} else if state[3] == "desired" && state[4] == "#" {
