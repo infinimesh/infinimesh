@@ -39,7 +39,7 @@ func (r *Router) Route(inputTopic, inputDevice string) (outputTopic string) {
 		// Check if at least the segment for the deviceID is given plus at least one subtopic segment
 		if len(splt) >= 3 {
 			deviceInTopic := splt[1]
-			if inputDevice != deviceInTopic && deviceInTopic != "#" {
+			if inputDevice != deviceInTopic && deviceInTopic != "+" {
 				fmt.Println("Input topic does not match device.", deviceInTopic, inputDevice)
 			} else {
 				subtopic := strings.Join(splt[2:], "/")
