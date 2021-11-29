@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strings"
 
 	"strconv"
 
@@ -31,7 +30,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 
 	"encoding/base64"
@@ -44,7 +42,6 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
 	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
-	"robpike.io/filter"
 )
 
 const (
@@ -65,108 +62,20 @@ var (
 	log *zap.Logger
 )
 
+
 var jwtAuthInterceptor = func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	log.Info("JWT: Request received")
+
 	if info.FullMethod == "/infinimesh.api.Accounts/Token" {
 		return handler(ctx, req)
 	}
 
-	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
+	ctx, err := jwtAuth(ctx)
 	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
+		return nil, err
 	}
 
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Unexpected signing method: %v", t.Header["alg"]))
-		}
-		return jwtSigningSecret, nil
-	})
-	if err != nil {
-		return ctx, err
-	}
-
-	if !token.Valid {
-		return ctx, errors.New("Invalid token")
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		log.Debug("GRPC API Server: Validated token Function Invoked", zap.Any("Claims", claims))
-
-		if accountID, ok := claims[accountIDClaim]; ok {
-
-			if accountIDStr, ok := accountID.(string); ok {
-				//Added the requestor account id to context metadata so that it can be passed on to the server
-				ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", accountIDStr)
-
-				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
-				if err != nil {
-					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
-				}
-
-				if !resp.Enabled {
-					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
-				}
-
-				ctx = context.WithValue(ctx, accountIDClaim, accountID)
-
-				if restricted, ok := claims[tokenRestrictedClaim]; ok && restricted.(bool) {
-					log.Info("Token is restricted", zap.Any("restricted", restricted))
-
-					fullMethod := strings.Split(info.FullMethod, "/")
-					reqNS, reqMethod := fullMethod[1], fullMethod[2]
-					for ns, ids := range claims {
-						if reqNS == ns {
-							idSet := make(map[string]bool)
-							if ids != nil {
-								for _, id := range ids.([]interface{}) {
-									idSet[id.(string)] = true
-								}
-							}
-							if reqMethod == "List" {
-								r, err := handler(ctx, req)
-								if err != nil {
-									return r, err
-								}
-								if ids != nil {
-									switch reqNS {
-									case "infinimesh.api.Devices":
-										res := r.(*registrypb.ListResponse)
-										res.Devices = filter.Choose(res.Devices, func(el *registrypb.Device) bool { return idSet[el.Id] }).([]*registrypb.Device)
-										r = res
-									case "infinimesh.api.Accounts":
-										res := r.(*nodepb.ListAccountsResponse)
-										res.Accounts = filter.Choose(res.Accounts, func(el *nodepb.Account) bool { return idSet[el.Uid] }).([]*nodepb.Account)
-										r = res
-									case "infinimesh.api.Namespaces":
-										res := r.(*nodepb.ListNamespacesResponse)
-										res.Namespaces = filter.Choose(res.Namespaces, func(el *nodepb.Namespace) bool { return idSet[el.Id] }).([]*nodepb.Namespace)
-										r = res
-									case "infinimesh.api.Objects":
-										res := r.(*nodepb.ListObjectsResponse)
-										res.Objects = filter.Choose(res.Objects, func(el *nodepb.Object) bool { return idSet[el.Uid] }).([]*nodepb.Object)
-										r = res
-									}
-								}
-								return r, err
-							} else if reqMethod == "Get" {
-								if ids == nil || idSet[req.(map[string]interface{})["id"].(string)] {
-									return handler(ctx, req)
-								}
-							}
-							return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
-						}
-					}
-					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Method is restricted"))
-				}
-
-				return handler(ctx, req)
-			}
-
-		}
-		log.Info("Token does not contain account id field", zap.Any("token", token))
-	}
-
-	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+	return handler(ctx, req)
 }
 
 var jwtAuth = func(ctx context.Context) (context.Context, error) {
@@ -177,6 +86,21 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 
 	log.Debug("Extracted bearer token", zap.String("token", tokenString))
 
+	var account_id_value interface{}
+
+	account_id_value, err = validateSelfSignedToken(tokenString)
+	if err != nil {
+		return ctx, err
+	}
+
+	if account_id, ok := account_id_value.(string); ok {
+		return authorizeAccount(ctx, account_id)
+	}
+
+	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+}
+
+func validateSelfSignedToken(tokenString string) (interface{}, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Unexpected signing method: %v", t.Header["alg"]))
@@ -184,37 +108,35 @@ var jwtAuth = func(ctx context.Context) (context.Context, error) {
 		return jwtSigningSecret, nil
 	})
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
 
 	if !token.Valid {
-		return ctx, errors.New("Invalid token")
+		return nil, errors.New("Invalid token")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		log.Info("Validated token", zap.Any("claims", claims))
-
 		if accountID, ok := claims[accountIDClaim]; ok {
-
-			if accountIDStr, ok := accountID.(string); ok {
-				resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: accountIDStr})
-				if err != nil {
-					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
-				}
-
-				if !resp.Enabled {
-					return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
-				}
-
-				newCtx := context.WithValue(ctx, accountIDClaim, accountID)
-				return newCtx, nil
-			}
-
+			return accountID, nil
 		}
-		log.Info("Token does not contain account id field", zap.Any("token", token))
 	}
 
 	return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+}
+
+func authorizeAccount(ctx context.Context, account_id string) (context.Context, error) {
+	resp, err := accountClient.GetAccount(context.Background(), &nodepb.GetAccountRequest{Id: account_id})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Failed to validate token"))
+	}
+
+	if !resp.Enabled {
+		return nil, status.Error(codes.Unauthenticated, fmt.Sprintf("Account is disabled"))
+	}
+
+	newCtx := context.WithValue(ctx, accountIDClaim, account_id)
+	return newCtx, nil
 }
 
 func init() {

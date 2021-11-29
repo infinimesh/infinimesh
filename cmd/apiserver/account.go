@@ -125,16 +125,6 @@ func (a *accountAPI) Token(ctx context.Context, request *apipb.TokenRequest) (re
 			claim[expiresAt] = time.Now().UTC().Add(time.Duration(exp) * time.Second).Unix()
 		}
 
-		if ruleset := request.GetRuleset(); len(ruleset) > 0 {
-			claim[tokenRestrictedClaim] = true
-			prefix := "infinimesh.api." // Should be equal to api.proto package name + .
-			for _, rule := range ruleset {
-				claim[prefix+rule.GetType()] = rule.GetIds()
-			}
-		} else {
-			claim[tokenRestrictedClaim] = false
-		}
-
 		//Added logging
 		log.Debug("Generate Token Method: Get Token for the Authenticated User")
 
