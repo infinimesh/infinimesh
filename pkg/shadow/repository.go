@@ -22,8 +22,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type Repo interface {
@@ -37,14 +35,6 @@ type Repo interface {
 type DeviceState struct {
 	ID    string
 	State DeviceStateMessage
-}
-
-type DeviceStateDB struct {
-	ID              string
-	ReportedVersion uint64
-	ReportedState   postgres.Jsonb
-	DesiredVersion  uint64
-	DesiredState    postgres.Jsonb
 }
 
 type redisRepo struct {
