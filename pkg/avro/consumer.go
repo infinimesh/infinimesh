@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/slntopp/infinimesh/pkg/avro/avropb"
+	"github.com/slntopp/infinimesh/pkg/shadow"
 	"go.uber.org/zap"
 )
 

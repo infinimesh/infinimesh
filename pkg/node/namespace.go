@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //NamespaceController is a Data type for Namespace Controller file

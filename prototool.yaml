@@ -17,7 +17,7 @@ lint:
 
 generate:
   go_options:
-    import_path: "github.com/infinimesh/infinimesh"
+    import_path: "github.com/slntopp/infinimesh"
     extra_modifiers:
       google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
       google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations

@@ -30,7 +30,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //UserExists is a method to check if the user is present in the Dgraph DB

@@ -12,14 +12,14 @@ Our API's (REST / gRPC) are considered als beta and may change in future. infini
 **Enhanced UI**  
 **k8s and docker environments**
 
-A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s). 
+A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (https://github.com/slntopp/infinimesh/tree/master/hack/microk8s). 
 
 # Documentation  
 Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
 ## Build status
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/infinimesh/infinimesh)](https://goreportcard.com/report/github.com/infinimesh/infinimesh)
+[![Go Report Card](https://goreportcard.com/badge/github.com/slntopp/infinimesh)](https://goreportcard.com/report/github.com/slntopp/infinimesh)
 
 ## API Documentation
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
@@ -38,7 +38,7 @@ For OSX please use:
 ```
 bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
 ```
-Source: https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s
+Source: https://github.com/slntopp/infinimesh/tree/master/hack/microk8s
 
 ### Generating proto files
 ```
@@ -90,7 +90,7 @@ Copyright 2018 - 2021, The infinimesh team
 Licensed under the Apache License, Version 2.0 (the "Licenses"); you may not use 
 this file except in compliance with the License. You may obtain a copy of the License at
 
-       https://github.com/infinimesh/infinimesh/blob/master/LICENSE
+       https://github.com/slntopp/infinimesh/blob/master/LICENSE
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

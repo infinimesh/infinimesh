@@ -24,8 +24,8 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
-	"github.com/infinimesh/infinimesh/pkg/node"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //ImportSchema is a method to import the schema in Dgraph DB for tests

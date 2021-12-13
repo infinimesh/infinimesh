@@ -26,7 +26,7 @@ import (
 	"github.com/dgraph-io/dgo"
 	"github.com/dgraph-io/dgo/protos/api"
 
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //checkKind is a method to execute Dgraph query to check the kind of the object

@@ -41,8 +41,7 @@ describe("Devices Registry", () => {
         noAccessScopes: [],
         topAction: undefined,
         release: {
-          html_url:
-            "https://github.com/infinimesh/infinimesh/releases/tag/v0.1.5",
+          html_url: "https://github.com/slntopp/infinimesh/releases/tag/v0.1.5",
           tag_name: "v0.1.5"
         }
       },

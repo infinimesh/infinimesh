@@ -38,7 +38,7 @@ import (
 
 	"encoding/pem"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
 )
 
 var (

@@ -32,9 +32,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/node"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/node"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 var repo node.Repo

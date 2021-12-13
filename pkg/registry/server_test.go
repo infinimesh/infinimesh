@@ -33,12 +33,12 @@ import (
 
 	randomdata "github.com/Pallinder/go-randomdata"
 
-	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/repo"
+	"github.com/slntopp/infinimesh/pkg/node/dgraph"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/repo"
 
-	logger "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	logger "github.com/slntopp/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 )
 
 var (

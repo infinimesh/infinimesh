@@ -33,7 +33,7 @@ import (
 
 	"strings"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 
 	_struct "github.com/golang/protobuf/ptypes/struct"
 )

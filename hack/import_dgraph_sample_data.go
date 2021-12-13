@@ -15,7 +15,7 @@ import (
 
 	"os"
 
-	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+	"github.com/slntopp/infinimesh/pkg/node/dgraph"
 )
 
 var (

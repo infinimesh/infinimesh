@@ -30,7 +30,7 @@ import (
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	"go.uber.org/zap"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 )
 
 //Server is a data strcuture for shadow server

@@ -28,7 +28,7 @@ import (
 
 	"github.com/jeremywohl/flatten"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/slntopp/infinimesh/pkg/shadow"
 )
 
 const (

@@ -27,8 +27,8 @@ import (
 
 	"io/ioutil"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 )
 
 var (

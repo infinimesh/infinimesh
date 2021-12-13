@@ -39,11 +39,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	inflog "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
+	inflog "github.com/slntopp/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 	"robpike.io/filter"
 )
 

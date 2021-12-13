@@ -7,7 +7,7 @@
       ©2021 —
       <strong>The infinimesh team</strong>
       - source code at
-      <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
+      <a href="https://www.github.com/slntopp/infinimesh" target="_blank">
         <strong>GitHub</strong>
       </a>
     </a-col>

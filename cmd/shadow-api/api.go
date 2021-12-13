@@ -34,9 +34,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	log1 "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/shadow"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	log1 "github.com/slntopp/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/shadow"
+	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 )
 
 var (

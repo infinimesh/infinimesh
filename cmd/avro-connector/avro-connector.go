@@ -25,9 +25,9 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
-	"github.com/infinimesh/infinimesh/pkg/avro"
-	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
-	log1 "github.com/infinimesh/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/avro"
+	"github.com/slntopp/infinimesh/pkg/avro/avropb"
+	log1 "github.com/slntopp/infinimesh/pkg/log"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )

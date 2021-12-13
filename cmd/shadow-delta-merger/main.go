@@ -29,7 +29,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/slntopp/infinimesh/pkg/shadow"
 )
 
 var (

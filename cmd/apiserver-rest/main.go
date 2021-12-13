@@ -28,7 +28,7 @@ import (
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 	"google.golang.org/grpc"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
 )
 
 var (

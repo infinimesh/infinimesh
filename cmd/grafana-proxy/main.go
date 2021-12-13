@@ -37,8 +37,8 @@ import (
 
 	"time"
 
-	"github.com/infinimesh/infinimesh/pkg/grafana"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/grafana"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 var (

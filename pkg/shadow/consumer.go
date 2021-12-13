@@ -27,7 +27,7 @@ import (
 
 	sarama "github.com/Shopify/sarama"
 
-	"github.com/infinimesh/infinimesh/pkg/mqtt"
+	"github.com/slntopp/infinimesh/pkg/mqtt"
 )
 
 type StateMerger struct {

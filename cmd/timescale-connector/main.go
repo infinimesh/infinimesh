@@ -28,8 +28,8 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	inflog "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/timeseries"
+	inflog "github.com/slntopp/infinimesh/pkg/log"
+	"github.com/slntopp/infinimesh/pkg/timeseries"
 )
 
 const (

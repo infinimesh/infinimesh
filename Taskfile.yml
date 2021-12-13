@@ -37,8 +37,8 @@ tasks:
         _root=$PWD
         cd ./Dockerfiles
         for f in *; do
-          echo docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root
-          docker build -f $f/Dockerfile -t quay.io/infinimesh/$f:latest $_root &
+          echo docker build -f $f/Dockerfile -t ghcr.io/slntopp/$f:latest $_root
+          docker build -f $f/Dockerfile -t ghcr.io/slntopp/$f:latest $_root &
         done
         wait
   docker-pull-images:
@@ -50,8 +50,8 @@ tasks:
         _root=$PWD
         cd ./Dockerfiles
         for f in *; do
-          echo docker pull quay.io/infinimesh/$f:latest
-          docker pull quay.io/infinimesh/$f:latest &
+          echo docker pull ghcr.io/slntopp/$f:latest
+          docker pull ghcr.io/slntopp/$f:latest &
         done
         wait
   start-dev:

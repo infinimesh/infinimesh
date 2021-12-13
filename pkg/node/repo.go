@@ -20,7 +20,7 @@ package node
 import (
 	"context"
 
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //KindAsset and KindDevice are constants for creating Object Heirarchy

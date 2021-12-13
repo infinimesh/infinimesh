@@ -25,9 +25,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 )
 
 type deviceAPI struct {

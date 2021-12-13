@@ -33,8 +33,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/infinimesh/infinimesh/pkg/mqtt"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/mqtt"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
@@ -354,8 +354,7 @@ func handleConn(c net.Conn, deviceIDs []string) {
 		fmt.Println("Failed to write ConnAck. Closing connection.")
 		return
 	}
-	var topicAliasPublishMap map[string]int
-	topicAliasPublishMap = make(map[string]int)
+	topicAliasPublishMap := make(map[string]int)
 
 	for {
 		deviceStatus, err := client.GetDeviceStatus(context.Background(), &registrypb.GetDeviceStatusRequest{Deviceid: deviceID})
@@ -399,15 +398,10 @@ func handleConn(c net.Conn, deviceIDs []string) {
 				fmt.Println("Failed to write SubAck:", err)
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				subTopic, validTopic := TopicChecker(sub.Topic, deviceID, "sub")
-				if validTopic {
-					ps.AddSub(backChannel, subTopic)
-					go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-					fmt.Println("Added Subscription", subTopic, deviceID)
-				} else {
-					fmt.Println("Invalid Subscribed Topic")
-					_ = c.Close()
-				}
+				subTopic := TopicChecker(sub.Topic, deviceID)
+				ps.AddSub(backChannel, subTopic)
+				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
+				fmt.Println("Added Subscription", subTopic, deviceID)
 			}
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
@@ -425,23 +419,24 @@ func handleConn(c net.Conn, deviceIDs []string) {
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {
 	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
+	topic := TopicChecker(p.VariableHeader.Topic, deviceID)
 	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
-		if val, ok := topicAliasPublishMap[p.VariableHeader.Topic]; ok {
+		if val, ok := topicAliasPublishMap[topic]; ok {
 			if val == p.VariableHeader.PublishProperties.TopicAlias {
-				if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
+				if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
 					return topicAliasPublishMap, err
 				}
 			} else {
 				fmt.Printf("Please use the correct topic alias")
 			}
 		} else {
-			topicAliasPublishMap[p.VariableHeader.Topic] = p.VariableHeader.PublishProperties.TopicAlias
-			if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
+			topicAliasPublishMap[topic] = p.VariableHeader.PublishProperties.TopicAlias
+			if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
 				return topicAliasPublishMap, err
 			}
 		}
 	} else {
-		if err := publishTelemetry(p.VariableHeader.Topic, p.Payload, deviceID, protocolLevel); err != nil {
+		if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
 			return topicAliasPublishMap, err
 		}
 	}
@@ -456,24 +451,14 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 }
 
 /*TopicChecker: to validate the subscribed topic name
-  input : topic name string
-  output : bool
+  input : topic, deviceId string
+  output : topicAltered
 */
-func TopicChecker(topic, deviceId, packetType string) (string, bool) {
-	if packetType == "sub" {
-		state := strings.Split(topic, "/")
-		if state[1] == "+" {
-			state[1] = deviceId
-		}
-		if state[3] == "desired" && state[4] == "delta" {
-			return topic, true
-		} else if state[3] == "desired" && state[4] == "#" {
-			topicAltered := state[0] + "/" + state[1] + "/" + state[2] + "/" + state[3] + "/delta"
-			return topicAltered, true
-		}
-		return "", false
-	}
-	return "", false
+func TopicChecker(topic, deviceId string) (string) {
+	state := strings.Split(topic, "/")
+	state[1] = deviceId
+	topic = strings.Join(state, "/")
+	return topic
 }
 
 func publishTelemetry(topic string, data []byte, deviceID string, version int) error {

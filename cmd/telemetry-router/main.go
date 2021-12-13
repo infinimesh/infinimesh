@@ -29,8 +29,8 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
 
-	"github.com/infinimesh/infinimesh/pkg/mqtt"
-	"github.com/infinimesh/infinimesh/pkg/router"
+	"github.com/slntopp/infinimesh/pkg/mqtt"
+	"github.com/slntopp/infinimesh/pkg/router"
 )
 
 type handler struct {

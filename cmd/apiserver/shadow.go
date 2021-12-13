@@ -24,9 +24,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 )
 
 //shadowAPI data strcuture

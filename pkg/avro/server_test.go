@@ -19,7 +19,7 @@ package avro
 
 /*
 import (
-	"github.com/infinimesh/infinimesh/pkg/avro/avropb"
+	"github.com/slntopp/infinimesh/pkg/avro/avropb"
 )
 
 var (

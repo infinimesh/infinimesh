@@ -28,11 +28,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/infinimesh/infinimesh/pkg/registry"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	"github.com/infinimesh/infinimesh/pkg/repo"
+	"github.com/slntopp/infinimesh/pkg/registry"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/repo"
 
-	logger "github.com/infinimesh/infinimesh/pkg/log"
+	logger "github.com/slntopp/infinimesh/pkg/log"
 )
 
 var (

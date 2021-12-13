@@ -27,8 +27,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/grafana"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/grafana"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //AccountController is a Data type for Account Controller file

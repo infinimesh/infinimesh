@@ -30,8 +30,8 @@ import (
 	jwt "github.com/golang-jwt/jwt"
 	"github.com/golang/protobuf/ptypes/empty"
 
-	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 type accountAPI struct {

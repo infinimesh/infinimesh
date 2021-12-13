@@ -31,7 +31,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/spf13/viper"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow"
+	"github.com/slntopp/infinimesh/pkg/shadow"
 )
 
 const (

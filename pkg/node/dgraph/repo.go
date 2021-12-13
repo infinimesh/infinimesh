@@ -29,8 +29,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/node"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/node"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 )
 
 //isPermissionSufficient is for checking permission on namespace

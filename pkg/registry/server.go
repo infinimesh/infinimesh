@@ -29,12 +29,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/infinimesh/infinimesh/pkg/node"
-	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
-	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
-	"github.com/infinimesh/infinimesh/pkg/repo"
-	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
+	"github.com/slntopp/infinimesh/pkg/node"
+	"github.com/slntopp/infinimesh/pkg/node/dgraph"
+	"github.com/slntopp/infinimesh/pkg/node/nodepb"
+	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/infinimesh/pkg/repo"
+	"github.com/slntopp/infinimesh/pkg/repo/repopb"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 

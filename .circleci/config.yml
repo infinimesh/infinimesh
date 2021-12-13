@@ -5,7 +5,7 @@ jobs:
       - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
-    working_directory: /go/src/github.com/infinimesh/infinimesh
+    working_directory: /go/src/github.com/slntopp/infinimesh
 
     steps:
       - checkout
@@ -43,7 +43,7 @@ jobs:
       - image: circleci/golang:1.16
         environment:
           GO111MODULE: "on"
-    working_directory: /go/src/github.com/infinimesh/infinimesh
+    working_directory: /go/src/github.com/slntopp/infinimesh
     steps:
       - checkout
       - setup_remote_docker

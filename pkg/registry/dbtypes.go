@@ -18,7 +18,7 @@
 package registry
 
 import (
-	"github.com/infinimesh/infinimesh/pkg/node/dgraph"
+	"github.com/slntopp/infinimesh/pkg/node/dgraph"
 )
 
 //Device data struct with Certificates data strcuture as slice

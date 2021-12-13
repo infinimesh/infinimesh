@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
+	"github.com/slntopp/infinimesh/pkg/repo/repopb"
 	"go.uber.org/zap"
 )
 
