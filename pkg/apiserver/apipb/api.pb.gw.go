@@ -13,18 +13,18 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/golang/protobuf/descriptor"
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/grpc-ecosystem/grpc-gateway/utilities"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"github.com/slntopp/infinimesh/pkg/node/nodepb"
 	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 	"github.com/slntopp/infinimesh/pkg/shadow/shadowpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Suppress "imported and not used" errors
@@ -33,7 +33,7 @@ var _ io.Reader
 var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
-var _ = descriptor.ForMessage
+var _ = metadata.Join
 
 func request_Devices_Create_0(ctx context.Context, marshaler runtime.Marshaler, client DevicesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq registrypb.CreateRequest
@@ -85,8 +85,7 @@ func request_Devices_Update_0(ctx context.Context, marshaler runtime.Marshaler, 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Device)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Device); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.FieldMask = fieldMask
@@ -106,7 +105,6 @@ func request_Devices_Update_0(ctx context.Context, marshaler runtime.Marshaler, 
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "device.id", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.id", err)
 	}
@@ -135,8 +133,7 @@ func local_request_Devices_Update_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Device)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Device); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.FieldMask = fieldMask
@@ -156,7 +153,6 @@ func local_request_Devices_Update_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "device.id", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "device.id", err)
 	}
@@ -190,7 +186,6 @@ func request_Devices_Get_0(ctx context.Context, marshaler runtime.Marshaler, cli
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -217,7 +212,6 @@ func local_request_Devices_Get_0(ctx context.Context, marshaler runtime.Marshale
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -280,7 +274,6 @@ func request_Devices_Delete_0(ctx context.Context, marshaler runtime.Marshaler, 
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -307,7 +300,6 @@ func local_request_Devices_Delete_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -334,7 +326,6 @@ func request_Devices_AssignOwnerDevices_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Deviceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceid", err)
 	}
@@ -345,7 +336,6 @@ func request_Devices_AssignOwnerDevices_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -372,7 +362,6 @@ func local_request_Devices_AssignOwnerDevices_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Deviceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceid", err)
 	}
@@ -383,7 +372,6 @@ func local_request_Devices_AssignOwnerDevices_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -410,7 +398,6 @@ func request_Devices_RemoveOwnerDevices_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Deviceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceid", err)
 	}
@@ -421,7 +408,6 @@ func request_Devices_RemoveOwnerDevices_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -448,7 +434,6 @@ func local_request_Devices_RemoveOwnerDevices_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Deviceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "deviceid", err)
 	}
@@ -459,7 +444,6 @@ func local_request_Devices_RemoveOwnerDevices_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -486,7 +470,6 @@ func request_States_Get_0(ctx context.Context, marshaler runtime.Marshaler, clie
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -513,7 +496,6 @@ func local_request_States_Get_0(ctx context.Context, marshaler runtime.Marshaler
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -548,7 +530,6 @@ func request_States_PatchDesiredState_0(ctx context.Context, marshaler runtime.M
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -583,7 +564,6 @@ func local_request_States_PatchDesiredState_0(ctx context.Context, marshaler run
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -614,7 +594,6 @@ func request_States_StreamReportedStateChanges_0(ctx context.Context, marshaler 
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -640,7 +619,7 @@ func request_States_StreamReportedStateChanges_0(ctx context.Context, marshaler 
 }
 
 func request_Accounts_SelfAccount_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq empty.Empty
+	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.SelfAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -649,7 +628,7 @@ func request_Accounts_SelfAccount_0(ctx context.Context, marshaler runtime.Marsh
 }
 
 func local_request_Accounts_SelfAccount_0(ctx context.Context, marshaler runtime.Marshaler, server AccountsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq empty.Empty
+	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.SelfAccount(ctx, &protoReq)
@@ -742,7 +721,6 @@ func request_Accounts_GetAccount_0(ctx context.Context, marshaler runtime.Marsha
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -769,7 +747,6 @@ func local_request_Accounts_GetAccount_0(ctx context.Context, marshaler runtime.
 	}
 
 	protoReq.Id, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
@@ -795,8 +772,7 @@ func request_Accounts_UpdateAccount_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Account)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Account); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.FieldMask = fieldMask
@@ -816,7 +792,6 @@ func request_Accounts_UpdateAccount_0(ctx context.Context, marshaler runtime.Mar
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "account.uid", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account.uid", err)
 	}
@@ -845,8 +820,7 @@ func local_request_Accounts_UpdateAccount_0(ctx context.Context, marshaler runti
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.FieldMask == nil || len(protoReq.FieldMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Account)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Account); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.FieldMask = fieldMask
@@ -866,7 +840,6 @@ func local_request_Accounts_UpdateAccount_0(ctx context.Context, marshaler runti
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "account.uid", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account.uid", err)
 	}
@@ -922,7 +895,6 @@ func request_Accounts_DeleteAccount_0(ctx context.Context, marshaler runtime.Mar
 	}
 
 	protoReq.Uid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uid", err)
 	}
@@ -956,7 +928,6 @@ func local_request_Accounts_DeleteAccount_0(ctx context.Context, marshaler runti
 	}
 
 	protoReq.Uid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uid", err)
 	}
@@ -990,7 +961,6 @@ func request_Accounts_AssignOwner_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Accountid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "accountid", err)
 	}
@@ -1001,7 +971,6 @@ func request_Accounts_AssignOwner_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -1028,7 +997,6 @@ func local_request_Accounts_AssignOwner_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Accountid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "accountid", err)
 	}
@@ -1039,7 +1007,6 @@ func local_request_Accounts_AssignOwner_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -1066,7 +1033,6 @@ func request_Accounts_RemoveOwner_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Accountid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "accountid", err)
 	}
@@ -1077,7 +1043,6 @@ func request_Accounts_RemoveOwner_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -1104,7 +1069,6 @@ func local_request_Accounts_RemoveOwner_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Accountid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "accountid", err)
 	}
@@ -1115,7 +1079,6 @@ func local_request_Accounts_RemoveOwner_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Ownerid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ownerid", err)
 	}
@@ -1212,7 +1175,6 @@ func request_Objects_DeleteObject_0(ctx context.Context, marshaler runtime.Marsh
 	}
 
 	protoReq.Uid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uid", err)
 	}
@@ -1239,7 +1201,6 @@ func local_request_Objects_DeleteObject_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Uid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uid", err)
 	}
@@ -1300,7 +1261,6 @@ func request_Namespaces_GetNamespace_0(ctx context.Context, marshaler runtime.Ma
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1327,7 +1287,6 @@ func local_request_Namespaces_GetNamespace_0(ctx context.Context, marshaler runt
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1380,7 +1339,6 @@ func request_Namespaces_CreatePermission_0(ctx context.Context, marshaler runtim
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1391,7 +1349,6 @@ func request_Namespaces_CreatePermission_0(ctx context.Context, marshaler runtim
 	}
 
 	protoReq.AccountId, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account_id", err)
 	}
@@ -1426,7 +1383,6 @@ func local_request_Namespaces_CreatePermission_0(ctx context.Context, marshaler 
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1437,7 +1393,6 @@ func local_request_Namespaces_CreatePermission_0(ctx context.Context, marshaler 
 	}
 
 	protoReq.AccountId, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account_id", err)
 	}
@@ -1464,7 +1419,6 @@ func request_Namespaces_ListPermissions_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1491,7 +1445,6 @@ func local_request_Namespaces_ListPermissions_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1518,7 +1471,6 @@ func request_Namespaces_DeletePermission_0(ctx context.Context, marshaler runtim
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1529,7 +1481,6 @@ func request_Namespaces_DeletePermission_0(ctx context.Context, marshaler runtim
 	}
 
 	protoReq.AccountId, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account_id", err)
 	}
@@ -1556,7 +1507,6 @@ func local_request_Namespaces_DeletePermission_0(ctx context.Context, marshaler 
 	}
 
 	protoReq.Namespace, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace", err)
 	}
@@ -1567,7 +1517,6 @@ func local_request_Namespaces_DeletePermission_0(ctx context.Context, marshaler 
 	}
 
 	protoReq.AccountId, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "account_id", err)
 	}
@@ -1594,7 +1543,6 @@ func request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Namespaceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespaceid", err)
 	}
@@ -1605,7 +1553,6 @@ func request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler runtime
 	}
 
 	protoReq.Harddelete, err = runtime.Bool(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "harddelete", err)
 	}
@@ -1632,7 +1579,6 @@ func local_request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Namespaceid, err = runtime.String(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespaceid", err)
 	}
@@ -1643,7 +1589,6 @@ func local_request_Namespaces_DeleteNamespace_0(ctx context.Context, marshaler r
 	}
 
 	protoReq.Harddelete, err = runtime.Bool(val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "harddelete", err)
 	}
@@ -1669,8 +1614,7 @@ func request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.NamespaceMask == nil || len(protoReq.NamespaceMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Namespace)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Namespace); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.NamespaceMask = fieldMask
@@ -1690,7 +1634,6 @@ func request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler runtime
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "namespace.id", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace.id", err)
 	}
@@ -1719,8 +1662,7 @@ func local_request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler r
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	if protoReq.NamespaceMask == nil || len(protoReq.NamespaceMask.GetPaths()) == 0 {
-		_, md := descriptor.ForMessage(protoReq.Namespace)
-		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), md); err != nil {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Namespace); err != nil {
 			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 		} else {
 			protoReq.NamespaceMask = fieldMask
@@ -1740,7 +1682,6 @@ func local_request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler r
 	}
 
 	err = runtime.PopulateFieldFromPath(&protoReq, "namespace.id", val)
-
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "namespace.id", err)
 	}
@@ -1760,18 +1701,22 @@ func local_request_Namespaces_UpdateNamespace_0(ctx context.Context, marshaler r
 // RegisterDevicesHandlerServer registers the http handlers for service Devices to "mux".
 // UnaryRPC     :call DevicesServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterDevicesHandlerFromEndpoint instead.
 func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, server DevicesServer) error {
 
 	mux.Handle("POST", pattern_Devices_Create_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/Create", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_Create_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1785,13 +1730,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("PATCH", pattern_Devices_Update_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/Update", runtime.WithHTTPPathPattern("/devices/{device.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_Update_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1805,13 +1753,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("GET", pattern_Devices_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/Get", runtime.WithHTTPPathPattern("/devices/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_Get_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1825,13 +1776,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("GET", pattern_Devices_List_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/List", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_List_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1845,13 +1799,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("DELETE", pattern_Devices_Delete_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/Delete", runtime.WithHTTPPathPattern("/devices/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1865,13 +1822,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("PUT", pattern_Devices_AssignOwnerDevices_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/AssignOwnerDevices", runtime.WithHTTPPathPattern("/devices/{deviceid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_AssignOwnerDevices_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1885,13 +1845,16 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("DELETE", pattern_Devices_RemoveOwnerDevices_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Devices/RemoveOwnerDevices", runtime.WithHTTPPathPattern("/devices/{deviceid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Devices_RemoveOwnerDevices_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1908,18 +1871,22 @@ func RegisterDevicesHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 // RegisterStatesHandlerServer registers the http handlers for service States to "mux".
 // UnaryRPC     :call StatesServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterStatesHandlerFromEndpoint instead.
 func RegisterStatesHandlerServer(ctx context.Context, mux *runtime.ServeMux, server StatesServer) error {
 
 	mux.Handle("GET", pattern_States_Get_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.States/Get", runtime.WithHTTPPathPattern("/devices/{id}/state"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_States_Get_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1933,13 +1900,16 @@ func RegisterStatesHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 	mux.Handle("PATCH", pattern_States_PatchDesiredState_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.States/PatchDesiredState", runtime.WithHTTPPathPattern("/devices/{id}/state"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_States_PatchDesiredState_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1963,18 +1933,22 @@ func RegisterStatesHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 // RegisterAccountsHandlerServer registers the http handlers for service Accounts to "mux".
 // UnaryRPC     :call AccountsServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterAccountsHandlerFromEndpoint instead.
 func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, server AccountsServer) error {
 
 	mux.Handle("GET", pattern_Accounts_SelfAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/SelfAccount", runtime.WithHTTPPathPattern("/account"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_SelfAccount_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1988,13 +1962,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("POST", pattern_Accounts_Token_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/Token", runtime.WithHTTPPathPattern("/account/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_Token_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2008,13 +1985,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("POST", pattern_Accounts_CreateUserAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/CreateUserAccount", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_CreateUserAccount_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2028,13 +2008,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("GET", pattern_Accounts_GetAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/GetAccount", runtime.WithHTTPPathPattern("/accounts/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_GetAccount_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2048,13 +2031,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("PATCH", pattern_Accounts_UpdateAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/UpdateAccount", runtime.WithHTTPPathPattern("/accounts/{account.uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_UpdateAccount_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2068,13 +2054,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("GET", pattern_Accounts_ListAccounts_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/ListAccounts", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_ListAccounts_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2088,13 +2077,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("DELETE", pattern_Accounts_DeleteAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/DeleteAccount", runtime.WithHTTPPathPattern("/accounts/{uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_DeleteAccount_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2108,13 +2100,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("PUT", pattern_Accounts_AssignOwner_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/AssignOwner", runtime.WithHTTPPathPattern("/accounts/{accountid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_AssignOwner_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2128,13 +2123,16 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 	mux.Handle("DELETE", pattern_Accounts_RemoveOwner_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Accounts/RemoveOwner", runtime.WithHTTPPathPattern("/accounts/{accountid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Accounts_RemoveOwner_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2151,18 +2149,22 @@ func RegisterAccountsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 // RegisterObjectsHandlerServer registers the http handlers for service Objects to "mux".
 // UnaryRPC     :call ObjectsServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterObjectsHandlerFromEndpoint instead.
 func RegisterObjectsHandlerServer(ctx context.Context, mux *runtime.ServeMux, server ObjectsServer) error {
 
 	mux.Handle("GET", pattern_Objects_ListObjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Objects/ListObjects", runtime.WithHTTPPathPattern("/objects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Objects_ListObjects_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2176,13 +2178,16 @@ func RegisterObjectsHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("POST", pattern_Objects_CreateObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Objects/CreateObject", runtime.WithHTTPPathPattern("/objects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Objects_CreateObject_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2196,13 +2201,16 @@ func RegisterObjectsHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 	mux.Handle("DELETE", pattern_Objects_DeleteObject_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Objects/DeleteObject", runtime.WithHTTPPathPattern("/objects/{uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Objects_DeleteObject_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2219,18 +2227,22 @@ func RegisterObjectsHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 // RegisterNamespacesHandlerServer registers the http handlers for service Namespaces to "mux".
 // UnaryRPC     :call NamespacesServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterNamespacesHandlerFromEndpoint instead.
 func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux, server NamespacesServer) error {
 
 	mux.Handle("POST", pattern_Namespaces_CreateNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/CreateNamespace", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_CreateNamespace_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2244,13 +2256,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("GET", pattern_Namespaces_GetNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/GetNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespace}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_GetNamespace_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2264,13 +2279,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("GET", pattern_Namespaces_ListNamespaces_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/ListNamespaces", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_ListNamespaces_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2284,13 +2302,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("PUT", pattern_Namespaces_CreatePermission_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/CreatePermission", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions/{account_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_CreatePermission_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2304,13 +2325,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("GET", pattern_Namespaces_ListPermissions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/ListPermissions", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_ListPermissions_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2324,13 +2348,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("DELETE", pattern_Namespaces_DeletePermission_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/DeletePermission", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions/{account_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_DeletePermission_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2344,13 +2371,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("DELETE", pattern_Namespaces_DeleteNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/DeleteNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespaceid}/{harddelete}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_DeleteNamespace_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2364,13 +2394,16 @@ func RegisterNamespacesHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 	mux.Handle("PATCH", pattern_Namespaces_UpdateNamespace_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.api.Namespaces/UpdateNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespace.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 		resp, md, err := local_request_Namespaces_UpdateNamespace_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2411,7 +2444,7 @@ func RegisterDevicesHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeM
 
 // RegisterDevicesHandler registers the http handlers for service Devices to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterDevicesHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterDevicesHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterDevicesHandlerClient(ctx, mux, NewDevicesClient(conn))
 }
 
@@ -2426,7 +2459,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/Create", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2446,7 +2479,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/Update", runtime.WithHTTPPathPattern("/devices/{device.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2466,7 +2499,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/Get", runtime.WithHTTPPathPattern("/devices/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2486,7 +2519,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/List", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2506,7 +2539,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/Delete", runtime.WithHTTPPathPattern("/devices/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2526,7 +2559,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/AssignOwnerDevices", runtime.WithHTTPPathPattern("/devices/{deviceid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2546,7 +2579,7 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Devices/RemoveOwnerDevices", runtime.WithHTTPPathPattern("/devices/{deviceid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2566,19 +2599,19 @@ func RegisterDevicesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Devices_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"devices"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"devices"}, ""))
 
-	pattern_Devices_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "device.id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "device.id"}, ""))
 
-	pattern_Devices_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "id"}, ""))
 
-	pattern_Devices_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"devices"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"devices"}, ""))
 
-	pattern_Devices_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"devices", "id"}, ""))
 
-	pattern_Devices_AssignOwnerDevices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"devices", "deviceid", "owner", "ownerid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_AssignOwnerDevices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"devices", "deviceid", "owner", "ownerid"}, ""))
 
-	pattern_Devices_RemoveOwnerDevices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"devices", "deviceid", "owner", "ownerid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Devices_RemoveOwnerDevices_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"devices", "deviceid", "owner", "ownerid"}, ""))
 )
 
 var (
@@ -2624,7 +2657,7 @@ func RegisterStatesHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMu
 
 // RegisterStatesHandler registers the http handlers for service States to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterStatesHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterStatesHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterStatesHandlerClient(ctx, mux, NewStatesClient(conn))
 }
 
@@ -2639,7 +2672,7 @@ func RegisterStatesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.States/Get", runtime.WithHTTPPathPattern("/devices/{id}/state"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2659,7 +2692,7 @@ func RegisterStatesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.States/PatchDesiredState", runtime.WithHTTPPathPattern("/devices/{id}/state"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2679,7 +2712,7 @@ func RegisterStatesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.States/StreamReportedStateChanges", runtime.WithHTTPPathPattern("/devices/{id}/state/stream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2699,11 +2732,11 @@ func RegisterStatesHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 }
 
 var (
-	pattern_States_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_States_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_States_PatchDesiredState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_States_PatchDesiredState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_States_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"devices", "id", "state", "stream"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_States_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"devices", "id", "state", "stream"}, ""))
 )
 
 var (
@@ -2741,7 +2774,7 @@ func RegisterAccountsHandlerFromEndpoint(ctx context.Context, mux *runtime.Serve
 
 // RegisterAccountsHandler registers the http handlers for service Accounts to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterAccountsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterAccountsHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterAccountsHandlerClient(ctx, mux, NewAccountsClient(conn))
 }
 
@@ -2756,7 +2789,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/SelfAccount", runtime.WithHTTPPathPattern("/account"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2776,7 +2809,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/Token", runtime.WithHTTPPathPattern("/account/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2796,7 +2829,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/CreateUserAccount", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2816,7 +2849,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/GetAccount", runtime.WithHTTPPathPattern("/accounts/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2836,7 +2869,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/UpdateAccount", runtime.WithHTTPPathPattern("/accounts/{account.uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2856,7 +2889,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/ListAccounts", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2876,7 +2909,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/DeleteAccount", runtime.WithHTTPPathPattern("/accounts/{uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2896,7 +2929,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/AssignOwner", runtime.WithHTTPPathPattern("/accounts/{accountid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2916,7 +2949,7 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Accounts/RemoveOwner", runtime.WithHTTPPathPattern("/accounts/{accountid}/owner/{ownerid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2936,23 +2969,23 @@ func RegisterAccountsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
-	pattern_Accounts_SelfAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"account"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_SelfAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"account"}, ""))
 
-	pattern_Accounts_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"account", "token"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_Token_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"account", "token"}, ""))
 
-	pattern_Accounts_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_CreateUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts"}, ""))
 
-	pattern_Accounts_GetAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_GetAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "id"}, ""))
 
-	pattern_Accounts_UpdateAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "account.uid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_UpdateAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "account.uid"}, ""))
 
-	pattern_Accounts_ListAccounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_ListAccounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"accounts"}, ""))
 
-	pattern_Accounts_DeleteAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "uid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_DeleteAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"accounts", "uid"}, ""))
 
-	pattern_Accounts_AssignOwner_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"accounts", "accountid", "owner", "ownerid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_AssignOwner_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"accounts", "accountid", "owner", "ownerid"}, ""))
 
-	pattern_Accounts_RemoveOwner_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"accounts", "accountid", "owner", "ownerid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Accounts_RemoveOwner_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"accounts", "accountid", "owner", "ownerid"}, ""))
 )
 
 var (
@@ -3002,7 +3035,7 @@ func RegisterObjectsHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeM
 
 // RegisterObjectsHandler registers the http handlers for service Objects to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterObjectsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterObjectsHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterObjectsHandlerClient(ctx, mux, NewObjectsClient(conn))
 }
 
@@ -3017,7 +3050,7 @@ func RegisterObjectsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Objects/ListObjects", runtime.WithHTTPPathPattern("/objects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3037,7 +3070,7 @@ func RegisterObjectsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Objects/CreateObject", runtime.WithHTTPPathPattern("/objects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3057,7 +3090,7 @@ func RegisterObjectsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Objects/DeleteObject", runtime.WithHTTPPathPattern("/objects/{uid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3077,11 +3110,11 @@ func RegisterObjectsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 }
 
 var (
-	pattern_Objects_ListObjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"objects"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Objects_ListObjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"objects"}, ""))
 
-	pattern_Objects_CreateObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"objects"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Objects_CreateObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"objects"}, ""))
 
-	pattern_Objects_DeleteObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"objects", "uid"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Objects_DeleteObject_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"objects", "uid"}, ""))
 )
 
 var (
@@ -3119,7 +3152,7 @@ func RegisterNamespacesHandlerFromEndpoint(ctx context.Context, mux *runtime.Ser
 
 // RegisterNamespacesHandler registers the http handlers for service Namespaces to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterNamespacesHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterNamespacesHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterNamespacesHandlerClient(ctx, mux, NewNamespacesClient(conn))
 }
 
@@ -3134,7 +3167,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/CreateNamespace", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3154,7 +3187,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/GetNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespace}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3174,7 +3207,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/ListNamespaces", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3194,7 +3227,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/CreatePermission", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions/{account_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3214,7 +3247,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/ListPermissions", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3234,7 +3267,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/DeletePermission", runtime.WithHTTPPathPattern("/namespaces/{namespace}/permissions/{account_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3254,7 +3287,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/DeleteNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespaceid}/{harddelete}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3274,7 +3307,7 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.api.Namespaces/UpdateNamespace", runtime.WithHTTPPathPattern("/namespaces/{namespace.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3294,21 +3327,21 @@ func RegisterNamespacesHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 }
 
 var (
-	pattern_Namespaces_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_CreateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
 
-	pattern_Namespaces_GetNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_GetNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace"}, ""))
 
-	pattern_Namespaces_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_ListNamespaces_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"namespaces"}, ""))
 
-	pattern_Namespaces_CreatePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "permissions", "account_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_CreatePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "permissions", "account_id"}, ""))
 
-	pattern_Namespaces_ListPermissions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "namespace", "permissions"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_ListPermissions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "namespace", "permissions"}, ""))
 
-	pattern_Namespaces_DeletePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "permissions", "account_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_DeletePermission_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"namespaces", "namespace", "permissions", "account_id"}, ""))
 
-	pattern_Namespaces_DeleteNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"namespaces", "namespaceid", "harddelete"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_DeleteNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 1, 0, 4, 1, 5, 2}, []string{"namespaces", "namespaceid", "harddelete"}, ""))
 
-	pattern_Namespaces_UpdateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace.id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Namespaces_UpdateNamespace_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "namespace.id"}, ""))
 )
 
 var (

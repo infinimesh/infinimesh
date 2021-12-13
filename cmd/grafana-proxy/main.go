@@ -26,7 +26,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	jwt "github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

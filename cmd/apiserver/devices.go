@@ -31,6 +31,8 @@ import (
 )
 
 type deviceAPI struct {
+	apipb.UnimplementedDevicesServer
+	
 	client        registrypb.DevicesClient
 	accountClient nodepb.AccountServiceClient
 }

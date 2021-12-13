@@ -1,7 +1,4 @@
-/mqtt-bridge
-*.swagger.json
 node_modules
-/apiserver
 dist
 .vscode
 coverage
