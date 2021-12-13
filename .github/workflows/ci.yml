@@ -1,0 +1,60 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'master'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set target tags
+        id: set-tags-matrix
+        run: echo "::set-output name=matrix::$(ls Dockerfiles | jq -cnR '[inputs | select(length>0)]')"
+      
+    outputs:
+      matrix: ${{steps.set-tags-matrix.outputs.matrix}}
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      matrix: 
+        tag: ${{fromJson(needs.prepare.outputs.matrix)}}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3.6.1
+        with:
+          tags: type=raw,value=latest
+          images: ${{ env.REGISTRY }}/slntopp/infinimesh/${{matrix.tag}}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2.7.0
+        with:
+          context: .
+          file: Dockerfiles/${{matrix.tag}}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
