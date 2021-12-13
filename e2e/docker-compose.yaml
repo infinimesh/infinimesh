@@ -32,11 +32,16 @@ services:
   testrunner:
       # This just sleeps, we execute the test command using docker-compose exec.
       container_name: testrunner
+      image: golang:latest
       command: sleep infinity
       depends_on:
           - server
-      # environment:
-      image: golang:latest
+          - redis
+      environment:
+        DGRAPH_URL: server:9080
+        DB_ADDR: redis:6379
+      volumes:
+        - ../:/go/src/github.com/slntopp/infinimesh
       # networks:
           # - internal
 volumes:
