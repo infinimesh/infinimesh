@@ -25,7 +25,7 @@ jobs:
         run: docker-compose -f e2e/docker-compose.yaml up -d --quiet-pull
 
       - name: Run tests
-        run: docker exec -it testrunner bash -c 'cd /go/src/github.com/slntopp/infinimesh && go mod download && CGO_ENABLED=0 go run -mod=mod hack/import_dgraph_sample_data.go -drop && go test -mod=mod ./...'
+        run: docker exec --tty -it testrunner bash -c 'cd /go/src/github.com/slntopp/infinimesh && go mod download && CGO_ENABLED=0 go run -mod=mod hack/import_dgraph_sample_data.go -drop && go test -mod=mod ./...'
   
   tests-frontend:
     runs-on: ubuntu-latest
