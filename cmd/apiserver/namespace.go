@@ -30,6 +30,8 @@ import (
 )
 
 type namespaceAPI struct {
+	apipb.UnimplementedNamespacesServer
+
 	client        nodepb.NamespacesClient
 	accountClient nodepb.AccountServiceClient
 }
