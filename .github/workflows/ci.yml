@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check Tests
-      - uses: ahmadnassri/action-workflow-run-wait@v1
+        uses: ahmadnassri/action-workflow-run-wait@v1
 
   prepare:
     runs-on: ubuntu-latest
