@@ -26,7 +26,7 @@ import (
 
 	"strconv"
 
-	jwt "github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
