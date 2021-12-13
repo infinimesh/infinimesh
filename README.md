@@ -8,7 +8,6 @@ Our API's (REST / gRPC) are considered als beta and may change in future. infini
 **Graph-based permission management (multi-dimensional permissons at data layer)**  
 **TLS 1.2 / 1.3 support**  
 **Device-to-Cloud and Cloud-to-Device messages**  
-**Integrated persistence data layer as .avro**  
 **Enhanced UI**  
 **k8s and docker environments**
 

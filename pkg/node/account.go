@@ -33,6 +33,8 @@ import (
 
 //AccountController is a Data type for Account Controller file
 type AccountController struct {
+	nodepb.UnimplementedAccountServiceServer
+
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
 

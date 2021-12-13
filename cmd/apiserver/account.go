@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	jwt "github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/slntopp/infinimesh/pkg/apiserver/apipb"
@@ -35,6 +35,8 @@ import (
 )
 
 type accountAPI struct {
+	apipb.UnimplementedAccountsServer
+
 	signingSecret []byte
 	client        nodepb.AccountServiceClient
 }
