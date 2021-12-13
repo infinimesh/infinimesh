@@ -36,8 +36,6 @@ import (
 	"github.com/slntopp/infinimesh/pkg/repo"
 	"github.com/slntopp/infinimesh/pkg/repo/repopb"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	"github.com/dgraph-io/dgo"
 )
 
