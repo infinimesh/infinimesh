@@ -8,9 +8,6 @@ services:
         target: /dgraph
         volume:
           nocopy: true
-    ports:
-      - 5080:5080
-      - 6080:6080
     restart: on-failure
     command: dgraph zero --my=zero:5080
   server:
@@ -21,9 +18,6 @@ services:
         target: /dgraph
         volume:
           nocopy: true
-    ports:
-      - 8084:8080
-      - 9080:9080
     restart: on-failure
     command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
   redis:
