@@ -284,7 +284,19 @@ export default {
       return divs[this.$store.state.window.gridSize];
     },
   },
+  mounted() {
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.refresh,
+    });
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
+  },
   methods: {
+    refresh() {
+      this.$store.dispatch("devices/get");
+    },
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
