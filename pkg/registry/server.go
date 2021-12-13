@@ -43,6 +43,8 @@ import (
 
 //Server is a Data type for Device Controller file
 type Server struct {
+	registrypb.UnimplementedDevicesServer
+	
 	dgo  *dgo.Dgraph
 	rep  repo.Server
 	repo node.Repo

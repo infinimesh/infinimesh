@@ -31,6 +31,8 @@ import (
 
 //shadowAPI data strcuture
 type shadowAPI struct {
+	apipb.UnimplementedStatesServer
+
 	accountClient nodepb.AccountServiceClient
 	client        shadowpb.ShadowsClient
 }

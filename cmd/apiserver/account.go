@@ -35,6 +35,8 @@ import (
 )
 
 type accountAPI struct {
+	apipb.UnimplementedAccountsServer
+
 	signingSecret []byte
 	client        nodepb.AccountServiceClient
 }
