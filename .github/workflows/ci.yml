@@ -1,9 +1,13 @@
 name: ci
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - tests
     branches:
-      - 'master'
+      - master
+    types:
+      - completed
 
 env:
   REGISTRY: ghcr.io
@@ -14,6 +18,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Check Tests
+      - uses: ahmadnassri/action-workflow-run-wait@v1
 
       - name: Set target tags
         id: set-tags-matrix
