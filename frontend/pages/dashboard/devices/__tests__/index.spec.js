@@ -14,6 +14,7 @@ describe("Devices Registry", () => {
   let wrapper;
 
   let default_store = {
+    commit: jest.fn((mutation, data) => {}),
     getters: {
       loggedInUser: {
         default_namespace: { id: "0x0" }
