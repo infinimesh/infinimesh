@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "ant-design-vue": "^1.7.5",
-    "@babel/core": "^7.12.3",
+    "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.12.1",
     "@nuxt/types": "^2.14.3",
     "@nuxtjs/color-mode": "^2.0.9",
