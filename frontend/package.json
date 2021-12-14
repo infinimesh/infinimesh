@@ -32,7 +32,7 @@
     "@vue/test-utils": "^1.1.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "babel-jest": "^27.0.1",
+    "babel-jest": "^27.4.5",
     "eslint": "^7.27.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^4.0.2",
