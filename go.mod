@@ -3,7 +3,7 @@ module github.com/slntopp/infinimesh
 go 1.17
 
 require (
-	github.com/Pallinder/go-randomdata v1.1.0
+	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/Shopify/sarama v1.30.1
 	github.com/avast/retry-go v2.2.0+incompatible
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
