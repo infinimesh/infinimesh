@@ -81,7 +81,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
