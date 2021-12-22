@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:14-slim
 
 ADD ./frontend /frontend/
 WORKDIR /frontend
