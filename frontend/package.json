@@ -33,7 +33,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^27.4.6",
-    "css-what": "^5.0.1",
+    "css-what": "^6.0.1",
     "eslint": "^7.27.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^4.0.2",
