@@ -353,9 +353,6 @@ google.golang.org/protobuf/types/known/wrapperspb
 # gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c
 ## explicit
 gopkg.in/alecthomas/kingpin.v3-unstable
-# gopkg.in/yaml.v2 v2.2.3
+# gopkg.in/yaml.v2 v2.2.8
 ## explicit
 gopkg.in/yaml.v2
-# robpike.io/filter v0.0.0-20150108201509-2984852a2183
-## explicit
-robpike.io/filter
