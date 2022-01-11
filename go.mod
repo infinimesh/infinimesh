@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/Shopify/sarama v1.30.1
-	github.com/avast/retry-go v2.7.0+incompatible
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 	github.com/cskr/pubsub v1.0.2
 	github.com/dgraph-io/dgo v0.0.0-20181226155115-a20f509ade83
