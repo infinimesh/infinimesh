@@ -9,7 +9,7 @@ require (
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 	github.com/cskr/pubsub v1.0.2
 	github.com/dgraph-io/dgo v0.0.0-20181226155115-a20f509ade83
-	github.com/evanphx/json-patch v4.1.0+incompatible
+	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/golang/glog v1.0.0
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
