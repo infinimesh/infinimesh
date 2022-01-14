@@ -74,7 +74,7 @@ services:
     restart: unless-stopped
   frontend:
     ports:
-      - "8082:80"
+      - "80:80"
     image: ghcr.io/slntopp/infinimesh/frontend:latest
     environment:
       - "APISERVER_URL=http://apiserver-rest:8081"
