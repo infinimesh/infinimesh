@@ -98,4 +98,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The authors of infinimesh are @birdayz and @2pk03, all rights reserved. 
+The authors of infinimesh are [birdayz](https://github.com/birdayz) and [2pk03](https://github.com/2pk03), all rights reserved. 
