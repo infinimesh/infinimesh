@@ -85,7 +85,7 @@ The cafile path may vary depending on your operating system.
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinimesh%2Finfinimesh?ref=badge_large)
 
-Copyright 2018 - 2021, The infinimesh team
+Copyright 2018 - 2022, The infinimesh team
 
 Licensed under the Apache License, Version 2.0 (the "Licenses"); you may not use 
 this file except in compliance with the License. You may obtain a copy of the License at
@@ -97,3 +97,5 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+The authors of infinimesh are @birdayz and @2pk03, all rights reserved. 
