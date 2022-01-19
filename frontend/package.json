@@ -44,7 +44,7 @@
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "node-sass": "^7.0.1",
-    "normalize-url": "^7.0.2",
+    "normalize-url": "^7.0.3",
     "postcss": "^8.2.10",
     "trim-newlines": "^4.0.1",
     "vue-jest": "^3.0.7"
