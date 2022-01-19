@@ -188,6 +188,9 @@ func main() {
 	go readBackchannelFromKafka()
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
+		if debug {
+			printConnState(conn)
+		}
 		timeout := time.Second * 30
 		errChannel := make(chan error, 2)
 		go func() {
@@ -280,10 +283,6 @@ func printConnState(con net.Conn) {
 // Connection is expected to be valid & legitimate at this point
 func handleConn(c net.Conn, deviceIDs []string) {
 	p, err := packet.ReadPacket(c, 0)
-
-	if debug {
-		printConnState(c)
-	}
 
 	if err != nil {
 		fmt.Printf("Error while reading connect packet: %v\n", err)
