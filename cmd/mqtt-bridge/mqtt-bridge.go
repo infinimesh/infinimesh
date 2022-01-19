@@ -33,9 +33,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
+	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/slntopp/infinimesh/pkg/mqtt"
 	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
-	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"google.golang.org/grpc"
@@ -102,6 +102,7 @@ func init() {
 	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
 	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
+	viper.SetDefault("DEBUG", false)
 	viper.AutomaticEnv()
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
@@ -111,7 +112,7 @@ func init() {
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 	dbAddr = viper.GetString("DB_ADDR2")
-
+	debug = viper.GetBool("DEBUG")
 }
 
 func readBackchannelFromKafka() {
