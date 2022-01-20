@@ -144,8 +144,8 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: resp.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     	resp.Device.Enabled.Value,
-			BasicEnabled: resp.Device.BasicEnabled.Value,
+			Enabled:     	resp.Device.GetEnabled().GetValue(),
+			BasicEnabled: resp.Device.GetBasicEnabled().GetValue(),
 			FingerPrint: 	resp.Device.Certificate.Fingerprint,
 		},
 	})
@@ -206,12 +206,12 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	if err != nil {
 		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
-		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
+		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.GetEnabled().GetValue()))
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 			Id: request.Device.Id,
 			Repo: &repopb.Repo{
-				Enabled:     	repData.Device.Enabled.Value,
-				BasicEnabled: repData.Device.BasicEnabled.Value,
+				Enabled:     	repData.Device.GetEnabled().GetValue(),
+				BasicEnabled: repData.Device.GetBasicEnabled().GetValue(),
 				FingerPrint: 	repData.Device.Certificate.Fingerprint,
 				NamespaceID: 	repData.Device.Namespace,
 			},
