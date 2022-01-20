@@ -247,24 +247,18 @@ func main() {
 			fmt.Println("Fingerprint", fingerprint)
 		}
 
-		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
-			Fingerprint: fingerprint,
-		})
-		if err != nil || len(reply.Devices) == 0 { //FIXME change logic so the client can send his id, and we track here which IDs are possible, but he can choose which identity he wants to use (in most cases it's only once, unless a device has multiple certs from multiple devices)
-			_ = conn.Close()
-			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
-			continue
-		}
-
-		var possibleIDs []string
-
-		for _, device := range reply.Devices {
+		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) (bool) {
 			if device.Enabled.Value {
 				fmt.Println(device.Tags)
-				possibleIDs = append(possibleIDs, device.Id)
+				return true
 			} else {
 				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
+				return false
 			}
+		})
+		if err != nil {
+			_ = conn.Close()
+			continue
 		}
 
 		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
