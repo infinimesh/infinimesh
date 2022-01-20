@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------
-// Copyright 2018 infinimesh
+// Copyright 2018-2022 infinimesh
 // www.infinimesh.io
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +22,10 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"strings"
@@ -68,6 +68,13 @@ var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error
 		return nil
 	}
 	return errors.New("Could not verify fingerprint")
+}
+
+func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
+	if p.ConnectPayload.Password == "" {
+		return nil, errors.New("Payload Password is Empty")
+	}
+	return base64.StdEncoding.DecodeString(p.ConnectPayload.Password)
 }
 
 func getFingerprint(c []byte) []byte {
@@ -184,8 +191,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	tcp, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		panic(err)
+	}
 
 	go readBackchannelFromKafka()
+	go handleTCPConnections(tcp)
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		if debug {
@@ -266,6 +278,71 @@ func main() {
 func changeDeviceStatus(deviceID string, deviceStatus bool) {
 	deviceStatusMap[deviceID] = deviceStatus
 }*/
+func handleTCPConnections(tcp net.Listener) {
+	for {
+		conn, _ := tcp.Accept() // nolint: gosec
+
+		p, err := packet.ReadPacket(conn, 0)
+		if err != nil {
+			fmt.Printf("Error while reading connect packet: %v\n", err)
+			return
+		}
+		if debug {
+			fmt.Println("ControlPacket", p)
+		}
+
+		connectPacket, ok := p.(*packet.ConnectControlPacket)
+		if !ok {
+			fmt.Println("Got wrong packet as first packet..need connect!")
+			return
+		}
+		if debug {
+			fmt.Println("ConnectPacket", p)
+		}
+
+		var fingerprint []byte
+		fingerprint, err = verifyBasicAuth(connectPacket)
+		if err != nil {
+			fmt.Println("Error verifying Basic Auth", err)
+			continue
+		}
+
+		if debug {
+			fmt.Println("Fingerprint", string(fingerprint))
+		}
+
+		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+			Fingerprint: fingerprint,
+		})
+		if err != nil || len(reply.Devices) == 0 { //FIXME change logic so the client can send his id, and we track here which IDs are possible, but he can choose which identity he wants to use (in most cases it's only once, unless a device has multiple certs from multiple devices)
+			_ = conn.Close()
+			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
+			continue
+		}
+
+		var possibleIDs []string
+
+		for _, device := range reply.Devices {
+			if device.Name != connectPacket.ConnectPayload.Username {
+				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v", device.Id)
+				continue
+			} else if !device.BasicEnabled.Value {
+				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v", device.Id)
+				continue
+			}
+			if device.Enabled.Value {
+				fmt.Println(device.Tags)
+				possibleIDs = append(possibleIDs, device.Id)
+			} else {
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
+			}
+		}
+
+		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
+
+		go HandleConn(conn, connectPacket, possibleIDs)
+	}
+}
 
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
@@ -304,148 +381,6 @@ func printConnState(con net.Conn) {
 		log.Printf("   i:/C=%v/ST=%v/L=%v/O=%v/OU=%v/CN=%s", issuer.Country, issuer.Province, issuer.Locality, issuer.Organization, issuer.OrganizationalUnit, issuer.CommonName)
 	}
 	log.Print(">>>>>>>>>>>>>>>> State End <<<<<<<<<<<<<<<<")
-}
-
-// Connection is expected to be valid & legitimate at this point
-func handleConn(c net.Conn, deviceIDs []string) {
-	p, err := packet.ReadPacket(c, 0)
-	if err != nil {
-		fmt.Printf("Error while reading connect packet: %v\n", err)
-		return
-	}
-	if debug {
-		fmt.Println("ControlPacket", p)
-	}
-
-	connectPacket, ok := p.(*packet.ConnectControlPacket)
-	if !ok {
-		fmt.Println("Got wrong packet as first packet..need connect!")
-		return
-	}
-	if debug {
-		fmt.Println("ConnectPacket", p)
-	}
-
-	defer fmt.Println("Client disconnected ", connectPacket.ConnectPayload.ClientID)
-
-	fmt.Printf("Client with ID %v connected!\n", connectPacket.ConnectPayload.ClientID)
-	// TODO ignore/compare this ID with the given ID from the verify function
-
-	var clientIDOK bool
-	var deviceID string
-	if len(deviceIDs) == 1 {
-		// only one ID is possible with this cert; no need to have clientID set
-		clientIDOK = true
-		deviceID = deviceIDs[0]
-	} else {
-		fmt.Printf("Client used duplicate fingerprint, Please use unique certificate for your device\n")
-		_ = c.Close()
-		return
-		//TODO : when multiple devices have single fingerprint authentication
-		/*
-			for _, possibleID := range deviceIDs {
-				if connectPacket.ConnectPayload.ClientID == possibleID {
-					fmt.Printf("Using ClientID: %v\n", possibleID)
-					clientIDOK = true
-					deviceID = possibleID
-				}
-			}
-		*/
-	}
-
-	if !clientIDOK {
-		fmt.Printf("Client used invalid clientID, disconnecting\n")
-		_ = c.Close()
-		return
-
-	}
-	//TODO : MQTT CONNACK Properties need to add here
-	resp := packet.ConnAckControlPacket{
-		FixedHeader: packet.FixedHeader{
-			ControlPacketType: packet.CONNACK,
-		},
-		VariableHeader: packet.ConnAckVariableHeader{},
-	}
-
-	if len(connectPacket.ConnectPayload.ClientID) <= 0 {
-		resp.VariableHeader.ConnAckProperties.AssignedClientID = deviceID
-	}
-	// Only open Back-channel after conn packet was received
-
-	// Create empty subscription
-	backChannel := ps.Sub()
-	go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-	defer func() {
-		fmt.Printf("Unsubbed channel %v\n", deviceID)
-		ps.Unsub(backChannel)
-	}()
-
-	_, err = resp.WriteTo(c)
-	if err != nil {
-		fmt.Println("Failed to write ConnAck. Closing connection.")
-		return
-	}
-	topicAliasPublishMap := make(map[string]int)
-
-	for {
-		deviceStatus, err := client.GetDeviceStatus(context.Background(), &registrypb.GetDeviceStatusRequest{Deviceid: deviceID})
-		if err != nil {
-			fmt.Printf("device status doesn't exist in redis %v\n", err)
-		} else {
-			if !deviceStatus.Status {
-				_ = c.Close()
-				break
-			}
-		}
-		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
-
-		if err != nil {
-			if err == io.EOF {
-				fmt.Printf("Client closed connection.\n")
-			} else {
-				fmt.Printf("Error while reading packet in client loop: %v. Disconnecting client.\n", err)
-			}
-			_ = c.Close() // nolint: gosec
-			break
-		}
-
-		switch p := p.(type) {
-		case *packet.PingReqControlPacket:
-			pong := packet.NewPingRespControlPacket()
-			_, err := pong.WriteTo(c)
-			if err != nil {
-				fmt.Println("Failed to write PingResp", err)
-			}
-		case *packet.PublishControlPacket:
-			topicAliasPublishMap, err = handlePublish(p, c, deviceID, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
-			if err != nil {
-				fmt.Printf("Failed to handle Publish packet: %v.", err)
-			}
-
-		case *packet.SubscribeControlPacket:
-			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
-			_, err := response.WriteTo(c)
-			if err != nil {
-				fmt.Println("Failed to write SubAck:", err)
-			}
-			for _, sub := range p.Payload.Subscriptions {
-				subTopic := TopicChecker(sub.Topic, deviceID)
-				ps.AddSub(backChannel, subTopic)
-				go handleBackChannel(c, deviceID, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-				fmt.Println("Added Subscription", subTopic, deviceID)
-			}
-		case *packet.UnsubscribeControlPacket:
-			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
-			_, err := response.WriteTo(c)
-			if err != nil {
-				fmt.Println("Failed to write UnSubAck:", err)
-			}
-			for _, unsub := range p.Payload.UnSubscriptions {
-				ps.Unsub(backChannel, unsub.Topic)
-				fmt.Println("Removed Subscription", unsub.Topic, deviceID)
-			}
-		}
-	}
 }
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {

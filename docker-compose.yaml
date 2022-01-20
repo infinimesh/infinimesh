@@ -22,13 +22,15 @@ services:
   mqtt-bridge:
     image: ghcr.io/slntopp/infinimesh/mqtt-bridge:latest
     ports:
-      - "8089:8089"
+      - "8080:8080" # BasicAuth(non-TLS)
+      - "8089:8089" # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
     environment:
-      - KAFKA_HOST=kafka:29092
-      - DEVICE_REGISTRY_URL=device-registry:8080
+      DEBUG: "true"
+      KAFKA_HOST: kafka:29092
+      DEVICE_REGISTRY_URL: device-registry:8080
     depends_on:
       - kafka
     restart: unless-stopped
