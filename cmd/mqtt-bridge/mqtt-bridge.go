@@ -205,12 +205,38 @@ func main() {
 			fmt.Println("Handshake failed due to timeout")
 			_ = conn.Close()
 		}
+
+		p, err := packet.ReadPacket(conn, 0)
+		if err != nil {
+			fmt.Printf("Error while reading connect packet: %v\n", err)
+			return
+		}
+		if debug {
+			fmt.Println("ControlPacket", p)
+		}
+
+		connectPacket, ok := p.(*packet.ConnectControlPacket)
+		if !ok {
+			fmt.Println("Got wrong packet as first packet..need connect!")
+			return
+		}
+		if debug {
+			fmt.Println("ConnectPacket", p)
+		}
+
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
 			continue
 		}
+
 		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
+		fingerprint := getFingerprint(rawcert)
+
+		if debug {
+			fmt.Println("Fingerprint", fingerprint)
+		}
+
 		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
-			Fingerprint: getFingerprint(rawcert),
+			Fingerprint: fingerprint,
 		})
 		if err != nil || len(reply.Devices) == 0 { //FIXME change logic so the client can send his id, and we track here which IDs are possible, but he can choose which identity he wants to use (in most cases it's only once, unless a device has multiple certs from multiple devices)
 			_ = conn.Close()
