@@ -63,9 +63,10 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 			Kind: node.KindDevice,
 		},
 		Enabled: request.Device.Enabled.Value,
+		BasicEnabled: request.Device.BasicEnabled.Value,
 		Tags:    request.Device.Tags,
 		Certificates: []*X509Cert{
-			&X509Cert{
+			{
 				PemData:              request.Device.Certificate.PemData,
 				Algorithm:            request.Device.Certificate.Algorithm,
 				Fingerprint:          fp,
@@ -110,12 +111,13 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 
 	return &registrypb.CreateResponse{
 		Device: &registrypb.Device{
-			Id:          newUID,
-			Name:        request.Device.Name,
-			Enabled:     request.Device.Enabled,
-			Tags:        request.Device.Tags,
-			Namespace:   request.Device.Namespace,
-			Certificate: request.Device.Certificate,
+			Id:          	newUID,
+			Name:        	request.Device.Name,
+			Enabled:     	request.Device.Enabled,
+			BasicEnabled: request.Device.BasicEnabled,
+			Tags:        	request.Device.Tags,
+			Namespace:   	request.Device.Namespace,
+			Certificate: 	request.Device.Certificate,
 		},
 	}, nil
 }
@@ -134,6 +136,7 @@ func (s *Server) UpdateQ(ctx context.Context, request *registrypb.UpdateRequest)
 		  }
 		  tags
 		  enabled
+			basic_enabled
 		  certificates {
 			uid
 			pem_data
@@ -173,9 +176,10 @@ func (s *Server) UpdateQ(ctx context.Context, request *registrypb.UpdateRequest)
 			Name: result.Devices[0].Name,
 		},
 		Enabled: result.Devices[0].Enabled,
+		BasicEnabled: result.Devices[0].BasicEnabled,
 		Tags:    result.Devices[0].Tags,
 		Certificates: []*X509Cert{
-			&X509Cert{
+			{
 				Node: dgraph.Node{
 					UID: result.Devices[0].Certificates[0].UID,
 				},
@@ -194,6 +198,8 @@ func (s *Server) UpdateQ(ctx context.Context, request *registrypb.UpdateRequest)
 		//Update the device details
 		case "enabled":
 			d.Enabled = request.Device.GetEnabled().Value
+		case "basic_enabled":
+			d.BasicEnabled = request.Device.GetBasicEnabled().Value
 		case "tags":
 			d.Tags = request.Device.Tags
 		case "name":
@@ -251,6 +257,7 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
       uid : uid
       name : name
       enabled : enabled
+			basic_enabled : basic_enabled
     }
   }
 }
@@ -270,6 +277,7 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
 			Uid       string `json:"uid"`
 			Name      string `json:"name"`
 			Enabled   bool   `json:"enabled"`
+			BasicEnabled bool `json:"basic_enabled"`
 			Namespace string `json:"namespace"`
 		} `json:"devices"`
 	}
@@ -286,6 +294,7 @@ func (s *Server) GetByFingerprintQ(ctx context.Context, request *registrypb.GetB
 			Name:      device.Name,
 			Namespace: device.Namespace,
 			Enabled:   &wrappers.BoolValue{Value: device.Enabled},
+			BasicEnabled: &wrappers.BoolValue{Value: device.BasicEnabled},
 		})
 	}
 
@@ -304,6 +313,7 @@ func (s *Server) GetQ(ctx context.Context, request *registrypb.GetRequest, acces
     name
     tags
     enabled
+		basic_enabled
     %v
     ~owns {
       name
@@ -366,6 +376,7 @@ func (s *Server) ListQ(ctx context.Context, request *registrypb.ListDevicesReque
 		  name
 		  kind
 		  enabled
+			basic_enabled
 		  tags
 		}
 	  }`
@@ -419,6 +430,7 @@ func (s *Server) ListForAccountQ(ctx context.Context, request *registrypb.ListDe
 		  name
 		  kind
 		  enabled
+			basic_enabled
 		  tags
 		  ~owns {
 			name
@@ -547,6 +559,7 @@ func toProto(device *Device) *registrypb.Device {
 		Id:      device.UID,
 		Name:    device.Name,
 		Enabled: &wrappers.BoolValue{Value: device.Enabled},
+		BasicEnabled: &wrappers.BoolValue{Value: device.BasicEnabled},
 		Tags:    device.Tags,
 		// TODO cert etc
 	}

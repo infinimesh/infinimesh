@@ -11,6 +11,7 @@ message Repo{
     bool Enabled = 1;
     bytes FingerPrint = 2;
     string NamespaceID = 3;
+    bool BasicEnabled = 4;
 }
 
 message GetRequest{

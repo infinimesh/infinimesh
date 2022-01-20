@@ -33,9 +33,9 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/infinimesh/mqtt-go/packet"
 	"github.com/slntopp/infinimesh/pkg/mqtt"
 	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
+	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"google.golang.org/grpc"
@@ -222,6 +222,7 @@ func main() {
 
 		for _, device := range reply.Devices {
 			if device.Enabled.Value {
+				fmt.Println(device.Tags)
 				possibleIDs = append(possibleIDs, device.Id)
 			} else {
 				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
@@ -283,16 +284,21 @@ func printConnState(con net.Conn) {
 // Connection is expected to be valid & legitimate at this point
 func handleConn(c net.Conn, deviceIDs []string) {
 	p, err := packet.ReadPacket(c, 0)
-
 	if err != nil {
 		fmt.Printf("Error while reading connect packet: %v\n", err)
 		return
+	}
+	if debug {
+		fmt.Println("ControlPacket", p)
 	}
 
 	connectPacket, ok := p.(*packet.ConnectControlPacket)
 	if !ok {
 		fmt.Println("Got wrong packet as first packet..need connect!")
 		return
+	}
+	if debug {
+		fmt.Println("ConnectPacket", p)
 	}
 
 	defer fmt.Println("Client disconnected ", connectPacket.ConnectPayload.ClientID)

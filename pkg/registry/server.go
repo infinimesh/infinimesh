@@ -94,6 +94,7 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		zap.String("Device Name", request.Device.Name),
 		zap.String("Namespace", request.Device.Namespace),
 		zap.Bool("Enabled", request.Device.Enabled.Value),
+		zap.Bool("BasicEnabled", request.Device.BasicEnabled.Value),
 	)
 
 	//Data Validation for namespace
@@ -143,8 +144,9 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: resp.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     resp.Device.Enabled.Value,
-			FingerPrint: resp.Device.Certificate.Fingerprint,
+			Enabled:     	resp.Device.Enabled.Value,
+			BasicEnabled: resp.Device.BasicEnabled.Value,
+			FingerPrint: 	resp.Device.Certificate.Fingerprint,
 		},
 	})
 	if err != nil {
@@ -208,9 +210,10 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 			Id: request.Device.Id,
 			Repo: &repopb.Repo{
-				Enabled:     repData.Device.Enabled.Value,
-				FingerPrint: repData.Device.Certificate.Fingerprint,
-				NamespaceID: repData.Device.Namespace,
+				Enabled:     	repData.Device.Enabled.Value,
+				BasicEnabled: repData.Device.BasicEnabled.Value,
+				FingerPrint: 	repData.Device.Certificate.Fingerprint,
+				NamespaceID: 	repData.Device.Namespace,
 			},
 		})
 		if err != nil {

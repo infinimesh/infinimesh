@@ -84,7 +84,7 @@ var lsDeviceCmd = &cobra.Command{
 		}
 
 		for _, device := range response.Devices {
-			fmt.Fprintf(w, "%v\t%v\t%v\t\n", device.Id, device.Name, device.Enabled)
+			fmt.Fprintf(w, "%v\t%v\t%v\t%v\t\n", device.Id, device.Name, device.Enabled, device.BasicEnabled)
 		}
 
 	},

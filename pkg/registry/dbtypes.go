@@ -24,8 +24,9 @@ import (
 //Device data struct with Certificates data strcuture as slice
 type Device struct {
 	dgraph.Object
-	Tags    []string `json:"tags,omitempty"`
-	Enabled bool     `json:"enabled"`
+	Tags    []string 	`json:"tags,omitempty"`
+	Enabled bool     	`json:"enabled"`
+	BasicEnabled bool `json:"basic_enabled"`
 
 	Certificates []*X509Cert `json:"certificates,omitempty"`
 }

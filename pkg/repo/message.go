@@ -18,7 +18,8 @@
 package repo
 
 type DeviceStatus struct {
-	Fingerprint []byte
-	Enabled     bool
-	NamespaceID string
+	Fingerprint 	[]byte
+	Enabled     	bool
+	BasicEnabled 	bool
+	NamespaceID 	string
 }

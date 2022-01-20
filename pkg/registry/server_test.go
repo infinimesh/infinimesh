@@ -182,6 +182,7 @@ func sampleDevice(name string, namespaceid string) *registrypb.Device {
 		Namespace: namespaceid,
 		Name:      name,
 		Enabled:   &wrappers.BoolValue{Value: true},
+		BasicEnabled: &wrappers.BoolValue{Value: false},
 		Tags:      []string{"a", "b", "c"},
 		Certificate: &registrypb.Certificate{
 			PemData: `-----BEGIN CERTIFICATE-----
@@ -246,7 +247,7 @@ func TestCreateGet(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, BasicEnabled: &wrappers.BoolValue{Value: false}, Name: respGet.Device.Name})
 
 	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
 		Id: response.Device.Id,
@@ -294,7 +295,7 @@ func TestUpdate(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, BasicEnabled: &wrappers.BoolValue{Value: false}, Name: respGet.Device.Name})
 
 	//Set new values
 	NewName := randomdata.SillyName()

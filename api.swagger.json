@@ -1160,6 +1160,9 @@
         },
         "namespace": {
           "type": "string"
+        },
+        "basicEnabled": {
+          "type": "boolean"
         }
       }
     },
@@ -1526,6 +1529,9 @@
         },
         "NamespaceID": {
           "type": "string"
+        },
+        "BasicEnabled": {
+          "type": "boolean"
         }
       }
     },
