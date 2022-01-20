@@ -220,7 +220,7 @@ func main() {
 				fmt.Println(device.Tags)
 				return true
 			} else {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Id)
 				return false
 			}
 		})
