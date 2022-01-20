@@ -28,12 +28,13 @@
     </a-col>
     <a-col>
       <a-button
-        type="danger"
+        :type="device.basic_enabled ? 'success' : 'danger'"
         icon="switcher"
         @click="() => (basic_enabled_visible = true)"
         >MQTT Basic Auth</a-button
       >
       <ToggleMQTTBasicAuth
+        @toggle="$emit('toggle-basic')"
         @close="() => (basic_enabled_visible = false)"
         :device="device"
         :visible="basic_enabled_visible"

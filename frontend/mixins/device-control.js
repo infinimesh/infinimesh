@@ -112,6 +112,28 @@ export default {
         }
       );
     },
+    handleToggleBasicDevice(refresh = true) {
+      this.handleDeviceUpdate(
+        {
+          basic_enabled: !this.device.basic_enabled,
+        },
+        {
+          refresh: refresh,
+          success: () => {
+            this.$message.success(
+              `MQTT Basic Auth successfuly ${
+                this.device.basic_enabled ? "disabled" : "enabled"
+              }!`
+            );
+          },
+          error: () => {
+            this.$notification.error({
+              message: `Error ${
+                device.basic_enabled ? "disabling" : "enabling"
+              } MQTT Basic Auth for device`,
+              description: e.response.data.message,
+            });
+          },
         }
       );
     },

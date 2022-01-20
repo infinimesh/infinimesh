@@ -32,6 +32,24 @@
         />
       </a-input>
     </a-row>
+    <a-row type="flex" justify="space-around" style="margin-top: 15px">
+      <a-col>
+        <a-popconfirm
+          :title="`Are you sure ${
+            device.basic_enabled ? 'disabling' : 'enabling'
+          } MQTT Basic Auth for this device?`"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="$emit('toggle')"
+        >
+          <a-button
+            :type="device.basic_enabled ? 'success' : 'danger'"
+            icon="switcher"
+            >{{ device.basic_enabled ? "Disable" : "Enable" }}</a-button
+          >
+        </a-popconfirm>
+      </a-col>
+    </a-row>
   </a-modal>
 </template>
 
