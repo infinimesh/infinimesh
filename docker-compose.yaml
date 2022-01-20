@@ -22,7 +22,7 @@ services:
   mqtt-bridge:
     image: ghcr.io/slntopp/infinimesh/mqtt-bridge:latest
     ports:
-      - "8080:8080" # BasicAuth(non-TLS)
+      - "8090:8080" # BasicAuth(non-TLS)
       - "8089:8089" # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
