@@ -16,12 +16,12 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hokaccha/go-prettyjson v0.0.0-20180920040306-f579f869bbfe
-	github.com/infinimesh/mqtt-go v0.0.0-20201229165322-c894a644da7a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/rs/cors v1.8.2
+	github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
