@@ -72,17 +72,7 @@ export default Vue.component("toggle-mqtt-basic-auth", {
     fingerprint() {
       console.log(this.device);
       if (!this.device.certificate) return "";
-      let binary_string = atob(this.device.certificate.fingerprint);
-      let len = binary_string.length;
-      let hash = "";
-      for (var i = 0; i < len; i++) {
-        hash += binary_string
-          .charCodeAt(i)
-          .toString(16)
-          .padStart(2, 0)
-          .toUpperCase();
-      }
-      return hash;
+      return this.device.certificate.fingerprint;
     },
   },
 });
