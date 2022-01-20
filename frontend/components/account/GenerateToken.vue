@@ -68,8 +68,10 @@
 
 <script>
 import { mapGetters } from "vuex";
+import Clipboard from "@/mixins/clipboard";
 
 export default {
+  mixins: [Clipboard],
   props: {
     active: {
       required: true,
@@ -135,29 +137,6 @@ export default {
           this.error = e.response.data.message;
           this.step--;
         });
-    },
-    fallbackCopyTextToClipboard(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
-
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      document.execCommand("copy");
-
-      document.body.removeChild(textArea);
-    },
-    copyTextToClipboard(text) {
-      if (!navigator.clipboard) {
-        this.fallbackCopyTextToClipboard(text);
-        return;
-      }
-      navigator.clipboard.writeText(text);
     },
   },
 };
