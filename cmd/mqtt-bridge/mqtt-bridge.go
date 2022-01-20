@@ -18,10 +18,8 @@
 package main
 
 import (
-	"context"
 	"crypto/sha256"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -40,35 +38,6 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 	"google.golang.org/grpc"
 )
-
-var verify = func(rawcerts [][]byte, verifiedChains [][]*x509.Certificate) error {
-	for _, rawcert := range rawcerts {
-		digest := getFingerprint(rawcert)
-		fmt.Printf("Validating certificate with fingerprint sha256-%X\n", digest)
-
-		// Request information about all devices with this fingerprint
-		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{Fingerprint: digest})
-		if err != nil {
-			fmt.Printf("Failed to find device for fingerprint: %v\n", err)
-			continue
-		}
-
-		var enabled []*registrypb.Device
-		for _, device := range reply.Devices {
-			if device.Enabled.Value {
-				enabled = append(enabled, device)
-			}
-		}
-
-		if len(enabled) == 0 {
-			return fmt.Errorf("There are no enabled devices found for fingerprint %X", digest)
-		}
-
-		fmt.Printf("Verified connection with fingerprint [%v]. There are %v enabled devices with this fingerprint.\n", digest, len(enabled))
-		return nil
-	}
-	return errors.New("Could not verify fingerprint")
-}
 
 func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
 	if p.ConnectPayload.Password == "" {
@@ -185,7 +154,6 @@ func main() {
 
 	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
-		VerifyPeerCertificate: verify,
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
 	if err != nil {
