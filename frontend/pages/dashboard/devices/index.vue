@@ -51,10 +51,10 @@
           <a-button
             type="success"
             style="margin-right: 5px"
-            @click="toogleSelected(true)"
+            @click="toggleSelected(true)"
             >Enable All
           </a-button>
-          <a-button type="danger" @click="toogleSelected(false)"
+          <a-button type="danger" @click="toggleSelected(false)"
             >Disable All
           </a-button>
         </a-col>
@@ -312,7 +312,7 @@ export default {
         },
       });
     },
-    toogleSelected(enable) {
+    toggleSelected(enable) {
       let vm = this;
       this.updateSelected(
         () => {

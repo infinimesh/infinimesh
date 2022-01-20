@@ -5,19 +5,19 @@ export default {
       vm.loading = true;
       vm.$axios
         .get("/api/accounts")
-        .then(res => (vm.accounts = res.data.accounts))
-        .catch(e => {
+        .then((res) => (vm.accounts = res.data.accounts))
+        .catch((e) => {
           if (e.response.status === 403) {
             vm.$notification.error({
               message: "Oops",
-              description: e.response.data.message
+              description: e.response.data.message,
             });
             vm.$store.commit("window/noAccess", "dashboard-accounts");
             vm.$router.push({ name: "dashboard-devices" });
           } else if (e.response.status === 500) {
             vm.$notification.error({
               message: "Internal Server Error",
-              description: e.response.data.message
+              description: e.response.data.message,
             });
           }
         })
@@ -27,24 +27,24 @@ export default {
       const vm = this;
       this.$axios({
         url: `/api/accounts/${account.uid}`,
-        method: "delete"
+        method: "delete",
       })
         .then(() => {
           vm.$message.success("Account successfuly deleted!");
           vm.getAccountsPool();
         })
-        .catch(e => {
+        .catch((e) => {
           vm.$notification.error({
             message: "Error deleting account " + account.name,
-            description: e.response.data.message
+            description: e.response.data.message,
           });
         });
     },
-    toogleAccount(account) {
+    toggleAccount(account) {
       this.updateAccount(
         account.uid,
         {
-          enabled: !account.enabled
+          enabled: !account.enabled,
         },
         `Account successfuly ${account.enabled ? "disabled" : "enabled"}!`,
         `Error ${account.enabled ? "disabling" : "enabling"} account`
@@ -56,20 +56,20 @@ export default {
       vm.$axios({
         method: "post",
         url: "/api/accounts",
-        data: account
+        data: account,
       })
         .then(() => {
           vm.$notification.success({
-            message: "Account created successfuly"
+            message: "Account created successfuly",
           });
           vm.createAccountDrawerVisible = false;
           vm.getAccountsPool();
         })
-        .catch(err => {
+        .catch((err) => {
           this.$notification.error({
             message: "Failed to create an account",
             description: `Response: ${err.response.data.message}`,
-            duration: 10
+            duration: 10,
           });
         });
     },
@@ -79,7 +79,7 @@ export default {
       vm.$axios({
         method: "patch",
         url: `/api/accounts/${id}`,
-        data: data
+        data: data,
       })
         .then(
           success_callback
@@ -92,14 +92,14 @@ export default {
         .catch(
           error_callback
             ? error_callback(e)
-            : e => {
+            : (e) => {
                 vm.$notification.error({
                   message: error,
-                  description: e.response.data.message
+                  description: e.response.data.message,
                 });
               }
         )
         .then(() => (vm.loading = false));
-    }
-  }
+    },
+  },
 };

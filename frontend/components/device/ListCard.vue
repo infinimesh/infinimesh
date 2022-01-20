@@ -61,12 +61,12 @@
           <a-button type="link"> Open </a-button>
         </nuxt-link>
       </a-menu-item>
-      <a-menu-item key="toogle">
-        <a-button type="link" @click="handleToogleDevice(false)">
+      <a-menu-item key="toggle">
+        <a-button type="link" @click="handleToggleDevice(false)">
           {{ device.enabled ? "Disable" : "Enable" }}
         </a-button>
       </a-menu-item>
-      <a-menu-item key="toogle-selection">
+      <a-menu-item key="toggle-selection">
         <a-button
           type="link"
           @click="$emit((selected ? 'de' : '') + 'select', device.id)"

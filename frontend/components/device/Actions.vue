@@ -7,7 +7,7 @@
         } this device?`"
         ok-text="Yes"
         cancel-text="No"
-        @confirm="$emit('toogle')"
+        @confirm="$emit('toggle')"
       >
         <a-button
           :type="device.enabled ? 'danger' : 'success'"

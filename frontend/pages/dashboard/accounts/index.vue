@@ -73,13 +73,13 @@
                     >Reset password</a-button
                   >
                 </a-menu-item>
-                <a-menu-item @click="toogleAdmin(account)" v-if="user.is_root">
+                <a-menu-item @click="toggleAdmin(account)" v-if="user.is_root">
                   <a-button type="link">
                     {{ account.is_admin ? "Make not Admin" : "Make Admin" }}
                   </a-button>
                 </a-menu-item>
                 <a-menu-item>
-                  <a-button type="link" @click="toogleAccount(account)">{{
+                  <a-button type="link" @click="toggleAccount(account)">{{
                     account.enabled ? "Disable" : "Enable"
                   }}</a-button>
                 </a-menu-item>
@@ -177,7 +177,7 @@ export default {
     this.$store.commit("window/unsetTopAction");
   },
   methods: {
-    toogleAdmin(account) {
+    toggleAdmin(account) {
       this.updateAccount(
         account.uid,
         { is_admin: !account.is_admin },
