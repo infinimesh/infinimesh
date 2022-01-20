@@ -28,6 +28,7 @@
     </a-col>
     <a-col>
       <a-button
+        :disabled="!device.enabled"
         :type="device.basic_enabled ? 'success' : 'danger'"
         icon="switcher"
         @click="() => (basic_enabled_visible = true)"
