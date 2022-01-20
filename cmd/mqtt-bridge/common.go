@@ -48,6 +48,20 @@ func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (ids []s
 	return ids, nil
 }
 
+// Log Error, Send Acknowlegement(ACK) packet and Close the connection
+// ACK Packet needs to be sent to prevent MQTT Client sending CONN packets further
+func LogErrorAndClose(c net.Conn, err error) {
+	fmt.Printf("Closing connection on error: %v\n", err)
+	resp := packet.ConnAckControlPacket{
+		FixedHeader: packet.FixedHeader{
+			ControlPacketType: packet.CONNACK,
+		},
+		VariableHeader: packet.ConnAckVariableHeader{},
+	}
+	resp.WriteTo(c)
+	c.Close()
+}
+
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, deviceIDs []string) {
 	defer fmt.Println("Client disconnected ", connectPacket.ConnectPayload.ClientID)
@@ -65,16 +79,6 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, deviceID
 		fmt.Printf("Client used duplicate fingerprint, Please use unique certificate for your device\n")
 		_ = c.Close()
 		return
-		//TODO : when multiple devices have single fingerprint authentication
-		/*
-			for _, possibleID := range deviceIDs {
-				if connectPacket.ConnectPayload.ClientID == possibleID {
-					fmt.Printf("Using ClientID: %v\n", possibleID)
-					clientIDOK = true
-					deviceID = possibleID
-				}
-			}
-		*/
 	}
 
 	if !clientIDOK {
