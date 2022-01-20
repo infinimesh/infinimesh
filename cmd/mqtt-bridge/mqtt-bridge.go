@@ -225,6 +225,7 @@ func main() {
 			}
 		})
 		if err != nil {
+			fmt.Printf("Error Getting Device: %v\n", err)
 			_ = conn.Close()
 			continue
 		}
