@@ -197,7 +197,7 @@ func main() {
 	}
 
 	go readBackchannelFromKafka()
-	go handleTCPConnections(tcp)
+	go HandleTCPConnections(tcp)
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
 		if debug {
@@ -272,71 +272,6 @@ func main() {
 func changeDeviceStatus(deviceID string, deviceStatus bool) {
 	deviceStatusMap[deviceID] = deviceStatus
 }*/
-func handleTCPConnections(tcp net.Listener) {
-	for {
-		conn, _ := tcp.Accept() // nolint: gosec
-
-		p, err := packet.ReadPacket(conn, 0)
-		if err != nil {
-			fmt.Printf("Error while reading connect packet: %v\n", err)
-			return
-		}
-		if debug {
-			fmt.Println("ControlPacket", p)
-		}
-
-		connectPacket, ok := p.(*packet.ConnectControlPacket)
-		if !ok {
-			fmt.Println("Got wrong packet as first packet..need connect!")
-			return
-		}
-		if debug {
-			fmt.Println("ConnectPacket", p)
-		}
-
-		var fingerprint []byte
-		fingerprint, err = verifyBasicAuth(connectPacket)
-		if err != nil {
-			fmt.Println("Error verifying Basic Auth", err)
-			continue
-		}
-
-		if debug {
-			fmt.Println("Fingerprint", string(fingerprint))
-		}
-
-		reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
-			Fingerprint: fingerprint,
-		})
-		if err != nil || len(reply.Devices) == 0 { //FIXME change logic so the client can send his id, and we track here which IDs are possible, but he can choose which identity he wants to use (in most cases it's only once, unless a device has multiple certs from multiple devices)
-			_ = conn.Close()
-			fmt.Printf("Failed to verify client, closing connection. err=%v\n", err)
-			continue
-		}
-
-		var possibleIDs []string
-
-		for _, device := range reply.Devices {
-			if device.Name != connectPacket.ConnectPayload.Username {
-				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v", device.Id)
-				continue
-			} else if !device.BasicEnabled.Value {
-				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v", device.Id)
-				continue
-			}
-			if device.Enabled.Value {
-				fmt.Println(device.Tags)
-				possibleIDs = append(possibleIDs, device.Id)
-			} else {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
-			}
-		}
-
-		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
-
-		go HandleConn(conn, connectPacket, possibleIDs)
-	}
-}
 
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
