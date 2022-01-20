@@ -91,10 +91,10 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 
 	//Added logging
 	log.Info("Function Invoked",
-		zap.String("Device Name", request.Device.Name),
-		zap.String("Namespace", request.Device.Namespace),
-		zap.Bool("Enabled", request.Device.Enabled.Value),
-		zap.Bool("BasicEnabled", request.Device.BasicEnabled.Value),
+		zap.String("Device Name", request.Device.GetName()),
+		zap.String("Namespace", request.Device.GetNamespace()),
+		zap.Bool("Enabled", request.Device.GetEnabled().GetValue()),
+		zap.Bool("BasicEnabled", request.Device.GetBasicEnabled().GetValue()),
 	)
 
 	//Data Validation for namespace

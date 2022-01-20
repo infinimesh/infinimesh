@@ -62,9 +62,9 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 			Name: request.Device.Name,
 			Kind: node.KindDevice,
 		},
-		Enabled: request.Device.Enabled.Value,
-		BasicEnabled: request.Device.BasicEnabled.Value,
-		Tags:    request.Device.Tags,
+		Enabled: request.Device.GetBasicEnabled().GetValue(),
+		BasicEnabled: request.Device.BasicEnabled.GetValue(),
+		Tags:    request.Device.GetTags(),
 		Certificates: []*X509Cert{
 			{
 				PemData:              request.Device.Certificate.PemData,
@@ -113,8 +113,8 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 		Device: &registrypb.Device{
 			Id:          	newUID,
 			Name:        	request.Device.Name,
-			Enabled:     	request.Device.Enabled,
-			BasicEnabled: request.Device.BasicEnabled,
+			Enabled:     	request.Device.GetEnabled(),
+			BasicEnabled: request.Device.GetBasicEnabled(),
 			Tags:        	request.Device.Tags,
 			Namespace:   	request.Device.Namespace,
 			Certificate: 	request.Device.Certificate,
