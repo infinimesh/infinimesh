@@ -180,16 +180,17 @@ func main() {
 		case err := <-errChannel:
 			if err != nil {
 				fmt.Println("Handshake failed", err)
+				continue
 			}
 		case <-time.After(timeout):
-			fmt.Println("Handshake failed due to timeout")
-			_ = conn.Close()
+			LogErrorAndClose(conn, errors.New("Handshake failed due to timeout"))
+			continue
 		}
 
 		p, err := packet.ReadPacket(conn, 0)
 		if err != nil {
-			fmt.Printf("Error while reading connect packet: %v\n", err)
-			return
+			LogErrorAndClose(conn, fmt.Errorf("Error while reading connect packet: %v\n", err))
+			continue
 		}
 		if debug {
 			fmt.Println("ControlPacket", p)
@@ -197,14 +198,15 @@ func main() {
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
-			fmt.Println("Got wrong packet as first packet..need connect!")
-			return
+			LogErrorAndClose(conn, errors.New("Got wrong packet as first packet..need connect!"))
+			continue
 		}
 		if debug {
 			fmt.Println("ConnectPacket", p)
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
+			LogErrorAndClose(conn, errors.New("No certificate given"))
 			continue
 		}
 
@@ -225,8 +227,7 @@ func main() {
 			}
 		})
 		if err != nil {
-			fmt.Printf("Error Getting Device: %v\n", err)
-			_ = conn.Close()
+			LogErrorAndClose(conn, err)
 			continue
 		}
 

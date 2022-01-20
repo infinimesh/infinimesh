@@ -18,6 +18,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 
@@ -31,8 +32,7 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		p, err := packet.ReadPacket(conn, 0)
 		if err != nil {
-			fmt.Printf("Error while reading connect packet: %v\n", err)
-			_ = conn.Close()
+			LogErrorAndClose(conn, fmt.Errorf("Error while reading connect packet: %v", err))
 			continue
 		}
 		if debug {
@@ -41,8 +41,7 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
-			fmt.Println("Got wrong packet as first packet..need connect!")
-			_ = conn.Close()
+			LogErrorAndClose(conn, errors.New("Got wrong packet as first packet..need connect!"))
 			continue
 		}
 		if debug {
@@ -52,8 +51,7 @@ func HandleTCPConnections(tcp net.Listener) {
 		var fingerprint []byte
 		fingerprint, err = verifyBasicAuth(connectPacket)
 		if err != nil {
-			fmt.Println("Error verifying Basic Auth", err)
-			_ = conn.Close()
+			LogErrorAndClose(conn, fmt.Errorf("Error verifying Basic Auth: %v", err))
 			continue
 		}
 
@@ -77,7 +75,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			}
 		})
 		if err != nil {
-			_ = conn.Close()
+			LogErrorAndClose(conn, err)
 			continue
 		}
 
