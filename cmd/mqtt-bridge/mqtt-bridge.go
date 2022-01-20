@@ -231,8 +231,7 @@ func main() {
 
 		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
 
-		go handleConn(conn, possibleIDs)
-
+		go HandleConn(conn, connectPacket, possibleIDs)
 	}
 
 }
