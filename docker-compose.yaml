@@ -37,7 +37,7 @@ services:
   telemetry-router:
     image: ghcr.io/slntopp/infinimesh/telemetry-router:latest
     environment:
-      - KAFKA_HOST=kafka:29092
+      KAFKA_HOST: kafka:29092
     depends_on:
       - kafka
     restart: unless-stopped
@@ -46,15 +46,15 @@ services:
     ports:
       - "8070:8080"
     environment:
-      - DGRAPH_HOST=alpha:9080
-      - DB_ADDR2=redis:6379
+      DGRAPH_HOST: alpha:9080
+      DB_ADDR2: redis:6379
     restart: unless-stopped
   shadow-delta-merger:
     image: ghcr.io/slntopp/infinimesh/shadow-delta-merger:latest
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
+      KAFKA_HOST: kafka:29092
     restart: unless-stopped
   shadow-api:
     image: ghcr.io/slntopp/infinimesh/shadow-api:latest
@@ -63,29 +63,29 @@ services:
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
-      - "DB_ADDR=redis:6379"
+      KAFKA_HOST: kafka:29092
+      DB_ADDR: redis:6379
     restart: unless-stopped
   shadow-persister:
     image: ghcr.io/slntopp/infinimesh/shadow-persister:latest
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
-      - "DB_ADDR=redis:6379"
+      KAFKA_HOST: kafka:29092
+      DB_ADDR: redis:6379
     restart: unless-stopped
   frontend:
     ports:
       - "80:80"
     image: ghcr.io/slntopp/infinimesh/frontend:latest
     environment:
-      - "APISERVER_URL=http://apiserver-rest:8081"
+      APISERVER_URL: http://apiserver-rest:8081
   apiserver:
     ports:
       - "8080:8080"
     image: ghcr.io/slntopp/infinimesh/apiserver:latest
     environment:
-      - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=
+      JWT_SIGNING_KEY: c3VwZXIgc2VjcmV0IGtleQo=
     depends_on:
       - device-registry
       - shadow-api
@@ -94,7 +94,7 @@ services:
   apiserver-rest:
     image: ghcr.io/slntopp/infinimesh/apiserver-rest:latest
     environment:
-      - APISERVER_ENDPOINT=apiserver:8080
+      APISERVER_ENDPOINT: apiserver:8080
     ports:
       - "8081:8081"
     depends_on:
@@ -106,7 +106,7 @@ services:
     depends_on:
       - alpha
     environment:
-      - DGRAPH_HOST=alpha:9080
+      DGRAPH_HOST: alpha:9080
   # dgraph
   zero:
     image: dgraph/dgraph:v1.0.14
