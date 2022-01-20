@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -26,6 +27,26 @@ import (
 	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
 	"github.com/slntopp/mqtt-go/packet"
 )
+
+type VerifyDeviceFunc func(*registrypb.Device) bool
+
+func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (ids []string, err error) {
+	reply, err := client.GetByFingerprint(context.Background(), &registrypb.GetByFingerprintRequest{
+		Fingerprint: fingerprint,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, device := range reply.Devices {
+		if cb(device) {
+			ids = append(ids, device.Id)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, errors.New("No device has been picked")
+	}
+	return ids, nil
+}
 
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, deviceIDs []string) {
