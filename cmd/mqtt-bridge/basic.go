@@ -61,13 +61,13 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) (bool) {
 			if device.Name != connectPacket.ConnectPayload.Username {
-				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v", device.Id)
+				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v\n", device.Id)
 				return false
 			} else if !device.BasicEnabled.Value {
-				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v", device.Id)
+				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v\n", device.Id)
 				return false
 			} else if !device.Enabled.Value {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v", device.Id)
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Id)
 				return false
 			} else {
 				fmt.Println(device.Tags)
