@@ -404,6 +404,36 @@
         ]
       }
     },
+    "/devices/states/all": {
+      "get": {
+        "operationId": "States_GetForNS",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowGetForNSResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "States"
+        ]
+      }
+    },
     "/devices/{device.id}": {
       "patch": {
         "operationId": "Devices_Update",
@@ -1565,6 +1595,17 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "shadowGetForNSResponse": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/shadowShadow"
           }
         }
       }

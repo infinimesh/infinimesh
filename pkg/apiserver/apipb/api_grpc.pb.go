@@ -325,6 +325,7 @@ var Devices_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StatesClient interface {
 	Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error)
+	GetForNS(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetForNSResponse, error)
 	PatchDesiredState(ctx context.Context, in *shadowpb.PatchDesiredStateRequest, opts ...grpc.CallOption) (*shadowpb.PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(ctx context.Context, in *shadowpb.StreamReportedStateChangesRequest, opts ...grpc.CallOption) (States_StreamReportedStateChangesClient, error)
 }
@@ -340,6 +341,15 @@ func NewStatesClient(cc grpc.ClientConnInterface) StatesClient {
 func (c *statesClient) Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error) {
 	out := new(shadowpb.GetResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.api.States/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *statesClient) GetForNS(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetForNSResponse, error) {
+	out := new(shadowpb.GetForNSResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.api.States/GetForNS", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -392,6 +402,7 @@ func (x *statesStreamReportedStateChangesClient) Recv() (*shadowpb.StreamReporte
 // for forward compatibility
 type StatesServer interface {
 	Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error)
+	GetForNS(context.Context, *shadowpb.GetRequest) (*shadowpb.GetForNSResponse, error)
 	PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(*shadowpb.StreamReportedStateChangesRequest, States_StreamReportedStateChangesServer) error
 	mustEmbedUnimplementedStatesServer()
@@ -403,6 +414,9 @@ type UnimplementedStatesServer struct {
 
 func (UnimplementedStatesServer) Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedStatesServer) GetForNS(context.Context, *shadowpb.GetRequest) (*shadowpb.GetForNSResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetForNS not implemented")
 }
 func (UnimplementedStatesServer) PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PatchDesiredState not implemented")
@@ -437,6 +451,24 @@ func _States_Get_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StatesServer).Get(ctx, req.(*shadowpb.GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _States_GetForNS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(shadowpb.GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatesServer).GetForNS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.api.States/GetForNS",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatesServer).GetForNS(ctx, req.(*shadowpb.GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -490,6 +522,10 @@ var States_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _States_Get_Handler,
+		},
+		{
+			MethodName: "GetForNS",
+			Handler:    _States_GetForNS_Handler,
 		},
 		{
 			MethodName: "PatchDesiredState",

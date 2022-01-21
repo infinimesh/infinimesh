@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShadowsClient interface {
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	GetForNS(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetForNSResponse, error)
 	PatchDesiredState(ctx context.Context, in *PatchDesiredStateRequest, opts ...grpc.CallOption) (*PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(ctx context.Context, in *StreamReportedStateChangesRequest, opts ...grpc.CallOption) (Shadows_StreamReportedStateChangesClient, error)
 }
@@ -34,6 +35,15 @@ func NewShadowsClient(cc grpc.ClientConnInterface) ShadowsClient {
 func (c *shadowsClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shadowsClient) GetForNS(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetForNSResponse, error) {
+	out := new(GetForNSResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/GetForNS", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +96,7 @@ func (x *shadowsStreamReportedStateChangesClient) Recv() (*StreamReportedStateCh
 // for forward compatibility
 type ShadowsServer interface {
 	Get(context.Context, *GetRequest) (*GetResponse, error)
+	GetForNS(context.Context, *GetRequest) (*GetForNSResponse, error)
 	PatchDesiredState(context.Context, *PatchDesiredStateRequest) (*PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(*StreamReportedStateChangesRequest, Shadows_StreamReportedStateChangesServer) error
 	mustEmbedUnimplementedShadowsServer()
@@ -97,6 +108,9 @@ type UnimplementedShadowsServer struct {
 
 func (UnimplementedShadowsServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedShadowsServer) GetForNS(context.Context, *GetRequest) (*GetForNSResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetForNS not implemented")
 }
 func (UnimplementedShadowsServer) PatchDesiredState(context.Context, *PatchDesiredStateRequest) (*PatchDesiredStateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PatchDesiredState not implemented")
@@ -131,6 +145,24 @@ func _Shadows_Get_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ShadowsServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Shadows_GetForNS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShadowsServer).GetForNS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.shadow.Shadows/GetForNS",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShadowsServer).GetForNS(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -184,6 +216,10 @@ var Shadows_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _Shadows_Get_Handler,
+		},
+		{
+			MethodName: "GetForNS",
+			Handler:    _Shadows_GetForNS_Handler,
 		},
 		{
 			MethodName: "PatchDesiredState",

@@ -35,6 +35,10 @@ message GetRequest {
 
 message GetResponse { Shadow shadow = 1; }
 
+message GetForNSResponse {
+  map<string, Shadow> pool = 1;
+}
+
 message Shadow {
   VersionedValue config = 2;
   VersionedValue reported = 3;
@@ -60,6 +64,7 @@ message StreamReportedStateChangesResponse {
 
 service Shadows {
   rpc Get(GetRequest) returns (GetResponse);
+  rpc GetForNS(GetRequest) returns (GetForNSResponse);
   rpc PatchDesiredState(PatchDesiredStateRequest)
       returns (PatchDesiredStateResponse);
   rpc StreamReportedStateChanges(StreamReportedStateChangesRequest)

@@ -60,6 +60,7 @@ func Validation(ctx context.Context, log *zap.Logger) (md metadata.MD, acc strin
 		log.Error("The account is not authenticated")
 		return nil, "", status.Error(codes.Unauthenticated, "The account is not authenticated")
 	}
+	log.Debug("Requestor ID", zap.Strings("id", requestorID))
 
 	return md, requestorID[0], nil
 }

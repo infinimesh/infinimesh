@@ -284,7 +284,7 @@ func main() {
 	log.Info("GRPC API Server: Starting GRPC Service")
 
 	apipb.RegisterDevicesServer(srv, &deviceAPI{client: devicesClient, accountClient: accountClient})
-	apipb.RegisterStatesServer(srv, &shadowAPI{client: shadowClient, accountClient: accountClient})
+	apipb.RegisterStatesServer(srv, &shadowAPI{client: shadowClient, accountClient: accountClient, devicesClient: devicesClient})
 	apipb.RegisterAccountsServer(srv, &accountAPI{client: accountClient, signingSecret: jwtSigningSecret})
 	apipb.RegisterObjectsServer(srv, &objectAPI{objectClient: objectClient, accountClient: accountClient})
 	apipb.RegisterNamespacesServer(srv, &namespaceAPI{client: namespaceClient, accountClient: accountClient})
