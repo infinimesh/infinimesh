@@ -3,7 +3,8 @@ import Vue from "vue";
 export const state = () => ({
   namespace: "",
   namespaces: [],
-  pool: []
+  pool: [],
+  states_pool: {},
 });
 
 export const mutations = {
@@ -16,13 +17,16 @@ export const mutations = {
   update_namespace(state, ns) {
     Vue.set(
       state.namespaces,
-      state.namespaces.findIndex(el => el.id === ns.id),
+      state.namespaces.findIndex((el) => el.id === ns.id),
       ns
     );
   },
   pool(state, val) {
     state.pool = val;
-  }
+  },
+  states_pool(state, val) {
+    state.states_pool = { ...state.states_pool, ...val };
+  },
 };
 
 export const actions = {
@@ -31,17 +35,37 @@ export const actions = {
 
     let ns = "";
     if (state.namespaces.length) {
-      ns = state.namespaces.filter(el => el.id == state.namespace)[0].id;
+      ns = state.namespaces.filter((el) => el.id == state.namespace)[0].id;
     } else {
       ns = rootState.auth.user.default_namespace.id;
     }
 
     const devices = await this.$axios.$get("/api/devices", {
       params: {
-        namespaceid: ns
-      }
+        namespaceid: ns,
+      },
     });
     commit("pool", devices.devices);
+
+    if (window.$nuxt) window.$nuxt.$loading.finish();
+  },
+  async state({ commit, state, rootState }) {
+    if (window.nuxt) window.$nuxt.$loading.start();
+
+    let ns = "";
+    if (state.namespaces.length) {
+      ns = state.namespaces.filter((el) => el.id == state.namespace)[0].id;
+    } else {
+      ns = rootState.auth.user.default_namespace.id;
+    }
+
+    const states = await this.$axios.$get("/api/devices/states/all", {
+      params: {
+        id: ns,
+      },
+    });
+
+    commit("states_pool", states.pool);
 
     if (window.$nuxt) window.$nuxt.$loading.finish();
   },
@@ -56,13 +80,13 @@ export const actions = {
     if (!device) return;
     this.$axios
       .$post("/api/devices", {
-        device: device
+        device: device,
       })
-      .then(res => {
+      .then((res) => {
         dispatch("get");
         if (success) success(res);
       })
-      .catch(e => {
+      .catch((e) => {
         if (error) error(e);
       })
       .then(() => {
@@ -81,19 +105,22 @@ export const actions = {
     commit("update_namespace", { ...ns, loading: true });
     this.$axios
       .$get(`/api/namespaces/${ns.id}/permissions`)
-      .then(permissions => {
+      .then((permissions) => {
         ns = { ...ns, ...permissions };
         commit("update_namespace", ns);
       })
       .catch(() => {
         commit("update_namespace", ns);
       });
-  }
+  },
 };
 
 export const getters = {
-  get: state => id => {
-    return state.pool.filter(el => el.id == id)[0];
+  get: (state) => (id) => {
+    return state.pool.filter((el) => el.id == id)[0];
   },
-  currentNamespace: state => state.namespace
+  get_state: (state) => (id) => {
+    return state.states_pool[id];
+  },
+  currentNamespace: (state) => state.namespace,
 };

@@ -2,7 +2,7 @@
   <div id="state">
     <a-row>
       <a-col :span="10">
-        <h1 class="lead lead-dark">{{ title }}</h1>
+        <h1 class="lead lead-dark" v-if="title">{{ title }}</h1>
       </a-col>
       <a-col :span="2" :offset="9" v-if="editable && !active_edit">
         <a-button type="primary" icon="edit" @click="active_edit = true"
@@ -10,7 +10,7 @@
         >
       </a-col>
     </a-row>
-    <p>
+    <p v-if="version">
       <strong>Version:</strong>
       <u>{{ state.version }}</u>
     </p>
@@ -72,8 +72,11 @@ export default Vue.component("device-state", {
       required: true,
     },
     title: {
-      required: true,
-      type: String,
+      required: false,
+    },
+    version: {
+      type: Boolean,
+      default: true,
     },
     editable: {
       type: Boolean,

@@ -51,6 +51,13 @@
             >No tags were provided</a-row
           >
         </template>
+        <template v-if="state">
+          <device-state
+            :title="false"
+            :version="false"
+            :state="state.reported"
+          />
+        </template>
       </a-card>
     </div>
     <a-menu slot="overlay">
@@ -86,9 +93,11 @@
 <script>
 import Vue from "vue";
 import deviceControlMixin from "@/mixins/device-control";
+import DeviceState from "@/components/device/State";
 
 export default Vue.component("device-list-card", {
   mixins: [deviceControlMixin],
+  components: { DeviceState },
   props: {
     device: {
       required: true,
@@ -98,6 +107,16 @@ export default Vue.component("device-list-card", {
       required: false,
       default: false,
       type: Boolean,
+    },
+  },
+  computed: {
+    state() {
+      let state = this.$store.getters["devices/get_state"](this.device.id);
+      console.log(state, this.device.id);
+      if (!state) {
+        return false;
+      }
+      return state;
     },
   },
 });

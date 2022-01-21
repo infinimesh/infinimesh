@@ -68,6 +68,13 @@
           </a-button>
         </a-col>
       </template>
+      <template v-if="pool.length">
+        <a-col>
+          <a-button type="success" @click="handleLoadState"
+            >Load Devices State</a-button
+          >
+        </a-col>
+      </template>
     </a-row>
     <template v-if="groupByTags">
       <a-collapse
@@ -296,6 +303,9 @@ export default {
   methods: {
     refresh() {
       this.$store.dispatch("devices/get");
+    },
+    handleLoadState() {
+      this.$store.dispatch("devices/state");
     },
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
