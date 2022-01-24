@@ -344,10 +344,19 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 
+	randomName := randomdata.SillyName()
+
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
+	require.NoError(t, err)
+
 	//Set metadata for context
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
 	request := &registrypb.CreateRequest{
-		Device: sampleDevice(randomdata.SillyName(), "0x1"),
+		Device: sampleDevice(randomdata.SillyName(), ns.Id),
 	}
 	response, err := server.Create(ctx, request)
 	require.NoError(t, err)
