@@ -62,8 +62,8 @@ func (s *Server) CreateQ(ctx context.Context, request *registrypb.CreateRequest)
 			Name: request.Device.Name,
 			Kind: node.KindDevice,
 		},
-		Enabled: request.Device.GetBasicEnabled().GetValue(),
-		BasicEnabled: request.Device.BasicEnabled.GetValue(),
+		Enabled: request.Device.GetEnabled().GetValue(),
+		BasicEnabled: request.Device.GetBasicEnabled().GetValue(),
 		Tags:    request.Device.GetTags(),
 		Certificates: []*X509Cert{
 			{
