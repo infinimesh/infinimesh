@@ -21,6 +21,16 @@ jobs:
       - name: Set Docker up
         uses: docker-practice/actions-setup-docker@master
 
+      - name: Ensure Clean (Containers)
+        continue-on-error: true
+        run: docker rm $(docker ps -a -q)
+      - name: Ensure Clean (Images)
+        continue-on-error: true
+        run: docker rmi $(docker images -q -f dangling=true)
+      - name: Ensure Clean (Volumes)
+        continue-on-error: true
+        run: docker volume prune -f
+
       - name: Compose Up
         run: docker-compose -f e2e/docker-compose.yaml up -d --quiet-pull
 
