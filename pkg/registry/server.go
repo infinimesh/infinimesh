@@ -153,7 +153,12 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 		log.Info("Device status not stored in repo", zap.String("DeviceId", resp.Device.Id))
 	}
 	//Added logging
-	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
+	log.Info("Device Created", 
+		zap.String("Device ID", resp.Device.GetId()),
+		zap.String("Device Name", resp.Device.GetName()),
+		zap.String("Namespace", resp.Device.GetNamespace()),
+		zap.Bool("Enabled", resp.Device.GetEnabled().GetValue()),
+		zap.Bool("BasicEnabled", resp.Device.GetBasicEnabled().GetValue()),)
 	return resp, nil
 }
 
