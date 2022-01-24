@@ -19,7 +19,6 @@ package main
 
 import (
 	"context"
-	"sync"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -87,21 +86,35 @@ func (s *shadowAPI) GetForNS(ctx context.Context, request *shadowpb.GetRequest) 
 			zap.String("namespace", request.GetId()), zap.Error(err))
 		return nil, err
 	}
-	result := make(map[string]*shadowpb.Shadow)
-	
-	var wg sync.WaitGroup
-	wg.Add(len(res.GetDevices()))
+
+	type State struct {
+		OK bool
+		ID string
+		State *shadowpb.Shadow
+	}
+	n := len(res.GetDevices())
+	states := make(chan State, n)
+	defer close(states)
+
+	log.Debug("Gathering devices states", zap.Int("amount", n))
 	for _, dev := range res.GetDevices() {
-		go func(wg *sync.WaitGroup, dev *registrypb.Device, r map[string]*shadowpb.Shadow) {
-			defer wg.Done()
+		go func(dev *registrypb.Device, r chan State) {
 			res, err := s.client.Get(ctx, &shadowpb.GetRequest{Id: dev.GetId()})
 			if err != nil {
-				return
+				log.Error("Error getting Device state", zap.Error(err))
+				r <- State{OK: false}
 			}
-			r[dev.GetId()] = res.GetShadow()
-		}(&wg, dev, result)
+			r <- State{true, dev.GetId(), res.GetShadow()}
+		}(dev, states)
 	}
-	wg.Wait()
+
+	result := make(map[string]*shadowpb.Shadow)
+	for i := 0; i < n; i++ {
+		state := <- states
+		if state.OK {
+			result[state.ID] = state.State
+		}
+	}
 
 	return &shadowpb.GetForNSResponse{Pool: result}, nil
 }
