@@ -30,6 +30,7 @@ import (
 	"github.com/slntopp/infinimesh/pkg/node"
 	"github.com/slntopp/infinimesh/pkg/node/dgraph"
 	"github.com/slntopp/infinimesh/pkg/registry/registrypb"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -236,6 +237,7 @@ func (s *Server) UpdateQ(ctx context.Context, request *registrypb.UpdateRequest)
 		return nil, status.Error(codes.Internal, fmt.Sprintf("Failed to patch device: %v", err))
 	}
 
+	s.Log.Debug("Mutating Device", zap.ByteString("set_json", js))
 	_, err = txn.Mutate(ctx, &api.Mutation{
 		SetJson:   js,
 		CommitNow: true,
