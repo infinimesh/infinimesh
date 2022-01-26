@@ -30,7 +30,7 @@ require (
 	github.com/yosssi/gmq v0.0.1
 	go.uber.org/zap v1.20.0
 	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
 	robpike.io/filter v0.0.0-20210831053821-dcb4225e6ac8
