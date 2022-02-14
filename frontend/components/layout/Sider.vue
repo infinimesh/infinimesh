@@ -63,6 +63,7 @@ import AccountResetPassword from "@/components/account/ResetPassword.vue";
 import AccountControlMixin from "@/mixins/account-control";
 
 export default {
+  name: "layout-sider",
   mixins: [AccountControlMixin],
   components: {
     AccountGenerateToken,

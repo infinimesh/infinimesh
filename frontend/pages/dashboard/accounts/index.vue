@@ -144,6 +144,7 @@ const columns = [
 ];
 
 export default {
+  name: "account-pool",
   mixins: [AccountControlMixin],
   components: {
     AccountAdd,

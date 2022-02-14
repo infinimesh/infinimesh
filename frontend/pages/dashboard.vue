@@ -21,6 +21,7 @@ import Sider from "@/components/layout/Sider";
 import InfinimeshFooter from "@/components/generic/footer.vue";
 
 export default {
+  name: "page-dashboard",
   components: {
     Header,
     Sider,

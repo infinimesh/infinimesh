@@ -148,6 +148,7 @@ const namespaces_table_columns = [
 ];
 
 export default {
+  name: "namespaces-pool",
   components: {
     NamespaceAdd,
     NamespacePermissionsTable,

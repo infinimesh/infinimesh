@@ -8,6 +8,7 @@
 import axios from "axios";
 
 export default {
+  name: "default-layout",
   mounted() {
     axios
       .get("https://api.github.com/repos/infinimesh/infinimesh/releases")

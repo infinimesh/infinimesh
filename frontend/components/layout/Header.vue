@@ -40,6 +40,7 @@
 
 <script>
 export default {
+  name: "layout-header",
   computed: {
     menu: {
       get() {

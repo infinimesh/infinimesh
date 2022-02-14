@@ -88,6 +88,7 @@
 import InfinimeshFooter from "@/components/generic/footer.vue";
 
 export default {
+  name: "page-login",
   components: {
     InfinimeshFooter,
   },
