@@ -55,7 +55,7 @@ jobs:
           command: docker cp ./ testrunner:/project
       - run:
           name: run tests
-          command: docker exec -e TIMESERIES_URL="postgres://postgres:postgres@timescaledb/postgres?sslmode=disable" -e DB_ADDR="redis:6379" -e DGRAPH_URL=server:9080 -it testrunner bash -c 'cd /project && CGO_ENABLED=0 go run -mod=vendor hack/import_dgraph_sample_data.go -drop && go test -mod=vendor ./...'
+          command:  docker exec -t testrunner bash -c 'cd /go/src/github.com/infinimesh/infinimesh && go mod download && CGO_ENABLED=0 go run -mod=mod hack/import_dgraph_sample_data.go -drop && go test -mod=mod ./...'
   tests-frontend:
     docker:
       - image: circleci/node:14.17.0
