@@ -1,10 +1,19 @@
-FROM golang:1.11 AS builder
-ADD go.mod /go/src/github.com/infinimesh/infinimesh/go.mod
-ADD . /go/src/github.com/infinimesh/infinimesh
+FROM golang:1.17-alpine AS builder
+
+RUN apk add upx
+
 WORKDIR /go/src/github.com/infinimesh/infinimesh
-RUN cd /go/src/github.com/infinimesh/infinimesh && CGO_ENABLED=0 go build ./cmd/mqtt-bridge/
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" ./cmd/mqtt-bridge
+RUN upx ./mqtt-bridge
 
 FROM scratch
 WORKDIR /
-COPY --from=builder  /go/src/github.com/infinimesh/infinimesh/mqtt-bridge /mqtt-bridge
+COPY --from=builder /go/src/github.com/infinimesh/infinimesh/mqtt-bridge /mqtt-bridge
+
+LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
+
 ENTRYPOINT ["/mqtt-bridge"]

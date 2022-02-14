@@ -41,6 +41,7 @@ func ImportSchema(dg *dgo.Dgraph, drop bool) error {
   name: string @index(exact) .
   username: string @index(exact) .
   enabled: bool @index(bool) .
+  basic_enabled: bool @index(bool) .
   isRoot: bool @index(bool) .
   isAdmin: bool @index(bool) .
   markfordeletion: bool @index(bool) .

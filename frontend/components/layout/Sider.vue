@@ -29,6 +29,15 @@
         </template>
         <v-list-item>
           <v-list-item-title>
+            <a @click="generateTokenVisible = true">Generate Token</a>
+          </v-list-item-title>
+          <account-generate-token
+            :active="generateTokenVisible"
+            @cancel="generateTokenVisible = false"
+          />
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>
             <a @click="resetAccountPasswordVisible = true">Reset password</a>
           </v-list-item-title>
           <account-reset-password
@@ -49,16 +58,19 @@
 </template>
 
 <script>
+import AccountGenerateToken from "@/components/account/GenerateToken.vue";
 import AccountResetPassword from "@/components/account/ResetPassword.vue";
 import AccountControlMixin from "@/mixins/account-control";
 
 export default {
   mixins: [AccountControlMixin],
   components: {
+    AccountGenerateToken,
     AccountResetPassword,
   },
   data() {
     return {
+      generateTokenVisible: false,
       resetAccountPasswordVisible: false,
 
       pages: [

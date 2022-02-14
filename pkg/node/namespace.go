@@ -32,6 +32,8 @@ import (
 
 //NamespaceController is a Data type for Namespace Controller file
 type NamespaceController struct {
+	nodepb.UnimplementedNamespacesServer
+
 	Repo Repo
 	Log  *zap.Logger
 }

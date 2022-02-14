@@ -22,11 +22,12 @@ import (
 	"net/http"
 
 	"github.com/golang/glog"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 )
@@ -56,7 +57,9 @@ func run() error {
 
 	mux := runtime.NewServeMux(
 		runtime.WithDisablePathLengthFallback(),
-		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{MarshalOptions: protojson.MarshalOptions{
+			UseProtoNames: true, EmitUnpopulated: true,
+		}}),
 	)
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := apipb.RegisterDevicesHandlerFromEndpoint(ctx, mux, apiserverEndpoint, opts)

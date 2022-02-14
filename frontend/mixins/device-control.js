@@ -3,36 +3,33 @@ export default {
     refresh() {
       this.$axios
         .get(`/api/devices/${this.device.id}`)
-        .then(res => {
+        .then((res) => {
           this.device = res.data.device;
           this.socket = new WebSocket(
             `wss://${this.$config.baseURL.replace("https://", "")}/devices/${
               this.device.id
             }/state/stream`,
-            this.$auth
-              .getToken("local")
-              .replace("bearer", "Bearer")
-              .split(" ")
+            this.$auth.getToken("local").replace("bearer", "Bearer").split(" ")
           );
-          this.socket.onmessage = msg => {
+          this.socket.onmessage = (msg) => {
             let response = JSON.parse(msg.data).result;
             if (response)
               this.device.state.shadow.reported = response.reportedState;
           };
-          window.addEventListener("beforeunload", function(event) {
+          window.addEventListener("beforeunload", function (event) {
             this.socket.close();
           });
         })
-        .catch(res => {
+        .catch((res) => {
           if (res.response.status == 404) {
             this.$notification.error({
               message: "Device wasn't found",
-              description: "Redirecting..."
+              description: "Redirecting...",
             });
           } else if (res.response.status == 403) {
             this.$notification.error({
               message: "You have no access to this device",
-              description: "Redirecting..."
+              description: "Redirecting...",
             });
           }
           this.$router.push({ name: "dashboard-devices" });
@@ -45,10 +42,10 @@ export default {
     async deviceStateGet() {
       await this.$axios
         .get(`/api/devices/${this.device.id}/state`)
-        .then(res => {
+        .then((res) => {
           this.device = {
             ...this.device,
-            state: res.data
+            state: res.data,
           };
         });
     },
@@ -61,12 +58,12 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}/state`,
         method: "patch",
-        data: state
+        data: state,
       })
-        .then(res => {
+        .then((res) => {
           this.deviceStateGet();
         })
-        .catch(res => {
+        .catch((res) => {
           console.error(res);
         })
         .then(() => {
@@ -76,24 +73,24 @@ export default {
     handleDeviceDelete() {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
-        method: "delete"
+        method: "delete",
       })
         .then(() => {
           this.$message.success("Device successfuly deleted!");
           this.$store.dispatch("devices/get");
           this.$router.push({ name: "dashboard-devices" });
         })
-        .catch(e => {
+        .catch((e) => {
           this.$notification.error({
             message: "Error deleting device",
-            description: e.response.data.message
+            description: e.response.data.message,
           });
         });
     },
-    handleToogleDevice(refresh = true) {
+    handleToggleDevice(refresh = true) {
       this.handleDeviceUpdate(
         {
-          enabled: !this.device.enabled
+          enabled: !this.device.enabled,
         },
         {
           refresh: refresh,
@@ -109,9 +106,34 @@ export default {
               message: `Error ${
                 device.enabled ? "disabling" : "enabling"
               } device`,
-              description: e.response.data.message
+              description: e.response.data.message,
             });
-          }
+          },
+        }
+      );
+    },
+    handleToggleBasicDevice(refresh = true) {
+      this.handleDeviceUpdate(
+        {
+          basic_enabled: !this.device.basic_enabled,
+        },
+        {
+          refresh: refresh,
+          success: () => {
+            this.$message.success(
+              `MQTT Basic Auth successfuly ${
+                this.device.basic_enabled ? "disabled" : "enabled"
+              }!`
+            );
+          },
+          error: () => {
+            this.$notification.error({
+              message: `Error ${
+                device.basic_enabled ? "disabling" : "enabling"
+              } MQTT Basic Auth for device`,
+              description: e.response.data.message,
+            });
+          },
         }
       );
     },
@@ -119,18 +141,18 @@ export default {
       this.$axios({
         url: `/api/devices/${this.device.id}`,
         method: "patch",
-        data: data
+        data: data,
       })
         .then(() => {
           if (success) success();
         })
-        .catch(e => {
+        .catch((e) => {
           if (error) error(e);
         })
         .then(() => {
           if (refresh) this.refresh();
           this.$store.dispatch("devices/get");
         });
-    }
-  }
+    },
+  },
 };

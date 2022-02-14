@@ -1,10 +1,19 @@
-FROM golang:1.11 AS builder
-ADD go.mod /go/src/github.com/infinimesh/infinimesh/go.mod
-ADD . /go/src/github.com/infinimesh/infinimesh
+FROM golang:1.17-alpine AS builder
+
+RUN apk add upx
+
 WORKDIR /go/src/github.com/infinimesh/infinimesh
-RUN cd /go/src/github.com/infinimesh/infinimesh && CGO_ENABLED=0 go build ./cmd/device-registry/
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" ./cmd/device-registry
+RUN upx ./device-registry
 
 FROM scratch
 WORKDIR /
-COPY --from=builder  /go/src/github.com/infinimesh/infinimesh/device-registry /device-registry
+COPY --from=builder /go/src/github.com/infinimesh/infinimesh/device-registry /device-registry
+
+LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
+
 ENTRYPOINT ["/device-registry"]

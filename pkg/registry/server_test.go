@@ -182,6 +182,7 @@ func sampleDevice(name string, namespaceid string) *registrypb.Device {
 		Namespace: namespaceid,
 		Name:      name,
 		Enabled:   &wrappers.BoolValue{Value: true},
+		BasicEnabled: &wrappers.BoolValue{Value: false},
 		Tags:      []string{"a", "b", "c"},
 		Certificate: &registrypb.Certificate{
 			PemData: `-----BEGIN CERTIFICATE-----
@@ -246,13 +247,18 @@ func TestCreateGet(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name})
+	require.Contains(t, respFP.Devices, &registrypb.Device{
+		Id: respGet.Device.Id, Name: respGet.Device.Name,
+		Enabled: &wrappers.BoolValue{Value: true},
+		BasicEnabled: &wrappers.BoolValue{Value: false},
+	})
 
+	// Delete the Device created
 	_, err = server.Delete(ctx, &registrypb.DeleteRequest{
 		Id: response.Device.Id,
 	})
 
-	//Delete the Account created
+	// Delete the Account created
 	_ = server.repo.DeleteAccount(ctx, &nodepb.DeleteAccountRequest{Uid: accid})
 }
 
@@ -294,7 +300,7 @@ func TestUpdate(t *testing.T) {
 		Fingerprint: response.Device.Certificate.Fingerprint,
 	})
 	require.NoError(t, err)
-	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, Name: respGet.Device.Name})
+	require.Contains(t, respFP.Devices, &registrypb.Device{Id: respGet.Device.Id, Enabled: &wrappers.BoolValue{Value: true}, BasicEnabled: &wrappers.BoolValue{Value: false}, Name: respGet.Device.Name})
 
 	//Set new values
 	NewName := randomdata.SillyName()
@@ -338,10 +344,19 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	ctx := context.Background()
 
+	randomName := randomdata.SillyName()
+
+	accid, err := server.repo.CreateUserAccount(ctx, randomName, "password", false, true, true)
+	require.NoError(t, err)
+
 	//Set metadata for context
-	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": "0x3"}))
+	ctx = metadata.NewIncomingContext(ctx, metadata.New(map[string]string{"requestorid": accid}))
+
+	ns, err := server.repo.GetNamespace(ctx, randomName)
+	require.NoError(t, err)
+
 	request := &registrypb.CreateRequest{
-		Device: sampleDevice(randomdata.SillyName(), "0x1"),
+		Device: sampleDevice(randomdata.SillyName(), ns.Id),
 	}
 	response, err := server.Create(ctx, request)
 	require.NoError(t, err)

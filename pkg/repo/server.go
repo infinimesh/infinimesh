@@ -28,9 +28,10 @@ func (s *Server) Get(context context.Context, request *repopb.GetRequest) (respo
 		}
 	}
 	response.Repo = &repopb.Repo{
-		Enabled:     deviceStatus.Status.Enabled,
-		NamespaceID: deviceStatus.Status.NamespaceID,
-		FingerPrint: deviceStatus.Status.Fingerprint,
+		Enabled:     	deviceStatus.Status.Enabled,
+		BasicEnabled: deviceStatus.Status.BasicEnabled,
+		NamespaceID: 	deviceStatus.Status.NamespaceID,
+		FingerPrint: 	deviceStatus.Status.Fingerprint,
 	}
 	return response, nil
 }

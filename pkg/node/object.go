@@ -30,6 +30,8 @@ import (
 
 //ObjectController is a Data type for Object Controller file
 type ObjectController struct {
+	nodepb.UnimplementedObjectServiceServer
+
 	Dgraph *dgo.Dgraph
 	Log    *zap.Logger
 

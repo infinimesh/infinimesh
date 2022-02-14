@@ -5,20 +5,6 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-  timescaledb:
-    image: timescale/timescaledb:latest-pg11
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - 5432:5432
-  grafana:
-    hostname: grafana
-    image: grafana/grafana:6.1.3
-    expose:
-      - 3000
-    ports:
-      - 3000:3000
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
@@ -34,91 +20,93 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   mqtt-bridge:
-    image: quay.io/infinimesh/mqtt-bridge:latest
+    image: ghcr.io/slntopp/infinimesh/mqtt-bridge:latest
     ports:
-      - "8089:8089"
+      - "8090:8080" # BasicAuth(non-TLS)
+      - "8089:8089" # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
     environment:
-      - KAFKA_HOST=kafka:29092
-      - DEVICE_REGISTRY_URL=device-registry:8080
+      DEBUG: "true"
+      KAFKA_HOST: kafka:29092
+      DEVICE_REGISTRY_URL: device-registry:8080
     depends_on:
       - kafka
     restart: unless-stopped
   telemetry-router:
-    image: quay.io/infinimesh/telemetry-router:latest
+    image: ghcr.io/slntopp/infinimesh/telemetry-router:latest
     environment:
-      - KAFKA_HOST=kafka:29092
+      KAFKA_HOST: kafka:29092
     depends_on:
       - kafka
     restart: unless-stopped
   device-registry:
-    image: quay.io/infinimesh/device-registry:latest
+    image: ghcr.io/slntopp/infinimesh/device-registry:latest
     ports:
       - "8070:8080"
     environment:
-      - DGRAPH_HOST=alpha:9080
-      - DB_ADDR2=redis:6379
+      DGRAPH_HOST: alpha:9080
+      DB_ADDR2: redis:6379
     restart: unless-stopped
   shadow-delta-merger:
-    image: quay.io/infinimesh/shadow-delta-merger:latest
+    image: ghcr.io/slntopp/infinimesh/shadow-delta-merger:latest
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
+      KAFKA_HOST: kafka:29092
     restart: unless-stopped
   shadow-api:
-    image: quay.io/infinimesh/shadow-api:latest
+    image: ghcr.io/slntopp/infinimesh/shadow-api:latest
     ports:
       - "8096:8096"
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
-      - "DB_ADDR=redis:6379"
+      KAFKA_HOST: kafka:29092
+      DB_ADDR: redis:6379
     restart: unless-stopped
   shadow-persister:
-    image: quay.io/infinimesh/shadow-persister:latest
+    image: ghcr.io/slntopp/infinimesh/shadow-persister:latest
     depends_on:
       - kafka
     environment:
-      - KAFKA_HOST=kafka:29092
-      - "DB_ADDR=redis:6379"
+      KAFKA_HOST: kafka:29092
+      DB_ADDR: redis:6379
     restart: unless-stopped
   frontend:
     ports:
-      - "8082:80"
-    image: quay.io/infinimesh/frontend:latest
+      - "80:80"
+    image: ghcr.io/slntopp/infinimesh/frontend:latest
     environment:
-      - "APISERVER_URL=http://apiserver-rest:8081"
+      APISERVER_URL: http://apiserver-rest:8081
   apiserver:
     ports:
       - "8080:8080"
-    image: quay.io/infinimesh/apiserver:latest
+    image: ghcr.io/slntopp/infinimesh/apiserver:latest
     environment:
-      - JWT_SIGNING_KEY=c3VwZXIgc2VjcmV0IGtleQo=
+      JWT_SIGNING_KEY: c3VwZXIgc2VjcmV0IGtleQo=
     depends_on:
       - device-registry
       - shadow-api
       - nodeserver
     restart: unless-stopped
   apiserver-rest:
-    image: quay.io/infinimesh/apiserver-rest:latest
+    image: ghcr.io/slntopp/infinimesh/apiserver-rest:latest
     environment:
-      - APISERVER_ENDPOINT=apiserver:8080
+      APISERVER_ENDPOINT: apiserver:8080
     ports:
       - "8081:8081"
     depends_on:
       - apiserver
     restart: unless-stopped
   nodeserver:
-    image: quay.io/infinimesh/nodeserver:latest
+    image: ghcr.io/slntopp/infinimesh/nodeserver:latest
     restart: unless-stopped
     depends_on:
       - alpha
     environment:
-      - DGRAPH_HOST=alpha:9080
+      DGRAPH_HOST: alpha:9080
   # dgraph
   zero:
     image: dgraph/dgraph:v1.0.14

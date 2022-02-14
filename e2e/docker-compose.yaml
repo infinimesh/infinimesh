@@ -1,12 +1,5 @@
 version: "3.2"
 services:
-  timescaledb:
-    image: timescale/timescaledb:latest-pg11
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: postgres
-    ports:
-    - 5432:5432
   zero:
     image: dgraph/dgraph:v1.0.12-rc5
     volumes:
@@ -15,9 +8,6 @@ services:
         target: /dgraph
         volume:
           nocopy: true
-    ports:
-      - 5080:5080
-      - 6080:6080
     restart: on-failure
     command: dgraph zero --my=zero:5080
   server:
@@ -28,9 +18,6 @@ services:
         target: /dgraph
         volume:
           nocopy: true
-    ports:
-      - 8084:8080
-      - 9080:9080
     restart: on-failure
     command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
   redis:
@@ -39,11 +26,16 @@ services:
   testrunner:
       # This just sleeps, we execute the test command using docker-compose exec.
       container_name: testrunner
+      image: golang:latest
       command: sleep infinity
       depends_on:
           - server
-      # environment:
-      image: golang:latest
+          - redis
+      environment:
+        DGRAPH_URL: server:9080
+        DB_ADDR: redis:6379
+      volumes:
+        - ../:/go/src/github.com/infinimesh/infinimesh
       # networks:
           # - internal
 volumes:

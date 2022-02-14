@@ -14,11 +14,12 @@ describe("Devices Registry", () => {
   let wrapper;
 
   let default_store = {
+    commit: jest.fn((mutation, data) => {}),
     getters: {
       loggedInUser: {
-        default_namespace: { id: "0x0" }
+        default_namespace: { id: "0x0" },
       },
-      "devices/currentNamespace": jest.fn(() => "0x0")
+      "devices/currentNamespace": jest.fn(() => "0x0"),
     },
     state: {
       devices: {
@@ -28,10 +29,10 @@ describe("Devices Registry", () => {
             id: "0x0",
             name: "test",
             markfordeletion: false,
-            deleteinitiationtime: "0000-01-01T00:00:00Z"
-          }
+            deleteinitiationtime: "0000-01-01T00:00:00Z",
+          },
         ],
-        pool: []
+        pool: [],
       },
       window: {
         width: 1920,
@@ -43,8 +44,8 @@ describe("Devices Registry", () => {
         release: {
           html_url:
             "https://github.com/infinimesh/infinimesh/releases/tag/v0.1.5",
-          tag_name: "v0.1.5"
-        }
+          tag_name: "v0.1.5",
+        },
       },
       auth: {
         user: {
@@ -56,17 +57,17 @@ describe("Devices Registry", () => {
             id: "0x0",
             name: "test",
             markfordeletion: false,
-            deleteinitiationtime: ""
+            deleteinitiationtime: "",
           },
           password: "",
           is_admin: false,
           owner: "",
-          username: "test"
+          username: "test",
         },
         loggedIn: true,
-        strategy: "local"
-      }
-    }
+        strategy: "local",
+      },
+    },
   };
 
   beforeEach(() => {

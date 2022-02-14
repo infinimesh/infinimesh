@@ -51,10 +51,10 @@
           <a-button
             type="success"
             style="margin-right: 5px"
-            @click="toogleSelected(true)"
+            @click="toggleSelected(true)"
             >Enable All
           </a-button>
-          <a-button type="danger" @click="toogleSelected(false)"
+          <a-button type="danger" @click="toggleSelected(false)"
             >Disable All
           </a-button>
         </a-col>
@@ -66,6 +66,13 @@
             @click="selectedDevices = suggested.map((d) => d.id)"
             >Select All
           </a-button>
+        </a-col>
+      </template>
+      <template v-if="pool.length">
+        <a-col>
+          <a-button type="success" @click="handleLoadState"
+            >Load Devices State</a-button
+          >
         </a-col>
       </template>
     </a-row>
@@ -284,7 +291,22 @@ export default {
       return divs[this.$store.state.window.gridSize];
     },
   },
+  mounted() {
+    this.$store.commit("window/setTopAction", {
+      icon: "undo",
+      callback: this.refresh,
+    });
+  },
+  beforeDestroy() {
+    this.$store.commit("window/unsetTopAction");
+  },
   methods: {
+    refresh() {
+      this.$store.dispatch("devices/get");
+    },
+    handleLoadState() {
+      this.$store.dispatch("devices/state");
+    },
     handleDeviceAdd(device) {
       this.$store.dispatch("devices/add", {
         device: device,
@@ -300,7 +322,7 @@ export default {
         },
       });
     },
-    toogleSelected(enable) {
+    toggleSelected(enable) {
       let vm = this;
       this.updateSelected(
         () => {

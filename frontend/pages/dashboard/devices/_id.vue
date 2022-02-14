@@ -125,7 +125,8 @@
               <device-actions
                 :device="device"
                 @delete="handleDeviceDelete"
-                @toogle="handleToogleDevice"
+                @toggle="handleToggleDevice"
+                @toggle-basic="handleToggleBasicDevice"
               />
             </a-card>
             <a-card

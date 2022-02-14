@@ -24,11 +24,12 @@ import (
 )
 
 func TestRoute(t *testing.T) {
-	dlq := "default_or_dlq"
+	const dlq = "default_or_dlq"
+	const shadow = "shadow.reported-state.delta"
 	router := New(dlq)
 
-	require.Equal(t, "shadow.reported-state.delta", router.Route("devices/0x1/state/reported/delta", "0x1"))
-	require.Equal(t, dlq, router.Route("devices/0x1/state/reported/delta", "0x2"))
+	require.Equal(t, shadow, router.Route("devices/0x1/state/reported/delta", "0x1"))
+	require.Equal(t, shadow, router.Route("devices/0x1/state/reported/delta", "0x2"))
 	require.Equal(t, dlq, router.Route("/devices/0x1/state/reported/delta", "0x1"))
 	require.Equal(t, dlq, router.Route("", "0x1"))
 	require.Equal(t, dlq, router.Route("/", "0x1"))

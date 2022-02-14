@@ -35,6 +35,8 @@ import (
 
 //Server is a data strcuture for shadow server
 type Server struct {
+	shadowpb.UnimplementedShadowsServer
+
 	Repo         Repo
 	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
 	ProduceTopic string

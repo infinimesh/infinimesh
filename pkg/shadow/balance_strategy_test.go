@@ -28,11 +28,11 @@ func TestBalance(t *testing.T) {
 	strat := &BalanceStrategyCoPartitioned{}
 
 	members := map[string]sarama.ConsumerGroupMemberMetadata{
-		"member-a": sarama.ConsumerGroupMemberMetadata{},
+		"member-a": {},
 	}
 
 	topics := map[string][]int32{
-		"first-topic": []int32{1, 2},
+		"first-topic": {1, 2},
 	}
 
 	plan, err := strat.Plan(members, topics)
@@ -47,13 +47,13 @@ func TestBalanceMultipleMembers(t *testing.T) {
 	strat := &BalanceStrategyCoPartitioned{}
 
 	members := map[string]sarama.ConsumerGroupMemberMetadata{
-		"member-a": sarama.ConsumerGroupMemberMetadata{},
-		"member-b": sarama.ConsumerGroupMemberMetadata{},
+		"member-a": {},
+		"member-b": {},
 	}
 
 	topics := map[string][]int32{
-		"first-topic":  []int32{1, 2},
-		"second-topic": []int32{1, 2},
+		"first-topic":  {1, 2},
+		"second-topic": {1, 2},
 	}
 
 	plan, err := strat.Plan(members, topics)

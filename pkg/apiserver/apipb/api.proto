@@ -42,13 +42,13 @@ option java_multiple_files = true;
 option java_outer_classname = "ApiProto";
 option java_package = "com.infinimesh.api";
 
-import "google/api/annotations.proto";
+import "pkg/google/api/annotations.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "pkg/node/nodepb/node.proto";
 import "pkg/registry/registrypb/device_registry.proto";
 import "pkg/shadow/shadowpb/shadow.proto";
-import "protoc-gen-swagger/options/annotations.proto";
+import "pkg/protoc-gen-swagger/options/annotations.proto";
 
 message TokenRequest {
   string username    = 1;
@@ -116,10 +116,16 @@ rpc RemoveOwnerDevices(infinimesh.deviceregistry.OwnershipRequestDevices)
 
 service States {
   rpc Get(infinimesh.shadow.GetRequest)
-      returns (infinimesh.shadow.GetResponse) {
-    option (google.api.http) = {
-      get : "/devices/{id}/state"
-    };
+    returns (infinimesh.shadow.GetResponse) {
+      option (google.api.http) = {
+        get : "/devices/{id}/state"
+      };
+  }
+  rpc GetForNS(infinimesh.shadow.GetRequest)
+    returns (infinimesh.shadow.GetForNSResponse) {
+      option (google.api.http) = {
+        get : "/devices/states/all"
+      };
   }
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
       returns (infinimesh.shadow.PatchDesiredStateResponse) {

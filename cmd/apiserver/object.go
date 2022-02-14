@@ -30,6 +30,8 @@ import (
 )
 
 type objectAPI struct {
+	apipb.UnimplementedObjectsServer
+
 	objectClient  nodepb.ObjectServiceClient
 	accountClient nodepb.AccountServiceClient
 }

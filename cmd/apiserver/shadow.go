@@ -22,16 +22,21 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/apiserver/apipb"
 	"github.com/infinimesh/infinimesh/pkg/node/nodepb"
+	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
 
 //shadowAPI data strcuture
 type shadowAPI struct {
+	apipb.UnimplementedStatesServer
+
 	accountClient nodepb.AccountServiceClient
+	devicesClient registrypb.DevicesClient
 	client        shadowpb.ShadowsClient
 }
 
@@ -59,6 +64,59 @@ func (s *shadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (resp
 	}
 
 	return s.client.Get(ctx, request)
+}
+
+func (s *shadowAPI) GetForNS(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetForNSResponse, err error) {
+	log.Debug("Get State for Namespace API Method: Invoked", zap.String("namespace", request.GetId()))
+
+	if request.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "Namespace ID not given")
+	}
+
+	account, ok := ctx.Value("account_id").(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Unauthenticated")
+	}
+	log.Debug("Requestor ID", zap.String("account", account))
+
+	ctx = metadata.AppendToOutgoingContext(ctx, "requestorid", account)
+	res, err := s.devicesClient.List(ctx, &registrypb.ListDevicesRequest{Namespaceid: request.GetId(), Account: account})
+	if err != nil {
+		log.Error("Error listing Devices for Namespace",
+			zap.String("namespace", request.GetId()), zap.Error(err))
+		return nil, err
+	}
+
+	type State struct {
+		OK bool
+		ID string
+		State *shadowpb.Shadow
+	}
+	n := len(res.GetDevices())
+	states := make(chan State, n)
+	defer close(states)
+
+	log.Debug("Gathering devices states", zap.Int("amount", n))
+	for _, dev := range res.GetDevices() {
+		go func(dev *registrypb.Device, r chan State) {
+			res, err := s.client.Get(ctx, &shadowpb.GetRequest{Id: dev.GetId()})
+			if err != nil {
+				log.Error("Error getting Device state", zap.Error(err))
+				r <- State{OK: false}
+			}
+			r <- State{true, dev.GetId(), res.GetShadow()}
+		}(dev, states)
+	}
+
+	result := make(map[string]*shadowpb.Shadow)
+	for i := 0; i < n; i++ {
+		state := <- states
+		if state.OK {
+			result[state.ID] = state.State
+		}
+	}
+
+	return &shadowpb.GetForNSResponse{Pool: result}, nil
 }
 
 //PatchDesiredState is a method to update the current state of the device

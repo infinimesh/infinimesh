@@ -24,10 +24,25 @@ import (
 //Device data struct with Certificates data strcuture as slice
 type Device struct {
 	dgraph.Object
-	Tags    []string `json:"tags,omitempty"`
-	Enabled bool     `json:"enabled"`
+	Tags    []string 	`json:"tags,omitempty"`
+	Enabled bool     	`json:"enabled"`
+	BasicEnabled bool `json:"basic_enabled"`
 
 	Certificates []*X509Cert `json:"certificates,omitempty"`
+}
+
+func (d *Device) TagsDiff(tags []string) (diff []string ){
+	mb := make(map[string]struct{}, len(d.Tags))
+	for _, x := range d.Tags {
+		mb[x] = struct{}{}
+	}
+
+	for _, x := range tags {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
 }
 
 //X509Cert is Certificate data struct which is refered in Device data strcuture

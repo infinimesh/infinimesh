@@ -36,13 +36,13 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/repo"
 	"github.com/infinimesh/infinimesh/pkg/repo/repopb"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
 	"github.com/dgraph-io/dgo"
 )
 
 //Server is a Data type for Device Controller file
 type Server struct {
+	registrypb.UnimplementedDevicesServer
+	
 	dgo  *dgo.Dgraph
 	rep  repo.Server
 	repo node.Repo
@@ -91,9 +91,10 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 
 	//Added logging
 	log.Info("Function Invoked",
-		zap.String("Device Name", request.Device.Name),
-		zap.String("Namespace", request.Device.Namespace),
-		zap.Bool("Enabled", request.Device.Enabled.Value),
+		zap.String("Device Name", request.Device.GetName()),
+		zap.String("Namespace", request.Device.GetNamespace()),
+		zap.Bool("Enabled", request.Device.GetEnabled().GetValue()),
+		zap.Bool("BasicEnabled", request.Device.GetBasicEnabled().GetValue()),
 	)
 
 	//Data Validation for namespace
@@ -143,15 +144,21 @@ func (s *Server) Create(ctx context.Context, request *registrypb.CreateRequest) 
 	_, err = s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 		Id: resp.Device.Id,
 		Repo: &repopb.Repo{
-			Enabled:     resp.Device.Enabled.Value,
-			FingerPrint: resp.Device.Certificate.Fingerprint,
+			Enabled:     	resp.Device.GetEnabled().GetValue(),
+			BasicEnabled: resp.Device.GetBasicEnabled().GetValue(),
+			FingerPrint: 	resp.Device.Certificate.Fingerprint,
 		},
 	})
 	if err != nil {
 		log.Info("Device status not stored in repo", zap.String("DeviceId", resp.Device.Id))
 	}
 	//Added logging
-	log.Info("Device Created", zap.String("Device ID", resp.Device.Id), zap.String("Device Name", resp.Device.Name))
+	log.Info("Device Created", 
+		zap.String("Device ID", resp.Device.GetId()),
+		zap.String("Device Name", resp.Device.GetName()),
+		zap.String("Namespace", resp.Device.GetNamespace()),
+		zap.Bool("Enabled", resp.Device.GetEnabled().GetValue()),
+		zap.Bool("BasicEnabled", resp.Device.GetBasicEnabled().GetValue()),)
 	return resp, nil
 }
 
@@ -204,13 +211,14 @@ func (s *Server) Update(ctx context.Context, request *registrypb.UpdateRequest) 
 	if err != nil {
 		log.Error("Failed to Get Device", zap.Error(err))
 	} else {
-		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.Enabled.Value))
+		log.Info("Data read from dgraph", zap.Bool(repData.Device.Namespace, repData.Device.GetEnabled().GetValue()))
 		reso, err := s.rep.SetDeviceState(ctx, &repopb.SetDeviceStateRequest{
 			Id: request.Device.Id,
 			Repo: &repopb.Repo{
-				Enabled:     repData.Device.Enabled.Value,
-				FingerPrint: repData.Device.Certificate.Fingerprint,
-				NamespaceID: repData.Device.Namespace,
+				Enabled:     	repData.Device.GetEnabled().GetValue(),
+				BasicEnabled: repData.Device.GetBasicEnabled().GetValue(),
+				FingerPrint: 	repData.Device.Certificate.Fingerprint,
+				NamespaceID: 	repData.Device.Namespace,
 			},
 		})
 		if err != nil {
