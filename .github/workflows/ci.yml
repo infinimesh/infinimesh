@@ -52,7 +52,7 @@ jobs:
         uses: docker/metadata-action@v3.6.1
         with:
           tags: type=raw,value=latest
-          images: ${{ env.REGISTRY }}/slntopp/infinimesh/${{matrix.tag}}
+          images: ${{ env.REGISTRY }}/infinimesh/infinimesh/${{matrix.tag}}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1.10.0
