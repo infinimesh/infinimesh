@@ -17,6 +17,8 @@ A kubernetes operator is also available, which is in an early stage. The simples
 Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
 ## Build status
+[![tests](https://github.com/infinimesh/infinimesh/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/infinimesh/infinimesh/actions/workflows/tests.yml)
+[![CI(Build Docker images)](https://github.com/infinimesh/infinimesh/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/infinimesh/infinimesh/actions/workflows/ci.yml)
 [![CircleCI](https://img.shields.io/circleci/project/github/infinimesh/infinimesh.svg)](https://circleci.com/gh/infinimesh/infinimesh/tree/master) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinimesh/infinimesh)](https://goreportcard.com/report/github.com/infinimesh/infinimesh)
 
