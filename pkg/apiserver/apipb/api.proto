@@ -19,7 +19,12 @@ syntax = "proto3";
 
 package infinimesh.api;
 
-option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   host : "api.infinimesh.io"
   info : {
     title : "Infinimesh IoT Platform"
@@ -42,13 +47,9 @@ option java_multiple_files = true;
 option java_outer_classname = "ApiProto";
 option java_package = "com.infinimesh.api";
 
-import "pkg/google/api/annotations.proto";
-import "google/protobuf/wrappers.proto";
-import "google/protobuf/empty.proto";
 import "pkg/node/nodepb/node.proto";
 import "pkg/registry/registrypb/device_registry.proto";
 import "pkg/shadow/shadowpb/shadow.proto";
-import "pkg/protoc-gen-swagger/options/annotations.proto";
 
 message TokenRequest {
   string username    = 1;
