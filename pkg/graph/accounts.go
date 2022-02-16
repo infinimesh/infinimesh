@@ -62,8 +62,7 @@ func Validate(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string,
 	//Get the metadata from the context
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		//Added logging
-		log.Error("Failed to get metadata from context", zap.Error(err))
+		log.Error("Failed to get metadata from context")
 		return nil, "", status.Error(codes.Aborted, "Failed to get metadata from context")
 	}
 
@@ -124,7 +123,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 		c.log.Debug("Error creating account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while creating account")
 	}
-	account.Uuid = meta.ID.String()
+	account.Uuid = meta.ID.Key()
 	account.DocumentMeta = meta
 
 	// Add Account to Namespace
