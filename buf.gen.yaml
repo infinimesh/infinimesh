@@ -3,6 +3,9 @@ managed:
   enabled: true
   go_package_prefix:
     default: github.com/infinimesh/infinimesh
+    except:
+      - buf.build/googleapis/googleapis
+      - buf.build/grpc-ecosystem/grpc-gateway
 plugins:
   - name: go
     out: .

@@ -90,7 +90,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiTokenResponse"
+              "$ref": "#/definitions/infinimeshapiTokenResponse"
             }
           },
           "default": {
@@ -106,7 +106,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/apiTokenRequest"
+              "$ref": "#/definitions/infinimeshapiTokenRequest"
             }
           }
         ],
@@ -164,6 +164,36 @@
         ],
         "tags": [
           "Accounts"
+        ]
+      },
+      "put": {
+        "operationId": "AccountsService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeaccountsCreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeaccountsCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
         ]
       }
     },
@@ -1085,6 +1115,38 @@
           "Objects"
         ]
       }
+    },
+    "/token": {
+      "post": {
+        "operationId": "AccountsService_Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshnodeTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/infinimeshnodeTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1116,34 +1178,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "apiTokenRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "expireTime": {
-          "type": "string"
-        },
-        "ruleset": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiRestrictionRule"
-          }
-        }
-      }
-    },
-    "apiTokenResponse": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string"
         }
       }
     },
@@ -1256,6 +1290,34 @@
       },
       "description": "Permission.Action may either be NONE, READ or WRITE."
     },
+    "infinimeshapiTokenRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "expireTime": {
+          "type": "string"
+        },
+        "ruleset": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiRestrictionRule"
+          }
+        }
+      }
+    },
+    "infinimeshapiTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
     "infinimeshdeviceregistryCreateRequest": {
       "type": "object",
       "properties": {
@@ -1326,6 +1388,26 @@
         },
         "action": {
           "$ref": "#/definitions/nodeAction"
+        }
+      }
+    },
+    "infinimeshnodeTokenRequest": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/accountsCredentials"
+        },
+        "exp": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "infinimeshnodeTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
         }
       }
     },
@@ -1546,8 +1628,26 @@
         "title": {
           "type": "string"
         },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "nodeaccountsCreateRequest": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "$ref": "#/definitions/nodeaccountsAccount"
+        },
+        "credentials": {
+          "$ref": "#/definitions/accountsCredentials"
+        },
         "namespace": {
           "type": "string"
+        },
+        "access": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
