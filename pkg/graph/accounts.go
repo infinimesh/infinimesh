@@ -88,6 +88,9 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 		return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 	}
 	log.Debug("Authorized user", zap.String("ID", account.ID.String()))
+	if !account.Enabled {
+		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
+	}
 
 	claims := jwt.MapClaims{}
 	claims[inf.INFINIMESH_ACCOUNT_CLAIM] = account.Key
