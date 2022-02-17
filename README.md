@@ -23,7 +23,7 @@ Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting 
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinimesh/infinimesh)](https://goreportcard.com/report/github.com/infinimesh/infinimesh)
 
 ## API Documentation
-You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh/swagger-ui/)
+You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh)
 
 ## Community
 You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity) or join us in our CNCF channel [#infinimesh](https://cloud-native.slack.com/archives/C01EP6QRJTD).
