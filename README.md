@@ -26,7 +26,7 @@ Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting 
 You can find swagger docs for the API server [here](https://infinimesh.github.io/infinimesh)
 
 ## Community
-You can reach out to the community via [Slack](https://launchpass.com/infinimeshcommunity) or join us in our CNCF channel [#infinimesh](https://cloud-native.slack.com/archives/C01EP6QRJTD).
+You can reach out to community and team via [Discord](https://discord.com/channels/801798988163448832/801798988624953374).
 
 ## Development
 ### Local development installation
