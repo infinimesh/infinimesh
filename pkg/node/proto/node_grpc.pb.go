@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountsServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
+	Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -37,6 +38,15 @@ func NewAccountsServiceClient(cc grpc.ClientConnInterface) AccountsServiceClient
 func (c *accountsServiceClient) Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error) {
 	out := new(TokenResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Token", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountsServiceClient) Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error) {
+	out := new(accounts.Account)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +94,7 @@ func (c *accountsServiceClient) SetCredentials(ctx context.Context, in *SetCrede
 // for forward compatibility
 type AccountsServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
+	Get(context.Context, *accounts.Account) (*accounts.Account, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
 	Delete(context.Context, *accounts.Account) (*DeleteResponse, error)
@@ -97,6 +108,9 @@ type UnimplementedAccountsServiceServer struct {
 
 func (UnimplementedAccountsServiceServer) Token(context.Context, *TokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Token not implemented")
+}
+func (UnimplementedAccountsServiceServer) Get(context.Context, *accounts.Account) (*accounts.Account, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedAccountsServiceServer) Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -137,6 +151,24 @@ func _AccountsService_Token_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AccountsServiceServer).Token(ctx, req.(*TokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountsService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(accounts.Account)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).Get(ctx, req.(*accounts.Account))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -223,6 +255,10 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Token",
 			Handler:    _AccountsService_Token_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _AccountsService_Get_Handler,
 		},
 		{
 			MethodName: "Create",

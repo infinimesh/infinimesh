@@ -43,6 +43,13 @@ service AccountsService {
       body: "*"
     };
   };
+
+  rpc Get(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
+    option (google.api.http) = {
+      get: "/accounts/{uuid}"
+    };
+  };
+
   rpc Create(infinimesh.node.accounts.CreateRequest) returns (infinimesh.node.accounts.CreateResponse) {
     option (google.api.http) = {
       put: "/accounts"

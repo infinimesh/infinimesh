@@ -378,6 +378,46 @@
       }
     },
     "/accounts/{uuid}": {
+      "get": {
+        "operationId": "AccountsService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeaccountsAccount"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      },
       "delete": {
         "operationId": "AccountsService_Delete",
         "responses": {
