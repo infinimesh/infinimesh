@@ -21,6 +21,9 @@ const _ = grpc.SupportPackageIsVersion7
 type AccountsServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
+	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
+	Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error)
+	SetCredentials(ctx context.Context, in *SetCredentialsRequest, opts ...grpc.CallOption) (*SetCredentialsResponse, error)
 }
 
 type accountsServiceClient struct {
@@ -49,12 +52,42 @@ func (c *accountsServiceClient) Create(ctx context.Context, in *accounts.CreateR
 	return out, nil
 }
 
+func (c *accountsServiceClient) Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error) {
+	out := new(accounts.Account)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountsServiceClient) Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountsServiceClient) SetCredentials(ctx context.Context, in *SetCredentialsRequest, opts ...grpc.CallOption) (*SetCredentialsResponse, error) {
+	out := new(SetCredentialsResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/SetCredentials", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountsServiceServer is the server API for AccountsService service.
 // All implementations must embed UnimplementedAccountsServiceServer
 // for forward compatibility
 type AccountsServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
+	Update(context.Context, *accounts.Account) (*accounts.Account, error)
+	Delete(context.Context, *accounts.Account) (*DeleteResponse, error)
+	SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse, error)
 	mustEmbedUnimplementedAccountsServiceServer()
 }
 
@@ -67,6 +100,15 @@ func (UnimplementedAccountsServiceServer) Token(context.Context, *TokenRequest) 
 }
 func (UnimplementedAccountsServiceServer) Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedAccountsServiceServer) Update(context.Context, *accounts.Account) (*accounts.Account, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedAccountsServiceServer) Delete(context.Context, *accounts.Account) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedAccountsServiceServer) SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetCredentials not implemented")
 }
 func (UnimplementedAccountsServiceServer) mustEmbedUnimplementedAccountsServiceServer() {}
 
@@ -117,6 +159,60 @@ func _AccountsService_Create_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountsService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(accounts.Account)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).Update(ctx, req.(*accounts.Account))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountsService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(accounts.Account)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).Delete(ctx, req.(*accounts.Account))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountsService_SetCredentials_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetCredentialsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).SetCredentials(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/SetCredentials",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).SetCredentials(ctx, req.(*SetCredentialsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountsService_ServiceDesc is the grpc.ServiceDesc for AccountsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -131,6 +227,18 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Create",
 			Handler:    _AccountsService_Create_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _AccountsService_Update_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _AccountsService_Delete_Handler,
+		},
+		{
+			MethodName: "SetCredentials",
+			Handler:    _AccountsService_SetCredentials_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

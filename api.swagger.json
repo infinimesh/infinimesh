@@ -377,6 +377,135 @@
         ]
       }
     },
+    "/accounts/{uuid}": {
+      "delete": {
+        "operationId": "AccountsService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      },
+      "patch": {
+        "operationId": "AccountsService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeaccountsAccount"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
+    "/accounts/{uuid}/credentials": {
+      "post": {
+        "operationId": "AccountsService_SetCredentials",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeSetCredentialsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "credentials": {
+                  "$ref": "#/definitions/accountsCredentials"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
     "/devices": {
       "get": {
         "operationId": "Devices_List",
@@ -616,7 +745,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/deviceregistryDeleteResponse"
+              "$ref": "#/definitions/infinimeshdeviceregistryDeleteResponse"
             }
           },
           "default": {
@@ -1199,9 +1328,6 @@
         }
       }
     },
-    "deviceregistryDeleteResponse": {
-      "type": "object"
-    },
     "deviceregistryDevice": {
       "type": "object",
       "properties": {
@@ -1334,6 +1460,9 @@
         }
       }
     },
+    "infinimeshdeviceregistryDeleteResponse": {
+      "type": "object"
+    },
     "infinimeshdeviceregistryGetResponse": {
       "type": "object",
       "properties": {
@@ -1373,6 +1502,9 @@
           "type": "string"
         }
       }
+    },
+    "infinimeshnodeDeleteResponse": {
+      "type": "object"
     },
     "infinimeshnodePermission": {
       "type": "object",
@@ -1608,6 +1740,9 @@
       }
     },
     "nodeOwnershipResponse": {
+      "type": "object"
+    },
+    "nodeSetCredentialsResponse": {
       "type": "object"
     },
     "nodeSetPasswordResponse": {

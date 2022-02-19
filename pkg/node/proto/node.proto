@@ -28,17 +28,44 @@ message TokenResponse {
   string token = 1;
 }
 
+message SetCredentialsRequest {
+  string uuid = 1;
+  infinimesh.node.accounts.Credentials credentials = 2;
+}
+
+message SetCredentialsResponse {}
+message DeleteResponse {}
+
 service AccountsService {
   rpc Token(TokenRequest) returns (TokenResponse) {
-      option (google.api.http) = {
-          post: "/token"
-          body: "*"
-      };
+    option (google.api.http) = {
+      post: "/token"
+      body: "*"
+    };
   };
   rpc Create(infinimesh.node.accounts.CreateRequest) returns (infinimesh.node.accounts.CreateResponse) {
     option (google.api.http) = {
-        put: "/accounts"
-        body: "*"
+      put: "/accounts"
+      body: "*"
+    };
+  };
+  rpc Update(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
+    option(google.api.http) = {
+      patch: "/accounts/{uuid}"
+      body: "*"
+    };
+  };
+  rpc Delete(infinimesh.node.accounts.Account) returns (DeleteResponse) {
+    option(google.api.http) = {
+      delete: "/accounts/{uuid}"
+    };
+  };
+
+
+  rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse) {
+    option(google.api.http) = {
+      post: "/accounts/{uuid}/credentials"
+      body: "*"
     };
   };
 }
