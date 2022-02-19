@@ -144,6 +144,28 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	return &accpb.CreateResponse{Account: account.Account}, nil
 }
 
+func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+	log := c.log.Named("UpdateAccount")
+	log.Debug("Update request received", zap.Any("request", acc), zap.Any("context", ctx))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	// Check requestor access to acc.GetUuid()
+
+	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
+	if err != nil {
+		log.Error("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Account")
+	}
+
+	return acc, nil
+}
+
 // Helper Functions
 
 func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string, args ...string) (Account, bool) {

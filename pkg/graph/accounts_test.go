@@ -220,9 +220,9 @@ func TestAuthorizeStandardFail(t *testing.T) {
 			Title: username, Enabled: true,
 		},
 		Credentials: &accounts.Credentials{
-		Type: "standard",
-		Data: []string{username, password},
-	},
+			Type: "standard",
+			Data: []string{username, password},
+		},
 	})
 	if err != nil {
 		t.Fatal("Error creating Account")
@@ -246,5 +246,48 @@ func TestAuthorizeStandardFail(t *testing.T) {
 
 	if s.Code() != codes.Unauthenticated || s.Message() != "Wrong credentials given" {
 		t.Fatalf("Error supposed to be Unauthenticated: Wrong credentials given, but got %v: %v", s.Code().String(), s.Message())
+	}
+}
+
+func TestUpdateAccount(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: false,
+	}
+
+	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+		return
+	}
+
+	uuid := res.GetAccount().GetUuid()
+	this.Uuid = uuid
+	this.Title = username + "-new"
+	this.Enabled = true
+	
+	that, err := ctrl.Update(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error udpating Account: %v", err)
+	}
+	if that != this {
+		t.Fatal("Requested updates and updated accounts(from Response) aren't matching, this:", this, "that:", that)
+	}
+
+	_, err = ctrl.col.ReadDocument(rootCtx, uuid, that)
+	if err != nil {
+		t.Fatalf("Error reading Account in DB: %v", err)
+	}
+	if that != this {
+		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
 	}
 }
