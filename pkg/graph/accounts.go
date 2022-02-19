@@ -105,7 +105,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 }
 
 func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRequest) (*accpb.CreateResponse, error) {
-	log := c.log.Named("CreateAccount")
+	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
 
 	//Get metadata from context and perform validation
@@ -145,7 +145,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 }
 
 func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
-	log := c.log.Named("UpdateAccount")
+	log := c.log.Named("Update")
 	log.Debug("Update request received", zap.Any("request", acc), zap.Any("context", ctx))
 
 	//Get metadata from context and perform validation
