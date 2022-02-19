@@ -38,6 +38,8 @@ type Credentials interface {
 	Authorize(...string) bool;
 	// Return Credentials type
 	Type() string;
+	// Return Credentials Document Key
+	Key() string;
 
 	// Find Credentials in database by authorisation data and Unmarshall it's data into struct
 	Find(context.Context, driver.Database) bool;

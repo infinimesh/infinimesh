@@ -52,6 +52,10 @@ func (*StandardCredentials) Type() string {
 	return "standard"
 }
 
+func (sc *StandardCredentials) Key() string {
+	return sc.ID.Key()
+}
+
 func (c *StandardCredentials) SetLogger(log *zap.Logger) {
     c.log = log.Named("Standard Auth")
 }
