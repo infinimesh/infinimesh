@@ -80,8 +80,8 @@ func Validate(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string,
 
 func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*pb.TokenResponse, error) {
 	log := c.log.Named("Token")
-
 	log.Debug("Token request received", zap.Any("request", req))
+
 	account, ok := c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
@@ -102,6 +102,29 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	}
 
 	return &pb.TokenResponse{Token: token_string}, nil
+}
+
+func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+	log := c.log.Named("Get")
+	log.Debug("Get request received", zap.Any("request", acc))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	// Getting Account from DB
+	_, err = c.col.ReadDocument(ctx, acc.GetUuid(), acc)
+	if err != nil {
+		log.Error("Error getting account", zap.String("uuid", acc.GetUuid()), zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Account not found")
+	}
+
+	// Check requestor access to acc.GetUuid()
+	
+	return acc, nil
 }
 
 func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRequest) (*accpb.CreateResponse, error) {

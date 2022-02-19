@@ -60,6 +60,12 @@ func init() {
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
 }
 
+func CompareAccounts(a, b *accounts.Account) bool {
+	return a.GetUuid() == b.GetUuid() &&
+				 a.GetTitle() == b.GetTitle() &&
+				 a.GetEnabled() == b.GetEnabled()
+}
+
 func TestValidate(t *testing.T) {
 	t.Log("Testing Validate function")
 	_, id, err := Validate(rootCtx, log)
@@ -140,8 +146,7 @@ func TestAuthorizeDisabledAccount(t *testing.T) {
 		Credentials: credentials,
 	})
 	if err != nil {
-		t.Error("Error creating Account")
-		return
+		t.Fatal("Error creating Account")
 	}
 
 	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -171,7 +176,6 @@ func TestAuthorizeStandard(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal("Error creating Account")
-		return
 	}
 
 	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -226,7 +230,6 @@ func TestAuthorizeStandardFail(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal("Error creating Account")
-		return
 	}
 
 	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -267,7 +270,6 @@ func TestUpdateAccount(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
-		return
 	}
 
 	uuid := res.GetAccount().GetUuid()
@@ -279,7 +281,7 @@ func TestUpdateAccount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error udpating Account: %v", err)
 	}
-	if that != this {
+	if !CompareAccounts(this, that) {
 		t.Fatal("Requested updates and updated accounts(from Response) aren't matching, this:", this, "that:", that)
 	}
 
@@ -287,7 +289,54 @@ func TestUpdateAccount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error reading Account in DB: %v", err)
 	}
-	if that != this {
+	if !CompareAccounts(this, that) {
 		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
+	}
+}
+
+func TestGetAccount(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: false,
+	}
+
+	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+	}
+
+	uuid := res.GetAccount().GetUuid()
+	this.Uuid = uuid
+	that, err := ctrl.Get(rootCtx, &accounts.Account{Uuid: uuid})
+	if err != nil {
+		t.Fatalf("Error getting Account from API: %v", err)
+	}
+	if !CompareAccounts(this, that) {
+		t.Fatal("Requested and created accounts(from API) aren't matching, this:", this, "that:", that)
+	}
+}
+
+func TestGetAccountNotFound(t *testing.T) {
+	r, err := ctrl.Get(rootCtx, &accounts.Account{Uuid: randomdata.Alphanumeric(12)})
+	if err == nil {
+		t.Fatal("Get account received no error despite it should, response:", r)
+	}
+
+	s, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("Can't parse Status from error, got: %v", err)
+	}
+
+	if s.Code() != codes.NotFound {
+		t.Fatalf("Error supposed to be NotFound, but got %v", s.Code().String())
 	}
 }
