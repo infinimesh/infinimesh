@@ -181,6 +181,9 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
 func (ctrl *AccountsController) SetCredentials(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) (error) {
 	cred, err := ctrl.cred.CreateDocument(ctx, c)	
+	if err != nil {
+		return status.Error(codes.Internal, "Couldn't create credentials")
+	}
 	_, err = edge.CreateDocument(ctx, credentials.Link{
 		From: acc.ID,
 		To: cred.ID,
@@ -190,7 +193,8 @@ func (ctrl *AccountsController) SetCredentials(ctx context.Context, acc Account,
 		},
 	})
 	if err != nil {
-		return status.Error(codes.Internal, "Couldn't create credentials")
+		ctrl.cred.RemoveDocument(ctx, cred.Key)
+		return status.Error(codes.Internal, "Couldn't assign credentials")
 	}
 	return nil
 }
