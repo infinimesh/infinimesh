@@ -158,7 +158,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = c.SetCredentials(ctx, account, col, cred)
+	err = c.SetCredentialsCtrl(ctx, account, col, cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		return nil, err
@@ -204,6 +204,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	c.col.ReadDocument(ctx, req.GetUuid(), &acc)
 
 	// Check requestor access to acc.GetUuid()
+
 	creds, err := c.GetCredentials(ctx, acc)
 	if err != nil {
 		log.Error("Error gathering Account credentials", zap.String("account", acc.Key), zap.Error(err))
@@ -287,22 +288,70 @@ func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account)
 }
 
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
-func (ctrl *AccountsController) SetCredentials(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) (error) {
+func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) (error) {
+	key := c.Type() + "-" + acc.Key
+	var oldLink credentials.Link
+	_, err := edge.ReadDocument(ctx, key, &oldLink)
+	if err == nil {	
+		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
+		if err != nil {
+			ctrl.log.Error("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
+			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
+		}
+
+		return nil
+	}
+	ctrl.log.Debug("Credentials of type don't exist or failed to Read then from DB", zap.Error(err), zap.String("key", key))
+
 	cred, err := ctrl.cred.CreateDocument(ctx, c)	
 	if err != nil {
+		ctrl.log.Error("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
 		return status.Error(codes.Internal, "Couldn't create credentials")
 	}
+
 	_, err = edge.CreateDocument(ctx, credentials.Link{
 		From: acc.ID,
 		To: cred.ID,
 		Type: c.Type(),
 		DocumentMeta: driver.DocumentMeta {
-			Key: c.Type() + "-" + acc.Key, // Ensure only one credentials vertex per type
+			Key: key, // Ensure only one credentials vertex per type
 		},
 	})
 	if err != nil {
+		ctrl.log.Error("Error Linking Credentials to Account",
+			zap.String("account", acc.Key), zap.String("type", c.Type()), zap.Error(err),
+		)
 		ctrl.cred.RemoveDocument(ctx, cred.Key)
 		return status.Error(codes.Internal, "Couldn't assign credentials")
 	}
 	return nil
+}
+
+func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCredentialsRequest) (*pb.SetCredentialsResponse, error) {
+	log := c.log.Named("SetCredentials")
+	log.Debug("Set Credentials request received", zap.String("account", req.GetUuid()), zap.String("type", req.GetCredentials().GetType()), zap.Any("context", ctx))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	var acc Account
+	c.col.ReadDocument(ctx, req.GetUuid(), &acc)
+
+	// Check requestor access to acc.GetUuid()
+
+	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
+	cred, err := credentials.MakeCredentials(req.GetCredentials(), log)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = c.SetCredentialsCtrl(ctx, acc, col, cred)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.SetCredentialsResponse{}, nil
 }

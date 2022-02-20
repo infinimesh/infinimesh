@@ -381,3 +381,73 @@ func TestDeleteAccount(t *testing.T) {
 		t.Fatalf("Error supposed to be NotFound, but got %v", s.Code().String())
 	}
 }
+
+func TestSetCredentialsStandard(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: true,
+	}
+
+	crtRes, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+	}
+	this.Uuid = crtRes.GetAccount().GetUuid()
+
+	_, err = ctrl.SetCredentials(rootCtx, &pb.SetCredentialsRequest{
+		Uuid: this.GetUuid(), Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password + "-addon"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error Setting New Credentials: %v", err)
+	}
+
+	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
+			Auth: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password + "-addon"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Unexpected error while getting Token: %v", err)
+	}
+
+	token, err := jwt.Parse(res.GetToken(), func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Unexpected signing alg")
+		}
+		return ctrl.SIGNING_KEY, nil
+	})
+	if err != nil {
+		t.Fatalf("Error parsing JWT: %v", err)
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		t.Fatal("Unexpected error while reading JWT Claims as Map")
+	}
+
+	account := claims[inf.INFINIMESH_ACCOUNT_CLAIM]
+	if account == nil {
+		t.Fatal("Account Claim is empty")
+	}
+
+	id, ok := account.(string)
+	if !ok {
+		t.Fatal("Error casting claim value to string")
+	}
+
+	if id != this.GetUuid() {
+		t.Fatalf("Expected account in Claim to be %s, got: %s", this.GetUuid(), id)
+	}
+}
