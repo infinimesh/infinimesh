@@ -340,3 +340,44 @@ func TestGetAccountNotFound(t *testing.T) {
 		t.Fatalf("Error supposed to be NotFound, but got %v", s.Code().String())
 	}
 }
+
+func TestDeleteAccount(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: false,
+	}
+
+	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+	}
+
+	this.Uuid = res.Account.GetUuid()
+	_, err = ctrl.Delete(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Unexpected error while deleting Account: %v", err)
+	}
+
+	r, err := ctrl.Get(rootCtx, this)
+	if err == nil {
+		t.Fatal("Get account received no error despite it should, response:", r)
+	}
+
+	s, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("Can't parse Status from error, got: %v", err)
+	}
+
+	if s.Code() != codes.NotFound {
+		t.Fatalf("Error supposed to be NotFound, but got %v", s.Code().String())
+	}
+}

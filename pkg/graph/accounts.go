@@ -189,6 +189,44 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	return acc, nil
 }
 
+func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*pb.DeleteResponse, error)  {
+	log := c.log.Named("Delete")
+	log.Debug("Delete request received", zap.Any("request", req), zap.Any("context", ctx))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	var acc Account
+	c.col.ReadDocument(ctx, req.GetUuid(), &acc)
+
+	// Check requestor access to acc.GetUuid()
+	creds, err := c.GetCredentials(ctx, acc)
+	if err != nil {
+		log.Error("Error gathering Account credentials", zap.String("account", acc.Key), zap.Error(err))
+	}
+	credsKeys := make([]string, len(creds))
+	for i, cred := range creds {
+		credsKeys[i] = cred.Key()
+	}
+	_, errs, err := c.cred.RemoveDocuments(ctx, credsKeys)
+	if err != nil {
+		log.Error("Error deleting Credentials", zap.String("account", acc.Key), zap.Any("errors", errs), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Account has been deleted partialy")
+	}
+
+	_, err = c.col.RemoveDocument(ctx, acc.ID.Key())
+	if err != nil {
+		log.Error("Error deleting Account", zap.String("account", acc.Key), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error deleting Account")
+	}
+
+	return &pb.DeleteResponse{}, nil
+}
+
 // Helper Functions
 
 func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string, args ...string) (Account, bool) {
@@ -221,6 +259,31 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 	var r Account
 	_, err = c.ReadDocument(ctx, &r)
 	return r, err == nil
+}
+
+// Return Credentials linked to Account
+func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []credentials.Credentials, err error) {
+	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials`
+	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
+		"account": acc.ID.String(),
+		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	for {
+		var cred credentials.Credentials 
+		_, err := c.ReadDocument(ctx, &cred)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		r = append(r, cred)
+	}
+	return r, nil
 }
 
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
