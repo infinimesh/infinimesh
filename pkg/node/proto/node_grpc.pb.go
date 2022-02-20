@@ -5,6 +5,7 @@ package proto
 import (
 	context "context"
 	accounts "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	namespaces "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -275,6 +276,200 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetCredentials",
 			Handler:    _AccountsService_SetCredentials_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/node/proto/node.proto",
+}
+
+// NamespacesServiceClient is the client API for NamespacesService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type NamespacesServiceClient interface {
+	Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
+	Create(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
+	Update(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
+	Delete(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*DeleteResponse, error)
+}
+
+type namespacesServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNamespacesServiceClient(cc grpc.ClientConnInterface) NamespacesServiceClient {
+	return &namespacesServiceClient{cc}
+}
+
+func (c *namespacesServiceClient) Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
+	out := new(namespaces.Namespace)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *namespacesServiceClient) Create(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
+	out := new(namespaces.Namespace)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *namespacesServiceClient) Update(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
+	out := new(namespaces.Namespace)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *namespacesServiceClient) Delete(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NamespacesServiceServer is the server API for NamespacesService service.
+// All implementations must embed UnimplementedNamespacesServiceServer
+// for forward compatibility
+type NamespacesServiceServer interface {
+	Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
+	Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
+	Update(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
+	Delete(context.Context, *namespaces.Namespace) (*DeleteResponse, error)
+	mustEmbedUnimplementedNamespacesServiceServer()
+}
+
+// UnimplementedNamespacesServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedNamespacesServiceServer struct {
+}
+
+func (UnimplementedNamespacesServiceServer) Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedNamespacesServiceServer) Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedNamespacesServiceServer) Update(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedNamespacesServiceServer) Delete(context.Context, *namespaces.Namespace) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedNamespacesServiceServer) mustEmbedUnimplementedNamespacesServiceServer() {}
+
+// UnsafeNamespacesServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NamespacesServiceServer will
+// result in compilation errors.
+type UnsafeNamespacesServiceServer interface {
+	mustEmbedUnimplementedNamespacesServiceServer()
+}
+
+func RegisterNamespacesServiceServer(s grpc.ServiceRegistrar, srv NamespacesServiceServer) {
+	s.RegisterService(&NamespacesService_ServiceDesc, srv)
+}
+
+func _NamespacesService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(namespaces.Namespace)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).Get(ctx, req.(*namespaces.Namespace))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NamespacesService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(namespaces.Namespace)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).Create(ctx, req.(*namespaces.Namespace))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NamespacesService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(namespaces.Namespace)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).Update(ctx, req.(*namespaces.Namespace))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NamespacesService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(namespaces.Namespace)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).Delete(ctx, req.(*namespaces.Namespace))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// NamespacesService_ServiceDesc is the grpc.ServiceDesc for NamespacesService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NamespacesService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "infinimesh.node.NamespacesService",
+	HandlerType: (*NamespacesServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Get",
+			Handler:    _NamespacesService_Get_Handler,
+		},
+		{
+			MethodName: "Create",
+			Handler:    _NamespacesService_Create_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _NamespacesService_Update_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _NamespacesService_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -45,6 +45,9 @@
       "name": "AccountsService"
     },
     {
+      "name": "NamespacesService"
+    },
+    {
       "name": "Repos"
     }
   ],
@@ -946,7 +949,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeNamespace"
+              "$ref": "#/definitions/infinimeshnodeNamespace"
             }
           },
           "default": {
@@ -968,6 +971,36 @@
         ],
         "tags": [
           "Namespaces"
+        ]
+      },
+      "put": {
+        "operationId": "NamespacesService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodenamespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodenamespacesNamespace"
+            }
+          }
+        ],
+        "tags": [
+          "NamespacesService"
         ]
       }
     },
@@ -1000,7 +1033,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/nodeNamespace"
+              "$ref": "#/definitions/infinimeshnodeNamespace"
             }
           },
           {
@@ -1058,7 +1091,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeNamespace"
+              "$ref": "#/definitions/infinimeshnodeNamespace"
             }
           },
           "default": {
@@ -1186,6 +1219,117 @@
         ],
         "tags": [
           "Namespaces"
+        ]
+      }
+    },
+    "/namespaces/{uuid}": {
+      "get": {
+        "operationId": "NamespacesService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodenamespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      },
+      "delete": {
+        "operationId": "NamespacesService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      },
+      "patch": {
+        "operationId": "NamespacesService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodenamespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "NamespacesService"
         ]
       }
     },
@@ -1527,7 +1671,7 @@
           "type": "boolean"
         },
         "defaultNamespace": {
-          "$ref": "#/definitions/nodeNamespace"
+          "$ref": "#/definitions/infinimeshnodeNamespace"
         },
         "password": {
           "type": "string"
@@ -1545,6 +1689,27 @@
     },
     "infinimeshnodeDeleteResponse": {
       "type": "object"
+    },
+    "infinimeshnodeNamespace": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "markfordeletion": {
+          "type": "boolean"
+        },
+        "deleteinitiationtime": {
+          "type": "string"
+        },
+        "RetentionPeriod": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     },
     "infinimeshnodePermission": {
       "type": "object",
@@ -1711,7 +1876,7 @@
         "namespaces": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/nodeNamespace"
+            "$ref": "#/definitions/infinimeshnodeNamespace"
           }
         }
       }
@@ -1735,27 +1900,6 @@
           "items": {
             "$ref": "#/definitions/infinimeshnodePermission"
           }
-        }
-      }
-    },
-    "nodeNamespace": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "markfordeletion": {
-          "type": "boolean"
-        },
-        "deleteinitiationtime": {
-          "type": "string"
-        },
-        "RetentionPeriod": {
-          "type": "integer",
-          "format": "int32"
         }
       }
     },
@@ -1831,6 +1975,17 @@
       "properties": {
         "account": {
           "$ref": "#/definitions/nodeaccountsAccount"
+        }
+      }
+    },
+    "nodenamespacesNamespace": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
         }
       }
     },

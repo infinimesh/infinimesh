@@ -76,3 +76,31 @@ service AccountsService {
     };
   };
 }
+
+import "pkg/node/proto/namespaces/namespaces.proto";
+
+service NamespacesService {
+  rpc Get(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
+    option (google.api.http) = {
+      get: "/namespaces/{uuid}"
+    };
+  };
+
+  rpc Create(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
+    option (google.api.http) = {
+      put: "/namespaces"
+      body: "*"
+    };
+  };
+  rpc Update(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
+    option (google.api.http) = {
+      patch: "/namespaces/{uuid}"
+      body: "*"
+    };
+  };
+  rpc Delete(infinimesh.node.namespaces.Namespace) returns (DeleteResponse) {
+    option (google.api.http) = {
+      delete: "/namespaces/{uuid}"
+    };
+  };
+}
