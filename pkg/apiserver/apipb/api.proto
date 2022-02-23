@@ -27,7 +27,7 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
     version : "0.0.10"
     contact : {
       name : "Infinimesh"
-      url : "https://infinitedevices.io"
+      url : "https://www.infinitedevices.io"
       email : "engineering@infinitedevices.io"
     }
   }
