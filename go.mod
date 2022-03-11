@@ -22,7 +22,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/rs/cors v1.8.2
 	github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802
