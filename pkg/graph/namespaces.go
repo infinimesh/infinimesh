@@ -26,7 +26,6 @@ import (
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	"go.uber.org/zap"
 
-	// accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 )
 type Namespace struct {
@@ -36,6 +35,15 @@ type Namespace struct {
 
 func (o *Namespace) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
+}
+
+func NewBlankNamespaceDocument(key string) *Namespace {
+	return &Namespace{
+		Namespace: &nspb.Namespace{
+			Uuid: key,
+		},
+		DocumentMeta: NewBlankDocument(schema.NAMESPACES_COL, key),
+	}
 }
 
 type NamespacesController struct {

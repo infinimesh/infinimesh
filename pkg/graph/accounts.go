@@ -43,8 +43,8 @@ func (o *Account) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
-func NewBlankAccountDocument(key string) Account {
-	return Account{
+func NewBlankAccountDocument(key string) *Account {
+	return &Account{
 		Account: &accpb.Account{
 			Uuid: key,
 		},
