@@ -19,6 +19,16 @@ var (
 	DB_NAME = "infinimesh"
 )
 
+type infinimeshClaim string
+const (
+	InfinimeshAccount infinimeshClaim = "requestorID"
+)
+
+const (
+	ROOT_ACCOUNT_KEY = "infinimesh"
+	ROOT_NAMESPACE_KEY = "infinimesh"
+)
+
 const (
 	ACCOUNTS_COL = "Accounts"
 	ACC2NS = ACCOUNTS_COL + "2" + NAMESPACES_COL
