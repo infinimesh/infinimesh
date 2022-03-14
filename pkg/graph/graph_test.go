@@ -170,7 +170,7 @@ func TestAuthorizeDisabledAccount(t *testing.T) {
 		Credentials: credentials,
 	})
 	if err != nil {
-		t.Fatal("Error creating Account")
+		t.Fatalf("Error creating Account: %v", err)
 	}
 
 	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -199,7 +199,7 @@ func TestAuthorizeStandard(t *testing.T) {
 		Credentials: credentials,
 	})
 	if err != nil {
-		t.Fatal("Error creating Account")
+		t.Fatalf("Error creating Account: %v", err)
 	}
 
 	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -253,7 +253,7 @@ func TestAuthorizeStandardFail(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Fatal("Error creating Account")
+		t.Fatalf("Error creating Account: %v", err)
 	}
 
 	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
@@ -536,5 +536,145 @@ func TestListNamespaces(t *testing.T) {
 	}
 	if createdFound {
 		t.Fatal("Created Namespace not listed")
+	}
+}
+
+// Permissions Tests
+
+func TestNewAccountNoNamespaceGiven(t *testing.T) {
+	t.Log("Creating Sample Account and testing Authorisation")
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	credentials := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username, password},
+	}
+
+	accpb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username, Enabled: true,
+		},
+		Credentials: credentials,
+	})
+	if err != nil {
+		t.Fatalf("Failed to create Account: %v", err)
+	}
+	acc := NewAccountFromPB(accpb.Account)
+
+	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	ok := CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
+	if !ok {
+		t.Fatal("Account has to be under platform Namespace byt default")
+	}
+}
+
+func TestNewAccountAccessToRoot(t *testing.T) {
+	t.Log("Creating Sample Account and testing Authorisation")
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	credentials := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username, password},
+	}
+
+	accPb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username, Enabled: true,
+		},
+		Credentials: credentials,
+		Namespace: schema.ROOT_NAMESPACE_KEY,
+	})
+	if err != nil {
+		t.Fatal("Error creating Account")
+	}
+	acc := NewAccountFromPB(accPb.Account)
+
+	// Checking Account access to Root Account
+	ok, level := AccessLevel(rootCtx, db, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
+	if ok {
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
+	}
+}
+
+/*
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░█████░░░░░░░░░░░░░░░░░█████░░░░░░░░░░
+░░░██A██────────V────────██1██░░░░░░░░░░
+░░░█████░░░░░░░░░░░░░░░░░█████░░░░░░░░░░
+░░░░░│░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░░░│░░░░░░░ A - infinimesh NS ░░░░░░░░
+░░░░░X░░░░░░░ 1 - User 1 ░░░░░░░░░░░░░░░
+░░░░░│░░░░░░░ 2 - User 2 ░░░░░░░░░░░░░░░
+░░░░░│░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░██2██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+*/
+
+func TestPermissionsRootNamespace(t *testing.T) {
+	t.Log("Creating Sample Account and testing Authorisation")
+	username1 := randomdata.SillyName()
+	credentials1 := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username1, randomdata.Alphanumeric(12)},
+	}
+
+	// Create Account 1 under platform Namespace
+	acc1pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username1, Enabled: true,
+		},
+		Credentials: credentials1,
+		Namespace: schema.ROOT_NAMESPACE_KEY,
+	})
+	if err != nil {
+		t.Fatal("Error creating Account 1")
+	}
+	acc1 := NewAccountFromPB(acc1pb.Account)
+
+	username2 := randomdata.SillyName()
+	credentials2 := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username2, randomdata.Alphanumeric(12)},
+	}
+
+	// Create Account 2 under platform Namespace
+	acc2pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username2, Enabled: true,
+		},
+		Credentials: credentials2,
+		Namespace: schema.ROOT_NAMESPACE_KEY,
+	})
+	if err != nil {
+		t.Fatal("Error creating Account 2")
+	}
+	acc2 := NewAccountFromPB(acc2pb.Account)
+
+	// Giving Account 1 Management access(MGMT) to Platform
+	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), schema.MGMT)
+	if err != nil {
+		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
+	}
+
+	// Checking Account 1 access to Account 2
+	ok, level := AccessLevel(rootCtx, db, acc1, acc2)
+	if !ok {
+		t.Fatalf("Error checking Access or Access Level is 0(none)")
+	}
+
+	if level > int32(schema.MGMT) {
+		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", level, schema.MGMT)
+	}
+	if level < int32(schema.MGMT) {
+		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", level, schema.MGMT)
+	}
+
+	// Checking Account 2 access to Account 1
+	ok, level = AccessLevel(rootCtx, db, acc2, acc1)
+	if ok {
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
 	}
 }
