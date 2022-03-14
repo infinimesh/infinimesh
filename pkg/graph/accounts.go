@@ -17,6 +17,8 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
@@ -25,6 +27,8 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -364,4 +368,93 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 		return nil, err
 	}
 	return &pb.SetCredentialsResponse{}, nil
+}
+
+func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
+
+	ctx := context.TODO()
+	db := ctrl.db
+
+	exists, err := ctrl.col.DocumentExists(ctx, schema.ROOT_ACCOUNT_KEY)
+	if err != nil {
+		return err
+	}
+
+	var meta driver.DocumentMeta
+	if !exists {
+		meta, err = ctrl.col.CreateDocument(ctx, Account{ 
+			Account: &accpb.Account{
+				Title: "infinimesh",
+				Enabled: true,
+			},
+			DocumentMeta: driver.DocumentMeta { Key: schema.ROOT_ACCOUNT_KEY },
+		})
+		if err != nil {
+			return err
+		}
+		ctrl.log.Debug("Created root Account", zap.Any("result", meta))
+	}
+	var acc accpb.Account
+	meta, err = ctrl.col.ReadDocument(ctx, schema.ROOT_ACCOUNT_KEY, &acc)
+	if err != nil {
+		return err
+	}
+	root := &Account{
+		Account: &acc,
+		DocumentMeta: meta,
+	}
+
+	ns_col, _ := ctrl.col.Database().Collection(ctx, schema.NAMESPACES_COL)
+	exists, err = ns_col.DocumentExists(ctx, schema.ROOT_NAMESPACE_KEY)
+	if err != nil || !exists {
+		meta, err := ns_col.CreateDocument(ctx, Namespace{ 
+			Namespace: &namespaces.Namespace{
+				Title: "infinimesh",
+			},
+			DocumentMeta: driver.DocumentMeta { Key: schema.ROOT_NAMESPACE_KEY },
+		})
+		if err != nil {
+			return err
+		}
+		ctrl.log.Debug("Created root Namespace", zap.Any("result", meta))
+	}
+
+	var ns nspb.Namespace
+	meta, err = ns_col.ReadDocument(ctx, schema.ROOT_NAMESPACE_KEY, &ns)
+	if err != nil {
+		return err
+	}
+	rootNS := &Namespace{
+		Namespace: &ns,
+		DocumentMeta: meta,
+	}
+
+	edge_col := GetEdgeCol(ctx, db, schema.ACC2NS)
+	exists, err = edge_col.DocumentExists(ctx, fmt.Sprintf("%s-%s", schema.ROOT_ACCOUNT_KEY, schema.ROOT_NAMESPACE_KEY))
+	if err != nil || !exists {
+		err = Link(ctx, edge_col, root, rootNS, schema.ROOT)
+		if err != nil {
+			return err
+		}
+	}
+
+	ctx = context.WithValue(ctx, schema.InfinimeshAccount, schema.ROOT_ACCOUNT_KEY)
+	cred_edge_col, _ := ctrl.col.Database().Collection(ctx, schema.ACC2CRED)
+	cred, err := credentials.NewStandardCredentials("infinimesh", passwd)
+	if err != nil {
+		return err
+	}
+
+	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
+	if err != nil || !exists {
+		err = ctrl.SetCredentialsCtrl(ctx, *root, cred_edge_col, cred)
+		if err != nil {
+			return err
+		}
+	}
+	_, r := ctrl.Authorize(ctx, "standard", "infinimesh", passwd)
+	if !r {
+		return errors.New("Cannot authorize infinimesh")
+	}
+	return nil
 }

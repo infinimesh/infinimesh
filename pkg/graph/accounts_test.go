@@ -49,12 +49,18 @@ func init() {
 
 	viper.SetDefault("DB_HOST", "localhost:8529")
 	viper.SetDefault("DB_CRED", "root:openSesame")
+	viper.SetDefault("ROOT_PASS", "infinimesh")
 
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
+	rootPass := viper.GetString("ROOT_PASS")
 	db := schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh")
-
+	
 	ctrl = NewAccountsController(log, db)
+	err := ctrl.EnsureRootExists(rootPass)
+	if err != nil {
+		panic(err)
+	}
 
 	md := metadata.New(map[string]string{"requestorid": "infinimesh"})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
