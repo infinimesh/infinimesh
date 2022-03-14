@@ -36,6 +36,10 @@ type Account struct {
 	driver.DocumentMeta
 }
 
+func (o *Account) ID() (driver.DocumentID) {
+	return o.DocumentMeta.ID
+}
+
 type AccountsController struct {
 	pb.UnimplementedAccountsServiceServer
 	log *zap.Logger
@@ -86,7 +90,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 	}
-	log.Debug("Authorized user", zap.String("ID", account.ID.String()))
+	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
 	if !account.Enabled {
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
 	}
@@ -219,7 +223,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 		return nil, status.Error(codes.Internal, "Account has been deleted partialy")
 	}
 
-	_, err = c.col.RemoveDocument(ctx, acc.ID.Key())
+	_, err = c.col.RemoveDocument(ctx, acc.ID().Key())
 	if err != nil {
 		log.Error("Error deleting Account", zap.String("account", acc.Key), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting Account")
@@ -266,7 +270,7 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []credentials.Credentials, err error) {
 	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials`
 	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
-		"account": acc.ID.String(),
+		"account": acc.ID().String(),
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
@@ -310,7 +314,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 	}
 
 	_, err = edge.CreateDocument(ctx, credentials.Link{
-		From: acc.ID,
+		From: acc.ID(),
 		To: cred.ID,
 		Type: c.Type(),
 		DocumentMeta: driver.DocumentMeta {
