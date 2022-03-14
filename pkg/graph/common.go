@@ -68,3 +68,31 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 	r, err := edge.DocumentExists(ctx, from.GetUuid() + "-" + to.GetUuid())
 	return err == nil && r
 }
+
+func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
+	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
+	c, err := db.Query(ctx, query, map[string]interface{}{
+		"account": account.ID(),
+		"node": node.ID(),
+		"permissions": schema.PERMISSIONS_GRAPH.Name,
+	})
+	if err != nil {
+		return false, 0
+	}
+	defer c.Close()
+
+	var access int32 = 0
+	for {
+		var level int32
+		_, err := c.ReadDocument(ctx, &level)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			continue
+		}
+		if level > access {
+			access = level
+		}
+	}
+	return access > 0, access
+}
