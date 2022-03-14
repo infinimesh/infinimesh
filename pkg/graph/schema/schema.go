@@ -62,3 +62,10 @@ var CREDENTIALS_GRAPH = InfinimeshGraphSchema{
 var GRAPHS_SCHEMAS = []InfinimeshGraphSchema{
 	PERMISSIONS_GRAPH, CREDENTIALS_GRAPH,
 }
+
+type InfinimeshAccessLevel int32;
+const NONE InfinimeshAccessLevel = 0;
+const READ InfinimeshAccessLevel = 1;
+const MGMT InfinimeshAccessLevel = 2;
+const ADMIN InfinimeshAccessLevel = 3;
+const ROOT InfinimeshAccessLevel = 4;
