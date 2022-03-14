@@ -20,6 +20,7 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
+	"go.uber.org/zap"
 )
 
 type Access struct {
@@ -47,7 +48,11 @@ func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Co
 	return col
 }
 
-func Link(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access schema.InfinimeshAccessLevel) error {
+func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access schema.InfinimeshAccessLevel) error {
+	log.Debug("Linking two nodes",
+		zap.Any("from", from),
+		zap.Any("to", to),
+	)
 	_, err := edge.CreateDocument(ctx, Access{
 		From: from.ID(),
 		To: to.ID(),
