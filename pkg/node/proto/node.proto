@@ -35,6 +35,7 @@ message SetCredentialsRequest {
 
 message SetCredentialsResponse {}
 message DeleteResponse {}
+message EmptyMessage {}
 
 service AccountsService {
   rpc Token(TokenRequest) returns (TokenResponse) {
@@ -44,6 +45,11 @@ service AccountsService {
     };
   };
 
+  rpc List(EmptyMessage) returns (infinimesh.node.accounts.AccountsPool) {
+    option (google.api.http) = {
+      get: "/accounts"
+    };
+  };
   rpc Get(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
     option (google.api.http) = {
       get: "/accounts/{uuid}"
@@ -80,6 +86,11 @@ service AccountsService {
 import "pkg/node/proto/namespaces/namespaces.proto";
 
 service NamespacesService {
+  rpc List(EmptyMessage) returns (infinimesh.node.namespaces.NamespacesPool) {
+    option (google.api.http) = {
+      get: "/namespaces"
+    };
+  };
   rpc Get(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
     option (google.api.http) = {
       get: "/namespaces/{uuid}"

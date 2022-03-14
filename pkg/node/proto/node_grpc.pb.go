@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountsServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error)
 	Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
@@ -39,6 +40,15 @@ func NewAccountsServiceClient(cc grpc.ClientConnInterface) AccountsServiceClient
 func (c *accountsServiceClient) Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error) {
 	out := new(TokenResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Token", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountsServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error) {
+	out := new(accounts.AccountsPool)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +105,7 @@ func (c *accountsServiceClient) SetCredentials(ctx context.Context, in *SetCrede
 // for forward compatibility
 type AccountsServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
+	List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error)
 	Get(context.Context, *accounts.Account) (*accounts.Account, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
@@ -109,6 +120,9 @@ type UnimplementedAccountsServiceServer struct {
 
 func (UnimplementedAccountsServiceServer) Token(context.Context, *TokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Token not implemented")
+}
+func (UnimplementedAccountsServiceServer) List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedAccountsServiceServer) Get(context.Context, *accounts.Account) (*accounts.Account, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -152,6 +166,24 @@ func _AccountsService_Token_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AccountsServiceServer).Token(ctx, req.(*TokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountsService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).List(ctx, req.(*EmptyMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -258,6 +290,10 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AccountsService_Token_Handler,
 		},
 		{
+			MethodName: "List",
+			Handler:    _AccountsService_List_Handler,
+		},
+		{
 			MethodName: "Get",
 			Handler:    _AccountsService_Get_Handler,
 		},
@@ -286,6 +322,7 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NamespacesServiceClient interface {
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error)
 	Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Create(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Update(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
@@ -298,6 +335,15 @@ type namespacesServiceClient struct {
 
 func NewNamespacesServiceClient(cc grpc.ClientConnInterface) NamespacesServiceClient {
 	return &namespacesServiceClient{cc}
+}
+
+func (c *namespacesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error) {
+	out := new(namespaces.NamespacesPool)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *namespacesServiceClient) Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
@@ -340,6 +386,7 @@ func (c *namespacesServiceClient) Delete(ctx context.Context, in *namespaces.Nam
 // All implementations must embed UnimplementedNamespacesServiceServer
 // for forward compatibility
 type NamespacesServiceServer interface {
+	List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error)
 	Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Update(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
@@ -351,6 +398,9 @@ type NamespacesServiceServer interface {
 type UnimplementedNamespacesServiceServer struct {
 }
 
+func (UnimplementedNamespacesServiceServer) List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
 func (UnimplementedNamespacesServiceServer) Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
@@ -374,6 +424,24 @@ type UnsafeNamespacesServiceServer interface {
 
 func RegisterNamespacesServiceServer(s grpc.ServiceRegistrar, srv NamespacesServiceServer) {
 	s.RegisterService(&NamespacesService_ServiceDesc, srv)
+}
+
+func _NamespacesService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).List(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _NamespacesService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -455,6 +523,10 @@ var NamespacesService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "infinimesh.node.NamespacesService",
 	HandlerType: (*NamespacesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "List",
+			Handler:    _NamespacesService_List_Handler,
+		},
 		{
 			MethodName: "Get",
 			Handler:    _NamespacesService_Get_Handler,

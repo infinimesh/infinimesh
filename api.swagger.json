@@ -120,12 +120,12 @@
     },
     "/accounts": {
       "get": {
-        "operationId": "Accounts_ListAccounts",
+        "operationId": "AccountsService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeListAccountsResponse"
+              "$ref": "#/definitions/accountsAccountsPool"
             }
           },
           "default": {
@@ -136,7 +136,7 @@
           }
         },
         "tags": [
-          "Accounts"
+          "AccountsService"
         ]
       },
       "post": {
@@ -924,12 +924,12 @@
     },
     "/namespaces": {
       "get": {
-        "operationId": "Namespaces_ListNamespaces",
+        "operationId": "NamespacesService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeListNamespacesResponse"
+              "$ref": "#/definitions/namespacesNamespacesPool"
             }
           },
           "default": {
@@ -940,7 +940,7 @@
           }
         },
         "tags": [
-          "Namespaces"
+          "NamespacesService"
         ]
       },
       "post": {
@@ -1463,6 +1463,17 @@
     }
   },
   "definitions": {
+    "accountsAccountsPool": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodeaccountsAccount"
+          }
+        }
+      }
+    },
     "accountsCredentials": {
       "type": "object",
       "properties": {
@@ -1753,6 +1764,17 @@
       "properties": {
         "shadow": {
           "$ref": "#/definitions/shadowShadow"
+        }
+      }
+    },
+    "namespacesNamespacesPool": {
+      "type": "object",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodenamespacesNamespace"
+          }
         }
       }
     },

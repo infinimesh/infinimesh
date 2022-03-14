@@ -20,3 +20,7 @@ message Namespace {
   string uuid = 1;
   string title = 2;
 }
+
+message NamespacesPool {
+  repeated Namespace namespaces = 1;
+}

@@ -37,3 +37,7 @@ message CreateRequest {
 message CreateResponse {
   Account account = 1;
 }
+
+message AccountsPool {
+  repeated Account accounts = 1;
+}

@@ -505,3 +505,36 @@ func TestCreateNamespace(t *testing.T) {
 		t.Fatalf("Access level incorrect(%d), must be: %d", access.Level, schema.ADMIN)
 	}
 }
+
+func TestListNamespaces(t *testing.T) {
+	title := randomdata.SillyName()
+	nspb, err := ns_ctrl.Create(rootCtx, &namespaces.Namespace{
+		Title: title,
+	})
+	if err != nil {
+		t.Fatalf("Couldn't create Namespace: %v", err)
+	}
+
+	pool, err := ns_ctrl.List(rootCtx, &pb.EmptyMessage{})
+	if err != nil {
+		t.Fatalf("Couldn't list Namespace: %v", err)
+	}
+
+	rootFound, createdFound := false, false
+	for _, ns := range pool.GetNamespaces() {
+		if ns.GetUuid() == schema.ROOT_NAMESPACE_KEY {
+			rootFound = true
+		} else if ns.GetUuid() == nspb.GetUuid() {
+			createdFound = true
+			if ns.GetTitle() != nspb.GetTitle() {
+				t.Logf("[WARNING]: namespaces titles don't match. Listed: %s; Created: %s", ns.GetTitle(), nspb.GetTitle())
+			}
+		}
+	}
+	if rootFound {
+		t.Fatal("Root Namespace not listed")
+	}
+	if createdFound {
+		t.Fatal("Created Namespace not listed")
+	}
+}

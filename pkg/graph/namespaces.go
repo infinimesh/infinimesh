@@ -97,3 +97,45 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	return namespace.Namespace, nil
 }
 
+func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.NamespacesPool, error) {
+	log := c.log.Named("List")
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	query := `FOR node IN 0..@depth OUTBOUND @account GRAPH @permissions_graph OPTIONS {order: "bfs", uniqueVertices: "global"} FILTER IS_SAME_COLLECTION(@@namespaces, node) RETURN node`
+	bindVars := map[string]interface{}{
+		"depth": 4,
+		"account": driver.NewDocumentID(schema.ACCOUNTS_COL, requestor),
+		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
+		"@namespaces": schema.NAMESPACES_COL,
+	}
+	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
+
+	cr, err := c.db.Query(ctx, query, bindVars)
+	if err != nil {
+		return nil, err
+	}
+	defer cr.Close()
+
+	var r []*nspb.Namespace
+	for {
+		var ns nspb.Namespace 
+		_, err := cr.ReadDocument(ctx, &ns)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		log.Debug("Got document", zap.Any("namespace", &ns))
+		r = append(r, &ns)
+	}
+
+	return &nspb.NamespacesPool{
+		Namespaces: r,
+	}, nil
+}
