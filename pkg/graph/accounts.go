@@ -60,14 +60,19 @@ type AccountsController struct {
 	cred driver.Collection
 	db driver.Database
 
+	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
+	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
+
 	SIGNING_KEY []byte
 }
 
 func NewAccountsController(log *zap.Logger, db driver.Database) AccountsController {
-	col, _ := db.Collection(context.TODO(), schema.ACCOUNTS_COL)
-	cred, _ := db.Collection(context.TODO(), schema.CREDENTIALS_COL)
+	ctx := context.TODO()
+	col, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
+	cred, _ := db.Collection(ctx, schema.CREDENTIALS_COL)
 	return AccountsController{
 		log: log.Named("AccountsController"), col: col, db: db, cred: cred,
+		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -154,29 +159,45 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	}
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	// Check requestor access to request.GetNamespace()
+	ns_id := request.GetNamespace()
+	if ns_id == "" {
+		ns_id = schema.ROOT_NAMESPACE_KEY
+	}
+
+	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
+	if !ok || level < int32(schema.ADMIN) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
+	}
 
 	account := Account{Account: request.GetAccount()}
 	meta, err := c.col.CreateDocument(ctx, account)
 	if err != nil {
-		c.log.Debug("Error creating account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error while creating account")
+		log.Error("Error creating Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while creating Account")
 	}
 	account.Uuid = meta.ID.Key()
 	account.DocumentMeta = meta
 
-	// Add Account to Namespace
+	ns := NewBlankNamespaceDocument(ns_id)
+	err = Link(ctx, log, c.acc2ns, ns, &account, schema.ADMIN)
+	if err != nil {
+		defer c.col.RemoveDocument(ctx, meta.Key)
+		log.Error("Error Linking Namespace to Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
 	cred, err := credentials.MakeCredentials(request.GetCredentials(), log)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
+		log.Error("Error making Credentials for Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	err = c.SetCredentialsCtrl(ctx, account, col, cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
+		log.Error("Error setting Credentials for Account", zap.Error(err))
 		return nil, err
 	}
 
