@@ -37,6 +37,7 @@ type InfinimeshGraphNode interface {
 
 func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
 	return driver.DocumentMeta{
+		Key: key,
 		ID: driver.NewDocumentID(col, key),
 	}
 }
@@ -56,4 +57,9 @@ func Link(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode,
 		},
 	})
 	return err
+}
+
+func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) (bool) {
+	r, err := edge.DocumentExists(ctx, from.GetUuid() + "-" + to.GetUuid())
+	return err == nil && r
 }

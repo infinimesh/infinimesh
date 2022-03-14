@@ -21,11 +21,13 @@ import (
 	"testing"
 
 	randomdata "github.com/Pallinder/go-randomdata"
+	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -39,8 +41,11 @@ var (
 	arangodbCred string
 
 	ctrl AccountsController
+	ns_ctrl NamespacesController
 
 	rootCtx context.Context
+
+	db driver.Database
 )
 
 func init() {
@@ -54,7 +59,7 @@ func init() {
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
 	rootPass := viper.GetString("ROOT_PASS")
-	db := schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh")
+	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh")
 	
 	ctrl = NewAccountsController(log, db)
 	err := ctrl.EnsureRootExists(rootPass)
@@ -62,7 +67,9 @@ func init() {
 		panic(err)
 	}
 
-	md := metadata.New(map[string]string{"requestorid": "infinimesh"})
+	ns_ctrl = NewNamespacesController(log, db)
+
+	md := metadata.New(map[string]string{"requestorid": schema.ROOT_ACCOUNT_KEY})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
 }
 
@@ -70,6 +77,17 @@ func CompareAccounts(a, b *accounts.Account) bool {
 	return a.GetUuid() == b.GetUuid() &&
 				 a.GetTitle() == b.GetTitle() &&
 				 a.GetEnabled() == b.GetEnabled()
+}
+
+// AccountsController Tests
+
+func TestNewBlankAccountDocument(t *testing.T) {
+	uuid := randomdata.StringNumber(10, "-")
+	uuidMeta := driver.NewDocumentID(schema.ACCOUNTS_COL, uuid)
+	acc := NewBlankAccountDocument(uuid)
+	if acc.ID() != uuidMeta {
+		t.Fatalf("Blank document meta ID not equal to given. Comparing %v with %v", acc.ID(), uuidMeta)
+	}
 }
 
 func TestValidate(t *testing.T) {
@@ -120,7 +138,7 @@ func TestValidateEmptyRequestor(t *testing.T) {
 	}
 }
 
-func TestFalseCredentialsType(t *testing.T) {
+func TestAccountCreate_FalseCredentialsType(t *testing.T) {
 	t.Log("Creating Sample Account with unsupported Credentials")
 	username := randomdata.SillyName()
 	_, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
@@ -455,5 +473,35 @@ func TestSetCredentialsStandard(t *testing.T) {
 
 	if id != this.GetUuid() {
 		t.Fatalf("Expected account in Claim to be %s, got: %s", this.GetUuid(), id)
+	}
+}
+
+// NamespacesController Tests
+
+func TestCreateNamespace(t *testing.T) {
+	title := randomdata.SillyName()
+	nspb, err := ns_ctrl.Create(rootCtx, &namespaces.Namespace{
+		Title: title,
+	})
+	if err != nil {
+		t.Fatalf("Couldn't create Namespace: %v", err)
+	}
+
+	ok, err := ns_ctrl.col.DocumentExists(rootCtx, nspb.Uuid)
+	if err != nil {
+		t.Fatalf("Error testing Namespace existance: %v", err)
+	} else if !ok {
+		t.Fatalf("Namespace doesn't exist in DB")
+	}
+
+	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	var access Access
+	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY + "-" + nspb.Uuid, &access)
+	if err != nil {
+		t.Fatalf("Can't read edge document or it doesn't exist: %v", err)
+	}
+
+	if access.Level < 3 {
+		t.Fatalf("Access level incorrect(%d), must be: %d", access.Level, schema.ADMIN)
 	}
 }

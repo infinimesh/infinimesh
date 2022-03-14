@@ -73,15 +73,19 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	namespace := Namespace{Namespace: request}
 	meta, err := c.col.CreateDocument(ctx, namespace)
 	if err != nil {
-		c.log.Debug("Error creating namespace", zap.Error(err))
+		log.Error("Error creating namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while creating namespace")
 	}
 	namespace.Uuid = meta.ID.Key()
 	namespace.DocumentMeta = meta
 
-
+	requestorAcc := NewBlankAccountDocument(requestor)
+	log.Debug("Linking Account and Namespace",
+		zap.Any("account", requestorAcc),
+		zap.Any("namespace", namespace),
+	)
 	err = Link(ctx, c.acc2ns,
-		NewBlankAccountDocument(requestor),
+		&requestorAcc,
 		&namespace, schema.ADMIN,
 	)
 	if err != nil {
