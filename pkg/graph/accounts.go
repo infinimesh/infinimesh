@@ -454,7 +454,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 	}
 	_, r := ctrl.Authorize(ctx, "standard", "infinimesh", passwd)
 	if !r {
-		return errors.New("Cannot authorize infinimesh")
+		return errors.New("cannot authorize infinimesh")
 	}
 	return nil
 }
