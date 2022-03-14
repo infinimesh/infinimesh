@@ -27,7 +27,6 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -408,7 +407,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 	exists, err = ns_col.DocumentExists(ctx, schema.ROOT_NAMESPACE_KEY)
 	if err != nil || !exists {
 		meta, err := ns_col.CreateDocument(ctx, Namespace{ 
-			Namespace: &namespaces.Namespace{
+			Namespace: &nspb.Namespace{
 				Title: "infinimesh",
 			},
 			DocumentMeta: driver.DocumentMeta { Key: schema.ROOT_NAMESPACE_KEY },
