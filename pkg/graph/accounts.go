@@ -466,7 +466,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 		log.Error("Error checking link Root Account to Root Namespace", zap.Error(err))
 		return err
 	} else if !exists {
-		err = Link(ctx, edge_col, root, rootNS, schema.ROOT)
+		err = Link(ctx, log, edge_col, root, rootNS, schema.ROOT)
 		if err != nil {
 			log.Error("Error linking Root Account to Root Namespace")
 			return err

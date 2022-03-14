@@ -88,12 +88,8 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	namespace.DocumentMeta = meta
 
 	requestorAcc := NewBlankAccountDocument(requestor)
-	log.Debug("Linking Account and Namespace",
-		zap.Any("account", requestorAcc),
-		zap.Any("namespace", namespace),
-	)
-	err = Link(ctx, c.acc2ns,
-		&requestorAcc,
+	err = Link(ctx, log, c.acc2ns,
+		requestorAcc,
 		&namespace, schema.ADMIN,
 	)
 	if err != nil {
