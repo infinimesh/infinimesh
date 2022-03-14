@@ -52,6 +52,13 @@ func NewBlankAccountDocument(key string) *Account {
 	}
 }
 
+func NewAccountFromPB(acc *accpb.Account) (res *Account) {
+	return &Account{
+		Account: acc,
+		DocumentMeta: NewBlankDocument(schema.ACCOUNTS_COL, acc.Uuid),
+	}
+}
+
 type AccountsController struct {
 	pb.UnimplementedAccountsServiceServer
 	log *zap.Logger
