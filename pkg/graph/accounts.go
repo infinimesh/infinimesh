@@ -40,6 +40,12 @@ func (o *Account) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
+func NewBlankAccountDocument(key string) *Account {
+	return &Account{
+		DocumentMeta: NewBlankDocument(schema.ACCOUNTS_COL, key),
+	}
+}
+
 type AccountsController struct {
 	pb.UnimplementedAccountsServiceServer
 	log *zap.Logger
