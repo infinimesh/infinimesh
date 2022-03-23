@@ -75,8 +75,11 @@ type AccountsController struct {
 
 func NewAccountsController(log *zap.Logger, db driver.Database) AccountsController {
 	ctx := context.TODO()
-	col, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
-	cred, _ := db.Collection(ctx, schema.CREDENTIALS_COL)
+	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
+	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
+
+	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
+	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
 	return AccountsController{
 		log: log.Named("AccountsController"), col: col, db: db, cred: cred,
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
@@ -132,7 +135,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	return &pb.TokenResponse{Token: token_string}, nil
 }
 
-func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *accpb.Account, err error) {
 	log := c.log.Named("Get")
 	log.Debug("Get request received", zap.Any("request", acc))
 
@@ -144,15 +147,17 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (*accp
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	// Getting Account from DB
-	_, err = c.col.ReadDocument(ctx, acc.GetUuid(), acc)
-	if err != nil {
-		log.Error("Error getting account", zap.String("uuid", acc.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.NotFound, "Account not found")
+	// and Check requestor access
+	result := *NewBlankAccountDocument(acc.GetUuid())
+	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+	}
+	if level < 1 {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	// Check requestor access to acc.GetUuid()
-	
-	return acc, nil
+	return result.Account, nil
 }
 
 func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRequest) (*accpb.CreateResponse, error) {
@@ -244,20 +249,22 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	}
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	var acc Account
-	c.col.ReadDocument(ctx, req.GetUuid(), &acc)
-
-	// Check requestor access to acc.GetUuid()
+	acc := *NewBlankAccountDocument(req.GetUuid())
+	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+	}
+	if level < 3 {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
 
 	creds, err := c.GetCredentials(ctx, acc)
 	if err != nil {
 		log.Error("Error gathering Account credentials", zap.String("account", acc.Key), zap.Error(err))
 	}
-	credsKeys := make([]string, len(creds))
-	for i, cred := range creds {
-		credsKeys[i] = cred.Key()
-	}
-	_, errs, err := c.cred.RemoveDocuments(ctx, credsKeys)
+	log.Debug("Got credentials", zap.Any("credentials", creds))
+
+	_, errs, err := c.cred.RemoveDocuments(ctx, creds)
 	if err != nil {
 		log.Error("Error deleting Credentials", zap.String("account", acc.Key), zap.Any("errors", errs), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Account has been deleted partialy")
@@ -307,23 +314,25 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 }
 
 // Return Credentials linked to Account
-func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []credentials.Credentials, err error) {
-	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials`
+func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []string, err error) {
+	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials._key`
 	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
 		"account": acc.ID().String(),
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
+		ctrl.log.Error("Error executing query", zap.Error(err))
 		return nil, err
 	}
 	defer c.Close()
 
 	for {
-		var cred credentials.Credentials 
+		var cred string
 		_, err := c.ReadDocument(ctx, &cred)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
+			ctrl.log.Debug("Error unmarshalling credentials", zap.Error(err))
 			return nil, err
 		}
 		r = append(r, cred)
@@ -335,8 +344,9 @@ func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account)
 func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) (error) {
 	key := c.Type() + "-" + acc.Key
 	var oldLink credentials.Link
-	_, err := edge.ReadDocument(ctx, key, &oldLink)
+	meta, err := edge.ReadDocument(ctx, key, &oldLink)
 	if err == nil {	
+		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
 		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
 		if err != nil {
 			ctrl.log.Error("Error updating Credentials of type", zap.Error(err), zap.String("key", key))

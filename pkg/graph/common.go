@@ -71,13 +71,14 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 
 func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
 	query := `FOR o IN LAST((FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions SORT path.edges[0].level RETURN [ path.edges[0].level, path.vertices[-1]])) RETURN o`
-	c, err := db.Query(ctx, query, map[string]interface{}{
+	vars :=  map[string]interface{}{
 		"account": account.ID(),
 		"node": node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
-	})
+	}
+	c, err := db.Query(ctx, query, vars)
 	if err != nil {
-		log.Debug("Error while executing query", zap.Error(err))
+		log.Debug("Error while executing query", zap.Any("vars", vars), zap.Error(err))
 		return false, 0
 	}
 	defer c.Close()
