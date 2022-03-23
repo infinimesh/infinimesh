@@ -45,6 +45,10 @@ const (
 	CREDENTIALS_EDGE_COL = ACCOUNTS_COL + "2" + CREDENTIALS_COL
 )
 
+const (
+	DEVICES_COL = "Devices"
+	DEVICES_EDGE_COL = ACCOUNTS_COL + "2" + DEVICES_COL
+)
 
 type InfinimeshGraphSchema struct {
 	Name string
@@ -52,7 +56,8 @@ type InfinimeshGraphSchema struct {
 }
 
 var COLLECTIONS = []string{
-	ACCOUNTS_COL, NAMESPACES_COL, CREDENTIALS_COL,
+	ACCOUNTS_COL, NAMESPACES_COL,
+	CREDENTIALS_COL, DEVICES_COL,
 }
 
 var PERMISSIONS_GRAPH = InfinimeshGraphSchema{
@@ -60,6 +65,7 @@ var PERMISSIONS_GRAPH = InfinimeshGraphSchema{
 	Edges: [][]string{
 		{ACCOUNTS_COL, NAMESPACES_COL},
 		{NAMESPACES_COL, ACCOUNTS_COL},
+		{NAMESPACES_COL, DEVICES_COL},
 	},
 }
 var CREDENTIALS_GRAPH = InfinimeshGraphSchema{
