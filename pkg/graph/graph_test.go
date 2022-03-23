@@ -747,3 +747,13 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
 	}
 }
+
+func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
+	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
+	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
+
+	ok, level := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
+	if ok {
+		t.Fatalf("Has to be error but it's not: %d", level)
+	}
+}
