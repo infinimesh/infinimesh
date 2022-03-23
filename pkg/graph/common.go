@@ -69,6 +69,35 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 	return err == nil && r
 }
 
+func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
+	query := `FOR o IN LAST((FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions SORT path.edges[0].level RETURN [ path.edges[0].level, path.vertices[-1]])) RETURN o`
+	c, err := db.Query(ctx, query, map[string]interface{}{
+		"account": account.ID(),
+		"node": node.ID(),
+		"permissions": schema.PERMISSIONS_GRAPH.Name,
+	})
+	if err != nil {
+		log.Debug("Error while executing query", zap.Error(err))
+		return false, 0
+	}
+	defer c.Close()
+	
+	var level int32
+	_, err = c.ReadDocument(ctx, &level)
+	if err != nil {
+		log.Debug("Error while reading level", zap.Error(err))
+		return false, 0
+	}
+
+	_, err = c.ReadDocument(ctx, &node)
+	if err != nil {
+		log.Debug("Error while reading node document", zap.Error(err))
+		return false, 0
+	}
+
+	return true, level
+}
+
 func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
 	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{

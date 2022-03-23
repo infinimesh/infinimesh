@@ -678,3 +678,72 @@ func TestPermissionsRootNamespace(t *testing.T) {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
 	}
 }
+
+func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
+	t.Log("Creating Sample Account and testing Authorisation")
+	username1 := randomdata.SillyName()
+	credentials1 := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username1, randomdata.Alphanumeric(12)},
+	}
+
+	// Create Account 1 under platform Namespace
+	acc1pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username1, Enabled: true,
+		},
+		Credentials: credentials1,
+		Namespace: schema.ROOT_NAMESPACE_KEY,
+	})
+	if err != nil {
+		t.Fatal("Error creating Account 1")
+	}
+	acc1 := NewAccountFromPB(acc1pb.Account)
+
+	username2 := randomdata.SillyName()
+	credentials2 := &accounts.Credentials{
+		Type: "standard",
+		Data: []string{username2, randomdata.Alphanumeric(12)},
+	}
+
+	// Create Account 2 under platform Namespace
+	acc2pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: &accounts.Account{
+			Title: username2, Enabled: true,
+		},
+		Credentials: credentials2,
+		Namespace: schema.ROOT_NAMESPACE_KEY,
+	})
+	if err != nil {
+		t.Fatal("Error creating Account 2")
+	}
+	acc2 := NewAccountFromPB(acc2pb.Account)
+
+	// Giving Account 1 Management access(MGMT) to Platform
+	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), schema.MGMT)
+	if err != nil {
+		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
+	}
+
+	nacc1 := *NewBlankAccountDocument(acc1.Key)
+	nacc2 := *NewBlankAccountDocument(acc2.Key)
+	// Checking Account 1 access to Account 2
+	ok, level := AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
+	if !ok {
+		t.Fatalf("Error checking Access or Access Level is 0(none)")
+	}
+
+	if level > int32(schema.MGMT) {
+		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", level, schema.MGMT)
+	}
+	if level < int32(schema.MGMT) {
+		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", level, schema.MGMT)
+	}
+
+	// Checking Account 2 access to Account 1
+	ok, level = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
+	if ok {
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
+	}
+}
