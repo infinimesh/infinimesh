@@ -48,6 +48,9 @@
       "name": "NamespacesService"
     },
     {
+      "name": "DevicesService"
+    },
+    {
       "name": "Repos"
     }
   ],
@@ -551,12 +554,12 @@
     },
     "/devices": {
       "get": {
-        "operationId": "Devices_List",
+        "operationId": "DevicesService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/deviceregistryListResponse"
+              "$ref": "#/definitions/devicesDevicesPool"
             }
           },
           "default": {
@@ -566,16 +569,8 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "namespaceid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
         "tags": [
-          "Devices"
+          "DevicesService"
         ]
       },
       "post": {
@@ -606,6 +601,87 @@
         ],
         "tags": [
           "Devices"
+        ]
+      },
+      "put": {
+        "operationId": "DevicesService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodedevicesCreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "device.uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "device.certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "device.certificate.fingerprintAlgorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DevicesService"
         ]
       }
     },
@@ -668,7 +744,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/deviceregistryDevice"
+              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
             }
           },
           {
@@ -919,6 +995,233 @@
         ],
         "tags": [
           "States"
+        ]
+      }
+    },
+    "/devices/{uuid}": {
+      "get": {
+        "operationId": "DevicesService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodedevicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "certificate.fingerprintAlgorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      },
+      "delete": {
+        "operationId": "DevicesService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "certificate.fingerprintAlgorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      },
+      "patch": {
+        "operationId": "DevicesService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodedevicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "certificate.fingerprintAlgorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "DevicesService"
         ]
       }
     },
@@ -1505,60 +1808,13 @@
         }
       }
     },
-    "deviceregistryCertificate": {
-      "type": "object",
-      "properties": {
-        "pemData": {
-          "type": "string"
-        },
-        "algorithm": {
-          "type": "string"
-        },
-        "fingerprint": {
-          "type": "string",
-          "format": "byte"
-        },
-        "fingerprintAlgorithm": {
-          "type": "string"
-        }
-      }
-    },
-    "deviceregistryDevice": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "certificate": {
-          "$ref": "#/definitions/deviceregistryCertificate"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "basicEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "deviceregistryGetByFingerprintResponse": {
       "type": "object",
       "properties": {
         "devices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/deviceregistryDevice"
+            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
           }
         }
       }
@@ -1577,7 +1833,7 @@
         "devices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/deviceregistryDevice"
+            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
           }
         }
       }
@@ -1587,6 +1843,17 @@
     },
     "deviceregistryUpdateResponse": {
       "type": "object"
+    },
+    "devicesDevicesPool": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/nodedevicesDevice"
+          }
+        }
+      }
     },
     "infinimeshapiCreateObjectRequest": {
       "type": "object",
@@ -1639,11 +1906,29 @@
         }
       }
     },
+    "infinimeshdeviceregistryCertificate": {
+      "type": "object",
+      "properties": {
+        "pemData": {
+          "type": "string"
+        },
+        "algorithm": {
+          "type": "string"
+        },
+        "fingerprint": {
+          "type": "string",
+          "format": "byte"
+        },
+        "fingerprintAlgorithm": {
+          "type": "string"
+        }
+      }
+    },
     "infinimeshdeviceregistryCreateRequest": {
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
+          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
         }
       }
     },
@@ -1651,18 +1936,47 @@
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
+          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
         }
       }
     },
     "infinimeshdeviceregistryDeleteResponse": {
       "type": "object"
     },
+    "infinimeshdeviceregistryDevice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "certificate": {
+          "$ref": "#/definitions/infinimeshdeviceregistryCertificate"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "basicEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "infinimeshdeviceregistryGetResponse": {
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
+          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
         }
       }
     },
@@ -1997,6 +2311,55 @@
       "properties": {
         "account": {
           "$ref": "#/definitions/nodeaccountsAccount"
+        }
+      }
+    },
+    "nodedevicesCertificate": {
+      "type": "object",
+      "properties": {
+        "pemData": {
+          "type": "string"
+        },
+        "algorithm": {
+          "type": "string"
+        },
+        "fingerprint": {
+          "type": "string",
+          "format": "byte"
+        },
+        "fingerprintAlgorithm": {
+          "type": "string"
+        }
+      }
+    },
+    "nodedevicesCreateResponse": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/nodedevicesDevice"
+        }
+      }
+    },
+    "nodedevicesDevice": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "certificate": {
+          "$ref": "#/definitions/nodedevicesCertificate"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

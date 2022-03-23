@@ -1,0 +1,49 @@
+/*
+Copyright © 2022 Infinite Devices GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+syntax = "proto3";
+package infinimesh.node.devices;
+
+message Device {
+  string uuid = 1;
+  string title = 2;
+  bool enabled = 3;
+  Certificate certificate = 4;
+  repeated string tags = 5;
+}
+
+message Certificate {
+  string pem_data = 1;
+  string algorithm = 2;
+  bytes fingerprint = 3;
+  string fingerprintAlgorithm = 4;
+}
+
+message DevicesPool {
+  repeated Device devices = 1;
+}
+
+message CreateRequest {
+  Device device = 1;
+  string namespace = 2; // Namespace to put device under
+}
+
+message CreateResponse {
+  Device device = 1;
+}
+
+message GetByFingerprintRequest {
+  bytes fingerprint = 1;
+}

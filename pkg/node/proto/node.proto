@@ -45,14 +45,14 @@ service AccountsService {
     };
   };
 
-  rpc List(EmptyMessage) returns (infinimesh.node.accounts.AccountsPool) {
-    option (google.api.http) = {
-      get: "/accounts"
-    };
-  };
   rpc Get(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
     option (google.api.http) = {
       get: "/accounts/{uuid}"
+    };
+  };
+  rpc List(EmptyMessage) returns (infinimesh.node.accounts.AccountsPool) {
+    option (google.api.http) = {
+      get: "/accounts"
     };
   };
 
@@ -86,14 +86,14 @@ service AccountsService {
 import "pkg/node/proto/namespaces/namespaces.proto";
 
 service NamespacesService {
-  rpc List(EmptyMessage) returns (infinimesh.node.namespaces.NamespacesPool) {
-    option (google.api.http) = {
-      get: "/namespaces"
-    };
-  };
   rpc Get(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
     option (google.api.http) = {
       get: "/namespaces/{uuid}"
+    };
+  };
+  rpc List(EmptyMessage) returns (infinimesh.node.namespaces.NamespacesPool) {
+    option (google.api.http) = {
+      get: "/namespaces"
     };
   };
 
@@ -114,4 +114,37 @@ service NamespacesService {
       delete: "/namespaces/{uuid}"
     };
   };
+}
+
+import "pkg/node/proto/devices/devices.proto";
+
+service DevicesService {
+  rpc Get(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
+    option (google.api.http) = {
+      get: "/devices/{uuid}"
+    };
+  };
+  rpc List(EmptyMessage) returns (infinimesh.node.devices.DevicesPool) {
+    option (google.api.http) = {
+      get: "/devices"
+    };
+  };
+
+  rpc Create(infinimesh.node.devices.CreateRequest) returns (infinimesh.node.devices.CreateResponse) {
+    option (google.api.http) = {
+      put: "/devices"
+    };
+  };
+  rpc Update(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
+    option (google.api.http) = {
+      patch: "/devices/{uuid}"
+    };
+  };
+  rpc Delete(infinimesh.node.devices.Device) returns (DeleteResponse) {
+    option (google.api.http) = {
+      delete: "/devices/{uuid}"
+    };
+  };
+
+  rpc GetByFingerprint(infinimesh.node.devices.GetByFingerprintRequest) returns (infinimesh.node.devices.Device);
 }

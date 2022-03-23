@@ -5,6 +5,7 @@ package proto
 import (
 	context "context"
 	accounts "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	devices "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	namespaces "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -21,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountsServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
-	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error)
 	Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -46,18 +47,18 @@ func (c *accountsServiceClient) Token(ctx context.Context, in *TokenRequest, opt
 	return out, nil
 }
 
-func (c *accountsServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error) {
-	out := new(accounts.AccountsPool)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/List", in, out, opts...)
+func (c *accountsServiceClient) Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error) {
+	out := new(accounts.Account)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountsServiceClient) Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error) {
-	out := new(accounts.Account)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Get", in, out, opts...)
+func (c *accountsServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error) {
+	out := new(accounts.AccountsPool)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,8 +106,8 @@ func (c *accountsServiceClient) SetCredentials(ctx context.Context, in *SetCrede
 // for forward compatibility
 type AccountsServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
-	List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error)
 	Get(context.Context, *accounts.Account) (*accounts.Account, error)
+	List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
 	Delete(context.Context, *accounts.Account) (*DeleteResponse, error)
@@ -121,11 +122,11 @@ type UnimplementedAccountsServiceServer struct {
 func (UnimplementedAccountsServiceServer) Token(context.Context, *TokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Token not implemented")
 }
-func (UnimplementedAccountsServiceServer) List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
-}
 func (UnimplementedAccountsServiceServer) Get(context.Context, *accounts.Account) (*accounts.Account, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedAccountsServiceServer) List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedAccountsServiceServer) Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -170,24 +171,6 @@ func _AccountsService_Token_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AccountsService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyMessage)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AccountsServiceServer).List(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.AccountsService/List",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountsServiceServer).List(ctx, req.(*EmptyMessage))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AccountsService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(accounts.Account)
 	if err := dec(in); err != nil {
@@ -202,6 +185,24 @@ func _AccountsService_Get_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AccountsServiceServer).Get(ctx, req.(*accounts.Account))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountsService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).List(ctx, req.(*EmptyMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -290,12 +291,12 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AccountsService_Token_Handler,
 		},
 		{
-			MethodName: "List",
-			Handler:    _AccountsService_List_Handler,
-		},
-		{
 			MethodName: "Get",
 			Handler:    _AccountsService_Get_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _AccountsService_List_Handler,
 		},
 		{
 			MethodName: "Create",
@@ -322,8 +323,8 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NamespacesServiceClient interface {
-	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error)
 	Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error)
 	Create(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Update(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Delete(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -337,18 +338,18 @@ func NewNamespacesServiceClient(cc grpc.ClientConnInterface) NamespacesServiceCl
 	return &namespacesServiceClient{cc}
 }
 
-func (c *namespacesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error) {
-	out := new(namespaces.NamespacesPool)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/List", in, out, opts...)
+func (c *namespacesServiceClient) Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
+	out := new(namespaces.Namespace)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *namespacesServiceClient) Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error) {
-	out := new(namespaces.Namespace)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Get", in, out, opts...)
+func (c *namespacesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error) {
+	out := new(namespaces.NamespacesPool)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -386,8 +387,8 @@ func (c *namespacesServiceClient) Delete(ctx context.Context, in *namespaces.Nam
 // All implementations must embed UnimplementedNamespacesServiceServer
 // for forward compatibility
 type NamespacesServiceServer interface {
-	List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error)
 	Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
+	List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error)
 	Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Update(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Delete(context.Context, *namespaces.Namespace) (*DeleteResponse, error)
@@ -398,11 +399,11 @@ type NamespacesServiceServer interface {
 type UnimplementedNamespacesServiceServer struct {
 }
 
-func (UnimplementedNamespacesServiceServer) List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
-}
 func (UnimplementedNamespacesServiceServer) Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedNamespacesServiceServer) List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedNamespacesServiceServer) Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
@@ -426,24 +427,6 @@ func RegisterNamespacesServiceServer(s grpc.ServiceRegistrar, srv NamespacesServ
 	s.RegisterService(&NamespacesService_ServiceDesc, srv)
 }
 
-func _NamespacesService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyMessage)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NamespacesServiceServer).List(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.NamespacesService/List",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NamespacesServiceServer).List(ctx, req.(*EmptyMessage))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _NamespacesService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(namespaces.Namespace)
 	if err := dec(in); err != nil {
@@ -458,6 +441,24 @@ func _NamespacesService_Get_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NamespacesServiceServer).Get(ctx, req.(*namespaces.Namespace))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NamespacesService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).List(ctx, req.(*EmptyMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -524,12 +525,12 @@ var NamespacesService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*NamespacesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "List",
-			Handler:    _NamespacesService_List_Handler,
-		},
-		{
 			MethodName: "Get",
 			Handler:    _NamespacesService_Get_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _NamespacesService_List_Handler,
 		},
 		{
 			MethodName: "Create",
@@ -542,6 +543,272 @@ var NamespacesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _NamespacesService_Delete_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/node/proto/node.proto",
+}
+
+// DevicesServiceClient is the client API for DevicesService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type DevicesServiceClient interface {
+	Get(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.DevicesPool, error)
+	Create(ctx context.Context, in *devices.CreateRequest, opts ...grpc.CallOption) (*devices.CreateResponse, error)
+	Update(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
+	Delete(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*DeleteResponse, error)
+	GetByFingerprint(ctx context.Context, in *devices.GetByFingerprintRequest, opts ...grpc.CallOption) (*devices.Device, error)
+}
+
+type devicesServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewDevicesServiceClient(cc grpc.ClientConnInterface) DevicesServiceClient {
+	return &devicesServiceClient{cc}
+}
+
+func (c *devicesServiceClient) Get(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.DevicesPool, error) {
+	out := new(devices.DevicesPool)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) Create(ctx context.Context, in *devices.CreateRequest, opts ...grpc.CallOption) (*devices.CreateResponse, error) {
+	out := new(devices.CreateResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) Update(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) Delete(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*DeleteResponse, error) {
+	out := new(DeleteResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) GetByFingerprint(ctx context.Context, in *devices.GetByFingerprintRequest, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/GetByFingerprint", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DevicesServiceServer is the server API for DevicesService service.
+// All implementations must embed UnimplementedDevicesServiceServer
+// for forward compatibility
+type DevicesServiceServer interface {
+	Get(context.Context, *devices.Device) (*devices.Device, error)
+	List(context.Context, *EmptyMessage) (*devices.DevicesPool, error)
+	Create(context.Context, *devices.CreateRequest) (*devices.CreateResponse, error)
+	Update(context.Context, *devices.Device) (*devices.Device, error)
+	Delete(context.Context, *devices.Device) (*DeleteResponse, error)
+	GetByFingerprint(context.Context, *devices.GetByFingerprintRequest) (*devices.Device, error)
+	mustEmbedUnimplementedDevicesServiceServer()
+}
+
+// UnimplementedDevicesServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedDevicesServiceServer struct {
+}
+
+func (UnimplementedDevicesServiceServer) Get(context.Context, *devices.Device) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedDevicesServiceServer) List(context.Context, *EmptyMessage) (*devices.DevicesPool, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedDevicesServiceServer) Create(context.Context, *devices.CreateRequest) (*devices.CreateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedDevicesServiceServer) Update(context.Context, *devices.Device) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedDevicesServiceServer) Delete(context.Context, *devices.Device) (*DeleteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedDevicesServiceServer) GetByFingerprint(context.Context, *devices.GetByFingerprintRequest) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByFingerprint not implemented")
+}
+func (UnimplementedDevicesServiceServer) mustEmbedUnimplementedDevicesServiceServer() {}
+
+// UnsafeDevicesServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DevicesServiceServer will
+// result in compilation errors.
+type UnsafeDevicesServiceServer interface {
+	mustEmbedUnimplementedDevicesServiceServer()
+}
+
+func RegisterDevicesServiceServer(s grpc.ServiceRegistrar, srv DevicesServiceServer) {
+	s.RegisterService(&DevicesService_ServiceDesc, srv)
+}
+
+func _DevicesService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).Get(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyMessage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).List(ctx, req.(*EmptyMessage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.CreateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).Create(ctx, req.(*devices.CreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).Update(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/Delete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).Delete(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_GetByFingerprint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.GetByFingerprintRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).GetByFingerprint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/GetByFingerprint",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).GetByFingerprint(ctx, req.(*devices.GetByFingerprintRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// DevicesService_ServiceDesc is the grpc.ServiceDesc for DevicesService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var DevicesService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "infinimesh.node.DevicesService",
+	HandlerType: (*DevicesServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Get",
+			Handler:    _DevicesService_Get_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _DevicesService_List_Handler,
+		},
+		{
+			MethodName: "Create",
+			Handler:    _DevicesService_Create_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _DevicesService_Update_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _DevicesService_Delete_Handler,
+		},
+		{
+			MethodName: "GetByFingerprint",
+			Handler:    _DevicesService_GetByFingerprint_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
