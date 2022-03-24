@@ -47,7 +47,7 @@ const (
 
 const (
 	DEVICES_COL = "Devices"
-	DEVICES_EDGE_COL = ACCOUNTS_COL + "2" + DEVICES_COL
+	NS2DEV = NAMESPACES_COL + "2" + DEVICES_COL
 )
 
 type InfinimeshGraphSchema struct {

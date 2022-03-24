@@ -51,6 +51,8 @@ type DevicesController struct {
 	col driver.Collection // Devices Collection
 	db driver.Database
 
+	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
+
 	SIGNING_KEY []byte
 }
 
@@ -60,6 +62,7 @@ func NewDevicesController(log *zap.Logger, db driver.Database) DevicesController
 
 	return DevicesController{
 		log: log.Named("DevicesController"), col: col, db: db,
+		ns2dev: GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
