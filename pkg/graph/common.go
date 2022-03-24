@@ -116,6 +116,7 @@ func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from In
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
+	FILTER edge.level > 0
 	RETURN node`
 	bindVars := map[string]interface{}{
 		"depth": depth,
