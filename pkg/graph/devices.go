@@ -17,12 +17,18 @@ package graph
 
 import (
 	"context"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Device struct {
@@ -65,4 +71,101 @@ func NewDevicesController(log *zap.Logger, db driver.Database) DevicesController
 		ns2dev: GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
+}
+
+func sha256Fingerprint(cert *devpb.Certificate) (err error) {
+	block, _ := pem.Decode([]byte(cert.PemData))
+	if block == nil {
+		return errors.New("coudn't decode PEM data")
+	}
+
+	parsed, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return err
+	}
+
+	s := sha256.New()
+	_, err = s.Write(parsed.Raw)
+	if err != nil {
+		return err
+	}
+
+	cert.Algorithm = "sha256"
+	cert.Fingerprint = s.Sum(nil)
+
+	return nil
+}
+
+func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
+	log := c.log.Named("Create")
+	log.Debug("Create request received", zap.Any("request", req), zap.Any("context", ctx))
+	
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns_id := req.GetNamespace()
+	if ns_id == "" {
+		ns_id = schema.ROOT_NAMESPACE_KEY
+	}
+
+	ns := NewBlankNamespaceDocument(ns_id)
+
+	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	if !ok || level < int32(schema.ADMIN) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
+	}
+
+	device := Device{Device: req.GetDevice()}
+	err = sha256Fingerprint(device.Certificate)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "Can't generate fingerprint: %v", err)
+	}
+
+	meta, err := c.col.CreateDocument(ctx, device)
+	if err != nil {
+		log.Error("Error creating Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while creating Device")
+	}
+	device.Uuid = meta.ID.Key()
+	device.DocumentMeta = meta
+
+	err = Link(ctx, log, c.ns2dev, ns, &device, schema.ADMIN)
+	if err != nil {
+		log.Error("Error creating edge", zap.Error(err))
+		c.col.RemoveDocument(ctx, device.Uuid)
+		return nil, status.Error(codes.Internal, "error creating Permission")
+	}
+
+	return &devpb.CreateResponse{
+		Device: device.Device,
+	}, nil
+}
+
+func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+	log := c.log.Named("Create")
+	log.Debug("Get request received", zap.Any("request", dev), zap.Any("context", ctx))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	// Getting Account from DB
+	// and Check requestor access
+	device := *NewBlankDeviceDocument(dev.GetUuid())
+	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+	}
+	if level < 1 {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	return device.Device, nil
 }

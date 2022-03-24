@@ -27,6 +27,7 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -42,6 +43,7 @@ var (
 
 	ctrl AccountsController
 	ns_ctrl NamespacesController
+	dev_ctrl DevicesController
 
 	rootCtx context.Context
 
@@ -68,6 +70,7 @@ func init() {
 	}
 
 	ns_ctrl = NewNamespacesController(log, db)
+	dev_ctrl = NewDevicesController(log, db)
 
 	md := metadata.New(map[string]string{"requestorid": schema.ROOT_ACCOUNT_KEY})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
@@ -799,5 +802,74 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 	ok, level := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
 	if ok {
 		t.Fatalf("Has to be error but it's not: %d", level)
+	}
+}
+
+// Devices Tests
+
+func TestCreateAndGet(t *testing.T) {
+	cert := `-----BEGIN CERTIFICATE-----
+MIIExDCCAqwCCQD8UjXANeUExTANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlt
+cXR0LmFwaS5pb3Quc2xudC1vcHAueHl6MB4XDTIxMDkyMjE1MzIyM1oXDTIyMDky
+MjE1MzIyM1owJDEiMCAGA1UEAwwZbXF0dC5hcGkuaW90LnNsbnQtb3BwLnh5ejCC
+AiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANgYpD4Yk3RMFDe/XU7hCk1P
+lUB0nYrceGVp5DDWaWc/0AhvPJgUqNIW5ujRK4Wy6IF7eZvcTOzGPdX1ZzKzZxWQ
+3roQ0Z/qzX7Rd/mLiTEsQ8tZvO9EuiJDOWGwD5tSpXWRCJ73td7sNskH0bPkUsug
+UxEM2G5/9DxRBES6Gwbm0ouUWEN7vEByndgbjxna5Lw1K2rg/UBps4HNf/fLG1c9
+d7CldIym4W9PKKAqjskWp/maFX30fn+Gg6K2sH3Fjpw6xwEnZHszUcd5QB2HFGjo
+YrLuCDFoXqJOK96gX7SRu3ABd3Voj1TQ6mOvoH1OjGl/PP/vS5NUzCkt5Q550onY
+fXlYiodb6L4Dwa3o8Nk0BC3EGU/jE05FLkdX8mowYgyO9SmQrMf29HMLTSJVc67I
+3EDBqJ4xECVfpl6BNrgbW2jXvkgc5xSdBWC9Vw1cufpF+XuJVEpxRWnCO6qb+wf7
+KtPSiM2m7NHQ2p8nlRVI6Yag/C8zpImieUu3ZJ/dA/sgJEEnC1KmE9OJmYuTv8kX
+RU3bpjQVym78jir7tpE159VmckJcG5MHa3DMyOzA7w+eCTxg9QyuvuXNsKYg0lJz
+F2wXNBk51gXQFijvdLGz+m+V+JgHEkiwdK/r0BU+ALi2mMFuW1Js42DjE6Ns7OsE
+hkAIXoFrSNd8K9HhFCUrAgMBAAEwDQYJKoZIhvcNAQELBQADggIBACVD8k3jgFnV
+gJeVKPfE8UfS4TWngL/TbWlRcbee+ZjQ1S78w2Ad3nKLKMOEoyMZI6r/rgC0mde1
+uNI2VtvYcd4SMKcMfDK3tLSie3fh0Ocu7NRxERb6Z9ohru/ve23YA+fcwJ/BtuFi
+mwsIeysRXuKWSARC8FvdZ3a1RhfdZ0r3eiFjOsCOJDfCTHAdMfR2hyEvPIGJIMIX
+diTX4fadmWvf9X6Z659zC/MJrddLwe4MIEYSvexzs+dovashYMItZvftB52ozw9I
+cZ0zpT53087BomIfkByFnwcG/d+rWohYMRO0wbYyI30hthN1vcgs/nzUO/gW5PMo
+U7Ca6x3BossmwL10/Wf3V0rP7g5z9LNyqQVqEW9qLYDrzmeYBpuNcEISnPVo25zM
+Z0m2l4mPrIEuGNVzwGHUmTQRogdM4dxlfFgv2YC2yW6B7+IEPC1syz80nKYXedMD
+sk+zvBgiE6TVmDqd25YKrA897x9H4IzJV77NLlFuR9Xi/rUOEVY6jY4xPCm+4suo
+jJULw0esGtJYldca1+xL0PQMLZmD9IpMCNLNnFx6GpSPWl5u70aj5QCZ1o9mcDpj
+zpMIeSYbFDLfhTdQVxZ9TzT2SEZcrHX/1R3kM0RRQtE+ig4w+0Yk6u01fWStLOgW
+EzfzAZe0LDxgsHmBEjfZHyjtmXuq2q0S
+-----END CERTIFICATE-----`
+
+	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
+		Device: &devices.Device{
+			Title: randomdata.SillyName(),
+			Enabled: true,
+			Certificate: &devices.Certificate{
+				PemData: cert,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating device: %v", err)
+	}
+	this := thisR.Device
+
+	t.Logf("Device created: %s", this.GetUuid())
+
+	that, err := dev_ctrl.Get(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error getting device: %v", err)
+	}
+
+	if this.Uuid != that.Uuid	{
+			t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	}
+	if this.Title != that.Title {
+			t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+	}
+	if this.Enabled != that.Enabled {
+			t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+	}
+	thisc := string(this.Certificate.Fingerprint)
+	thatc := string(that.Certificate.Fingerprint)
+	if thisc != thatc {
+			t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
 	}
 }
