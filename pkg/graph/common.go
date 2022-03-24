@@ -90,6 +90,10 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 		return false, 0
 	}
 
+	if account.ID() == node.ID() {
+		level = int32(schema.ROOT)
+	}
+
 	_, err = c.ReadDocument(ctx, &node)
 	if err != nil {
 		log.Debug("Error while reading node document", zap.Error(err))
@@ -99,7 +103,36 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 	return true, level
 }
 
+// List children nodes
+// ctx - context
+// log - logger
+// db - Database connection
+// from - Graph node to start traversal from
+// children - children type(collection name)
+// depth
+func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
+	query := `
+	FOR node IN 0..@depth OUTBOUND @from
+	GRAPH @permissions_graph
+	OPTIONS {order: "bfs", uniqueVertices: "global"}
+	FILTER IS_SAME_COLLECTION(@@kind, node)
+	RETURN node`
+	bindVars := map[string]interface{}{
+		"depth": depth,
+		"from": from.ID(),
+		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
+		"@kind": children,
+	}
+
+	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
+	return db.Query(ctx, query, bindVars)
+}
+
+
 func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
+	if account.ID() == node.ID() {
+		return true, int32(schema.ROOT)
+	}
 	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{
 		"account": account.ID(),
