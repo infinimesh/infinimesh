@@ -160,6 +160,44 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	return result.Account, nil
 }
 
+func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*accpb.AccountsPool, error) {
+	log := c.log.Named("List")
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+
+	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL, 4)
+	if err != nil {
+		log.Error("Error executing query", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Couldn't execute query")
+	}
+	defer cr.Close()
+
+	var r []*accpb.Account
+	for {
+		var acc accpb.Account
+		meta, err := cr.ReadDocument(ctx, &acc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			log.Error("Error unmarshalling Document", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Couldn't execute query")
+		}
+		acc.Uuid = meta.ID.Key()
+		log.Debug("Got document", zap.Any("account", &acc))
+		r = append(r, &acc)
+	}
+
+	return &accpb.AccountsPool{
+		Accounts: r,
+	}, nil
+}
+
 func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRequest) (*accpb.CreateResponse, error) {
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
@@ -227,7 +265,10 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	}
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	// Check requestor access to acc.GetUuid()
+	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankAccountDocument(acc.GetUuid()))
+	if !ok || level < int32(schema.ADMIN) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
+	}
 
 	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
 	if err != nil {

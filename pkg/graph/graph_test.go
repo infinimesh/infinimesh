@@ -365,6 +365,50 @@ func TestGetAccountNotFound(t *testing.T) {
 	}
 }
 
+func TestList(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: false,
+	}
+
+	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+	}
+
+	t.Logf("Created account: %s", res.GetAccount().GetUuid())
+
+	pool, err := ctrl.List(rootCtx, nil)
+	if err != nil {
+		t.Fatalf("Error listing Account: %v", err)
+	}
+
+	if len(pool.Accounts) < 1 {
+		t.Fatalf("Pool is empty, length: %d", len(pool.Accounts))
+	}
+
+	r := false
+	for _, acc := range pool.Accounts {
+		if acc.Uuid == res.GetAccount().GetUuid() {
+			r = true
+			break
+		}
+	}
+
+	if !r {
+		t.Fatalf("Account not found in pool")
+	}
+}
+
 func TestDeleteAccount(t *testing.T) {
 	t.Log("Creating sample account")
 
