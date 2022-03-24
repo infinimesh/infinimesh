@@ -44,7 +44,8 @@ func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
 }
 
 func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Collection) {
-	col, _ := db.Collection(ctx, name)
+	g, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
+	col, _, _ := g.EdgeCollection(ctx, name)
 	return col
 }
 
