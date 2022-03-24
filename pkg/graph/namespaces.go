@@ -111,16 +111,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 	}
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	query := `FOR node IN 0..@depth OUTBOUND @account GRAPH @permissions_graph OPTIONS {order: "bfs", uniqueVertices: "global"} FILTER IS_SAME_COLLECTION(@@namespaces, node) RETURN node`
-	bindVars := map[string]interface{}{
-		"depth": 4,
-		"account": driver.NewDocumentID(schema.ACCOUNTS_COL, requestor),
-		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
-		"@namespaces": schema.NAMESPACES_COL,
-	}
-	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
-
-	cr, err := c.db.Query(ctx, query, bindVars)
+	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL, 4)
 	if err != nil {
 		return nil, err
 	}
@@ -129,12 +120,13 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 	var r []*nspb.Namespace
 	for {
 		var ns nspb.Namespace 
-		_, err := cr.ReadDocument(ctx, &ns)
+		meta, err := cr.ReadDocument(ctx, &ns)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			return nil, err
 		}
+		ns.Uuid = meta.ID.Key()
 		log.Debug("Got document", zap.Any("namespace", &ns))
 		r = append(r, &ns)
 	}

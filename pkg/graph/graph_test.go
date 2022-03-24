@@ -575,10 +575,10 @@ func TestListNamespaces(t *testing.T) {
 			}
 		}
 	}
-	if rootFound {
+	if !rootFound {
 		t.Fatal("Root Namespace not listed")
 	}
-	if createdFound {
+	if !createdFound {
 		t.Fatal("Created Namespace not listed")
 	}
 }
