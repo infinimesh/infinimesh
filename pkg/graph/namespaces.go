@@ -94,7 +94,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))
-		c.col.RemoveDocument(ctx, namespace.GetUuid())
+		c.col.RemoveDocument(ctx, namespace.Uuid)
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
