@@ -112,7 +112,7 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 // depth
 func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
 	query := `
-	FOR node IN 0..@depth OUTBOUND @from
+	FOR node, edge IN 0..@depth OUTBOUND @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
