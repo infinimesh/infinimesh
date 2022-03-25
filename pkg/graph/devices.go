@@ -206,3 +206,32 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 		Devices: r,
 	}, nil
 }
+
+func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.DeleteResponse, error) {
+	log := c.log.Named("Delete")
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	acc := *NewBlankAccountDocument(requestor)
+	dev := *NewBlankDeviceDocument(req.GetUuid())
+	ok, level := AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+	}
+	if level < 3 {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
+	if err != nil {
+		log.Error("Error removing document", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error deleting Device")
+	}
+
+	return &pb.DeleteResponse{}, nil
+}

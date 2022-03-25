@@ -807,7 +807,7 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 
 // Devices Tests
 
-func TestCreateAndGet(t *testing.T) {
+func TestCreateGetAndDelete(t *testing.T) {
 	cert := `-----BEGIN CERTIFICATE-----
 MIIExDCCAqwCCQD8UjXANeUExTANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlt
 cXR0LmFwaS5pb3Quc2xudC1vcHAueHl6MB4XDTIxMDkyMjE1MzIyM1oXDTIyMDky
@@ -871,6 +871,11 @@ EzfzAZe0LDxgsHmBEjfZHyjtmXuq2q0S
 	thatc := string(that.Certificate.Fingerprint)
 	if thisc != thatc {
 			t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
+	}
+
+	_, err = dev_ctrl.Delete(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error deleting device: %v", err)
 	}
 }
 
