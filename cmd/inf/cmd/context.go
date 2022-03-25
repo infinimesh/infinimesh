@@ -62,12 +62,7 @@ var contextCmd = &cobra.Command{
 		}
 
 		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
-			data, err := json.Marshal(data)
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(data))
-			return nil
+			return printJsonResponse(data)
 		}
 
 		for k, v := range data {
