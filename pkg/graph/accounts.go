@@ -30,7 +30,6 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -87,28 +86,6 @@ func NewAccountsController(log *zap.Logger, db driver.Database) *AccountsControl
 	}
 }
 
-//Validate method does the pre-checks for a REST request
-func Validate(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string, err error) {
-
-	//Get the metadata from the context
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		log.Error("Failed to get metadata from context")
-		return nil, "", status.Error(codes.Aborted, "Failed to get metadata from context")
-	}
-
-	//Check for Authentication
-	requestorID := md.Get(inf.INFINIMESH_ACCOUNT_CLAIM)
-	if requestorID == nil {
-		//Added logging
-		log.Error("The account is not authenticated")
-		return nil, "", status.Error(codes.Unauthenticated, "The account is not authenticated")
-	}
-	log.Debug("Requestor ID", zap.Strings("id", requestorID))
-
-	return md, requestorID[0], nil
-}
-
 func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*pb.TokenResponse, error) {
 	log := c.log.Named("Token")
 	log.Debug("Token request received", zap.Any("request", req))
@@ -139,11 +116,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	log := c.log.Named("Get")
 	log.Debug("Get request received", zap.Any("request", acc))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	// Getting Account from DB
@@ -163,11 +136,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*accpb.AccountsPool, error) {
 	log := c.log.Named("List")
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 
@@ -202,11 +171,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns_id := request.GetNamespace()
@@ -258,11 +223,7 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	log := c.log.Named("Update")
 	log.Debug("Update request received", zap.Any("request", acc), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankAccountDocument(acc.GetUuid()))
@@ -270,7 +231,7 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
 	}
 
-	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
+	_, err := c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
 	if err != nil {
 		log.Error("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
@@ -283,11 +244,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	log := c.log.Named("Delete")
 	log.Debug("Delete request received", zap.Any("request", req), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
@@ -426,11 +383,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 	log := c.log.Named("SetCredentials")
 	log.Debug("Set Credentials request received", zap.String("account", req.GetUuid()), zap.String("type", req.GetCredentials().GetType()), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	var acc Account

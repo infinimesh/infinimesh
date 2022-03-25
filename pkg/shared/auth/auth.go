@@ -84,8 +84,9 @@ func JWT_AUTH_MIDDLEWARE(ctx context.Context) (context.Context, error) {
 	if account == nil {
 		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
 	}
-	ctx = context.WithValue(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, account.(string))
-	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, account.(string))
+	uuid := account.(string)
+	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
+	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, uuid)
 
 	return ctx, nil
 }

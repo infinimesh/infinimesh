@@ -19,3 +19,5 @@ type ContextKey string;
 
 const INFINIMESH_ACCOUNT_CLAIM = "account"
 const INFINIMESH_ROOT_CLAIM = "root"
+
+const InfinimeshAccountCtxKey = ContextKey("account")

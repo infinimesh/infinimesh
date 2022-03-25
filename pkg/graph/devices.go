@@ -26,6 +26,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -100,11 +101,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", req), zap.Any("context", ctx))
 	
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns_id := req.GetNamespace()
@@ -120,7 +117,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	}
 
 	device := Device{Device: req.GetDevice()}
-	err = sha256Fingerprint(device.Certificate)
+	err := sha256Fingerprint(device.Certificate)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Can't generate fingerprint: %v", err)
 	}
@@ -149,11 +146,7 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 	log := c.log.Named("Create")
 	log.Debug("Get request received", zap.Any("request", dev), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	// Getting Account from DB
@@ -173,11 +166,7 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devpb.DevicesPool, error) {
 	log := c.log.Named("List")
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL, 4)
@@ -210,11 +199,7 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.DeleteResponse, error) {
 	log := c.log.Named("Delete")
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(requestor)
@@ -227,7 +212,7 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
+	_, err := c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Error("Error removing document", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting Device")
@@ -245,11 +230,7 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 	log := c.log.Named("GetByFingerprint")
 	log.Debug("GetByFingerprint request received", zap.Any("request", req), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	cr, err := c.db.Query(ctx, findByFingerprintQuery, map[string]interface{}{

@@ -24,6 +24,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
@@ -71,11 +72,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	namespace := Namespace{Namespace: request}
@@ -104,11 +101,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.NamespacesPool, error) {
 	log := c.log.Named("List")
 
-	//Get metadata from context and perform validation
-	_, requestor, err := Validate(ctx, log)
-	if err != nil {
-		return nil, err
-	}
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL, 4)

@@ -95,54 +95,6 @@ func TestNewBlankAccountDocument(t *testing.T) {
 	}
 }
 
-func TestValidate(t *testing.T) {
-	t.Log("Testing Validate function")
-	_, id, err := Validate(rootCtx, log)
-	if err != nil {
-		t.Fatalf("Error validating correct context: %v", err)
-	}
-
-	if id != "infinimesh" {
-		t.Fatalf("Requestor ID supposed to be 'infinimesh', got: %s", id)
-	}
-}
-
-func TestValidateEmptyContext(t *testing.T) {
-	t.Log("Testing Validate function with Empty Context")
-	_, _, err := Validate(context.TODO(), log)
-	if err == nil {
-		t.Fatal("Error is nil, while it's supposed to be 'Failed to get metadata from context'")
-	}
-
-	s, ok := status.FromError(err)
-	if !ok {
-		t.Fatalf("Error reading status from error, original error: %v", err)
-	}
-
-	if s.Code() != codes.Aborted && s.Message() != ("Failed to get metadata from context") {
-		t.Fatalf("Error supposed to be Aborted: Failed to get metadata from context, but received %s: %s", s.Code().String(), s.Message())
-	}
-}
-
-func TestValidateEmptyRequestor(t *testing.T) {
-	t.Log("Testing Validate function with Empty Context")
-	md := metadata.New(map[string]string{"notrequestorid": "infinimesh"})
-	ctx := metadata.NewIncomingContext(context.Background(), md)
-	_, _, err := Validate(ctx, log)
-	if err == nil {
-		t.Fatal("Error is nil, while it's supposed to be 'The account is not authenticated'")
-	}
-
-	s, ok := status.FromError(err)
-	if !ok {
-		t.Fatalf("Error reading status from error, original error: %v", err)
-	}
-
-	if s.Code() != codes.Unauthenticated && s.Message() != ("The account is not authenticated") {
-		t.Fatalf("Error supposed to be Unauthenticated: The account is not authenticated, but received %s: %s", s.Code().String(), s.Message())
-	}
-}
-
 func TestAccountCreate_FalseCredentialsType(t *testing.T) {
 	t.Log("Creating Sample Account with unsupported Credentials")
 	username := randomdata.SillyName()
