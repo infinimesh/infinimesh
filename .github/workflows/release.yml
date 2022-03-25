@@ -1,0 +1,32 @@
+name: Go
+
+on: 
+  release:
+    types: [released]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/386, linux/amd64, darwin/amd64, darwin/arm64
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check Release Tag
+      id: make_context
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - uses: wangyoucao577/go-release-action@v1.21
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        overwrite: true
+        goversion: 1.17
+        ldflags: -s -w -X main.version=${{ steps.make_context.outputs.tag }}
+        executable_compression: upx
+        project_path: cmd/inf
+        binary_name: inf
+        extra_files: LICENSE README.md
