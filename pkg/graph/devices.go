@@ -235,3 +235,42 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 
 	return &pb.DeleteResponse{}, nil
 }
+
+const findByFingerprintQuery = 
+`FOR device IN @@devices
+FILTER device.certificate.fingerprint == @fingerprint
+RETURN device`
+
+func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.GetByFingerprintRequest) (*devpb.Device, error) {
+	log := c.log.Named("GetByFingerprint")
+	log.Debug("GetByFingerprint request received", zap.Any("request", req), zap.Any("context", ctx))
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	cr, err := c.db.Query(ctx, findByFingerprintQuery, map[string]interface{}{
+		"@devices": schema.DEVICES_COL,
+		"fingerprint": req.GetFingerprint(),
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Error executing query")
+	}
+	defer cr.Close()
+
+	var r devpb.Device
+	meta, err := cr.ReadDocument(ctx, &r)
+	if driver.IsNoMoreDocuments(err) {
+		return nil, status.Error(codes.NotFound, "Device not found")
+	}
+	if err != nil {
+		log.Error("Error unmarshalling Document", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error executing query")
+	}
+	r.Uuid = meta.ID.Key()
+
+	return &r, nil
+}

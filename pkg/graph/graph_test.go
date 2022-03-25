@@ -941,3 +941,95 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 		t.Fatalf("Created device not found in Pool")
 	}
 }
+
+func TestCreateFingByFingerprintAndDelete(t *testing.T) {
+	cert := `-----BEGIN CERTIFICATE-----
+MIIEmDCCAoACCQDLeCKlPBA5IzANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDDANk
+ZXYwHhcNMjEwNjE2MTEzMzE4WhcNMjIwNjE2MTEzMzE4WjAOMQwwCgYDVQQDDANk
+ZXYwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC8XcvgKyPfTnGqP1Y0
+GXpKj63/A285MMudwNHk59X38RSwrBl4IpWd43w6BBSbVBYYJ4lDsRDnQLjTelEa
+BFlLrM1ZPtlh6qsYwcPRgHpujw7ufifhuKbtMPCz2IomyzzGFFKY3d+oJ7hRQe8m
+fDcIpqrLCiuc2zuGLjVTEueFStJBdXciDRNeY9ILTHCpnZ7XNx8EsDylli3h5WOt
+IsINB7osLmcnhsuvD594IQ2CBLUjOfeQDrkAWGxQ1DvaN1u7HCP84SXJ7nWdfma3
+aYfesrDo+mlD70maucD1CemklY8yzgNxuFFIzQ+L4Klx7cjujqPd6XZmJjm1LTj7
+ITHbbM9uzawx6+0591uOZivEgPB02b+92iAx5x1yYC5tjnTMy2P3TYrMMcKpI+uh
+0KruEYWPKNuFOjcV6svoZEVeyTOLRjj63xkJ50HFrdE2Xcj70nPuB482B2jmcuOG
+17ThaHTWd7paT/I5pgyQgRVTHmyRcqR6MfR6ofTXI76U5RBAKe6vrfVdNKNQ5J/T
+uEygaIZCP+/Lq3ydS4/UNP0E7NgrkODG9i8FD1DF4wxneX2c8gozh5rVKuP2yS0r
++qgIH5AK9pKDNSL7J6P2ZIGeuwc2B800wGQhRCNMQUiz/llAVypqrJWUxBtN9v8k
+CDMYxHQ4EBLfOOXLw8Youf/SpQIDAQABMA0GCSqGSIb3DQEBCwUAA4ICAQAGe3jr
+tvC4auIpVFspS1KnRhaKxWootuMFrfo7yZQsSDYpCV3iM4RSwovsyn5xZvRJWO8z
+7Gj5h4ZbmEFYsyNo9tbKeKWQjn3QVK7UlwMCjwZTYsxpxCioQ66XqjnSjzfTKFcm
+CFOpP8nkR6mgxjDyQcqsDQX4vrUrt8PtwSag7r7+xl9MJ1pBKUaAmgGJAtjLxDyq
+LDSnXI4/gTTKyXCxHzxgcioVz4j1gNtyFjPeDNkgOCuLhxBk1ewmR3m6swwMReiL
+APdZLak2EPunZCYTG5648xYUowwkBSINQmGWS3YbuC0xncy/EhEuBS4mbsd7uO5w
+m0HNT/FPHfoZnYS7eUOj42ER1q0JmPJYkgtJMwrNylF6+djrXbVLMeimh6ME2mA9
+oROBNInt3vw6Ssd3kyQBMurh8ETu01Dj9MSzFcoX8293FsYbj9H/FndBf9I/a/UK
++iEPErgUiy8x+5qMRGeZrqHtfOdcHuliSJ0pS207nVdmMHUmHXm1LW3v+cScF+13
+EqW8wfH8nuubsLAgpxx4s6hin9wjs9a27fAPEUPzFNmXs5SZF6+dGTbUtmd0Zp84
+a+5z88Oa1aswXQBRt+4JTHJsc5KE2/pWuZY6+CL738hzWmDYpr3JHV1HdAN3dHU1
+UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
+-----END CERTIFICATE-----`
+
+	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
+		Device: &devices.Device{
+			Title: randomdata.SillyName(),
+			Enabled: true,
+			Certificate: &devices.Certificate{
+				PemData: cert,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating device: %v", err)
+	}
+	this := thisR.Device
+	t.Logf("Device created: %s", this.GetUuid())
+
+	that, err := dev_ctrl.GetByFingerprint(rootCtx, &devices.GetByFingerprintRequest{
+		Fingerprint: this.Certificate.Fingerprint,
+	})
+
+	if err != nil {
+		t.Fatalf("Error getting device: %v", err)
+	}
+
+	if this.Uuid != that.Uuid	{
+			t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	}
+	if this.Title != that.Title {
+			t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+	}
+	if this.Enabled != that.Enabled {
+			t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+	}
+	thisc := string(this.Certificate.Fingerprint)
+	thatc := string(that.Certificate.Fingerprint)
+	if thisc != thatc {
+			t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
+	}
+
+	_, err = dev_ctrl.Delete(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error deleting device: %v", err)
+	}
+}
+
+func TestFingByFingerprintNotFound(t *testing.T){
+	_, err := dev_ctrl.GetByFingerprint(rootCtx, &devices.GetByFingerprintRequest{
+		Fingerprint: []byte("notfound"),
+	})
+
+	if err == nil {
+		t.Fatalf("Expected error")
+	}
+
+	s, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("Error reading status from error, original error: %v", err)
+	}
+
+	if s.Code() != codes.NotFound && s.Message() != ("Device not found") {
+		t.Fatalf("Error supposed to be NotFound: The device does not exist, but received %s: %s", s.Code().String(), s.Message())
+	}
+}
