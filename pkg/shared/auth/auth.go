@@ -54,7 +54,7 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	l.Debug("Invoked", zap.String("method", info.FullMethod))
 
 	switch info.FullMethod {
-	case "/infinimesh.registry.AccountsService/Token":
+	case "/infinimesh.node.AccountsService/Token":
 		return handler(ctx, req)
 	}
 
