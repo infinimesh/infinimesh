@@ -32,12 +32,7 @@ import (
 	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 )
 
-var VERSION string
-
 func getVersion() string {
-	if VERSION == "" {
-		return "dev"
-	}
 	return VERSION
 }
 
