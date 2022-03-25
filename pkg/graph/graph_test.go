@@ -24,11 +24,11 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -41,9 +41,9 @@ var (
 	arangodbHost string
 	arangodbCred string
 
-	ctrl AccountsController
-	ns_ctrl NamespacesController
-	dev_ctrl DevicesController
+	ctrl *AccountsController
+	ns_ctrl *NamespacesController
+	dev_ctrl *DevicesController
 
 	rootCtx context.Context
 
@@ -72,7 +72,9 @@ func init() {
 	ns_ctrl = NewNamespacesController(log, db)
 	dev_ctrl = NewDevicesController(log, db)
 
-	md := metadata.New(map[string]string{"requestorid": schema.ROOT_ACCOUNT_KEY})
+	md := metadata.New(map[string]string{
+		inf.INFINIMESH_ACCOUNT_CLAIM: schema.ROOT_ACCOUNT_KEY,
+	})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
 }
 
