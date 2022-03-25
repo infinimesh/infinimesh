@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -80,4 +81,13 @@ func initConfig() {
 	if err == nil && verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func printJsonResponse(data interface{}) error {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(bytes))
+	return nil
 }
