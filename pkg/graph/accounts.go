@@ -24,10 +24,10 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	inf "github.com/infinimesh/infinimesh/pkg/internal"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -73,14 +73,14 @@ type AccountsController struct {
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database) AccountsController {
+func NewAccountsController(log *zap.Logger, db driver.Database) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
 
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
-	return AccountsController{
+	return &AccountsController{
 		log: log.Named("AccountsController"), col: col, db: db, cred: cred,
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
@@ -98,7 +98,7 @@ func Validate(ctx context.Context, log *zap.Logger) (md metadata.MD, acc string,
 	}
 
 	//Check for Authentication
-	requestorID := md.Get("requestorID")
+	requestorID := md.Get(inf.INFINIMESH_ACCOUNT_CLAIM)
 	if requestorID == nil {
 		//Added logging
 		log.Error("The account is not authenticated")

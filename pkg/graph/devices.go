@@ -62,11 +62,11 @@ type DevicesController struct {
 	SIGNING_KEY []byte
 }
 
-func NewDevicesController(log *zap.Logger, db driver.Database) DevicesController {
+func NewDevicesController(log *zap.Logger, db driver.Database) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
-	return DevicesController{
+	return &DevicesController{
 		log: log.Named("DevicesController"), col: col, db: db,
 		ns2dev: GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),

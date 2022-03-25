@@ -58,10 +58,10 @@ type NamespacesController struct {
 	SIGNING_KEY []byte
 }
 
-func NewNamespacesController(log *zap.Logger, db driver.Database) NamespacesController {
+func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
-	return NamespacesController{
+	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db,
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me")}
