@@ -169,3 +169,40 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 
 	return device.Device, nil
 }
+
+func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devpb.DevicesPool, error) {
+	log := c.log.Named("List")
+
+	//Get metadata from context and perform validation
+	_, requestor, err := Validate(ctx, log)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL, 4)
+	if err != nil {
+		log.Error("Error executing query", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Couldn't execute query")
+	}
+	defer cr.Close()
+
+	var r []*devpb.Device
+	for {
+		var dev devpb.Device
+		meta, err := cr.ReadDocument(ctx, &dev)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			log.Error("Error unmarshalling Document", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Couldn't execute query")
+		}
+		dev.Uuid = meta.ID.Key()
+		log.Debug("Got document", zap.Any("device", &dev))
+		r = append(r, &dev)
+	}
+
+	return &devpb.DevicesPool{
+		Devices: r,
+	}, nil
+}
