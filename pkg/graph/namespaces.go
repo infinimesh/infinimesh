@@ -56,7 +56,6 @@ type NamespacesController struct {
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
 	db driver.Database
-	SIGNING_KEY []byte
 }
 
 func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesController {
@@ -65,7 +64,7 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db,
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
-		SIGNING_KEY: []byte("just-an-init-thing-replace-me")}
+	}
 }
 
 func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespace) (*nspb.Namespace, error) {
