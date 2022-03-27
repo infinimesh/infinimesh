@@ -109,6 +109,30 @@ var listAccountsCmd = &cobra.Command{
 	},
 }
 
+var getAccountCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Get infinimesh Account",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeAccountsServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		r, err := client.Get(ctx, &accpb.Account{Uuid: args[0]})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(r)
+		}
+
+		PrintAccountsPool([]*accpb.Account{r})
+		return nil
+	},
+}
+
 var createAccountCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create infinimesh Account",
@@ -155,6 +179,7 @@ var createAccountCmd = &cobra.Command{
 func init() {
 	createAccountCmd.Flags().BoolP("enable", "e", false, "Enable Account upon create")
 
+	accountsCmd.AddCommand(getAccountCmd)
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(createAccountCmd)
 	rootCmd.AddCommand(accountsCmd)
