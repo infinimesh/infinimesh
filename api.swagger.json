@@ -1,46 +1,10 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Infinimesh IoT Platform",
-    "description": "Cloud Native IoT Platform",
-    "version": "0.0.10",
-    "contact": {
-      "name": "Infinimesh",
-      "url": "https://infinitedevices.io",
-      "email": "engineering@infinitedevices.io"
-    }
+    "title": "pkg/node/proto/accounts/accounts.proto",
+    "version": "version not set"
   },
   "tags": [
-    {
-      "name": "Devices"
-    },
-    {
-      "name": "States"
-    },
-    {
-      "name": "Accounts"
-    },
-    {
-      "name": "Objects"
-    },
-    {
-      "name": "Namespaces"
-    },
-    {
-      "name": "AccountService"
-    },
-    {
-      "name": "ObjectService"
-    },
-    {
-      "name": "Namespaces"
-    },
-    {
-      "name": "Devices"
-    },
-    {
-      "name": "Shadows"
-    },
     {
       "name": "AccountsService"
     },
@@ -51,76 +15,16 @@
       "name": "DevicesService"
     },
     {
-      "name": "Repos"
+      "name": "Shadows"
     }
   ],
-  "host": "api.infinimesh.io",
-  "schemes": [
-    "https"
-  ],
   "consumes": [
-    "application/json",
-    "text/event-stream"
+    "application/json"
   ],
   "produces": [
-    "application/json",
-    "text/event-stream"
+    "application/json"
   ],
   "paths": {
-    "/account": {
-      "get": {
-        "operationId": "Accounts_SelfAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeAccount"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/account/token": {
-      "post": {
-        "operationId": "Accounts_Token",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshapiTokenResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshapiTokenRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
     "/accounts": {
       "get": {
         "operationId": "AccountsService_List",
@@ -140,36 +44,6 @@
         },
         "tags": [
           "AccountsService"
-        ]
-      },
-      "post": {
-        "operationId": "Accounts_CreateUserAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeCreateUserAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeCreateUserAccountRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Accounts"
         ]
       },
       "put": {
@@ -203,186 +77,6 @@
         ]
       }
     },
-    "/accounts/{account.uid}": {
-      "patch": {
-        "operationId": "Accounts_UpdateAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeUpdateAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "account.uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeAccount"
-            }
-          },
-          {
-            "name": "fieldMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{accountid}/owner/{ownerid}": {
-      "delete": {
-        "operationId": "Accounts_RemoveOwner",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeOwnershipResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "accountid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      },
-      "put": {
-        "operationId": "Accounts_AssignOwner",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeOwnershipResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "accountid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{id}": {
-      "get": {
-        "operationId": "Accounts_GetAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeAccount"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{uid}": {
-      "delete": {
-        "operationId": "Accounts_DeleteAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "harddelete",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
     "/accounts/{uuid}": {
       "get": {
         "operationId": "AccountsService_Get",
@@ -390,7 +84,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeaccountsAccount"
+              "$ref": "#/definitions/accountsAccount"
             }
           },
           "default": {
@@ -430,7 +124,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+              "$ref": "#/definitions/nodeDeleteResponse"
             }
           },
           "default": {
@@ -470,7 +164,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeaccountsAccount"
+              "$ref": "#/definitions/accountsAccount"
             }
           },
           "default": {
@@ -573,36 +267,6 @@
           "DevicesService"
         ]
       },
-      "post": {
-        "operationId": "Devices_Create",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryCreateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryCreateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      },
       "put": {
         "operationId": "DevicesService_Create",
         "responses": {
@@ -679,319 +343,6 @@
         ]
       }
     },
-    "/devices/states/all": {
-      "get": {
-        "operationId": "States_GetForNS",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/shadowGetForNSResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      }
-    },
-    "/devices/{device.id}": {
-      "patch": {
-        "operationId": "Devices_Update",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryUpdateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "device.id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-            }
-          },
-          {
-            "name": "fieldMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/{deviceid}/owner/{ownerid}": {
-      "delete": {
-        "operationId": "Devices_RemoveOwnerDevices",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryOwnershipResponseDevices"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "deviceid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      },
-      "put": {
-        "operationId": "Devices_AssignOwnerDevices",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryOwnershipResponseDevices"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "deviceid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/{id}": {
-      "get": {
-        "operationId": "Devices_Get",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryGetResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      },
-      "delete": {
-        "operationId": "Devices_Delete",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryDeleteResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/{id}/state": {
-      "get": {
-        "operationId": "States_Get",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshshadowGetResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      },
-      "patch": {
-        "operationId": "States_PatchDesiredState",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/shadowPatchDesiredStateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object"
-            }
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      }
-    },
-    "/devices/{id}/state/stream": {
-      "get": {
-        "operationId": "States_StreamReportedStateChanges",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of shadowStreamReportedStateChangesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "onlyDelta",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      }
-    },
     "/devices/{uuid}": {
       "get": {
         "operationId": "DevicesService_Get",
@@ -999,7 +350,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodedevicesDevice"
+              "$ref": "#/definitions/devicesDevice"
             }
           },
           "default": {
@@ -1068,7 +419,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+              "$ref": "#/definitions/nodeDeleteResponse"
             }
           },
           "default": {
@@ -1137,7 +488,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodedevicesDevice"
+              "$ref": "#/definitions/devicesDevice"
             }
           },
           "default": {
@@ -1222,43 +573,13 @@
           "NamespacesService"
         ]
       },
-      "post": {
-        "operationId": "Namespaces_CreateNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeNamespace"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeCreateNamespaceRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      },
       "put": {
         "operationId": "NamespacesService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodenamespacesNamespace"
+              "$ref": "#/definitions/namespacesNamespace"
             }
           },
           "default": {
@@ -1274,230 +595,12 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/nodenamespacesNamespace"
+              "$ref": "#/definitions/namespacesNamespace"
             }
           }
         ],
         "tags": [
           "NamespacesService"
-        ]
-      }
-    },
-    "/namespaces/{namespace.id}": {
-      "patch": {
-        "operationId": "Namespaces_UpdateNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeUpdateNamespaceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace.id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeNamespace"
-            }
-          },
-          {
-            "name": "namespaceMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespaceid}/{harddelete}": {
-      "delete": {
-        "operationId": "Namespaces_DeleteNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteNamespaceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespaceid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "harddelete",
-            "in": "path",
-            "required": true,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}": {
-      "get": {
-        "operationId": "Namespaces_GetNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshnodeNamespace"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}/permissions": {
-      "get": {
-        "operationId": "Namespaces_ListPermissions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeListPermissionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}/permissions/{accountId}": {
-      "delete": {
-        "operationId": "Namespaces_DeletePermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeletePermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      },
-      "put": {
-        "operationId": "Namespaces_CreatePermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiCreateNamespacePermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshapiPermission"
-            }
-          }
-        ],
-        "tags": [
-          "Namespaces"
         ]
       }
     },
@@ -1508,7 +611,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodenamespacesNamespace"
+              "$ref": "#/definitions/namespacesNamespace"
             }
           },
           "default": {
@@ -1542,7 +645,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/infinimeshnodeDeleteResponse"
+              "$ref": "#/definitions/nodeDeleteResponse"
             }
           },
           "default": {
@@ -1576,7 +679,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodenamespacesNamespace"
+              "$ref": "#/definitions/namespacesNamespace"
             }
           },
           "default": {
@@ -1612,102 +715,6 @@
         ]
       }
     },
-    "/objects": {
-      "get": {
-        "operationId": "Objects_ListObjects",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeListObjectsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "recurse",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "Objects"
-        ]
-      },
-      "post": {
-        "operationId": "Objects_CreateObject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeObject"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/infinimeshapiCreateObjectRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Objects"
-        ]
-      }
-    },
-    "/objects/{uid}": {
-      "delete": {
-        "operationId": "Objects_DeleteObject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteObjectResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Objects"
-        ]
-      }
-    },
     "/token": {
       "post": {
         "operationId": "AccountsService_Token",
@@ -1715,7 +722,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/infinimeshnodeTokenResponse"
+              "$ref": "#/definitions/nodeTokenResponse"
             }
           },
           "default": {
@@ -1731,7 +738,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshnodeTokenRequest"
+              "$ref": "#/definitions/nodeTokenRequest"
             }
           }
         ],
@@ -1742,13 +749,27 @@
     }
   },
   "definitions": {
+    "accountsAccount": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "accountsAccountsPool": {
       "type": "object",
       "properties": {
         "accounts": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/nodeaccountsAccount"
+            "$ref": "#/definitions/accountsAccount"
           }
         }
       }
@@ -1767,122 +788,7 @@
         }
       }
     },
-    "apiCreateNamespacePermissionResponse": {
-      "type": "object"
-    },
-    "apiRestrictionRule": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string"
-        },
-        "ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "deviceregistryGetByFingerprintResponse": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-          }
-        }
-      }
-    },
-    "deviceregistryGetDeviceStatusResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "deviceregistryListResponse": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-          }
-        }
-      }
-    },
-    "deviceregistryOwnershipResponseDevices": {
-      "type": "object"
-    },
-    "deviceregistryUpdateResponse": {
-      "type": "object"
-    },
-    "devicesDevicesPool": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/nodedevicesDevice"
-          }
-        }
-      }
-    },
-    "infinimeshapiCreateObjectRequest": {
-      "type": "object",
-      "properties": {
-        "parent": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "object": {
-          "$ref": "#/definitions/nodeObject"
-        }
-      }
-    },
-    "infinimeshapiPermission": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "$ref": "#/definitions/nodeAction"
-        }
-      },
-      "description": "Permission.Action may either be NONE, READ or WRITE."
-    },
-    "infinimeshapiTokenRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "expireTime": {
-          "type": "string"
-        },
-        "ruleset": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiRestrictionRule"
-          }
-        }
-      }
-    },
-    "infinimeshapiTokenResponse": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string"
-        }
-      }
-    },
-    "infinimeshdeviceregistryCertificate": {
+    "devicesCertificate": {
       "type": "object",
       "properties": {
         "pemData": {
@@ -1894,142 +800,72 @@
         "fingerprint": {
           "type": "string",
           "format": "byte"
-        },
-        "fingerprintAlgorithm": {
-          "type": "string"
         }
       }
     },
-    "infinimeshdeviceregistryCreateRequest": {
+    "devicesDevice": {
       "type": "object",
       "properties": {
-        "device": {
-          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-        }
-      }
-    },
-    "infinimeshdeviceregistryCreateResponse": {
-      "type": "object",
-      "properties": {
-        "device": {
-          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
-        }
-      }
-    },
-    "infinimeshdeviceregistryDeleteResponse": {
-      "type": "object"
-    },
-    "infinimeshdeviceregistryDevice": {
-      "type": "object",
-      "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
-        "name": {
+        "title": {
           "type": "string"
         },
         "enabled": {
           "type": "boolean"
         },
         "certificate": {
-          "$ref": "#/definitions/infinimeshdeviceregistryCertificate"
+          "$ref": "#/definitions/devicesCertificate"
         },
         "tags": {
           "type": "array",
           "items": {
             "type": "string"
           }
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "basicEnabled": {
-          "type": "boolean"
         }
       }
     },
-    "infinimeshdeviceregistryGetResponse": {
+    "devicesDevicesPool": {
       "type": "object",
       "properties": {
-        "device": {
-          "$ref": "#/definitions/infinimeshdeviceregistryDevice"
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/devicesDevice"
+          }
         }
       }
     },
-    "infinimeshnodeAccount": {
+    "namespacesNamespace": {
       "type": "object",
       "properties": {
-        "uid": {
+        "uuid": {
           "type": "string"
         },
-        "name": {
-          "type": "string"
-        },
-        "isRoot": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "defaultNamespace": {
-          "$ref": "#/definitions/infinimeshnodeNamespace"
-        },
-        "password": {
-          "type": "string"
-        },
-        "isAdmin": {
-          "type": "boolean"
-        },
-        "owner": {
-          "type": "string"
-        },
-        "username": {
+        "title": {
           "type": "string"
         }
       }
     },
-    "infinimeshnodeDeleteResponse": {
+    "namespacesNamespacesPool": {
+      "type": "object",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/namespacesNamespace"
+          }
+        }
+      }
+    },
+    "nodeDeleteResponse": {
       "type": "object"
     },
-    "infinimeshnodeNamespace": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "markfordeletion": {
-          "type": "boolean"
-        },
-        "deleteinitiationtime": {
-          "type": "string"
-        },
-        "RetentionPeriod": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
+    "nodeSetCredentialsResponse": {
+      "type": "object"
     },
-    "infinimeshnodePermission": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string"
-        },
-        "accountId": {
-          "type": "string"
-        },
-        "accountName": {
-          "type": "string"
-        },
-        "action": {
-          "$ref": "#/definitions/nodeAction"
-        }
-      }
-    },
-    "infinimeshnodeTokenRequest": {
+    "nodeTokenRequest": {
       "type": "object",
       "properties": {
         "auth": {
@@ -2041,7 +877,7 @@
         }
       }
     },
-    "infinimeshnodeTokenResponse": {
+    "nodeTokenResponse": {
       "type": "object",
       "properties": {
         "token": {
@@ -2049,226 +885,11 @@
         }
       }
     },
-    "infinimeshshadowGetResponse": {
-      "type": "object",
-      "properties": {
-        "shadow": {
-          "$ref": "#/definitions/shadowShadow"
-        }
-      }
-    },
-    "namespacesNamespacesPool": {
-      "type": "object",
-      "properties": {
-        "namespaces": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/nodenamespacesNamespace"
-          }
-        }
-      }
-    },
-    "nodeAction": {
-      "type": "string",
-      "enum": [
-        "NONE",
-        "READ",
-        "WRITE"
-      ],
-      "default": "NONE"
-    },
-    "nodeAuthenticateResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean"
-        },
-        "account": {
-          "$ref": "#/definitions/infinimeshnodeAccount"
-        },
-        "defaultNamespace": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeAuthorizeNamespaceResponse": {
-      "type": "object"
-    },
-    "nodeAuthorizeResponse": {
-      "type": "object"
-    },
-    "nodeCreateNamespaceRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeCreateUserAccountRequest": {
-      "type": "object",
-      "properties": {
-        "account": {
-          "$ref": "#/definitions/infinimeshnodeAccount"
-        },
-        "password": {
-          "type": "string"
-        },
-        "createGfUser": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeCreateUserAccountResponse": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeDeleteAccountResponse": {
-      "type": "object"
-    },
-    "nodeDeleteNamespaceResponse": {
-      "type": "object"
-    },
-    "nodeDeleteObjectResponse": {
-      "type": "object"
-    },
-    "nodeDeletePermissionResponse": {
-      "type": "object"
-    },
-    "nodeIsAdminResponse": {
-      "type": "object",
-      "properties": {
-        "isAdmin": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsAuthorizedNamespaceResponse": {
-      "type": "object",
-      "properties": {
-        "decision": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsAuthorizedResponse": {
-      "type": "object",
-      "properties": {
-        "decision": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsRootResponse": {
-      "type": "object",
-      "properties": {
-        "isRoot": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeListAccountsResponse": {
-      "type": "object",
-      "properties": {
-        "accounts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeAccount"
-          }
-        }
-      }
-    },
-    "nodeListNamespacesResponse": {
-      "type": "object",
-      "properties": {
-        "namespaces": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodeNamespace"
-          }
-        }
-      }
-    },
-    "nodeListObjectsResponse": {
-      "type": "object",
-      "properties": {
-        "objects": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/nodeObject"
-          }
-        }
-      }
-    },
-    "nodeListPermissionsResponse": {
-      "type": "object",
-      "properties": {
-        "permissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodePermission"
-          }
-        }
-      }
-    },
-    "nodeObject": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string"
-        },
-        "objects": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/nodeObject"
-          }
-        }
-      }
-    },
-    "nodeOwnershipResponse": {
-      "type": "object"
-    },
-    "nodeSetCredentialsResponse": {
-      "type": "object"
-    },
-    "nodeSetPasswordResponse": {
-      "type": "object"
-    },
-    "nodeUpdateAccountResponse": {
-      "type": "object"
-    },
-    "nodeUpdateNamespaceResponse": {
-      "type": "object"
-    },
-    "nodeaccountsAccount": {
-      "type": "object",
-      "properties": {
-        "uuid": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "nodeaccountsCreateRequest": {
       "type": "object",
       "properties": {
         "account": {
-          "$ref": "#/definitions/nodeaccountsAccount"
+          "$ref": "#/definitions/accountsAccount"
         },
         "credentials": {
           "$ref": "#/definitions/accountsCredentials"
@@ -2286,22 +907,7 @@
       "type": "object",
       "properties": {
         "account": {
-          "$ref": "#/definitions/nodeaccountsAccount"
-        }
-      }
-    },
-    "nodedevicesCertificate": {
-      "type": "object",
-      "properties": {
-        "pemData": {
-          "type": "string"
-        },
-        "algorithm": {
-          "type": "string"
-        },
-        "fingerprint": {
-          "type": "string",
-          "format": "byte"
+          "$ref": "#/definitions/accountsAccount"
         }
       }
     },
@@ -2309,41 +915,7 @@
       "type": "object",
       "properties": {
         "device": {
-          "$ref": "#/definitions/nodedevicesDevice"
-        }
-      }
-    },
-    "nodedevicesDevice": {
-      "type": "object",
-      "properties": {
-        "uuid": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "certificate": {
-          "$ref": "#/definitions/nodedevicesCertificate"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "nodenamespacesNamespace": {
-      "type": "object",
-      "properties": {
-        "uuid": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
+          "$ref": "#/definitions/devicesDevice"
         }
       }
     },
@@ -2363,48 +935,6 @@
       ],
       "default": "NULL_VALUE",
       "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\n The JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
-    },
-    "repopbDeleteDeviceStateResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "repopbRepo": {
-      "type": "object",
-      "properties": {
-        "Enabled": {
-          "type": "boolean"
-        },
-        "FingerPrint": {
-          "type": "string",
-          "format": "byte"
-        },
-        "NamespaceID": {
-          "type": "string"
-        },
-        "BasicEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
-    "repopbSetDeviceStateResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "reporepopbGetResponse": {
-      "type": "object",
-      "properties": {
-        "repo": {
-          "$ref": "#/definitions/repopbRepo"
-        }
-      }
     },
     "rpcStatus": {
       "type": "object",
@@ -2432,6 +962,14 @@
           "additionalProperties": {
             "$ref": "#/definitions/shadowShadow"
           }
+        }
+      }
+    },
+    "shadowGetResponse": {
+      "type": "object",
+      "properties": {
+        "shadow": {
+          "$ref": "#/definitions/shadowShadow"
         }
       }
     },
