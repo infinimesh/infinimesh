@@ -119,6 +119,10 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
+	uuid := acc.GetUuid()
+	if uuid == "me" {
+		uuid = requestor
+	}
 	// Getting Account from DB
 	// and Check requestor access
 	result := *NewBlankAccountDocument(acc.GetUuid())
