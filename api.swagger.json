@@ -112,6 +112,12 @@
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -152,6 +158,12 @@
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -193,6 +205,9 @@
                 },
                 "enabled": {
                   "type": "boolean"
+                },
+                "defaultNamespace": {
+                  "type": "string"
                 }
               }
             }
@@ -760,6 +775,9 @@
         },
         "enabled": {
           "type": "boolean"
+        },
+        "defaultNamespace": {
+          "type": "string"
         }
       }
     },

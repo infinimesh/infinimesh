@@ -229,10 +229,19 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
+	requestorAccount := NewBlankAccountDocument(requestor)	
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankAccountDocument(acc.GetUuid()))
+	old := *NewBlankAccountDocument(acc.GetUuid())
+	ok, level := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
 	if !ok || level < int32(schema.ADMIN) {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
+	}
+
+	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
+		ok, level := AccessLevel(ctx, c.db, requestorAccount, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
+		if !ok || level < int32(schema.READ) {
+			return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", acc.GetDefaultNamespace())
+		}
 	}
 
 	_, err := c.col.UpdateDocument(ctx, acc.GetUuid(), acc)

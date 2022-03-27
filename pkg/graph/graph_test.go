@@ -76,12 +76,14 @@ func init() {
 		inf.INFINIMESH_ACCOUNT_CLAIM: schema.ROOT_ACCOUNT_KEY,
 	})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
+	rootCtx = context.WithValue(rootCtx, inf.InfinimeshAccountCtxKey, schema.ROOT_ACCOUNT_KEY)
 }
 
 func CompareAccounts(a, b *accounts.Account) bool {
 	return a.GetUuid() == b.GetUuid() &&
 				 a.GetTitle() == b.GetTitle() &&
-				 a.GetEnabled() == b.GetEnabled()
+				 a.GetEnabled() == b.GetEnabled() &&
+				 a.GetDefaultNamespace() == b.GetDefaultNamespace()
 }
 
 // AccountsController Tests
@@ -272,6 +274,61 @@ func TestUpdateAccount(t *testing.T) {
 	}
 	if !CompareAccounts(this, that) {
 		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
+	}
+}
+
+func TestUpdateAccountDefaultNS(t *testing.T) {
+	t.Log("Creating sample account")
+
+	username := randomdata.SillyName()
+	password := randomdata.Alphanumeric(12)
+	this := &accounts.Account{
+		Title: username, Enabled: false,
+	}
+
+	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+		Account: this,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{username, password},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Error creating Account: %v", err)
+	}
+
+	uuid := res.GetAccount().GetUuid()
+	this.Uuid = uuid
+	this.DefaultNamespace = schema.ROOT_NAMESPACE_KEY
+	
+	that, err := ctrl.Update(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error udpating Account: %v", err)
+	}
+	if !CompareAccounts(this, that) {
+		t.Fatal("Requested updates and updated accounts(from Response) aren't matching, this:", this, "that:", that)
+	}
+
+	_, err = ctrl.col.ReadDocument(rootCtx, uuid, that)
+	if err != nil {
+		t.Fatalf("Error reading Account in DB: %v", err)
+	}
+	if !CompareAccounts(this, that) {
+		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
+	}
+
+	this.DefaultNamespace = "notexistent"
+	_, err = ctrl.Update(rootCtx, this)
+	if err == nil {
+		t.Fatalf("Error supposed to be raised, but it didn't")
+	}
+
+	s, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("Can't parse Status from error, got: %v", err)
+	}
+	if s.Code() != codes.PermissionDenied {
+		t.Fatalf("Error supposed to be PermissionDenied, but it was %v", s.Code().String())
 	}
 }
 
