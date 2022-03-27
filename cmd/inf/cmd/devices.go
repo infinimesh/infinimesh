@@ -94,6 +94,35 @@ var getDeviceCmd = &cobra.Command{
 	},
 }
 
+var makeDeviceTokenCmd = &cobra.Command{
+	Use:   "token",
+	Short: "Make device token",
+	Aliases: []string{"tok", "t"},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeDevicesServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		allowPost, _ := cmd.Flags().GetBool("allow-post")
+		r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
+			Devices: args,
+			Post: allowPost,
+		})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(r)
+		}
+
+		fmt.Println(r.Token)
+		return nil
+	},
+}
+
 func PrintSingleDevice(d *devpb.Device) {
 	fmt.Printf("UUID: %s\n", d.Uuid)
 	fmt.Printf("Title: %s\n", d.Title)
@@ -135,6 +164,9 @@ func PrintDevicesPool(pool []*devpb.Device) {
 func init() {
 	devicesCmd.AddCommand(listDevicesCmd)
 	devicesCmd.AddCommand(getDeviceCmd)
+
+	makeDeviceTokenCmd.Flags().Bool("allow-post", false, "Allow posting devices states")
+	devicesCmd.AddCommand(makeDeviceTokenCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }

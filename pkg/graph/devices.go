@@ -23,6 +23,7 @@ import (
 	"errors"
 
 	"github.com/arangodb/go-driver"
+	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
@@ -254,4 +255,41 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 	r.Uuid = meta.ID.Key()
 
 	return &r, nil
+}
+
+func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.DevicesTokenRequest) (*pb.TokenResponse, error) {
+	log := c.log.Named("MakeDevicesToken")
+	log.Debug("MakeDevicesToken request received", zap.Any("request", req), zap.Any("context", ctx))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	acc := *NewBlankAccountDocument(requestor)
+	access := int32(schema.READ)
+	if req.GetPost() {
+		access = int32(schema.MGMT)
+	}
+
+	for _, uuid := range req.GetDevices() {
+		ok, level := AccessLevel(ctx, c.db, &acc, NewBlankDeviceDocument(uuid))
+		if !ok {
+			return nil, status.Errorf(codes.NotFound, "Account not found or not enough Access Rights to device: %s", uuid)
+		}
+		if level < access {
+			return nil, status.Errorf(codes.PermissionDenied, "Not enough Access Rights to device: %s", uuid)
+		}
+	}
+
+	claims := jwt.MapClaims{}
+	claims[inf.INFINIMESH_DEVICES_CLAIM] = req.GetDevices()
+	claims["exp"] = req.Exp
+	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = req.GetPost()
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token_string, err := token.SignedString(c.SIGNING_KEY)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to issue token")
+	}
+
+	return &pb.TokenResponse{Token: token_string}, nil
 }

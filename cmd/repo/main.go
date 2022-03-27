@@ -87,6 +87,7 @@ func main() {
 	ns_ctrl  := graph.NewNamespacesController(log, db)
 	pb.RegisterNamespacesServiceServer(s, ns_ctrl)
 	dev_ctrl := graph.NewDevicesController(log, db)
+	dev_ctrl.SIGNING_KEY = SIGNING_KEY
 	pb.RegisterDevicesServiceServer(s, dev_ctrl)
 
 	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
