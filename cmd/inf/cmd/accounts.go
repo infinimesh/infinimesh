@@ -68,11 +68,11 @@ var accountsCmd = &cobra.Command{
 func PrintAccountsPool(pool []*accpb.Account) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"UUID", "Title", "Enabled"})
+	t.AppendHeader(table.Row{"UUID", "Title", "Enabled", "Default NS"})
 	
 	rows := make([]table.Row, len(pool))
 	for i, acc := range pool {
-		rows[i] = table.Row{acc.Uuid, acc.Title, acc.Enabled}
+		rows[i] = table.Row{acc.Uuid, acc.Title, acc.Enabled, acc.DefaultNamespace}
 	}
 	t.AppendRows(rows)
 
