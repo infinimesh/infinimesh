@@ -118,6 +118,12 @@ service NamespacesService {
 
 import "pkg/node/proto/devices/devices.proto";
 
+message DevicesTokenRequest {
+  repeated string devices = 1;
+  int32 exp = 2;
+  bool post = 3;
+}
+
 service DevicesService {
   rpc Get(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
     option (google.api.http) = {
@@ -143,6 +149,12 @@ service DevicesService {
   rpc Delete(infinimesh.node.devices.Device) returns (DeleteResponse) {
     option (google.api.http) = {
       delete: "/devices/{uuid}"
+    };
+  };
+
+  rpc MakeDevicesToken(DevicesTokenRequest) returns (TokenResponse) {
+    option (google.api.http) = {
+      post: "/devices/token"
     };
   };
 
