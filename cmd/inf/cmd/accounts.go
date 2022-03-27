@@ -31,8 +31,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// make AccountsServiceClient
-func makeAccountsServiceClient(ctx context.Context) (pb.AccountsServiceClient, error) {
+func makeConnection(ctx context.Context) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	if insec := viper.GetBool("insecure"); insec {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -41,7 +40,13 @@ func makeAccountsServiceClient(ctx context.Context) (pb.AccountsServiceClient, e
 			InsecureSkipVerify: true,
 		})))
 	}
-	conn, err := grpc.DialContext(ctx, viper.GetString("infinimesh"), opts...)
+
+	return grpc.DialContext(ctx, viper.GetString("infinimesh"), opts...)
+}
+
+// make AccountsServiceClient
+func makeAccountsServiceClient(ctx context.Context) (pb.AccountsServiceClient, error) {
+	conn, err := makeConnection(ctx)
 	if err != nil {
 		return nil, err
 	}
