@@ -16,6 +16,9 @@
     },
     {
       "name": "Shadows"
+    },
+    {
+      "name": "StateService"
     }
   ],
   "consumes": [
@@ -351,6 +354,53 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/devices/token": {
+      "post": {
+        "operationId": "DevicesService_MakeDevicesToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "devices",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "exp",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "post",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -855,6 +905,60 @@
         }
       }
     },
+    "infinimeshshadowGetResponse": {
+      "type": "object",
+      "properties": {
+        "shadow": {
+          "$ref": "#/definitions/shadowShadow"
+        }
+      }
+    },
+    "infinimeshshadowVersionedValue": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "data": {
+          "type": "object"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "infinimeshstateEmptyMessage": {
+      "type": "object"
+    },
+    "infinimeshstateGetResponse": {
+      "type": "object",
+      "properties": {
+        "states": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/stateState"
+          }
+        }
+      }
+    },
+    "infinimeshstateVersionedValue": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "data": {
+          "type": "object"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "namespacesNamespace": {
       "type": "object",
       "properties": {
@@ -983,14 +1087,6 @@
         }
       }
     },
-    "shadowGetResponse": {
-      "type": "object",
-      "properties": {
-        "shadow": {
-          "$ref": "#/definitions/shadowShadow"
-        }
-      }
-    },
     "shadowPatchDesiredStateResponse": {
       "type": "object"
     },
@@ -998,13 +1094,13 @@
       "type": "object",
       "properties": {
         "config": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/infinimeshshadowVersionedValue"
         },
         "reported": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/infinimeshshadowVersionedValue"
         },
         "desired": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/infinimeshshadowVersionedValue"
         }
       }
     },
@@ -1012,26 +1108,21 @@
       "type": "object",
       "properties": {
         "reportedState": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/infinimeshshadowVersionedValue"
         },
         "desiredState": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/infinimeshshadowVersionedValue"
         }
       }
     },
-    "shadowVersionedValue": {
+    "stateState": {
       "type": "object",
       "properties": {
-        "version": {
-          "type": "string",
-          "format": "uint64"
+        "reported": {
+          "$ref": "#/definitions/infinimeshstateVersionedValue"
         },
-        "data": {
-          "type": "object"
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
+        "desired": {
+          "$ref": "#/definitions/infinimeshstateVersionedValue"
         }
       }
     }
