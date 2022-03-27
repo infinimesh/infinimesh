@@ -125,7 +125,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	}
 	// Getting Account from DB
 	// and Check requestor access
-	result := *NewBlankAccountDocument(acc.GetUuid())
+	result := *NewBlankAccountDocument(uuid)
 	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
 	if !ok {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
