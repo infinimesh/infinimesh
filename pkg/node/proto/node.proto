@@ -158,6 +158,7 @@ service DevicesService {
     };
   };
 
+  rpc GetByToken(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device);
   rpc GetByFingerprint(infinimesh.node.devices.GetByFingerprintRequest) returns (infinimesh.node.devices.Device);
 }
 

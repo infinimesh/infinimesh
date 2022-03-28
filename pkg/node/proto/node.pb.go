@@ -501,7 +501,7 @@ var file_pkg_node_proto_node_proto_rawDesc = []byte{
 	0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
 	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1a, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x14,
 	0x2a, 0x12, 0x2f, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x70, 0x61, 0x63, 0x65, 0x73, 0x2f, 0x7b, 0x75,
-	0x75, 0x69, 0x64, 0x7d, 0x32, 0xe1, 0x05, 0x0a, 0x0e, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73,
+	0x75, 0x69, 0x64, 0x7d, 0x32, 0xb1, 0x06, 0x0a, 0x0e, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73,
 	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x60, 0x0a, 0x03, 0x47, 0x65, 0x74, 0x12, 0x1f,
 	0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65,
 	0x2e, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x1a,
@@ -541,7 +541,12 @@ var file_pkg_node_proto_node_proto_rawDesc = []byte{
 	0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x54, 0x6f, 0x6b, 0x65,
 	0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x16, 0x82, 0xd3, 0xe4, 0x93, 0x02,
 	0x10, 0x22, 0x0e, 0x2f, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2f, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x12, 0x65, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x42, 0x79, 0x46, 0x69, 0x6e, 0x67, 0x65, 0x72,
+	0x6e, 0x12, 0x4e, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x42, 0x79, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12,
+	0x1f, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64,
+	0x65, 0x2e, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65,
+	0x1a, 0x1f, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65, 0x73, 0x68, 0x2e, 0x6e, 0x6f,
+	0x64, 0x65, 0x2e, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e, 0x44, 0x65, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x65, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x42, 0x79, 0x46, 0x69, 0x6e, 0x67, 0x65, 0x72,
 	0x70, 0x72, 0x69, 0x6e, 0x74, 0x12, 0x30, 0x2e, 0x69, 0x6e, 0x66, 0x69, 0x6e, 0x69, 0x6d, 0x65,
 	0x73, 0x68, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2e,
 	0x47, 0x65, 0x74, 0x42, 0x79, 0x46, 0x69, 0x6e, 0x67, 0x65, 0x72, 0x70, 0x72, 0x69, 0x6e, 0x74,
@@ -659,36 +664,38 @@ var file_pkg_node_proto_node_proto_depIdxs = []int32{
 	11, // 17: infinimesh.node.DevicesService.Update:input_type -> infinimesh.node.devices.Device
 	11, // 18: infinimesh.node.DevicesService.Delete:input_type -> infinimesh.node.devices.Device
 	6,  // 19: infinimesh.node.DevicesService.MakeDevicesToken:input_type -> infinimesh.node.DevicesTokenRequest
-	13, // 20: infinimesh.node.DevicesService.GetByFingerprint:input_type -> infinimesh.node.devices.GetByFingerprintRequest
-	14, // 21: infinimesh.node.ShadowService.Get:input_type -> infinimesh.shadow.GetRequest
-	15, // 22: infinimesh.node.ShadowService.GetMultiple:input_type -> infinimesh.shadow.Empty
-	16, // 23: infinimesh.node.ShadowService.PatchDesiredState:input_type -> infinimesh.shadow.PatchDesiredStateRequest
-	17, // 24: infinimesh.node.ShadowService.StreamReportedStateChanges:input_type -> infinimesh.shadow.StreamReportedStateChangesRequest
-	1,  // 25: infinimesh.node.AccountsService.Token:output_type -> infinimesh.node.TokenResponse
-	8,  // 26: infinimesh.node.AccountsService.Get:output_type -> infinimesh.node.accounts.Account
-	18, // 27: infinimesh.node.AccountsService.List:output_type -> infinimesh.node.accounts.AccountsPool
-	19, // 28: infinimesh.node.AccountsService.Create:output_type -> infinimesh.node.accounts.CreateResponse
-	8,  // 29: infinimesh.node.AccountsService.Update:output_type -> infinimesh.node.accounts.Account
-	4,  // 30: infinimesh.node.AccountsService.Delete:output_type -> infinimesh.node.DeleteResponse
-	3,  // 31: infinimesh.node.AccountsService.SetCredentials:output_type -> infinimesh.node.SetCredentialsResponse
-	10, // 32: infinimesh.node.NamespacesService.Get:output_type -> infinimesh.node.namespaces.Namespace
-	20, // 33: infinimesh.node.NamespacesService.List:output_type -> infinimesh.node.namespaces.NamespacesPool
-	10, // 34: infinimesh.node.NamespacesService.Create:output_type -> infinimesh.node.namespaces.Namespace
-	10, // 35: infinimesh.node.NamespacesService.Update:output_type -> infinimesh.node.namespaces.Namespace
-	4,  // 36: infinimesh.node.NamespacesService.Delete:output_type -> infinimesh.node.DeleteResponse
-	11, // 37: infinimesh.node.DevicesService.Get:output_type -> infinimesh.node.devices.Device
-	21, // 38: infinimesh.node.DevicesService.List:output_type -> infinimesh.node.devices.DevicesPool
-	22, // 39: infinimesh.node.DevicesService.Create:output_type -> infinimesh.node.devices.CreateResponse
-	11, // 40: infinimesh.node.DevicesService.Update:output_type -> infinimesh.node.devices.Device
-	4,  // 41: infinimesh.node.DevicesService.Delete:output_type -> infinimesh.node.DeleteResponse
-	1,  // 42: infinimesh.node.DevicesService.MakeDevicesToken:output_type -> infinimesh.node.TokenResponse
-	11, // 43: infinimesh.node.DevicesService.GetByFingerprint:output_type -> infinimesh.node.devices.Device
-	23, // 44: infinimesh.node.ShadowService.Get:output_type -> infinimesh.shadow.GetResponse
-	24, // 45: infinimesh.node.ShadowService.GetMultiple:output_type -> infinimesh.shadow.GetMultipleResponse
-	25, // 46: infinimesh.node.ShadowService.PatchDesiredState:output_type -> infinimesh.shadow.PatchDesiredStateResponse
-	26, // 47: infinimesh.node.ShadowService.StreamReportedStateChanges:output_type -> infinimesh.shadow.StreamReportedStateChangesResponse
-	25, // [25:48] is the sub-list for method output_type
-	2,  // [2:25] is the sub-list for method input_type
+	11, // 20: infinimesh.node.DevicesService.GetByToken:input_type -> infinimesh.node.devices.Device
+	13, // 21: infinimesh.node.DevicesService.GetByFingerprint:input_type -> infinimesh.node.devices.GetByFingerprintRequest
+	14, // 22: infinimesh.node.ShadowService.Get:input_type -> infinimesh.shadow.GetRequest
+	15, // 23: infinimesh.node.ShadowService.GetMultiple:input_type -> infinimesh.shadow.Empty
+	16, // 24: infinimesh.node.ShadowService.PatchDesiredState:input_type -> infinimesh.shadow.PatchDesiredStateRequest
+	17, // 25: infinimesh.node.ShadowService.StreamReportedStateChanges:input_type -> infinimesh.shadow.StreamReportedStateChangesRequest
+	1,  // 26: infinimesh.node.AccountsService.Token:output_type -> infinimesh.node.TokenResponse
+	8,  // 27: infinimesh.node.AccountsService.Get:output_type -> infinimesh.node.accounts.Account
+	18, // 28: infinimesh.node.AccountsService.List:output_type -> infinimesh.node.accounts.AccountsPool
+	19, // 29: infinimesh.node.AccountsService.Create:output_type -> infinimesh.node.accounts.CreateResponse
+	8,  // 30: infinimesh.node.AccountsService.Update:output_type -> infinimesh.node.accounts.Account
+	4,  // 31: infinimesh.node.AccountsService.Delete:output_type -> infinimesh.node.DeleteResponse
+	3,  // 32: infinimesh.node.AccountsService.SetCredentials:output_type -> infinimesh.node.SetCredentialsResponse
+	10, // 33: infinimesh.node.NamespacesService.Get:output_type -> infinimesh.node.namespaces.Namespace
+	20, // 34: infinimesh.node.NamespacesService.List:output_type -> infinimesh.node.namespaces.NamespacesPool
+	10, // 35: infinimesh.node.NamespacesService.Create:output_type -> infinimesh.node.namespaces.Namespace
+	10, // 36: infinimesh.node.NamespacesService.Update:output_type -> infinimesh.node.namespaces.Namespace
+	4,  // 37: infinimesh.node.NamespacesService.Delete:output_type -> infinimesh.node.DeleteResponse
+	11, // 38: infinimesh.node.DevicesService.Get:output_type -> infinimesh.node.devices.Device
+	21, // 39: infinimesh.node.DevicesService.List:output_type -> infinimesh.node.devices.DevicesPool
+	22, // 40: infinimesh.node.DevicesService.Create:output_type -> infinimesh.node.devices.CreateResponse
+	11, // 41: infinimesh.node.DevicesService.Update:output_type -> infinimesh.node.devices.Device
+	4,  // 42: infinimesh.node.DevicesService.Delete:output_type -> infinimesh.node.DeleteResponse
+	1,  // 43: infinimesh.node.DevicesService.MakeDevicesToken:output_type -> infinimesh.node.TokenResponse
+	11, // 44: infinimesh.node.DevicesService.GetByToken:output_type -> infinimesh.node.devices.Device
+	11, // 45: infinimesh.node.DevicesService.GetByFingerprint:output_type -> infinimesh.node.devices.Device
+	23, // 46: infinimesh.node.ShadowService.Get:output_type -> infinimesh.shadow.GetResponse
+	24, // 47: infinimesh.node.ShadowService.GetMultiple:output_type -> infinimesh.shadow.GetMultipleResponse
+	25, // 48: infinimesh.node.ShadowService.PatchDesiredState:output_type -> infinimesh.shadow.PatchDesiredStateResponse
+	26, // 49: infinimesh.node.ShadowService.StreamReportedStateChanges:output_type -> infinimesh.shadow.StreamReportedStateChangesResponse
+	26, // [26:50] is the sub-list for method output_type
+	2,  // [2:26] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name

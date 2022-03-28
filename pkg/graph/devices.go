@@ -144,7 +144,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 }
 
 func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
-	log := c.log.Named("Create")
+	log := c.log.Named("Get")
 	log.Debug("Get request received", zap.Any("request", dev), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -170,6 +170,34 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
 	device.Token = token
+
+	return device.Device, nil
+}
+
+func (c *DevicesController) GetByToken(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+	log := c.log.Named("GetByToken")
+	log.Debug("Get by Token request received", zap.String("device", dev.Uuid), zap.Any("context", ctx))
+
+	devices_scope := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
+	log.Debug("Devices Scope", zap.Any("devices", devices_scope))
+
+	found := false
+	for _, device := range devices_scope {
+		if device == dev.GetUuid() {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
+	}
+
+	device := *NewBlankDeviceDocument(dev.GetUuid())
+	meta, err := c.col.ReadDocument(ctx, dev.GetUuid(), &device)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "Device not found")
+	}
+	device.Uuid = meta.ID.Key()
 
 	return device.Device, nil
 }

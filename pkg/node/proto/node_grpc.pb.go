@@ -560,6 +560,7 @@ type DevicesServiceClient interface {
 	Update(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	Delete(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*DeleteResponse, error)
 	MakeDevicesToken(ctx context.Context, in *DevicesTokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
+	GetByToken(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	GetByFingerprint(ctx context.Context, in *devices.GetByFingerprintRequest, opts ...grpc.CallOption) (*devices.Device, error)
 }
 
@@ -625,6 +626,15 @@ func (c *devicesServiceClient) MakeDevicesToken(ctx context.Context, in *Devices
 	return out, nil
 }
 
+func (c *devicesServiceClient) GetByToken(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/GetByToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *devicesServiceClient) GetByFingerprint(ctx context.Context, in *devices.GetByFingerprintRequest, opts ...grpc.CallOption) (*devices.Device, error) {
 	out := new(devices.Device)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/GetByFingerprint", in, out, opts...)
@@ -644,6 +654,7 @@ type DevicesServiceServer interface {
 	Update(context.Context, *devices.Device) (*devices.Device, error)
 	Delete(context.Context, *devices.Device) (*DeleteResponse, error)
 	MakeDevicesToken(context.Context, *DevicesTokenRequest) (*TokenResponse, error)
+	GetByToken(context.Context, *devices.Device) (*devices.Device, error)
 	GetByFingerprint(context.Context, *devices.GetByFingerprintRequest) (*devices.Device, error)
 	mustEmbedUnimplementedDevicesServiceServer()
 }
@@ -669,6 +680,9 @@ func (UnimplementedDevicesServiceServer) Delete(context.Context, *devices.Device
 }
 func (UnimplementedDevicesServiceServer) MakeDevicesToken(context.Context, *DevicesTokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeDevicesToken not implemented")
+}
+func (UnimplementedDevicesServiceServer) GetByToken(context.Context, *devices.Device) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetByToken not implemented")
 }
 func (UnimplementedDevicesServiceServer) GetByFingerprint(context.Context, *devices.GetByFingerprintRequest) (*devices.Device, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetByFingerprint not implemented")
@@ -794,6 +808,24 @@ func _DevicesService_MakeDevicesToken_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DevicesService_GetByToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).GetByToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/GetByToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).GetByToken(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DevicesService_GetByFingerprint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(devices.GetByFingerprintRequest)
 	if err := dec(in); err != nil {
@@ -842,6 +874,10 @@ var DevicesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MakeDevicesToken",
 			Handler:    _DevicesService_MakeDevicesToken_Handler,
+		},
+		{
+			MethodName: "GetByToken",
+			Handler:    _DevicesService_GetByToken_Handler,
 		},
 		{
 			MethodName: "GetByFingerprint",
