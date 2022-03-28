@@ -20,7 +20,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   mqtt-bridge:
-    image: ghcr.io/slntopp/infinimesh/mqtt-bridge:latest
+    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
     restart: unless-stopped
     ports:
       - "8090:8080" # BasicAuth(non-TLS)
@@ -38,14 +38,14 @@ services:
       - kafka
       - repo:device-registry
   telemetry-router:
-    image: ghcr.io/slntopp/infinimesh/telemetry-router:latest
+    image: ghcr.io/infinimesh/infinimesh/telemetry-router:latest
     environment:
       KAFKA_HOST: kafka:29092
     depends_on:
       - kafka
     restart: unless-stopped
   shadow-delta-merger:
-    image: ghcr.io/slntopp/infinimesh/shadow-delta-merger:latest
+    image: ghcr.io/infinimesh/infinimesh/shadow-delta-merger:latest
     depends_on:
       - kafka
     environment:
@@ -53,7 +53,7 @@ services:
     restart: unless-stopped
   shadow-api:
     restart: unless-stopped
-    image: ghcr.io/slntopp/infinimesh/shadow-api:latest
+    image: ghcr.io/infinimesh/infinimesh/shadow-api:latest
     ports:
       - "8096:8096"
     depends_on:
@@ -63,21 +63,21 @@ services:
       DB_ADDR: redis:6379
   shadow-persister:
     restart: unless-stopped
-    image: ghcr.io/slntopp/infinimesh/shadow-persister:latest
+    image: ghcr.io/infinimesh/infinimesh/shadow-persister:latest
     depends_on:
       - kafka
     environment:
       KAFKA_HOST: kafka:29092
       DB_ADDR: redis:6379
   frontend:
-    image: ghcr.io/slntopp/infinimesh/frontend:latest
+    image: ghcr.io/infinimesh/infinimesh/frontend:latest
     ports:
       - "80:80"
     environment:
       APISERVER_URL: http://apiserver-rest:8081
 
   repo:
-    image: ghcr.io/slntopp/infinimesh/repo:latest
+    image: ghcr.io/infinimesh/infinimesh/repo:latest
     restart: unless-stopped
     depends_on:
       - alpha

@@ -7,13 +7,13 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" ./cmd/device-registry
-RUN upx ./device-registry
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" ./cmd/repo
+RUN upx ./repo
 
 FROM scratch
 WORKDIR /
-COPY --from=builder /go/src/github.com/infinimesh/infinimesh/device-registry /device-registry
+COPY --from=builder /go/src/github.com/infinimesh/infinimesh/repo /repo
 
 LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
 
-ENTRYPOINT ["/device-registry"]
+ENTRYPOINT ["/repo"]
