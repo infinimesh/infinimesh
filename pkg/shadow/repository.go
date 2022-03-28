@@ -76,11 +76,11 @@ func (r *redisRepo) GetReported(id string) (d DeviceState, err error) {
 	return r.getState("reported", id)
 }
 
-func (r *redisRepo) getState(prefix, id string) (d DeviceState, err error) {
+func (r *redisRepo) getState(suffix, id string) (d DeviceState, err error) {
 	conn := r.pool.Get()
 	defer conn.Close()
 
-	bytes, err := redis.Bytes(conn.Do("GET", prefix+"#"+id))
+	bytes, err := redis.Bytes(conn.Do("GET", id + ":" + suffix))
 	if err != nil {
 		return DeviceState{}, err
 	}
@@ -89,7 +89,7 @@ func (r *redisRepo) getState(prefix, id string) (d DeviceState, err error) {
 	return d, err
 }
 
-func (r *redisRepo) setState(prefix string, d DeviceState) (err error) {
+func (r *redisRepo) setState(suffix string, d DeviceState) (err error) {
 	conn := r.pool.Get()
 	defer conn.Close()
 
@@ -98,7 +98,7 @@ func (r *redisRepo) setState(prefix string, d DeviceState) (err error) {
 		return err
 	}
 
-	err = conn.Send("SET", prefix+"#"+d.ID, bytes)
+	err = conn.Send("SET", d.ID + ":" + suffix, bytes)
 	if err != nil {
 		return err
 	}
