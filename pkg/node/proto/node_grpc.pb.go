@@ -7,6 +7,7 @@ import (
 	accounts "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	devices "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	namespaces "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -848,5 +849,227 @@ var DevicesService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/node/proto/node.proto",
+}
+
+// ShadowServiceClient is the client API for ShadowService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ShadowServiceClient interface {
+	Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error)
+	GetMultiple(ctx context.Context, in *shadowpb.Empty, opts ...grpc.CallOption) (*shadowpb.GetMultipleResponse, error)
+	PatchDesiredState(ctx context.Context, in *shadowpb.PatchDesiredStateRequest, opts ...grpc.CallOption) (*shadowpb.PatchDesiredStateResponse, error)
+	StreamReportedStateChanges(ctx context.Context, in *shadowpb.StreamReportedStateChangesRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error)
+}
+
+type shadowServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewShadowServiceClient(cc grpc.ClientConnInterface) ShadowServiceClient {
+	return &shadowServiceClient{cc}
+}
+
+func (c *shadowServiceClient) Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error) {
+	out := new(shadowpb.GetResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shadowServiceClient) GetMultiple(ctx context.Context, in *shadowpb.Empty, opts ...grpc.CallOption) (*shadowpb.GetMultipleResponse, error) {
+	out := new(shadowpb.GetMultipleResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/GetMultiple", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shadowServiceClient) PatchDesiredState(ctx context.Context, in *shadowpb.PatchDesiredStateRequest, opts ...grpc.CallOption) (*shadowpb.PatchDesiredStateResponse, error) {
+	out := new(shadowpb.PatchDesiredStateResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/PatchDesiredState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in *shadowpb.StreamReportedStateChangesRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ShadowService_ServiceDesc.Streams[0], "/infinimesh.node.ShadowService/StreamReportedStateChanges", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &shadowServiceStreamReportedStateChangesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ShadowService_StreamReportedStateChangesClient interface {
+	Recv() (*shadowpb.StreamReportedStateChangesResponse, error)
+	grpc.ClientStream
+}
+
+type shadowServiceStreamReportedStateChangesClient struct {
+	grpc.ClientStream
+}
+
+func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*shadowpb.StreamReportedStateChangesResponse, error) {
+	m := new(shadowpb.StreamReportedStateChangesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// ShadowServiceServer is the server API for ShadowService service.
+// All implementations must embed UnimplementedShadowServiceServer
+// for forward compatibility
+type ShadowServiceServer interface {
+	Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error)
+	GetMultiple(context.Context, *shadowpb.Empty) (*shadowpb.GetMultipleResponse, error)
+	PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error)
+	StreamReportedStateChanges(*shadowpb.StreamReportedStateChangesRequest, ShadowService_StreamReportedStateChangesServer) error
+	mustEmbedUnimplementedShadowServiceServer()
+}
+
+// UnimplementedShadowServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedShadowServiceServer struct {
+}
+
+func (UnimplementedShadowServiceServer) Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedShadowServiceServer) GetMultiple(context.Context, *shadowpb.Empty) (*shadowpb.GetMultipleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMultiple not implemented")
+}
+func (UnimplementedShadowServiceServer) PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PatchDesiredState not implemented")
+}
+func (UnimplementedShadowServiceServer) StreamReportedStateChanges(*shadowpb.StreamReportedStateChangesRequest, ShadowService_StreamReportedStateChangesServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamReportedStateChanges not implemented")
+}
+func (UnimplementedShadowServiceServer) mustEmbedUnimplementedShadowServiceServer() {}
+
+// UnsafeShadowServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ShadowServiceServer will
+// result in compilation errors.
+type UnsafeShadowServiceServer interface {
+	mustEmbedUnimplementedShadowServiceServer()
+}
+
+func RegisterShadowServiceServer(s grpc.ServiceRegistrar, srv ShadowServiceServer) {
+	s.RegisterService(&ShadowService_ServiceDesc, srv)
+}
+
+func _ShadowService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(shadowpb.GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShadowServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.ShadowService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShadowServiceServer).Get(ctx, req.(*shadowpb.GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShadowService_GetMultiple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(shadowpb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShadowServiceServer).GetMultiple(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.ShadowService/GetMultiple",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShadowServiceServer).GetMultiple(ctx, req.(*shadowpb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShadowService_PatchDesiredState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(shadowpb.PatchDesiredStateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShadowServiceServer).PatchDesiredState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.ShadowService/PatchDesiredState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShadowServiceServer).PatchDesiredState(ctx, req.(*shadowpb.PatchDesiredStateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShadowService_StreamReportedStateChanges_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(shadowpb.StreamReportedStateChangesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ShadowServiceServer).StreamReportedStateChanges(m, &shadowServiceStreamReportedStateChangesServer{stream})
+}
+
+type ShadowService_StreamReportedStateChangesServer interface {
+	Send(*shadowpb.StreamReportedStateChangesResponse) error
+	grpc.ServerStream
+}
+
+type shadowServiceStreamReportedStateChangesServer struct {
+	grpc.ServerStream
+}
+
+func (x *shadowServiceStreamReportedStateChangesServer) Send(m *shadowpb.StreamReportedStateChangesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// ShadowService_ServiceDesc is the grpc.ServiceDesc for ShadowService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ShadowService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "infinimesh.node.ShadowService",
+	HandlerType: (*ShadowServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Get",
+			Handler:    _ShadowService_Get_Handler,
+		},
+		{
+			MethodName: "GetMultiple",
+			Handler:    _ShadowService_GetMultiple_Handler,
+		},
+		{
+			MethodName: "PatchDesiredState",
+			Handler:    _ShadowService_PatchDesiredState_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamReportedStateChanges",
+			Handler:       _ShadowService_StreamReportedStateChanges_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "pkg/node/proto/node.proto",
 }

@@ -6,6 +6,9 @@
   },
   "tags": [
     {
+      "name": "Shadows"
+    },
+    {
       "name": "AccountsService"
     },
     {
@@ -15,7 +18,7 @@
       "name": "DevicesService"
     },
     {
-      "name": "Shadows"
+      "name": "ShadowService"
     },
     {
       "name": "StateService"
@@ -361,6 +364,28 @@
         ]
       }
     },
+    "/devices/states/all": {
+      "get": {
+        "operationId": "ShadowService_GetMultiple",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowGetMultipleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
     "/devices/token": {
       "post": {
         "operationId": "DevicesService_MakeDevicesToken",
@@ -405,6 +430,117 @@
         ],
         "tags": [
           "DevicesService"
+        ]
+      }
+    },
+    "/devices/{id}/state": {
+      "get": {
+        "operationId": "ShadowService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshshadowGetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      },
+      "patch": {
+        "operationId": "ShadowService_PatchDesiredState",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowPatchDesiredStateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/{id}/state/stream": {
+      "get": {
+        "operationId": "ShadowService_StreamReportedStateChanges",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of shadowStreamReportedStateChangesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "onlyDelta",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "ShadowService"
         ]
       }
     },
@@ -1076,7 +1212,7 @@
         }
       }
     },
-    "shadowGetForNSResponse": {
+    "shadowGetMultipleResponse": {
       "type": "object",
       "properties": {
         "pool": {

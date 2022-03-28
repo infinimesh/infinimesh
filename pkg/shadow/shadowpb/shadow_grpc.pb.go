@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShadowsClient interface {
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	GetForNS(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetForNSResponse, error)
+	GetMultiple(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetMultipleResponse, error)
 	PatchDesiredState(ctx context.Context, in *PatchDesiredStateRequest, opts ...grpc.CallOption) (*PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(ctx context.Context, in *StreamReportedStateChangesRequest, opts ...grpc.CallOption) (Shadows_StreamReportedStateChangesClient, error)
 }
@@ -41,9 +41,9 @@ func (c *shadowsClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *shadowsClient) GetForNS(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetForNSResponse, error) {
-	out := new(GetForNSResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/GetForNS", in, out, opts...)
+func (c *shadowsClient) GetMultiple(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetMultipleResponse, error) {
+	out := new(GetMultipleResponse)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/GetMultiple", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (x *shadowsStreamReportedStateChangesClient) Recv() (*StreamReportedStateCh
 // for forward compatibility
 type ShadowsServer interface {
 	Get(context.Context, *GetRequest) (*GetResponse, error)
-	GetForNS(context.Context, *GetRequest) (*GetForNSResponse, error)
+	GetMultiple(context.Context, *Empty) (*GetMultipleResponse, error)
 	PatchDesiredState(context.Context, *PatchDesiredStateRequest) (*PatchDesiredStateResponse, error)
 	StreamReportedStateChanges(*StreamReportedStateChangesRequest, Shadows_StreamReportedStateChangesServer) error
 	mustEmbedUnimplementedShadowsServer()
@@ -109,8 +109,8 @@ type UnimplementedShadowsServer struct {
 func (UnimplementedShadowsServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedShadowsServer) GetForNS(context.Context, *GetRequest) (*GetForNSResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetForNS not implemented")
+func (UnimplementedShadowsServer) GetMultiple(context.Context, *Empty) (*GetMultipleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMultiple not implemented")
 }
 func (UnimplementedShadowsServer) PatchDesiredState(context.Context, *PatchDesiredStateRequest) (*PatchDesiredStateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PatchDesiredState not implemented")
@@ -149,20 +149,20 @@ func _Shadows_Get_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Shadows_GetForNS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequest)
+func _Shadows_GetMultiple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShadowsServer).GetForNS(ctx, in)
+		return srv.(ShadowsServer).GetMultiple(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.shadow.Shadows/GetForNS",
+		FullMethod: "/infinimesh.shadow.Shadows/GetMultiple",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShadowsServer).GetForNS(ctx, req.(*GetRequest))
+		return srv.(ShadowsServer).GetMultiple(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,8 +218,8 @@ var Shadows_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Shadows_Get_Handler,
 		},
 		{
-			MethodName: "GetForNS",
-			Handler:    _Shadows_GetForNS_Handler,
+			MethodName: "GetMultiple",
+			Handler:    _Shadows_GetMultiple_Handler,
 		},
 		{
 			MethodName: "PatchDesiredState",
