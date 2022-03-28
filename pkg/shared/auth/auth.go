@@ -112,7 +112,7 @@ func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
 	l := log.Named("DeviceAuthMiddleware")
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
-		l.Debug("Error extracting token", zap.Any("error", err))
+		l.Error("Error extracting token", zap.Any("error", err))
 		return nil, err
 	}
 
@@ -127,12 +127,29 @@ func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
 		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
 	}
 
-	pool, ok := devices.([]string)
+	ipool, ok := devices.([]interface{})
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't slice of strings")
+		return nil, status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
 	}
 
+	pool := make([]string, len(ipool))
+	for i, el := range ipool {
+		pool[i], ok = el.(string)
+		if !ok {
+			return nil, status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+		}
+	}
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
+
+	post := false
+	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
+	if ipost != nil {
+		post, ok = ipost.(bool)
+		if !ok {
+			post = false
+		}
+	}
+	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
 
 	return ctx, nil
 }

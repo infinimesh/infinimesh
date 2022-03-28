@@ -122,6 +122,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Can't generate fingerprint: %v", err)
 	}
+	device.Token = ""
 
 	meta, err := c.col.CreateDocument(ctx, device)
 	if err != nil {
@@ -192,14 +193,18 @@ func (c *DevicesController) GetByToken(ctx context.Context, dev *devpb.Device) (
 		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
 	}
 
-	device := *NewBlankDeviceDocument(dev.GetUuid())
+	var device devpb.Device
 	meta, err := c.col.ReadDocument(ctx, dev.GetUuid(), &device)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Device not found")
 	}
 	device.Uuid = meta.ID.Key()
 
-	return device.Device, nil
+	if !ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool) {
+		device.Certificate = nil
+	}
+
+	return &device, nil
 }
 
 func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devpb.DevicesPool, error) {
