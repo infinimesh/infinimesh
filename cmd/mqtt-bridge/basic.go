@@ -24,9 +24,11 @@ import (
 
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/slntopp/mqtt-go/packet"
+	"go.uber.org/zap"
 )
 
 func HandleTCPConnections(tcp net.Listener) {
+	log := log.Named("HandleTCPConnections")
 	for {
 		conn, _ := tcp.Accept() // nolint: gosec
 
@@ -35,18 +37,14 @@ func HandleTCPConnections(tcp net.Listener) {
 			LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
 			continue
 		}
-		if debug {
-			fmt.Println("ControlPacket", p)
-		}
+		log.Debug("ControlPacket", zap.Any("packet", p))
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
 			LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
 			continue
 		}
-		if debug {
-			fmt.Println("ConnectPacket", p)
-		}
+		log.Debug("ConnectPacket", zap.Any("packet", p))
 
 		var fingerprint []byte
 		fingerprint, err = verifyBasicAuth(connectPacket)
@@ -55,22 +53,20 @@ func HandleTCPConnections(tcp net.Listener) {
 			continue
 		}
 
-		if debug {
-			fmt.Println("Fingerprint", string(fingerprint))
-		}
+		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
 		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
 			if device.Title != connectPacket.ConnectPayload.Username {
-				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v\n", device.Uuid)
+				log.Error("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
 				return false
 			} else if !device.BasicEnabled {
-				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v\n", device.Uuid)
+				log.Error("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))
 				return false
 			} else if !device.Enabled {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Uuid)
+				log.Error("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
 				return false
 			} else {
-				fmt.Println(device.Tags)
+				log.Info("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))
 				return true
 			}
 		})
@@ -79,7 +75,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			continue
 		}
 
-		fmt.Printf("Client connected, ID: %v\n", device.Uuid)
+		log.Info("Client connected", zap.String("device", device.Uuid))
 
 		go HandleConn(conn, connectPacket, device)
 	}

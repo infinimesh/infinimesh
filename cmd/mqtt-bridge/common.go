@@ -20,12 +20,12 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/slntopp/mqtt-go/packet"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -49,7 +49,7 @@ func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (device 
 // Log Error, Send Acknowlegement(ACK) packet and Close the connection
 // ACK Packet needs to be sent to prevent MQTT Client sending CONN packets further
 func LogErrorAndClose(c net.Conn, err error) {
-	fmt.Printf("Closing connection on error: %v\n", err)
+	log.Error("Closing connection on error", zap.Error(err))
 	resp := packet.ConnAckControlPacket{
 		FixedHeader: packet.FixedHeader{
 			ControlPacketType: packet.CONNACK,
@@ -62,9 +62,8 @@ func LogErrorAndClose(c net.Conn, err error) {
 
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
-	defer fmt.Println("Client disconnected ", connectPacket.ConnectPayload.ClientID)
-
-	fmt.Printf("Client with ID %v connected!\n", connectPacket.ConnectPayload.ClientID)
+	defer log.Info("Client disconnected", zap.String("client", connectPacket.ConnectPayload.ClientID))
+	log.Info("Client connected", zap.String("client", connectPacket.ConnectPayload.ClientID))
 	// TODO ignore/compare this ID with the given ID from the verify function
 
 	//TODO : MQTT CONNACK Properties need to add here
@@ -84,25 +83,22 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	backChannel := ps.Sub()
 	go handleBackChannel(c, device.Uuid, backChannel, connectPacket.VariableHeader.ProtocolLevel)
 	defer func() {
-		fmt.Printf("Unsubbed channel %v\n", device.Uuid)
+		log.Info("Unsubbed from backchannel", zap.String("device", device.Uuid))
 		ps.Unsub(backChannel)
 	}()
 
 	_, err := resp.WriteTo(c)
 	if err != nil {
-		fmt.Println("Failed to write ConnAck. Closing connection.")
+		log.Error("Failed to write Connection Acknowlegement", zap.Error(err))
 		return
 	}
 	topicAliasPublishMap := make(map[string]int)
 
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer" + device.GetToken())
 	for {
-
-		// TODO: check device status(Enabeld/Disabled)
-
 		device, err = client.GetByToken(ctx, device)
 		if err != nil {
-			fmt.Printf("device status doesn't exist in redis %v\n", err)
+			log.Error("Can't retrieve device status from registry", zap.Error(err))
 		} else {
 			if !device.Enabled {
 				_ = c.Close()
@@ -113,9 +109,9 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 		if err != nil {
 			if err == io.EOF {
-				fmt.Printf("Client closed connection.\n")
+				log.Info("Client closed connection", zap.String("client", connectPacket.ConnectPayload.ClientID))
 			} else {
-				fmt.Printf("Error while reading packet in client loop: %v. Disconnecting client.\n", err)
+				log.Error("Failed to read packet", zap.Error(err))
 			}
 			_ = c.Close() // nolint: gosec
 			break
@@ -126,35 +122,35 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			pong := packet.NewPingRespControlPacket()
 			_, err := pong.WriteTo(c)
 			if err != nil {
-				fmt.Println("Failed to write PingResp", err)
+				log.Error("Failed to write Ping Response", zap.Error(err))
 			}
 		case *packet.PublishControlPacket:
 			topicAliasPublishMap, err = handlePublish(p, c, device.Uuid, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
 			if err != nil {
-				fmt.Printf("Failed to handle Publish packet: %v.", err)
+				log.Error("Failed to handle Publish", zap.Error(err))
 			}
 
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
-				fmt.Println("Failed to write SubAck:", err)
+				log.Error("Failed to write Subscription Acknowlegement", zap.Error(err))
 			}
 			for _, sub := range p.Payload.Subscriptions {
 				subTopic := TopicChecker(sub.Topic, device.Uuid)
 				ps.AddSub(backChannel, subTopic)
 				go handleBackChannel(c, device.Uuid, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-				fmt.Println("Added Subscription", subTopic, device.Uuid)
+				log.Info("Added Subscription", zap.String("topic", subTopic), zap.String("device", device.Uuid))
 			}
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
-				fmt.Println("Failed to write UnSubAck:", err)
+				log.Error("Failed to write Unsubscription Acknowlegement", zap.Error(err))
 			}
 			for _, unsub := range p.Payload.UnSubscriptions {
 				ps.Unsub(backChannel, unsub.Topic)
-				fmt.Println("Removed Subscription", unsub.Topic, device.Uuid)
+				log.Info("Removed Subscription", zap.String("topic", unsub.Topic), zap.String("device", device.Uuid))
 			}
 		}
 	}

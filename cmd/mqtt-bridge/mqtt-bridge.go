@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -37,8 +36,11 @@ import (
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	inflog "github.com/infinimesh/infinimesh/pkg/log"
 )
 
 func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
@@ -69,9 +71,17 @@ var (
 	tlsKeyFile            string
 
 	ps *pubsub.PubSub
+
+	log *zap.Logger
 )
 
 func init() {
+	var err error
+	log, err = inflog.NewProdOrDev()
+	if err != nil {
+		panic(err)
+	}
+
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
@@ -111,10 +121,10 @@ func readBackchannelFromKafka() {
 			var m mqtt.OutgoingMessage
 			err = json.Unmarshal(message.Value, &m)
 			if err != nil {
-				fmt.Println("Failed to unmarshal message from kafka", err)
+				log.Error("Failed to unmarshal message from kafka", zap.Error(err))
 			}
 			topic := fqTopic(m.DeviceID, m.SubPath)
-			fmt.Println("pub to topic", fqTopic(m.DeviceID, m.SubPath))
+			log.Info("Publish to the topic", zap.String("topic", topic))
 			ps.Pub(&m, topic)
 		}
 	}
@@ -125,29 +135,33 @@ func fqTopic(deviceID, subPath string) string {
 }
 
 func main() {
+	defer func() {
+		_ = log.Sync()
+	}()
 
+	log.Info("Starting MQTT Bridge")
 	serverCert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatal("Error loading server certificate", zap.Error(err))
 	}
 
+	log.Info("Connecting to registry", zap.String("host", deviceRegistryHost))
 	conn, err = grpc.Dial(deviceRegistryHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		panic(err)
+		log.Fatal("Error dialing device registry", zap.Error(err))
 	}
 	client = pb.NewDevicesServiceClient(conn)
 
-	fmt.Printf("KAFKA HOST :%v\n", kafkaHost)
+	log.Info("Connecting to Kafka", zap.String("host", kafkaHost))
 	conf := sarama.NewConfig()
 	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error creating kafka client", zap.Error(err))
 	}
 
 	producer, err = sarama.NewAsyncProducerFromClient(kafkaClient)
 	if err != nil {
-		panic(err)
+		log.Fatal("Error creating kafka producer", zap.Error(err))
 	}
 
 	ps = pubsub.New(10)
@@ -179,7 +193,7 @@ func main() {
 		select {
 		case err := <-errChannel:
 			if err != nil {
-				fmt.Println("Handshake failed", err)
+				log.Info("Handshake failed", zap.Error(err))
 				continue
 			}
 		case <-time.After(timeout):
@@ -192,18 +206,15 @@ func main() {
 			LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
 			continue
 		}
-		if debug {
-			fmt.Println("ControlPacket", p)
-		}
+
+		log.Debug("Control packet", zap.Any("packet", p))
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
 			LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
 			continue
 		}
-		if debug {
-			fmt.Println("ConnectPacket", p)
-		}
+		log.Debug("ConnectPacket", zap.Any("packet", p))
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
 			LogErrorAndClose(conn, errors.New("no certificate given"))
@@ -212,17 +223,14 @@ func main() {
 
 		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
 		fingerprint := getFingerprint(rawcert)
-
-		if debug {
-			fmt.Println("Fingerprint", fingerprint)
-		}
+		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
 		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
 			if device.Enabled {
-				fmt.Println(device.Tags)
+				log.Info("Device is enabled", zap.String("device", device.Uuid), zap.Strings("tags", device.Tags))
 				return true
 			} else {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Uuid)
+				log.Error("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
 				return false
 			}
 		})
@@ -231,7 +239,7 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Client connected, ID: %s\n", device.Uuid)
+		log.Info("Client connected", zap.String("device", device.Uuid))
 
 		go HandleConn(conn, connectPacket, device)
 	}
@@ -246,12 +254,10 @@ func changeDeviceStatus(deviceID string, deviceStatus bool) {
 func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
 	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
 	for message := range backChannel {
-		fmt.Printf("Inside reading backchannel")
 		m := message.(*mqtt.OutgoingMessage)
 		// TODO PacketID
-		fmt.Printf("m.subpath : %v", m.SubPath)
 		topic := fqTopic(m.DeviceID, m.SubPath)
-		fmt.Println("Publish to topic ", topic, "of client", deviceID)
+		log.Info("Publish to the topic", zap.String("topic", topic), zap.String("client", deviceID))
 		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
 		_, err := p.WriteTo(c)
 		if err != nil {
@@ -263,26 +269,20 @@ func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}
 
 func printConnState(con net.Conn) {
 	conn := con.(*tls.Conn)
-	log.Print(">>>>>>>>>>>>>>>> State <<<<<<<<<<<<<<<<")
 	state := conn.ConnectionState()
-	log.Printf("Version: %x", state.Version)
-	log.Printf("HandshakeComplete: %t", state.HandshakeComplete)
-	log.Printf("DidResume: %t", state.DidResume)
-	log.Printf("CipherSuite: %x", state.CipherSuite)
-	log.Printf("NegotiatedProtocol: %s", state.NegotiatedProtocol)
 
-	log.Print("Certificate chain:")
-	for i, cert := range state.PeerCertificates {
-		subject := cert.Subject
-		issuer := cert.Issuer
-		log.Printf(" %d s:/C=%v/ST=%v/L=%v/O=%v/OU=%v/CN=%s", i, subject.Country, subject.Province, subject.Locality, subject.Organization, subject.OrganizationalUnit, subject.CommonName)
-		log.Printf("   i:/C=%v/ST=%v/L=%v/O=%v/OU=%v/CN=%s", issuer.Country, issuer.Province, issuer.Locality, issuer.Organization, issuer.OrganizationalUnit, issuer.CommonName)
-	}
-	log.Print(">>>>>>>>>>>>>>>> State End <<<<<<<<<<<<<<<<")
+	log.Info("Connection state", 
+		zap.Uint16("version", state.Version),
+		zap.Bool("handshake-complete", state.HandshakeComplete),
+		zap.Bool("did-resume", state.DidResume),
+		zap.Uint16("cipher-suite", state.CipherSuite),
+		zap.String("proto-version", state.NegotiatedProtocol),
+		zap.Any("certs", state.PeerCertificates),
+	)
 }
 
 func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {
-	fmt.Println("Handle publish", deviceID, p.VariableHeader.Topic, string(p.Payload))
+	log.Info("Handle publish", zap.String("device", deviceID), zap.String("topic", p.VariableHeader.Topic), zap.ByteString("payload", p.Payload))
 	topic := TopicChecker(p.VariableHeader.Topic, deviceID)
 	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
 		if val, ok := topicAliasPublishMap[topic]; ok {
@@ -291,7 +291,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
 					return topicAliasPublishMap, err
 				}
 			} else {
-				fmt.Printf("Please use the correct topic alias")
+				log.Error("Please use correct topic alias")
 			}
 		} else {
 			topicAliasPublishMap[topic] = p.VariableHeader.PublishProperties.TopicAlias
@@ -345,7 +345,7 @@ func publishTelemetry(topic string, data []byte, deviceID string, version int) e
 			Value: sarama.ByteEncoder(serialized),
 		}
 	} else {
-		fmt.Println("Payload schema invalid")
+		log.Error("Payload schema is invalid")
 	}
 	return nil
 }
@@ -392,7 +392,7 @@ func schemaValidation(data []byte, version int) bool {
 	var payload mqtt.Payload
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
-		log.Printf("invalid payload format")
+		log.Error("invalid payload format", zap.Error(err))
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
@@ -401,12 +401,12 @@ func schemaValidation(data []byte, version int) bool {
 	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
-		log.Printf("Loading new schema failed %v", err)
+		log.Error("Loading new schema failed", zap.Error(err))
 		return false
 	}
 	result, err := schema.Validate(loader)
 	if err != nil {
-		log.Printf("Schema validation failed %v", err)
+		log.Error("Schema validation failed", zap.Error(err))
 		return false
 	}
 	return result.Valid()
