@@ -18,10 +18,13 @@ package cmd
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/infinimesh/infinimesh/pkg/convert"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -123,6 +126,85 @@ var makeDeviceTokenCmd = &cobra.Command{
 	},
 }
 
+var createDeviceCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create infinimesh device",
+	Aliases: []string{"add", "a", "new", "crt"},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeDevicesServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		if _, err := os.Stat(args[0]); os.IsNotExist(err) {
+			return errors.New("Template doesn't exist at path " + args[0])
+		}
+
+		var format string
+		{
+			pathSlice := strings.Split(args[0], ".")
+			format = pathSlice[len(pathSlice) - 1]
+		}
+
+		template, err := os.ReadFile(args[0])
+		if err != nil {
+			fmt.Println("Error while reading template")
+			return err
+		}
+
+		switch format {
+		case "json":
+		case "yml", "yaml":
+			template, err = convert.ConvertBytes(template)
+		default:
+			return errors.New("Unsupported template format " + format)
+		}
+
+		if err != nil {
+			fmt.Println("Error while parsing template")
+			return err
+		}
+		
+		fmt.Println("Template", string(template))
+
+		var device devpb.Device
+		err = json.Unmarshal(template, &device)
+		if err != nil {
+			fmt.Println("Error while parsing template")
+			return err
+		}
+
+		certPath, _ := cmd.Flags().GetString("crt")
+		if _, err := os.Stat(certPath); os.IsNotExist(err) {
+			return errors.New("Certificate doesn't exist at path " + certPath)
+		}
+		pem, err := os.ReadFile(certPath)
+		if err != nil {
+			fmt.Println("Error while reading certificate")
+			return err
+		}
+
+		cert := &devpb.Certificate{
+			PemData: string(pem),
+		}
+		device.Certificate = cert
+
+		ns, _ := cmd.Flags().GetString("namespace")
+
+		res, err := client.Create(ctx, &devpb.CreateRequest{
+			Device: &device,
+			Namespace: ns,
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Device Created, UUID:", res.Device.Uuid)
+		return nil
+	},
+}
+
 func PrintSingleDevice(d *devpb.Device) {
 	fmt.Printf("UUID: %s\n", d.Uuid)
 	fmt.Printf("Title: %s\n", d.Title)
@@ -167,6 +249,10 @@ func init() {
 
 	makeDeviceTokenCmd.Flags().Bool("allow-post", false, "Allow posting devices states")
 	devicesCmd.AddCommand(makeDeviceTokenCmd)
+
+	createDeviceCmd.Flags().String("crt", "", "Path to certificate file")
+	createDeviceCmd.Flags().StringP("namespace", "n", "", "Namespace to create device in")
+	devicesCmd.AddCommand(createDeviceCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }

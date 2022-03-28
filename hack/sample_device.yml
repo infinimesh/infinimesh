@@ -1,0 +1,6 @@
+title: Sample Device
+enabled: true
+basic_enabled: false
+tags:
+  - testo
+  - pesto
