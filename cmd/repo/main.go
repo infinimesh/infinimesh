@@ -76,13 +76,13 @@ func main() {
 	defer func() {
 		_ = log.Sync()
 	}()
-
+	
+	passwd := viper.GetString("ROOT_PASSWORD")
+	schema.InitDB(log, arangodbHost, arangodbCred, passwd, true)
+	
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
 	db := connectdb.MakeDBConnection(log, arangodbHost, arangodbCred)
 	log.Info("DB connection established")
-
-	passwd := viper.GetString("ROOT_PASSWORD")
-	schema.InitDB(log, arangodbHost, arangodbCred, passwd, true)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
