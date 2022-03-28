@@ -23,6 +23,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/infinimesh/infinimesh/pkg/graph"
+	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
@@ -51,6 +52,7 @@ func init() {
 	viper.SetDefault("DB_HOST", "db:8529")
 	viper.SetDefault("DB_CRED", "root:openSesame")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
+	viper.SetDefault("ROOT_PASSWORD", "infinimesh")
 
 	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow")
 
@@ -78,6 +80,9 @@ func main() {
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
 	db := connectdb.MakeDBConnection(log, arangodbHost, arangodbCred)
 	log.Info("DB connection established")
+
+	passwd := viper.GetString("ROOT_PASSWORD")
+	schema.InitDB(log, arangodbHost, arangodbCred, passwd, true)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {

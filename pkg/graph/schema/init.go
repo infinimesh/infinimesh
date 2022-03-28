@@ -73,7 +73,7 @@ func CheckAndRegisterGraph(log *zap.Logger, db driver.Database, graph Infinimesh
 	}
 }
 
-func InitDB(log *zap.Logger, dbHost, dbCred, rootPass string) (driver.Database) {
+func InitDB(log *zap.Logger, dbHost, dbCred, rootPass string, quick bool) (driver.Database) {
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{"http://" + dbCred + "@" + dbHost},
 	})
@@ -96,6 +96,10 @@ func InitDB(log *zap.Logger, dbHost, dbCred, rootPass string) (driver.Database) 
 	}
 	log.Debug("DataBase", zap.Bool("Exists", dbExists))
 	
+	if dbExists && quick {
+		return nil
+	}
+
 	var db driver.Database
 	if !dbExists {
 		_, err = c.CreateDatabase(context.TODO(), DB_NAME, nil)
