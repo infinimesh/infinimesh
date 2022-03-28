@@ -80,7 +80,7 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 }
 
 func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
-	l := log.Named("Middleware")
+	l := log.Named("StandardAuthMiddleware")
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		l.Debug("Error extracting token", zap.Any("error", err))
@@ -109,7 +109,7 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 }
 
 func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
-	l := log.Named("Middleware")
+	l := log.Named("DeviceAuthMiddleware")
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		l.Debug("Error extracting token", zap.Any("error", err))
