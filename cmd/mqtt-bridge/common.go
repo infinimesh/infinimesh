@@ -94,11 +94,12 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}
 	topicAliasPublishMap := make(map[string]int)
 
-	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer" + device.GetToken())
+	token := device.GetToken()
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
 	for {
 		device, err = client.GetByToken(ctx, device)
 		if err != nil {
-			log.Error("Can't retrieve device status from registry", zap.Error(err))
+			log.Error("Can't retrieve device status from registry", zap.String("token", token), zap.Error(err))
 		} else {
 			if !device.Enabled {
 				_ = c.Close()
