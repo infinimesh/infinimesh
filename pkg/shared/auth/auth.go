@@ -18,6 +18,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
@@ -53,12 +54,24 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	l := log.Named("Interceptor")
 	l.Debug("Invoked", zap.String("method", info.FullMethod))
 
+	// Unauthorized zone
 	switch info.FullMethod {
 	case "/infinimesh.node.AccountsService/Token":
 		return handler(ctx, req)
 	}
 
-	ctx, err := JWT_AUTH_MIDDLEWARE(ctx)
+	// Middleware selector
+	var middleware func(context.Context) (context.Context, error)
+	switch {
+		case info.FullMethod == "/infinimesh.node.DevicesService/GetByToken":
+			middleware = JwtDeviceAuthMiddleware
+		case strings.HasPrefix(info.FullMethod, "/infinimesh.node.ShadowService/"):
+			middleware = JwtDeviceAuthMiddleware
+		default:
+			middleware = JwtStandardAuthMiddleware
+	}
+
+	ctx, err := middleware(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +79,7 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	return handler(ctx, req)
 }
 
-func JWT_AUTH_MIDDLEWARE(ctx context.Context) (context.Context, error) {
+func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 	l := log.Named("Middleware")
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
@@ -84,9 +97,42 @@ func JWT_AUTH_MIDDLEWARE(ctx context.Context) (context.Context, error) {
 	if account == nil {
 		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
 	}
-	uuid := account.(string)
+	uuid, ok := account.(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+	}
+
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
 	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, uuid)
+
+	return ctx, nil
+}
+
+func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
+	l := log.Named("Middleware")
+	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
+	if err != nil {
+		l.Debug("Error extracting token", zap.Any("error", err))
+		return nil, err
+	}
+
+	token, err := validateToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Validated token", zap.Any("claims", token))
+
+	devices := token[infinimesh.INFINIMESH_DEVICES_CLAIM]
+	if devices == nil {
+		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+	}
+
+	pool, ok := devices.([]string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't slice of strings")
+	}
+
+	ctx = context.WithValue(ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
 
 	return ctx, nil
 }
