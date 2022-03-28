@@ -31,6 +31,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/spf13/cobra"
 )
@@ -232,6 +233,7 @@ var getDeviceStateCmd = &cobra.Command{
 			}
 			r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
 				Devices: []string{args[0]},
+				Post: true,
 			})
 			if err != nil {
 				return err
@@ -243,6 +245,24 @@ var getDeviceStateCmd = &cobra.Command{
 		client, err := makeShadowServiceClient(ctx)
 		if err != nil {
 			return err
+		}
+
+		if patch, _ := cmd.Flags().GetString("patch"); patch != "" {
+			var data structpb.Value
+			err = json.Unmarshal([]byte(patch), &data)
+			if err != nil {
+				return err
+			}
+
+			_, err = client.PatchDesiredState(ctx, &shadowpb.PatchDesiredStateRequest{
+				Id: args[0],
+				Data: &data,
+			})
+			if err != nil {
+				return err
+			}
+
+			return nil
 		}
 
 		if stream, _ := cmd.Flags().GetBool("stream"); stream {
@@ -380,6 +400,7 @@ func init() {
 
 	getDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
 	getDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
+	getDeviceStateCmd.Flags().StringP("patch", "p", "", "Pacth Device Desired state")
 	getDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
 	devicesCmd.AddCommand(getDeviceStateCmd)
 
