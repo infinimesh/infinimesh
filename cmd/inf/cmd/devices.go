@@ -22,12 +22,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/infinimesh/infinimesh/pkg/convert"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/spf13/cobra"
 )
@@ -38,6 +41,14 @@ func makeDevicesServiceClient(ctx context.Context) (pb.DevicesServiceClient, err
 		return nil, err
 	}
 	return pb.NewDevicesServiceClient(conn), nil
+}
+
+func makeShadowServiceClient(ctx context.Context) (pb.ShadowServiceClient, error) {
+	conn, err := makeConnection(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return pb.NewShadowServiceClient(conn), nil
 }
 
 // devicesCmd represents the devices command
@@ -205,6 +216,82 @@ var createDeviceCmd = &cobra.Command{
 	},
 }
 
+var getDeviceStateCmd = &cobra.Command{
+	Use:   "state",
+	Short: "Get device state",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+	
+		var token string
+		if t, _ := cmd.Flags().GetString("token"); t != "" {
+			token = t
+		} else {
+			client, err := makeDevicesServiceClient(ctx)
+			if err != nil {
+				return err
+			}
+			r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
+				Devices: []string{args[0]},
+			})
+			if err != nil {
+				return err
+			}
+			token = r.Token
+		}
+
+		ctx = metadata.AppendToOutgoingContext(context.Background(), "Authorization", "Bearer " + token)
+		client, err := makeShadowServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		if stream, _ := cmd.Flags().GetBool("stream"); stream {
+			delta, _ := cmd.Flags().GetBool("delta")
+			c, err := client.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
+				Id: args[0],
+				OnlyDelta: delta,
+			})
+			if err != nil {
+				return err
+			}
+
+			printJson, _ := cmd.Flags().GetBool("json");
+			if !printJson {
+				fmt.Println("Streaming started")
+			}
+			for {
+				msg, err := c.Recv()
+				if err != nil {
+					return err
+				}
+				s := &shadowpb.Shadow{
+					Reported: msg.GetReportedState(),
+					Desired: msg.GetDesiredState(),
+				}
+				if printJson {
+					printJsonResponse(s)
+				} else {
+					PrintSingleDeviceState(s)
+				}
+			}
+		}
+
+		r, err := client.Get(ctx, &shadowpb.GetRequest{
+			Id: args[0],
+		})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(r)
+		}
+
+		PrintSingleDeviceState(r.GetShadow())
+		return nil
+	},
+}
+
 func PrintSingleDevice(d *devpb.Device) {
 	fmt.Printf("UUID: %s\n", d.Uuid)
 	fmt.Printf("Title: %s\n", d.Title)
@@ -218,6 +305,43 @@ func PrintSingleDevice(d *devpb.Device) {
 
 	fingerprint := hex.EncodeToString(d.Certificate.Fingerprint)
 	fmt.Printf("Fingerprint:\n  Algorythm: %s\n  Hash: %s\n", d.Certificate.Algorithm, fingerprint)
+}
+
+func PrintSingleDeviceState(state *shadowpb.Shadow) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"State", "Reported", "Desired"})
+
+	var reported []byte
+	var reported_time string
+	var reported_version string
+	if state.Reported == nil {
+		reported = []byte("{}")
+		reported_time = "-"
+		reported_version = "-"
+	} else {
+		reported, _ = state.Reported.Data.MarshalJSON()
+		reported_time = state.Reported.Timestamp.AsTime().String()
+		reported_version = strconv.FormatUint(state.Reported.Version, 10)
+	}
+
+	var desired []byte
+	var desired_time string
+	var desired_version string
+	if state.Desired == nil {
+		desired = []byte("{}")
+		desired_time = "-"
+		desired_version = "-"
+	} else {
+		desired, _ = state.Desired.Data.MarshalJSON()
+		desired_time = state.Desired.Timestamp.AsTime().String()
+		desired_version = strconv.FormatUint(state.Desired.Version, 10)
+	}
+	t.AppendRow(table.Row{"Data", string(reported), string(desired)})
+	t.AppendRow(table.Row{"Timestamp", reported_time, desired_time})
+	t.AppendRow(table.Row{"Version", reported_version, desired_version})
+
+	t.Render()
 }
 
 func PrintDevicesPool(pool []*devpb.Device) {
@@ -253,6 +377,11 @@ func init() {
 	createDeviceCmd.Flags().String("crt", "", "Path to certificate file")
 	createDeviceCmd.Flags().StringP("namespace", "n", "", "Namespace to create device in")
 	devicesCmd.AddCommand(createDeviceCmd)
+
+	getDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
+	getDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
+	getDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
+	devicesCmd.AddCommand(getDeviceStateCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }
