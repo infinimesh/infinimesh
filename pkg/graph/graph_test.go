@@ -61,7 +61,7 @@ func init() {
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
 	rootPass := viper.GetString("ROOT_PASS")
-	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh")
+	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
 	
 	ctrl = NewAccountsController(log, db)
 	err := ctrl.EnsureRootExists(rootPass)
