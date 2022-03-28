@@ -151,7 +151,7 @@ func main() {
 	subscribe(consumer, ps, topicDesiredDeltaComputed, "/desired/delta")
 
 	go func() {
-		lis, err := net.Listen("tcp", ":8096")
+		lis, err := net.Listen("tcp", ":8080")
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}

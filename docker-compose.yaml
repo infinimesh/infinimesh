@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
     image: ghcr.io/infinimesh/infinimesh/shadow-api:latest
     ports:
-      - "8096:8096"
+      - "8096:8080"
     depends_on:
       - kafka
     environment:
