@@ -32,16 +32,18 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
 	if p.ConnectPayload.Password == "" {
-		return nil, errors.New("Payload Password is Empty")
+		return nil, errors.New("payload Password is Empty")
 	}
 	return base64.StdEncoding.DecodeString(p.ConnectPayload.Password)
 }
@@ -56,7 +58,7 @@ var (
 	conn        *grpc.ClientConn
 	kafkaClient sarama.Client
 	producer    sarama.AsyncProducer
-	client      registrypb.DevicesClient
+	client      pb.DevicesServiceClient
 	debug       bool
 
 	deviceRegistryHost    string
@@ -65,7 +67,6 @@ var (
 	kafkaTopicBackChannel string
 	tlsCertFile           string
 	tlsKeyFile            string
-	dbAddr                string
 
 	ps *pubsub.PubSub
 )
@@ -87,7 +88,6 @@ func init() {
 	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
-	dbAddr = viper.GetString("DB_ADDR2")
 	debug = viper.GetBool("DEBUG")
 }
 
@@ -132,11 +132,11 @@ func main() {
 		return
 	}
 
-	conn, err = grpc.Dial(deviceRegistryHost, grpc.WithInsecure())
+	conn, err = grpc.Dial(deviceRegistryHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
-	client = registrypb.NewDevicesClient(conn)
+	client = pb.NewDevicesServiceClient(conn)
 
 	fmt.Printf("KAFKA HOST :%v\n", kafkaHost)
 	conf := sarama.NewConfig()
@@ -183,13 +183,13 @@ func main() {
 				continue
 			}
 		case <-time.After(timeout):
-			LogErrorAndClose(conn, errors.New("Handshake failed due to timeout"))
+			LogErrorAndClose(conn, errors.New("handshake failed due to timeout"))
 			continue
 		}
 
 		p, err := packet.ReadPacket(conn, 0)
 		if err != nil {
-			LogErrorAndClose(conn, fmt.Errorf("Error while reading connect packet: %v\n", err))
+			LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
 			continue
 		}
 		if debug {
@@ -198,7 +198,7 @@ func main() {
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
-			LogErrorAndClose(conn, errors.New("Got wrong packet as first packet..need connect!"))
+			LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
 			continue
 		}
 		if debug {
@@ -206,7 +206,7 @@ func main() {
 		}
 
 		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
-			LogErrorAndClose(conn, errors.New("No certificate given"))
+			LogErrorAndClose(conn, errors.New("no certificate given"))
 			continue
 		}
 
@@ -217,12 +217,12 @@ func main() {
 			fmt.Println("Fingerprint", fingerprint)
 		}
 
-		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) (bool) {
-			if device.Enabled.Value {
+		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
+			if device.Enabled {
 				fmt.Println(device.Tags)
 				return true
 			} else {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Id)
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Uuid)
 				return false
 			}
 		})
@@ -231,9 +231,9 @@ func main() {
 			continue
 		}
 
-		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
+		fmt.Printf("Client connected, ID: %s\n", device.Uuid)
 
-		go HandleConn(conn, connectPacket, possibleIDs)
+		go HandleConn(conn, connectPacket, device)
 	}
 
 }
@@ -270,7 +270,6 @@ func printConnState(con net.Conn) {
 	log.Printf("DidResume: %t", state.DidResume)
 	log.Printf("CipherSuite: %x", state.CipherSuite)
 	log.Printf("NegotiatedProtocol: %s", state.NegotiatedProtocol)
-	log.Printf("NegotiatedProtocolIsMutual: %t", state.NegotiatedProtocolIsMutual)
 
 	log.Print("Certificate chain:")
 	for i, cert := range state.PeerCertificates {

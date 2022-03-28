@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/infinimesh/infinimesh/pkg/registry/registrypb"
+	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/slntopp/mqtt-go/packet"
 )
 
@@ -32,7 +32,7 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		p, err := packet.ReadPacket(conn, 0)
 		if err != nil {
-			LogErrorAndClose(conn, fmt.Errorf("Error while reading connect packet: %v", err))
+			LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
 			continue
 		}
 		if debug {
@@ -41,7 +41,7 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		connectPacket, ok := p.(*packet.ConnectControlPacket)
 		if !ok {
-			LogErrorAndClose(conn, errors.New("Got wrong packet as first packet..need connect!"))
+			LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
 			continue
 		}
 		if debug {
@@ -51,7 +51,7 @@ func HandleTCPConnections(tcp net.Listener) {
 		var fingerprint []byte
 		fingerprint, err = verifyBasicAuth(connectPacket)
 		if err != nil {
-			LogErrorAndClose(conn, fmt.Errorf("Error verifying Basic Auth: %v", err))
+			LogErrorAndClose(conn, fmt.Errorf("error verifying Basic Auth: %v", err))
 			continue
 		}
 
@@ -59,15 +59,15 @@ func HandleTCPConnections(tcp net.Listener) {
 			fmt.Println("Fingerprint", string(fingerprint))
 		}
 
-		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) (bool) {
-			if device.Name != connectPacket.ConnectPayload.Username {
-				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v\n", device.Id)
+		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
+			if device.Title != connectPacket.ConnectPayload.Username {
+				fmt.Printf("Failed to verify client as the device name is doesn't match Basic Auth Username. Device ID:%v\n", device.Uuid)
 				return false
-			} else if !device.BasicEnabled.Value {
-				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v\n", device.Id)
+			} else if !device.BasicEnabled {
+				fmt.Printf("Failed to verify client as the Basic Auth is not enabled for device. Device ID:%v\n", device.Uuid)
 				return false
-			} else if !device.Enabled.Value {
-				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Id)
+			} else if !device.Enabled {
+				fmt.Printf("Failed to verify client as the device is not enabled. Device ID:%v\n", device.Uuid)
 				return false
 			} else {
 				fmt.Println(device.Tags)
@@ -79,8 +79,8 @@ func HandleTCPConnections(tcp net.Listener) {
 			continue
 		}
 
-		fmt.Printf("Client connected, IDs: %v\n", possibleIDs)
+		fmt.Printf("Client connected, ID: %v\n", device.Uuid)
 
-		go HandleConn(conn, connectPacket, possibleIDs)
+		go HandleConn(conn, connectPacket, device)
 	}
 }
