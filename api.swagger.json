@@ -353,6 +353,18 @@
             "collectionFormat": "multi"
           },
           {
+            "name": "device.basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "device.token",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "namespace",
             "in": "query",
             "required": false,
@@ -608,6 +620,18 @@
               "type": "string"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "name": "basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -677,6 +701,18 @@
               "type": "string"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "name": "basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -746,6 +782,18 @@
               "type": "string"
             },
             "collectionFormat": "multi"
+          },
+          {
+            "name": "basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1027,6 +1075,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "basicEnabled": {
+          "type": "boolean"
+        },
+        "token": {
+          "type": "string"
         }
       }
     },

@@ -22,6 +22,8 @@ message Device {
   bool enabled = 3;
   Certificate certificate = 4;
   repeated string tags = 5;
+  bool basic_enabled = 6;
+  string token = 7;
 }
 
 message Certificate {

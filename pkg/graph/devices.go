@@ -161,6 +161,16 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	post := false
+	if level > 1 {
+		post = true
+	}
+	token, err := c._MakeToken([]string{device.Uuid}, post, 0)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to issue token")
+	}
+	device.Token = token
+
 	return device.Device, nil
 }
 
@@ -254,6 +264,12 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 	}
 	r.Uuid = meta.ID.Key()
 
+	token, err := c._MakeToken([]string{r.Uuid}, false, 0)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to issue token")
+	}
+	r.Token = token
+
 	return &r, nil
 }
 
@@ -280,16 +296,20 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.Device
 		}
 	}
 
-	claims := jwt.MapClaims{}
-	claims[inf.INFINIMESH_DEVICES_CLAIM] = req.GetDevices()
-	claims["exp"] = req.Exp
-	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = req.GetPost()
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token_string, err := token.SignedString(c.SIGNING_KEY)
+	token_string, err := c._MakeToken(req.GetDevices(), req.GetPost(), req.GetExp())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
 
 	return &pb.TokenResponse{Token: token_string}, nil
+}
+
+func (c *DevicesController) _MakeToken(devices []string, post bool, exp int32) (string, error) {
+	claims := jwt.MapClaims{}
+	claims[inf.INFINIMESH_DEVICES_CLAIM] = devices
+	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = post
+	claims["exp"] = exp
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(c.SIGNING_KEY)
 }
