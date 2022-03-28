@@ -100,11 +100,11 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		device, err = client.GetByToken(ctx, device)
 		if err != nil {
 			log.Error("Can't retrieve device status from registry", zap.Error(err))
-		} else {
-			if !device.Enabled {
-				_ = c.Close()
-				break
-			}
+		}
+		if !device.Enabled {
+			log.Debug("Device is disabled, disconnecting", zap.String("device", device.Uuid), zap.Bool("enabled", device.Enabled))
+			_ = c.Close()
+			break
 		}
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 
