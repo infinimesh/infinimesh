@@ -32,7 +32,7 @@ import (
 type VerifyDeviceFunc func(*devpb.Device) bool
 
 func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (device *devpb.Device, err error) {
-	resp, err := client.GetByFingerprint(context.Background(), &devpb.GetByFingerprintRequest{
+	resp, err := client.GetByFingerprint(internal_ctx, &devpb.GetByFingerprintRequest{
 		Fingerprint: fingerprint,
 	})
 	if err != nil {

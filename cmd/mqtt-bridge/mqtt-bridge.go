@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
@@ -30,15 +31,18 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
 )
@@ -72,7 +76,8 @@ var (
 
 	ps *pubsub.PubSub
 
-	log *zap.Logger
+	log 				 *zap.Logger
+	internal_ctx context.Context
 )
 
 func init() {
@@ -82,6 +87,8 @@ func init() {
 		panic(err)
 	}
 
+	viper.AutomaticEnv()
+
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("KAFKA_HOST", "localhost:9092")
@@ -90,7 +97,7 @@ func init() {
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
 	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
 	viper.SetDefault("DEBUG", false)
-	viper.AutomaticEnv()
+	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
 	kafkaHost = viper.GetString("KAFKA_HOST")
@@ -151,6 +158,14 @@ func main() {
 		log.Fatal("Error dialing device registry", zap.Error(err))
 	}
 	client = pb.NewDevicesServiceClient(conn)
+
+	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
+	auth.SetContext(log, SIGNING_KEY)
+	token, err := auth.MakeToken(schema.ROOT_ACCOUNT_KEY)
+	if err != nil {
+		log.Fatal("Error making token", zap.Error(err))
+	}
+	internal_ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
 
 	log.Info("Connecting to Kafka", zap.String("host", kafkaHost))
 	conf := sarama.NewConfig()
