@@ -182,7 +182,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 
-	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired), zap.Any("Events", eventsDesired))
+	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired))
 
 	defer func() {
 

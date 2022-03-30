@@ -62,7 +62,7 @@ func main() {
 	config.Producer.Return.Successes = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
-	config.Version = sarama.V2_0_0_0
+	config.Version = sarama.V2_5_0_0
 
 	client, err := sarama.NewClient([]string{broker}, config)
 	if err != nil {

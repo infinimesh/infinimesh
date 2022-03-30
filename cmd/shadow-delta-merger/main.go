@@ -55,7 +55,7 @@ func init() {
 func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, stop chan bool, ctx context.Context) (close io.Closer, done chan bool) {
 	done = make(chan bool)
 	consumerGroupClient := sarama.NewConfig()
-	consumerGroupClient.Version = sarama.V2_0_0_0
+	consumerGroupClient.Version = sarama.V2_5_0_0
 	consumerGroupClient.Consumer.Return.Errors = true
 	consumerGroupClient.Consumer.Offsets.Initial = sarama.OffsetOldest
 
@@ -82,7 +82,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	pconfig.Producer.Partitioner = sarama.NewManualPartitioner
 	pconfig.Producer.Return.Errors = false
 	pconfig.Producer.Return.Successes = false
-	pconfig.Version = sarama.V2_0_0_0
+	pconfig.Version = sarama.V2_5_0_0
 
 	producerClient, err := sarama.NewClient([]string{broker}, pconfig)
 	if err != nil {
@@ -90,7 +90,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	}
 
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_0_0_0
+	config.Version = sarama.V2_5_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	//pconfig.Producer.Return.Errors = false

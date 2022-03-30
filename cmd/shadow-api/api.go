@@ -131,7 +131,7 @@ func main() {
 	}
 
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_0_0_0
+	config.Version = sarama.V2_5_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Producer.Return.Successes = true
