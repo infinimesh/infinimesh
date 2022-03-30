@@ -131,6 +131,7 @@ func main() {
 	}
 
 	config := sarama.NewConfig()
+	config.ClientID = "shadow-api"
 	config.Version = sarama.V2_5_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest

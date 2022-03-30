@@ -140,6 +140,7 @@ func main() {
 
 	fmt.Printf("KAFKA HOST :%v\n", kafkaHost)
 	conf := sarama.NewConfig()
+	conf.ClientID = "mqtt-bridge"
 	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
 	if err != nil {
 		panic(err)

@@ -77,6 +77,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	}()
 
 	pconfig := sarama.NewConfig()
+	pconfig.ClientID = "shadow-delta-merger.producer"
 	pconfig.Producer.RequiredAcks = sarama.WaitForAll // Wait for all in-sync replicas to ack the message
 	pconfig.Producer.Retry.Max = 10                   // Retry up to 10 times to produce the message
 	pconfig.Producer.Partitioner = sarama.NewManualPartitioner
@@ -90,6 +91,7 @@ func runMerger(inputTopic, outputTopic, realDeltaTopic, consumerGroup string, st
 	}
 
 	config := sarama.NewConfig()
+	config.ClientID = "shadow-delta-merger.consumer"
 	config.Version = sarama.V2_5_0_0
 	config.Consumer.Return.Errors = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest

@@ -62,6 +62,7 @@ func main() {
 	config.Producer.Return.Successes = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
+	config.ClientID = "telemetry-router"
 	config.Version = sarama.V2_5_0_0
 
 	client, err := sarama.NewClient([]string{broker}, config)

@@ -67,6 +67,7 @@ func main() {
 	}
 
 	config := sarama.NewConfig()
+	config.ClientID = "shadow-persister"
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Consumer.Return.Errors = false
 	config.Version = sarama.V2_5_0_0
