@@ -134,6 +134,8 @@ func (h *StateMerger) ConsumeClaim(sess sarama.ConsumerGroupSession, claim saram
 	localState := h.localStates[claim.Partition()] // local state for exactly this partition
 	h.m.Unlock()
 	for message := range claim.Messages() {
+		fmt.Printf("Got message: %s / %s\n", message.Topic, string(message.Key))
+
 		sess.MarkMessage(message, "")
 		key := string(message.Key)
 
