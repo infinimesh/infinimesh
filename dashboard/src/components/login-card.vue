@@ -44,7 +44,6 @@ async function login() {
   }).then(res => {
     success.value = true
     store.token = res.data.token
-    console.log(router.push)
     router.push({name: 'Root'})
   }).catch(err => {
     console.log(err)

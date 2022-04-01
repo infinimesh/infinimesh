@@ -7,7 +7,10 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 
 import { createPinia } from 'pinia'
+import piniaPersist from 'pinia-plugin-persist'
+
 const pinia = createPinia()
+pinia.use(piniaPersist)
 
 const app = createApp(App)
   
