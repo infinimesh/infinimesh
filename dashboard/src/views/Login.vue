@@ -1,11 +1,12 @@
 <template>
   <n-space align="center" justify="center" class="fullscreen">
-    <h1>Login Page</h1>
+    <LoginCard />
   </n-space>
 </template>
 
 <script setup>
 import { NSpace } from "naive-ui"
+import LoginCard from "@/components/login-card.vue"
 </script>
 
 <style>

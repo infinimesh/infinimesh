@@ -1,4 +1,6 @@
+import { computed } from 'vue'
 import { createRouter, createWebHashHistory } from "vue-router"
+import { useAppStore } from "@/store/app";
 
 const routes = [
   {
@@ -10,7 +12,7 @@ const routes = [
     }
   },
   { path: "/", 
-    name: "Home",
+    name: "Root",
     redirect: { name: "Dashboard" },
     meta: {
       requiresAuth: true,
@@ -31,10 +33,9 @@ const router = createRouter({
   routes
 })
 
-let isLoggedIn = false
-
 router.beforeEach(async (to, from) => {
-  if (to.matched.some((el) => el.meta.requiresAuth) && !isLoggedIn) {
+  const store = useAppStore()
+  if (to.matched.some((el) => el.meta.requiresAuth) && !store.logged_in) {
     return { name: "Login" };
   }
 });
