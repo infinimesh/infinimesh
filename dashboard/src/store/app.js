@@ -20,7 +20,7 @@ export const useAppStore = defineStore('app', {
   persist: {
     enabled: true,
     strategies: [
-      { storage: localStorage, paths: ['token'], key: 'infinimesh' },
+      { storage: localStorage, key: 'infinimesh' },
     ],
   },
 })
