@@ -93,7 +93,7 @@ func main() {
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))
 	handler := handlers.CORS(
 		handlers.AllowedOrigins(corsAllowed),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS", "HEAD"}),
 	)(gwmux)
 
