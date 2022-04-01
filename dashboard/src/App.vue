@@ -29,7 +29,6 @@ export default {
     NConfigProvider, NGlobalStyle, NWatermark
   },
   setup() {
-    console.log(darkTheme)
     const osThemeRef = useOsTheme();
     return {
       theme: computed(() => osThemeRef.value === "dark" ? darkTheme : null),
