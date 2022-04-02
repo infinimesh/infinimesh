@@ -1,3 +1,4 @@
+import { inject } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
@@ -5,10 +6,19 @@ export const useAppStore = defineStore('app', {
     token: "",
     me: {
       title: ""
-    }
+    },
+    namespace_selected: "",
+    namespaces: [],
   }),
   getters: {
     logged_in: (state) => state.token !== "",
+    http: (state) => {
+      return inject('axios').create({
+        headers: {
+          Authorization: `Bearer ${state.token}`
+        }
+      })
+    }
   },
   actions: {
     logout() {

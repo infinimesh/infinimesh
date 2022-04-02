@@ -1,6 +1,7 @@
 <template>
   <n-space justify="space-between" :style="{padding: '15px'}" align="center">
     <span class="infinimesh">infinimesh<span class="copyright">©</span></span>
+    <ns-selector />
     <user-details/>
   </n-space>
 </template>
@@ -8,6 +9,7 @@
 <script setup>
 import { NSpace } from "naive-ui"
 import UserDetails from "@/components/dashboard/user.vue"
+import NsSelector from "@/components/core/ns-selector.vue";
 </script>
 
 <style>
