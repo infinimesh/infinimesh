@@ -42,6 +42,11 @@ func (o *Device) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
+func (o *Device) SetAccessLevel(level schema.InfinimeshAccessLevel) {
+	il := int32(level)
+	o.AccessLevel = &il
+}
+
 func NewBlankDeviceDocument(key string) (*Device) {
 	return &Device{
 		Device: &devpb.Device{
@@ -154,16 +159,16 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 	// Getting Account from DB
 	// and Check requestor access
 	device := *NewBlankDeviceDocument(dev.GetUuid())
-	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
-	if !ok {
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
+	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if level < 1 {
+	if *device.AccessLevel < 1 {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
 	post := false
-	if level > 1 {
+	if *device.AccessLevel > 1 {
 		post = true
 	}
 	token, err := c._MakeToken([]string{device.Uuid}, post, 0)
@@ -248,15 +253,15 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 
 	acc := *NewBlankAccountDocument(requestor)
 	dev := *NewBlankDeviceDocument(req.GetUuid())
-	ok, level := AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
-	if !ok {
+	err := AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
+	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if level < 3 {
+	if *dev.AccessLevel < 3 {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	_, err := c.col.RemoveDocument(ctx, dev.ID().Key())
+	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Error("Error removing document", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting Device")

@@ -787,22 +787,22 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	nacc1 := *NewBlankAccountDocument(acc1.Key)
 	nacc2 := *NewBlankAccountDocument(acc2.Key)
 	// Checking Account 1 access to Account 2
-	ok, level := AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
-	if !ok {
+	err = AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
+	if err != nil {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
 
-	if level > int32(schema.MGMT) {
-		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", level, schema.MGMT)
+	if *nacc2.AccessLevel > int32(schema.MGMT) {
+		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", nacc2.AccessLevel, schema.MGMT)
 	}
-	if level < int32(schema.MGMT) {
-		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", level, schema.MGMT)
+	if *nacc2.AccessLevel < int32(schema.MGMT) {
+		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", nacc2.AccessLevel, schema.MGMT)
 	}
 
 	// Checking Account 2 access to Account 1
-	ok, level = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
-	if ok {
-		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
+	err = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
+	if err == nil && *nacc1.AccessLevel > int32(schema.NONE) {
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.AccessLevel, schema.NONE)
 	}
 }
 
@@ -810,9 +810,9 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
 	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
 
-	ok, level := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
-	if ok {
-		t.Fatalf("Has to be error but it's not: %d", level)
+	err := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
+	if err == nil {
+		t.Fatalf("Has to be error but it's not: %v", err)
 	}
 }
 

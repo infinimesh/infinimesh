@@ -42,6 +42,11 @@ func (o *Account) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
+func (o *Account) SetAccessLevel(level schema.InfinimeshAccessLevel) {
+	il := int32(level)
+	o.AccessLevel = &il
+}
+
 func NewBlankAccountDocument(key string) *Account {
 	return &Account{
 		Account: &accpb.Account{
@@ -126,11 +131,11 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	// Getting Account from DB
 	// and Check requestor access
 	result := *NewBlankAccountDocument(uuid)
-	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
-	if !ok {
+	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
+	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if level < 1 {
+	if *result.AccessLevel < 1 {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
@@ -232,8 +237,8 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	requestorAccount := NewBlankAccountDocument(requestor)	
 
 	old := *NewBlankAccountDocument(acc.GetUuid())
-	ok, level := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
-	if !ok || level < int32(schema.ADMIN) {
+	err := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
+	if err != nil || *old.AccessLevel < int32(schema.ADMIN) {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
 	}
 
@@ -244,7 +249,7 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 		}
 	}
 
-	_, err := c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
+	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
 	if err != nil {
 		log.Error("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
@@ -261,11 +266,11 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
-	ok, level := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
-	if !ok {
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if level < 3 {
+	if *acc.AccessLevel < 3 {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 

@@ -24,6 +24,8 @@ message Device {
   repeated string tags = 5;
   bool basic_enabled = 6;
   string token = 7;
+  optional int32 access_level = 8;
+  optional string namespace = 9;
 }
 
 message Certificate {

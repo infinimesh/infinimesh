@@ -38,6 +38,11 @@ func (o *Namespace) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
+func (o *Namespace) SetAccessLevel(level schema.InfinimeshAccessLevel) {
+	il := int32(level)
+	o.AccessLevel = &il
+}
+
 func NewBlankNamespaceDocument(key string) *Namespace {
 	return &Namespace{
 		Namespace: &nspb.Namespace{

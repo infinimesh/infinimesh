@@ -124,6 +124,19 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -170,6 +183,19 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -213,6 +239,13 @@
                   "type": "boolean"
                 },
                 "defaultNamespace": {
+                  "type": "string"
+                },
+                "accessLevel": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "namespace": {
                   "type": "string"
                 }
               }
@@ -360,6 +393,19 @@
           },
           {
             "name": "device.token",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "device.accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "device.namespace",
             "in": "query",
             "required": false,
             "type": "string"
@@ -632,6 +678,19 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -713,6 +772,19 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -791,6 +863,19 @@
           },
           {
             "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
             "in": "query",
             "required": false,
             "type": "string"
@@ -882,6 +967,19 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -913,6 +1011,19 @@
           },
           {
             "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accessLevel",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "namespace",
             "in": "query",
             "required": false,
             "type": "string"
@@ -953,6 +1064,13 @@
               "type": "object",
               "properties": {
                 "title": {
+                  "type": "string"
+                },
+                "accessLevel": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "namespace": {
                   "type": "string"
                 }
               }
@@ -1011,6 +1129,13 @@
           "type": "boolean"
         },
         "defaultNamespace": {
+          "type": "string"
+        },
+        "accessLevel": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "namespace": {
           "type": "string"
         }
       }
@@ -1080,6 +1205,13 @@
           "type": "boolean"
         },
         "token": {
+          "type": "string"
+        },
+        "accessLevel": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "namespace": {
           "type": "string"
         }
       }
@@ -1156,6 +1288,13 @@
           "type": "string"
         },
         "title": {
+          "type": "string"
+        },
+        "accessLevel": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "namespace": {
           "type": "string"
         }
       }

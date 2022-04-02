@@ -19,6 +19,8 @@ package infinimesh.node.namespaces;
 message Namespace {
   string uuid = 1;
   string title = 2;
+  optional int32 access_level = 3;
+  optional string namespace = 4;
 }
 
 message NamespacesPool {

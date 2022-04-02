@@ -34,6 +34,7 @@ type Access struct {
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
+	SetAccessLevel(level schema.InfinimeshAccessLevel)
 }
 
 func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
@@ -70,38 +71,35 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 	return err == nil && r
 }
 
-func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
-	query := `FOR o IN LAST((FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions SORT path.edges[0].level RETURN [ path.edges[0].level, path.vertices[-1]])) RETURN o`
+const getWithAccessLevelAndNS = `
+FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
+GRAPH @permissions SORT path.edges[0].level
+	RETURN MERGE(path.vertices[-1], { access_level: path.edges[0].level, namespace: path.vertices[-2]._key })
+`
+func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (error) {
 	vars :=  map[string]interface{}{
 		"account": account.ID(),
 		"node": node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	}
-	c, err := db.Query(ctx, query, vars)
+	c, err := db.Query(ctx, getWithAccessLevelAndNS, vars)
 	if err != nil {
 		log.Debug("Error while executing query", zap.Any("vars", vars), zap.Error(err))
-		return false, 0
+		return err
 	}
 	defer c.Close()
 	
-	var level int32
-	_, err = c.ReadDocument(ctx, &level)
-	if err != nil {
-		log.Debug("Error while reading level", zap.Error(err))
-		return false, 0
-	}
-
-	if account.ID() == node.ID() {
-		level = int32(schema.ROOT)
-	}
-
 	_, err = c.ReadDocument(ctx, &node)
 	if err != nil {
 		log.Debug("Error while reading node document", zap.Error(err))
-		return false, 0
+		return err
 	}
 
-	return true, level
+	if account.ID() == node.ID() {
+		node.SetAccessLevel(schema.ROOT)
+	}
+
+	return nil
 }
 
 // List children nodes
@@ -113,12 +111,12 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 // depth
 func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
 	query := `
-	FOR node, edge IN 0..@depth OUTBOUND @from
+FOR node, edge, path IN 0..@depth OUTBOUND @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
 	FILTER edge.level > 0
-	RETURN node`
+	RETURN MERGE(node, { access_level: path.edges[0].level, namespace: path.vertices[-2]._key })`
 	bindVars := map[string]interface{}{
 		"depth": depth,
 		"from": from.ID(),
