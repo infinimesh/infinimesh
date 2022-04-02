@@ -6,26 +6,22 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/Shopify/sarama v1.31.1
 	github.com/arangodb/go-driver v1.2.1
-	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/birdayz/conjungo v1.0.1-0.20181127234741-4eb7246db343
 	github.com/cskr/pubsub v1.0.2
-	github.com/dgraph-io/dgo v0.0.0-20181226155115-a20f509ade83
 	github.com/evanphx/json-patch v5.6.0+incompatible
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/golang/glog v1.0.0
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/handlers v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jedib0t/go-pretty/v6 v6.3.0
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/rs/cors v1.8.2
 	github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
-	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yosssi/gmq v0.0.1
 	go.uber.org/zap v1.21.0
@@ -33,6 +29,7 @@ require (
 	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -42,10 +39,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -75,7 +69,6 @@ require (
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
@@ -84,7 +77,6 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.3.0
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.3
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
