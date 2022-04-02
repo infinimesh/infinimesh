@@ -12,7 +12,7 @@ const routes = [
   },
   { path: "/", 
     name: "Root",
-    redirect: { name: "Dashboard" },
+    redirect: { path: "/dashboard/devices" },
     meta: {
       requiresAuth: true,
     }
@@ -23,8 +23,11 @@ const routes = [
     component: () => import("@/views/Dashboard.vue"),
     meta: {
       requiresAuth: true,
-    }
-  }
+    },
+    children: [
+      { path: "devices", name: "Devices", component: () => import("@/views/dashboard/Devices.vue") },
+    ]
+  },
 ]
 
 const router = createRouter({

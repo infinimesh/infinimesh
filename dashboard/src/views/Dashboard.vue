@@ -5,10 +5,10 @@
     </n-layout-header>
     <n-layout has-sider>
         <n-layout-sider content-style="padding: 24px;">
-          Handian Bridge
+          <dashboard-menu />
         </n-layout-sider>
         <n-layout-content content-style="padding: 24px;">
-          Pingshan Road
+          <router-view />
         </n-layout-content>
       </n-layout>
       <n-layout-footer position="absolute">Chengfu Road</n-layout-footer>
@@ -18,6 +18,7 @@
 <script setup>
 import { NLayout, NLayoutHeader, NLayoutContent, NLayoutSider, NLayoutFooter } from "naive-ui"
 import DashboardNav from "@/components/dashboard/nav.vue"
+import DashboardMenu from "@/components/dashboard/menu.vue"
 
 import { inject } from "vue";
 import { useAppStore } from "@/store/app";

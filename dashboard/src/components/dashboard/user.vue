@@ -15,6 +15,7 @@
 import { h, ref } from "vue"
 import { storeToRefs } from "pinia"
 import { NButton, NDropdown, NIcon } from "naive-ui";
+import { renderIcon } from "@/utils"
 import { Person, LogOutOutline } from '@vicons/ionicons5'
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router"
@@ -23,14 +24,6 @@ const router = useRouter()
 const store = useAppStore()
 
 const { me } = storeToRefs(store)
-
-const renderIcon = (icon) => {
-  return () => {
-    return h(NIcon, null, {
-      default: () => h(icon)
-    });
-  };
-};
 
 const options = ref([
   {
