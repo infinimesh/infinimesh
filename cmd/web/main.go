@@ -90,6 +90,12 @@ func main() {
 		log.Fatal("Failed to register AccountsService gateway", zap.Error(err))
 	}
 
+	log.Info("Registering Namespaces Service")
+	err = pb.RegisterNamespacesServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register NamespacesService gateway", zap.Error(err))
+	}
+
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))
 	handler := handlers.CORS(
 		handlers.AllowedOrigins(corsAllowed),
