@@ -1,21 +1,18 @@
 <template>
-  <h1>I am Devices Dashboard</h1>
+  <n-spin :show="loading">
+    <devices-pool :devices="devices" />
+  </n-spin>
 </template>
 
 <script setup>
 import { ref } from "vue"
-import { useAppStore } from "@/store/app";
+import { NSpin } from "naive-ui"
+import { storeToRefs } from "pinia";
+import DevicesPool from "@/components/devices/pool.vue"
+import { useDevicesStore } from "@/store/devices";
 
-const loading = ref(false)
+const store = useDevicesStore()
+const { loading, devices } = storeToRefs(store)
 
-const axios = useAppStore().http
-async function loadDevices() {
-  loading.value = true
-  axios.get('http://localhost:8000/devices', {}).then(res => {
-    console.log(res.data)
-    loading.value = false
-  })
-}
-
-loadDevices()
+store.fetchDevices()
 </script>

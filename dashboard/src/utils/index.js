@@ -8,3 +8,11 @@ export const renderIcon = (icon) => {
     });
   };
 };
+
+export const renderIconColored = (icon, color) => {
+  return () => {
+    return h(NIcon, { color }, {
+      default: () => h(icon)
+    });
+  };
+}
