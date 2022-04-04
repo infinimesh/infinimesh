@@ -6,9 +6,9 @@
 
 <script setup>
 import { NSpin } from "naive-ui"
+import { useDevicesStore } from "@/store/devices";
 import { storeToRefs } from "pinia";
 import DevicesPool from "@/components/devices/pool.vue"
-import { useDevicesStore } from "@/store/devices";
 
 const store = useDevicesStore()
 const { loading, devices_ns_filtered: devices } = storeToRefs(store)

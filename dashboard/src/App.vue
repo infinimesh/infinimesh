@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme="theme">
+  <n-config-provider :theme="theme" :hljs="hljs">
     <n-global-style />
     <router-view />
     <n-watermark
@@ -24,6 +24,8 @@ import {
   NConfigProvider, NGlobalStyle, NWatermark,
   darkTheme, useOsTheme } from 'naive-ui'
 
+import hljs from "@/utils/hljs"
+
 export default {
   components: {
     NConfigProvider, NGlobalStyle, NWatermark
@@ -34,6 +36,7 @@ export default {
       theme: computed(() => osThemeRef.value === "dark" ? darkTheme : null),
       osTheme: osThemeRef,
       watermark: false,
+      hljs
     };
   }
 }

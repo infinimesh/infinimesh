@@ -19,14 +19,20 @@
           {{ tag }}
         </n-tag>
       </template>
+
+      <template #action v-if="state && state.reported && state.reported.version != '0'">
+        <n-code :code="JSON.stringify(state.reported.data, null, 2)" language="json" />
+      </template>
     </n-card>
   </n-dropdown>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
-import { NDropdown, NCard, NTooltip, NIcon, NTag } from "naive-ui"
+import { NDropdown, NCard, NTooltip, NIcon, NTag, NCode } from "naive-ui"
 import { OpenOutline, Bulb } from '@vicons/ionicons5'
+
+import { useDevicesStore } from "@/store/devices";
 
 import { renderIcon } from "@/utils";
 
@@ -53,4 +59,7 @@ const options = ref([
     }
   }
 ])
+
+const store = useDevicesStore()
+const state = computed(() => store.device_state(device.value.uuid))
 </script>
