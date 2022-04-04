@@ -16,10 +16,13 @@ const store = useNSStore()
 
 const { loading, selected, namespaces } = storeToRefs(store)
 const options = computed(() => {
-  return namespaces.value.map(ns => ({
-    label: ns.title,
-    value: ns.uuid,
-  }))
+  return [
+    { label: "All", value: "all" },
+    ...namespaces.value.map(ns => ({
+      label: ns.title,
+      value: ns.uuid,
+    }))
+  ]
 })
 
 function handleShow(show) {
