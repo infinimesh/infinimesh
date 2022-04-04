@@ -23,16 +23,12 @@
       </template>
 
       <template #action >
-        <n-code
-          v-if="state && state.reported && state.reported.version != '0'"
-          :code="JSON.stringify(state.reported.data, null, 2)" language="json" />
-        <n-code v-else code="No State have been reported yet" />
-        <n-collapse>
+        <n-collapse :default-expanded-names="['reported']">
+          <n-collapse-item title="Reported State" name="reported">
+            <n-code :code="reported ? JSON.stringify(reported.data, null, 2) : '// No State have been reported yet'" language="json" />
+          </n-collapse-item>
           <n-collapse-item title="Desired State" name="desired">
-            <n-code
-              v-if="state && state.desired && state.desired.version != '0'"
-              :code="JSON.stringify(state.desired.data, null, 2)" language="json" />
-            <n-code v-else code="No Desired state have been set yet" />
+            <n-code :code="desired ? JSON.stringify(desired.data, null, 2) : '// No Desired state have been set yet'" language="json" />
           </n-collapse-item>
         </n-collapse>
       </template>
@@ -76,7 +72,22 @@ const options = ref([
 ])
 
 const store = useDevicesStore()
-const state = computed(() => store.device_state(device.value.uuid))
+
+const reported = computed(() => {
+  let state = store.device_state(device.value.uuid)
+  if (!state || !state.reported || state.reported.version == '0') {
+    return false
+  }
+  return state.reported
+})
+
+const desired = computed(() => {
+  let state = store.device_state(device.value.uuid)
+  if (!state || !state.desired || state.desired.version == '0') {
+    return false
+  }
+  return state.desired
+})
 
 const message = useMessage()
 async function handleUUIDClicked() {
