@@ -12,13 +12,20 @@
           <bulb />
         </n-icon>
       </template>
+
+      <template #footer v-if="device.tags.length > 0">
+        Tags:
+        <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
+          {{ tag }}
+        </n-tag>
+      </template>
     </n-card>
   </n-dropdown>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
-import { NDropdown, NCard, NTooltip, NIcon } from "naive-ui"
+import { NDropdown, NCard, NTooltip, NIcon, NTag } from "naive-ui"
 import { OpenOutline, Bulb } from '@vicons/ionicons5'
 
 import { renderIcon } from "@/utils";
