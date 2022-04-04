@@ -20,8 +20,19 @@
         </n-tag>
       </template>
 
-      <template #action v-if="state && state.reported && state.reported.version != '0'">
-        <n-code :code="JSON.stringify(state.reported.data, null, 2)" language="json" />
+      <template #action >
+        <n-code
+          v-if="state && state.reported && state.reported.version != '0'"
+          :code="JSON.stringify(state.reported.data, null, 2)" language="json" />
+        <n-code v-else code="No State have been reported yet" />
+        <n-collapse>
+          <n-collapse-item title="Desired State" name="desired">
+            <n-code
+              v-if="state && state.desired && state.desired.version != '0'"
+              :code="JSON.stringify(state.desired.data, null, 2)" language="json" />
+            <n-code v-else code="No Desired state have been set yet" />
+          </n-collapse-item>
+        </n-collapse>
       </template>
     </n-card>
   </n-dropdown>
@@ -29,7 +40,9 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { NDropdown, NCard, NTooltip, NIcon, NTag, NCode } from "naive-ui"
+import {
+  NDropdown, NCard, NTooltip, NIcon, useMessage,
+  NTag, NCode, NCollapse, NCollapseItem } from "naive-ui"
 import { OpenOutline, Bulb } from '@vicons/ionicons5'
 
 import { useDevicesStore } from "@/store/devices";
