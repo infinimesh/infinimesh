@@ -11,7 +11,7 @@
           <router-view />
         </n-layout-content>
       </n-layout>
-      <n-layout-footer position="absolute">Chengfu Road</n-layout-footer>
+      <n-layout-footer>Chengfu Road</n-layout-footer>
   </n-layout>
 </template>
 
