@@ -463,27 +463,12 @@
         },
         "parameters": [
           {
-            "name": "devices",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "exp",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "post",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeDevicesTokenRequest"
+            }
           }
         ],
         "tags": [
@@ -1312,6 +1297,24 @@
     },
     "nodeDeleteResponse": {
       "type": "object"
+    },
+    "nodeDevicesTokenRequest": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exp": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "post": {
+          "type": "boolean"
+        }
+      }
     },
     "nodeSetCredentialsResponse": {
       "type": "object"

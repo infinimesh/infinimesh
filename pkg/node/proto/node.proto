@@ -155,6 +155,7 @@ service DevicesService {
   rpc MakeDevicesToken(DevicesTokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       post: "/devices/token"
+      body: "*"
     };
   };
 

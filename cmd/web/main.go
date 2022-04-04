@@ -102,6 +102,12 @@ func main() {
 		log.Fatal("Failed to register DevicesService gateway", zap.Error(err))
 	}
 
+	log.Info("Registering Shadow Service")
+	err = pb.RegisterShadowServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register ShadowService gateway", zap.Error(err))
+	}
+
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))
 	handler := handlers.CORS(
 		handlers.AllowedOrigins(corsAllowed),
