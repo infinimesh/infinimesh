@@ -2,13 +2,15 @@
   <n-dropdown trigger="contextmenu" :options="options">
     <n-card hoverable :title="device.title" :header-style="{fontFamily: 'Exo'}">
       <template #header-extra>
-       <n-tooltip trigger="hover">
+       <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
-            {{ device.uuid_short }}
+            <span @click="handleUUIDClicked">
+              {{ device.uuid_short }}
+            </span>
           </template>
           {{ device.uuid }}
         </n-tooltip>
-        <n-icon size="2vh" :color="device.enabled ? '#52c41a' : '#eb2f96'">
+        <n-icon size="2vh" :color="device.enabled ? '#52c41a' : '#eb2f96'" style="margin-left: 1vw;">
           <bulb />
         </n-icon>
       </template>
@@ -75,4 +77,14 @@ const options = ref([
 
 const store = useDevicesStore()
 const state = computed(() => store.device_state(device.value.uuid))
+
+const message = useMessage()
+async function handleUUIDClicked() {
+  try {
+    await navigator.clipboard.writeText(device.value.uuid);
+    message.success('Device UUID copied to clipboard')
+  } catch {
+    message.error('Failed to copy device UUID to clipboard')
+  }
+}
 </script>
