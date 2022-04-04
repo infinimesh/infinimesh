@@ -7,8 +7,6 @@ export const useAppStore = defineStore('app', {
     me: {
       title: ""
     },
-    namespace_selected: "",
-    namespaces: [],
   }),
   getters: {
     logged_in: (state) => state.token !== "",

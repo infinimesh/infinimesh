@@ -22,19 +22,24 @@ const props = defineProps({
 })
 
 const pool = computed(() => {
-  let devices = props.devices
-  let div = grid.value.responsiveCols
-  if (!div || div == 1) return [devices]
-  let res = new Array(div);
-  for (let i = 0; i < div; i++) {
-    res[i] = new Array();
-  }
-  for (let i = 0; i <= devices.length; i++) {
-    for (let j = 0; j < div && i + j < devices.length; j++) {
-      res[j].push(devices[i + j]);
+  try {
+    let devices = props.devices
+    let div = (grid.value ?? { responsiveCols: 0 }).responsiveCols
+    if (!div || div == 1) return [devices]
+    let res = new Array(div);
+    for (let i = 0; i < div; i++) {
+      res[i] = new Array();
     }
-    i += div - 1;
+    for (let i = 0; i <= devices.length; i++) {
+      for (let j = 0; j < div && i + j < devices.length; j++) {
+        res[j].push(devices[i + j]);
+      }
+      i += div - 1;
+    }
+    return res;
+  } catch (e) {
+    console.error(e)
+    return []
   }
-  return res;
 })
 </script>
