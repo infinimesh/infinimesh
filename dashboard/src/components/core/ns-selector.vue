@@ -14,9 +14,7 @@ import { storeToRefs } from "pinia";
 
 const store = useNSStore()
 
-const loading = ref(false)
-
-const { selected, namespaces } = storeToRefs(store)
+const { loading, selected, namespaces } = storeToRefs(store)
 const options = computed(() => {
   return namespaces.value.map(ns => ({
     label: ns.title,
@@ -24,18 +22,9 @@ const options = computed(() => {
   }))
 })
 
-const axios = useAppStore().http
-async function loadNamespaces() {
-  loading.value = true
-  axios.get('http://localhost:8000/namespaces', {}).then(res => {
-    namespaces.value = res.data.namespaces
-    loading.value = false
-  })
-}
-
 function handleShow(show) {
   if (show) {
-    loadNamespaces()
+    store.fetchNamespaces()
   }
 }
 
@@ -45,5 +34,5 @@ watch(namespaces, () => {
   }
 })
 
-loadNamespaces()
+store.fetchNamespaces()
 </script>

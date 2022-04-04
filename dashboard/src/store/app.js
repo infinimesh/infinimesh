@@ -14,6 +14,7 @@ export const useAppStore = defineStore('app', {
     logged_in: (state) => state.token !== "",
     http: (state) => {
       return inject('axios').create({
+        baseURL: 'http://localhost:8000',
         headers: {
           Authorization: `Bearer ${state.token}`
         }
