@@ -11,7 +11,7 @@
           <router-view />
         </n-layout-content>
       </n-layout>
-      <n-layout-footer>Chengfu Road</n-layout-footer>
+      <n-layout-footer><dashboard-footer /></n-layout-footer>
   </n-layout>
 </template>
 
@@ -19,6 +19,7 @@
 import { NLayout, NLayoutHeader, NLayoutContent, NLayoutSider, NLayoutFooter } from "naive-ui"
 import DashboardNav from "@/components/dashboard/nav.vue"
 import DashboardMenu from "@/components/dashboard/menu.vue"
+import DashboardFooter from "@/components/core/footer.vue"
 
 import { inject } from "vue";
 import { useAppStore } from "@/store/app";
