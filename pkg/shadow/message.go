@@ -23,6 +23,7 @@ import (
 )
 
 type DeviceStateMessage struct {
+	Device 		string
 	Version   uint64
 	State     json.RawMessage
 	Timestamp time.Time

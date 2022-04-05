@@ -134,6 +134,7 @@ func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.Pa
 	if err != nil {
 		return nil, err
 	}
+
 	return &shadowpb.PatchDesiredStateResponse{}, nil
 }
 
@@ -155,7 +156,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEvents := request.Id + subPathReported
 	events := s.PubSub.Sub(topicEvents)
 
-	log.Debug("Reported Streaming Details", zap.String("Topic Events", topicEvents), zap.Any("Events", events))
+	log.Debug("Reported Streaming Details", zap.String("Topic Events", topicEvents))
 
 	defer func() {
 
@@ -182,7 +183,7 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 	topicEventsDesired := request.Id + subPathDesired
 	eventsDesired := s.PubSub.Sub(topicEventsDesired)
 
-	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired), zap.Any("Events", eventsDesired))
+	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired))
 
 	defer func() {
 
@@ -203,8 +204,8 @@ outer:
 		log.Debug("Looping through Stream")
 		select {
 		case reportedEvent := <-events:
-			log.Debug("Inside reported event reading")
-			value, err := toProto(reportedEvent, log)
+			log.Debug("Inside reported event reading", zap.Any("event", reportedEvent))
+			device, value, err := toProto(reportedEvent, log)
 			if err != nil {
 				log.Error("Unable to Unmarshal data", zap.Error(err))
 				break outer
@@ -213,6 +214,7 @@ outer:
 			log.Debug("Reported", zap.Any("Reported Value", value))
 
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+				Device: device,
 				ReportedState: value,
 			})
 			if err != nil {
@@ -220,8 +222,8 @@ outer:
 				break outer
 			}
 		case desiredEvent := <-eventsDesired:
-			log.Debug("Inside desired event reading")
-			value, err := toProto(desiredEvent, log)
+			log.Debug("Inside desired event reading", zap.Any("event", desiredEvent))
+			device, value, err := toProto(desiredEvent, log)
 			if err != nil {
 				log.Error("Unable to Unmarshal data", zap.Error(err))
 				break outer
@@ -230,6 +232,7 @@ outer:
 			log.Debug("Desired", zap.Any("Desired Value", value))
 
 			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
+				Device: device,
 				DesiredState: value,
 			})
 			if err != nil {
@@ -246,28 +249,28 @@ outer:
 	return nil
 }
 
-func toProto(event interface{}, log *zap.Logger) (result *shadowpb.VersionedValue, err error) {
+func toProto(event interface{}, log *zap.Logger) (device string, result *shadowpb.VersionedValue, err error) {
 	var value structpb.Value
 	if raw, ok := event.(*DeviceStateMessage); ok {
 		var u jsonpb.Unmarshaler
 		err = u.Unmarshal(bytes.NewReader(raw.State), &value)
 		if err != nil {
 			log.Error("Failed to unmarshal jsonpb", zap.Error(err))
-			return nil, err
+			return "", nil, err
 		}
 
 		ts, err := ptypes.TimestampProto(raw.Timestamp)
 		if err != nil {
 			log.Error("Invalid timestamp", zap.Error(err))
-			return nil, err
+			return "", nil, err
 		}
 
-		return &shadowpb.VersionedValue{
+		return raw.Device, &shadowpb.VersionedValue{
 			Version:   raw.Version,
 			Data:      &value,
 			Timestamp: ts, // TODO
 		}, nil
 	}
-	return nil, errors.New("Failed type assertion")
+	return "", nil, errors.New("Failed type assertion")
 
 }

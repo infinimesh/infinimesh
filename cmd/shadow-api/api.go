@@ -93,17 +93,19 @@ func subscribe(consumer sarama.Consumer, ps *pubsub.PubSub, topic, subPath strin
 					continue
 				}
 
-				ps.Pub(&deltaMsg, string(message.Key)+subPath)
+				deltaMsg.Device = string(message.Key)
+
+				ps.Pub(&deltaMsg, deltaMsg.Device + subPath)
 
 				d := DeviceState(deltaMsg.State)
 
 				localStateMtx.Lock()
-				localState[string(message.Key)] = &d
+				localState[deltaMsg.Device] = &d
 				localStateMtx.Unlock()
 
 				// notify
 				subMtx.Lock()
-				if sub, ok := subscribers[string(message.Key)]; ok {
+				if sub, ok := subscribers[deltaMsg.Device]; ok {
 					for subscriber := range sub {
 						subscriber <- &d
 					}

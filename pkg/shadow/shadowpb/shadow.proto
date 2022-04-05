@@ -59,6 +59,7 @@ message StreamReportedStateChangesRequest {
 }
 
 message StreamReportedStateChangesResponse {
+  string device = 1;
   VersionedValue reportedState = 2;
   VersionedValue desiredState = 3;
 }
