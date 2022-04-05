@@ -22,13 +22,16 @@
     </template>
 
     <template #action>
-      <device-state-collapse :state="store.device_state(device.uuid)" />
+      <n-spin :show="patching">
+        <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" @submit="handlePatchDesired" />
+      </n-spin>
       <n-space justify="start" align="center" style="margin-top: 1vh;">
           <n-button
             type="success" round tertiary
             :disabled="subscribed"
             @click="handleSubscribe">{{ subscribed ? 'Subscribed' : 'Subscribe'}}</n-button>
-          <n-button type="warning" round tertiary @click="handlePatchDesired">Patch</n-button>
+          
+          <n-button type="warning" round tertiary @click="patch = !patch">{{ patch ? 'Cancel Patch' : 'Patch Desired' }}</n-button>
       </n-space>
     </template>
   </n-card>
@@ -37,7 +40,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import {
-  NCard, NTooltip, NIcon, useMessage,
+  NCard, NTooltip, NIcon, useMessage, NSpin, useLoadingBar,
   NTag, NSpace, NButton } from "naive-ui"
 import { Bulb } from '@vicons/ionicons5'
 import DeviceStateCollapse from './state-collapse.vue'
@@ -77,9 +80,14 @@ function handleSubscribe() {
   store.subscribe([device.value.uuid])
 }
 
-function handlePatchDesired() {
-  if(!expanded.value.includes('desired')) {
-    expanded.value.push('desired')
-  }
+const bar = useLoadingBar()
+const patch = ref(false)
+const patching = ref(false)
+async function handlePatchDesired(state) {
+  console.log(state)
+  patching.value = true
+  await store.patchDesiredState(device.value.uuid, state, bar)
+  patch.value = false
+  patching.value = false
 }
 </script>

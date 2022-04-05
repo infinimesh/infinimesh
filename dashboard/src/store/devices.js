@@ -20,7 +20,7 @@ export const useDevicesStore = defineStore('devices', {
       return state.devices.filter(d => d.namespace == ns)
     },
     device_state: (state) => {
-      return (device_id) => state.devices_state.get(device_id)
+      return (device_id) => state.devices_state.get(device_id) ?? {}
     },
     device_subscribed: (state) => {
       return (device_id) => state.subscribed.includes(device_id)
@@ -76,17 +76,18 @@ export const useDevicesStore = defineStore('devices', {
         this.subscribed = pool
       }
     },
-    async makeDevicesToken(pool) {
+    async makeDevicesToken(pool, post = false) {
       const { data } = await as.http.post('/devices/token', {
-        devices: pool, post: false
+        devices: pool, post
       })
 
       return data.token
     },
     // pool - array of devices UUIDs
-    async getDevicesState(pool) {
-      
-      let token = await this.makeDevicesToken(pool)
+    async getDevicesState(pool, token) {
+      if (!token) {
+        token = await this.makeDevicesToken(pool)
+      }
 
       const { data } = await as.http.get('/devices/states', {
         headers: {
@@ -96,6 +97,22 @@ export const useDevicesStore = defineStore('devices', {
 
       for (let [uuid, state] of Object.entries(data.pool)) {
         this.devices_state.set(uuid, state)
+      }
+    },
+    async patchDesiredState(device, state, bar) {
+      bar.start()
+      try {
+        let token = await this.makeDevicesToken([device], true)
+        await as.http.patch(`devices/${device}/state`, state, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        })
+        this.getDevicesState([device], token)
+        bar.finish()
+      } catch (e) {
+        console.error(e)
+        bar.error()
       }
     }
   },
