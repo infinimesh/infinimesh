@@ -14,7 +14,7 @@
         :code="reported ? JSON.stringify(reported.data, null, 2) : '// No State have been reported yet'">
       </n-code>
     </n-collapse-item>
-    <n-space justify="space-between" align="center" v-if="reported && expanded.includes('reported')">
+    <n-space justify="start" align="center" v-if="reported && expanded.includes('reported')">
       <n-statistic label="Version">
         <n-number-animation
           :from="0"
@@ -39,7 +39,7 @@
         language="json" :word-wrap="true"
         :code="desired ? JSON.stringify(desired.data, null, 2) : '// No Desired state have been set yet'" />
     </n-collapse-item>
-    <n-space justify="space-between" align="center" v-if="desired && expanded.includes('desired')">
+    <n-space justify="start" align="center" v-if="desired && expanded.includes('desired')">
       <n-statistic label="Version">
         <n-number-animation
           :from="0"
