@@ -1,20 +1,21 @@
 <template>
-  <n-card hoverable :title="device.title" :header-style="{fontFamily: 'Exo'}" style="border-radius: 0;">
-    <template #header-extra>
-     <n-tooltip trigger="hover" @click="handleUUIDClicked">
-        <template #trigger>
-          <span @click="handleUUIDClicked">
-            {{ device.uuid_short }}
-          </span>
-        </template>
-        {{ device.uuid }}
-      </n-tooltip>
-      <n-icon size="2vh" :color="device.enabled ? '#52c41a' : '#eb2f96'" style="margin-left: 1vw;">
-        <bulb />
-      </n-icon>
-    </template>
+  <n-spin :show="patching">
+    <n-card hoverable :title="device.title" :header-style="{fontFamily: 'Exo'}" style="border-radius: 0;">
+      <template #header-extra>
+      <n-tooltip trigger="hover" @click="handleUUIDClicked">
+          <template #trigger>
+            <span @click="handleUUIDClicked">
+              {{ device.uuid_short }}
+            </span>
+          </template>
+          {{ device.uuid }}
+        </n-tooltip>
+        <n-icon size="2vh" :color="device.enabled ? '#52c41a' : '#eb2f96'" style="margin-left: 1vw;">
+          <bulb />
+        </n-icon>
+      </template>
 
-    <template #footer>
+      <template #footer>
         <template v-if="show_ns">
           Namespace: <strong>{{ device.namespace }}</strong>
         </template><br>
@@ -24,29 +25,43 @@
             {{ tag }}
           </n-tag>
         </template>
-    </template>
+      </template>
 
-    <template #action>
-      <n-spin :show="patching">
+      <template #action>
         <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" @submit="handlePatchDesired" />
-      </n-spin>
-      <n-space justify="start" align="center" style="margin-top: 1vh;">
+        <n-space justify="start" align="center" style="margin-top: 1vh;">
           <n-button
             type="success" round tertiary
             :disabled="subscribed"
             @click="handleSubscribe">{{ subscribed ? 'Subscribed' : 'Subscribe'}}</n-button>
           
-          <n-button type="warning" round tertiary @click="patch = !patch">{{ patch ? 'Cancel Patch' : 'Patch Desired' }}</n-button>
-      </n-space>
-    </template>
-  </n-card>
+          <n-button 
+            v-if="device.accessLevel > 1"
+            type="warning" round tertiary
+            @click="patch = !patch">{{ patch ? 'Cancel Patch' : 'Patch Desired' }}</n-button>
+
+          <n-popconfirm
+            @positive-click="handleDelete"
+          >
+            <template #trigger>
+              <n-button
+                v-if="device.accessLevel > 2"
+                type="error" round secondary>Delete</n-button>
+            </template>
+            Are you sure about deleting this device?
+          </n-popconfirm>
+
+        </n-space>
+      </template>
+    </n-card>
+  </n-spin>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import {
   NCard, NTooltip, NIcon, useMessage, NSpin, useLoadingBar,
-  NTag, NSpace, NButton } from "naive-ui"
+  NTag, NSpace, NButton, NPopconfirm } from "naive-ui"
 import { Bulb } from '@vicons/ionicons5'
 import DeviceStateCollapse from './state-collapse.vue'
 
@@ -93,10 +108,15 @@ const bar = useLoadingBar()
 const patch = ref(false)
 const patching = ref(false)
 async function handlePatchDesired(state) {
-  console.log(state)
   patching.value = true
   await store.patchDesiredState(device.value.uuid, state, bar)
   patch.value = false
+  patching.value = false
+}
+
+async function handleDelete() {
+  patching.value = true
+  await store.deleteDevice(device.value.uuid, bar)
   patching.value = false
 }
 </script>

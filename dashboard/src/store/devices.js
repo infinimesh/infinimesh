@@ -117,6 +117,18 @@ export const useDevicesStore = defineStore('devices', {
         console.error(e)
         bar.error()
       }
+    },
+    async deleteDevice(device, bar) {
+      bar.start()
+      try {
+        await as.http.delete(`devices/${device}`)
+        bar.finish()
+  
+        this.fetchDevices()
+      } catch (e) {
+        console.error(e)
+        bar.error()
+      }
     }
   },
 })
