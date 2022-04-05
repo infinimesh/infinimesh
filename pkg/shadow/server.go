@@ -271,6 +271,6 @@ func toProto(event interface{}, log *zap.Logger) (device string, result *shadowp
 			Timestamp: ts, // TODO
 		}, nil
 	}
-	return "", nil, errors.New("Failed type assertion")
+	return "", nil, errors.New("failed type assertion")
 
 }
