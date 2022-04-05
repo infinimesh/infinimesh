@@ -17,10 +17,17 @@ export const useDevicesStore = defineStore('devices', {
     show_ns: (state) => nss.selected == "all",
     devices_ns_filtered: (state) => {
       let ns = nss.selected;
+      let subscribed = new Set(state.subscribed);
+      let pool = state.devices.map(d => {
+        d.sorter =
+          d.enabled + d.accessLevel + d.basicEnabled
+        + subscribed.has(d.uuid)
+        return d
+      }).sort((a, b) => b.sorter - a.sorter);
       if (ns == "all") {
-        return state.devices
+        return pool
       }
-      return state.devices.filter(d => d.namespace == ns)
+      return pool.filter(d => d.namespace == ns)
     },
     device_state: (state) => {
       return (device_id) => state.devices_state.get(device_id) ?? {}
@@ -35,9 +42,9 @@ export const useDevicesStore = defineStore('devices', {
       this.loading = true
       const { data } = await as.http.get('/devices');
       this.devices = data.devices;
-      this.loading = false
+      this.loading = false;
 
-      this.getDevicesState(data.devices.map(d => d.uuid))
+      this.getDevicesState(data.devices.map(d => d.uuid));
     },
     async subscribe(devices) {
       let pool = this.subscribed.concat(devices)
