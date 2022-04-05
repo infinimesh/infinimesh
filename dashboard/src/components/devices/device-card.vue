@@ -1,5 +1,5 @@
 <template>
-  <n-card hoverable :title="device.title" :header-style="{fontFamily: 'Exo'}">
+  <n-card hoverable :title="device.title" :header-style="{fontFamily: 'Exo'}" style="border-radius: 0;">
     <template #header-extra>
      <n-tooltip trigger="hover" @click="handleUUIDClicked">
         <template #trigger>
