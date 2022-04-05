@@ -14,11 +14,16 @@
       </n-icon>
     </template>
 
-    <template #footer v-if="device.tags.length > 0">
-      Tags:
-      <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
-        {{ tag }}
-      </n-tag>
+    <template #footer>
+        <template v-if="show_ns">
+          Namespace: <strong>{{ device.namespace }}</strong>
+        </template><br>
+        <template v-if="device.tags.length > 0">
+          Tags:
+          <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
+            {{ tag }}
+          </n-tag>
+        </template>
     </template>
 
     <template #action>
@@ -51,6 +56,10 @@ const props = defineProps({
   device: {
     type: Object,
     required: true,
+  },
+  show_ns: {
+    type: Boolean,
+    default: false,
   },
 })
 

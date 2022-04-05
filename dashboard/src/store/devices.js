@@ -14,9 +14,12 @@ export const useDevicesStore = defineStore('devices', {
   }),
 
   getters: {
+    show_ns: (state) => nss.selected == "all",
     devices_ns_filtered: (state) => {
       let ns = nss.selected;
-      if (ns == "all") return state.devices
+      if (ns == "all") {
+        return state.devices
+      }
       return state.devices.filter(d => d.namespace == ns)
     },
     device_state: (state) => {

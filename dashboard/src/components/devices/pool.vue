@@ -2,7 +2,7 @@
   <n-empty size="huge" description="No Devices" v-if="devices.length == 0"></n-empty>
   <n-grid v-else cols="1 s:1 m:2 l:3 xl:4 2xl:4" responsive="screen" ref="grid">
     <n-grid-item v-for="(col, i) in pool" :key="i">
-      <device-card v-for="device in col" :key="device.uuid" :device="device" />
+      <device-card v-for="device in col" :key="device.uuid" :device="device" :show_ns="show_ns" />
     </n-grid-item>
   </n-grid>
 </template>
@@ -19,6 +19,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  show_ns: {
+    type: Boolean,
+    default: false,
+  }
 })
 
 const pool = computed(() => {

@@ -1,6 +1,6 @@
 <template>
   <n-spin :show="loading">
-    <devices-pool :devices="devices" />
+    <devices-pool :devices="devices" :show_ns="show_ns" />
   </n-spin>
 </template>
 
@@ -11,7 +11,7 @@ import { storeToRefs } from "pinia";
 import DevicesPool from "@/components/devices/pool.vue"
 
 const store = useDevicesStore()
-const { loading, devices_ns_filtered: devices } = storeToRefs(store)
+const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store)
 
 store.fetchDevices()
 </script>
