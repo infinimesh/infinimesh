@@ -1,5 +1,10 @@
 <template>
-  <n-menu :options="menuOptions" :value="selected" />
+  <n-menu
+    :collapsed="collapsed"
+    :collapsed-width="64"
+    :collapsed-icon-size="22"
+    :options="menuOptions"
+    :value="selected" />
 </template>
 
 <script setup>
@@ -9,6 +14,13 @@ import { NMenu } from "naive-ui"
 
 import { renderIcon } from "@/utils"
 import { HardwareChipOutline } from "@vicons/ionicons5"
+
+const props = defineProps({
+  collapsed: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 const route = useRoute()
 const selected = computed(() => route.name)
@@ -24,4 +36,5 @@ const menuOptions = ref([
   }
 ])
 
+const collapsed = computed(() => props.collapsed)
 </script>

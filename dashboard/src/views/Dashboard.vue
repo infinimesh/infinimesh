@@ -4,8 +4,15 @@
       <dashboard-nav />
     </n-layout-header>
     <n-layout has-sider>
-        <n-layout-sider content-style="padding: 24px;">
-          <dashboard-menu />
+        <n-layout-sider
+          collapse-mode="width"
+          :collapsed-width="64"
+          :width="240"
+          :collapsed="collapsed"
+          @mouseover="collapsed = false"
+          @mouseleave="collapsed = true"
+        >
+          <dashboard-menu :collapsed="collapsed" />
         </n-layout-sider>
         <n-layout-content content-style="padding: 24px;">
           <router-view />
@@ -16,6 +23,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { NLayout, NLayoutHeader, NLayoutContent, NLayoutSider, NLayoutFooter } from "naive-ui"
 import DashboardNav from "@/components/dashboard/nav.vue"
 import DashboardMenu from "@/components/dashboard/menu.vue"
@@ -36,4 +44,6 @@ const axios = inject('axios');
     store.me = res.data
   })
 })()
+
+const collapsed = ref(true)
 </script>
