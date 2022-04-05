@@ -1094,29 +1094,12 @@ func local_request_ShadowService_PatchDesiredState_0(ctx context.Context, marsha
 }
 
 var (
-	filter_ShadowService_StreamReportedStateChanges_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+	filter_ShadowService_StreamReportedStateChanges_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
 func request_ShadowService_StreamReportedStateChanges_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowServiceClient, req *http.Request, pathParams map[string]string) (ShadowService_StreamReportedStateChangesClient, runtime.ServerMetadata, error) {
 	var protoReq shadowpb.StreamReportedStateChangesRequest
 	var metadata runtime.ServerMetadata
-
-	var (
-		val string
-		ok  bool
-		err error
-		_   = err
-	)
-
-	val, ok = pathParams["id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
-	}
-
-	protoReq.Id, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -1614,7 +1597,7 @@ func RegisterShadowServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/GetMultiple", runtime.WithHTTPPathPattern("/devices/states/all"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/GetMultiple", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2293,7 +2276,7 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/GetMultiple", runtime.WithHTTPPathPattern("/devices/states/all"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/GetMultiple", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2333,7 +2316,7 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamReportedStateChanges", runtime.WithHTTPPathPattern("/devices/{id}/state/stream"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamReportedStateChanges", runtime.WithHTTPPathPattern("/devices/states/stream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2355,11 +2338,11 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 var (
 	pattern_ShadowService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_ShadowService_GetMultiple_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"devices", "states", "all"}, ""))
+	pattern_ShadowService_GetMultiple_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"devices", "states"}, ""))
 
 	pattern_ShadowService_PatchDesiredState_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"devices", "id", "state"}, ""))
 
-	pattern_ShadowService_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"devices", "id", "state", "stream"}, ""))
+	pattern_ShadowService_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"devices", "states", "stream"}, ""))
 )
 
 var (

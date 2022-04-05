@@ -148,18 +148,10 @@ func (s *ShadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-	found := false
-	for _, device := range devices_scope {
-		if device == request.Id {
-			found = true
-			break
-		}
-	}
-	if !found {
-		return status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
-	}
 
-	log.Debug("Stream API Method: Streaming started", zap.String("Device ID", request.Id))
+	request.Devices = devices_scope
+
+	log.Debug("Stream API Method: Streaming started", zap.Strings("devices", devices_scope))
 
 	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
 	if err != nil {

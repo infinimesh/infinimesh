@@ -54,7 +54,7 @@ message PatchDesiredStateResponse {
 }
 
 message StreamReportedStateChangesRequest {
-  string id = 1;
+  repeated string devices = 1;
   bool only_delta = 2;
 }
 

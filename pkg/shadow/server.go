@@ -133,9 +133,11 @@ func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.Pa
 func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
 
 	log := s.Log.Named("Stream State Controller")
-	log.Debug("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
+	log.Debug("Function Invoked", zap.Strings("devices", request.Devices), zap.Bool("delta", request.OnlyDelta))
 
-	// TODO validate request/Id
+	if len(request.Devices) == 0 {
+		return errors.New("no devices specified")
+	}
 
 	var subPathReported string
 	if request.OnlyDelta {
@@ -144,10 +146,13 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 		subPathReported = "/reported/full"
 	}
 
-	topicEvents := request.Id + subPathReported
-	events := s.PubSub.Sub(topicEvents)
+	topicEvents := make([]string, len(request.Devices))
+	for i, device := range request.Devices {
+		topicEvents[i] = device + subPathReported
+	}
+	events := s.PubSub.Sub(topicEvents...)
 
-	log.Debug("Reported Streaming Details", zap.String("Topic Events", topicEvents))
+	log.Debug("Reported Streaming Details", zap.Strings("topics", topicEvents))
 
 	defer func() {
 
@@ -171,10 +176,13 @@ func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStat
 		subPathDesired = "/desired/full"
 	}
 
-	topicEventsDesired := request.Id + subPathDesired
-	eventsDesired := s.PubSub.Sub(topicEventsDesired)
+	topicEventsDesired := make([]string, len(request.Devices))
+	for i, device := range request.Devices {
+		topicEventsDesired[i] = device + subPathDesired
+	}
+	eventsDesired := s.PubSub.Sub(topicEventsDesired...)
 
-	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired))
+	log.Debug("Desired Streaming Details", zap.Strings("topics", topicEventsDesired))
 
 	defer func() {
 

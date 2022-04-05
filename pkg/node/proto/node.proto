@@ -173,7 +173,7 @@ service ShadowService {
   };
   rpc GetMultiple(infinimesh.shadow.Empty) returns (infinimesh.shadow.GetMultipleResponse) {
     option (google.api.http) = {
-      get: "/devices/states/all"
+      get: "/devices/states"
     };
   };
   rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
@@ -186,7 +186,7 @@ service ShadowService {
   rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest)
       returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
     option (google.api.http) = {
-      get : "/devices/{id}/state/stream"
+      get : "/devices/states/stream"
     };
   }
 }

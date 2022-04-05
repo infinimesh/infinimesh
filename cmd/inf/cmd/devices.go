@@ -232,7 +232,7 @@ var getDeviceStateCmd = &cobra.Command{
 				return err
 			}
 			r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
-				Devices: []string{args[0]},
+				Devices: args,
 				Post: true,
 			})
 			if err != nil {
@@ -268,7 +268,6 @@ var getDeviceStateCmd = &cobra.Command{
 		if stream, _ := cmd.Flags().GetBool("stream"); stream {
 			delta, _ := cmd.Flags().GetBool("delta")
 			c, err := client.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
-				Id: args[0],
 				OnlyDelta: delta,
 			})
 			if err != nil {

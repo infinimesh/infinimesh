@@ -422,7 +422,7 @@
         ]
       }
     },
-    "/devices/states/all": {
+    "/devices/states": {
       "get": {
         "operationId": "ShadowService_GetMultiple",
         "responses": {
@@ -439,6 +439,55 @@
             }
           }
         },
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/states/stream": {
+      "get": {
+        "operationId": "ShadowService_StreamReportedStateChanges",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of shadowStreamReportedStateChangesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "devices",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "onlyDelta",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "tags": [
           "ShadowService"
         ]
@@ -535,51 +584,6 @@
             "schema": {
               "type": "object"
             }
-          }
-        ],
-        "tags": [
-          "ShadowService"
-        ]
-      }
-    },
-    "/devices/{id}/state/stream": {
-      "get": {
-        "operationId": "ShadowService_StreamReportedStateChanges",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of shadowStreamReportedStateChangesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "onlyDelta",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
           }
         ],
         "tags": [
