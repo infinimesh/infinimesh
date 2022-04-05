@@ -26,9 +26,9 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
 )
@@ -81,14 +81,10 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 	if err := u.Unmarshal(bytes.NewReader(reportedState.State.State), &reportedValue); err != nil {
 		log.Error("Failed to unmarshal reported JSON from database", zap.Error(err))
 	} else {
-		ts, err := ptypes.TimestampProto(reportedState.State.Timestamp)
-		if err != nil {
-			return nil, err
-		}
 		response.Shadow.Reported = &shadowpb.VersionedValue{
 			Version:   uint64(reportedState.State.Version),
 			Data:      &reportedValue,
-			Timestamp: ts,
+			Timestamp: timestamppb.New(reportedState.State.Timestamp),
 		}
 	}
 
@@ -96,15 +92,10 @@ func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (res
 	if err := u.Unmarshal(bytes.NewReader(desiredState.State.State), &desiredValue); err != nil {
 		log.Error("Failed to unmarshal desired JSON from database", zap.Error(err))
 	} else {
-		ts, err := ptypes.TimestampProto(desiredState.State.Timestamp)
-		if err != nil {
-			return nil, err
-		}
-
 		response.Shadow.Desired = &shadowpb.VersionedValue{
 			Version:   uint64(desiredState.State.Version),
 			Data:      &desiredValue,
-			Timestamp: ts,
+			Timestamp: timestamppb.New(desiredState.State.Timestamp),
 		}
 	}
 
@@ -259,16 +250,10 @@ func toProto(event interface{}, log *zap.Logger) (device string, result *shadowp
 			return "", nil, err
 		}
 
-		ts, err := ptypes.TimestampProto(raw.Timestamp)
-		if err != nil {
-			log.Error("Invalid timestamp", zap.Error(err))
-			return "", nil, err
-		}
-
 		return raw.Device, &shadowpb.VersionedValue{
 			Version:   raw.Version,
 			Data:      &value,
-			Timestamp: ts, // TODO
+			Timestamp: timestamppb.New(raw.Timestamp), // TODO
 		}, nil
 	}
 	return "", nil, errors.New("failed type assertion")
