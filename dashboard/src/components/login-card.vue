@@ -18,7 +18,7 @@
 
 <script setup>
 import { ref, inject } from "vue";
-import { NCard, NSpace, NInput, NButton, NForm, NFormItem, NAlert } from "naive-ui"
+import { NCard, NSpace, NInput, NButton, NAlert, useLoadingBar } from "naive-ui"
 import { useRouter } from "vue-router"
 import { useAppStore } from "@/store/app";
 
@@ -31,10 +31,13 @@ const password = ref("");
 const error = ref(false);
 const success = ref(false)
 
+const bar = useLoadingBar()
+
 const axios = inject('axios')
 async function login() {
   success.value = false
   error.value = false
+  bar.start()
   
   axios.post('http://localhost:8000/token', {
     auth: {
@@ -45,8 +48,10 @@ async function login() {
     success.value = true
     store.token = res.data.token
     router.push({name: 'Root'})
+    bar.finish()
   }).catch(err => {
     console.log(err)
+    bar.error()
     if (err.response.status == 401) {
       error.value = {
         title: "Wrong credentials given",
