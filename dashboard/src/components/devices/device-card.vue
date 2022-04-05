@@ -35,12 +35,8 @@
                 :active="true"
               />
             </n-statistic>
-            <n-statistic label="Timestamp" :value="(new Date(reported.timestamp)).toLocaleString()">
-              <template #prefix>
-                <n-icon>
-                  <time-outline />
-                </n-icon>
-              </template>
+            <n-statistic label="Timestamp">
+              <n-date-picker input-readonly :value="(new Date(reported.timestamp)).getTime()" type="datetime" disabled class="pseudo-disabled" />
             </n-statistic>
           </n-space>
           <n-collapse-item title="Desired State" name="desired">
@@ -54,12 +50,8 @@
                 :active="true"
               />
             </n-statistic>
-            <n-statistic label="Timestamp" :value="(new Date(desired.timestamp)).toLocaleString()">
-              <template #prefix>
-                <n-icon>
-                  <time-outline />
-                </n-icon>
-              </template>
+            <n-statistic label="Timestamp">
+              <n-date-picker input-readonly :value="(new Date(desired.timestamp)).getTime()" type="datetime" disabled class="pseudo-disabled" />
             </n-statistic>
           </n-space>
         </n-collapse>
@@ -79,9 +71,9 @@
 import { ref, computed } from "vue";
 import {
   NDropdown, NCard, NTooltip, NIcon, useMessage,
-  NTag, NCode, NCollapse, NCollapseItem,
+  NTag, NCode, NCollapse, NCollapseItem, NDatePicker,
   NSpace, NButton, NStatistic, NNumberAnimation } from "naive-ui"
-import { OpenOutline, Bulb, TimeOutline } from '@vicons/ionicons5'
+import { OpenOutline, Bulb } from '@vicons/ionicons5'
 
 import { useDevicesStore } from "@/store/devices";
 
