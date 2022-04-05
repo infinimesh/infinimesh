@@ -22,7 +22,7 @@
         </n-tag>
       </template>
 
-      <template #action >
+      <template #action>
         <n-collapse :default-expanded-names="['reported']">
           <n-collapse-item title="Reported State" name="reported">
             <n-code :code="reported ? JSON.stringify(reported.data, null, 2) : '// No State have been reported yet'" language="json" />
@@ -31,6 +31,13 @@
             <n-code :code="desired ? JSON.stringify(desired.data, null, 2) : '// No Desired state have been set yet'" language="json" />
           </n-collapse-item>
         </n-collapse>
+        <n-space justify="start" align="center" style="margin-top: 1vh;">
+            <n-button
+              type="success" round tertiary
+              :disabled="subscribed"
+              @click="handleSubscribe">{{ subscribed ? 'Subscribed' : 'Subscribe'}}</n-button>
+            <n-button type="warning" round tertiary>Patch</n-button>
+        </n-space>
       </template>
     </n-card>
   </n-dropdown>
@@ -40,7 +47,8 @@
 import { ref, computed } from "vue";
 import {
   NDropdown, NCard, NTooltip, NIcon, useMessage,
-  NTag, NCode, NCollapse, NCollapseItem } from "naive-ui"
+  NTag, NCode, NCollapse, NCollapseItem,
+  NSpace, NButton } from "naive-ui"
 import { OpenOutline, Bulb } from '@vicons/ionicons5'
 
 import { useDevicesStore } from "@/store/devices";
@@ -89,6 +97,10 @@ const desired = computed(() => {
   return state.desired
 })
 
+const subscribed = computed(() => {
+  return store.device_subscribed(device.value.uuid)
+})
+
 const message = useMessage()
 async function handleUUIDClicked() {
   try {
@@ -97,5 +109,9 @@ async function handleUUIDClicked() {
   } catch {
     message.error('Failed to copy device UUID to clipboard')
   }
+}
+
+function handleSubscribe() {
+  store.subscribe([device.value.uuid])
 }
 </script>

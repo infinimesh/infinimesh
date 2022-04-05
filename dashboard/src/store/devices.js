@@ -9,7 +9,8 @@ export const useDevicesStore = defineStore('devices', {
   state: () => ({
     loading: false,
     devices: [],
-    devices_state: new Map()
+    devices_state: new Map(),
+    subscribed: [],
   }),
 
   getters: {
@@ -20,6 +21,9 @@ export const useDevicesStore = defineStore('devices', {
     },
     device_state: (state) => {
       return (device_id) => state.devices_state.get(device_id)
+    },
+    device_subscribed: (state) => {
+      return (device_id) => state.subscribed.includes(device_id)
     }
   },
 
@@ -32,15 +36,59 @@ export const useDevicesStore = defineStore('devices', {
 
       this.getDevicesState(data.devices.map(d => d.uuid))
     },
-    // pool - array of devices UUIDs
-    async getDevicesState(pool) {
-      const { data: res } = await as.http.post('/devices/token', {
+    async subscribe(devices) {
+      let pool = this.subscribed.concat(devices)
+
+      let token = await this.makeDevicesToken(pool)
+      let socket = new WebSocket(`ws://localhost:8000/devices/states/stream`, ["Bearer", token])
+      socket.onmessage = (msg) => {
+        let response = JSON.parse(msg.data).result;
+        if (!response) {
+          console.log("Empty response", msg)
+          return
+        }
+
+
+        let curr = this.devices_state.get(response.device)
+        let exist = true
+        if (!curr) {
+          exist = false
+        }
+
+        if (response.reportedState) {
+          curr.reported = response.reportedState
+        }
+        if (response.desiredState) {
+          curr.desired = response.desiredState
+        }
+
+        if (!exist) {
+          this.devices_state.set(response.device, curr)
+        }
+      }
+      socket.onclose = () => {
+        this.subscribed = []
+      }
+      socket.onerror = () => {
+        this.subscribed = []
+      }
+      socket.onopen = () => {
+        this.subscribed = pool
+      }
+    },
+    async makeDevicesToken(pool) {
+      const { data } = await as.http.post('/devices/token', {
         devices: pool, post: false
       })
 
-      let token = res.token;
+      return data.token
+    },
+    // pool - array of devices UUIDs
+    async getDevicesState(pool) {
+      
+      let token = await this.makeDevicesToken(pool)
 
-      const { data } = await as.http.get('/devices/states/all', {
+      const { data } = await as.http.get('/devices/states', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -50,5 +98,5 @@ export const useDevicesStore = defineStore('devices', {
         this.devices_state.set(uuid, state)
       }
     }
-  }
+  },
 })
