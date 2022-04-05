@@ -23,6 +23,7 @@ import (
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 
 	"github.com/gorilla/handlers"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -116,5 +117,5 @@ func main() {
 	)(gwmux)
 
 	log.Info("Serving gRPC-Gateway on http://0.0.0.0:8000")
-	log.Fatal("Failed to Listen and Serve Gateway-Server", zap.Error(http.ListenAndServe(":8000", handler)))
+	log.Fatal("Failed to Listen and Serve Gateway-Server", zap.Error(http.ListenAndServe(":8000", wsproxy.WebsocketProxy(handler))))
 }
