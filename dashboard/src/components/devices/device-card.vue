@@ -23,20 +23,52 @@
       </template>
 
       <template #action>
-        <n-collapse :default-expanded-names="['reported']">
+        <n-collapse v-model:expanded-names="expanded">
           <n-collapse-item title="Reported State" name="reported">
             <n-code :code="reported ? JSON.stringify(reported.data, null, 2) : '// No State have been reported yet'" language="json" />
           </n-collapse-item>
+          <n-space justify="space-between" align="center" v-if="reported && expanded.includes('reported')">
+            <n-statistic label="Version">
+              <n-number-animation
+                :from="0"
+                :to="reported.version"
+                :active="true"
+              />
+            </n-statistic>
+            <n-statistic label="Timestamp" :value="(new Date(reported.timestamp)).toLocaleString()">
+              <template #prefix>
+                <n-icon>
+                  <time-outline />
+                </n-icon>
+              </template>
+            </n-statistic>
+          </n-space>
           <n-collapse-item title="Desired State" name="desired">
             <n-code :code="desired ? JSON.stringify(desired.data, null, 2) : '// No Desired state have been set yet'" language="json" />
           </n-collapse-item>
+          <n-space justify="space-between" align="center" v-if="desired && expanded.includes('desired')">
+            <n-statistic label="Version">
+              <n-number-animation
+                :from="0"
+                :to="desired.version"
+                :active="true"
+              />
+            </n-statistic>
+            <n-statistic label="Timestamp" :value="(new Date(desired.timestamp)).toLocaleString()">
+              <template #prefix>
+                <n-icon>
+                  <time-outline />
+                </n-icon>
+              </template>
+            </n-statistic>
+          </n-space>
         </n-collapse>
         <n-space justify="start" align="center" style="margin-top: 1vh;">
             <n-button
               type="success" round tertiary
               :disabled="subscribed"
               @click="handleSubscribe">{{ subscribed ? 'Subscribed' : 'Subscribe'}}</n-button>
-            <n-button type="warning" round tertiary>Patch</n-button>
+            <n-button type="warning" round tertiary @click="handlePatchDesired">Patch</n-button>
         </n-space>
       </template>
     </n-card>
@@ -48,8 +80,8 @@ import { ref, computed } from "vue";
 import {
   NDropdown, NCard, NTooltip, NIcon, useMessage,
   NTag, NCode, NCollapse, NCollapseItem,
-  NSpace, NButton } from "naive-ui"
-import { OpenOutline, Bulb } from '@vicons/ionicons5'
+  NSpace, NButton, NStatistic, NNumberAnimation } from "naive-ui"
+import { OpenOutline, Bulb, TimeOutline } from '@vicons/ionicons5'
 
 import { useDevicesStore } from "@/store/devices";
 
@@ -78,6 +110,8 @@ const options = ref([
     }
   }
 ])
+
+const expanded = ref(['reported'])
 
 const store = useDevicesStore()
 
@@ -113,5 +147,11 @@ async function handleUUIDClicked() {
 
 function handleSubscribe() {
   store.subscribe([device.value.uuid])
+}
+
+function handlePatchDesired() {
+  if(!expanded.value.includes('desired')) {
+    expanded.value.push('desired')
+  }
 }
 </script>
