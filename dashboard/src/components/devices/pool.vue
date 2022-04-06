@@ -2,15 +2,21 @@
   <n-empty size="huge" description="No Devices" v-if="devices.length == 0"></n-empty>
   <div v-else>
     <n-grid responsive="screen">
-      <n-grid-item>
+      <n-grid-item span="3">
         <n-h1 prefix="bar" align-text type="info">
           <n-text type="info">
             Devices
           </n-text>
         </n-h1>
       </n-grid-item>
+      <n-grid-item span="18">
+        
+      </n-grid-item>
+      <n-grid-item span="3">
+        <device-create />
+      </n-grid-item>
     </n-grid>
-    <n-grid cols="1 s:1 m:2 l:3 xl:4 2xl:4" responsive="screen" ref="grid">
+    <n-grid cols="1 s:1 m:2 l:3 xl:4 2xl:4" ref="grid" responsive="screen">
       <n-grid-item v-for="(col, i) in pool" :key="i">
         <device-card v-for="device in col" :key="device.uuid" :device="device" :show_ns="show_ns" />
       </n-grid-item>
@@ -22,6 +28,7 @@
 import { ref, computed } from "vue";
 import { NEmpty, NGrid, NGridItem, NH1, NText } from "naive-ui";
 import DeviceCard from "./device-card.vue"
+import DeviceCreate from './create-drawer.vue'
 
 const grid = ref({ responsiveCols: 0 })
 

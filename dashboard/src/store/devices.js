@@ -136,6 +136,20 @@ export const useDevicesStore = defineStore('devices', {
         console.error(e)
         bar.error()
       }
+    },
+    async createDevice(request, bar) {
+      bar.start()
+      try {
+        await as.http.put(`/devices`, request)
+        
+        this.fetchDevices()
+        bar.finish()
+        return false
+      } catch (e) {
+        console.error(e)
+        bar.error()
+        return e
+      }
     }
   },
 })

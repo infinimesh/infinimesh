@@ -123,7 +123,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	}
 
 	device := Device{Device: req.GetDevice()}
-	err := sha256Fingerprint(device.Certificate)
+	err := sha256Fingerprint(device.Device.Certificate)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Can't generate fingerprint: %v", err)
 	}
