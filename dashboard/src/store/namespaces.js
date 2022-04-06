@@ -1,9 +1,9 @@
 import { useAppStore } from "@/store/app";
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
 const as = useAppStore();
 
-export const useNSStore = defineStore('namespaces', {
+export const useNSStore = defineStore("namespaces", {
   state: () => ({
     loading: false,
     selected: "",
@@ -12,17 +12,15 @@ export const useNSStore = defineStore('namespaces', {
 
   actions: {
     async fetchNamespaces() {
-      this.loading = true
-      const { data } = await as.http.get('/namespaces');
+      this.loading = true;
+      const { data } = await as.http.get("/namespaces");
       this.namespaces = data.namespaces;
-      this.loading = false
-    }
+      this.loading = false;
+    },
   },
 
   persist: {
     enabled: true,
-    strategies: [
-      { storage: localStorage, key: 'infinimesh.ns' },
-    ],
+    strategies: [{ storage: localStorage, key: "infinimesh.ns" }],
   },
-})
+});

@@ -23,25 +23,35 @@
 </template>
 
 <script>
-import { computed } from "vue"
+import { computed } from "vue";
 import {
-  NConfigProvider, NGlobalStyle, NWatermark, NLoadingBarProvider,
-  NMessageProvider, darkTheme, useOsTheme } from 'naive-ui'
+  NConfigProvider,
+  NGlobalStyle,
+  NWatermark,
+  NLoadingBarProvider,
+  NMessageProvider,
+  darkTheme,
+  useOsTheme,
+} from "naive-ui";
 
-import hljs from "@/utils/hljs"
+import hljs from "@/utils/hljs";
 
 export default {
   components: {
-    NConfigProvider, NGlobalStyle, NWatermark, NMessageProvider, NLoadingBarProvider
+    NConfigProvider,
+    NGlobalStyle,
+    NWatermark,
+    NMessageProvider,
+    NLoadingBarProvider,
   },
   setup() {
     const osThemeRef = useOsTheme();
     return {
-      theme: computed(() => osThemeRef.value === "dark" ? darkTheme : null),
+      theme: computed(() => (osThemeRef.value === "dark" ? darkTheme : null)),
       osTheme: osThemeRef,
       watermark: false,
-      hljs
+      hljs,
     };
-  }
-}
+  },
+};
 </script>

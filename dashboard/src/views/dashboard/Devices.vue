@@ -5,13 +5,13 @@
 </template>
 
 <script setup>
-import { NSpin } from "naive-ui"
+import { NSpin } from "naive-ui";
 import { useDevicesStore } from "@/store/devices";
 import { storeToRefs } from "pinia";
-import DevicesPool from "@/components/devices/pool.vue"
+import DevicesPool from "@/components/devices/pool.vue";
 
-const store = useDevicesStore()
-const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store)
+const store = useDevicesStore();
+const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
 
-store.fetchDevices()
+store.fetchDevices();
 </script>

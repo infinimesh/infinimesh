@@ -5,8 +5,8 @@
 </template>
 
 <script setup>
-import { NSpace } from "naive-ui"
-import LoginCard from "@/components/login-card.vue"
+import { NSpace } from "naive-ui";
+import LoginCard from "@/components/login-card.vue";
 </script>
 
 <style>

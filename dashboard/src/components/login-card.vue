@@ -1,15 +1,23 @@
 <template>
-  <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh" :header-style="{fontFamily: 'Exo', fontSize: '2vh'}" class="login-card">
+  <n-card
+    embedded
+    :bordered="false"
+    hoverable
+    size="huge"
+    title="infinimesh"
+    :header-style="{ fontFamily: 'Exo', fontSize: '2vh' }"
+    class="login-card"
+  >
     <template #header-extra>
       <n-button type="info" ghost @click="login">Login</n-button>
     </template>
     <n-space vertical>
-      <n-input v-model:value="username"
-        placeholder="Username"></n-input>
+      <n-input v-model:value="username" placeholder="Username"></n-input>
       <n-input
         v-model:value="password"
         type="password"
-        placeholder="Password"></n-input>
+        placeholder="Password"
+      ></n-input>
       <n-alert :title="error.title" type="error" v-if="error" />
       <n-alert title="Success! Redirecting..." type="success" v-if="success" />
     </n-space>
@@ -18,46 +26,56 @@
 
 <script setup>
 import { ref, inject } from "vue";
-import { NCard, NSpace, NInput, NButton, NAlert, useLoadingBar } from "naive-ui"
-import { useRouter } from "vue-router"
+import {
+  NCard,
+  NSpace,
+  NInput,
+  NButton,
+  NAlert,
+  useLoadingBar,
+} from "naive-ui";
+import { useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
 
-const store = useAppStore()
-const router = useRouter()
+const store = useAppStore();
+const router = useRouter();
 
 const username = ref("");
 const password = ref("");
 
 const error = ref(false);
-const success = ref(false)
+const success = ref(false);
 
-const bar = useLoadingBar()
+const bar = useLoadingBar();
 
-const axios = inject('axios')
+const axios = inject("axios");
 async function login() {
-  success.value = false
-  error.value = false
-  bar.start()
-  
-  axios.post('http://localhost:8000/token', {
-    auth: {
-      type: 'standard',
-      data: [username.value, password.value]
-    },
-  }).then(res => {
-    success.value = true
-    store.token = res.data.token
-    router.push({name: 'Root'})
-    bar.finish()
-  }).catch(err => {
-    console.log(err)
-    bar.error()
-    if (err.response.status == 401) {
-      error.value = {
-        title: "Wrong credentials given",
+  success.value = false;
+  error.value = false;
+  bar.start();
+
+  axios
+    .post("http://localhost:8000/token", {
+      auth: {
+        type: "standard",
+        data: [username.value, password.value],
+      },
+    })
+    .then((res) => {
+      success.value = true;
+      store.token = res.data.token;
+      router.push({ name: "Root" });
+      bar.finish();
+    })
+    .catch((err) => {
+      console.log(err);
+      bar.error();
+      if (err.response.status == 401) {
+        error.value = {
+          title: "Wrong credentials given",
+        };
       }
-    }
-  })
+    });
 }
 </script>
 

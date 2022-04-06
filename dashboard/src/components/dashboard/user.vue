@@ -12,29 +12,30 @@
 </template>
 
 <script setup>
-import { h, ref } from "vue"
-import { storeToRefs } from "pinia"
+import { h, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { NButton, NDropdown, NIcon } from "naive-ui";
-import { renderIcon } from "@/utils"
-import { Person, LogOutOutline } from '@vicons/ionicons5'
+import { renderIcon } from "@/utils";
+import { Person, LogOutOutline } from "@vicons/ionicons5";
 import { useAppStore } from "@/store/app";
-import { useRouter } from "vue-router"
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-const store = useAppStore()
+const router = useRouter();
+const store = useAppStore();
 
-const { me } = storeToRefs(store)
+const { me } = storeToRefs(store);
 
 const options = ref([
   {
-    key: 'logout', label: 'Logout',
+    key: "logout",
+    label: "Logout",
     icon: renderIcon(LogOutOutline),
     props: {
       onClick: () => {
-        store.logout()
-        router.push({name: 'Login'})
-      }
-    }
+        store.logout();
+        router.push({ name: "Login" });
+      },
+    },
   },
-])
+]);
 </script>

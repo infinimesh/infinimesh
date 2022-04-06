@@ -1,18 +1,22 @@
-import { h } from "vue"
+import { h } from "vue";
 import { NIcon } from "naive-ui";
 
 export const renderIcon = (icon) => {
   return () => {
     return h(NIcon, null, {
-      default: () => h(icon)
+      default: () => h(icon),
     });
   };
 };
 
 export const renderIconColored = (icon, color) => {
   return () => {
-    return h(NIcon, { color }, {
-      default: () => h(icon)
-    });
+    return h(
+      NIcon,
+      { color },
+      {
+        default: () => h(icon),
+      }
+    );
   };
-}
+};

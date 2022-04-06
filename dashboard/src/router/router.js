@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from "vue-router"
+import { createRouter, createWebHashHistory } from "vue-router";
 import { useAppStore } from "@/store/app";
 
 const routes = [
@@ -7,15 +7,16 @@ const routes = [
     name: "Login",
     component: () => import("@/views/Login.vue"),
     meta: {
-      requiresAuth: false
-    }
+      requiresAuth: false,
+    },
   },
-  { path: "/", 
+  {
+    path: "/",
     name: "Root",
     redirect: { path: "/dashboard/devices" },
     meta: {
       requiresAuth: true,
-    }
+    },
   },
   {
     path: "/dashboard",
@@ -25,18 +26,22 @@ const routes = [
       requiresAuth: true,
     },
     children: [
-      { path: "devices", name: "Devices", component: () => import("@/views/dashboard/Devices.vue") },
-    ]
+      {
+        path: "devices",
+        name: "Devices",
+        component: () => import("@/views/dashboard/Devices.vue"),
+      },
+    ],
   },
-]
+];
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
-})
+  routes,
+});
 
 router.beforeEach(async (to, from) => {
-  const store = useAppStore()
+  const store = useAppStore();
   if (to.matched.some((el) => el.meta.requiresAuth) && !store.logged_in) {
     return { name: "Login" };
   }

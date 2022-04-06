@@ -1,11 +1,11 @@
 import { useAppStore } from "@/store/app";
-import { useNSStore } from "@/store/namespaces"
-import { defineStore } from 'pinia'
+import { useNSStore } from "@/store/namespaces";
+import { defineStore } from "pinia";
 
 const as = useAppStore();
 const nss = useNSStore();
 
-export const useDevicesStore = defineStore('devices', {
+export const useDevicesStore = defineStore("devices", {
   state: () => ({
     loading: false,
     devices: [],
@@ -18,138 +18,142 @@ export const useDevicesStore = defineStore('devices', {
     devices_ns_filtered: (state) => {
       let ns = nss.selected;
       let subscribed = new Set(state.subscribed);
-      let pool = state.devices.map(d => {
-        d.sorter =
-          d.enabled + d.accessLevel + d.basicEnabled
-        + subscribed.has(d.uuid)
-        return d
-      }).sort((a, b) => b.sorter - a.sorter);
+      let pool = state.devices
+        .map((d) => {
+          d.sorter =
+            d.enabled + d.accessLevel + d.basicEnabled + subscribed.has(d.uuid);
+          return d;
+        })
+        .sort((a, b) => b.sorter - a.sorter);
       if (ns == "all") {
-        return pool
+        return pool;
       }
-      return pool.filter(d => d.namespace == ns)
+      return pool.filter((d) => d.namespace == ns);
     },
     device_state: (state) => {
-      return (device_id) => state.devices_state.get(device_id) ?? {}
+      return (device_id) => state.devices_state.get(device_id) ?? {};
     },
     device_subscribed: (state) => {
-      return (device_id) => state.subscribed.includes(device_id)
-    }
+      return (device_id) => state.subscribed.includes(device_id);
+    },
   },
 
   actions: {
     async fetchDevices() {
-      this.loading = true
-      const { data } = await as.http.get('/devices');
+      this.loading = true;
+      const { data } = await as.http.get("/devices");
       this.devices = data.devices;
       this.loading = false;
 
-      this.getDevicesState(data.devices.map(d => d.uuid));
+      this.getDevicesState(data.devices.map((d) => d.uuid));
     },
     async subscribe(devices) {
-      let pool = this.subscribed.concat(devices)
+      let pool = this.subscribed.concat(devices);
 
-      let token = await this.makeDevicesToken(pool)
-      let socket = new WebSocket(`ws://localhost:8000/devices/states/stream`, ["Bearer", token])
+      let token = await this.makeDevicesToken(pool);
+      let socket = new WebSocket(`ws://localhost:8000/devices/states/stream`, [
+        "Bearer",
+        token,
+      ]);
       socket.onmessage = (msg) => {
         let response = JSON.parse(msg.data).result;
         if (!response) {
-          console.log("Empty response", msg)
-          return
+          console.log("Empty response", msg);
+          return;
         }
 
-
-        let curr = this.devices_state.get(response.device)
-        let exist = true
+        let curr = this.devices_state.get(response.device);
+        let exist = true;
         if (!curr) {
-          exist = false
+          exist = false;
         }
 
         if (response.reportedState) {
-          curr.reported = response.reportedState
+          curr.reported = response.reportedState;
         }
         if (response.desiredState) {
-          curr.desired = response.desiredState
+          curr.desired = response.desiredState;
         }
 
         if (!exist) {
-          this.devices_state.set(response.device, curr)
+          this.devices_state.set(response.device, curr);
         }
-      }
+      };
       socket.onclose = () => {
-        this.subscribed = []
-      }
+        this.subscribed = [];
+      };
       socket.onerror = () => {
-        this.subscribed = []
-      }
+        this.subscribed = [];
+      };
       socket.onopen = () => {
-        this.subscribed = pool
-      }
+        this.subscribed = pool;
+      };
     },
     async makeDevicesToken(pool, post = false) {
-      const { data } = await as.http.post('/devices/token', {
-        devices: pool, post
-      })
+      const { data } = await as.http.post("/devices/token", {
+        devices: pool,
+        post,
+      });
 
-      return data.token
+      return data.token;
     },
     // pool - array of devices UUIDs
     async getDevicesState(pool, token) {
       if (!token) {
-        token = await this.makeDevicesToken(pool)
+        token = await this.makeDevicesToken(pool);
       }
 
-      const { data } = await as.http.get('/devices/states', {
+      const { data } = await as.http.get("/devices/states", {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       for (let [uuid, state] of Object.entries(data.pool)) {
-        this.devices_state.set(uuid, state)
+        this.devices_state.set(uuid, state);
       }
     },
     async patchDesiredState(device, state, bar) {
-      bar.start()
+      bar.start();
       try {
-        let token = await this.makeDevicesToken([device], true)
+        let token = await this.makeDevicesToken([device], true);
         await as.http.patch(`devices/${device}/state`, state, {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-        })
-        this.getDevicesState([device], token)
-        bar.finish()
+        });
+        this.getDevicesState([device], token);
+        bar.finish();
       } catch (e) {
-        console.error(e)
-        bar.error()
+        console.error(e);
+        bar.error();
       }
     },
     async deleteDevice(device, bar) {
-      bar.start()
+      bar.start();
       try {
-        await as.http.delete(`devices/${device}`)
-        bar.finish()
-  
-        this.fetchDevices()
+        await as.http.delete(`devices/${device}`);
+        bar.finish();
+
+        this.fetchDevices();
       } catch (e) {
-        console.error(e)
-        bar.error()
+        console.error(e);
+        bar.error();
       }
     },
     async createDevice(request, bar) {
-      bar.start()
+      bar.start();
       try {
-        await as.http.put(`/devices`, request)
-        
-        this.fetchDevices()
-        bar.finish()
-        return false
+        await as.http.put(`/devices`, request);
+
+        this.fetchDevices();
+        bar.finish();
+        return false;
       } catch (e) {
-        console.error(e)
-        bar.error()
-        return e
+        console.error(e);
+        bar.error();
+        return e;
       }
-    }
+    },
   },
-})
+});
