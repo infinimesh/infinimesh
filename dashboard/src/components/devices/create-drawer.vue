@@ -24,6 +24,9 @@
             placeholder="Make it bright"
           />
         </n-form-item>
+        <n-form-item label="Namespace" path="namespace">
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{minWidth: '15vw'}"  />
+        </n-form-item>
         <n-form-item label="Enabled" path="device.enabled">
           <n-switch v-model:value="model.device.enabled" />
         </n-form-item>
@@ -62,14 +65,23 @@
 import { ref, watch, computed } from "vue";
 import { 
   NButton, NDrawer, NDrawerContent, NIcon, NSwitch,
-  NSpace, NForm, NFormItem, NInput, NDynamicTags,
+  NSpace, NForm, NFormItem, NInput, NDynamicTags, NSelect,
   NUpload, NUploadDragger, NText, NAlert, useLoadingBar } from 'naive-ui';
 import { AddOutline, CloudUploadOutline } from '@vicons/ionicons5';
 import { useDevicesStore } from "@/store/devices";
+import { useNSStore } from "@/store/namespaces";
 const show = ref(false)
 
 watch(() => show.value, val => {
   val && reset()
+})
+
+const nss = useNSStore()
+const namespaces = computed(() => {
+  return nss.namespaces.map(ns => ({
+    label: ns.title,
+    value: ns.uuid,
+  }))
 })
 
 const form = ref()
@@ -82,7 +94,7 @@ const model = ref({
     },
     tags: [],
   },
-  namespace: '',
+  namespace: nss.selected == 'all' ? null : nss.selected,
 })
 const rules = ref({
   device: {
@@ -95,6 +107,9 @@ const rules = ref({
       ],
     },
   },
+  namespace: [
+    { required: true, message: 'Please select namespace' },
+  ],
 })
 const store = useDevicesStore()
 
@@ -108,7 +123,7 @@ function reset() {
       },
       tags: [],
     },
-    namespace: '',
+    namespace: nss.selected == 'all' ? null : nss.selected,
   }
 }
 
