@@ -112,7 +112,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 
 	ns_id := req.GetNamespace()
 	if ns_id == "" {
-		ns_id = schema.ROOT_NAMESPACE_KEY
+		return nil, status.Error(codes.InvalidArgument, "Namespace ID is required")
 	}
 
 	ns := NewBlankNamespaceDocument(ns_id)
