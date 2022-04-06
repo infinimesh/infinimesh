@@ -339,82 +339,12 @@
         },
         "parameters": [
           {
-            "name": "device.uuid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "device.title",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "device.enabled",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "device.certificate.pemData",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "device.certificate.algorithm",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "device.certificate.fingerprint",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "byte"
-          },
-          {
-            "name": "device.tags",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "device.basicEnabled",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "device.token",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "device.accessLevel",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "device.namespace",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodedevicesCreateRequest"
+            }
           }
         ],
         "tags": [
@@ -804,70 +734,42 @@
             "type": "string"
           },
           {
-            "name": "title",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "enabled",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "certificate.pemData",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "certificate.algorithm",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "certificate.fingerprint",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "byte"
-          },
-          {
-            "name": "tags",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "basicEnabled",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "accessLevel",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "namespace",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "accessLevel": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "namespace": {
+                  "type": "string"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -1366,6 +1268,17 @@
       "properties": {
         "account": {
           "$ref": "#/definitions/accountsAccount"
+        }
+      }
+    },
+    "nodedevicesCreateRequest": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/devicesDevice"
+        },
+        "namespace": {
+          "type": "string"
         }
       }
     },

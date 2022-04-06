@@ -139,11 +139,13 @@ service DevicesService {
   rpc Create(infinimesh.node.devices.CreateRequest) returns (infinimesh.node.devices.CreateResponse) {
     option (google.api.http) = {
       put: "/devices"
+      body: "*"
     };
   };
   rpc Update(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
     option (google.api.http) = {
       patch: "/devices/{uuid}"
+      body: "*"
     };
   };
   rpc Delete(infinimesh.node.devices.Device) returns (DeleteResponse) {
