@@ -108,13 +108,13 @@ func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.S
 	for {
 		msg, err := c.Recv()
 		if err != nil {
-			log.Error("Stream API Method: Error while receving message", zap.Error(err))
+			log.Info("Error receiving message, closing stream", zap.Error(err))
 			return err
 		}
 
 		err = srv.Send(msg)
 		if err != nil {
-			log.Error("Stream API Method: Error while sending message", zap.Error(err))
+			log.Info("Error sending message, closing stream", zap.Error(err))
 			return err
 		}
 	}
