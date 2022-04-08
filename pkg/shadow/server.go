@@ -96,14 +96,17 @@ func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Sh
 	}
 
 	now := timestamppb.Now()
+	topics := []string{}
 	if req.Reported != nil {
 		req.Reported.Timestamp = now
+		topics = append(topics, "mqtt.incoming")
 	}
 	if req.Desired != nil {
 		req.Desired.Timestamp = now
+		topics = append(topics, "mqtt.outgoing")
 	}
 
-	s.ps.Pub(req, "shadow.internal")
+	s.ps.Pub(req, topics...)
 
 	return req, nil
 }
