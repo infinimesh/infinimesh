@@ -24,7 +24,7 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         overwrite: true
-        goversion: 1.17
+        goversion: 1.18
         ldflags: -s -w -X main.version=${{ steps.make_context.outputs.tag }}
         executable_compression: upx
         project_path: cmd/inf
