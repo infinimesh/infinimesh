@@ -1,5 +1,16 @@
 version: "3.2"
 services:
+  
+  web:
+    image: ghcr.io/infinimesh/infinimesh/web:latest
+    restart: always
+    depends_on:
+      - repo
+    ports:
+      - "8000:8000"
+    environment:
+      APISERVER_HOST: repo:8080
+
   rabbitmq:
     image: rabbitmq:3.9-management
     ports:
@@ -14,6 +25,7 @@ services:
     restart: unless-stopped
     depends_on:
       - rabbitmq
+      - repo
     ports:
       - "1883:1883" # BasicAuth(non-TLS)
       - "8883:8883" # Standard(TLS)
