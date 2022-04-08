@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "Shadows"
+      "name": "ShadowService"
     },
     {
       "name": "AccountsService"
@@ -19,6 +19,9 @@
     },
     {
       "name": "ShadowService"
+    },
+    {
+      "name": "Shadows"
     },
     {
       "name": "StateService"
@@ -354,12 +357,12 @@
     },
     "/devices/states": {
       "get": {
-        "operationId": "ShadowService_GetMultiple",
+        "operationId": "ShadowService_Get",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/shadowGetMultipleResponse"
+              "$ref": "#/definitions/infinimeshshadowGetResponse"
             }
           },
           "default": {
@@ -369,6 +372,48 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "pool",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      },
+      "post": {
+        "operationId": "ShadowService_Patch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshshadowShadow"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/infinimeshshadowShadow"
+            }
+          }
+        ],
         "tags": [
           "ShadowService"
         ]
@@ -384,13 +429,13 @@
               "type": "object",
               "properties": {
                 "result": {
-                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
+                  "$ref": "#/definitions/infinimeshshadowShadow"
                 },
                 "error": {
                   "$ref": "#/definitions/rpcStatus"
                 }
               },
-              "title": "Stream result of shadowStreamReportedStateChangesResponse"
+              "title": "Stream result of infinimeshshadowShadow"
             }
           },
           "default": {
@@ -452,72 +497,6 @@
         ],
         "tags": [
           "DevicesService"
-        ]
-      }
-    },
-    "/devices/{id}/state": {
-      "get": {
-        "operationId": "ShadowService_Get",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshshadowGetResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "ShadowService"
-        ]
-      },
-      "patch": {
-        "operationId": "ShadowService_PatchDesiredState",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/shadowPatchDesiredStateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object"
-            }
-          }
-        ],
-        "tags": [
-          "ShadowService"
         ]
       }
     },
@@ -1122,23 +1101,36 @@
       "type": "object",
       "properties": {
         "shadow": {
-          "$ref": "#/definitions/shadowShadow"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/infinimeshshadowShadow"
+          }
         }
       }
     },
-    "infinimeshshadowVersionedValue": {
+    "infinimeshshadowShadow": {
       "type": "object",
       "properties": {
-        "version": {
-          "type": "string",
-          "format": "uint64"
+        "device": {
+          "type": "string"
         },
-        "data": {
-          "type": "object"
+        "reported": {
+          "$ref": "#/definitions/infinimeshshadowState"
         },
+        "desired": {
+          "$ref": "#/definitions/infinimeshshadowState"
+        }
+      }
+    },
+    "infinimeshshadowState": {
+      "type": "object",
+      "properties": {
         "timestamp": {
           "type": "string",
           "format": "date-time"
+        },
+        "data": {
+          "type": "object"
         }
       }
     },
@@ -1151,8 +1143,19 @@
         "states": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/stateState"
+            "$ref": "#/definitions/infinimeshstateState"
           }
+        }
+      }
+    },
+    "infinimeshstateState": {
+      "type": "object",
+      "properties": {
+        "reported": {
+          "$ref": "#/definitions/infinimeshstateVersionedValue"
+        },
+        "desired": {
+          "$ref": "#/definitions/infinimeshstateVersionedValue"
         }
       }
     },
@@ -1169,6 +1172,34 @@
         "timestamp": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "legacyGetMultipleResponse": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/shadowlegacyShadow"
+          }
+        }
+      }
+    },
+    "legacyPatchDesiredStateResponse": {
+      "type": "object"
+    },
+    "legacyStreamReportedStateChangesResponse": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "reportedState": {
+          "$ref": "#/definitions/shadowlegacyVersionedValue"
+        },
+        "desiredState": {
+          "$ref": "#/definitions/shadowlegacyVersionedValue"
         }
       }
     },
@@ -1325,56 +1356,41 @@
         }
       }
     },
-    "shadowGetMultipleResponse": {
+    "shadowlegacyGetResponse": {
       "type": "object",
       "properties": {
-        "pool": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/shadowShadow"
-          }
+        "shadow": {
+          "$ref": "#/definitions/shadowlegacyShadow"
         }
       }
     },
-    "shadowPatchDesiredStateResponse": {
-      "type": "object"
-    },
-    "shadowShadow": {
+    "shadowlegacyShadow": {
       "type": "object",
       "properties": {
         "config": {
-          "$ref": "#/definitions/infinimeshshadowVersionedValue"
+          "$ref": "#/definitions/shadowlegacyVersionedValue"
         },
         "reported": {
-          "$ref": "#/definitions/infinimeshshadowVersionedValue"
+          "$ref": "#/definitions/shadowlegacyVersionedValue"
         },
         "desired": {
-          "$ref": "#/definitions/infinimeshshadowVersionedValue"
+          "$ref": "#/definitions/shadowlegacyVersionedValue"
         }
       }
     },
-    "shadowStreamReportedStateChangesResponse": {
+    "shadowlegacyVersionedValue": {
       "type": "object",
       "properties": {
-        "device": {
-          "type": "string"
+        "version": {
+          "type": "string",
+          "format": "uint64"
         },
-        "reportedState": {
-          "$ref": "#/definitions/infinimeshshadowVersionedValue"
+        "data": {
+          "type": "object"
         },
-        "desiredState": {
-          "$ref": "#/definitions/infinimeshshadowVersionedValue"
-        }
-      }
-    },
-    "stateState": {
-      "type": "object",
-      "properties": {
-        "reported": {
-          "$ref": "#/definitions/infinimeshstateVersionedValue"
-        },
-        "desired": {
-          "$ref": "#/definitions/infinimeshstateVersionedValue"
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     }

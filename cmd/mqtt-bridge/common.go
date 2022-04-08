@@ -23,10 +23,13 @@ import (
 	"io"
 	"net"
 
+	structpb "github.com/golang/protobuf/ptypes/struct"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"github.com/slntopp/mqtt-go/packet"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type VerifyDeviceFunc func(*devpb.Device) bool
@@ -81,18 +84,12 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 	// Create empty subscription
 	backChannel := ps.Sub()
-	go handleBackChannel(c, device.Uuid, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-	defer func() {
-		log.Info("Unsubbed from backchannel", zap.String("device", device.Uuid))
-		ps.Unsub(backChannel)
-	}()
 
 	_, err := resp.WriteTo(c)
 	if err != nil {
 		log.Error("Failed to write Connection Acknowlegement", zap.Error(err))
 		return
 	}
-	topicAliasPublishMap := make(map[string]int)
 
 	token := device.GetToken()
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
@@ -126,11 +123,19 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 				log.Error("Failed to write Ping Response", zap.Error(err))
 			}
 		case *packet.PublishControlPacket:
-			topicAliasPublishMap, err = handlePublish(p, c, device.Uuid, topicAliasPublishMap, int(connectPacket.VariableHeader.ProtocolLevel))
+			var data structpb.Struct
+			err = data.UnmarshalJSON(p.Payload)
 			if err != nil {
 				log.Error("Failed to handle Publish", zap.Error(err))
 			}
-
+			payload := &pb.Shadow{
+				Device: device.Uuid,
+				Reported: &pb.State{
+					Timestamp: timestamppb.Now(),
+					Data: &data,
+				},
+			}
+			ps.Pub(payload, "mqtt.incoming")
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
@@ -138,10 +143,9 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 				log.Error("Failed to write Subscription Acknowlegement", zap.Error(err))
 			}
 			for _, sub := range p.Payload.Subscriptions {
-				subTopic := TopicChecker(sub.Topic, device.Uuid)
-				ps.AddSub(backChannel, subTopic)
-				go handleBackChannel(c, device.Uuid, backChannel, connectPacket.VariableHeader.ProtocolLevel)
-				log.Info("Added Subscription", zap.String("topic", subTopic), zap.String("device", device.Uuid))
+				ps.AddSub(backChannel, "mqtt.outgoing/" + device.Uuid)
+				go handleBackChannel(backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
+				log.Info("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
@@ -150,9 +154,25 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 				log.Error("Failed to write Unsubscription Acknowlegement", zap.Error(err))
 			}
 			for _, unsub := range p.Payload.UnSubscriptions {
-				ps.Unsub(backChannel, unsub.Topic)
+				ps.Unsub(backChannel, "mqtt.outgoing/" + device.Uuid)
 				log.Info("Removed Subscription", zap.String("topic", unsub.Topic), zap.String("device", device.Uuid))
 			}
+		}
+	}
+}
+
+func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
+	for msg := range ch {
+		shadow := msg.(*pb.Shadow)
+		payload, err := shadow.Desired.Data.MarshalJSON()
+		if err != nil {
+			log.Error("Failed to marshal shadow", zap.Error(err))
+			continue
+		}
+		p := packet.NewPublish(topic, 0, payload, protocolLevel)
+		_, err = p.WriteTo(c)
+		if err != nil {
+			panic(err)
 		}
 	}
 }

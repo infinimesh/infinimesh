@@ -29,15 +29,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
+	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
+	"github.com/streadway/amqp"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -62,15 +63,11 @@ func getFingerprint(c []byte) []byte {
 
 var (
 	conn        *grpc.ClientConn
-	kafkaClient sarama.Client
-	producer    sarama.AsyncProducer
 	client      pb.DevicesServiceClient
 	debug       bool
 
 	deviceRegistryHost    string
-	kafkaHost             string
-	kafkaTopicTelemetry   string
-	kafkaTopicBackChannel string
+	RabbitMQConn					string
 	tlsCertFile           string
 	tlsKeyFile            string
 
@@ -91,54 +88,17 @@ func init() {
 
 	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
 	viper.SetDefault("DB_ADDR2", ":6379")
-	viper.SetDefault("KAFKA_HOST", "localhost:9092")
-	viper.SetDefault("KAFKA_TOPIC", "mqtt.messages.incoming")
-	viper.SetDefault("KAFKA_TOPIC_BACK", "mqtt.messages.outgoing")
+	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
 	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 
 	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
-	kafkaHost = viper.GetString("KAFKA_HOST")
-	kafkaTopicTelemetry = viper.GetString("KAFKA_TOPIC")
-	kafkaTopicBackChannel = viper.GetString("KAFKA_TOPIC_BACK")
+	RabbitMQConn = viper.GetString("RABBITMQ_CONN")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 	debug = viper.GetBool("DEBUG")
-}
-
-func readBackchannelFromKafka() {
-	consumer, err := sarama.NewConsumerFromClient(kafkaClient)
-	if err != nil {
-		panic(err)
-	}
-
-	partitions, err := consumer.Partitions(kafkaTopicBackChannel)
-	if err != nil {
-		panic(err)
-	}
-	for _, partition := range partitions {
-		pc, err := consumer.ConsumePartition(kafkaTopicBackChannel, partition, sarama.OffsetNewest) // TODO, currently no guarantees, just process new messages
-		if err != nil {
-			panic(err)
-		}
-
-		for message := range pc.Messages() {
-			var m mqtt.OutgoingMessage
-			err = json.Unmarshal(message.Value, &m)
-			if err != nil {
-				log.Error("Failed to unmarshal message from kafka", zap.Error(err))
-			}
-			topic := fqTopic(m.DeviceID, m.SubPath)
-			log.Info("Publish to the topic", zap.String("topic", topic))
-			ps.Pub(&m, topic)
-		}
-	}
-}
-
-func fqTopic(deviceID, subPath string) string {
-	return "devices/" + deviceID + "/" + subPath
 }
 
 func main() {
@@ -167,33 +127,30 @@ func main() {
 	}
 	internal_ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
 
-	log.Info("Connecting to Kafka", zap.String("host", kafkaHost))
-	conf := sarama.NewConfig()
-	kafkaClient, err = sarama.NewClient([]string{kafkaHost}, conf)
+	log.Info("Connecting to RabbitMQ", zap.String("url", RabbitMQConn))
+	rbmq, err := amqp.Dial(RabbitMQConn)
 	if err != nil {
-		log.Fatal("Error creating kafka client", zap.Error(err))
+		log.Fatal("Error dialing RabbitMQ", zap.Error(err))
+	}
+	defer rbmq.Close()
+
+	ps, err = mqttps.Setup(log, rbmq)
+	if err != nil {
+		log.Fatal("Error setting up pubsub", zap.Error(err))
 	}
 
-	producer, err = sarama.NewAsyncProducerFromClient(kafkaClient)
-	if err != nil {
-		log.Fatal("Error creating kafka producer", zap.Error(err))
-	}
-
-	ps = pubsub.New(10)
-
-	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
+	tlsl, err := tls.Listen("tcp", ":8883", &tls.Config{
 		Certificates:          []tls.Certificate{serverCert},
 		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
 	if err != nil {
 		panic(err)
 	}
-	tcp, err := net.Listen("tcp", ":8080")
+	tcp, err := net.Listen("tcp", ":1883")
 	if err != nil {
 		panic(err)
 	}
 
-	go readBackchannelFromKafka()
 	go HandleTCPConnections(tcp)
 	for {
 		conn, _ := tlsl.Accept() // nolint: gosec
@@ -261,27 +218,6 @@ func main() {
 
 }
 
-/*
-func changeDeviceStatus(deviceID string, deviceStatus bool) {
-	deviceStatusMap[deviceID] = deviceStatus
-}*/
-
-func handleBackChannel(c net.Conn, deviceID string, backChannel chan interface{}, protocolLevel byte) {
-	// Everything from this channel is "vetted", i.e. it's legit that this client is subscribed to the topic.
-	for message := range backChannel {
-		m := message.(*mqtt.OutgoingMessage)
-		// TODO PacketID
-		topic := fqTopic(m.DeviceID, m.SubPath)
-		log.Info("Publish to the topic", zap.String("topic", topic), zap.String("client", deviceID))
-		p := packet.NewPublish(topic, uint16(0), m.Data, protocolLevel)
-		_, err := p.WriteTo(c)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-}
-
 func printConnState(con net.Conn) {
 	conn := con.(*tls.Conn)
 	state := conn.ConnectionState()
@@ -296,39 +232,6 @@ func printConnState(con net.Conn) {
 	)
 }
 
-func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, topicAliasPublishMap map[string]int, protocolLevel int) (map[string]int, error) {
-	log.Info("Handle publish", zap.String("device", deviceID), zap.String("topic", p.VariableHeader.Topic), zap.ByteString("payload", p.Payload))
-	topic := TopicChecker(p.VariableHeader.Topic, deviceID)
-	if p.VariableHeader.PublishProperties.TopicAlias > 0 {
-		if val, ok := topicAliasPublishMap[topic]; ok {
-			if val == p.VariableHeader.PublishProperties.TopicAlias {
-				if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
-					return topicAliasPublishMap, err
-				}
-			} else {
-				log.Error("Please use correct topic alias")
-			}
-		} else {
-			topicAliasPublishMap[topic] = p.VariableHeader.PublishProperties.TopicAlias
-			if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
-				return topicAliasPublishMap, err
-			}
-		}
-	} else {
-		if err := publishTelemetry(topic, p.Payload, deviceID, protocolLevel); err != nil {
-			return topicAliasPublishMap, err
-		}
-	}
-	if p.FixedHeaderFlags.QoS >= packet.QoSLevelAtLeastOnce {
-		pubAck := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)) // TODO better always use directly uint16 for PacketIDs,everywhere
-		_, err := pubAck.WriteTo(c)
-		if err != nil {
-			return topicAliasPublishMap, err
-		}
-	}
-	return topicAliasPublishMap, nil
-}
-
 /*TopicChecker: to validate the subscribed topic name
   input : topic, deviceId string
   output : topicAltered
@@ -338,31 +241,6 @@ func TopicChecker(topic, deviceId string) (string) {
 	state[1] = deviceId
 	topic = strings.Join(state, "/")
 	return topic
-}
-
-func publishTelemetry(topic string, data []byte, deviceID string, version int) error {
-	valid := schemaValidation(data, version)
-	if valid {
-		message := mqtt.IncomingMessage{
-			ProtoLevel:   version,
-			SourceTopic:  topic,
-			SourceDevice: deviceID,
-			Data:         data,
-		}
-
-		serialized, err := json.Marshal(&message)
-		if err != nil {
-			return err
-		}
-		producer.Input() <- &sarama.ProducerMessage{
-			Topic: kafkaTopicTelemetry,
-			Key:   sarama.StringEncoder(deviceID), // TODO
-			Value: sarama.ByteEncoder(serialized),
-		}
-	} else {
-		log.Error("Payload schema is invalid")
-	}
-	return nil
 }
 
 //MQTT5 schema

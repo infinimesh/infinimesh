@@ -165,28 +165,22 @@ service DevicesService {
   rpc GetByFingerprint(infinimesh.node.devices.GetByFingerprintRequest) returns (infinimesh.node.devices.Device);
 }
 
-import "pkg/shadow/shadowpb/shadow.proto";
+import "pkg/shadow/proto/shadow.proto";
 
 service ShadowService {
   rpc Get(infinimesh.shadow.GetRequest) returns (infinimesh.shadow.GetResponse) {
     option (google.api.http) = {
-      get: "/devices/{id}/state"
-    };
-  };
-  rpc GetMultiple(infinimesh.shadow.Empty) returns (infinimesh.shadow.GetMultipleResponse) {
-    option (google.api.http) = {
       get: "/devices/states"
     };
   };
-  rpc PatchDesiredState(infinimesh.shadow.PatchDesiredStateRequest)
-      returns (infinimesh.shadow.PatchDesiredStateResponse) {
+  rpc Patch(infinimesh.shadow.Shadow) returns (infinimesh.shadow.Shadow) {
     option (google.api.http) = {
-      patch : "/devices/{id}/state"
-      body : "data"
+      post: "/devices/states"
+      body: "*"
     };
-  }
-  rpc StreamReportedStateChanges(infinimesh.shadow.StreamReportedStateChangesRequest)
-      returns (stream infinimesh.shadow.StreamReportedStateChangesResponse) {
+  };
+  rpc StreamReportedStateChanges(infinimesh.shadow.StreamShadowRequest)
+      returns (stream infinimesh.shadow.Shadow) {
     option (google.api.http) = {
       get : "/devices/states/stream"
     };

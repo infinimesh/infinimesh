@@ -34,7 +34,7 @@ func NewShadowsClient(cc grpc.ClientConnInterface) ShadowsClient {
 
 func (c *shadowsClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.legacy.Shadows/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *shadowsClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.Ca
 
 func (c *shadowsClient) GetMultiple(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetMultipleResponse, error) {
 	out := new(GetMultipleResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/GetMultiple", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.legacy.Shadows/GetMultiple", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *shadowsClient) GetMultiple(ctx context.Context, in *Empty, opts ...grpc
 
 func (c *shadowsClient) PatchDesiredState(ctx context.Context, in *PatchDesiredStateRequest, opts ...grpc.CallOption) (*PatchDesiredStateResponse, error) {
 	out := new(PatchDesiredStateResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.shadow.Shadows/PatchDesiredState", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/infinimesh.shadow.legacy.Shadows/PatchDesiredState", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (c *shadowsClient) PatchDesiredState(ctx context.Context, in *PatchDesiredS
 }
 
 func (c *shadowsClient) StreamReportedStateChanges(ctx context.Context, in *StreamReportedStateChangesRequest, opts ...grpc.CallOption) (Shadows_StreamReportedStateChangesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Shadows_ServiceDesc.Streams[0], "/infinimesh.shadow.Shadows/StreamReportedStateChanges", opts...)
+	stream, err := c.cc.NewStream(ctx, &Shadows_ServiceDesc.Streams[0], "/infinimesh.shadow.legacy.Shadows/StreamReportedStateChanges", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func _Shadows_Get_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.shadow.Shadows/Get",
+		FullMethod: "/infinimesh.shadow.legacy.Shadows/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ShadowsServer).Get(ctx, req.(*GetRequest))
@@ -159,7 +159,7 @@ func _Shadows_GetMultiple_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.shadow.Shadows/GetMultiple",
+		FullMethod: "/infinimesh.shadow.legacy.Shadows/GetMultiple",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ShadowsServer).GetMultiple(ctx, req.(*Empty))
@@ -177,7 +177,7 @@ func _Shadows_PatchDesiredState_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.shadow.Shadows/PatchDesiredState",
+		FullMethod: "/infinimesh.shadow.legacy.Shadows/PatchDesiredState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ShadowsServer).PatchDesiredState(ctx, req.(*PatchDesiredStateRequest))
@@ -210,7 +210,7 @@ func (x *shadowsStreamReportedStateChangesServer) Send(m *StreamReportedStateCha
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Shadows_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "infinimesh.shadow.Shadows",
+	ServiceName: "infinimesh.shadow.legacy.Shadows",
 	HandlerType: (*ShadowsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

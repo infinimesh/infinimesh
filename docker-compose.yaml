@@ -1,36 +1,25 @@
 version: "3.2"
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      - zookeeper
-    restart: unless-stopped
+  rabbitmq:
+    image: rabbitmq:3.9-management
     ports:
-      - 9092:9092
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      RABBITMQ_DEFAULT_USER: infinimesh
+      RABBITMQ_DEFAULT_PASS: infinimesh
   mqtt-bridge:
     image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
     restart: unless-stopped
     ports:
-      - "8090:8080" # BasicAuth(non-TLS)
-      - "8089:8089" # Standard(TLS)
+      - "1883:1883" # BasicAuth(non-TLS)
+      - "8883:8883" # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
     environment:
       DEBUG: "true"
-      KAFKA_HOST: kafka:29092
+      RABBITMQ_CONN: amqp://infinimesh:infinimesh@rabbitmq:5672/
       DEVICE_REGISTRY_URL: repo:8080
       SIGNING_KEY: "${SIGNING_KEY}"
     depends_on:
@@ -69,12 +58,6 @@ services:
     environment:
       KAFKA_HOST: kafka:29092
       DB_ADDR: redis:6379
-  frontend:
-    image: ghcr.io/infinimesh/infinimesh/frontend:latest
-    ports:
-      - "80:80"
-    environment:
-      APISERVER_URL: http://apiserver-rest:8081
 
   repo:
     image: ghcr.io/infinimesh/infinimesh/repo:latest

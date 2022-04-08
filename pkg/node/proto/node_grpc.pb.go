@@ -7,7 +7,7 @@ import (
 	accounts "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	devices "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	namespaces "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
-	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	proto "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -892,10 +892,9 @@ var DevicesService_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShadowServiceClient interface {
-	Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error)
-	GetMultiple(ctx context.Context, in *shadowpb.Empty, opts ...grpc.CallOption) (*shadowpb.GetMultipleResponse, error)
-	PatchDesiredState(ctx context.Context, in *shadowpb.PatchDesiredStateRequest, opts ...grpc.CallOption) (*shadowpb.PatchDesiredStateResponse, error)
-	StreamReportedStateChanges(ctx context.Context, in *shadowpb.StreamReportedStateChangesRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error)
+	Get(ctx context.Context, in *proto.GetRequest, opts ...grpc.CallOption) (*proto.GetResponse, error)
+	Patch(ctx context.Context, in *proto.Shadow, opts ...grpc.CallOption) (*proto.Shadow, error)
+	StreamReportedStateChanges(ctx context.Context, in *proto.StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error)
 }
 
 type shadowServiceClient struct {
@@ -906,8 +905,8 @@ func NewShadowServiceClient(cc grpc.ClientConnInterface) ShadowServiceClient {
 	return &shadowServiceClient{cc}
 }
 
-func (c *shadowServiceClient) Get(ctx context.Context, in *shadowpb.GetRequest, opts ...grpc.CallOption) (*shadowpb.GetResponse, error) {
-	out := new(shadowpb.GetResponse)
+func (c *shadowServiceClient) Get(ctx context.Context, in *proto.GetRequest, opts ...grpc.CallOption) (*proto.GetResponse, error) {
+	out := new(proto.GetResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -915,25 +914,16 @@ func (c *shadowServiceClient) Get(ctx context.Context, in *shadowpb.GetRequest, 
 	return out, nil
 }
 
-func (c *shadowServiceClient) GetMultiple(ctx context.Context, in *shadowpb.Empty, opts ...grpc.CallOption) (*shadowpb.GetMultipleResponse, error) {
-	out := new(shadowpb.GetMultipleResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/GetMultiple", in, out, opts...)
+func (c *shadowServiceClient) Patch(ctx context.Context, in *proto.Shadow, opts ...grpc.CallOption) (*proto.Shadow, error) {
+	out := new(proto.Shadow)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/Patch", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *shadowServiceClient) PatchDesiredState(ctx context.Context, in *shadowpb.PatchDesiredStateRequest, opts ...grpc.CallOption) (*shadowpb.PatchDesiredStateResponse, error) {
-	out := new(shadowpb.PatchDesiredStateResponse)
-	err := c.cc.Invoke(ctx, "/infinimesh.node.ShadowService/PatchDesiredState", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in *shadowpb.StreamReportedStateChangesRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error) {
+func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in *proto.StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error) {
 	stream, err := c.cc.NewStream(ctx, &ShadowService_ServiceDesc.Streams[0], "/infinimesh.node.ShadowService/StreamReportedStateChanges", opts...)
 	if err != nil {
 		return nil, err
@@ -949,7 +939,7 @@ func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in
 }
 
 type ShadowService_StreamReportedStateChangesClient interface {
-	Recv() (*shadowpb.StreamReportedStateChangesResponse, error)
+	Recv() (*proto.Shadow, error)
 	grpc.ClientStream
 }
 
@@ -957,8 +947,8 @@ type shadowServiceStreamReportedStateChangesClient struct {
 	grpc.ClientStream
 }
 
-func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*shadowpb.StreamReportedStateChangesResponse, error) {
-	m := new(shadowpb.StreamReportedStateChangesResponse)
+func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*proto.Shadow, error) {
+	m := new(proto.Shadow)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -969,10 +959,9 @@ func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*shadowpb.Stream
 // All implementations must embed UnimplementedShadowServiceServer
 // for forward compatibility
 type ShadowServiceServer interface {
-	Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error)
-	GetMultiple(context.Context, *shadowpb.Empty) (*shadowpb.GetMultipleResponse, error)
-	PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error)
-	StreamReportedStateChanges(*shadowpb.StreamReportedStateChangesRequest, ShadowService_StreamReportedStateChangesServer) error
+	Get(context.Context, *proto.GetRequest) (*proto.GetResponse, error)
+	Patch(context.Context, *proto.Shadow) (*proto.Shadow, error)
+	StreamReportedStateChanges(*proto.StreamShadowRequest, ShadowService_StreamReportedStateChangesServer) error
 	mustEmbedUnimplementedShadowServiceServer()
 }
 
@@ -980,16 +969,13 @@ type ShadowServiceServer interface {
 type UnimplementedShadowServiceServer struct {
 }
 
-func (UnimplementedShadowServiceServer) Get(context.Context, *shadowpb.GetRequest) (*shadowpb.GetResponse, error) {
+func (UnimplementedShadowServiceServer) Get(context.Context, *proto.GetRequest) (*proto.GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedShadowServiceServer) GetMultiple(context.Context, *shadowpb.Empty) (*shadowpb.GetMultipleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMultiple not implemented")
+func (UnimplementedShadowServiceServer) Patch(context.Context, *proto.Shadow) (*proto.Shadow, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Patch not implemented")
 }
-func (UnimplementedShadowServiceServer) PatchDesiredState(context.Context, *shadowpb.PatchDesiredStateRequest) (*shadowpb.PatchDesiredStateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PatchDesiredState not implemented")
-}
-func (UnimplementedShadowServiceServer) StreamReportedStateChanges(*shadowpb.StreamReportedStateChangesRequest, ShadowService_StreamReportedStateChangesServer) error {
+func (UnimplementedShadowServiceServer) StreamReportedStateChanges(*proto.StreamShadowRequest, ShadowService_StreamReportedStateChangesServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamReportedStateChanges not implemented")
 }
 func (UnimplementedShadowServiceServer) mustEmbedUnimplementedShadowServiceServer() {}
@@ -1006,7 +992,7 @@ func RegisterShadowServiceServer(s grpc.ServiceRegistrar, srv ShadowServiceServe
 }
 
 func _ShadowService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(shadowpb.GetRequest)
+	in := new(proto.GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1018,49 +1004,31 @@ func _ShadowService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/infinimesh.node.ShadowService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShadowServiceServer).Get(ctx, req.(*shadowpb.GetRequest))
+		return srv.(ShadowServiceServer).Get(ctx, req.(*proto.GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShadowService_GetMultiple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(shadowpb.Empty)
+func _ShadowService_Patch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(proto.Shadow)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShadowServiceServer).GetMultiple(ctx, in)
+		return srv.(ShadowServiceServer).Patch(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/infinimesh.node.ShadowService/GetMultiple",
+		FullMethod: "/infinimesh.node.ShadowService/Patch",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShadowServiceServer).GetMultiple(ctx, req.(*shadowpb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ShadowService_PatchDesiredState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(shadowpb.PatchDesiredStateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ShadowServiceServer).PatchDesiredState(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/infinimesh.node.ShadowService/PatchDesiredState",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShadowServiceServer).PatchDesiredState(ctx, req.(*shadowpb.PatchDesiredStateRequest))
+		return srv.(ShadowServiceServer).Patch(ctx, req.(*proto.Shadow))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ShadowService_StreamReportedStateChanges_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(shadowpb.StreamReportedStateChangesRequest)
+	m := new(proto.StreamShadowRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -1068,7 +1036,7 @@ func _ShadowService_StreamReportedStateChanges_Handler(srv interface{}, stream g
 }
 
 type ShadowService_StreamReportedStateChangesServer interface {
-	Send(*shadowpb.StreamReportedStateChangesResponse) error
+	Send(*proto.Shadow) error
 	grpc.ServerStream
 }
 
@@ -1076,7 +1044,7 @@ type shadowServiceStreamReportedStateChangesServer struct {
 	grpc.ServerStream
 }
 
-func (x *shadowServiceStreamReportedStateChangesServer) Send(m *shadowpb.StreamReportedStateChangesResponse) error {
+func (x *shadowServiceStreamReportedStateChangesServer) Send(m *proto.Shadow) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -1092,12 +1060,8 @@ var ShadowService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ShadowService_Get_Handler,
 		},
 		{
-			MethodName: "GetMultiple",
-			Handler:    _ShadowService_GetMultiple_Handler,
-		},
-		{
-			MethodName: "PatchDesiredState",
-			Handler:    _ShadowService_PatchDesiredState_Handler,
+			MethodName: "Patch",
+			Handler:    _ShadowService_Patch_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -17,7 +17,7 @@
 
 syntax = "proto3";
 
-package infinimesh.shadow;
+package infinimesh.shadow.legacy;
 option go_package = "shadowpb";
 
 import "google/protobuf/struct.proto";
