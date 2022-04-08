@@ -134,7 +134,7 @@ func main() {
 	}
 	defer rbmq.Close()
 
-	ps, err = mqttps.Setup(log, rbmq)
+	ps, err = mqttps.Setup(log, rbmq, "mqtt.incoming", "mqtt.outgoing")
 	if err != nil {
 		log.Fatal("Error setting up pubsub", zap.Error(err))
 	}

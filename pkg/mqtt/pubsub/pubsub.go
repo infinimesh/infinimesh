@@ -30,7 +30,7 @@ var (
 	logger *zap.Logger
 )
 
-func Setup(Log *zap.Logger, conn *amqp.Connection) (*pubsub.PubSub, error) {
+func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string) (*pubsub.PubSub, error) {
 	logger = Log
 	ps = pubsub.New(10)
 
@@ -39,17 +39,18 @@ func Setup(Log *zap.Logger, conn *amqp.Connection) (*pubsub.PubSub, error) {
 		return nil, err
 	}
 
-	go HandlePublish(ch)
-	go HandleSubscribe(ch)
+	go HandlePublish(ch, pub)
+	go HandleSubscribe(ch, sub)
 
 	return ps, nil
 }
 
-func HandlePublish(ch *amqp.Channel) {
+// Reading messages from PubSub and publishing them to RabbitMQ Queue
+func HandlePublish(ch *amqp.Channel, topic string) {
 	log := logger.Named("publish")
 	init:
 	q, err := ch.QueueDeclare(
-		"mqtt.incoming",
+		topic,
 		true, false, false, true, nil,
 	)
 	if err != nil {
@@ -57,12 +58,14 @@ func HandlePublish(ch *amqp.Channel) {
 		time.Sleep(time.Second)
 		goto init
 	}
+	log.Info("Queue declared", zap.String("name", q.Name))
 
 	incoming := make(chan interface{}, 10)
-	ps.AddSub(incoming, "mqtt.incoming")
+	ps.AddSub(incoming, topic)
 
 	for msg := range incoming {
 		shadow := msg.(*pb.Shadow)
+		log.Debug("Received message from PubSub", zap.Any("shadow", shadow))
 		payload, err := proto.Marshal(shadow)
 		if err != nil {
 			log.Error("Error while publishing message:", zap.Error(err))
@@ -74,11 +77,12 @@ func HandlePublish(ch *amqp.Channel) {
 	}
 }
 
-func HandleSubscribe(ch *amqp.Channel) {
+// Reading messages from RabbitMQ Queue and publishing them to PubSub
+func HandleSubscribe(ch *amqp.Channel, topic string) {
 	log := logger.Named("subscribe")
 	init:
 	q, err := ch.QueueDeclare(
-		"mqtt.outgoing",
+		topic,
 		true, false, false, true, nil,
 	)
 	if err != nil {
@@ -86,6 +90,7 @@ func HandleSubscribe(ch *amqp.Channel) {
 		time.Sleep(time.Second)
 		goto init
 	}
+	log.Info("Queue declared", zap.String("name", q.Name))
 
 	consume:
 	messages, err := ch.Consume(q.Name, "", false, false, false, false, nil)
@@ -96,12 +101,13 @@ func HandleSubscribe(ch *amqp.Channel) {
 	}
 
 	for msg := range messages {
-		var shadow *pb.Shadow
+		shadow := &pb.Shadow{}
 		err = proto.Unmarshal(msg.Body, shadow)
 		if err != nil {
 			log.Error("Error while consuming message:", zap.Error(err))
 			continue
 		}
-		ps.Pub(shadow, "mqtt.outgoing/" + shadow.Device)
+		log.Debug("Received message from RabbitMQ", zap.Any("shadow", &shadow))
+		ps.Pub(shadow, topic, topic + "/" + shadow.Device)
 	}
 }
