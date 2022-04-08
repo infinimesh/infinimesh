@@ -164,6 +164,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
 	for msg := range ch {
 		shadow := msg.(*pb.Shadow)
+		log.Debug("Received message", zap.String("topic", topic), zap.String("device", shadow.Device))
 		payload, err := shadow.Desired.Data.MarshalJSON()
 		if err != nil {
 			log.Error("Failed to marshal shadow", zap.Error(err))
