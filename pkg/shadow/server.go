@@ -16,9 +16,16 @@ limitations under the License.
 package shadow
 
 import (
+	"context"
+
+	"encoding/json"
+
 	"github.com/cskr/pubsub"
 	redis "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 )
@@ -37,4 +44,96 @@ func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSu
 		rdb: rdb,
 		ps: ps,
 	}
+}
+
+func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
+	log := s.log.Named("get")
+	log.Debug("Request received", zap.Any("req", req))
+
+	keys := make([]string, len(req.GetPool()) * 2)
+	for i, dev := range req.GetPool() {
+		keys[i * 2] = Key(dev, "reported")
+		keys[i * 2 + 1] = Key(dev, "desired")
+	}
+	if len(keys) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "no devices specified")
+	}
+	r := s.rdb.MGet(ctx, keys...)
+	states, err := r.Result()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to get Shadows")
+	}
+
+	shadows := make([]*pb.Shadow, len(states))
+	for i := range shadows {
+		s := &pb.Shadow{ Device: req.Pool[i] }
+		if states[i * 2] != nil {
+			state := states[i * 2].(string)
+			json.Unmarshal([]byte(state), s.Reported)
+		}
+		if states[i * 2 + 1] != nil {
+			state := states[i * 2 + 1].(string)
+			json.Unmarshal([]byte(state), s.Desired)
+		}
+	}
+
+	return &pb.GetResponse{ Shadows: shadows }, nil
+}
+
+func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Shadow, error) {
+	log := s.log.Named("patch")
+	log.Debug("Request received", zap.Any("req", req))
+
+	if req.GetDevice() == "" {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
+	}
+
+	now := timestamppb.Now()
+	if req.Reported != nil {
+		req.Reported.Timestamp = now
+	}
+	if req.Desired != nil {
+		req.Desired.Timestamp = now
+	}
+
+	s.ps.Pub(req, "shadow.internal")
+
+	return req, nil
+}
+
+func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
+	log := s.log.Named("stream")
+	log.Debug("Request received", zap.Any("req", req))
+
+	if len(req.GetDevices()) == 0 {
+		return status.Error(codes.InvalidArgument, "no devices specified")
+	}
+	devices := map[string]bool{}
+	for _, id := range req.GetDevices() {
+		devices[id] = true
+	}
+
+	messages := make(chan interface{}, 10)
+	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
+	defer unsub(s.ps, messages)
+
+	for msg := range messages {
+		shadow := msg.(*pb.Shadow)
+		if _, ok := devices[shadow.GetDevice()]; !ok {
+			continue
+		}
+		err := srv.Send(shadow)
+		if err != nil {
+			log.Error("Unable to send message", zap.Error(err))
+			break
+		}
+	}
+
+	return nil
+}
+
+func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+	go ps.Unsub(ch)
+	
+	for range ch {}
 }

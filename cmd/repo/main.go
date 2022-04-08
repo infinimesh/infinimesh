@@ -26,7 +26,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
 	connectdb "github.com/infinimesh/infinimesh/pkg/shared/connectdb"
 	"github.com/spf13/viper"
@@ -129,7 +129,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Failed to connect to shadow", zap.String("address", host), zap.Error(err))
 		}
-		client := shadowpb.NewShadowsClient(conn)
+		client := shadowpb.NewShadowServiceClient(conn)
 		pb.RegisterShadowServiceServer(s, NewShadowAPI(log, client))
 	}
 

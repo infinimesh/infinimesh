@@ -179,7 +179,7 @@ service ShadowService {
       body: "*"
     };
   };
-  rpc StreamReportedStateChanges(infinimesh.shadow.StreamShadowRequest)
+  rpc StreamShadow(infinimesh.shadow.StreamShadowRequest)
       returns (stream infinimesh.shadow.Shadow) {
     option (google.api.http) = {
       get : "/devices/states/stream"

@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ShadowServiceClient interface {
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Patch(ctx context.Context, in *Shadow, opts ...grpc.CallOption) (*Shadow, error)
-	StreamReportedStateChanges(ctx context.Context, in *StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error)
+	StreamShadow(ctx context.Context, in *StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamShadowClient, error)
 }
 
 type shadowServiceClient struct {
@@ -49,12 +49,12 @@ func (c *shadowServiceClient) Patch(ctx context.Context, in *Shadow, opts ...grp
 	return out, nil
 }
 
-func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in *StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamReportedStateChangesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ShadowService_ServiceDesc.Streams[0], "/infinimesh.shadow.ShadowService/StreamReportedStateChanges", opts...)
+func (c *shadowServiceClient) StreamShadow(ctx context.Context, in *StreamShadowRequest, opts ...grpc.CallOption) (ShadowService_StreamShadowClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ShadowService_ServiceDesc.Streams[0], "/infinimesh.shadow.ShadowService/StreamShadow", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &shadowServiceStreamReportedStateChangesClient{stream}
+	x := &shadowServiceStreamShadowClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -64,16 +64,16 @@ func (c *shadowServiceClient) StreamReportedStateChanges(ctx context.Context, in
 	return x, nil
 }
 
-type ShadowService_StreamReportedStateChangesClient interface {
+type ShadowService_StreamShadowClient interface {
 	Recv() (*Shadow, error)
 	grpc.ClientStream
 }
 
-type shadowServiceStreamReportedStateChangesClient struct {
+type shadowServiceStreamShadowClient struct {
 	grpc.ClientStream
 }
 
-func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*Shadow, error) {
+func (x *shadowServiceStreamShadowClient) Recv() (*Shadow, error) {
 	m := new(Shadow)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (x *shadowServiceStreamReportedStateChangesClient) Recv() (*Shadow, error) 
 type ShadowServiceServer interface {
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Patch(context.Context, *Shadow) (*Shadow, error)
-	StreamReportedStateChanges(*StreamShadowRequest, ShadowService_StreamReportedStateChangesServer) error
+	StreamShadow(*StreamShadowRequest, ShadowService_StreamShadowServer) error
 	mustEmbedUnimplementedShadowServiceServer()
 }
 
@@ -101,8 +101,8 @@ func (UnimplementedShadowServiceServer) Get(context.Context, *GetRequest) (*GetR
 func (UnimplementedShadowServiceServer) Patch(context.Context, *Shadow) (*Shadow, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Patch not implemented")
 }
-func (UnimplementedShadowServiceServer) StreamReportedStateChanges(*StreamShadowRequest, ShadowService_StreamReportedStateChangesServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamReportedStateChanges not implemented")
+func (UnimplementedShadowServiceServer) StreamShadow(*StreamShadowRequest, ShadowService_StreamShadowServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamShadow not implemented")
 }
 func (UnimplementedShadowServiceServer) mustEmbedUnimplementedShadowServiceServer() {}
 
@@ -153,24 +153,24 @@ func _ShadowService_Patch_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ShadowService_StreamReportedStateChanges_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _ShadowService_StreamShadow_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(StreamShadowRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ShadowServiceServer).StreamReportedStateChanges(m, &shadowServiceStreamReportedStateChangesServer{stream})
+	return srv.(ShadowServiceServer).StreamShadow(m, &shadowServiceStreamShadowServer{stream})
 }
 
-type ShadowService_StreamReportedStateChangesServer interface {
+type ShadowService_StreamShadowServer interface {
 	Send(*Shadow) error
 	grpc.ServerStream
 }
 
-type shadowServiceStreamReportedStateChangesServer struct {
+type shadowServiceStreamShadowServer struct {
 	grpc.ServerStream
 }
 
-func (x *shadowServiceStreamReportedStateChangesServer) Send(m *Shadow) error {
+func (x *shadowServiceStreamShadowServer) Send(m *Shadow) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -192,8 +192,8 @@ var ShadowService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamReportedStateChanges",
-			Handler:       _ShadowService_StreamReportedStateChanges_Handler,
+			StreamName:    "StreamShadow",
+			Handler:       _ShadowService_StreamShadow_Handler,
 			ServerStreams: true,
 		},
 	},

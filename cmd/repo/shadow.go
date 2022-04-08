@@ -25,7 +25,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 )
 
@@ -34,19 +34,17 @@ type ShadowAPI struct {
 	pb.UnimplementedShadowServiceServer
 
 	log *zap.Logger
-	client        shadowpb.ShadowsClient
+	client        shadowpb.ShadowServiceClient
 }
 
-func NewShadowAPI(log *zap.Logger, client shadowpb.ShadowsClient) *ShadowAPI {
+func NewShadowAPI(log *zap.Logger, client shadowpb.ShadowServiceClient) *ShadowAPI {
 	return &ShadowAPI{
 		log: log.Named("ShadowAPI"), client: client,
 	}
 }	
 
-//Get is a method to get the current state of the device
-func (s *ShadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+func (s *ShadowAPI) Get(ctx context.Context, _ *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 	log := s.log.Named("Get")
-	log.Debug("Get request received", zap.Any("request", request), zap.Any("context", ctx))
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
@@ -54,63 +52,11 @@ func (s *ShadowAPI) Get(ctx context.Context, request *shadowpb.GetRequest) (resp
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-	found := false
-	for _, device := range devices_scope {
-		if device == request.Id {
-			found = true
-			break
-		}
-	}
-	if !found {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
-	}
-
-	return s.client.Get(ctx, request)
-}
-
-func (s *ShadowAPI) GetMultiple(ctx context.Context, _ *shadowpb.Empty) (response *shadowpb.GetMultipleResponse, err error) {
-	log := s.log.Named("GetMultiple")
-
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
-	}
-	log.Debug("Scope", zap.Strings("devices", devices_scope))
-
-	type State struct {
-		OK bool
-		ID string
-		State *shadowpb.Shadow
-	}
-	n := len(devices_scope)
-	states := make(chan State, n)
-	defer close(states)
-
-	log.Debug("Gathering devices states", zap.Int("amount", n))
-	for _, dev := range devices_scope {
-		go func(dev string, r chan State) {
-			res, err := s.client.Get(ctx, &shadowpb.GetRequest{Id: dev})
-			if err != nil {
-				log.Error("Error getting Device state", zap.Error(err))
-				r <- State{OK: false}
-			}
-			r <- State{true, dev, res.GetShadow()}
-		}(dev, states)
-	}
-
-	result := make(map[string]*shadowpb.Shadow)
-	for i := 0; i < n; i++ {
-		state := <- states
-		if state.OK {
-			result[state.ID] = state.State
-		}
-	}
-
-	return &shadowpb.GetMultipleResponse{Pool: result}, nil
+	return s.client.Get(ctx, &shadowpb.GetRequest{Pool: devices_scope})
 }
 
 //PatchDesiredState is a method to update the current state of the device
-func (s *ShadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+func (s *ShadowAPI) Patch(ctx context.Context, request *shadowpb.Shadow) (response *shadowpb.Shadow, err error) {
 	log := s.log.Named("PatchDesiredState")
 
 	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
@@ -126,7 +72,7 @@ func (s *ShadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 
 	found := false
 	for _, device := range devices_scope {
-		if device == request.Id {
+		if device == request.Device {
 			found = true
 			break
 		}
@@ -135,11 +81,11 @@ func (s *ShadowAPI) PatchDesiredState(ctx context.Context, request *shadowpb.Pat
 		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
 	}
 
-	return s.client.PatchDesiredState(ctx, request)
+	return s.client.Patch(ctx, request)
 }
 
-//StreamReportedStateChanges is a method to get the stream for a device
-func (s *ShadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv pb.ShadowService_StreamReportedStateChangesServer) (err error) {
+//StreamShadow is a method to get the stream for a device
+func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
 	log := s.log.Named("StreamReportedStateChanges")
 
 	devices_scope, ok := srv.Context().Value(inf.InfinimeshDevicesCtxKey).([]string)
@@ -153,7 +99,7 @@ func (s *ShadowAPI) StreamReportedStateChanges(request *shadowpb.StreamReportedS
 
 	log.Debug("Stream API Method: Streaming started", zap.Strings("devices", devices_scope))
 
-	c, err := s.client.StreamReportedStateChanges(srv.Context(), request)
+	c, err := s.client.StreamShadow(srv.Context(), request)
 	if err != nil {
 		log.Error("Stream API Method: Failed to start the Stream", zap.Error(err))
 		return status.Error(codes.Unauthenticated, "Failed to start the Stream")

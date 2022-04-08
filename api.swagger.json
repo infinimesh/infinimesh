@@ -421,7 +421,7 @@
     },
     "/devices/states/stream": {
       "get": {
-        "operationId": "ShadowService_StreamReportedStateChanges",
+        "operationId": "ShadowService_StreamShadow",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -1100,7 +1100,7 @@
     "infinimeshshadowGetResponse": {
       "type": "object",
       "properties": {
-        "shadow": {
+        "shadows": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/infinimeshshadowShadow"

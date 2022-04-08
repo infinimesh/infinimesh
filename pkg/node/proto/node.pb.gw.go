@@ -18,7 +18,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
-	proto_1 "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	proto_0 "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
@@ -956,7 +956,7 @@ var (
 )
 
 func request_ShadowService_Get_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq proto_1.GetRequest
+	var protoReq proto_0.GetRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -972,7 +972,7 @@ func request_ShadowService_Get_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_ShadowService_Get_0(ctx context.Context, marshaler runtime.Marshaler, server ShadowServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq proto_1.GetRequest
+	var protoReq proto_0.GetRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
@@ -988,7 +988,7 @@ func local_request_ShadowService_Get_0(ctx context.Context, marshaler runtime.Ma
 }
 
 func request_ShadowService_Patch_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq proto_1.Shadow
+	var protoReq proto_0.Shadow
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1005,7 +1005,7 @@ func request_ShadowService_Patch_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_ShadowService_Patch_0(ctx context.Context, marshaler runtime.Marshaler, server ShadowServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq proto_1.Shadow
+	var protoReq proto_0.Shadow
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -1022,21 +1022,21 @@ func local_request_ShadowService_Patch_0(ctx context.Context, marshaler runtime.
 }
 
 var (
-	filter_ShadowService_StreamReportedStateChanges_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_ShadowService_StreamShadow_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_ShadowService_StreamReportedStateChanges_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowServiceClient, req *http.Request, pathParams map[string]string) (ShadowService_StreamReportedStateChangesClient, runtime.ServerMetadata, error) {
-	var protoReq proto_1.StreamShadowRequest
+func request_ShadowService_StreamShadow_0(ctx context.Context, marshaler runtime.Marshaler, client ShadowServiceClient, req *http.Request, pathParams map[string]string) (ShadowService_StreamShadowClient, runtime.ServerMetadata, error) {
+	var protoReq proto_0.StreamShadowRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ShadowService_StreamReportedStateChanges_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ShadowService_StreamShadow_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	stream, err := client.StreamReportedStateChanges(ctx, &protoReq)
+	stream, err := client.StreamShadow(ctx, &protoReq)
 	if err != nil {
 		return nil, metadata, err
 	}
@@ -1542,7 +1542,7 @@ func RegisterShadowServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 
 	})
 
-	mux.Handle("GET", pattern_ShadowService_StreamReportedStateChanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ShadowService_StreamShadow_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2197,23 +2197,23 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 
 	})
 
-	mux.Handle("GET", pattern_ShadowService_StreamReportedStateChanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ShadowService_StreamShadow_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamReportedStateChanges", runtime.WithHTTPPathPattern("/devices/states/stream"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamShadow", runtime.WithHTTPPathPattern("/devices/states/stream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ShadowService_StreamReportedStateChanges_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ShadowService_StreamShadow_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ShadowService_StreamReportedStateChanges_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_ShadowService_StreamShadow_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2225,7 +2225,7 @@ var (
 
 	pattern_ShadowService_Patch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"devices", "states"}, ""))
 
-	pattern_ShadowService_StreamReportedStateChanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"devices", "states", "stream"}, ""))
+	pattern_ShadowService_StreamShadow_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"devices", "states", "stream"}, ""))
 )
 
 var (
@@ -2233,5 +2233,5 @@ var (
 
 	forward_ShadowService_Patch_0 = runtime.ForwardResponseMessage
 
-	forward_ShadowService_StreamReportedStateChanges_0 = runtime.ForwardResponseStream
+	forward_ShadowService_StreamShadow_0 = runtime.ForwardResponseStream
 )

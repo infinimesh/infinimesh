@@ -38,7 +38,7 @@ message GetRequest {
 }
 
 message GetResponse {
-  repeated Shadow shadow = 1;
+  repeated Shadow shadows = 1;
 }
 
 message StreamShadowRequest {
@@ -49,6 +49,6 @@ message StreamShadowRequest {
 service ShadowService {
   rpc Get(GetRequest) returns (GetResponse);
   rpc Patch(Shadow) returns (Shadow);
-  rpc StreamReportedStateChanges(StreamShadowRequest)
+  rpc StreamShadow(StreamShadowRequest)
       returns (stream Shadow);
 }
