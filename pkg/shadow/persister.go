@@ -18,16 +18,21 @@ package shadow
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	jsonpatch "github.com/evanphx/json-patch"
 	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"go.uber.org/zap"
 )
 
+func Key(device, key string) string {
+	return fmt.Sprintf("%s:%s", device, key)
+}
+
 func (s *ShadowServiceServer) Persister() {
 	log := s.log.Named("persister")
 	messages := make(chan interface{}, 10)
-	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
+	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing", "shadow.internal")
 
 	for msg := range messages {
 		shadow := msg.(*pb.Shadow)
@@ -42,7 +47,7 @@ func (s *ShadowServiceServer) Persister() {
 }
 
 func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string, state *pb.State) {
-	key = device + ":" + key
+	key = Key(device, key)
 
 	var new []byte
 	var err error
