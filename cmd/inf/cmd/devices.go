@@ -314,7 +314,6 @@ var getDeviceStateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println(r)
 
 		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
 			return printJsonResponse(r)
