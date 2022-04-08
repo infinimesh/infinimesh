@@ -22,13 +22,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/infinimesh/infinimesh/pkg/convert"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -248,28 +247,46 @@ var getDeviceStateCmd = &cobra.Command{
 		}
 
 		if patch, _ := cmd.Flags().GetString("patch"); patch != "" {
-			var data structpb.Value
-			err = json.Unmarshal([]byte(patch), &data)
+			req := &shadowpb.Shadow{
+				Device: args[0],
+				Desired: &shadowpb.State{
+					Data: &structpb.Struct{},
+				},
+			}
+			
+			err = req.Desired.Data.UnmarshalJSON([]byte(patch))
 			if err != nil {
 				return err
 			}
 
-			_, err = client.PatchDesiredState(ctx, &shadowpb.PatchDesiredStateRequest{
-				Id: args[0],
-				Data: &data,
-			})
+			_, err = client.Patch(ctx, req)
+			if err != nil {
+				return err
+			}
+		}
+
+		if report, _ := cmd.Flags().GetString("report"); report != "" {
+			req := &shadowpb.Shadow{
+				Device: args[0],
+				Reported: &shadowpb.State{
+					Data: &structpb.Struct{},
+				},
+			}
+			
+			err = req.Reported.Data.UnmarshalJSON([]byte(report))
 			if err != nil {
 				return err
 			}
 
-			return nil
+			_, err = client.Patch(ctx, req)
+			if err != nil {
+				return err
+			}
 		}
 
 		if stream, _ := cmd.Flags().GetBool("stream"); stream {
 			delta, _ := cmd.Flags().GetBool("delta")
-			c, err := client.StreamReportedStateChanges(ctx, &shadowpb.StreamReportedStateChangesRequest{
-				OnlyDelta: delta,
-			})
+			c, err := client.StreamShadow(ctx, &shadowpb.StreamShadowRequest{OnlyDelta: delta})
 			if err != nil {
 				return err
 			}
@@ -283,30 +300,29 @@ var getDeviceStateCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				s := &shadowpb.Shadow{
-					Reported: msg.GetReportedState(),
-					Desired: msg.GetDesiredState(),
-				}
 				if printJson {
-					printJsonResponse(s)
+					printJsonResponse(msg)
 				} else {
-					PrintSingleDeviceState(s)
+					PrintSingleDeviceState(msg)
 				}
 			}
 		}
 
 		r, err := client.Get(ctx, &shadowpb.GetRequest{
-			Id: args[0],
+			Pool: args,
 		})
 		if err != nil {
 			return err
 		}
+		fmt.Println(r)
 
 		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
 			return printJsonResponse(r)
 		}
 
-		PrintSingleDeviceState(r.GetShadow())
+		for _, shadow := range r.GetShadows() {
+			PrintSingleDeviceState(shadow)
+		}
 		return nil
 	},
 }
@@ -329,36 +345,30 @@ func PrintSingleDevice(d *devpb.Device) {
 func PrintSingleDeviceState(state *shadowpb.Shadow) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
+	t.AppendRow(table.Row{ "Device", state.Device })
 	t.AppendHeader(table.Row{"State", "Reported", "Desired"})
 
 	var reported []byte
 	var reported_time string
-	var reported_version string
 	if state.Reported == nil {
 		reported = []byte("{}")
 		reported_time = "-"
-		reported_version = "-"
 	} else {
 		reported, _ = state.Reported.Data.MarshalJSON()
 		reported_time = state.Reported.Timestamp.AsTime().String()
-		reported_version = strconv.FormatUint(state.Reported.Version, 10)
 	}
 
 	var desired []byte
 	var desired_time string
-	var desired_version string
 	if state.Desired == nil {
 		desired = []byte("{}")
 		desired_time = "-"
-		desired_version = "-"
 	} else {
 		desired, _ = state.Desired.Data.MarshalJSON()
 		desired_time = state.Desired.Timestamp.AsTime().String()
-		desired_version = strconv.FormatUint(state.Desired.Version, 10)
 	}
 	t.AppendRow(table.Row{"Data", string(reported), string(desired)})
 	t.AppendRow(table.Row{"Timestamp", reported_time, desired_time})
-	t.AppendRow(table.Row{"Version", reported_version, desired_version})
 
 	t.Render()
 }
@@ -399,7 +409,8 @@ func init() {
 
 	getDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
 	getDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
-	getDeviceStateCmd.Flags().StringP("patch", "p", "", "Pacth Device Desired state")
+	getDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
+	getDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
 	getDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
 	devicesCmd.AddCommand(getDeviceStateCmd)
 
