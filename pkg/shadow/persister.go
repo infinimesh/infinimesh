@@ -32,7 +32,7 @@ func Key(device, key string) string {
 func (s *ShadowServiceServer) Persister() {
 	log := s.log.Named("persister")
 	messages := make(chan interface{}, 10)
-	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing", "shadow.internal")
+	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
 
 	for msg := range messages {
 		shadow := msg.(*pb.Shadow)
