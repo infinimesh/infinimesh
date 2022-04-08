@@ -38,9 +38,11 @@ func (s *ShadowServiceServer) Persister() {
 		shadow := msg.(*pb.Shadow)
 		log.Debug("Message received", zap.Any("shadow", shadow))
 		if shadow.Reported != nil {
+			log.Debug("Reporting", zap.String("device", shadow.Device))
 			s.MergeAndStore(log, shadow.Device, "reported", shadow.Reported)
 		}
 		if shadow.Desired != nil {
+			log.Debug("Desiring", zap.String("device", shadow.Device))
 			s.MergeAndStore(log, shadow.Device, "desired", shadow.Desired)
 		}
 	}
@@ -49,14 +51,8 @@ func (s *ShadowServiceServer) Persister() {
 func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string, state *pb.State) {
 	key = Key(device, key)
 
-	var new []byte
+	var new, merged []byte
 	var err error
-
-	cmd := s.rdb.Get(context.Background(), key)
-	m, err := cmd.Result()
-	if err != nil {
-		goto set
-	}
 
 	new, err = json.Marshal(state)
 	if err != nil {
@@ -64,12 +60,24 @@ func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string,
 		return
 	}
 
-	log.Debug("Merging", zap.ByteString("old", []byte(m)), zap.ByteString("new", new))
-	new, err = jsonpatch.MergePatch([]byte(m), new)
+	cmd := s.rdb.Get(context.Background(), key)
+	m, err := cmd.Result()
 	if err != nil {
+		goto set
+	}
+
+	merge:
+	log.Debug("Merging", zap.ByteString("old", []byte(m)), zap.ByteString("new", new))
+	merged, err = jsonpatch.MergePatch([]byte(m), new)
+	if err != nil {
+		if m == "" {
+			m = "{}"
+			goto merge
+		}
 		log.Error("Error Merging State", zap.String("key", key), zap.Error(err))
 		return
 	}
+	new = merged
 
 	set:
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
