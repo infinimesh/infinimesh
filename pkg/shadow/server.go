@@ -48,10 +48,11 @@ func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSu
 
 func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
 	log := s.log.Named("get")
-	log.Debug("Request received", zap.Any("req", req))
+	pool := req.GetPool()
+	log.Debug("Request received", zap.Strings("pool", pool))
 
-	keys := make([]string, len(req.GetPool()) * 2)
-	for i, dev := range req.GetPool() {
+	keys := make([]string, len(pool) * 2)
+	for i, dev := range pool {
 		keys[i * 2] = Key(dev, "reported")
 		keys[i * 2 + 1] = Key(dev, "desired")
 	}
@@ -64,9 +65,14 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 		return nil, status.Error(codes.Internal, "failed to get Shadows")
 	}
 
-	shadows := make([]*pb.Shadow, len(states))
+	log.Debug("Got states", zap.Int("count", len(states)))
+	shadows := make([]*pb.Shadow, len(pool))
 	for i := range shadows {
-		s := &pb.Shadow{ Device: req.Pool[i] }
+		s := &pb.Shadow{
+			Device: pool[i],
+			Reported: &pb.State{},
+			Desired: &pb.State{},
+		}
 		if states[i * 2] != nil {
 			state := states[i * 2].(string)
 			json.Unmarshal([]byte(state), s.Reported)
@@ -75,6 +81,7 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 			state := states[i * 2 + 1].(string)
 			json.Unmarshal([]byte(state), s.Desired)
 		}
+		shadows[i] = s
 	}
 
 	return &pb.GetResponse{ Shadows: shadows }, nil
