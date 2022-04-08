@@ -6,11 +6,14 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: infinimesh
-      RABBITMQ_DEFAULT_PASS: infinimesh
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+
   mqtt-bridge:
     image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
     ports:
       - "1883:1883" # BasicAuth(non-TLS)
       - "8883:8883" # Standard(TLS)
@@ -19,45 +22,9 @@ services:
       - $PWD/hack/server.key:/cert/tls.key
     environment:
       DEBUG: "true"
-      RABBITMQ_CONN: amqp://infinimesh:infinimesh@rabbitmq:5672/
+      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       DEVICE_REGISTRY_URL: repo:8080
       SIGNING_KEY: "${SIGNING_KEY}"
-    depends_on:
-      - kafka
-    links:
-      - kafka
-  telemetry-router:
-    image: ghcr.io/infinimesh/infinimesh/telemetry-router:latest
-    environment:
-      KAFKA_HOST: kafka:29092
-    depends_on:
-      - kafka
-    restart: unless-stopped
-  shadow-delta-merger:
-    image: ghcr.io/infinimesh/infinimesh/shadow-delta-merger:latest
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-    restart: unless-stopped
-  shadow-api:
-    restart: unless-stopped
-    image: ghcr.io/infinimesh/infinimesh/shadow-api:latest
-    ports:
-      - "8096:8080"
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-      DB_ADDR: redis:6379
-  shadow-persister:
-    restart: unless-stopped
-    image: ghcr.io/infinimesh/infinimesh/shadow-persister:latest
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-      DB_ADDR: redis:6379
 
   repo:
     image: ghcr.io/infinimesh/infinimesh/repo:latest
@@ -69,8 +36,17 @@ services:
     environment:
       DB_HOST: db:8529
       DB_CRED: root:openSesame
-      SHADOW_HOST: shadow-api:8080
+      SHADOW_HOST: shadow:8080
       SIGNING_KEY: "${SIGNING_KEY}"
+  shadow:
+    image: ghcr.io/infinimesh/infinimesh/shadow:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      REDIS_HOST: redis:6379
+      
   redis:
     image: redis:latest
     command: ["redis-server", "--appendonly", "yes"]
