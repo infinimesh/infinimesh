@@ -154,6 +154,19 @@ service DevicesService {
     };
   };
 
+  rpc Toggle(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
+    option (google.api.http) = {
+      post: "/devices/{uuid}/toggle"
+      body: "*"
+    };
+  };
+  rpc ToggleBasic(infinimesh.node.devices.Device) returns (infinimesh.node.devices.Device) {
+    option (google.api.http) = {
+      post: "/devices/{uuid}/toggle/basic"
+      body: "*"
+    };
+  };
+
   rpc MakeDevicesToken(DevicesTokenRequest) returns (TokenResponse) {
     option (google.api.http) = {
       post: "/devices/token"

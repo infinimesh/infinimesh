@@ -22,9 +22,6 @@
     },
     {
       "name": "Shadows"
-    },
-    {
-      "name": "StateService"
     }
   ],
   "consumes": [
@@ -756,6 +753,142 @@
         ]
       }
     },
+    "/devices/{uuid}/toggle": {
+      "post": {
+        "operationId": "DevicesService_Toggle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "accessLevel": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "namespace": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/devices/{uuid}/toggle/basic": {
+      "post": {
+        "operationId": "DevicesService_ToggleBasic",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "accessLevel": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "namespace": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
     "/namespaces": {
       "get": {
         "operationId": "NamespacesService_List",
@@ -1115,63 +1248,10 @@
           "type": "string"
         },
         "reported": {
-          "$ref": "#/definitions/infinimeshshadowState"
+          "$ref": "#/definitions/shadowState"
         },
         "desired": {
-          "$ref": "#/definitions/infinimeshshadowState"
-        }
-      }
-    },
-    "infinimeshshadowState": {
-      "type": "object",
-      "properties": {
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "data": {
-          "type": "object"
-        }
-      }
-    },
-    "infinimeshstateEmptyMessage": {
-      "type": "object"
-    },
-    "infinimeshstateGetResponse": {
-      "type": "object",
-      "properties": {
-        "states": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/infinimeshstateState"
-          }
-        }
-      }
-    },
-    "infinimeshstateState": {
-      "type": "object",
-      "properties": {
-        "reported": {
-          "$ref": "#/definitions/infinimeshstateVersionedValue"
-        },
-        "desired": {
-          "$ref": "#/definitions/infinimeshstateVersionedValue"
-        }
-      }
-    },
-    "infinimeshstateVersionedValue": {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "data": {
-          "type": "object"
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
+          "$ref": "#/definitions/shadowState"
         }
       }
     },
@@ -1196,10 +1276,26 @@
           "type": "string"
         },
         "reportedState": {
-          "$ref": "#/definitions/shadowlegacyVersionedValue"
+          "$ref": "#/definitions/legacyVersionedValue"
         },
         "desiredState": {
-          "$ref": "#/definitions/shadowlegacyVersionedValue"
+          "$ref": "#/definitions/legacyVersionedValue"
+        }
+      }
+    },
+    "legacyVersionedValue": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "data": {
+          "type": "object"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1356,6 +1452,18 @@
         }
       }
     },
+    "shadowState": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    },
     "shadowlegacyGetResponse": {
       "type": "object",
       "properties": {
@@ -1368,29 +1476,13 @@
       "type": "object",
       "properties": {
         "config": {
-          "$ref": "#/definitions/shadowlegacyVersionedValue"
+          "$ref": "#/definitions/legacyVersionedValue"
         },
         "reported": {
-          "$ref": "#/definitions/shadowlegacyVersionedValue"
+          "$ref": "#/definitions/legacyVersionedValue"
         },
         "desired": {
-          "$ref": "#/definitions/shadowlegacyVersionedValue"
-        }
-      }
-    },
-    "shadowlegacyVersionedValue": {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "data": {
-          "type": "object"
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
+          "$ref": "#/definitions/legacyVersionedValue"
         }
       }
     }

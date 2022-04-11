@@ -149,6 +149,79 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	}, nil
 }
 
+func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+	log := c.log.Named("Update")
+	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+
+	curr, err := c.Get(ctx, dev)
+	if err != nil {
+		return nil, err
+	}
+
+	if curr.GetAccessLevel() < int32(schema.MGMT) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	}
+
+	curr.Tags = dev.Tags
+	curr.Title = dev.Title
+
+	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	if err != nil {
+		log.Error("Error updating Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	return curr, nil
+}
+
+func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+		log := c.log.Named("Update")
+		log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+
+		curr, err := c.Get(ctx, dev)
+		if err != nil {
+			return nil, err
+		}
+
+	if curr.GetAccessLevel() < int32(schema.MGMT) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	}
+
+	curr.Enabled = !curr.Enabled
+
+	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	if err != nil {
+		log.Error("Error updating Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	return curr, nil
+}
+
+func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+		log := c.log.Named("Update")
+		log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+
+		curr, err := c.Get(ctx, dev)
+		if err != nil {
+			return nil, err
+		}
+
+	if curr.GetAccessLevel() < int32(schema.MGMT) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	}
+
+	curr.BasicEnabled = !curr.BasicEnabled
+
+	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	if err != nil {
+		log.Error("Error updating Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	return curr, nil
+}
+
 func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
 	log := c.log.Named("Get")
 	log.Debug("Get request received", zap.Any("request", dev), zap.Any("context", ctx))

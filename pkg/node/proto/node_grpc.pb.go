@@ -559,6 +559,8 @@ type DevicesServiceClient interface {
 	Create(ctx context.Context, in *devices.CreateRequest, opts ...grpc.CallOption) (*devices.CreateResponse, error)
 	Update(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	Delete(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Toggle(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
+	ToggleBasic(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	MakeDevicesToken(ctx context.Context, in *DevicesTokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	GetByToken(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	GetByFingerprint(ctx context.Context, in *devices.GetByFingerprintRequest, opts ...grpc.CallOption) (*devices.Device, error)
@@ -617,6 +619,24 @@ func (c *devicesServiceClient) Delete(ctx context.Context, in *devices.Device, o
 	return out, nil
 }
 
+func (c *devicesServiceClient) Toggle(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/Toggle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *devicesServiceClient) ToggleBasic(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error) {
+	out := new(devices.Device)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/ToggleBasic", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *devicesServiceClient) MakeDevicesToken(ctx context.Context, in *DevicesTokenRequest, opts ...grpc.CallOption) (*TokenResponse, error) {
 	out := new(TokenResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/MakeDevicesToken", in, out, opts...)
@@ -653,6 +673,8 @@ type DevicesServiceServer interface {
 	Create(context.Context, *devices.CreateRequest) (*devices.CreateResponse, error)
 	Update(context.Context, *devices.Device) (*devices.Device, error)
 	Delete(context.Context, *devices.Device) (*DeleteResponse, error)
+	Toggle(context.Context, *devices.Device) (*devices.Device, error)
+	ToggleBasic(context.Context, *devices.Device) (*devices.Device, error)
 	MakeDevicesToken(context.Context, *DevicesTokenRequest) (*TokenResponse, error)
 	GetByToken(context.Context, *devices.Device) (*devices.Device, error)
 	GetByFingerprint(context.Context, *devices.GetByFingerprintRequest) (*devices.Device, error)
@@ -677,6 +699,12 @@ func (UnimplementedDevicesServiceServer) Update(context.Context, *devices.Device
 }
 func (UnimplementedDevicesServiceServer) Delete(context.Context, *devices.Device) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedDevicesServiceServer) Toggle(context.Context, *devices.Device) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Toggle not implemented")
+}
+func (UnimplementedDevicesServiceServer) ToggleBasic(context.Context, *devices.Device) (*devices.Device, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleBasic not implemented")
 }
 func (UnimplementedDevicesServiceServer) MakeDevicesToken(context.Context, *DevicesTokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MakeDevicesToken not implemented")
@@ -790,6 +818,42 @@ func _DevicesService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DevicesService_Toggle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).Toggle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/Toggle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).Toggle(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DevicesService_ToggleBasic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(devices.Device)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DevicesServiceServer).ToggleBasic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.DevicesService/ToggleBasic",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DevicesServiceServer).ToggleBasic(ctx, req.(*devices.Device))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DevicesService_MakeDevicesToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DevicesTokenRequest)
 	if err := dec(in); err != nil {
@@ -870,6 +934,14 @@ var DevicesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _DevicesService_Delete_Handler,
+		},
+		{
+			MethodName: "Toggle",
+			Handler:    _DevicesService_Toggle_Handler,
+		},
+		{
+			MethodName: "ToggleBasic",
+			Handler:    _DevicesService_ToggleBasic_Handler,
 		},
 		{
 			MethodName: "MakeDevicesToken",
