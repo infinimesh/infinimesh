@@ -73,6 +73,10 @@
             >{{ patch ? "Cancel Patch" : "Patch Desired" }}</n-button
           >
 
+          <n-button type="info" round tertiary @click="handleMakeToken"
+            >Make Device Token</n-button
+          >
+
           <n-popconfirm @positive-click="handleDelete">
             <template #trigger>
               <n-button
@@ -170,5 +174,18 @@ async function handleDelete() {
 
 async function handleToggle() {
   store.toggle(device.value.uuid, bar);
+}
+
+async function handleMakeToken() {
+  let token = await store.makeDevicesToken(
+    [device.value.uuid],
+    device.value.accessLevel > 1
+  );
+  try {
+    await navigator.clipboard.writeText(token);
+    message.success("Device Token copied to clipboard");
+  } catch {
+    message.error("Failed to copy device token to clipboard");
+  }
 }
 </script>
