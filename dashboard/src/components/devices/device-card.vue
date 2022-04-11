@@ -15,13 +15,19 @@
           </template>
           {{ device.uuid }}
         </n-tooltip>
-        <n-icon
-          size="2vh"
-          :color="device.enabled ? '#52c41a' : '#eb2f96'"
-          style="margin-left: 1vw"
-        >
-          <bulb />
-        </n-icon>
+        <n-tooltip trigger="hover" @click="handleToggle">
+          <template #trigger>
+            <n-icon
+              size="2vh"
+              :color="bulb_color"
+              style="margin-left: 1vw"
+              @click="handleToggle"
+            >
+              <bulb />
+            </n-icon>
+          </template>
+          Click to toggle device(enable/disable)
+        </n-tooltip>
       </template>
 
       <template #footer>
@@ -127,6 +133,11 @@ const subscribed = computed(() => {
   return store.device_subscribed(device.value.uuid);
 });
 
+const bulb_color = computed(() => {
+  if (device.value.enabled === null) return "gray";
+  return device.value.enabled ? "#52c41a" : "#eb2f96";
+});
+
 const message = useMessage();
 async function handleUUIDClicked() {
   try {
@@ -155,5 +166,9 @@ async function handleDelete() {
   patching.value = true;
   await store.deleteDevice(device.value.uuid, bar);
   patching.value = false;
+}
+
+async function handleToggle() {
+  store.toggle(device.value.uuid, bar);
 }
 </script>

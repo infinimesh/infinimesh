@@ -153,5 +153,31 @@ export const useDevicesStore = defineStore("devices", {
         return e;
       }
     },
+    async toggle(uuid, bar) {
+      let device;
+      for (let dev of this.devices) {
+        if (dev.uuid == uuid) {
+          device = dev;
+          break;
+        }
+      }
+      if (!device) {
+        return;
+      }
+
+      bar.start();
+      device.enabled = null;
+
+      try {
+        await as.http.post(`/devices/${uuid}/toggle`);
+        bar.finish();
+      } catch (e) {
+        console.error(e);
+        bar.error();
+        return;
+      }
+
+      this.fetchDevices();
+    },
   },
 });
