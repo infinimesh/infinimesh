@@ -26,21 +26,23 @@
       >
       </n-code>
     </n-collapse-item>
-    <n-space
-      justify="start"
-      align="center"
+    <n-grid
+      responsive="screen"
+      :collapsed-rows="2"
       v-if="reported && expanded.includes('reported')"
     >
-      <n-statistic label="Timestamp">
-        <n-date-picker
+      <n-grid-item :span="8">
+        <span>Timestamp</span>
+      </n-grid-item>
+      <n-grid-item :span="16"
+        ><n-date-picker
           input-readonly
           :value="new Date(reported.timestamp).getTime()"
           type="datetime"
           disabled
           class="pseudo-disabled"
-        />
-      </n-statistic>
-    </n-space>
+      /></n-grid-item>
+    </n-grid>
     <n-collapse-item title="Desired State" name="desired">
       <template #header-extra v-if="desired">
         <n-button
@@ -66,21 +68,23 @@
         "
       />
     </n-collapse-item>
-    <n-space
-      justify="start"
-      align="center"
+    <n-grid
+      responsive="screen"
+      :collapsed-rows="2"
       v-if="desired && expanded.includes('desired')"
     >
-      <n-statistic label="Timestamp">
-        <n-date-picker
+      <n-grid-item :span="8">
+        <span>Timestamp</span>
+      </n-grid-item>
+      <n-grid-item :span="16"
+        ><n-date-picker
           input-readonly
           :value="new Date(desired.timestamp).getTime()"
           type="datetime"
           disabled
           class="pseudo-disabled"
-        />
-      </n-statistic>
-    </n-space>
+      /></n-grid-item>
+    </n-grid>
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
       <template #header-extra v-if="validation == 'success'">
         <n-button
@@ -116,6 +120,8 @@ import {
   NNumberAnimation,
   NButton,
   NIcon,
+  NGrid,
+  NGridItem,
 } from "naive-ui";
 import { CopyOutline } from "@vicons/ionicons5";
 
