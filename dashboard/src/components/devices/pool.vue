@@ -11,7 +11,17 @@
           <n-text type="info"> Devices </n-text>
         </n-h1>
       </n-grid-item>
-      <n-grid-item span="18"> </n-grid-item>
+      <n-grid-item span="15"> </n-grid-item>
+      <n-grid-item span="3">
+        <n-button strong secondary round type="info" @click="emit('refresh')">
+          <template #icon>
+            <n-icon>
+              <refresh-outline />
+            </n-icon>
+          </template>
+          Refresh State
+        </n-button>
+      </n-grid-item>
       <n-grid-item span="3">
         <device-create />
       </n-grid-item>
@@ -31,7 +41,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { NEmpty, NGrid, NGridItem, NH1, NText } from "naive-ui";
+import { NEmpty, NGrid, NGridItem, NH1, NText, NIcon, NButton } from "naive-ui";
+import { RefreshOutline } from "@vicons/ionicons5";
 import DeviceCard from "./device-card.vue";
 import DeviceCreate from "./create-drawer.vue";
 
@@ -47,6 +58,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emit = defineEmits(["refresh"]);
 
 const pool = computed(() => {
   try {

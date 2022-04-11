@@ -1,6 +1,10 @@
 <template>
   <n-spin :show="loading">
-    <devices-pool :devices="devices" :show_ns="show_ns" />
+    <devices-pool
+      :devices="devices"
+      :show_ns="show_ns"
+      @refresh="() => store.fetchDevices()"
+    />
   </n-spin>
 </template>
 

@@ -1,6 +1,7 @@
 import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
+import { setTransitionHooks } from "vue";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -9,7 +10,8 @@ export const useDevicesStore = defineStore("devices", {
   state: () => ({
     loading: false,
     devices: [],
-    devices_state: new Map(),
+    reported: new Map(),
+    desired: new Map(),
     subscribed: [],
   }),
 
@@ -31,7 +33,12 @@ export const useDevicesStore = defineStore("devices", {
       return pool.filter((d) => d.namespace == ns);
     },
     device_state: (state) => {
-      return (device_id) => state.devices_state.get(device_id) ?? {};
+      return (device_id) => {
+        return {
+          reported: state.reported.get(device_id) ?? {},
+          desired: state.desired.get(device_id) ?? {},
+        };
+      };
     },
     device_subscribed: (state) => {
       return (device_id) => state.subscribed.includes(device_id);
@@ -62,21 +69,11 @@ export const useDevicesStore = defineStore("devices", {
           return;
         }
 
-        let curr = this.devices_state.get(response.device);
-        let exist = true;
-        if (!curr) {
-          exist = false;
+        if (response.reported) {
+          this.reported.set(response.device, response.reported);
         }
-
-        if (response.reportedState) {
-          curr.reported = response.reportedState;
-        }
-        if (response.desiredState) {
-          curr.desired = response.desiredState;
-        }
-
-        if (!exist) {
-          this.devices_state.set(response.device, curr);
+        if (response.desired) {
+          this.desired.set(response.device, response.desired);
         }
       };
       socket.onclose = () => {
@@ -109,8 +106,9 @@ export const useDevicesStore = defineStore("devices", {
         },
       });
 
-      for (let [uuid, state] of Object.entries(data.pool)) {
-        this.devices_state.set(uuid, state);
+      for (let shadow of data.shadows) {
+        this.reported.set(shadow.device, shadow.reported);
+        this.desired.set(shadow.device, shadow.desired);
       }
     },
     async patchDesiredState(device, state, bar) {

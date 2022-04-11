@@ -31,13 +31,6 @@
       align="center"
       v-if="reported && expanded.includes('reported')"
     >
-      <n-statistic label="Version">
-        <n-number-animation
-          :from="0"
-          :to="parseInt(reported.version)"
-          :active="true"
-        />
-      </n-statistic>
       <n-statistic label="Timestamp">
         <n-date-picker
           input-readonly
@@ -78,13 +71,6 @@
       align="center"
       v-if="desired && expanded.includes('desired')"
     >
-      <n-statistic label="Version">
-        <n-number-animation
-          :from="0"
-          :to="parseInt(desired.version)"
-          :active="true"
-        />
-      </n-statistic>
       <n-statistic label="Timestamp">
         <n-date-picker
           input-readonly
@@ -160,7 +146,7 @@ const expanded = computed({
 
 const reported = computed(() => {
   let state = props.state;
-  if (!state || !state.reported || state.reported.version == "0") {
+  if (!state || !state.reported || !state.reported.timestamp) {
     return false;
   }
   return state.reported;
@@ -168,7 +154,7 @@ const reported = computed(() => {
 
 const desired = computed(() => {
   let state = props.state;
-  if (!state || !state.desired || state.desired.version == "0") {
+  if (!state || !state.desired || !state.desired.timestamp) {
     return false;
   }
   return state.desired;
