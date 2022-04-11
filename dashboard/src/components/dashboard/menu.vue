@@ -14,7 +14,7 @@ import { RouterLink, useRoute } from "vue-router";
 import { NMenu } from "naive-ui";
 
 import { renderIcon } from "@/utils";
-import { HardwareChipOutline } from "@vicons/ionicons5";
+import { HardwareChipOutline, PeopleOutline } from "@vicons/ionicons5";
 
 const props = defineProps({
   collapsed: {
@@ -26,6 +26,20 @@ const props = defineProps({
 const route = useRoute();
 const selected = computed(() => route.name);
 const menuOptions = ref([
+  {
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            name: "Accounts",
+          },
+        },
+        { default: () => "Accounts" }
+      ),
+    key: "Accounts",
+    icon: renderIcon(PeopleOutline),
+  },
   {
     label: () =>
       h(

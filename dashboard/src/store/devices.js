@@ -1,7 +1,6 @@
 import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
-import { setTransitionHooks } from "vue";
 
 const as = useAppStore();
 const nss = useNSStore();
