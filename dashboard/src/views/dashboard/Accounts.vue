@@ -119,7 +119,7 @@ import { storeToRefs } from "pinia";
 import AccountCreate from "@/components/accounts/create-drawer.vue";
 
 const store = useAccountsStore();
-const { accounts, loading } = storeToRefs(store);
+const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
 
 const pool = computed(() => accounts);
 

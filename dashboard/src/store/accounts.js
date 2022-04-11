@@ -11,6 +11,21 @@ export const useAccountsStore = defineStore("accounts", {
     accounts: [],
   }),
 
+  getters: {
+    accounts_ns_filtered: (state) => {
+      let ns = nss.selected;
+      let pool = state.accounts
+        .map((d) => {
+          d.sorter = d.enabled + d.accessLevel;
+          return d;
+        })
+        .sort((a, b) => b.sorter - a.sorter);
+      if (ns == "all") {
+        return pool;
+      }
+      return pool.filter((a) => a.namespace == ns);
+    },
+  },
   actions: {
     async fetchAccounts() {
       this.loading = true;
