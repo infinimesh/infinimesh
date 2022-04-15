@@ -20,7 +20,8 @@ jobs:
         with:
           image-names: ${{ github.event.inputs.images }}
           cut-off: A day ago UTC
-          account-type: personal
+          account-type: org
+          org-name: infinimesh
           untagged-only: true
           token: ${{ secrets.PACKAGES_PAT }}
 
@@ -29,7 +30,8 @@ jobs:
         with:
           image-names: ${{ github.event.inputs.images }}
           cut-off: 2 weeks ago UTC
-          account-type: personal
+          account-type: org
+          org-name: infinimesh
           filter-tags: dev-*
           filter-include-untagged: true
           token: ${{ secrets.PACKAGES_PAT }}
