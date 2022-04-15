@@ -8,7 +8,7 @@ on:
       images:
         description: 'comma-separated Images Names list'
         required: true
-        default: infinimesh/frontend, infinimesh/mqtt-bridge, infinimesh/devices-registry, infinimesh/apiserver, infinimesh/nodeserver, infinimesh/shadow-api, infinimesh/apiserver-rest, infinimesh/grafana-proxy, infinimesh/telemetry-router, infinimesh/shadow-delta-merger, infinimesh/shadow-persister
+        default: infinimesh/frontend, infinimesh/mqtt-bridge, infinimesh/device-registry, infinimesh/apiserver, infinimesh/nodeserver, infinimesh/shadow-api, infinimesh/apiserver-rest, infinimesh/grafana-proxy, infinimesh/telemetry-router, infinimesh/shadow-delta-merger, infinimesh/shadow-persister
 
 jobs:
   clean-ghcr:
