@@ -1,0 +1,35 @@
+name: Delete old container images
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'comma-separated Images Names list'
+        required: true
+        default: infinimesh/frontend, infinimesh/mqtt-bridge, infinimesh/devices-registry, infinimesh/apiserver, infinimesh/nodeserver, infinimesh/shadow-api, infinimesh/apiserver-rest, infinimesh/grafana-proxy, infinimesh/telemetry-router, infinimesh/shadow-delta-merger, infinimesh/shadow-persister
+
+jobs:
+  clean-ghcr:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Untagged Images (> 1 day)
+        uses: snok/container-retention-policy@v1
+        with:
+          image-names: ${{ github.event.inputs.images }}
+          cut-off: A day ago UTC
+          account-type: personal
+          untagged-only: true
+          token: ${{ secrets.PACKAGES_PAT }}
+
+      - name: Dev Images (> 2 weeks)
+        uses: snok/container-retention-policy@v1
+        with:
+          image-names: ${{ github.event.inputs.images }}
+          cut-off: 2 weeks ago UTC
+          account-type: personal
+          filter-tags: dev-*
+          filter-include-untagged: true
+          token: ${{ secrets.PACKAGES_PAT }}
