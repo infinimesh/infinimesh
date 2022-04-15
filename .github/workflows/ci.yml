@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows:
       - tests
-    branches:
-      - master
     types:
       - completed
 
@@ -13,12 +11,6 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  wait-for-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check Tests
-        uses: ahmadnassri/action-workflow-run-wait@v1
-
   prepare:
     runs-on: ubuntu-latest
     needs: wait-for-tests
