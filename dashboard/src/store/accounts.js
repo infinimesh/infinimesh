@@ -47,6 +47,20 @@ export const useAccountsStore = defineStore("accounts", {
         return e;
       }
     },
+    async updateAccount(account, bar) {
+      bar.start();
+      try {
+        await as.http.patch(`/accounts/${account.uuid}`, account);
+
+        this.fetchAccounts();
+        bar.finish();
+        return false;
+      } catch (e) {
+        console.error(e);
+        bar.error();
+        return e;
+      }
+    },
     async deleteAccount(uuid, bar) {
       bar.start();
       try {
