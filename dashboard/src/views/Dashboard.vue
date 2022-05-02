@@ -3,22 +3,18 @@
     <n-layout-header>
       <dashboard-nav />
     </n-layout-header>
-    <n-layout has-sider>
-      <n-layout-sider
-        collapse-mode="width"
-        :collapsed-width="64"
-        :width="240"
-        :collapsed="collapsed"
-        @mouseover="collapsed = false"
-        @mouseleave="collapsed = true"
-      >
+    <n-layout has-sider :content-style="{ minHeight: '90vh' }">
+      <n-layout-sider collapse-mode="width" :collapsed-width="64" :width="240" :collapsed="collapsed"
+        @mouseover="collapsed = false" @mouseleave="collapsed = true">
         <dashboard-menu :collapsed="collapsed" />
       </n-layout-sider>
-      <n-layout-content content-style="padding: 24px;">
+      <n-layout-content content-style="padding: 24px;" :native-scrollbar="false">
         <router-view />
       </n-layout-content>
     </n-layout>
-    <n-layout-footer><dashboard-footer /></n-layout-footer>
+    <n-layout-footer>
+      <dashboard-footer />
+    </n-layout-footer>
   </n-layout>
 </template>
 

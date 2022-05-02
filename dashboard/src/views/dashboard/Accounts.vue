@@ -27,12 +27,8 @@
           <td>
             <n-tooltip trigger="hover">
               <template #trigger>
-                <n-button
-                  tertiary
-                  round
-                  :type="account.enabled ? 'success' : 'error'"
-                  @click="handleCopyUUID(account.uuid)"
-                >
+                <n-button tertiary round :type="account.enabled ? 'success' : 'error'"
+                  @click="handleCopyUUID(account.uuid)">
                   <template #icon>
                     <n-icon>
                       <copy-outline />
@@ -62,11 +58,7 @@
             <n-space>
               <n-tooltip trigger="hover">
                 <template #trigger>
-                  <n-button
-                    tertiary
-                    round
-                    :type="account.enabled ? 'error' : 'success'"
-                  >
+                  <n-button tertiary round :type="account.enabled ? 'error' : 'success'">
                     <template #icon>
                       <n-icon>
                         <ban-outline v-if="account.enabled" />
@@ -79,13 +71,7 @@
               </n-tooltip>
               <n-popconfirm @positive-click="handleDelete">
                 <template #trigger>
-                  <n-button
-                    v-if="account.accessLevel > 2"
-                    type="error"
-                    round
-                    secondary
-                    >Delete</n-button
-                  >
+                  <n-button v-if="account.accessLevel > 2" type="error" round secondary>Delete</n-button>
                 </template>
                 Are you sure about deleting this account?
               </n-popconfirm>
