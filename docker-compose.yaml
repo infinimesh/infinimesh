@@ -49,6 +49,7 @@ services:
       DB_HOST: db:8529
       DB_CRED: root:openSesame
       SHADOW_HOST: shadow:8080
+      INF_DEFAULT_ROOT_PASS: infinimesh
       SIGNING_KEY: "${SIGNING_KEY}"
   shadow:
     image: ghcr.io/infinimesh/infinimesh/shadow:latest

@@ -28,7 +28,6 @@ import (
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
-	connectdb "github.com/infinimesh/infinimesh/pkg/shared/connectdb"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -42,6 +41,7 @@ var (
 
 	arangodbHost  string
 	arangodbCred  string
+	rootPass 	  string
 	SIGNING_KEY   []byte
 	services 			map[string]bool
 )
@@ -53,7 +53,7 @@ func init() {
 	viper.SetDefault("DB_HOST", "db:8529")
 	viper.SetDefault("DB_CRED", "root:openSesame")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
-	viper.SetDefault("ROOT_PASSWORD", "infinimesh")
+	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
 	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow")
 
@@ -62,6 +62,7 @@ func init() {
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
 	SIGNING_KEY = []byte(viper.GetString("SIGNING_KEY"))
+	rootPass = viper.GetString("INF_DEFAULT_ROOT_PASS")
 
 	services = make(map[string]bool)
 	for _, s := range strings.Split(viper.GetString("SERVICES"), ",") {
@@ -78,11 +79,8 @@ func main() {
 		_ = log.Sync()
 	}()
 	
-	passwd := viper.GetString("ROOT_PASSWORD")
-	schema.InitDB(log, arangodbHost, arangodbCred, passwd, true)
-	
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
-	db := connectdb.MakeDBConnection(log, arangodbHost, arangodbCred)
+	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
 	log.Info("DB connection established")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
@@ -109,6 +107,11 @@ func main() {
 		acc_ctrl := graph.NewAccountsController(log, db)
 		acc_ctrl.SIGNING_KEY = SIGNING_KEY
 		pb.RegisterAccountsServiceServer(s, acc_ctrl)
+
+		err := acc_ctrl.EnsureRootExists(rootPass)
+		if err != nil {
+			log.Warn("Failed to ensure root exists", zap.Error(err))
+		}
 	}
 	if _, ok := services["namespaces"]; ok {
 		log.Info("Registering namespaces service")
