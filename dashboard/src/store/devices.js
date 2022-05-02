@@ -95,6 +95,7 @@ export const useDevicesStore = defineStore("devices", {
     },
     // pool - array of devices UUIDs
     async getDevicesState(pool, token) {
+      if (pool.length == 0) return
       if (!token) {
         token = await this.makeDevicesToken(pool);
       }
