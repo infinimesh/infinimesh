@@ -6,7 +6,17 @@
           <n-text type="info"> Accounts </n-text>
         </n-h1>
       </n-grid-item>
-      <n-grid-item span="18"> </n-grid-item>
+      <n-grid-item span="15"> </n-grid-item>
+      <n-grid-item span="3">
+        <n-button strong secondary round type="info" @click="e => store.fetchAccounts()">
+          <template #icon>
+            <n-icon>
+              <refresh-outline />
+            </n-icon>
+          </template>
+          Refresh
+        </n-button>
+      </n-grid-item>
       <n-grid-item span="3">
         <account-create />
       </n-grid-item>
