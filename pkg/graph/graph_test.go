@@ -64,7 +64,7 @@ func init() {
 	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
 	
 	ctrl = NewAccountsController(log, db)
-	err := ctrl.EnsureRootExists(rootPass)
+	err := EnsureRootExists(log, db, rootPass)
 	if err != nil {
 		panic(err)
 	}

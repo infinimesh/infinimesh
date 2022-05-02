@@ -102,22 +102,30 @@ func main() {
 
 	log.Debug("Registering services", zap.Any("services", services))
 
+	ensure_root := false
 	if _, ok := services["accounts"]; ok {
 		log.Info("Registering accounts service")
 		acc_ctrl := graph.NewAccountsController(log, db)
 		acc_ctrl.SIGNING_KEY = SIGNING_KEY
 		pb.RegisterAccountsServiceServer(s, acc_ctrl)
 
-		err := acc_ctrl.EnsureRootExists(rootPass)
-		if err != nil {
-			log.Warn("Failed to ensure root exists", zap.Error(err))
-		}
+		ensure_root = true
 	}
 	if _, ok := services["namespaces"]; ok {
 		log.Info("Registering namespaces service")
 		ns_ctrl := graph.NewNamespacesController(log, db)
 		pb.RegisterNamespacesServiceServer(s, ns_ctrl)
+		
+		ensure_root = true
 	}
+
+	if ensure_root {
+		err := graph.EnsureRootExists(log, db, rootPass)
+		if err != nil {
+			log.Warn("Failed to ensure root exists", zap.Error(err))
+		}
+	}
+
 	if _, ok := services["devices"]; ok {
 		log.Info("Registering devices service")
 		dev_ctrl := graph.NewDevicesController(log, db)

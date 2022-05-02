@@ -28,14 +28,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
+func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err error) {
 
 	ctx := context.TODO()
-	db := ctrl.db
-	log := ctrl.log.Named("EnsureRootExists")
+	log := _log.Named("EnsureRootExists")
 
 	log.Debug("Checking Root Account exists")
-	exists, err := ctrl.col.DocumentExists(ctx, schema.ROOT_ACCOUNT_KEY)
+	col, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
+	exists, err := col.DocumentExists(ctx, schema.ROOT_ACCOUNT_KEY)
 	if err != nil {
 		log.Error("Error checking Root Account existance")
 		return err
@@ -44,7 +44,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 	var meta driver.DocumentMeta
 	if !exists {
 		log.Debug("Root Account doesn't exist, creating")
-		meta, err = ctrl.col.CreateDocument(ctx, Account{ 
+		meta, err = col.CreateDocument(ctx, Account{ 
 			Account: &accpb.Account{
 				Title: "infinimesh",
 				Enabled: true,
@@ -58,7 +58,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 		log.Debug("Created root Account", zap.Any("result", meta))
 	}
 	var acc accpb.Account
-	meta, err = ctrl.col.ReadDocument(ctx, schema.ROOT_ACCOUNT_KEY, &acc)
+	meta, err = col.ReadDocument(ctx, schema.ROOT_ACCOUNT_KEY, &acc)
 	if err != nil {
 		log.Error("Error reading Root Account")
 		return err
@@ -68,7 +68,7 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 		DocumentMeta: meta,
 	}
 
-	ns_col, _ := ctrl.col.Database().Collection(ctx, schema.NAMESPACES_COL)
+	ns_col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	exists, err = ns_col.DocumentExists(ctx, schema.ROOT_NAMESPACE_KEY)
 	if err != nil || !exists {
 		meta, err := ns_col.CreateDocument(ctx, Namespace{ 
@@ -109,13 +109,14 @@ func (ctrl *AccountsController) EnsureRootExists(passwd string) (err error) {
 	}
 
 	ctx = context.WithValue(ctx, schema.InfinimeshAccount, schema.ROOT_ACCOUNT_KEY)
-	cred_edge_col, _ := ctrl.col.Database().Collection(ctx, schema.ACC2CRED)
+	cred_edge_col, _ := db.Collection(ctx, schema.ACC2CRED)
 	cred, err := credentials.NewStandardCredentials("infinimesh", passwd)
 	if err != nil {
 		log.Error("Error creating Root Account Credentials")
 		return err
 	}
 
+	ctrl := NewAccountsController(log, db)
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
 		err = ctrl.SetCredentialsCtrl(ctx, *root, cred_edge_col, cred)
