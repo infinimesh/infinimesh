@@ -68,7 +68,8 @@
             <n-space>
               <n-tooltip trigger="hover">
                 <template #trigger>
-                  <n-button tertiary round :type="account.enabled ? 'error' : 'success'">
+                  <n-button tertiary round :type="account.enabled ? 'error' : 'success'"
+                    @click="e => handleToggleAccountEnabled(account)">
                     <template #icon>
                       <n-icon>
                         <ban-outline v-if="account.enabled" />
@@ -163,5 +164,7 @@ const bar = useLoadingBar();
 function handleDelete(uuid) {
   store.deleteAccount(uuid, bar)
 }
+function handleToggleAccountEnabled(account) {
+  store.updateAccount({ ...account, enabled: !account.enabled }, bar);
 }
 </script>
