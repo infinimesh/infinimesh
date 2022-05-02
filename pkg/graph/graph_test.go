@@ -856,6 +856,7 @@ EzfzAZe0LDxgsHmBEjfZHyjtmXuq2q0S
 				PemData: cert,
 			},
 		},
+		Namespace: schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
@@ -927,6 +928,7 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 				PemData: cert,
 			},
 		},
+		Namespace: schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
@@ -990,6 +992,7 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 				PemData: cert,
 			},
 		},
+		Namespace: schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
