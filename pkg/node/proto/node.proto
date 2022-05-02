@@ -63,20 +63,20 @@ service AccountsService {
     };
   };
   rpc Update(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
-    option(google.api.http) = {
+    option (google.api.http) = {
       patch: "/accounts/{uuid}"
       body: "*"
     };
   };
   rpc Delete(infinimesh.node.accounts.Account) returns (DeleteResponse) {
-    option(google.api.http) = {
+    option (google.api.http) = {
       delete: "/accounts/{uuid}"
     };
   };
 
 
   rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse) {
-    option(google.api.http) = {
+    option (google.api.http) = {
       post: "/accounts/{uuid}/credentials"
       body: "*"
     };
