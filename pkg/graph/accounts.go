@@ -190,6 +190,10 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
 
+	if request.Account.GetDefaultNamespace() == "" {
+		request.Account.DefaultNamespace = ns_id
+	}
+
 	account := Account{Account: request.GetAccount()}
 	meta, err := c.col.CreateDocument(ctx, account)
 	if err != nil {
