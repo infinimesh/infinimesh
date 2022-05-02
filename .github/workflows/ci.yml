@@ -9,6 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_TAG: ${{github.ref_name == 'master' && 'latest' || github.ref_name}}
 
 jobs:
   prepare:
@@ -42,7 +43,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3.6.1
         with:
-          tags: type=raw,value=latest
+          tags: type=raw,value=${{env.IMAGE_TAG}}
           images: ${{ env.REGISTRY }}/infinimesh/infinimesh/${{matrix.tag}}
 
       - name: Log in to the Container registry
