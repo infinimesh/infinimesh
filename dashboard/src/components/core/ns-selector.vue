@@ -1,12 +1,7 @@
 <template>
   <n-space justify="space-between" align="center">
     <n-spin size="small" v-show="loading" />
-    <n-select
-      v-model:value="selected"
-      :options="options"
-      :style="{ minWidth: '15vw' }"
-      @update:show="handleShow"
-    />
+    <n-select v-model:value="selected" :options="options" :style="{ minWidth: '15vw' }" @update:show="handleShow" />
   </n-space>
 </template>
 
@@ -38,7 +33,7 @@ function handleShow(show) {
 
 watch(namespaces, () => {
   if (!selected.value) {
-    selected.value = namespaces.value[0].uuid;
+    selected.value = (namespaces.value[0] ?? { uuid: "all" }).uuid;
   }
 });
 
