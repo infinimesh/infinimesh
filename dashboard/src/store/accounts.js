@@ -33,5 +33,19 @@ export const useAccountsStore = defineStore("accounts", {
       this.accounts = data.accounts;
       this.loading = false;
     },
+    async createAccount(request, bar) {
+      bar.start();
+      try {
+        await as.http.put(`/accounts`, request);
+
+        this.fetchAccounts();
+        bar.finish();
+        return false;
+      } catch (e) {
+        console.error(e);
+        bar.error();
+        return e;
+      }
+    },
   },
 });
