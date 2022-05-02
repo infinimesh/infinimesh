@@ -69,7 +69,7 @@
                 </template>
                 Click to {{ account.enabled ? "disable" : "enable" }} Account
               </n-tooltip>
-              <n-popconfirm @positive-click="handleDelete">
+              <n-popconfirm @positive-click="() => handleDelete(account.uuid)">
                 <template #trigger>
                   <n-button v-if="account.accessLevel > 2" type="error" round secondary>Delete</n-button>
                 </template>
@@ -97,9 +97,9 @@ import {
   NGrid,
   NGridItem,
   NH1,
-  NText,
+  NText, useLoadingBar
 } from "naive-ui";
-import { CopyOutline, CheckmarkOutline, BanOutline } from "@vicons/ionicons5";
+import { CopyOutline, CheckmarkOutline, BanOutline, RefreshOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
 import { storeToRefs } from "pinia";
 import AccountCreate from "@/components/accounts/create-drawer.vue";
@@ -149,7 +149,9 @@ function AccessBadge(props, context) {
   );
 }
 
+const bar = useLoadingBar();
 function handleDelete(uuid) {
-  console.log(uuid);
+  store.deleteAccount(uuid, bar)
+}
 }
 </script>

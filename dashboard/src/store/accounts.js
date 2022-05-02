@@ -47,5 +47,17 @@ export const useAccountsStore = defineStore("accounts", {
         return e;
       }
     },
+    async deleteAccount(uuid, bar) {
+      bar.start();
+      try {
+        await as.http.delete(`/accounts/${uuid}`);
+        bar.finish();
+
+        this.fetchAccounts();
+      } catch (e) {
+        console.error(e);
+        bar.error();
+      }
+    },
   },
 });
