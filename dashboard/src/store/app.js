@@ -23,7 +23,6 @@ export const useAppStore = defineStore("app", {
   },
   actions: {
     logout() {
-      console.log(this);
       this.$reset();
     },
   },

@@ -2,7 +2,10 @@
   <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
     header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
     <template #header-extra>
-      <n-button type="info" ghost @click="login">Login</n-button>
+      <n-space>
+        <theme-picker />
+        <n-button type="info" ghost @click="login">Login</n-button>
+      </n-space>
     </template>
     <n-space vertical>
       <n-input v-model:value="username" placeholder="Username"></n-input>
@@ -25,6 +28,7 @@ import {
 } from "naive-ui";
 import { useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
+import ThemePicker from "@/components/core/theme-picker.vue";
 
 const store = useAppStore();
 const router = useRouter();
