@@ -259,6 +259,29 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	return acc, nil
 }
 
+func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+	log := c.log.Named("Update")
+	log.Debug("Update request received", zap.Any("account", acc), zap.Any("context", ctx))
+
+	curr, err := c.Get(ctx, acc)
+	if err != nil {
+		return nil, err
+	}
+
+	if curr.GetAccessLevel() < int32(schema.MGMT) {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.Uuid)
+	}
+
+	res := NewAccountFromPB(curr)
+	err = Toggle(ctx, c.db, res, "enabled")
+	if err != nil {
+		log.Error("Error updating Account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Account")
+	}
+
+	return res.Account, nil
+}
+
 func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*pb.DeleteResponse, error)  {
 	log := c.log.Named("Delete")
 	log.Debug("Delete request received", zap.Any("request", req), zap.Any("context", ctx))

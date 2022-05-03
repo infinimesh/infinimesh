@@ -56,6 +56,12 @@ func NewBlankDeviceDocument(key string) (*Device) {
 	}
 }
 
+func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
+	return &Device{
+		Device: dev,
+		DocumentMeta: NewBlankDocument(schema.DEVICES_COL, dev.Uuid),
+	}
+}
 
 type DevicesController struct {
 	pb.UnimplementedDevicesServiceServer
@@ -175,21 +181,20 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 }
 
 func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
-		log := c.log.Named("Update")
-		log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
-
-		curr, err := c.Get(ctx, dev)
-		if err != nil {
-			return nil, err
-		}
+	log := c.log.Named("Update")
+	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+	
+	curr, err := c.Get(ctx, dev)
+	if err != nil {
+		return nil, err
+	}
 
 	if curr.GetAccessLevel() < int32(schema.MGMT) {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
-	curr.Enabled = !curr.Enabled
-
-	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	res := NewDeviceFromPB(curr)
+	err = Toggle(ctx, c.db, res, "enabled")
 	if err != nil {
 		log.Error("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
@@ -199,21 +204,20 @@ func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*dev
 }
 
 func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
-		log := c.log.Named("Update")
-		log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
-
-		curr, err := c.Get(ctx, dev)
-		if err != nil {
-			return nil, err
-		}
+	log := c.log.Named("Update")
+	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+	
+	curr, err := c.Get(ctx, dev)
+	if err != nil {
+		return nil, err
+	}
 
 	if curr.GetAccessLevel() < int32(schema.MGMT) {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
-	curr.BasicEnabled = !curr.BasicEnabled
-
-	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	res := NewDeviceFromPB(curr)
+	err = Toggle(ctx, c.db, res, "basic_enabled")
 	if err != nil {
 		log.Error("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")

@@ -31,6 +31,7 @@ type AccountsServiceClient interface {
 	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
+	Toggle(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error)
 	SetCredentials(ctx context.Context, in *SetCredentialsRequest, opts ...grpc.CallOption) (*SetCredentialsResponse, error)
 }
@@ -88,6 +89,15 @@ func (c *accountsServiceClient) Update(ctx context.Context, in *accounts.Account
 	return out, nil
 }
 
+func (c *accountsServiceClient) Toggle(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error) {
+	out := new(accounts.Account)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Toggle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *accountsServiceClient) Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Delete", in, out, opts...)
@@ -115,6 +125,7 @@ type AccountsServiceServer interface {
 	List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
+	Toggle(context.Context, *accounts.Account) (*accounts.Account, error)
 	Delete(context.Context, *accounts.Account) (*DeleteResponse, error)
 	SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse, error)
 	mustEmbedUnimplementedAccountsServiceServer()
@@ -138,6 +149,9 @@ func (UnimplementedAccountsServiceServer) Create(context.Context, *accounts.Crea
 }
 func (UnimplementedAccountsServiceServer) Update(context.Context, *accounts.Account) (*accounts.Account, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (UnimplementedAccountsServiceServer) Toggle(context.Context, *accounts.Account) (*accounts.Account, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Toggle not implemented")
 }
 func (UnimplementedAccountsServiceServer) Delete(context.Context, *accounts.Account) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
@@ -248,6 +262,24 @@ func _AccountsService_Update_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountsService_Toggle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(accounts.Account)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountsServiceServer).Toggle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.AccountsService/Toggle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountsServiceServer).Toggle(ctx, req.(*accounts.Account))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AccountsService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(accounts.Account)
 	if err := dec(in); err != nil {
@@ -310,6 +342,10 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Update",
 			Handler:    _AccountsService_Update_Handler,
+		},
+		{
+			MethodName: "Toggle",
+			Handler:    _AccountsService_Toggle_Handler,
 		},
 		{
 			MethodName: "Delete",

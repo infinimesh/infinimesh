@@ -17,6 +17,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -158,4 +159,22 @@ func AccessLevel(ctx context.Context, db driver.Database, account *Account, node
 		}
 	}
 	return access > 0, access
+}
+
+const toggleQuery = `
+LET o = DOCUMENT(@node)
+UPDATE o WITH {%[1]s: !o.%[1]s} IN @@col RETURN NEW 
+`
+func Toggle(ctx context.Context,  db driver.Database, node InfinimeshGraphNode, field string) (error) {
+	c, err := db.Query(ctx, fmt.Sprintf(toggleQuery, field), map[string]interface{}{
+		"node": node.ID(),
+		"@col": node.ID().Collection(),
+	})
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	_, err = c.ReadDocument(ctx, &node)
+	return err
 }

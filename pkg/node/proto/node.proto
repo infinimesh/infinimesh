@@ -68,6 +68,13 @@ service AccountsService {
       body: "*"
     };
   };
+  rpc Toggle(infinimesh.node.accounts.Account) returns (infinimesh.node.accounts.Account) {
+    option (google.api.http) = {
+      post: "/accounts/{uuid}/toggle"
+      body: "*"
+    };
+  };  
+
   rpc Delete(infinimesh.node.accounts.Account) returns (DeleteResponse) {
     option (google.api.http) = {
       delete: "/accounts/{uuid}"

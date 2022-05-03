@@ -165,6 +165,6 @@ function handleDelete(uuid) {
   store.deleteAccount(uuid, bar)
 }
 function handleToggleAccountEnabled(account) {
-  store.updateAccount({ ...account, enabled: !account.enabled }, bar);
+  store.toggle(account.uuid, bar);
 }
 </script>
