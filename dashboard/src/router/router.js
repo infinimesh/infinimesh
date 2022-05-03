@@ -1,12 +1,15 @@
+import { nextTick } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { useAppStore } from "@/store/app";
 
+const BASE_TITLE = 'infinimesh';
 const routes = [
   {
     path: "/login",
     name: "Login",
     component: () => import("@/views/Login.vue"),
     meta: {
+      title: "Login",
       requiresAuth: false,
     },
   },
@@ -23,6 +26,7 @@ const routes = [
     name: "Dashboard",
     component: () => import("@/views/Dashboard.vue"),
     meta: {
+      title: "Dashboard",
       requiresAuth: true,
     },
     children: [
@@ -30,11 +34,17 @@ const routes = [
         path: "devices",
         name: "Devices",
         component: () => import("@/views/dashboard/Devices.vue"),
+        meta: {
+          title: "Devices",
+        }
       },
       {
         path: "accounts",
         name: "Accounts",
         component: () => import("@/views/dashboard/Accounts.vue"),
+        meta: {
+          title: "Accounts",
+        }
       },
     ],
   },
@@ -43,6 +53,12 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+router.afterEach((to, from) => {
+  nextTick(() => {
+    document.title = [BASE_TITLE, to.meta.title].join(" | ");
+  });
 });
 
 router.beforeEach(async (to, from) => {
