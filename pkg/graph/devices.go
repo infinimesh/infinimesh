@@ -240,13 +240,15 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if *device.AccessLevel < 1 {
+	if *device.AccessLevel < int32(schema.READ) {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
 	post := false
-	if *device.AccessLevel > 1 {
+	if *device.AccessLevel > int32(schema.READ) {
 		post = true
+	} else {
+		device.Certificate = nil
 	}
 	token, err := c._MakeToken([]string{device.Uuid}, post, 0)
 	if err != nil {
@@ -313,6 +315,9 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
 		dev.Uuid = meta.ID.Key()
+		if *dev.AccessLevel < int32(schema.MGMT) {
+			dev.Certificate = nil
+		}
 		log.Debug("Got document", zap.Any("device", &dev))
 		r = append(r, &dev)
 	}
