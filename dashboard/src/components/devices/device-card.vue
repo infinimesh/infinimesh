@@ -4,9 +4,10 @@
       <template #header-extra>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
-            <span @click="handleUUIDClicked">
+            <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
+              @click="handleUUIDClicked">
               {{ device.uuid_short }}
-            </span>
+            </n-tag>
           </template>
           {{ device.uuid }}
         </n-tooltip>
