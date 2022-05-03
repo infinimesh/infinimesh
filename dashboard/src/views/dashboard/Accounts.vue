@@ -1,13 +1,13 @@
 <template>
   <n-spin :show="loading">
-    <n-grid responsive="screen">
-      <n-grid-item span="3">
+    <n-grid item-responsive>
+      <n-grid-item span="24 500:12 1000:4">
         <n-h1 prefix="bar" align-text type="info">
           <n-text type="info"> Accounts </n-text>
         </n-h1>
       </n-grid-item>
-      <n-grid-item span="15"> </n-grid-item>
-      <n-grid-item span="3">
+      <n-grid-item span="0 600:2 700:4 1000:12 1400:14"> </n-grid-item>
+      <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
         <n-button strong secondary round type="info" @click="e => store.fetchAccounts()">
           <template #icon>
             <n-icon>
@@ -17,16 +17,16 @@
           Refresh
         </n-button>
       </n-grid-item>
-      <n-grid-item span="3">
+      <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
         <account-create />
       </n-grid-item>
     </n-grid>
-    <n-table :bordered="false" :single-line="true">
+    <n-table :bordered="false" :single-line="true" style="margin-top: 10px">
       <thead>
         <tr>
           <th>UUID</th>
-          <th>Access</th>
           <th>Title</th>
+          <th>Access</th>
           <th>Namespace</th>
           <th>Default Namespace</th>
           <th>Actions</th>
@@ -51,12 +51,12 @@
             </n-tooltip>
           </td>
           <td>
-            <AccessBadge :access="account.accessLevel" />
-          </td>
-          <td>
             <strong>
               {{ account.title }}
             </strong>
+          </td>
+          <td>
+            <AccessBadge :access="account.accessLevel" />
           </td>
           <td>
             {{ account.namespace }}
