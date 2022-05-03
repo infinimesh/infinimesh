@@ -7,6 +7,8 @@ export const useAppStore = defineStore("app", {
     me: {
       title: "",
     },
+    theme: "dark",
+    theme_pick: "system",
   }),
   getters: {
     logged_in: (state) => state.token !== "",

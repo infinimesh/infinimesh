@@ -1,6 +1,5 @@
 <template>
-
-  <n-config-provider :theme="theme" :theme-overrides="overrides" :hljs="hljs">
+  <n-config-provider :theme="theme.it" :theme-overrides="theme.overrides" :hljs="hljs">
     <n-loading-bar-provider>
       <n-message-provider>
         <n-global-style />
@@ -22,17 +21,24 @@ import {
   NMessageProvider,
   darkTheme,
   lightTheme,
-  useOsTheme,
 } from "naive-ui";
+
+import { storeToRefs } from 'pinia';
+import { useAppStore } from "@/store/app"
 
 import lightThemeOverrides from "@/assets/light-theme-overrides.json"
 import darkThemeOverrides from "@/assets/dark-theme-overrides.json"
 
 import hljs from "@/utils/hljs";
 
-const osThemeRef = useOsTheme();
-const theme = computed(() => (osThemeRef.value === "dark" ? darkTheme : lightTheme))
-const overrides = computed(() => (osThemeRef.value === "dark" ? darkThemeOverrides : lightThemeOverrides))
+const { theme: pick } = storeToRefs(useAppStore())
+const theme = computed(() => {
+  return {
+    it: pick.value === "dark" ? darkTheme : lightTheme,
+    overrides: pick.value === "dark" ? darkThemeOverrides : lightThemeOverrides,
+  }
+})
+
 
 const watermark = ref(false)
 </script>
