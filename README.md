@@ -42,9 +42,13 @@ bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/ha
 Source: https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s
 
 ### Generating proto files
-```
-npm i -g merge-yaml-cli
-npm i -g api-spec-converter
+
+Simply navigate to cloned repo directory and run:
+
+```shell
+docker run -it \
+  -v $(pwd)/pkg:/go/src/github.com/infinimesh/infinimesh/pkg \
+  ghcr.io/infinimesh/infinimesh/buf:latest
 ```
 
 Start the local dev environment via `docker-compose up -d`.
