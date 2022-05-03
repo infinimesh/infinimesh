@@ -1,11 +1,6 @@
 <template>
   <n-spin :show="patching">
-    <n-card
-      hoverable
-      :title="device.title"
-      :header-style="{ fontFamily: 'Exo' }"
-      style="border-radius: 0"
-    >
+    <n-card hoverable :title="device.title" :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
       <template #header-extra>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
@@ -17,12 +12,7 @@
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon
-              size="2vh"
-              :color="bulb_color"
-              style="margin-left: 1vw"
-              @click="handleToggle"
-            >
+            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw" @click="handleToggle">
               <bulb />
             </n-icon>
           </template>
@@ -32,60 +22,31 @@
 
       <template #footer>
         <template v-if="show_ns">
-          Namespace: <strong>{{ device.namespace }}</strong> </template
-        ><br />
+          Namespace: <strong>{{ device.namespace }}</strong> </template><br />
         <template v-if="device.tags.length > 0">
           Tags:
-          <n-tag
-            type="warning"
-            round
-            v-for="tag in device.tags"
-            :key="tag"
-            style="margin-right: 3px"
-          >
+          <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
             {{ tag }}
           </n-tag>
         </template>
       </template>
 
       <template #action>
-        <device-state-collapse
-          :state="store.device_state(device.uuid)"
-          :patch="patch"
-          @submit="handlePatchDesired"
-        />
+        <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" @submit="handlePatchDesired" />
         <n-space justify="start" align="center" style="margin-top: 1vh">
-          <n-button
-            type="success"
-            round
-            tertiary
-            :disabled="subscribed"
-            @click="handleSubscribe"
-            >{{ subscribed ? "Subscribed" : "Subscribe" }}</n-button
-          >
+          <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">{{ subscribed ?
+              "Subscribed" : "Subscribe"
+          }}</n-button>
 
-          <n-button
-            v-if="device.accessLevel > 1"
-            type="warning"
-            round
-            tertiary
-            @click="patch = !patch"
-            >{{ patch ? "Cancel Patch" : "Patch Desired" }}</n-button
-          >
+          <n-button v-if="device.accessLevel > 1" type="warning" round tertiary @click="patch = !patch">{{ patch ?
+              "Cancel Patch" : "Patch Desired"
+          }}</n-button>
 
-          <n-button type="info" round tertiary @click="handleMakeToken"
-            >Make Device Token</n-button
-          >
+          <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
           <n-popconfirm @positive-click="handleDelete">
             <template #trigger>
-              <n-button
-                v-if="device.accessLevel > 2"
-                type="error"
-                round
-                secondary
-                >Delete</n-button
-              >
+              <n-button v-if="device.accessLevel > 2" type="error" round secondary>Delete</n-button>
             </template>
             Are you sure about deleting this device?
           </n-popconfirm>

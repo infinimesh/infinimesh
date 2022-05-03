@@ -15,8 +15,9 @@ import NsSelector from "@/components/core/ns-selector.vue";
 <style>
 span.infinimesh {
   font-size: 2vh;
-  font-family: "Exo", sans-serif;
+  font-family: "Exo 2", sans-serif;
 }
+
 span.copyright {
   vertical-align: super;
   font-size: 0.8vh;

@@ -1,23 +1,12 @@
 <template>
-  <n-card
-    embedded
-    :bordered="false"
-    hoverable
-    size="huge"
-    title="infinimesh"
-    :header-style="{ fontFamily: 'Exo', fontSize: '2vh' }"
-    class="login-card"
-  >
+  <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
+    header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
     <template #header-extra>
       <n-button type="info" ghost @click="login">Login</n-button>
     </template>
     <n-space vertical>
       <n-input v-model:value="username" placeholder="Username"></n-input>
-      <n-input
-        v-model:value="password"
-        type="password"
-        placeholder="Password"
-      ></n-input>
+      <n-input v-model:value="password" type="password" placeholder="Password"></n-input>
       <n-alert :title="error.title" type="error" v-if="error" />
       <n-alert title="Success! Redirecting..." type="success" v-if="success" />
     </n-space>
