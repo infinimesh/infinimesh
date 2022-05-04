@@ -434,10 +434,17 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	var acc Account
-	c.col.ReadDocument(ctx, req.GetUuid(), &acc)
+	acc := *NewBlankAccountDocument(req.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 
-	// Check requestor access to acc.GetUuid()
+	if err != nil {
+		log.Error("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()) , zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
+	}
+
+	if acc.Access.Level < access.AccessLevel_ROOT || acc.Access.Role != access.Role_OWNER {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+	}
 
 	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
 	cred, err := credentials.MakeCredentials(req.GetCredentials(), log)
