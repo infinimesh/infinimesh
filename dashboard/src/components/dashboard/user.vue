@@ -10,7 +10,7 @@
     </n-button>
   </n-dropdown>
 
-  <set-credentials-modal :show="show" @close="show = false" />
+  <set-credentials-modal :show="show" @close="show = false" :account="me" />
 </template>
 
 <script setup>

@@ -49,28 +49,31 @@ import { ref, watch } from "vue";
 import { NModal, NCard, NForm, NFormItem, NInput, NIcon, NButton, NSpace, useMessage, useLoadingBar, NTabs, NTabPane } from 'naive-ui';
 import { CloseOutline, EyeOffOutline, EyeOutline } from '@vicons/ionicons5';
 
-import { useAppStore } from "@/store/app";
 import { useAccountsStore } from "@/store/accounts";
+
+const store = useAccountsStore();
 
 const props = defineProps({
     show: {
         type: Boolean,
         default: false,
     },
+    account: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 const emit = defineEmits(['close'])
 
-const app = useAppStore();
-const store = useAccountsStore();
 const model = ref({
     type: 'standard',
-    data: [app.me.title, ''],
+    data: [props.account.title, ''],
 });
 
 function reset() {
     model.value = {
         type: 'standard',
-        data: [app.me.title, ''],
+        data: [props.account.title, ''],
     };
 }
 
@@ -84,7 +87,7 @@ watch(
 const message = useMessage();
 const bar = useLoadingBar();
 async function handleSubmit() {
-    let err = await store.setCredentials(app.me.uuid, model.value, bar);
+    let err = await store.setCredentials(props.account.uuid, model.value, bar);
     if (!err) {
         message.success('Credentials set');
         emit('close');
