@@ -14,12 +14,16 @@ import { storeToRefs } from "pinia";
 
 const store = useNSStore();
 
+function shortUUID(uuid) {
+  return uuid.substr(0, 8);
+}
+
 const { loading, selected, namespaces } = storeToRefs(store);
 const options = computed(() => {
   return [
     { label: "All", value: "all" },
     ...namespaces.value.map((ns) => ({
-      label: ns.title,
+      label: `${ns.title} (${shortUUID(ns.uuid)})`,
       value: ns.uuid,
     })),
   ];

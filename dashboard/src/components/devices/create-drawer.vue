@@ -93,9 +93,14 @@ watch(
 );
 
 const nss = useNSStore();
+
+function shortUUID(uuid) {
+  return uuid.substr(0, 8);
+}
+
 const namespaces = computed(() => {
   return nss.namespaces.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
-    label: ns.title,
+    label: `${ns.title} (${shortUUID(ns.uuid)})`,
     value: ns.uuid,
   }));
 });
