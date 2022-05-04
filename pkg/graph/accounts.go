@@ -210,7 +210,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	account.DocumentMeta = meta
 
 	ns := NewBlankNamespaceDocument(ns_id)
-	err = Link(ctx, log, c.acc2ns, ns, &account, access.AccessLevel_ADMIN, access.Role_UNSET)
+	err = Link(ctx, log, c.ns2acc, ns, &account, access.AccessLevel_ADMIN, access.Role_UNSET)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Error("Error Linking Namespace to Account", zap.Error(err))
@@ -401,7 +401,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 
 		return nil
 	}
-	ctrl.log.Debug("Credentials of type don't exist or failed to Read then from DB", zap.Error(err), zap.String("key", key))
+	ctrl.log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
 
 	cred, err := ctrl.cred.CreateDocument(ctx, c)	
 	if err != nil {

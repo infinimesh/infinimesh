@@ -620,10 +620,10 @@ func TestNewAccountNoNamespaceGiven(t *testing.T) {
 	}
 	acc := NewAccountFromPB(accpb.Account)
 
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	edge := GetEdgeCol(rootCtx, db, schema.NS2ACC)
 	ok := CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
 	if !ok {
-		t.Fatal("Account has to be under platform Namespace byt default")
+		t.Fatal("Account has to be under platform Namespace by default")
 	}
 }
 
