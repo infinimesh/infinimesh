@@ -23,6 +23,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
 	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"go.uber.org/zap"
@@ -101,7 +102,7 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 		log.Error("Error checking link Root Account to Root Namespace", zap.Error(err))
 		return err
 	} else if !exists {
-		err = Link(ctx, log, edge_col, root, rootNS, schema.ROOT)
+		err = Link(ctx, log, edge_col, root, rootNS, access.AccessLevel_ROOT, access.Role_OWNER)
 		if err != nil {
 			log.Error("Error linking Root Account to Root Namespace")
 			return err

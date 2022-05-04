@@ -2,6 +2,8 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
+import { access_lvl_conv } from "@/utils/access";
+
 const as = useAppStore();
 const nss = useNSStore();
 
@@ -22,14 +24,14 @@ export const useDevicesStore = defineStore("devices", {
       let pool = state.devices
         .map((d) => {
           d.sorter =
-            d.enabled + d.accessLevel + d.basicEnabled + subscribed.has(d.uuid);
+            d.enabled + access_lvl_conv(d) + d.basicEnabled + subscribed.has(d.uuid);
           return d;
         })
         .sort((a, b) => b.sorter - a.sorter);
       if (ns == "all") {
         return pool;
       }
-      return pool.filter((d) => d.namespace == ns);
+      return pool.filter((d) => d.access.namespace == ns);
     },
     device_state: (state) => {
       return (device_id) => {

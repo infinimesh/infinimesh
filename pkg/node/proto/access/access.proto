@@ -14,16 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 syntax = "proto3";
-package infinimesh.node.namespaces;
+package infinimesh.node.access;
 
-import "pkg/node/proto/access/access.proto";
-
-message Namespace {
-  string uuid = 1;
-  string title = 2;
-  optional infinimesh.node.access.Access access = 3;
+enum AccessLevel {
+    NONE = 0;
+    READ = 1;
+    MGMT = 2;
+    ADMIN = 3;
+    ROOT = 4;
 }
 
-message NamespacesPool {
-  repeated Namespace namespaces = 1;
+enum Role {
+    UNSET = 0;
+    OWNER = 1;
+}
+
+message Access {
+    AccessLevel level = 1;
+    Role role = 2;
+    optional string namespace = 3;
 }

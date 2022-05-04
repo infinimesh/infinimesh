@@ -23,7 +23,7 @@
 
       <template #footer>
         <template v-if="show_ns">
-          Namespace: <strong>{{ device.namespace }}</strong> </template><br />
+          Namespace: <strong>{{ device.access.namespace }}</strong> </template><br />
         <template v-if="device.tags.length > 0">
           Tags:
           <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
@@ -39,7 +39,7 @@
               "Subscribed" : "Subscribe"
           }}</n-button>
 
-          <n-button v-if="device.accessLevel > 1" type="warning" round tertiary @click="patch = !patch">{{ patch ?
+          <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">{{ patch ?
               "Cancel Patch" : "Patch Desired"
           }}</n-button>
 
@@ -47,7 +47,7 @@
 
           <n-popconfirm @positive-click="handleDelete">
             <template #trigger>
-              <n-button v-if="device.accessLevel > 2" type="error" round secondary>Delete</n-button>
+              <n-button v-if="access_lvl_conv(device) > 2" type="error" round secondary>Delete</n-button>
             </template>
             Are you sure about deleting this device?
           </n-popconfirm>
@@ -75,6 +75,8 @@ import { Bulb } from "@vicons/ionicons5";
 import DeviceStateCollapse from "./state-collapse.vue";
 
 import { useDevicesStore } from "@/store/devices";
+
+import { access_lvl_conv } from "@/utils/access";
 
 const props = defineProps({
   device: {
@@ -141,7 +143,7 @@ async function handleToggle() {
 async function handleMakeToken() {
   let token = await store.makeDevicesToken(
     [device.value.uuid],
-    device.value.accessLevel > 1
+    access_lvl_conv(device.value) > 1
   );
   try {
     await navigator.clipboard.writeText(token);

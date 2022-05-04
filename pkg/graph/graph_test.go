@@ -25,6 +25,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
@@ -553,14 +554,14 @@ func TestCreateNamespace(t *testing.T) {
 	}
 
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
-	var access Access
-	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY + "-" + nspb.Uuid, &access)
+	var _access Access
+	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY + "-" + nspb.Uuid, &_access)
 	if err != nil {
 		t.Fatalf("Can't read edge document or it doesn't exist: %v", err)
 	}
 
-	if access.Level < 3 {
-		t.Fatalf("Access level incorrect(%d), must be: %d", access.Level, schema.ADMIN)
+	if _access.Level < access.AccessLevel_ADMIN {
+		t.Fatalf("Access level incorrect(%d), must be: %d", _access.Level, access.AccessLevel_ADMIN)
 	}
 }
 
@@ -650,7 +651,7 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 	// Checking Account access to Root Account
 	ok, level := AccessLevel(rootCtx, db, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
 	if ok {
-		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.AccessLevel_NONE)
 	}
 }
 
@@ -712,7 +713,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), schema.MGMT)
+	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.AccessLevel_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -723,17 +724,17 @@ func TestPermissionsRootNamespace(t *testing.T) {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
 
-	if level > int32(schema.MGMT) {
-		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", level, schema.MGMT)
+	if level > access.AccessLevel_MGMT {
+		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", level, access.AccessLevel_MGMT)
 	}
-	if level < int32(schema.MGMT) {
-		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", level, schema.MGMT)
+	if level < access.AccessLevel_MGMT {
+		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", level, access.AccessLevel_MGMT)
 	}
 
 	// Checking Account 2 access to Account 1
 	ok, level = AccessLevel(rootCtx, db, acc2, acc1)
 	if ok {
-		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, schema.NONE)
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.AccessLevel_NONE)
 	}
 }
 
@@ -779,7 +780,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), schema.MGMT)
+	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.AccessLevel_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -792,17 +793,17 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
 
-	if *nacc2.AccessLevel > int32(schema.MGMT) {
-		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", nacc2.AccessLevel, schema.MGMT)
+	if nacc2.Access.Level > access.AccessLevel_MGMT {
+		t.Fatalf("Account 1 has higher access level than expected: %d(should be %d)", nacc2.Access.Level, access.AccessLevel_MGMT)
 	}
-	if *nacc2.AccessLevel < int32(schema.MGMT) {
-		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", nacc2.AccessLevel, schema.MGMT)
+	if nacc2.Access.Level < access.AccessLevel_MGMT {
+		t.Fatalf("Account 1 has lower access level than expected: %d(should be %d)", nacc2.Access.Level, access.AccessLevel_MGMT)
 	}
 
 	// Checking Account 2 access to Account 1
 	err = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
-	if err == nil && *nacc1.AccessLevel > int32(schema.NONE) {
-		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.AccessLevel, schema.NONE)
+	if err == nil && nacc1.Access.Level > access.AccessLevel_NONE {
+		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.Access.Level, access.AccessLevel_NONE)
 	}
 }
 

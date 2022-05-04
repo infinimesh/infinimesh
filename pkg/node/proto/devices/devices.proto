@@ -16,6 +16,8 @@ limitations under the License.
 syntax = "proto3";
 package infinimesh.node.devices;
 
+import "pkg/node/proto/access/access.proto";
+
 message Device {
   string uuid = 1;
   string title = 2;
@@ -24,8 +26,7 @@ message Device {
   repeated string tags = 5;
   bool basic_enabled = 6;
   string token = 7;
-  optional int32 access_level = 8;
-  optional string namespace = 9;
+  optional infinimesh.node.access.Access access = 8;
 }
 
 message Certificate {

@@ -2,6 +2,8 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
+import { access_lvl_conv } from "@/utils/access";
+
 const as = useAppStore();
 const nss = useNSStore();
 
@@ -15,15 +17,15 @@ export const useAccountsStore = defineStore("accounts", {
     accounts_ns_filtered: (state) => {
       let ns = nss.selected;
       let pool = state.accounts
-        .map((d) => {
-          d.sorter = d.enabled + d.accessLevel;
-          return d;
+        .map((acc) => {
+          acc.sorter = acc.enabled + access_lvl_conv(acc);
+          return acc;
         })
         .sort((a, b) => b.sorter - a.sorter);
       if (ns == "all") {
         return pool;
       }
-      return pool.filter((a) => a.namespace == ns);
+      return pool.filter((a) => a.access.namespace == ns);
     },
   },
   actions: {

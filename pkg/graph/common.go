@@ -21,13 +21,15 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
+	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
 	"go.uber.org/zap"
 )
 
 type Access struct {
 	From driver.DocumentID `json:"_from"`
 	To driver.DocumentID `json:"_to"`
-	Level schema.InfinimeshAccessLevel `json:"level"`
+	Level access.AccessLevel `json:"level"`
+	Role access.Role `json:"role,omitempty"`
 
 	driver.DocumentMeta
 }
@@ -35,7 +37,7 @@ type Access struct {
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
-	SetAccessLevel(level schema.InfinimeshAccessLevel)
+	SetAccessLevel(level access.AccessLevel)
 }
 
 func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
@@ -51,7 +53,7 @@ func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Co
 	return col
 }
 
-func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access schema.InfinimeshAccessLevel) error {
+func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access access.AccessLevel, role access.Role) error {
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
@@ -60,6 +62,7 @@ func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from Inf
 		From: from.ID(),
 		To: to.ID(),
 		Level: access,
+		Role: role,
 		DocumentMeta: driver.DocumentMeta {
 			Key: from.ID().Key() + "-" + to.ID().Key(),
 		},
@@ -72,10 +75,11 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 	return err == nil && r
 }
 
-const getWithAccessLevelAndNS = `
+const getWithAccessLevelRoleAndNS = `
 FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
 GRAPH @permissions SORT path.edges[0].level
-	RETURN MERGE(path.vertices[-1], { access_level: path.edges[0].level, namespace: path.vertices[-2]._key })
+    LET perm = path.edges[0]
+	RETURN MERGE(path.vertices[-1], { access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key }})
 `
 func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (error) {
 	vars :=  map[string]interface{}{
@@ -83,7 +87,7 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 		"node": node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	}
-	c, err := db.Query(ctx, getWithAccessLevelAndNS, vars)
+	c, err := db.Query(ctx, getWithAccessLevelRoleAndNS, vars)
 	if err != nil {
 		log.Debug("Error while executing query", zap.Any("vars", vars), zap.Error(err))
 		return err
@@ -97,12 +101,21 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 	}
 
 	if account.ID() == node.ID() {
-		node.SetAccessLevel(schema.ROOT)
+		node.SetAccessLevel(access.AccessLevel_ROOT)
 	}
 
 	return nil
 }
 
+const listObjectsOfKind = `
+FOR node, edge, path IN 0..@depth OUTBOUND @from
+GRAPH @permissions_graph
+OPTIONS {order: "bfs", uniqueVertices: "global"}
+FILTER IS_SAME_COLLECTION(@@kind, node)
+FILTER edge.level > 0
+    LET perm = path.edges[0]
+	RETURN MERGE(node, { access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key } })
+`
 // List children nodes
 // ctx - context
 // log - logger
@@ -111,28 +124,20 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 // children - children type(collection name)
 // depth
 func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
-	query := `
-FOR node, edge, path IN 0..@depth OUTBOUND @from
-	GRAPH @permissions_graph
-	OPTIONS {order: "bfs", uniqueVertices: "global"}
-	FILTER IS_SAME_COLLECTION(@@kind, node)
-	FILTER edge.level > 0
-	RETURN MERGE(node, { access_level: path.edges[0].level, namespace: path.vertices[-2]._key })`
 	bindVars := map[string]interface{}{
 		"depth": depth,
 		"from": from.ID(),
 		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
 		"@kind": children,
 	}
-
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
-	return db.Query(ctx, query, bindVars)
+	return db.Query(ctx, listObjectsOfKind, bindVars)
 }
 
 
-func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, int32) {
+func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, access.AccessLevel) {
 	if account.ID() == node.ID() {
-		return true, int32(schema.ROOT)
+		return true, access.AccessLevel_ROOT
 	}
 	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{
@@ -145,20 +150,20 @@ func AccessLevel(ctx context.Context, db driver.Database, account *Account, node
 	}
 	defer c.Close()
 
-	var access int32 = 0
+	_access := access.AccessLevel_NONE
 	for {
-		var level int32
+		var level access.AccessLevel
 		_, err := c.ReadDocument(ctx, &level)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			continue
 		}
-		if level > access {
-			access = level
+		if level > _access {
+			_access = level
 		}
 	}
-	return access > 0, access
+	return _access > access.AccessLevel_NONE, _access
 }
 
 const toggleQuery = `

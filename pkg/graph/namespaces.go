@@ -27,6 +27,7 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 
+	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 )
 type Namespace struct {
@@ -38,9 +39,14 @@ func (o *Namespace) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
-func (o *Namespace) SetAccessLevel(level schema.InfinimeshAccessLevel) {
-	il := int32(level)
-	o.AccessLevel = &il
+func (o *Namespace) SetAccessLevel(level access.AccessLevel) {
+	if o.Access == nil {
+		o.Access = &access.Access{
+			Level: level,
+		}
+		return
+	}
+	o.Access.Level = level
 }
 
 func NewBlankNamespaceDocument(key string) *Namespace {
@@ -91,7 +97,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	requestorAcc := NewBlankAccountDocument(requestor)
 	err = Link(ctx, log, c.acc2ns,
 		requestorAcc,
-		&namespace, schema.ADMIN,
+		&namespace, access.AccessLevel_ADMIN, access.Role_OWNER,
 	)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))

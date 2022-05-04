@@ -16,6 +16,8 @@ limitations under the License.
 syntax = "proto3";
 package infinimesh.node.accounts;
 
+import "pkg/node/proto/access/access.proto";
+
 message Credentials {
   string type = 1;
   repeated string data = 2;
@@ -26,8 +28,7 @@ message Account {
   string title = 2;
   bool enabled = 3;
   string default_namespace = 4;
-  optional int32 access_level = 5;
-  optional string namespace = 6;
+  optional infinimesh.node.access.Access access = 5;
 }
 
 message CreateRequest {

@@ -56,10 +56,10 @@
             </strong>
           </td>
           <td>
-            <AccessBadge :access="account.accessLevel" />
+            <AccessBadge :access="account.access.level" />
           </td>
           <td>
-            {{ account.namespace }}
+            {{ account.access.namespace }}
           </td>
           <td>
             {{ account.defaultNamespace || "-" }}
@@ -82,7 +82,7 @@
               </n-tooltip>
               <n-popconfirm @positive-click="() => handleDelete(account.uuid)">
                 <template #trigger>
-                  <n-button v-if="account.accessLevel > 2" type="error" round secondary>Delete</n-button>
+                  <n-button v-if="access_lvl_conv(account) > 2" type="error" round secondary>Delete</n-button>
                 </template>
                 Are you sure about deleting this account?
               </n-popconfirm>
@@ -114,6 +114,7 @@ import { CopyOutline, CheckmarkOutline, BanOutline, RefreshOutline } from "@vico
 import { useAccountsStore } from "@/store/accounts";
 import { storeToRefs } from "pinia";
 import AccountCreate from "@/components/accounts/create-drawer.vue";
+import { access_lvl_conv } from "@/utils/access";
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
@@ -127,11 +128,11 @@ function shortUUID(uuid) {
 }
 
 const accessLevels = {
-  [0]: ["None", "error", undefined],
-  [1]: ["Read", "error", undefined],
-  [2]: ["Write", "warning", undefined],
-  [3]: ["Admin", "success", undefined],
-  [4]: ["Super-Admin", "success", "#8a2be2"],
+  NONE: ["None", "error", undefined],
+  READ: ["Read", "error", undefined],
+  MGMT: ["Manage", "warning", undefined],
+  ADMIN: ["Admin", "success", undefined],
+  ROOT: ["Super-Admin", "success", "#8a2be2"],
 };
 
 const message = useMessage();
