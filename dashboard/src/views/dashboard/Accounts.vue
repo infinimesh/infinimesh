@@ -57,6 +57,7 @@
           </td>
           <td>
             <AccessBadge :access="account.access.level" />
+            <AccessBadge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
           </td>
           <td>
             {{ account.access.namespace }}
@@ -128,11 +129,12 @@ function shortUUID(uuid) {
 }
 
 const accessLevels = {
-  NONE: ["None", "error", undefined],
-  READ: ["Read", "error", undefined],
-  MGMT: ["Manage", "warning", undefined],
-  ADMIN: ["Admin", "success", undefined],
-  ROOT: ["Super-Admin", "success", "#8a2be2"],
+  NONE: ["None", "error", undefined, "How did you get here??? Please, report this immideately"],
+  READ: ["Read", "error", undefined, "You can only see this Account"],
+  MGMT: ["Manage", "warning", undefined, "You can Manage this Account, for example enable/disable it"],
+  ADMIN: ["Admin", "success", undefined, "You have the highest possible access to this Account"],
+  ROOT: ["Super-Admin", "success", "#8a2be2", "You have the highest possible access to this Account"],
+  OWNER: ["Owned", "success", "#8a2be2", "You are the owner of this Account, which gives you full access to it and right to delete it"]
 };
 
 const message = useMessage();
@@ -145,20 +147,33 @@ async function handleCopyUUID(uuid) {
   }
 }
 
-function AccessBadge(props, context) {
+function AccessBadge(props) {
   let conf = accessLevels[props.access];
   return h(
-    NButton,
+    NTooltip,
     {
-      secondary: true,
-      round: true,
-      type: conf[1],
-      color: conf[2],
+      trigger: "hover",
+      placement: "top",
     },
     {
-      default: () => conf[0],
+      trigger: () => h(
+        NButton,
+        {
+          secondary: true,
+          round: true,
+          type: conf[1],
+          color: conf[2],
+          style: {
+            marginLeft: props.left
+          }
+        },
+        {
+          default: () => conf[0],
+        }
+      ),
+      default: () => conf[3]
     }
-  );
+  )
 }
 
 const bar = useLoadingBar();
