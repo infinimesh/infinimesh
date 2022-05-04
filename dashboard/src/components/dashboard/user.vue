@@ -9,23 +9,43 @@
       {{ me.title }}
     </n-button>
   </n-dropdown>
+
+  <set-credentials-modal :show="show" @close="show = false" />
 </template>
 
 <script setup>
-import { h, ref } from "vue";
+import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { NButton, NDropdown, NIcon } from "naive-ui";
 import { renderIcon } from "@/utils";
-import { Person, LogOutOutline } from "@vicons/ionicons5";
+import { Person, LogOutOutline, LockClosedOutline } from "@vicons/ionicons5";
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
+
+import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
 
 const router = useRouter();
 const store = useAppStore();
 
 const { me } = storeToRefs(store);
 
+const show = ref(false)
+
 const options = ref([
+  {
+    key: "credentials",
+    label: "Manage Credentials",
+    icon: renderIcon(LockClosedOutline),
+    props: {
+      onClick: () => {
+        show.value = true;
+      },
+    },
+  },
+  {
+    type: 'divider',
+    key: 'd1'
+  },
   {
     key: "logout",
     label: "Logout",
@@ -36,6 +56,6 @@ const options = ref([
         router.push({ name: "Login" });
       },
     },
-  },
+  }
 ]);
 </script>

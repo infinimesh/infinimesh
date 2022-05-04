@@ -17,7 +17,7 @@
           <n-button type="warning" round @click="handleSubmit">Submit</n-button>
         </n-space>
       </template>
-      <n-form ref="form" :model="model" :rules="rules" label-placement="top">
+      <n-form ref="form" :model="model" label-placement="top">
         <n-form-item label="Title" path="account.title">
           <n-input v-model:value="model.account.title" placeholder="How should we call you?" />
         </n-form-item>
@@ -30,11 +30,18 @@
         Credentials:
         <n-tabs v-model="model.credentials.type">
           <n-tab-pane name="standard" display-directive="if" tab="Standard(user/pass)">
-            <n-form-item label="Username" path="credentials.credentials.data[0]">
+            <n-form-item label="Username" path="credentials.data[0]">
               <n-input v-model:value="model.credentials.data[0]" />
             </n-form-item>
-            <n-form-item label="Password" path="credentials.credentials.data[1]">
-              <n-input v-model:value="model.credentials.data[1]" />
+            <n-form-item label="Password" path="credentials.data[1]">
+              <n-input v-model:value="model.credentials.data[1]" type="password" show-password-on="click">
+                <template #password-visible-icon>
+                  <n-icon :size="16" :component="EyeOffOutline" />
+                </template>
+                <template #password-invisible-icon>
+                  <n-icon :size="16" :component="EyeOutline" />
+                </template>
+              </n-input>
             </n-form-item>
           </n-tab-pane>
         </n-tabs>
@@ -58,11 +65,9 @@ import {
   NSelect,
   NTabs,
   NTabPane,
-  NText,
-  NAlert,
   useLoadingBar,
 } from "naive-ui";
-import { AddOutline } from "@vicons/ionicons5";
+import { AddOutline, EyeOffOutline, EyeOutline } from "@vicons/ionicons5";
 import { useNSStore } from "@/store/namespaces";
 import { useAccountsStore } from "@/store/accounts";
 
