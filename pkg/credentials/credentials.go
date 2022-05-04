@@ -83,6 +83,10 @@ func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type st
 }
 
 func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Credentials, error) {
+	if credentials == nil {
+		return nil, errors.New("credentials aren't given")
+	}
+	
 	var cred Credentials;
 	var err error;
 	switch credentials.Type {
