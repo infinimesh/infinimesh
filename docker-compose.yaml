@@ -1,21 +1,39 @@
 version: "3.2"
 services:
   
+  proxy:
+    image: traefik:latest
+    labels:
+      - traefik.http.routers.api.rule=Host(`traefik.${BASE_DOMAIN}`)
+      - traefik.http.routers.api.service=api@internal
+    ports:
+      - 80:80
+      - 8000:8000
+      - 1883:1883
+      - 8883:8883
+    volumes:
+      - ./traefik.yml:/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+
   web:
     image: ghcr.io/infinimesh/infinimesh/web:latest
     restart: always
     depends_on:
       - repo
-    ports:
-      - "8000:8000"
+      - proxy
+    labels:
+      - traefik.http.routers.web.rule=Host(`api.${BASE_DOMAIN}`) && PathPrefix("/api")
+      - traefik.http.routers.web.entrypoints=http
+      - traefik.http.services.web.loadbalancer.server.port=8000
     environment:
       APISERVER_HOST: repo:8080
 
   rabbitmq:
     image: rabbitmq:3.9-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    labels:
+      - traefik.http.routers.rabbitmq.rule=Host(`rbmq.infinimesh.local`)
+      - traefik.http.routers.rabbitmq.entrypoints=http
+      - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
@@ -26,9 +44,14 @@ services:
     depends_on:
       - rabbitmq
       - repo
-    ports:
-      - "1883:1883" # BasicAuth(non-TLS)
-      - "8883:8883" # Standard(TLS)
+      - proxy
+    labels:
+      - traefik.http.routers.mqtt.rule=Host(`mqtt.${BASE_DOMAIN}`)
+      - traefik.http.routers.mqtt.entrypoints=mqtt # BasicAuth(non-TLS)
+      - traefik.http.services.mqtt.loadbalancer.server.port=1883
+      - traefik.http.routers.mqtts.rule=Host(`mqtt.${BASE_DOMAIN}`)
+      - traefik.http.routers.mqtts.entrypoints=mqtts  # Standard(TLS)
+      - traefik.http.services.mqtts.loadbalancer.server.port=8883
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
@@ -40,11 +63,15 @@ services:
 
   repo:
     image: ghcr.io/infinimesh/infinimesh/repo:latest
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
+    restart: always
+    labels:
+      - traefik.http.routers.repo.rule=Host(`api.${BASE_DOMAIN}`)
+      - traefik.http.routers.repo.entrypoints=grpc
+      - traefik.http.services.repo.loadbalancer.server.port=8080
+      - traefik.http.services.repo.loadbalancer.server.scheme=h2c
     depends_on:
       - db
+      - proxy
     environment:
       DB_HOST: db:8529
       DB_CRED: root:openSesame
@@ -63,15 +90,15 @@ services:
   redis:
     image: redis:latest
     command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
 
   db:
     image: arangodb/arangodb:latest
     environment:
       ARANGO_ROOT_PASSWORD: openSesame
-    ports:
-      - 8529:8529
+    labels:
+      - traefik.http.routers.db.rule=Host(`db.${BASE_DOMAIN}`)
+      - traefik.http.routers.db.entrypoints=http
+      - traefik.http.services.db.loadbalancer.server.port=8529
     volumes:
       - data:/var/lib/arangodb3
 

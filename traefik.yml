@@ -1,0 +1,15 @@
+api:
+  insecure: true
+  dashboard: true
+accessLog: {}
+providers:
+  docker: {}
+entryPoints:
+  http:
+    address: ":80"
+  grpc:
+    address: ":8000"
+  mqtt:
+    address: ":1883"
+  mqtts:
+    address: ":8883"

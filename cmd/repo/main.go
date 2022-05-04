@@ -49,7 +49,7 @@ var (
 func init() {
 	viper.AutomaticEnv()
 
-	viper.SetDefault("PORT", "8080")
+	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("DB_HOST", "db:8529")
 	viper.SetDefault("DB_CRED", "root:openSesame")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
