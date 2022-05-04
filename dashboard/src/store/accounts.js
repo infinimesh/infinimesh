@@ -92,7 +92,7 @@ export const useAccountsStore = defineStore("accounts", {
     async setCredentials(uuid, credentials, bar) {
       bar.start();
       try {
-        await as.http.post(`/accounts/${uuid}/credentials`, credentials);
+        await as.http.post(`/accounts/${uuid}/credentials`, {credentials});
         bar.finish();
 
         this.fetchAccounts();
