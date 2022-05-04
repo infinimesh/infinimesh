@@ -414,7 +414,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 		To: cred.ID,
 		Type: c.Type(),
 		DocumentMeta: driver.DocumentMeta {
-			Key: key, // Ensure only one credentials vertex per type
+			Key: key, // Ensures only one credentials vertex per type
 		},
 	})
 	if err != nil {
