@@ -1,7 +1,9 @@
 <template>
   <n-button @click="show = true" type="success" dashed>
     <template #icon>
-      <n-icon><add-outline /></n-icon>
+      <n-icon>
+        <add-outline />
+      </n-icon>
     </template>
     Create Device
   </n-button>
@@ -10,9 +12,7 @@
       <template #header> Create Device </template>
       <template #footer>
         <n-space justify="end" align="center">
-          <n-button type="error" round secondary @click="show = false"
-            >Cancel</n-button
-          >
+          <n-button type="error" round secondary @click="show = false">Cancel</n-button>
           <n-button type="info" round secondary @click="reset">Reset</n-button>
           <n-button type="warning" round @click="handleSubmit">Submit</n-button>
         </n-space>
@@ -20,17 +20,10 @@
 
       <n-form ref="form" :model="model" :rules="rules" label-placement="top">
         <n-form-item label="Title" path="device.title">
-          <n-input
-            v-model:value="model.device.title"
-            placeholder="Make it bright"
-          />
+          <n-input v-model:value="model.device.title" placeholder="Make it bright" />
         </n-form-item>
         <n-form-item label="Namespace" path="namespace">
-          <n-select
-            v-model:value="model.namespace"
-            :options="namespaces"
-            :style="{ minWidth: '15vw' }"
-          />
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
         </n-form-item>
         <n-form-item label="Enabled" path="device.enabled">
           <n-switch v-model:value="model.device.enabled" />
@@ -39,12 +32,8 @@
           <n-dynamic-tags v-model:value="model.device.tags" />
         </n-form-item>
         <n-form-item label="Certificate" path="device.certificate.pem_data">
-          <n-upload
-            v-if="pem_not_uploaded"
-            @before-upload="handleUploadCertificate"
-            accept=".crt,.pem"
-            :show-file-list="false"
-          >
+          <n-upload v-if="pem_not_uploaded" @before-upload="handleUploadCertificate" accept=".crt,.pem"
+            :show-file-list="false">
             <n-upload-dragger>
               <div style="margin-bottom: 12px">
                 <n-icon size="48" :depth="3">
@@ -56,13 +45,8 @@
               </n-text>
             </n-upload-dragger>
           </n-upload>
-          <n-alert
-            v-else
-            title="Certificate Upload Done"
-            type="success"
-            closable
-            @close="model.device.certificate.pem_data = ''"
-          >
+          <n-alert v-else title="Certificate Upload Done" type="success" closable
+            @close="model.device.certificate.pem_data = ''">
             Close this alert to upload another certificate
           </n-alert>
         </n-form-item>
@@ -97,6 +81,8 @@ import {
 import { AddOutline, CloudUploadOutline } from "@vicons/ionicons5";
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
+import { access_lvl_conv } from "@/utils/access";
+
 const show = ref(false);
 
 watch(
@@ -108,7 +94,7 @@ watch(
 
 const nss = useNSStore();
 const namespaces = computed(() => {
-  return nss.namespaces.map((ns) => ({
+  return nss.namespaces.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
     label: ns.title,
     value: ns.uuid,
   }));
@@ -179,9 +165,8 @@ function handleSubmit() {
       show.value = false;
     } else {
       console.log(err.response);
-      error.value = `${err.response.status}: ${
-        (err.response.data ?? { message: "Unexpected Error" }).message
-      }`;
+      error.value = `${err.response.status}: ${(err.response.data ?? { message: "Unexpected Error" }).message
+        }`;
     }
   });
 }
