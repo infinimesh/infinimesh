@@ -5,12 +5,11 @@ services:
     image: traefik:latest
     labels:
       - traefik.http.routers.api.rule=Host(`traefik.${BASE_DOMAIN}`)
+      - traefik.http.routers.api.entrypoints=http
       - traefik.http.routers.api.service=api@internal
     ports:
       - 80:80
       - 8000:8000
-      - 1883:1883
-      - 8883:8883
     volumes:
       - ./traefik.yml:/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock
@@ -53,18 +52,14 @@ services:
 
   mqtt:
     image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
-    restart: unless-stopped
+    restart: always
     depends_on:
       - rabbitmq
       - repo
       - proxy
-    labels:
-      - traefik.http.routers.mqtt.rule=Host(`mqtt.${BASE_DOMAIN}`)
-      - traefik.http.routers.mqtt.entrypoints=mqtt # BasicAuth(non-TLS)
-      - traefik.http.services.mqtt.loadbalancer.server.port=1883
-      - traefik.http.routers.mqtts.rule=Host(`mqtt.${BASE_DOMAIN}`)
-      - traefik.http.routers.mqtts.entrypoints=mqtts  # Standard(TLS)
-      - traefik.http.services.mqtts.loadbalancer.server.port=8883
+    ports:
+      - 1883:1883 # BasicAuth(non-TLS)
+      - 8883:8883 # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
