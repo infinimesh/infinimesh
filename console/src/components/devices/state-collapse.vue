@@ -2,106 +2,66 @@
   <n-collapse v-model:expanded-names="expanded">
     <n-collapse-item title="Reported State" name="reported">
       <template #header-extra v-if="reported">
-        <n-button
-          tertiary
-          circle
-          type="info"
-          @click.stop.prevent="
-            handleCopy(JSON.stringify(reported.data, null, 2))
-          "
-        >
+        <n-button tertiary circle type="info" @click.stop.prevent="
+          handleCopy(JSON.stringify(reported.data, null, 2))
+        ">
           <template #icon>
-            <n-icon><copy-outline /></n-icon>
+            <n-icon>
+              <copy-outline />
+            </n-icon>
           </template>
         </n-button>
       </template>
-      <n-code
-        language="json"
-        :word-wrap="true"
-        :code="
-          reported
-            ? JSON.stringify(reported.data, null, 2)
-            : '// No State have been reported yet'
-        "
-      >
+      <n-code language="json" :word-wrap="true" :code="
+        reported
+          ? JSON.stringify(reported.data, null, 2)
+          : '// No State have been reported yet'
+      ">
       </n-code>
     </n-collapse-item>
-    <n-grid
-      responsive="screen"
-      :collapsed-rows="2"
-      v-if="reported && expanded.includes('reported')"
-    >
+    <n-grid responsive="screen" :collapsed-rows="2" v-if="reported && expanded.includes('reported')">
       <n-grid-item :span="8">
         <span>Timestamp</span>
       </n-grid-item>
-      <n-grid-item :span="16"
-        ><n-date-picker
-          input-readonly
-          :value="new Date(reported.timestamp).getTime()"
-          type="datetime"
-          disabled
-          class="pseudo-disabled"
-      /></n-grid-item>
+      <n-grid-item :span="16">
+        <n-date-picker input-readonly :value="new Date(reported.timestamp).getTime()" type="datetime" disabled
+          class="pseudo-disabled" />
+      </n-grid-item>
     </n-grid>
     <n-collapse-item title="Desired State" name="desired">
       <template #header-extra v-if="desired">
-        <n-button
-          tertiary
-          circle
-          type="info"
-          @click.stop.prevent="
-            handleCopy(JSON.stringify(desired.data, null, 2))
-          "
-        >
+        <n-button tertiary circle type="info" @click.stop.prevent="
+          handleCopy(JSON.stringify(desired.data, null, 2))
+        ">
           <template #icon>
-            <n-icon><copy-outline /></n-icon>
+            <n-icon>
+              <copy-outline />
+            </n-icon>
           </template>
         </n-button>
       </template>
-      <n-code
-        language="json"
-        :word-wrap="true"
-        :code="
-          desired
-            ? JSON.stringify(desired.data, null, 2)
-            : '// No Desired state have been set yet'
-        "
-      />
+      <n-code language="json" :word-wrap="true" :code="
+        desired
+          ? JSON.stringify(desired.data, null, 2)
+          : '// No Desired state have been set yet'
+      " />
     </n-collapse-item>
-    <n-grid
-      responsive="screen"
-      :collapsed-rows="2"
-      v-if="desired && expanded.includes('desired')"
-    >
+    <n-grid responsive="screen" :collapsed-rows="2" v-if="desired && expanded.includes('desired')">
       <n-grid-item :span="8">
         <span>Timestamp</span>
       </n-grid-item>
-      <n-grid-item :span="16"
-        ><n-date-picker
-          input-readonly
-          :value="new Date(desired.timestamp).getTime()"
-          type="datetime"
-          disabled
-          class="pseudo-disabled"
-      /></n-grid-item>
+      <n-grid-item :span="16">
+        <n-date-picker input-readonly :value="new Date(desired.timestamp).getTime()" type="datetime" disabled
+          class="pseudo-disabled" />
+      </n-grid-item>
     </n-grid>
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
       <template #header-extra v-if="validation == 'success'">
-        <n-button
-          tertiary
-          round
-          type="warning"
-          @click.stop.prevent="handleSubmit"
-        >
+        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmit">
           Submit
         </n-button>
       </template>
-      <n-input
-        v-model:value="state"
-        type="textarea"
-        placeholder="Desired State"
-        :status="validation"
-      />
+      <n-input v-model:value="state" type="textarea" placeholder="Desired State" :status="validation" />
     </n-collapse-item>
   </n-collapse>
 </template>
@@ -188,6 +148,6 @@ const validation = computed(() => {
 });
 
 function handleSubmit() {
-  emit("submit", state.value);
+  emit("submit", JSON.parse(state.value));
 }
 </script>

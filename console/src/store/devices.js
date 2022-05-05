@@ -117,7 +117,9 @@ export const useDevicesStore = defineStore("devices", {
       bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
-        await as.http.patch(`devices/${device}/state`, state, {
+        await as.http.post(`/devices/states`, {
+          device, desired: { data: state },
+        }, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
