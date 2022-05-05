@@ -55,7 +55,7 @@ func init() {
 	viper.AutomaticEnv()
 	log = zap.NewExample()
 
-	viper.SetDefault("DB_HOST", "localhost:8529")
+	viper.SetDefault("DB_HOST", "db.infinimesh.local")
 	viper.SetDefault("DB_CRED", "root:openSesame")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
