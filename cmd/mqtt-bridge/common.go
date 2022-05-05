@@ -127,6 +127,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			err = data.UnmarshalJSON(p.Payload)
 			if err != nil {
 				log.Error("Failed to handle Publish", zap.Error(err))
+				continue
 			}
 			payload := &pb.Shadow{
 				Device: device.Uuid,
