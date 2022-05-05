@@ -216,9 +216,9 @@ var createDeviceCmd = &cobra.Command{
 	},
 }
 
-var getDeviceStateCmd = &cobra.Command{
+var mgmtDeviceStateCmd = &cobra.Command{
 	Use:   "state",
-	Short: "Get device state",
+	Short: "Manage device state",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 	
@@ -406,12 +406,12 @@ func init() {
 	createDeviceCmd.Flags().StringP("namespace", "n", "", "Namespace to create device in")
 	devicesCmd.AddCommand(createDeviceCmd)
 
-	getDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
-	getDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
-	getDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
-	getDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
-	getDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
-	devicesCmd.AddCommand(getDeviceStateCmd)
+	mgmtDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
+	mgmtDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
+	mgmtDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
+	mgmtDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
+	mgmtDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
+	devicesCmd.AddCommand(mgmtDeviceStateCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }
