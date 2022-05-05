@@ -1,5 +1,5 @@
 /docs/
 /README.md
-/dashboard/node_modules
-/dashboard/dist
+/console/node_modules
+/console/dist
 .git

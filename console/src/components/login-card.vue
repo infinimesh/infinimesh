@@ -48,7 +48,7 @@ async function login() {
   bar.start();
 
   axios
-    .post("http://localhost:8000/token", {
+    .post(store.base_url + "/token", {
       auth: {
         type: "standard",
         data: [username.value, password.value],

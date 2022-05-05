@@ -39,7 +39,7 @@ const axios = inject("axios");
 
 (async () => {
   axios
-    .get("http://localhost:8000/accounts/me", {
+    .get(`${store.base_url}/accounts/me`, {
       headers: {
         Authorization: `Bearer ${store.token}`,
       },

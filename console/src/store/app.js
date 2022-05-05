@@ -1,6 +1,8 @@
 import { inject } from "vue";
 import { defineStore } from "pinia";
 
+const baseURL = window.location.origin.replace("console.", "api.")
+
 export const useAppStore = defineStore("app", {
   state: () => ({
     token: "",
@@ -11,10 +13,11 @@ export const useAppStore = defineStore("app", {
     theme_pick: "system",
   }),
   getters: {
+    base_url: () => baseURL,
     logged_in: (state) => state.token !== "",
     http: (state) => {
       return inject("axios").create({
-        baseURL: "http://localhost:8000",
+        baseURL,
         headers: {
           Authorization: `Bearer ${state.token}`,
         },

@@ -15,6 +15,18 @@ services:
       - ./traefik.yml:/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock
 
+  console:
+    image: ghcr.io/infinimesh/infinimesh/console:latest
+    restart: always
+    depends_on:
+      - proxy
+    labels:
+      - traefik.http.routers.console.rule=Host(`console.${BASE_DOMAIN}`)
+      - traefik.http.routers.console.entrypoints=http
+      - traefik.http.routers.console.service=console@docker
+      - traefik.http.services.console.loadbalancer.server.port=80
+    environment:
+      VITE_API_HOST: api.${BASE_DOMAIN}
   web:
     image: ghcr.io/infinimesh/infinimesh/web:latest
     restart: always
@@ -22,8 +34,9 @@ services:
       - repo
       - proxy
     labels:
-      - traefik.http.routers.web.rule=Host(`api.${BASE_DOMAIN}`) && PathPrefix("/api")
+      - traefik.http.routers.web.rule=Host(`api.${BASE_DOMAIN}`)
       - traefik.http.routers.web.entrypoints=http
+      - traefik.http.routers.web.service=web@docker
       - traefik.http.services.web.loadbalancer.server.port=8000
     environment:
       APISERVER_HOST: repo:8080
@@ -38,7 +51,7 @@ services:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
 
-  mqtt-bridge:
+  mqtt:
     image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
     restart: unless-stopped
     depends_on:
