@@ -59,7 +59,7 @@ export const useDevicesStore = defineStore("devices", {
       let pool = this.subscribed.concat(devices);
 
       let token = await this.makeDevicesToken(pool);
-      let socket = new WebSocket(`ws://localhost:8000/devices/states/stream`, [
+      let socket = new WebSocket(`${as.base_url.replace("http", "ws")}/devices/states/stream`, [
         "Bearer",
         token,
       ]);
