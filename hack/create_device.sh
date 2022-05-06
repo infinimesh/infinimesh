@@ -1,5 +1,5 @@
 #!/bin/bash
-export TOKEN=$(grpcurl -d '{"username" : "joe", "password" : "test123"}' -plaintext localhost:8080 infinimesh.api.Accounts/Token | jq '.token' -r)
+export TOKEN=$(grpcurl -d '{"username" : "joe", "password" : "test123"}' -plaintext localhost:8000 infinimesh.api.Accounts/Token | jq '.token' -r)
 grpcurl -H "authorization: bearer $TOKEN" -d '{
   "namespace" : "joe",
   "device": {
@@ -9,4 +9,4 @@ grpcurl -H "authorization: bearer $TOKEN" -d '{
       "algorithm": "testalg"
     }
   }
-}'  -plaintext localhost:8080 infinimesh.api.Devices/Create
+}'  -plaintext localhost:8000 infinimesh.api.Devices/Create

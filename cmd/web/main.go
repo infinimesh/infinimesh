@@ -52,7 +52,7 @@ func init() {
 	log = Log
 
 	viper.SetDefault("CORS_ALLOWED", []string{"*"})
-	viper.SetDefault("APISERVER_HOST", "proxy:8080")
+	viper.SetDefault("APISERVER_HOST", "proxy:8000")
 	viper.SetDefault("SECURE", false)
 	viper.SetDefault("WITH_BLOCK", false)
 

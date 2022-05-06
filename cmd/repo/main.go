@@ -134,7 +134,7 @@ func main() {
 	}
 	if _, ok := services["shadow"]; ok {
 		log.Info("Registering shadow service")
-		viper.SetDefault("SHADOW_HOST", "shadow-api:8080")
+		viper.SetDefault("SHADOW_HOST", "shadow-api:8000")
 		host := viper.GetString("SHADOW_HOST")
 		conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {

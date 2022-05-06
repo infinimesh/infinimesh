@@ -86,7 +86,7 @@ func init() {
 
 	viper.AutomaticEnv()
 
-	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8080")
+	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8000")
 	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")

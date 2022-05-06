@@ -61,7 +61,7 @@ Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
 
 Login locally via CLI:
 ```
-inf config set-context local --apiserver localhost:8080 --tls=false
+inf config set-context local --apiserver localhost:8000 --tls=false
 inf login
 ```
 Use the users joe / test123 or admin/admin123 for local development.
