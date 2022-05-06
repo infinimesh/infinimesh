@@ -56,8 +56,8 @@
             </strong>
           </td>
           <td>
-            <AccessBadge :access="account.access.level" />
-            <AccessBadge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
+            <access-badge :access="account.access.level" />
+            <access-badge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
           </td>
           <td>
             {{ account.access.namespace }}
