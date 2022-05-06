@@ -24,6 +24,7 @@
     <n-table :bordered="false" :single-line="true" style="margin-top: 10px">
       <n-thead>
         <n-tr>
+          <th></th>
           <th>UUID</th>
           <th>Title</th>
           <th>Access</th>
@@ -31,52 +32,76 @@
         </n-tr>
       </n-thead>
       <tbody>
-        <n-tr v-for="ns in pool.admin" :key="ns.uuid">
-          <td>
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button tertiary round type="info" @click="handleCopyUUID(ns.uuid)">
-                  <template #icon>
-                    <n-icon>
-                      <copy-outline />
-                    </n-icon>
-                  </template>
-                  {{ shortUUID(ns.uuid) }}
-                </n-button>
-              </template>
-              {{ ns.uuid }}
-            </n-tooltip>
-          </td>
-          <td>
-            <strong>
-              {{ ns.title }}
-            </strong>
-          </td>
-          <td>
-            <access-badge :access="ns.access.level" namespace />
-            <access-badge access="OWNER" v-if="ns.access.role == 'OWNER'" left="5px" namespace />
-          </td>
-          <td>
-            <n-space>
-              <n-popconfirm @positive-click="() => handleDelete(ns.uuid)">
+        <template v-for="ns in pool.admin" :key="ns.uuid">
+          <n-tr @click="expand.has(ns.uuid) ? expand.delete(ns.uuid) : expand.add(ns.uuid)">
+            <td>
+              <n-icon>
+                <chevron-down-outline v-if="expand.has(ns.uuid)" />
+                <chevron-forward-outline v-else />
+              </n-icon>
+            </td>
+            <td>
+              <n-tooltip trigger="hover">
                 <template #trigger>
-                  <n-button v-if="ns.access.role == 'OWNER'" type="error" round secondary>Delete</n-button>
+                  <n-button tertiary round type="info" @click.stop.prevent="handleCopyUUID(ns.uuid)">
+                    <template #icon>
+                      <n-icon>
+                        <copy-outline />
+                      </n-icon>
+                    </template>
+                    {{ shortUUID(ns.uuid) }}
+                  </n-button>
                 </template>
-                <span>
-                  Are you sure about deleting <b>{{ ns.title }}'s</b> ns?
-                </span>
-              </n-popconfirm>
-            </n-space>
-          </td>
-        </n-tr>
+                {{ ns.uuid }}
+              </n-tooltip>
+            </td>
+            <td>
+              <strong>
+                {{ ns.title }}
+              </strong>
+            </td>
+            <td>
+              <access-badge :access="ns.access.level" namespace />
+              <access-badge access="OWNER" v-if="ns.access.role == 'OWNER'" left="5px" namespace />
+            </td>
+            <td>
+              <n-space>
+                <n-button type="success" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Devices')">
+                  Devices
+                </n-button>
+                <n-button type="info" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Accounts')">
+                  Accounts
+                </n-button>
+                <n-popconfirm @positive-click="() => handleDelete(ns.uuid)">
+                  <template #trigger>
+                    <n-button v-if="ns.access.role == 'OWNER'" type="error" round secondary @click.stop.prevent>Delete
+                    </n-button>
+                  </template>
+                  <span>
+                    Are you sure about deleting <b>{{ ns.title }}'s</b> ns?
+                  </span>
+                </n-popconfirm>
+              </n-space>
+            </td>
+          </n-tr>
+          <transition>
+            <n-tr v-if="expand.has(ns.uuid)">
+              <td></td>
+              <td colspan="4">
+                {{ ns.uuid }}
+              </td>
+            </n-tr>
+          </transition>
+        </template>
         <n-tr>
-          <td colspan="4" align="center">
+          <td colspan="5" align="center">
             <span>
               Namespaces below are those you don't have admin access to
             </span>
           </td>
         </n-tr>
         <n-tr v-for="ns in pool.user" :key="ns.uuid">
+          <td></td>
           <td>
             <n-tooltip trigger="hover">
               <template #trigger>
@@ -100,7 +125,16 @@
           <td>
             <access-badge :access="ns.access.level" namespace />
           </td>
-          <td></td>
+          <td>
+            <n-space>
+              <n-button type="success" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Devices')">
+                Devices
+              </n-button>
+              <n-button type="info" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Accounts')">
+                Accounts
+              </n-button>
+            </n-space>
+          </td>
         </n-tr>
       </tbody>
     </n-table>
@@ -108,7 +142,8 @@
 </template>
 
 <script setup>
-import { computed } from "vue"
+import { ref, computed } from "vue"
+import { useRouter } from "vue-router"
 import {
   NSpin,
   NTable,
@@ -125,7 +160,7 @@ import {
   NH1,
   NText, useLoadingBar
 } from "naive-ui";
-import { CopyOutline, CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
+import { CopyOutline, RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
@@ -146,6 +181,24 @@ const pool = computed(() => groupBy(namespaces.value, (e) => {
   }
   return "user"
 }))
+
+const expand = ref(new Set())
+
+const message = useMessage();
+async function handleCopyUUID(uuid) {
+  try {
+    await navigator.clipboard.writeText(uuid);
+    message.success("Account UUID copied to clipboard");
+  } catch {
+    message.error("Failed to copy Account UUID to clipboard");
+  }
+}
+
+const router = useRouter()
+function setNSAndGo(ns, route) {
+  store.selected = ns
+  router.push({ name: route })
+}
 
 store.fetchNamespaces()
 </script>
