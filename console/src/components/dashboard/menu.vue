@@ -38,14 +38,14 @@ function renderLabelLink(route, label = false) {
 
 const menuOptions = ref([
   {
-    label: renderLabelLink("Accounts"),
-    key: "Accounts",
-    icon: renderIcon(PeopleOutline),
-  },
-  {
     label: renderLabelLink("Devices"),
     key: "Devices",
     icon: renderIcon(HardwareChipOutline),
+  },
+  {
+    label: renderLabelLink("Accounts"),
+    key: "Accounts",
+    icon: renderIcon(PeopleOutline),
   },
   {
     label: renderLabelLink("Namespaces"),
