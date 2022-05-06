@@ -1,7 +1,7 @@
 import { inject } from "vue";
 import { defineStore } from "pinia";
 
-const baseURL = window.location.origin.replace("console.", "api.")
+const baseURL = import.meta.env.DEV ? "http://api.infinimesh.local" : window.location.origin.replace("console.", "api.")
 
 export const useAppStore = defineStore("app", {
   state: () => ({
