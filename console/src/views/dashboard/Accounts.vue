@@ -132,6 +132,7 @@ import {
 import { CopyOutline, CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
 import { storeToRefs } from "pinia";
+import AccessBadge from "@/components/core/access-badge"
 import AccountCreate from "@/components/accounts/create-drawer.vue";
 import { access_lvl_conv } from "@/utils/access";
 import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
@@ -145,15 +146,6 @@ function shortUUID(uuid) {
   return uuid.substr(0, 8);
 }
 
-const accessLevels = {
-  NONE: ["None", "error", undefined, "How did you get here??? Please, report this immideately"],
-  READ: ["Read", "error", undefined, "You can only see this Account"],
-  MGMT: ["Manage", "warning", undefined, "You can Manage this Account, for example enable/disable it"],
-  ADMIN: ["Admin", "success", undefined, "You have the highest possible access to this Account"],
-  ROOT: ["Super-Admin", "success", "#8a2be2", "You have the highest possible access to this Account"],
-  OWNER: ["Owned", "success", "#8a2be2", "You are the owner of this Account, which gives you full access to it and right to delete it"]
-};
-
 const message = useMessage();
 async function handleCopyUUID(uuid) {
   try {
@@ -162,35 +154,6 @@ async function handleCopyUUID(uuid) {
   } catch {
     message.error("Failed to copy Account UUID to clipboard");
   }
-}
-
-function AccessBadge(props) {
-  let conf = accessLevels[props.access];
-  return h(
-    NTooltip,
-    {
-      trigger: "hover",
-      placement: "top",
-    },
-    {
-      trigger: () => h(
-        NButton,
-        {
-          secondary: true,
-          round: true,
-          type: conf[1],
-          color: conf[2],
-          style: {
-            marginLeft: props.left
-          }
-        },
-        {
-          default: () => conf[0],
-        }
-      ),
-      default: () => conf[3]
-    }
-  )
 }
 
 const bar = useLoadingBar();
