@@ -10,5 +10,5 @@ entryPoints:
   grpc:
     address: ":8000"
 
-log:
-  level: DEBUG
+# log:
+#   level: DEBUG
