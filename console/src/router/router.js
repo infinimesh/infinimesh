@@ -46,6 +46,14 @@ const routes = [
           title: "Accounts",
         }
       },
+      {
+        path: "namespaces",
+        name: "Namespaces",
+        component: () => import("@/views/dashboard/Namespaces.vue"),
+        meta: {
+          title: "Namespaces",
+        },
+      }
     ],
   },
 ];
