@@ -21,7 +21,6 @@ const accessLevels = {
 };
 
 export default function AccessBadge(props) {
-  console.log(props)
   let key = "account"
   if (props.account != undefined) key = "account"
   if (props.namespace != undefined) key = "namespace"
