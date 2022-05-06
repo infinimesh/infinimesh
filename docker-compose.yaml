@@ -19,6 +19,7 @@ services:
     restart: always
     depends_on:
       - proxy
+      - web
     labels:
       - traefik.http.routers.console.rule=Host(`console.${BASE_DOMAIN}`)
       - traefik.http.routers.console.entrypoints=http
