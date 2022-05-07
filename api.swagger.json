@@ -1046,6 +1046,53 @@
         ]
       }
     },
+    "/namespaces/{namespace}/join": {
+      "post": {
+        "summary": "Sets Access to this namespace for the given account(deletes if level is set to NONE(0))",
+        "operationId": "NamespacesService_Join",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountsAccounts"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessLevel"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
     "/namespaces/{uuid}": {
       "get": {
         "operationId": "NamespacesService_Get",
@@ -1328,7 +1375,7 @@
       "type": "object",
       "properties": {
         "level": {
-          "$ref": "#/definitions/accessAccessLevel"
+          "$ref": "#/definitions/accessLevel"
         },
         "role": {
           "$ref": "#/definitions/accessRole"
@@ -1338,7 +1385,7 @@
         }
       }
     },
-    "accessAccessLevel": {
+    "accessLevel": {
       "type": "string",
       "enum": [
         "NONE",

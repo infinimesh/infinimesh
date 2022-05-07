@@ -367,6 +367,8 @@ type NamespacesServiceClient interface {
 	Delete(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*DeleteResponse, error)
 	// Accounts having access to this namespace
 	Joins(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*accounts.Accounts, error)
+	// Sets Access to this namespace for the given account(deletes if level is set to NONE(0))
+	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*accounts.Accounts, error)
 }
 
 type namespacesServiceClient struct {
@@ -431,6 +433,15 @@ func (c *namespacesServiceClient) Joins(ctx context.Context, in *namespaces.Name
 	return out, nil
 }
 
+func (c *namespacesServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*accounts.Accounts, error) {
+	out := new(accounts.Accounts)
+	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/Join", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NamespacesServiceServer is the server API for NamespacesService service.
 // All implementations must embed UnimplementedNamespacesServiceServer
 // for forward compatibility
@@ -442,6 +453,8 @@ type NamespacesServiceServer interface {
 	Delete(context.Context, *namespaces.Namespace) (*DeleteResponse, error)
 	// Accounts having access to this namespace
 	Joins(context.Context, *namespaces.Namespace) (*accounts.Accounts, error)
+	// Sets Access to this namespace for the given account(deletes if level is set to NONE(0))
+	Join(context.Context, *JoinRequest) (*accounts.Accounts, error)
 	mustEmbedUnimplementedNamespacesServiceServer()
 }
 
@@ -466,6 +479,9 @@ func (UnimplementedNamespacesServiceServer) Delete(context.Context, *namespaces.
 }
 func (UnimplementedNamespacesServiceServer) Joins(context.Context, *namespaces.Namespace) (*accounts.Accounts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Joins not implemented")
+}
+func (UnimplementedNamespacesServiceServer) Join(context.Context, *JoinRequest) (*accounts.Accounts, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
 func (UnimplementedNamespacesServiceServer) mustEmbedUnimplementedNamespacesServiceServer() {}
 
@@ -588,6 +604,24 @@ func _NamespacesService_Joins_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NamespacesService_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NamespacesServiceServer).Join(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infinimesh.node.NamespacesService/Join",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NamespacesServiceServer).Join(ctx, req.(*JoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NamespacesService_ServiceDesc is the grpc.ServiceDesc for NamespacesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -618,6 +652,10 @@ var NamespacesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Joins",
 			Handler:    _NamespacesService_Joins_Handler,
+		},
+		{
+			MethodName: "Join",
+			Handler:    _NamespacesService_Join_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
