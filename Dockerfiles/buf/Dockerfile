@@ -16,6 +16,8 @@ RUN go install \
 
 COPY buf.* ./
 
+RUN buf mod update
+
 LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
 
 ENTRYPOINT [ "buf", "generate" ]
