@@ -640,10 +640,10 @@ var file_pkg_node_proto_node_proto_goTypes = []interface{}{
 	(*proto.GetRequest)(nil),                // 14: infinimesh.shadow.GetRequest
 	(*proto.Shadow)(nil),                    // 15: infinimesh.shadow.Shadow
 	(*proto.StreamShadowRequest)(nil),       // 16: infinimesh.shadow.StreamShadowRequest
-	(*accounts.AccountsPool)(nil),           // 17: infinimesh.node.accounts.AccountsPool
+	(*accounts.Accounts)(nil),           // 17: infinimesh.node.accounts.Accounts
 	(*accounts.CreateResponse)(nil),         // 18: infinimesh.node.accounts.CreateResponse
-	(*namespaces.NamespacesPool)(nil),       // 19: infinimesh.node.namespaces.NamespacesPool
-	(*devices.DevicesPool)(nil),             // 20: infinimesh.node.devices.DevicesPool
+	(*namespaces.Namespaces)(nil),       // 19: infinimesh.node.namespaces.Namespaces
+	(*devices.Devices)(nil),             // 20: infinimesh.node.devices.Devices
 	(*devices.CreateResponse)(nil),          // 21: infinimesh.node.devices.CreateResponse
 	(*proto.GetResponse)(nil),               // 22: infinimesh.shadow.GetResponse
 }
@@ -678,19 +678,19 @@ var file_pkg_node_proto_node_proto_depIdxs = []int32{
 	16, // 27: infinimesh.node.ShadowService.StreamShadow:input_type -> infinimesh.shadow.StreamShadowRequest
 	1,  // 28: infinimesh.node.AccountsService.Token:output_type -> infinimesh.node.TokenResponse
 	8,  // 29: infinimesh.node.AccountsService.Get:output_type -> infinimesh.node.accounts.Account
-	17, // 30: infinimesh.node.AccountsService.List:output_type -> infinimesh.node.accounts.AccountsPool
+	17, // 30: infinimesh.node.AccountsService.List:output_type -> infinimesh.node.accounts.Accounts
 	18, // 31: infinimesh.node.AccountsService.Create:output_type -> infinimesh.node.accounts.CreateResponse
 	8,  // 32: infinimesh.node.AccountsService.Update:output_type -> infinimesh.node.accounts.Account
 	8,  // 33: infinimesh.node.AccountsService.Toggle:output_type -> infinimesh.node.accounts.Account
 	4,  // 34: infinimesh.node.AccountsService.Delete:output_type -> infinimesh.node.DeleteResponse
 	3,  // 35: infinimesh.node.AccountsService.SetCredentials:output_type -> infinimesh.node.SetCredentialsResponse
 	10, // 36: infinimesh.node.NamespacesService.Get:output_type -> infinimesh.node.namespaces.Namespace
-	19, // 37: infinimesh.node.NamespacesService.List:output_type -> infinimesh.node.namespaces.NamespacesPool
+	19, // 37: infinimesh.node.NamespacesService.List:output_type -> infinimesh.node.namespaces.Namespaces
 	10, // 38: infinimesh.node.NamespacesService.Create:output_type -> infinimesh.node.namespaces.Namespace
 	10, // 39: infinimesh.node.NamespacesService.Update:output_type -> infinimesh.node.namespaces.Namespace
 	4,  // 40: infinimesh.node.NamespacesService.Delete:output_type -> infinimesh.node.DeleteResponse
 	11, // 41: infinimesh.node.DevicesService.Get:output_type -> infinimesh.node.devices.Device
-	20, // 42: infinimesh.node.DevicesService.List:output_type -> infinimesh.node.devices.DevicesPool
+	20, // 42: infinimesh.node.DevicesService.List:output_type -> infinimesh.node.devices.Devices
 	21, // 43: infinimesh.node.DevicesService.Create:output_type -> infinimesh.node.devices.CreateResponse
 	11, // 44: infinimesh.node.DevicesService.Update:output_type -> infinimesh.node.devices.Device
 	4,  // 45: infinimesh.node.DevicesService.Delete:output_type -> infinimesh.node.DeleteResponse

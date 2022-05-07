@@ -28,7 +28,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AccountsServiceClient interface {
 	Token(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	Get(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
-	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.Accounts, error)
 	Create(ctx context.Context, in *accounts.CreateRequest, opts ...grpc.CallOption) (*accounts.CreateResponse, error)
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Toggle(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
@@ -62,8 +62,8 @@ func (c *accountsServiceClient) Get(ctx context.Context, in *accounts.Account, o
 	return out, nil
 }
 
-func (c *accountsServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.AccountsPool, error) {
-	out := new(accounts.AccountsPool)
+func (c *accountsServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*accounts.Accounts, error) {
+	out := new(accounts.Accounts)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (c *accountsServiceClient) SetCredentials(ctx context.Context, in *SetCrede
 type AccountsServiceServer interface {
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
 	Get(context.Context, *accounts.Account) (*accounts.Account, error)
-	List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error)
+	List(context.Context, *EmptyMessage) (*accounts.Accounts, error)
 	Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error)
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
 	Toggle(context.Context, *accounts.Account) (*accounts.Account, error)
@@ -141,7 +141,7 @@ func (UnimplementedAccountsServiceServer) Token(context.Context, *TokenRequest) 
 func (UnimplementedAccountsServiceServer) Get(context.Context, *accounts.Account) (*accounts.Account, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedAccountsServiceServer) List(context.Context, *EmptyMessage) (*accounts.AccountsPool, error) {
+func (UnimplementedAccountsServiceServer) List(context.Context, *EmptyMessage) (*accounts.Accounts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedAccountsServiceServer) Create(context.Context, *accounts.CreateRequest) (*accounts.CreateResponse, error) {
@@ -365,7 +365,7 @@ var AccountsService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NamespacesServiceClient interface {
 	Get(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
-	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.Namespaces, error)
 	Create(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Update(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*namespaces.Namespace, error)
 	Delete(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -388,8 +388,8 @@ func (c *namespacesServiceClient) Get(ctx context.Context, in *namespaces.Namesp
 	return out, nil
 }
 
-func (c *namespacesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.NamespacesPool, error) {
-	out := new(namespaces.NamespacesPool)
+func (c *namespacesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*namespaces.Namespaces, error) {
+	out := new(namespaces.Namespaces)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.NamespacesService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func (c *namespacesServiceClient) Delete(ctx context.Context, in *namespaces.Nam
 // for forward compatibility
 type NamespacesServiceServer interface {
 	Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
-	List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error)
+	List(context.Context, *EmptyMessage) (*namespaces.Namespaces, error)
 	Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Update(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error)
 	Delete(context.Context, *namespaces.Namespace) (*DeleteResponse, error)
@@ -443,7 +443,7 @@ type UnimplementedNamespacesServiceServer struct {
 func (UnimplementedNamespacesServiceServer) Get(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedNamespacesServiceServer) List(context.Context, *EmptyMessage) (*namespaces.NamespacesPool, error) {
+func (UnimplementedNamespacesServiceServer) List(context.Context, *EmptyMessage) (*namespaces.Namespaces, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedNamespacesServiceServer) Create(context.Context, *namespaces.Namespace) (*namespaces.Namespace, error) {
@@ -595,7 +595,7 @@ var NamespacesService_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DevicesServiceClient interface {
 	Get(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
-	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.DevicesPool, error)
+	List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.Devices, error)
 	Create(ctx context.Context, in *devices.CreateRequest, opts ...grpc.CallOption) (*devices.CreateResponse, error)
 	Update(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*devices.Device, error)
 	Delete(ctx context.Context, in *devices.Device, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -623,8 +623,8 @@ func (c *devicesServiceClient) Get(ctx context.Context, in *devices.Device, opts
 	return out, nil
 }
 
-func (c *devicesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.DevicesPool, error) {
-	out := new(devices.DevicesPool)
+func (c *devicesServiceClient) List(ctx context.Context, in *EmptyMessage, opts ...grpc.CallOption) (*devices.Devices, error) {
+	out := new(devices.Devices)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.DevicesService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -709,7 +709,7 @@ func (c *devicesServiceClient) GetByFingerprint(ctx context.Context, in *devices
 // for forward compatibility
 type DevicesServiceServer interface {
 	Get(context.Context, *devices.Device) (*devices.Device, error)
-	List(context.Context, *EmptyMessage) (*devices.DevicesPool, error)
+	List(context.Context, *EmptyMessage) (*devices.Devices, error)
 	Create(context.Context, *devices.CreateRequest) (*devices.CreateResponse, error)
 	Update(context.Context, *devices.Device) (*devices.Device, error)
 	Delete(context.Context, *devices.Device) (*DeleteResponse, error)
@@ -728,7 +728,7 @@ type UnimplementedDevicesServiceServer struct {
 func (UnimplementedDevicesServiceServer) Get(context.Context, *devices.Device) (*devices.Device, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
-func (UnimplementedDevicesServiceServer) List(context.Context, *EmptyMessage) (*devices.DevicesPool, error) {
+func (UnimplementedDevicesServiceServer) List(context.Context, *EmptyMessage) (*devices.Devices, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedDevicesServiceServer) Create(context.Context, *devices.CreateRequest) (*devices.CreateResponse, error) {

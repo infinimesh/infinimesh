@@ -136,6 +136,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	result := *NewBlankAccountDocument(uuid)
 	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
 	if err != nil {
+		log.Error("Failed to get Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
 	if result.Access.Level < access.AccessLevel_READ {
@@ -162,14 +163,13 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 	var r []*accpb.Account
 	for {
 		var acc accpb.Account
-		meta, err := cr.ReadDocument(ctx, &acc)
+		_, err := cr.ReadDocument(ctx, &acc)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			log.Error("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
-		acc.Uuid = meta.ID.Key()
 		log.Debug("Got document", zap.Any("account", &acc))
 		r = append(r, &acc)
 	}

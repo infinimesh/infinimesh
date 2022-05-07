@@ -307,7 +307,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/devicesDevicesPool"
+              "$ref": "#/definitions/devicesDevices"
             }
           },
           "default": {
@@ -1219,7 +1219,7 @@
         }
       }
     },
-    "devicesDevicesPool": {
+    "devicesDevices": {
       "type": "object",
       "properties": {
         "devices": {
