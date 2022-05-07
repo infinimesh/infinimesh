@@ -163,7 +163,7 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 	}
 
 	cr, err := c.db.Query(ctx, listJoinsQuery, map[string]interface{}{
-		"namespace": ns.ID,
+		"namespace": ns.ID(),
 	})
 	if err != nil {
 		log.Error("Error querying for joins", zap.Error(err))
