@@ -35,20 +35,7 @@
       <tbody>
         <tr v-for="account in accounts" :key="account.uuid">
           <td>
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button tertiary round :type="account.enabled ? 'success' : 'error'"
-                  @click="handleCopyUUID(account.uuid)">
-                  <template #icon>
-                    <n-icon>
-                      <copy-outline />
-                    </n-icon>
-                  </template>
-                  {{ shortUUID(account.uuid) }}
-                </n-button>
-              </template>
-              {{ account.uuid }}
-            </n-tooltip>
+            <uuid-badge :uuid="account.uuid" :type="account.enabled ? 'success' : 'error'" />
           </td>
           <td>
             <strong>
@@ -121,7 +108,6 @@ import {
   NButton,
   NIcon,
   NSpace,
-  useMessage,
   NTooltip,
   NPopconfirm,
   NGrid,
@@ -129,32 +115,21 @@ import {
   NH1,
   NText, useLoadingBar
 } from "naive-ui";
-import { CopyOutline, CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
+import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
 import { storeToRefs } from "pinia";
+
+import UuidBadge from "@/components/core/uuid-badge.vue";
 import AccessBadge from "@/components/core/access-badge"
 import AccountCreate from "@/components/accounts/create-drawer.vue";
-import { access_lvl_conv } from "@/utils/access";
 import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
+
+import { access_lvl_conv } from "@/utils/access";
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
 
 store.fetchAccounts();
-
-function shortUUID(uuid) {
-  return uuid.substr(0, 8);
-}
-
-const message = useMessage();
-async function handleCopyUUID(uuid) {
-  try {
-    await navigator.clipboard.writeText(uuid);
-    message.success("Account UUID copied to clipboard");
-  } catch {
-    message.error("Failed to copy Account UUID to clipboard");
-  }
-}
 
 const bar = useLoadingBar();
 function handleDelete(uuid) {

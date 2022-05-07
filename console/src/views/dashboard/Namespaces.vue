@@ -41,19 +41,7 @@
               </n-icon>
             </td>
             <td>
-              <n-tooltip trigger="hover">
-                <template #trigger>
-                  <n-button tertiary round type="info" @click.stop.prevent="handleCopyUUID(ns.uuid)">
-                    <template #icon>
-                      <n-icon>
-                        <copy-outline />
-                      </n-icon>
-                    </template>
-                    {{ shortUUID(ns.uuid) }}
-                  </n-button>
-                </template>
-                {{ ns.uuid }}
-              </n-tooltip>
+              <uuid-badge :uuid="ns.uuid" />
             </td>
             <td>
               <strong>
@@ -103,19 +91,7 @@
         <n-tr v-for="ns in pool.user" :key="ns.uuid">
           <td></td>
           <td>
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button tertiary round type="default" @click="handleCopyUUID(ns.uuid)">
-                  <template #icon>
-                    <n-icon>
-                      <copy-outline />
-                    </n-icon>
-                  </template>
-                  {{ shortUUID(ns.uuid) }}
-                </n-button>
-              </template>
-              {{ ns.uuid }}
-            </n-tooltip>
+            <uuid-badge :uuid="ns.uuid" type="default" />
           </td>
           <td>
             <strong>
@@ -166,11 +142,8 @@ import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
 import { groupBy } from "lodash"
 
+import UuidBadge from "@/components/core/uuid-badge.vue";
 import AccessBadge from "@/components/core/access-badge"
-
-function shortUUID(uuid) {
-  return uuid.substr(0, 8);
-}
 
 const store = useNSStore();
 const { loading, namespaces } = storeToRefs(store);
@@ -183,16 +156,6 @@ const pool = computed(() => groupBy(namespaces.value, (e) => {
 }))
 
 const expand = ref(new Set())
-
-const message = useMessage();
-async function handleCopyUUID(uuid) {
-  try {
-    await navigator.clipboard.writeText(uuid);
-    message.success("Account UUID copied to clipboard");
-  } catch {
-    message.error("Failed to copy Account UUID to clipboard");
-  }
-}
 
 const router = useRouter()
 function setNSAndGo(ns, route) {
