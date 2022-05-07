@@ -133,7 +133,7 @@ service NamespacesService {
     option (google.api.http) = {
       post: "/namespaces/{namespace}/joins"
       body: "*"
-    }
+    };
   }
 }
 
