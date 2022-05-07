@@ -726,6 +726,76 @@ func local_request_NamespacesService_Delete_0(ctx context.Context, marshaler run
 }
 
 var (
+	filter_NamespacesService_Joins_0 = &utilities.DoubleArray{Encoding: map[string]int{"uuid": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
+func request_NamespacesService_Joins_0(ctx context.Context, marshaler runtime.Marshaler, client NamespacesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq namespaces.Namespace
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["uuid"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "uuid")
+	}
+
+	protoReq.Uuid, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uuid", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NamespacesService_Joins_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.Joins(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_NamespacesService_Joins_0(ctx context.Context, marshaler runtime.Marshaler, server NamespacesServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq namespaces.Namespace
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["uuid"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "uuid")
+	}
+
+	protoReq.Uuid, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "uuid", err)
+	}
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NamespacesService_Joins_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := server.Joins(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+var (
 	filter_DevicesService_Get_0 = &utilities.DoubleArray{Encoding: map[string]int{"uuid": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
@@ -1265,13 +1335,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Token", runtime.WithHTTPPathPattern("/token"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Token", runtime.WithHTTPPathPattern("/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Token_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Token_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1289,13 +1358,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Get", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Get", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Get_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Get_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1313,13 +1381,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/List", runtime.WithHTTPPathPattern("/accounts"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/List", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_List_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_List_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1337,13 +1404,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Create", runtime.WithHTTPPathPattern("/accounts"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Create", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Create_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Create_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1361,13 +1427,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Update", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Update", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Update_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Update_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1385,13 +1450,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Toggle", runtime.WithHTTPPathPattern("/accounts/{uuid}/toggle"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Toggle", runtime.WithHTTPPathPattern("/accounts/{uuid}/toggle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Toggle_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Toggle_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1409,13 +1473,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Delete", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/Delete", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_Delete_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1433,13 +1496,12 @@ func RegisterAccountsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/SetCredentials", runtime.WithHTTPPathPattern("/accounts/{uuid}/credentials"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.AccountsService/SetCredentials", runtime.WithHTTPPathPattern("/accounts/{uuid}/credentials"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AccountsService_SetCredentials_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_AccountsService_SetCredentials_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1466,13 +1528,12 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Get", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Get", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NamespacesService_Get_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NamespacesService_Get_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1490,13 +1551,12 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/List", runtime.WithHTTPPathPattern("/namespaces"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/List", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NamespacesService_List_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NamespacesService_List_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1514,13 +1574,12 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Create", runtime.WithHTTPPathPattern("/namespaces"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Create", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NamespacesService_Create_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NamespacesService_Create_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1538,13 +1597,12 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Update", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Update", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NamespacesService_Update_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NamespacesService_Update_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1562,13 +1620,12 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Delete", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Delete", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NamespacesService_Delete_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NamespacesService_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1577,6 +1634,29 @@ func RegisterNamespacesServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		}
 
 		forward_NamespacesService_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_NamespacesService_Joins_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Joins", runtime.WithHTTPPathPattern("/namespaces/{uuid}/joins"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_NamespacesService_Joins_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_NamespacesService_Joins_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1595,13 +1675,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Get", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Get", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_Get_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_Get_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1619,13 +1698,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/List", runtime.WithHTTPPathPattern("/devices"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/List", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_List_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_List_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1643,13 +1721,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Create", runtime.WithHTTPPathPattern("/devices"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Create", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_Create_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_Create_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1667,13 +1744,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Update", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Update", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_Update_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_Update_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1691,13 +1767,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Delete", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Delete", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_Delete_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_Delete_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1715,13 +1790,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Toggle", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/Toggle", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_Toggle_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_Toggle_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1739,13 +1813,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/ToggleBasic", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle/basic"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/ToggleBasic", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle/basic"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_ToggleBasic_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_ToggleBasic_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1763,13 +1836,12 @@ func RegisterDevicesServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/MakeDevicesToken", runtime.WithHTTPPathPattern("/devices/token"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.DevicesService/MakeDevicesToken", runtime.WithHTTPPathPattern("/devices/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_DevicesService_MakeDevicesToken_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_DevicesService_MakeDevicesToken_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1796,13 +1868,12 @@ func RegisterShadowServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/Get", runtime.WithHTTPPathPattern("/devices/states"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/Get", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_ShadowService_Get_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ShadowService_Get_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1820,13 +1891,12 @@ func RegisterShadowServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/Patch", runtime.WithHTTPPathPattern("/devices/states"))
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/infinimesh.node.ShadowService/Patch", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_ShadowService_Patch_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ShadowService_Patch_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -1875,7 +1945,7 @@ func RegisterAccountsServiceHandlerFromEndpoint(ctx context.Context, mux *runtim
 
 // RegisterAccountsServiceHandler registers the http handlers for service AccountsService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterAccountsServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterAccountsServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterAccountsServiceHandlerClient(ctx, mux, NewAccountsServiceClient(conn))
 }
 
@@ -1890,13 +1960,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Token", runtime.WithHTTPPathPattern("/token"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Token", runtime.WithHTTPPathPattern("/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Token_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Token_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1911,13 +1980,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Get", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Get", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Get_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1932,13 +2000,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/List", runtime.WithHTTPPathPattern("/accounts"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/List", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_List_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_List_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1953,13 +2020,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Create", runtime.WithHTTPPathPattern("/accounts"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Create", runtime.WithHTTPPathPattern("/accounts"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Create_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Create_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1974,13 +2040,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Update", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Update", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Update_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Update_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -1995,13 +2060,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Toggle", runtime.WithHTTPPathPattern("/accounts/{uuid}/toggle"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Toggle", runtime.WithHTTPPathPattern("/accounts/{uuid}/toggle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Toggle_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Toggle_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2016,13 +2080,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Delete", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/Delete", runtime.WithHTTPPathPattern("/accounts/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_Delete_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2037,13 +2100,12 @@ func RegisterAccountsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/SetCredentials", runtime.WithHTTPPathPattern("/accounts/{uuid}/credentials"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.AccountsService/SetCredentials", runtime.WithHTTPPathPattern("/accounts/{uuid}/credentials"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AccountsService_SetCredentials_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_AccountsService_SetCredentials_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2120,7 +2182,7 @@ func RegisterNamespacesServiceHandlerFromEndpoint(ctx context.Context, mux *runt
 
 // RegisterNamespacesServiceHandler registers the http handlers for service NamespacesService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterNamespacesServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterNamespacesServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterNamespacesServiceHandlerClient(ctx, mux, NewNamespacesServiceClient(conn))
 }
 
@@ -2135,13 +2197,12 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Get", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Get", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespacesService_Get_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NamespacesService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2156,13 +2217,12 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/List", runtime.WithHTTPPathPattern("/namespaces"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/List", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespacesService_List_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NamespacesService_List_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2177,13 +2237,12 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Create", runtime.WithHTTPPathPattern("/namespaces"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Create", runtime.WithHTTPPathPattern("/namespaces"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespacesService_Create_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NamespacesService_Create_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2198,13 +2257,12 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Update", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Update", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespacesService_Update_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NamespacesService_Update_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2219,13 +2277,12 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Delete", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Delete", runtime.WithHTTPPathPattern("/namespaces/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NamespacesService_Delete_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NamespacesService_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2233,6 +2290,26 @@ func RegisterNamespacesServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		}
 
 		forward_NamespacesService_Delete_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_NamespacesService_Joins_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.NamespacesService/Joins", runtime.WithHTTPPathPattern("/namespaces/{uuid}/joins"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_NamespacesService_Joins_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_NamespacesService_Joins_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -2249,6 +2326,8 @@ var (
 	pattern_NamespacesService_Update_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "uuid"}, ""))
 
 	pattern_NamespacesService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"namespaces", "uuid"}, ""))
+
+	pattern_NamespacesService_Joins_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2}, []string{"namespaces", "uuid", "joins"}, ""))
 )
 
 var (
@@ -2261,6 +2340,8 @@ var (
 	forward_NamespacesService_Update_0 = runtime.ForwardResponseMessage
 
 	forward_NamespacesService_Delete_0 = runtime.ForwardResponseMessage
+
+	forward_NamespacesService_Joins_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterDevicesServiceHandlerFromEndpoint is same as RegisterDevicesServiceHandler but
@@ -2290,7 +2371,7 @@ func RegisterDevicesServiceHandlerFromEndpoint(ctx context.Context, mux *runtime
 
 // RegisterDevicesServiceHandler registers the http handlers for service DevicesService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterDevicesServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterDevicesServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterDevicesServiceHandlerClient(ctx, mux, NewDevicesServiceClient(conn))
 }
 
@@ -2305,13 +2386,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Get", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Get", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_Get_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2326,13 +2406,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/List", runtime.WithHTTPPathPattern("/devices"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/List", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_List_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_List_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2347,13 +2426,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Create", runtime.WithHTTPPathPattern("/devices"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Create", runtime.WithHTTPPathPattern("/devices"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_Create_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_Create_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2368,13 +2446,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Update", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Update", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_Update_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_Update_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2389,13 +2466,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Delete", runtime.WithHTTPPathPattern("/devices/{uuid}"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Delete", runtime.WithHTTPPathPattern("/devices/{uuid}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_Delete_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_Delete_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2410,13 +2486,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Toggle", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/Toggle", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_Toggle_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_Toggle_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2431,13 +2506,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/ToggleBasic", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle/basic"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/ToggleBasic", runtime.WithHTTPPathPattern("/devices/{uuid}/toggle/basic"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_ToggleBasic_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_ToggleBasic_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2452,13 +2526,12 @@ func RegisterDevicesServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/MakeDevicesToken", runtime.WithHTTPPathPattern("/devices/token"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.DevicesService/MakeDevicesToken", runtime.WithHTTPPathPattern("/devices/token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_DevicesService_MakeDevicesToken_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_DevicesService_MakeDevicesToken_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2535,7 +2608,7 @@ func RegisterShadowServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.
 
 // RegisterShadowServiceHandler registers the http handlers for service ShadowService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterShadowServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func RegisterShadowServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn grpc.ClientConnInterface) error {
 	return RegisterShadowServiceHandlerClient(ctx, mux, NewShadowServiceClient(conn))
 }
 
@@ -2550,13 +2623,12 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/Get", runtime.WithHTTPPathPattern("/devices/states"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/Get", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ShadowService_Get_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ShadowService_Get_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2571,13 +2643,12 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/Patch", runtime.WithHTTPPathPattern("/devices/states"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/Patch", runtime.WithHTTPPathPattern("/devices/states"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ShadowService_Patch_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ShadowService_Patch_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -2592,13 +2663,12 @@ func RegisterShadowServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamShadow", runtime.WithHTTPPathPattern("/devices/states/stream"))
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/infinimesh.node.ShadowService/StreamShadow", runtime.WithHTTPPathPattern("/devices/states/stream"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ShadowService_StreamShadow_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ShadowService_StreamShadow_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
