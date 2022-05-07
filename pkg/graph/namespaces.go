@@ -40,7 +40,7 @@ func (o *Namespace) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
-func (o *Namespace) SetAccessLevel(level access.AccessLevel) {
+func (o *Namespace) SetAccessLevel(level access.Level) {
 	if o.Access == nil {
 		o.Access = &access.Access{
 			Level: level,
@@ -98,7 +98,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	requestorAcc := NewBlankAccountDocument(requestor)
 	err = Link(ctx, log, c.acc2ns,
 		requestorAcc,
-		&namespace, access.AccessLevel_ADMIN, access.Role_OWNER,
+		&namespace, access.Level_ADMIN, access.Role_OWNER,
 	)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))
@@ -158,7 +158,7 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
 
-	if ns.Access.Level < access.AccessLevel_ADMIN {
+	if ns.Access.Level < access.Level_ADMIN {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 

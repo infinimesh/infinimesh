@@ -28,7 +28,7 @@ import (
 type Access struct {
 	From driver.DocumentID `json:"_from"`
 	To driver.DocumentID `json:"_to"`
-	Level access.AccessLevel `json:"level"`
+	Level access.Level `json:"level"`
 	Role access.Role `json:"role,omitempty"`
 
 	driver.DocumentMeta
@@ -37,7 +37,7 @@ type Access struct {
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
-	SetAccessLevel(level access.AccessLevel)
+	SetAccessLevel(level access.Level)
 }
 
 func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
@@ -53,7 +53,7 @@ func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Co
 	return col
 }
 
-func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access access.AccessLevel, role access.Role) error {
+func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access access.Level, role access.Role) error {
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
@@ -101,7 +101,7 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 	}
 
 	if account.ID() == node.ID() {
-		node.SetAccessLevel(access.AccessLevel_ROOT)
+		node.SetAccessLevel(access.Level_ROOT)
 	}
 
 	return nil
@@ -135,9 +135,9 @@ func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from In
 }
 
 
-func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, access.AccessLevel) {
+func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, access.Level) {
 	if account.ID() == node.ID() {
-		return true, access.AccessLevel_ROOT
+		return true, access.Level_ROOT
 	}
 	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{
@@ -150,9 +150,9 @@ func AccessLevel(ctx context.Context, db driver.Database, account *Account, node
 	}
 	defer c.Close()
 
-	_access := access.AccessLevel_NONE
+	_access := access.Level_NONE
 	for {
-		var level access.AccessLevel
+		var level access.Level
 		_, err := c.ReadDocument(ctx, &level)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -163,7 +163,7 @@ func AccessLevel(ctx context.Context, db driver.Database, account *Account, node
 			_access = level
 		}
 	}
-	return _access > access.AccessLevel_NONE, _access
+	return _access > access.Level_NONE, _access
 }
 
 const toggleQuery = `

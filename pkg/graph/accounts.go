@@ -40,7 +40,7 @@ func (o *Account) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
-func (o *Account) SetAccessLevel(level access.AccessLevel) {
+func (o *Account) SetAccessLevel(level access.Level) {
 	if o.Access == nil {
 		o.Access = &access.Access{
 			Level: level,
@@ -139,7 +139,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 		log.Error("Failed to get Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if result.Access.Level < access.AccessLevel_READ {
+	if result.Access.Level < access.Level_READ {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
@@ -192,7 +192,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	}
 
 	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
-	if !ok || level < access.AccessLevel_ADMIN {
+	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
 
@@ -210,7 +210,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	account.DocumentMeta = meta
 
 	ns := NewBlankNamespaceDocument(ns_id)
-	err = Link(ctx, log, c.ns2acc, ns, &account, access.AccessLevel_ADMIN, access.Role_UNSET)
+	err = Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_UNSET)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Error("Error Linking Namespace to Account", zap.Error(err))
@@ -245,13 +245,13 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 
 	old := *NewBlankAccountDocument(acc.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
-	if err != nil || old.Access.Level < access.AccessLevel_ADMIN {
+	if err != nil || old.Access.Level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
 		ok, level := AccessLevel(ctx, c.db, requestorAccount, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
-		if !ok || level < access.AccessLevel_READ {
+		if !ok || level < access.Level_READ {
 			return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", acc.GetDefaultNamespace())
 		}
 	}
@@ -274,7 +274,7 @@ func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*a
 		return nil, err
 	}
 
-	if curr.Access.Level < access.AccessLevel_MGMT {
+	if curr.Access.Level < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.Uuid)
 	}
 
@@ -300,7 +300,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if acc.Access.Level < access.AccessLevel_ADMIN {
+	if acc.Access.Level < access.Level_ADMIN {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
@@ -442,7 +442,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
 	}
 
-	if acc.Access.Level < access.AccessLevel_ROOT || acc.Access.Role != access.Role_OWNER {
+	if acc.Access.Level < access.Level_ROOT || acc.Access.Role != access.Role_OWNER {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 

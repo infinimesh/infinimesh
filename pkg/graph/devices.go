@@ -43,7 +43,7 @@ func (o *Device) ID() (driver.DocumentID) {
 	return o.DocumentMeta.ID
 }
 
-func (o *Device) SetAccessLevel(level access.AccessLevel) {
+func (o *Device) SetAccessLevel(level access.Level) {
 	if o.Access == nil {
 		o.Access = &access.Access{
 			Level: level,
@@ -130,7 +130,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	ns := NewBlankNamespaceDocument(ns_id)
 
 	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
-	if !ok || level < access.AccessLevel_ADMIN {
+	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
 
@@ -149,7 +149,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.AccessLevel_ADMIN, access.Role_UNSET)
+	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_UNSET)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -170,7 +170,7 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.AccessLevel_MGMT {
+	if curr.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
@@ -195,7 +195,7 @@ func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*dev
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.AccessLevel_MGMT {
+	if curr.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
@@ -218,7 +218,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) 
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.AccessLevel_MGMT {
+	if curr.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
@@ -246,12 +246,12 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if device.Access.Level < access.AccessLevel_READ {
+	if device.Access.Level < access.Level_READ {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
 	post := false
-	if device.Access.Level > access.AccessLevel_READ {
+	if device.Access.Level > access.Level_READ {
 		post = true
 	} else {
 		device.Certificate = nil
@@ -320,7 +320,7 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 			log.Error("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
-		if dev.Access.Level < access.AccessLevel_MGMT {
+		if dev.Access.Level < access.Level_MGMT {
 			dev.Certificate = nil
 		}
 		log.Debug("Got document", zap.Any("device", &dev))
@@ -344,7 +344,7 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if dev.Access.Level < access.AccessLevel_ADMIN {
+	if dev.Access.Level < access.Level_ADMIN {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
@@ -406,9 +406,9 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.Device
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(requestor)
-	_access := access.AccessLevel_READ
+	_access := access.Level_READ
 	if req.GetPost() {
-		_access = access.AccessLevel_MGMT
+		_access = access.Level_MGMT
 	}
 
 	for _, uuid := range req.GetDevices() {
