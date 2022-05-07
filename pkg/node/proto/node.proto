@@ -121,6 +121,13 @@ service NamespacesService {
       delete: "/namespaces/{uuid}"
     };
   };
+
+  // Accounts having access to this namespace
+  rpc Joins(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.accounts.Accounts) {
+    option (google.api.http) = {
+      get: "/namespaces/{uuid}/joins"
+    };
+  }
 }
 
 import "pkg/node/proto/devices/devices.proto";

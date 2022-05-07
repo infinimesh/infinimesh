@@ -24,6 +24,7 @@ import (
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 
@@ -136,4 +137,53 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 	return &nspb.Namespaces{
 		Namespaces: r,
 	}, nil
+}
+
+const listJoinsQuery = `
+FOR node, edge, path IN 1 INBOUND @namespace
+GRAPH Permissions
+FILTER edge.role != 1 && edge.level > 0
+RETURN MERGE(node, { uuid: node._key, access: { level: edge.level } })
+`
+func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespace) (*accpb.Accounts, error) {
+	log := c.log.Named("Joins")
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns := *NewBlankNamespaceDocument(request.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	if err != nil {
+		log.Error("Error getting Namespace and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
+	}
+
+	if ns.Access.Level < access.AccessLevel_ADMIN {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	cr, err := c.db.Query(ctx, listJoinsQuery, map[string]interface{}{
+		"namespace": ns.ID,
+	})
+	if err != nil {
+		log.Error("Error querying for joins", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error querying for joins")
+	}
+	defer cr.Close()
+
+	var r []*accpb.Account
+	for {
+		var acc accpb.Account
+		_, err := cr.ReadDocument(ctx, &acc)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			log.Error("Error unmarshalling Document", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Couldn't execute query")
+		}
+		log.Debug("Got document", zap.Any("account", &acc))
+		r = append(r, &acc)
+	}
+
+	return &accpb.Accounts{Accounts: r}, nil
 }
