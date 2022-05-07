@@ -93,6 +93,12 @@ service AccountsService {
 import "pkg/node/proto/namespaces/namespaces.proto";
 import "pkg/node/proto/access/access.proto";
 
+message JoinRequest {
+  string namespace = 1;
+  string account = 2;
+  infinimesh.node.access.AccessLevel access = 3;
+}
+
 service NamespacesService {
   rpc Get(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
     option (google.api.http) = {
@@ -130,9 +136,9 @@ service NamespacesService {
     };
   }
   // Sets Access to this namespace for the given account(deletes if level is set to NONE(0))
-  rpc Join(infinimesh.node.access.Access) returns (infinimesh.node.accounts.Accounts) {
+  rpc Join(JoinRequest) returns (infinimesh.node.accounts.Accounts) {
     option (google.api.http) = {
-      post: "/namespaces/{namespace}/joins"
+      post: "/namespaces/{namespace}/join"
       body: "*"
     };
   }
