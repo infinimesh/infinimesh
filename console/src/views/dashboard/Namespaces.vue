@@ -72,14 +72,7 @@
               </n-space>
             </td>
           </n-tr>
-          <transition>
-            <n-tr v-if="expand.has(ns.uuid)">
-              <td></td>
-              <td colspan="4">
-                {{ ns.uuid }}
-              </td>
-            </n-tr>
-          </transition>
+          <ns-joins v-if="expand.has(ns.uuid)" :namespace="ns.uuid" />
         </template>
         <n-tr>
           <td colspan="5" align="center">
@@ -144,6 +137,7 @@ import { groupBy } from "lodash"
 
 import UuidBadge from "@/components/core/uuid-badge.vue";
 import AccessBadge from "@/components/core/access-badge"
+import NsJoins from "@/components/namespaces/joins.vue"
 
 const store = useNSStore();
 const { loading, namespaces } = storeToRefs(store);

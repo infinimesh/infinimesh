@@ -17,6 +17,9 @@ export const useNSStore = defineStore("namespaces", {
       this.namespaces = data.namespaces;
       this.loading = false;
     },
+    loadJoins(ns) {
+      return as.http.get(`/namespaces/${ns}/joins`)
+    }
   },
 
   persist: {
