@@ -24,6 +24,6 @@ message Namespace {
   optional infinimesh.node.access.Access access = 3;
 }
 
-message NamespacesPool {
+message Namespaces {
   repeated Namespace namespaces = 1;
 }

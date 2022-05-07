@@ -108,7 +108,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	return namespace.Namespace, nil
 }
 
-func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.NamespacesPool, error) {
+func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.Namespaces, error) {
 	log := c.log.Named("List")
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -134,7 +134,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 		r = append(r, &ns)
 	}
 
-	return &nspb.NamespacesPool{
+	return &nspb.Namespaces{
 		Namespaces: r,
 	}, nil
 }

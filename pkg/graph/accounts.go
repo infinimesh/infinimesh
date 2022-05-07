@@ -145,7 +145,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	return result.Account, nil
 }
 
-func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*accpb.AccountsPool, error) {
+func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*accpb.Accounts, error) {
 	log := c.log.Named("List")
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -174,7 +174,7 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 		r = append(r, &acc)
 	}
 
-	return &accpb.AccountsPool{
+	return &accpb.Accounts{
 		Accounts: r,
 	}, nil
 }

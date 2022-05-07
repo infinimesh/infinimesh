@@ -202,7 +202,7 @@ func (x *Certificate) GetFingerprint() []byte {
 	return nil
 }
 
-type DevicesPool struct {
+type Devices struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -210,8 +210,8 @@ type DevicesPool struct {
 	Devices []*Device `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
 }
 
-func (x *DevicesPool) Reset() {
-	*x = DevicesPool{}
+func (x *Devices) Reset() {
+	*x = Devices{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pkg_node_proto_devices_devices_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -219,13 +219,13 @@ func (x *DevicesPool) Reset() {
 	}
 }
 
-func (x *DevicesPool) String() string {
+func (x *Devices) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DevicesPool) ProtoMessage() {}
+func (*Devices) ProtoMessage() {}
 
-func (x *DevicesPool) ProtoReflect() protoreflect.Message {
+func (x *Devices) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_node_proto_devices_devices_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -237,12 +237,12 @@ func (x *DevicesPool) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DevicesPool.ProtoReflect.Descriptor instead.
-func (*DevicesPool) Descriptor() ([]byte, []int) {
+// Deprecated: Use Devices.ProtoReflect.Descriptor instead.
+func (*Devices) Descriptor() ([]byte, []int) {
 	return file_pkg_node_proto_devices_devices_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *DevicesPool) GetDevices() []*Device {
+func (x *Devices) GetDevices() []*Device {
 	if x != nil {
 		return x.Devices
 	}
@@ -486,7 +486,7 @@ var file_pkg_node_proto_devices_devices_proto_msgTypes = make([]protoimpl.Messag
 var file_pkg_node_proto_devices_devices_proto_goTypes = []interface{}{
 	(*Device)(nil),                  // 0: infinimesh.node.devices.Device
 	(*Certificate)(nil),             // 1: infinimesh.node.devices.Certificate
-	(*DevicesPool)(nil),             // 2: infinimesh.node.devices.DevicesPool
+	(*Devices)(nil),             // 2: infinimesh.node.devices.Devices
 	(*CreateRequest)(nil),           // 3: infinimesh.node.devices.CreateRequest
 	(*CreateResponse)(nil),          // 4: infinimesh.node.devices.CreateResponse
 	(*GetByFingerprintRequest)(nil), // 5: infinimesh.node.devices.GetByFingerprintRequest
@@ -495,7 +495,7 @@ var file_pkg_node_proto_devices_devices_proto_goTypes = []interface{}{
 var file_pkg_node_proto_devices_devices_proto_depIdxs = []int32{
 	1, // 0: infinimesh.node.devices.Device.certificate:type_name -> infinimesh.node.devices.Certificate
 	6, // 1: infinimesh.node.devices.Device.access:type_name -> infinimesh.node.access.Access
-	0, // 2: infinimesh.node.devices.DevicesPool.devices:type_name -> infinimesh.node.devices.Device
+	0, // 2: infinimesh.node.devices.Devices.devices:type_name -> infinimesh.node.devices.Device
 	0, // 3: infinimesh.node.devices.CreateRequest.device:type_name -> infinimesh.node.devices.Device
 	0, // 4: infinimesh.node.devices.CreateResponse.device:type_name -> infinimesh.node.devices.Device
 	5, // [5:5] is the sub-list for method output_type
@@ -536,7 +536,7 @@ func file_pkg_node_proto_devices_devices_proto_init() {
 			}
 		}
 		file_pkg_node_proto_devices_devices_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DevicesPool); i {
+			switch v := v.(*Devices); i {
 			case 0:
 				return &v.state
 			case 1:

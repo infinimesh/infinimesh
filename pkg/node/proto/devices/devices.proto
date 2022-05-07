@@ -35,7 +35,7 @@ message Certificate {
   bytes fingerprint = 3;
 }
 
-message DevicesPool {
+message Devices {
   repeated Device devices = 1;
 }
 

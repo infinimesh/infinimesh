@@ -288,7 +288,7 @@ func (x *CreateResponse) GetAccount() *Account {
 	return nil
 }
 
-type AccountsPool struct {
+type Accounts struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -296,8 +296,8 @@ type AccountsPool struct {
 	Accounts []*Account `protobuf:"bytes,1,rep,name=accounts,proto3" json:"accounts,omitempty"`
 }
 
-func (x *AccountsPool) Reset() {
-	*x = AccountsPool{}
+func (x *Accounts) Reset() {
+	*x = Accounts{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pkg_node_proto_accounts_accounts_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -305,13 +305,13 @@ func (x *AccountsPool) Reset() {
 	}
 }
 
-func (x *AccountsPool) String() string {
+func (x *Accounts) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AccountsPool) ProtoMessage() {}
+func (*Accounts) ProtoMessage() {}
 
-func (x *AccountsPool) ProtoReflect() protoreflect.Message {
+func (x *Accounts) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_node_proto_accounts_accounts_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -323,12 +323,12 @@ func (x *AccountsPool) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AccountsPool.ProtoReflect.Descriptor instead.
-func (*AccountsPool) Descriptor() ([]byte, []int) {
+// Deprecated: Use Accounts.ProtoReflect.Descriptor instead.
+func (*Accounts) Descriptor() ([]byte, []int) {
 	return file_pkg_node_proto_accounts_accounts_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *AccountsPool) GetAccounts() []*Account {
+func (x *Accounts) GetAccounts() []*Account {
 	if x != nil {
 		return x.Accounts
 	}
@@ -420,7 +420,7 @@ var file_pkg_node_proto_accounts_accounts_proto_goTypes = []interface{}{
 	(*Account)(nil),        // 1: infinimesh.node.accounts.Account
 	(*CreateRequest)(nil),  // 2: infinimesh.node.accounts.CreateRequest
 	(*CreateResponse)(nil), // 3: infinimesh.node.accounts.CreateResponse
-	(*AccountsPool)(nil),   // 4: infinimesh.node.accounts.AccountsPool
+	(*Accounts)(nil),   // 4: infinimesh.node.accounts.Accounts
 	(*access.Access)(nil),  // 5: infinimesh.node.access.Access
 }
 var file_pkg_node_proto_accounts_accounts_proto_depIdxs = []int32{
@@ -428,7 +428,7 @@ var file_pkg_node_proto_accounts_accounts_proto_depIdxs = []int32{
 	1, // 1: infinimesh.node.accounts.CreateRequest.account:type_name -> infinimesh.node.accounts.Account
 	0, // 2: infinimesh.node.accounts.CreateRequest.credentials:type_name -> infinimesh.node.accounts.Credentials
 	1, // 3: infinimesh.node.accounts.CreateResponse.account:type_name -> infinimesh.node.accounts.Account
-	1, // 4: infinimesh.node.accounts.AccountsPool.accounts:type_name -> infinimesh.node.accounts.Account
+	1, // 4: infinimesh.node.accounts.Accounts.accounts:type_name -> infinimesh.node.accounts.Account
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -491,7 +491,7 @@ func file_pkg_node_proto_accounts_accounts_proto_init() {
 			}
 		}
 		file_pkg_node_proto_accounts_accounts_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AccountsPool); i {
+			switch v := v.(*Accounts); i {
 			case 0:
 				return &v.state
 			case 1:

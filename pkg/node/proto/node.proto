@@ -50,7 +50,7 @@ service AccountsService {
       get: "/accounts/{uuid}"
     };
   };
-  rpc List(EmptyMessage) returns (infinimesh.node.accounts.AccountsPool) {
+  rpc List(EmptyMessage) returns (infinimesh.node.accounts.Accounts) {
     option (google.api.http) = {
       get: "/accounts"
     };
@@ -98,7 +98,7 @@ service NamespacesService {
       get: "/namespaces/{uuid}"
     };
   };
-  rpc List(EmptyMessage) returns (infinimesh.node.namespaces.NamespacesPool) {
+  rpc List(EmptyMessage) returns (infinimesh.node.namespaces.Namespaces) {
     option (google.api.http) = {
       get: "/namespaces"
     };
@@ -137,7 +137,7 @@ service DevicesService {
       get: "/devices/{uuid}"
     };
   };
-  rpc List(EmptyMessage) returns (infinimesh.node.devices.DevicesPool) {
+  rpc List(EmptyMessage) returns (infinimesh.node.devices.Devices) {
     option (google.api.http) = {
       get: "/devices"
     };

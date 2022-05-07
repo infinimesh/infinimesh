@@ -99,7 +99,7 @@ func (x *Namespace) GetAccess() *access.Access {
 	return nil
 }
 
-type NamespacesPool struct {
+type Namespaces struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -107,8 +107,8 @@ type NamespacesPool struct {
 	Namespaces []*Namespace `protobuf:"bytes,1,rep,name=namespaces,proto3" json:"namespaces,omitempty"`
 }
 
-func (x *NamespacesPool) Reset() {
-	*x = NamespacesPool{}
+func (x *Namespaces) Reset() {
+	*x = Namespaces{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_pkg_node_proto_namespaces_namespaces_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -116,13 +116,13 @@ func (x *NamespacesPool) Reset() {
 	}
 }
 
-func (x *NamespacesPool) String() string {
+func (x *Namespaces) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*NamespacesPool) ProtoMessage() {}
+func (*Namespaces) ProtoMessage() {}
 
-func (x *NamespacesPool) ProtoReflect() protoreflect.Message {
+func (x *Namespaces) ProtoReflect() protoreflect.Message {
 	mi := &file_pkg_node_proto_namespaces_namespaces_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -134,12 +134,12 @@ func (x *NamespacesPool) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NamespacesPool.ProtoReflect.Descriptor instead.
-func (*NamespacesPool) Descriptor() ([]byte, []int) {
+// Deprecated: Use Namespaces.ProtoReflect.Descriptor instead.
+func (*Namespaces) Descriptor() ([]byte, []int) {
 	return file_pkg_node_proto_namespaces_namespaces_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *NamespacesPool) GetNamespaces() []*Namespace {
+func (x *Namespaces) GetNamespaces() []*Namespace {
 	if x != nil {
 		return x.Namespaces
 	}
@@ -203,12 +203,12 @@ func file_pkg_node_proto_namespaces_namespaces_proto_rawDescGZIP() []byte {
 var file_pkg_node_proto_namespaces_namespaces_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_pkg_node_proto_namespaces_namespaces_proto_goTypes = []interface{}{
 	(*Namespace)(nil),      // 0: infinimesh.node.namespaces.Namespace
-	(*NamespacesPool)(nil), // 1: infinimesh.node.namespaces.NamespacesPool
+	(*Namespaces)(nil), // 1: infinimesh.node.namespaces.Namespaces
 	(*access.Access)(nil),  // 2: infinimesh.node.access.Access
 }
 var file_pkg_node_proto_namespaces_namespaces_proto_depIdxs = []int32{
 	2, // 0: infinimesh.node.namespaces.Namespace.access:type_name -> infinimesh.node.access.Access
-	0, // 1: infinimesh.node.namespaces.NamespacesPool.namespaces:type_name -> infinimesh.node.namespaces.Namespace
+	0, // 1: infinimesh.node.namespaces.Namespaces.namespaces:type_name -> infinimesh.node.namespaces.Namespace
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -235,7 +235,7 @@ func file_pkg_node_proto_namespaces_namespaces_proto_init() {
 			}
 		}
 		file_pkg_node_proto_namespaces_namespaces_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NamespacesPool); i {
+			switch v := v.(*Namespaces); i {
 			case 0:
 				return &v.state
 			case 1:

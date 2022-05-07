@@ -42,6 +42,6 @@ message CreateResponse {
   Account account = 1;
 }
 
-message AccountsPool {
+message Accounts {
   repeated Account accounts = 1;
 }

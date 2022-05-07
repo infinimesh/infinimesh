@@ -297,7 +297,7 @@ func (c *DevicesController) GetByToken(ctx context.Context, dev *devpb.Device) (
 	return &device, nil
 }
 
-func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devpb.DevicesPool, error) {
+func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devpb.Devices, error) {
 	log := c.log.Named("List")
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -328,7 +328,7 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 		r = append(r, &dev)
 	}
 
-	return &devpb.DevicesPool{
+	return &devpb.Devices{
 		Devices: r,
 	}, nil
 }
