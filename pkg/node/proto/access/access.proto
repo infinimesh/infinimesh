@@ -33,4 +33,5 @@ message Access {
     AccessLevel level = 1;
     Role role = 2;
     optional string namespace = 3;
+    optional string account = 4;
 }
