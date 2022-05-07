@@ -91,6 +91,7 @@ service AccountsService {
 }
 
 import "pkg/node/proto/namespaces/namespaces.proto";
+import "pkg/node/proto/access/access.proto";
 
 service NamespacesService {
   rpc Get(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.namespaces.Namespace) {
