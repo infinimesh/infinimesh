@@ -8,7 +8,7 @@
       </n-grid-item>
       <n-grid-item span="0 600:2 700:4 1000:12 1400:14"> </n-grid-item>
       <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
-        <n-button strong secondary round type="info" @click="e => store.fetchNamespaces()">
+        <n-button strong secondary round type="info" @click="refresh">
           <template #icon>
             <n-icon>
               <refresh-outline />
@@ -72,7 +72,8 @@
               </n-space>
             </td>
           </n-tr>
-          <ns-joins v-if="expand.has(ns.uuid)" :namespace="ns.uuid" />
+          <ns-joins v-if="expand.has(ns.uuid)" :namespace="ns.uuid"
+            :admin="ns.access.role == 'OWNER' || ns.access.level == 'ROOT'" />
         </template>
         <n-tr>
           <td colspan="5" align="center">
@@ -121,23 +122,21 @@ import {
   NButton,
   NIcon,
   NSpace,
-  useMessage,
-  NTooltip,
   NPopconfirm,
   NGrid,
   NGridItem,
   NH1,
-  NText, useLoadingBar
+  NText,
 } from "naive-ui";
-import { CopyOutline, RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
+import { RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
-import { groupBy } from "lodash"
+import { groupBy } from "lodash";
 
 import UuidBadge from "@/components/core/uuid-badge.vue";
-import AccessBadge from "@/components/core/access-badge"
-import NsJoins from "@/components/namespaces/joins.vue"
+import AccessBadge from "@/components/core/access-badge";
+import NsJoins from "@/components/namespaces/joins.vue";
 
 const store = useNSStore();
 const { loading, namespaces } = storeToRefs(store);
@@ -157,5 +156,10 @@ function setNSAndGo(ns, route) {
   router.push({ name: route })
 }
 
-store.fetchNamespaces()
+function refresh() {
+  expand.value = new Set()
+  store.fetchNamespaces()
+}
+
+refresh()
 </script>
