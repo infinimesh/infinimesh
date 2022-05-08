@@ -18,6 +18,7 @@ package infinimesh.node;
 
 import "google/api/annotations.proto";
 import "pkg/node/proto/accounts/accounts.proto";
+import "pkg/node/proto/access/access.proto";
 
 message TokenRequest {
   infinimesh.node.accounts.Credentials auth = 1;
@@ -80,7 +81,11 @@ service AccountsService {
       delete: "/accounts/{uuid}"
     };
   };
-
+  rpc Deletables(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.access.Nodes) {
+    option (google.api.http) = {
+      get: "/accounts/{uuid}/deletables"
+    };
+  };
 
   rpc SetCredentials(SetCredentialsRequest) returns (SetCredentialsResponse) {
     option (google.api.http) = {
@@ -91,7 +96,6 @@ service AccountsService {
 }
 
 import "pkg/node/proto/namespaces/namespaces.proto";
-import "pkg/node/proto/access/access.proto";
 
 message JoinRequest {
   string namespace = 1;
@@ -126,6 +130,11 @@ service NamespacesService {
   rpc Delete(infinimesh.node.namespaces.Namespace) returns (DeleteResponse) {
     option (google.api.http) = {
       delete: "/namespaces/{uuid}"
+    };
+  };
+  rpc Deletables(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.access.Nodes) {
+    option (google.api.http) = {
+      get: "/namespaces/{uuid}/deletables"
     };
   };
 

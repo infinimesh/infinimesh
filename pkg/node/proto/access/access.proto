@@ -34,3 +34,14 @@ message Access {
     Role role = 2;
     optional string namespace = 3;
 }
+
+message Node {
+    string node = 1;
+    string parent = 2;
+
+    string edge = 3; // @private
+}
+
+message Nodes {
+    repeated Node nodes = 1;
+}
