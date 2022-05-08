@@ -34,6 +34,8 @@ export default function AccessBadge(props) {
   if (props.namespace != undefined) key = "namespace"
   if (props.join != undefined) key = "join"
 
+  if (props.cb == undefined) props.cb = () => {}
+
   let conf = accessLevels[key][props.access];
   return h(
     NTooltip,
@@ -51,7 +53,8 @@ export default function AccessBadge(props) {
           color: conf[2],
           style: {
             marginLeft: props.left
-          }
+          },
+          onClick: () => props.cb(props.access)
         },
         {
           default: () => conf[0],

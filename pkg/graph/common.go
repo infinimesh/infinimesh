@@ -53,20 +53,34 @@ func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Co
 	return col
 }
 
-func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, access access.Level, role access.Role) error {
+func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
+		zap.Any("level", lvl),
+		zap.Any("role", role),
 	)
-	_, err := edge.CreateDocument(ctx, Access{
+
+	a := Access{
 		From: from.ID(),
 		To: to.ID(),
-		Level: access,
+		Level: lvl,
 		Role: role,
 		DocumentMeta: driver.DocumentMeta {
 			Key: from.ID().Key() + "-" + to.ID().Key(),
 		},
-	})
+	}
+
+	if a.Level == access.Level_NONE {
+		_, err := edge.RemoveDocument(ctx, a.Key)
+		return err
+	}
+	
+	if _, err := edge.UpdateDocument(ctx, a.DocumentMeta.Key, a); err == nil {
+		return nil
+	}
+
+	_, err := edge.CreateDocument(ctx, a)
 	return err
 }
 

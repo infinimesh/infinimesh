@@ -1,4 +1,5 @@
 import { useAppStore } from "@/store/app";
+import { join } from "lodash";
 import { defineStore } from "pinia";
 
 const as = useAppStore();
@@ -19,6 +20,11 @@ export const useNSStore = defineStore("namespaces", {
     },
     loadJoins(ns) {
       return as.http.get(`/namespaces/${ns}/joins`)
+    },
+    join(ns, acc, lvl) {
+      return as.http.post(`/namespaces/${ns}/join`, {
+        account: acc, access: lvl,
+      })
     }
   },
 

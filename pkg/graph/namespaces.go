@@ -64,6 +64,7 @@ type NamespacesController struct {
 	log *zap.Logger
 
 	col driver.Collection // Namespaces Collection
+	accs driver.Collection // Accounts Collection
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
@@ -73,8 +74,9 @@ type NamespacesController struct {
 func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
+	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
 	return &NamespacesController{
-		log: log.Named("NamespacesController"), col: col, db: db,
+		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
 	}
 }
@@ -186,4 +188,36 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 	}
 
 	return &accpb.Accounts{Accounts: r}, nil
+}
+
+func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest) (*accpb.Accounts, error) {
+	log := c.log.Named("Join")
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns := *NewBlankNamespaceDocument(request.GetNamespace())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	if err != nil {
+		log.Error("Error getting Namespace and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
+	}
+	if ns.Access.Role != access.Role_OWNER || ns.Access.Level < access.Level_ROOT {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	acc := *NewBlankAccountDocument(request.GetAccount())
+	_, err = c.accs.ReadDocument(ctx, request.GetAccount(), &acc)
+	if err != nil {
+		log.Error("Error getting Account", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Account not found")
+	}
+
+	err = Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
+	if err != nil {
+		log.Error("Error creating edge", zap.Error(err))
+		return nil, status.Error(codes.Internal, "error creating Permission")
+	}
+
+	return c.Joins(ctx, ns.Namespace)
 }
