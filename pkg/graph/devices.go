@@ -149,7 +149,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_UNSET)
+	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
