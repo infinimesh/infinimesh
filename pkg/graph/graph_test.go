@@ -1034,7 +1034,7 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 	}
 }
 
-func TestFingByFingerprintNotFound(t *testing.T){
+func TestFingByFingerprintNotFound(t *testing.T) {
 	_, err := dev_ctrl.GetByFingerprint(rootCtx, &devices.GetByFingerprintRequest{
 		Fingerprint: []byte("notfound"),
 	})
@@ -1052,3 +1052,21 @@ func TestFingByFingerprintNotFound(t *testing.T){
 		t.Fatalf("Error supposed to be NotFound: The device does not exist, but received %s: %s", s.Code().String(), s.Message())
 	}
 }
+
+// TODO: Automate this test
+// func TestListOwnedDeep(t *testing.T) {
+// 	r, err := ListOwnedDeep(context.Background(), log, db, NewBlankAccountDocument("8fc2cbce-0b9a-4358-9942-b21967abe3d6"))
+// 	if err != nil {
+// 		t.Fatalf("Error listing nodes: %v", err)
+// 	}
+
+// 	log.Info("Retrieved nodes", zap.Any("nodes", r))
+// }
+
+// TODO: Automate this test
+// func TestDeleteRecursive(t *testing.T) {
+// 	err := DeleteRecursive(context.Background(), log, db, NewBlankAccountDocument("8fc2cbce-0b9a-4358-9942-b21967abe3d6"))
+// 	if err != nil {
+// 		t.Fatalf("Error deleting nodes: %v", err)
+// 	}
+// }

@@ -18,6 +18,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -148,6 +149,86 @@ func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from In
 	return db.Query(ctx, listObjectsOfKind, bindVars)
 }
 
+const listOwnedQuery = `
+FOR node, edge IN 0..100
+OUTBOUND @from
+GRAPH Permissions
+FILTER !edge || edge.role == 1
+    RETURN MERGE(node, { edge: edge ? edge._id : null })
+`
+type OwnedNode struct {
+	ID string `json:"_id"`
+	Title string `json:"title"`
+	Edge string `json:"edge"`
+}
+func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) ([]OwnedNode, error) {
+	c, err := db.Query(ctx, listOwnedQuery, map[string]interface{}{
+		"from": from.ID(),
+	})
+	if err != nil {
+		log.Debug("Error while executing query", zap.Error(err))
+		return nil, err
+	}
+	defer c.Close()
+
+	var nodes []OwnedNode
+	for {
+		var node OwnedNode
+		_, err := c.ReadDocument(ctx, &node)
+		if err != nil {
+			if driver.IsNoMoreDocuments(err) {
+				break
+			}
+			return nil, err
+		}
+		nodes = append(nodes, node)
+	}
+
+	return nodes, nil
+}
+
+func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (error) {
+	nodes, err := ListOwnedDeep(ctx, log, db, from)
+	if err != nil {
+		return err
+	}
+
+	cols := make(map[string]driver.Collection)
+	for i := len(nodes) - 1; i >= 0; i-- {
+		node := nodes[i]
+		log.Debug("Deleting", zap.String("node", node.ID), zap.String("title", node.Title), zap.String("edge", node.Edge))
+		
+		err := handleDeleteNodeInRecursion(ctx, log, db, node.ID, cols)
+		if err != nil {
+			return err
+		}
+
+		if node.Edge != "" {
+			err := handleDeleteNodeInRecursion(ctx, log, db, node.Edge, cols)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver.Database, node string, cols map[string]driver.Collection) (err error) {
+	id := strings.SplitN(node, "/", 2)
+	log.Debug("Retrieving Collection", zap.String("collection", id[0]), zap.String("id", node))
+	col, ok := cols[id[0]]
+	if !ok {
+		col, err = db.Collection(ctx, id[0])
+		if err != nil {
+			return err
+		}
+		cols[id[0]] = col
+	}
+
+	_, err = col.RemoveDocument(ctx, id[1])
+	return err
+}
 
 func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, access.Level) {
 	if account.ID() == node.ID() {
