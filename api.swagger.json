@@ -1716,8 +1716,8 @@
           }
         },
         "exp": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "post": {
           "type": "boolean"
@@ -1734,8 +1734,8 @@
           "$ref": "#/definitions/accountsCredentials"
         },
         "exp": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         },
         "uuid": {
           "type": "string"
