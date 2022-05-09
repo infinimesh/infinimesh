@@ -84,6 +84,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 	// Create empty subscription
 	backChannel := ps.Sub()
+	defer unsub(ps, backChannel)
 
 	_, err := resp.WriteTo(c)
 	if err != nil {
@@ -177,4 +178,10 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 			panic(err)
 		}
 	}
+}
+
+func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+	go ps.Unsub(ch)
+	
+	for range ch {}
 }
