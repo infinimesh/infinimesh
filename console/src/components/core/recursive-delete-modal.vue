@@ -78,7 +78,7 @@ watch(show, async (val) => {
             accs.fetchAccounts()
         }
         if (!Object.keys(devs.devices).length) {
-            devs.fetchDevices()
+            devs.fetchDevices(false)
         }
 
         tree.value = makeTree(data.nodes)
