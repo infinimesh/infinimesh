@@ -50,7 +50,7 @@ const { o, type, deletables } = defineProps({
         required: true
     },
     deletables: {
-        default: () => () => [],
+        default: () => async () => [],
     },
     type: {
         type: String,
