@@ -88,6 +88,14 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
+	if request.Title == "" {
+		return nil, status.Error(codes.InvalidArgument, "Title is required")
+	}
+
+	if request.Uuid != "" {
+		request.Uuid = ""
+	}
+
 	namespace := Namespace{Namespace: request}
 	meta, err := c.col.CreateDocument(ctx, namespace)
 	if err != nil {
@@ -224,4 +232,23 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 	}
 
 	return c.Joins(ctx, ns.Namespace)
+}
+
+func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Namespace) (*access.Nodes, error) {
+	log := c.log.Named("Deletables")
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns := *NewBlankNamespaceDocument(request.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	if err != nil {
+		log.Error("Error getting Namespace and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
+	}
+	if ns.Access.Role != access.Role_OWNER || ns.Access.Level < access.Level_ROOT {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	return nil, nil
 }
