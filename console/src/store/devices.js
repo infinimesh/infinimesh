@@ -47,10 +47,15 @@ export const useDevicesStore = defineStore("devices", {
   },
 
   actions: {
-    async fetchDevices(state = true) {
+    async fetchDevices(state = true, no_cache = false) {
       this.loading = true;
       const { data } = await as.http.get("/devices");
-      this.devices = { ...this.devices, ...data.devices.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})};
+
+      if (no_cache) {
+        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
+      } else {
+        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {})};
+      }
       this.loading = false;
 
       if(state)
@@ -138,7 +143,7 @@ export const useDevicesStore = defineStore("devices", {
         await as.http.delete(`/devices/${device}`);
         bar.finish();
 
-        this.fetchDevices();
+        this.fetchDevices(false, true);
       } catch (e) {
         console.error(e);
         bar.error();

@@ -21,7 +21,7 @@
         <device-create />
       </n-grid-item>
     </n-grid>
-    <devices-pool :devices="devices" :show_ns="show_ns" @refresh="() => store.fetchDevices()" />
+    <devices-pool :devices="devices" :show_ns="show_ns" @refresh="() => store.fetchDevices(true, true)" />
   </n-spin>
 </template>
 
@@ -36,5 +36,5 @@ import DeviceCreate from "@/components/devices/create-drawer.vue";
 const store = useDevicesStore();
 const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
 
-store.fetchDevices();
+store.fetchDevices(true, true);
 </script>
