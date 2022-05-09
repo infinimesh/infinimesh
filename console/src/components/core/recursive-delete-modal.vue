@@ -1,7 +1,8 @@
 <template>
     <n-popconfirm @positive-click="() => show = true">
         <template #trigger>
-            <n-button v-if="o.access.role == 'OWNER'" type="error" round secondary @click.stop.prevent>Delete
+            <n-button v-if="o.access.role == 'OWNER' || access_lvl_conv(o) > 3" type="error" round secondary
+                @click.stop.prevent>Delete
             </n-button>
         </template>
         <span>
@@ -35,6 +36,8 @@ import { NPopconfirm, NModal, NCard, NButton, NSpin, NTree, NSpace } from "naive
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { useDevicesStore } from "@/store/devices";
+
+import { access_lvl_conv } from "@/utils/access";
 
 const accs = useAccountsStore();
 const nss = useNSStore()
