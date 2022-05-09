@@ -102,6 +102,9 @@ function close() {
 function makeTree(data, parent = '') {
     let nodes = []
     data = data.filter((value) => {
+        if (value.node == "") {
+            return false
+        }
         if (value.parent == parent) {
             nodes.push(value)
             return false
