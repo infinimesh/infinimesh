@@ -23,6 +23,7 @@ import "pkg/node/proto/access/access.proto";
 message TokenRequest {
   infinimesh.node.accounts.Credentials auth = 1;
   int32 exp = 2;
+  optional string uuid = 3;
 }
 
 message TokenResponse {
