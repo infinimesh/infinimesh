@@ -20,6 +20,7 @@ import (
 	"errors"
 
 	"github.com/arangodb/go-driver"
+	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accountspb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	"go.uber.org/zap"
 )
@@ -99,4 +100,25 @@ func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Cred
 	cred.SetLogger(log)
 
 	return cred, err
+}
+
+const listCredentialsAndEdgesQuery = `
+RETURN FLATTEN(
+FOR node, edge IN 1 OUTBOUND @account
+GRAPH @credentials
+    RETURN [ node._id, edge._id ]
+)
+`
+func ListCredentialsAndEdges(ctx context.Context, log *zap.Logger, db driver.Database, account driver.DocumentID) (nodes []string, err error) {
+	c, err := db.Query(ctx, listCredentialsAndEdgesQuery, map[string]interface{}{
+		"account": account,
+		"credentials": schema.CREDENTIALS_COL,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	_, err = c.ReadDocument(ctx, &nodes)
+	return nodes, err
 }

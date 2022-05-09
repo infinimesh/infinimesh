@@ -17,10 +17,12 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
 	"go.uber.org/zap"
@@ -154,37 +156,32 @@ FOR node, edge IN 0..100
 OUTBOUND @from
 GRAPH Permissions
 FILTER !edge || edge.role == 1
-    RETURN MERGE(node, { edge: edge ? edge._id : null })
+    RETURN MERGE({ node: node._id }, edge ? { edge: edge._id, parent: edge._from } : { edge: null, parent: null })
 `
-type OwnedNode struct {
-	ID string `json:"_id"`
-	Title string `json:"title"`
-	Edge string `json:"edge"`
-}
-func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) ([]OwnedNode, error) {
+func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (res *access.Nodes, err error) {
 	c, err := db.Query(ctx, listOwnedQuery, map[string]interface{}{
 		"from": from.ID(),
 	})
 	if err != nil {
 		log.Debug("Error while executing query", zap.Error(err))
-		return nil, err
+		return res, err
 	}
 	defer c.Close()
 
-	var nodes []OwnedNode
+	var nodes []*access.Node
 	for {
-		var node OwnedNode
+		var node access.Node
 		_, err := c.ReadDocument(ctx, &node)
 		if err != nil {
 			if driver.IsNoMoreDocuments(err) {
 				break
 			}
-			return nil, err
+			return res, err
 		}
-		nodes = append(nodes, node)
+		nodes = append(nodes, &node)
 	}
 
-	return nodes, nil
+	return &access.Nodes{Nodes: nodes}, nil
 }
 
 func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (error) {
@@ -194,13 +191,18 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 	}
 
 	cols := make(map[string]driver.Collection)
-	for i := len(nodes) - 1; i >= 0; i-- {
-		node := nodes[i]
-		log.Debug("Deleting", zap.String("node", node.ID), zap.String("title", node.Title), zap.String("edge", node.Edge))
+	for i := len(nodes.Nodes) - 1; i >= 0; i-- {
+		node := nodes.Nodes[i]
+		log.Debug("Deleting", zap.String("node", node.Node), zap.String("edge", node.Edge))
 		
-		err := handleDeleteNodeInRecursion(ctx, log, db, node.ID, cols)
-		if err != nil {
-			return err
+		if node.Node != "" {
+			err := handleDeleteNodeInRecursion(ctx, log, db, node.Node, cols)
+			if err != nil {
+				if err.Error() == "ERR_ROOT_OBJECT_CANNOT_BE_DELETED" {
+					continue
+				}
+				return err
+			}
 		}
 
 		if node.Edge != "" {
@@ -215,6 +217,8 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 }
 
 func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver.Database, node string, cols map[string]driver.Collection) (err error) {
+	log.Debug("Handling deletion", zap.String("node", node))
+	
 	id := strings.SplitN(node, "/", 2)
 	log.Debug("Retrieving Collection", zap.String("collection", id[0]), zap.String("id", node))
 	col, ok := cols[id[0]]
@@ -226,7 +230,31 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 		cols[id[0]] = col
 	}
 
+	if id[0] == schema.ACCOUNTS_COL {
+		if id[1] == schema.ROOT_ACCOUNT_KEY {
+			log.Warn("Root account cannot be deleted")
+			return errors.New("ERR_ROOT_OBJECT_CANNOT_BE_DELETED")
+		}
+		nodes, err := credentials.ListCredentialsAndEdges(ctx, log, col.Database(), driver.NewDocumentID(col.Name(), node))
+		if err != nil {
+			return err
+		}
+		for _, node := range nodes {
+			err = handleDeleteNodeInRecursion(ctx, log, col.Database(), node, cols)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if id[0] == schema.NAMESPACES_COL && id[1] == schema.ROOT_NAMESPACE_KEY {
+		log.Warn("Root namespace cannot be deleted")
+		return errors.New("ERR_ROOT_OBJECT_CANNOT_BE_DELETED")
+	}
+
 	_, err = col.RemoveDocument(ctx, id[1])
+	if e, ok := driver.AsArangoError(err); ok && e.Code == 404 {
+		return nil
+	}
 	return err
 }
 

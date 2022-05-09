@@ -1055,7 +1055,7 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 
 // TODO: Automate this test
 // func TestListOwnedDeep(t *testing.T) {
-// 	r, err := ListOwnedDeep(context.Background(), log, db, NewBlankAccountDocument("8fc2cbce-0b9a-4358-9942-b21967abe3d6"))
+// 	r, err := ListOwnedDeep(context.Background(), log, db, NewBlankAccountDocument("infinimesh"))
 // 	if err != nil {
 // 		t.Fatalf("Error listing nodes: %v", err)
 // 	}
@@ -1065,7 +1065,7 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 
 // TODO: Automate this test
 // func TestDeleteRecursive(t *testing.T) {
-// 	err := DeleteRecursive(context.Background(), log, db, NewBlankAccountDocument("8fc2cbce-0b9a-4358-9942-b21967abe3d6"))
+// 	err := DeleteRecursive(context.Background(), log, db, NewBlankAccountDocument("infinimesh"))
 // 	if err != nil {
 // 		t.Fatalf("Error deleting nodes: %v", err)
 // 	}
