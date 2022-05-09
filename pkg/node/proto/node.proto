@@ -81,7 +81,7 @@ service AccountsService {
       delete: "/accounts/{uuid}"
     };
   };
-  rpc Deletables(infinimesh.node.namespaces.Namespace) returns (infinimesh.node.access.Nodes) {
+  rpc Deletables(infinimesh.node.accounts.Account) returns (infinimesh.node.access.Nodes) {
     option (google.api.http) = {
       get: "/accounts/{uuid}/deletables"
     };
