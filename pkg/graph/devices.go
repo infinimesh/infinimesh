@@ -439,7 +439,7 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.Device
 	return &pb.TokenResponse{Token: token_string}, nil
 }
 
-func (c *DevicesController) _MakeToken(devices []string, post bool, exp int32) (string, error) {
+func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims[inf.INFINIMESH_DEVICES_CLAIM] = devices
 	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = post
