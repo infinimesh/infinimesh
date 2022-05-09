@@ -60,15 +60,7 @@
                 <n-button type="info" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Accounts')">
                   Accounts
                 </n-button>
-                <n-popconfirm @positive-click="() => handleDelete(ns.uuid)">
-                  <template #trigger>
-                    <n-button v-if="ns.access.role == 'OWNER'" type="error" round secondary @click.stop.prevent>Delete
-                    </n-button>
-                  </template>
-                  <span>
-                    Are you sure about deleting <b>{{ ns.title }}'s</b> ns?
-                  </span>
-                </n-popconfirm>
+                <ns-delete :o="ns" :deletables="() => showDeletables(ns.uuid)" @confirm="() => handleDelete(ns.uuid)" />
               </n-space>
             </td>
           </n-tr>
@@ -122,14 +114,17 @@ import {
   NButton,
   NIcon,
   NSpace,
-  NPopconfirm,
   NGrid,
   NGridItem,
   NH1,
   NText,
+  useMessage
 } from "naive-ui";
 import { RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
+
 import { useNSStore } from "@/store/namespaces";
+import { useAccountsStore } from "@/store/accounts";
+
 import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
 import { groupBy } from "lodash";
@@ -138,6 +133,7 @@ import NsCreate from "@/components/namespaces/create-action-button.vue"
 
 import UuidBadge from "@/components/core/uuid-badge.vue";
 import AccessBadge from "@/components/core/access-badge";
+import NsDelete from "@/components/core/recursive-delete-modal.vue";
 import NsJoins from "@/components/namespaces/joins.vue";
 
 const store = useNSStore();
@@ -164,4 +160,21 @@ function refresh() {
 }
 
 refresh()
+
+async function showDeletables(uuid) {
+  return store.deletables(uuid)
+}
+
+const message = useMessage()
+async function handleDelete(uuid) {
+  console.log(uuid)
+  loading.value = true
+  try {
+    await store.delete(uuid)
+    message.success("Namespace successfuly deleted")
+  } catch (e) {
+    message.error("Failed to delete namespace: " + e.response.statusText)
+  }
+  refresh()
+}
 </script>

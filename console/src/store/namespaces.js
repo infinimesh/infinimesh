@@ -33,6 +33,12 @@ export const useNSStore = defineStore("namespaces", {
     },
     create(namespace) {
       return as.http.put("/namespaces", namespace);
+    },
+    deletables(uuid) {
+      return as.http.get(`/namespaces/${uuid}/deletables`);
+    },
+    delete(uuid) {
+      return as.http.delete(`/namespaces/${uuid}`);
     }
   },
 
