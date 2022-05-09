@@ -354,6 +354,16 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 		return nil, status.Error(codes.Internal, "Error deleting Device")
 	}
 
+	err = Link(
+		ctx, log, c.ns2dev,
+		NewBlankNamespaceDocument(*dev.Access.Namespace),
+		&dev, access.Level_NONE, access.Role_UNSET,
+	)
+	if err != nil {
+		log.Warn("Error removing device from namespace", zap.Error(err))
+	}
+
+
 	return &pb.DeleteResponse{}, nil
 }
 
