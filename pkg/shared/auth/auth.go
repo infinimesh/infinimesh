@@ -54,12 +54,6 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	l := log.Named("Interceptor")
 	l.Debug("Invoked", zap.String("method", info.FullMethod))
 
-	// Unauthorized zone
-	switch info.FullMethod {
-	case "/infinimesh.node.AccountsService/Token":
-		return handler(ctx, req)
-	}
-
 	// Middleware selector
 	var middleware func(context.Context) (context.Context, error)
 	switch {
@@ -72,7 +66,7 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 
 	ctx, err := middleware(ctx)
-	if err != nil {
+	if info.FullMethod != "/infinimesh.node.AccountsService/Token" && err != nil {
 		return nil, err
 	}
 
