@@ -78,22 +78,22 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		l.Debug("Error extracting token", zap.Any("error", err))
-		return nil, err
+		return ctx, err
 	}
 
 	token, err := validateToken(tokenString)
 	if err != nil {
-		return nil, err
+		return ctx, err
 	}
 	log.Debug("Validated token", zap.Any("claims", token))
 
 	account := token[infinimesh.INFINIMESH_ACCOUNT_CLAIM]
 	if account == nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
 	}
 	uuid, ok := account.(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
 	}
 
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
