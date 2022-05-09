@@ -1,5 +1,4 @@
 import { useAppStore } from "@/store/app";
-import { join } from "lodash";
 import { defineStore } from "pinia";
 
 const as = useAppStore();
