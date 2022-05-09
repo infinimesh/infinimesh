@@ -16,7 +16,7 @@
                 <n-tree :data="tree" :default-expand-all="true" />
                 <template #footer>
                     <n-space justify="end">
-                        <n-button type="info" round secondary @click="show = false">
+                        <n-button type="info" round secondary @click="close">
                             Cancel
                         </n-button>
                         <n-button type="error" round secondary @click="() => { emit('confirm'); show = false }">
@@ -32,7 +32,7 @@
 <script setup>
 import { h, ref, watch } from "vue"
 
-import { NPopconfirm, NModal, NCard, NButton, NSpin, NTree, NSpace } from "naive-ui";
+import { NPopconfirm, NModal, NCard, NButton, NSpin, NTree, NSpace, useMessage } from "naive-ui";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { useDevicesStore } from "@/store/devices";
@@ -63,28 +63,41 @@ const { o, type, deletables } = defineProps({
 
 const emit = defineEmits(['confirm'])
 
+const message = useMessage()
 watch(show, async (val) => {
     if (val) {
         loading.value = true
-        const { data } = await deletables()
 
-        if (data.nodes.length == 1) {
+        try {
+            const { data } = await deletables()
+
+            if (data.nodes.length == 1) {
+                close()
+                emit('confirm')
+                return
+            }
+
+            if (!Object.keys(accs.accounts).length) {
+                accs.fetchAccounts()
+            }
+            if (!Object.keys(devs.devices).length) {
+                devs.fetchDevices(false)
+            }
+
+            tree.value = makeTree(data.nodes)
             loading.value = false
-            show.value = false
-            emit('confirm')
-        }
 
-        if (!Object.keys(accs.accounts).length) {
-            accs.fetchAccounts()
+        } catch (e) {
+            message.error("Error loading deletables: " + e.response.statusText)
+            close()
         }
-        if (!Object.keys(devs.devices).length) {
-            devs.fetchDevices(false)
-        }
-
-        tree.value = makeTree(data.nodes)
-        loading.value = false
     }
 })
+
+function close() {
+    loading.value = false
+    show.value = false
+}
 
 function makeTree(data, parent = '') {
     let nodes = []
