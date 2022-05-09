@@ -10,13 +10,13 @@ const nss = useNSStore();
 export const useAccountsStore = defineStore("accounts", {
   state: () => ({
     loading: false,
-    accounts: [],
+    accounts: {},
   }),
 
   getters: {
     accounts_ns_filtered: (state) => {
       let ns = nss.selected;
-      let pool = state.accounts
+      let pool = Object.values(state.accounts)
         .map((acc) => {
           acc.sorter = acc.enabled + access_lvl_conv(acc);
           return acc;
@@ -32,7 +32,7 @@ export const useAccountsStore = defineStore("accounts", {
     async fetchAccounts() {
       this.loading = true;
       const { data } = await as.http.get("/accounts");
-      this.accounts = data.accounts;
+      this.accounts = { ...this.accounts, ...data.accounts.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})};
       this.loading = false;
     },
     async createAccount(request, bar) {

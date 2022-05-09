@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { h, ref } from "vue";
+import { ref } from "vue";
 import {
   NSpin,
   NTable,

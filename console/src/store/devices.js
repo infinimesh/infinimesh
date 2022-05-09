@@ -10,7 +10,7 @@ const nss = useNSStore();
 export const useDevicesStore = defineStore("devices", {
   state: () => ({
     loading: false,
-    devices: [],
+    devices: {},
     reported: new Map(),
     desired: new Map(),
     subscribed: [],
@@ -21,7 +21,7 @@ export const useDevicesStore = defineStore("devices", {
     devices_ns_filtered: (state) => {
       let ns = nss.selected;
       let subscribed = new Set(state.subscribed);
-      let pool = state.devices
+      let pool = Object.values(state.devices)
         .map((d) => {
           d.sorter =
             d.enabled + access_lvl_conv(d) + d.basicEnabled + subscribed.has(d.uuid);
@@ -50,7 +50,7 @@ export const useDevicesStore = defineStore("devices", {
     async fetchDevices() {
       this.loading = true;
       const { data } = await as.http.get("/devices");
-      this.devices = data.devices;
+      this.devices = { ...this.devices, ...data.devices.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})};
       this.loading = false;
 
       this.getDevicesState(data.devices.map((d) => d.uuid));

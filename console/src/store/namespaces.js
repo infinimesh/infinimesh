@@ -7,14 +7,20 @@ export const useNSStore = defineStore("namespaces", {
   state: () => ({
     loading: false,
     selected: "",
-    namespaces: [],
+    namespaces: {},
   }),
+
+  getters: {
+    namespaces_list: (state) => {
+      return Object.values(state.namespaces)
+    }
+  },
 
   actions: {
     async fetchNamespaces() {
       this.loading = true;
       const { data } = await as.http.get("/namespaces");
-      this.namespaces = data.namespaces;
+      this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
       this.loading = false;
     },
     loadJoins(ns) {

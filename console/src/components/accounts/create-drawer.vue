@@ -81,7 +81,7 @@ watch(
 
 const nss = useNSStore();
 const namespaces = computed(() => {
-  return nss.namespaces.map((ns) => ({
+  return nss.namespaces_list.map((ns) => ({
     label: ns.title,
     value: ns.uuid,
   }));

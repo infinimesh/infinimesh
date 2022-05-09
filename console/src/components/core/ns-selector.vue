@@ -6,9 +6,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { computed, watch } from "vue";
 import { NSpace, NSpin, NSelect } from "naive-ui";
-import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
@@ -18,7 +17,7 @@ function shortUUID(uuid) {
   return uuid.substr(0, 8);
 }
 
-const { loading, selected, namespaces } = storeToRefs(store);
+const { loading, selected, namespaces_list: namespaces } = storeToRefs(store);
 const options = computed(() => {
   return [
     { label: "All", value: "all" },

@@ -99,7 +99,7 @@ function shortUUID(uuid) {
 }
 
 const namespaces = computed(() => {
-  return nss.namespaces.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
+  return nss.namespaces_list.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
     label: `${ns.title} (${shortUUID(ns.uuid)})`,
     value: ns.uuid,
   }));

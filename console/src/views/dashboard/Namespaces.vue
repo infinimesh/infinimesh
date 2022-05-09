@@ -141,7 +141,7 @@ import AccessBadge from "@/components/core/access-badge";
 import NsJoins from "@/components/namespaces/joins.vue";
 
 const store = useNSStore();
-const { loading, namespaces } = storeToRefs(store);
+const { loading, namespaces_list: namespaces } = storeToRefs(store);
 
 const pool = computed(() => groupBy(namespaces.value, (e) => {
   if (e.access.role == "OWNER" || access_lvl_conv(e) >= 3) {
