@@ -210,7 +210,7 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 		log.Error("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
-	if ns.Access.Role != access.Role_OWNER || ns.Access.Level < access.Level_ROOT {
+	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
@@ -246,7 +246,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 		log.Error("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
-	if ns.Access.Role != access.Role_OWNER || ns.Access.Level < access.Level_ROOT {
+	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
