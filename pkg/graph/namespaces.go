@@ -250,5 +250,11 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	return nil, nil
+	nodes, err := ListOwnedDeep(ctx, log, c.db, &ns)
+	if err != nil {
+		log.Error("Error getting owned nodes", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error getting owned nodes")
+	}
+
+	return nodes, nil
 }
