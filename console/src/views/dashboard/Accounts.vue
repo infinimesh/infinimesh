@@ -47,10 +47,10 @@
             <access-badge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
           </td>
           <td>
-            {{ account.access.namespace }}
+            {{ nss.namespaces[account.access.namespace]?.title || account.access.namespace }}
           </td>
           <td>
-            {{ account.defaultNamespace || "-" }}
+            {{ nss.namespaces[account.defaultNamespace]?.title || "-" }}
           </td>
           <td>
             <n-space>
@@ -117,6 +117,7 @@ import {
 } from "naive-ui";
 import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
+import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
 import UuidBadge from "@/components/core/uuid-badge.vue";
@@ -141,4 +142,6 @@ function handleToggleAccountEnabled(account) {
 
 const show_mc = ref(false);
 const active_account = ref({})
+
+const nss = useNSStore()
 </script>

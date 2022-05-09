@@ -23,7 +23,8 @@
 
       <template #footer>
         <template v-if="show_ns">
-          Namespace: <strong>{{ device.access.namespace }}</strong> </template><br />
+          Namespace: <strong>{{ nss.namespaces[device.access.namespace]?.title || device.access.namespace }}</strong>
+        </template><br />
         <template v-if="device.tags.length > 0">
           Tags:
           <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
@@ -75,6 +76,7 @@ import { Bulb } from "@vicons/ionicons5";
 import DeviceStateCollapse from "./state-collapse.vue";
 
 import { useDevicesStore } from "@/store/devices";
+import { useNSStore } from "@/store/namespaces";
 
 import { access_lvl_conv } from "@/utils/access";
 
@@ -152,4 +154,6 @@ async function handleMakeToken() {
     message.error("Failed to copy device token to clipboard");
   }
 }
+
+const nss = useNSStore()
 </script>
