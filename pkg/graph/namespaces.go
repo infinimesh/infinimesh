@@ -213,6 +213,10 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 		return nil, status.Error(codes.NotFound, "Account not found")
 	}
 
+	if request.Access > ns.Access.Level {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights: can't grant higher access than current")
+	}
+
 	err = Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
 	if err != nil {
 		log.Error("Error creating edge", zap.Error(err))
