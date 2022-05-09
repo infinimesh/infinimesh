@@ -29,10 +29,16 @@ export const useAccountsStore = defineStore("accounts", {
     },
   },
   actions: {
-    async fetchAccounts() {
+    async fetchAccounts(no_cache = false) {
       this.loading = true;
       const { data } = await as.http.get("/accounts");
-      this.accounts = { ...this.accounts, ...data.accounts.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})};
+
+      if (no_cache) {
+        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
+      } else {
+        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {})};
+      }
+
       this.loading = false;
     },
     async createAccount(request, bar) {

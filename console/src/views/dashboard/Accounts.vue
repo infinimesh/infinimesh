@@ -8,7 +8,7 @@
       </n-grid-item>
       <n-grid-item span="0 600:2 700:4 1000:12 1400:14"> </n-grid-item>
       <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
-        <n-button strong secondary round type="info" @click="e => store.fetchAccounts()">
+        <n-button strong secondary round type="info" @click="e => store.fetchAccounts(true)">
           <template #icon>
             <n-icon>
               <refresh-outline />
@@ -113,7 +113,7 @@ import AccDelete from "@/components/core/recursive-delete-modal.vue";
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
 
-store.fetchAccounts();
+store.fetchAccounts(true);
 
 const show_mc = ref(false);
 const active_account = ref({})
