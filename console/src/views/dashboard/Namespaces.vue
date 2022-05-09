@@ -1,13 +1,13 @@
 <template>
   <n-spin :show="loading">
     <n-grid item-responsive>
-      <n-grid-item span="24 500:12 1000:4">
+      <n-grid-item span="24 400:12 550:8 1000:4">
         <n-h1 prefix="bar" align-text type="info">
           <n-text type="info"> Namespaces </n-text>
         </n-h1>
       </n-grid-item>
-      <n-grid-item span="0 600:2 700:4 1000:12 1400:14"> </n-grid-item>
-      <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
+      <n-grid-item span="0 1000:10 1400:12"> </n-grid-item>
+      <n-grid-item span="8 400:12 550:6 1000:3 1400:2" align="end">
         <n-button strong secondary round type="info" @click="refresh">
           <template #icon>
             <n-icon>
@@ -17,8 +17,8 @@
           Refresh
         </n-button>
       </n-grid-item>
-      <n-grid-item span="12 500:6 600:5 700:4 1000:4 1400:2">
-        <!-- <ns-create /> -->
+      <n-grid-item span="16 400:24 550:10 1000:7 1400:6" align="end">
+        <ns-create />
       </n-grid-item>
     </n-grid>
     <n-table :bordered="false" :single-line="true" style="margin-top: 10px">
@@ -133,6 +133,8 @@ import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
 import { groupBy } from "lodash";
+
+import NsCreate from "@/components/namespaces/create-action-button.vue"
 
 import UuidBadge from "@/components/core/uuid-badge.vue";
 import AccessBadge from "@/components/core/access-badge";

@@ -24,6 +24,9 @@ export const useNSStore = defineStore("namespaces", {
       return as.http.post(`/namespaces/${ns}/join`, {
         account: acc, access: lvl,
       })
+    },
+    create(namespace) {
+      return as.http.put("/namespaces", namespace);
     }
   },
 
