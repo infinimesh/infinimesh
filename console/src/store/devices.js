@@ -47,13 +47,14 @@ export const useDevicesStore = defineStore("devices", {
   },
 
   actions: {
-    async fetchDevices() {
+    async fetchDevices(state = true) {
       this.loading = true;
       const { data } = await as.http.get("/devices");
       this.devices = { ...this.devices, ...data.devices.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})};
       this.loading = false;
 
-      this.getDevicesState(data.devices.map((d) => d.uuid));
+      if(state)
+        this.getDevicesState(data.devices.map((d) => d.uuid));
     },
     async subscribe(devices) {
       let pool = this.subscribed.concat(devices);
