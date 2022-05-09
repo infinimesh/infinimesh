@@ -69,6 +69,19 @@
                 <span>Click to {{ account.enabled ? "disable" : "enable" }} <b>{{ account.title }}'s</b> Account</span>
               </n-tooltip>
 
+              <n-tooltip v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'" trigger="hover">
+                <template #trigger>
+                  <n-button type="warning" @click="() => { active_account = account; show_mc = true }" tertiary circle>
+                    <template #icon>
+                      <n-icon>
+                        <lock-closed-outline />
+                      </n-icon>
+                    </template>
+                  </n-button>
+                </template>
+                <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
+              </n-tooltip>
+
               <acc-delete :o="account" :deletables="() => showDeletables(account.uuid)"
                 @confirm="() => handleDelete(account.uuid)" type="account" />
             </n-space>
@@ -96,7 +109,7 @@ import {
   NText,
   useLoadingBar, useMessage
 } from "naive-ui";
-import { CheckmarkOutline, BanOutline, RefreshOutline } from "@vicons/ionicons5";
+import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
@@ -106,6 +119,7 @@ import AccountCreate from "@/components/accounts/create-drawer.vue";
 import UuidBadge from "@/components/core/uuid-badge.vue";
 
 import AccessBadge from "@/components/core/access-badge"
+import { access_lvl_conv } from "@/utils/access";
 import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
 import AccDelete from "@/components/core/recursive-delete-modal.vue";
 
