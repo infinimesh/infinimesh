@@ -236,6 +236,7 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 
 func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Namespace) (*access.Nodes, error) {
 	log := c.log.Named("Deletables")
+	log.Debug("Deletables request received", zap.Any("request", request))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -257,4 +258,30 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 	}
 
 	return nodes, nil
+}
+
+func (c *NamespacesController) Delete(ctx context.Context, request *nspb.Namespace) (*pb.DeleteResponse, error) {
+	log := c.log.Named("Delete")
+	log.Debug("Delete request received", zap.Any("request", request), zap.Any("context", ctx))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns := *NewBlankNamespaceDocument(request.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	if err != nil {
+		log.Error("Error getting Namespace and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
+	}
+	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	err = DeleteRecursive(ctx, log, c.db, &ns)
+	if err != nil {
+		log.Error("Error deleting namespace", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error deleting namespace")
+	}
+
+	return &pb.DeleteResponse{}, nil
 }

@@ -288,7 +288,33 @@ func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*a
 	return res.Account, nil
 }
 
-func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*pb.DeleteResponse, error)  {
+func (c *AccountsController) Deletables(ctx context.Context, request *accpb.Account) (*access.Nodes, error) {
+	log := c.log.Named("Deletables")
+	log.Debug("Deletables request received", zap.Any("request", request))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	acc := *NewBlankAccountDocument(request.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	if err != nil {
+		log.Error("Error getting Account and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+	}
+	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	nodes, err := ListOwnedDeep(ctx, log, c.db, &acc)
+	if err != nil {
+		log.Error("Error getting owned nodes", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error getting owned nodes")
+	}
+
+	return nodes, nil
+}
+
+func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*pb.DeleteResponse, error) {
 	log := c.log.Named("Delete")
 	log.Debug("Delete request received", zap.Any("request", req), zap.Any("context", ctx))
 
@@ -298,28 +324,17 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
+		log.Error("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if acc.Access.Level < access.Level_ROOT || access.Role_OWNER != acc.Access.Role {
+	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	creds, err := c.GetCredentials(ctx, acc)
+	err = DeleteRecursive(ctx, log, c.db, &acc)
 	if err != nil {
-		log.Error("Error gathering Account credentials", zap.String("account", acc.Key), zap.Error(err))
-	}
-	log.Debug("Got credentials", zap.Any("credentials", creds))
-
-	_, errs, err := c.cred.RemoveDocuments(ctx, creds)
-	if err != nil {
-		log.Error("Error deleting Credentials", zap.String("account", acc.Key), zap.Any("errors", errs), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Account has been deleted partialy")
-	}
-
-	_, err = c.col.RemoveDocument(ctx, acc.ID().Key())
-	if err != nil {
-		log.Error("Error deleting Account", zap.String("account", acc.Key), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error deleting Account")
+		log.Error("Error deleting account", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error deleting account")
 	}
 
 	return &pb.DeleteResponse{}, nil
