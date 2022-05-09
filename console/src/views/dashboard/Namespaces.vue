@@ -123,7 +123,6 @@ import {
 import { RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
 
 import { useNSStore } from "@/store/namespaces";
-import { useAccountsStore } from "@/store/accounts";
 
 import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
@@ -167,7 +166,6 @@ async function showDeletables(uuid) {
 
 const message = useMessage()
 async function handleDelete(uuid) {
-  console.log(uuid)
   loading.value = true
   try {
     await store.delete(uuid)
