@@ -116,6 +116,9 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 		log.Debug("Error while reading node document", zap.Error(err))
 		return err
 	}
+	if node == nil {
+		return errors.New("node not found")
+	}
 
 	if account.ID() == node.ID() {
 		node.SetAccessLevel(access.Level_ROOT)
