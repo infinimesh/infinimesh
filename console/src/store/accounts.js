@@ -109,6 +109,11 @@ export const useAccountsStore = defineStore("accounts", {
         console.error(e);
         bar.error();
       }
+    },
+    tokenFor(account) {
+      return as.http.post(`/token`, {
+        uuid: account
+      });
     }
   },
 });
