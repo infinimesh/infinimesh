@@ -17,6 +17,7 @@ package graph
 
 import (
 	"context"
+	"time"
 
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
@@ -98,10 +99,33 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	log := c.log.Named("Token")
 	log.Debug("Token request received", zap.Any("request", req))
 
-	account, ok := c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+	var account Account
+	var ok bool
+
+	if requestor := ctx.Value(inf.InfinimeshAccountCtxKey); requestor != nil && req.Uuid != nil {
+		account = *NewBlankAccountDocument(*req.Uuid)
+		requestor := requestor.(string)
+		if *req.Uuid == requestor {
+			return nil, status.Error(codes.PermissionDenied, "You can't create such token for yourself")
+		}
+		err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &account)
+		if err != nil {
+			log.Error("Failed to get Account and access level", zap.Error(err))
+			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+		}
+		if account.Access.Level < access.Level_ROOT {
+			log.Warn("Super-Admin Token Request attempted", zap.String("requestor", requestor), zap.String("account", account.Uuid))
+			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+		}
+
+		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds()) * 5
+	} else {
+		account, ok = c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
+		if !ok {
+			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+		}
 	}
+	
 	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
 	if !account.Enabled {
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
