@@ -65,7 +65,8 @@ services:
     environment:
       DEBUG: "true"
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
-      DEVICE_REGISTRY_URL: repo:8000
+      DEVICES_HOST: repo:8000
+      SHADOW_HOST: shadow:8000
       SIGNING_KEY: "${SIGNING_KEY}"
 
   repo:

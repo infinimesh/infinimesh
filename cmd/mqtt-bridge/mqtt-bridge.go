@@ -35,6 +35,7 @@ import (
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	stpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
@@ -64,12 +65,15 @@ func getFingerprint(c []byte) []byte {
 var (
 	conn        *grpc.ClientConn
 	client      pb.DevicesServiceClient
+	shadow   	stpb.ShadowServiceClient
 	debug       bool
 
-	deviceRegistryHost    string
-	RabbitMQConn					string
-	tlsCertFile           string
-	tlsKeyFile            string
+	devicesHost    	string
+	shadowHost     	string
+
+	RabbitMQConn	string
+	tlsCertFile     string
+	tlsKeyFile      string
 
 	ps *pubsub.PubSub
 
@@ -86,7 +90,8 @@ func init() {
 
 	viper.AutomaticEnv()
 
-	viper.SetDefault("DEVICE_REGISTRY_URL", "localhost:8000")
+	viper.SetDefault("DEVICES_HOST", "api.infinimesh.local")
+	viper.SetDefault("SHADOW_HOST", "shadow:8080")
 	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
@@ -94,7 +99,8 @@ func init() {
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 
-	deviceRegistryHost = viper.GetString("DEVICE_REGISTRY_URL")
+	devicesHost = viper.GetString("DEVICES_HOST")
+	shadowHost = viper.GetString("SHADOW_HOST")
 	RabbitMQConn = viper.GetString("RABBITMQ_CONN")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
@@ -112,12 +118,19 @@ func main() {
 		log.Fatal("Error loading server certificate", zap.Error(err))
 	}
 
-	log.Info("Connecting to registry", zap.String("host", deviceRegistryHost))
-	conn, err = grpc.Dial(deviceRegistryHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	log.Info("Connecting to registry", zap.String("host", devicesHost))
+	conn, err = grpc.Dial(devicesHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal("Error dialing device registry", zap.Error(err))
 	}
 	client = pb.NewDevicesServiceClient(conn)
+
+	conn, err = grpc.Dial(shadowHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Error("Error dialing shadow registry", zap.Error(err))
+	} else {
+		shadow = stpb.NewShadowServiceClient(conn)
+	}
 
 	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
 	auth.SetContext(log, SIGNING_KEY)

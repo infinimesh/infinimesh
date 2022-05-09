@@ -23,6 +23,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/cskr/pubsub"
 	structpb "github.com/golang/protobuf/ptypes/struct"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
@@ -144,11 +145,25 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			if err != nil {
 				log.Error("Failed to write Subscription Acknowlegement", zap.Error(err))
 			}
+
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, "mqtt.outgoing/" + device.Uuid)
 				go handleBackChannel(backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
 				log.Info("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
+
+			go func() {
+				if shadow != nil {
+					r, err := shadow.Get(ctx, &pb.GetRequest{Pool: []string{device.Uuid}})
+					if err != nil || len(r.GetShadows()) == 0 {
+						return
+					}
+					state := r.GetShadows()[0]
+					if state.Desired != nil {
+						ps.Pub(state, "mqtt.outgoing/" + device.Uuid)
+					}
+				}
+			}()
 		case *packet.UnsubscribeControlPacket:
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
@@ -164,9 +179,14 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 }
 
 func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
+	var ts int64 = 0
 	for msg := range ch {
 		shadow := msg.(*pb.Shadow)
 		log.Debug("Received message", zap.String("topic", topic), zap.String("device", shadow.Device))
+		if shadow.Desired.Timestamp.Seconds < ts {
+			log.Debug("Skipping message", zap.String("topic", topic), zap.String("device", shadow.Device))
+			continue
+		}
 		payload, err := shadow.Desired.Data.MarshalJSON()
 		if err != nil {
 			log.Error("Failed to marshal shadow", zap.Error(err))
