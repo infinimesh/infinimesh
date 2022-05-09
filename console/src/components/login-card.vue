@@ -61,7 +61,7 @@ async function login() {
       bar.finish();
     })
     .catch((err) => {
-      console.log(err);
+      console.error(err);
       bar.error();
       if (err.response.status == 401) {
         error.value = {
