@@ -17,10 +17,14 @@ export const useNSStore = defineStore("namespaces", {
   },
 
   actions: {
-    async fetchNamespaces() {
+    async fetchNamespaces(no_cache = false) {
       this.loading = true;
       const { data } = await as.http.get("/namespaces");
-      this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
+      if (no_cache) {
+        this.namespaces = data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {});
+      } else {
+        this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
+      }
       this.loading = false;
     },
     loadJoins(ns) {
@@ -38,6 +42,7 @@ export const useNSStore = defineStore("namespaces", {
       return as.http.get(`/namespaces/${uuid}/deletables`);
     },
     delete(uuid) {
+      delete this.namespaces[uuid];
       return as.http.delete(`/namespaces/${uuid}`);
     }
   },

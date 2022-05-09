@@ -155,7 +155,7 @@ function setNSAndGo(ns, route) {
 
 function refresh() {
   expand.value = new Set()
-  store.fetchNamespaces()
+  store.fetchNamespaces(true)
 }
 
 refresh()
