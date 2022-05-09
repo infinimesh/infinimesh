@@ -67,7 +67,7 @@
           <ns-joins v-if="expand.has(ns.uuid)" :namespace="ns.uuid"
             :admin="ns.access.role == 'OWNER' || ns.access.level == 'ROOT'" />
         </template>
-        <n-tr>
+        <n-tr v-if="pool.user && pool.user.length">
           <td colspan="5" align="center">
             <span>
               Namespaces below are those you don't have admin access to
