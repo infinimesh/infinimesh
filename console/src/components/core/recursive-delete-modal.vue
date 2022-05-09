@@ -65,6 +65,12 @@ watch(show, async (val) => {
         loading.value = true
         const { data } = await deletables()
 
+        if (data.nodes.length == 1) {
+            loading.value = false
+            show.value = false
+            emit('confirm')
+        }
+
         if (!Object.keys(accs.accounts).length) {
             accs.fetchAccounts()
         }
