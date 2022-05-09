@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { access_lvl_conv } from "@/utils/access";
+import { access_lvl_conv, check_token_expired } from "@/utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -31,12 +31,17 @@ export const useAccountsStore = defineStore("accounts", {
   actions: {
     async fetchAccounts(no_cache = false) {
       this.loading = true;
-      const { data } = await as.http.get("/accounts");
 
-      if (no_cache) {
-        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
-      } else {
-        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {})};
+      try {
+        const { data } = await as.http.get("/accounts");
+
+        if (no_cache) {
+          this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
+        } else {
+          this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {})};
+        }
+      } catch (e) {
+        check_token_expired(e, as)
       }
 
       this.loading = false;

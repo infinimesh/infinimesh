@@ -82,6 +82,9 @@
                 <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
               </n-tooltip>
 
+              <n-button round secondary type="success" @click="e => handleLoginAs(account)">
+                Login as
+              </n-button>
               <acc-delete :o="account" :deletables="() => showDeletables(account.uuid)"
                 @confirm="() => handleDelete(account.uuid)" type="account" />
             </n-space>
@@ -110,6 +113,7 @@ import {
   useLoadingBar, useMessage
 } from "naive-ui";
 import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
+import { useAppStore } from "@/store/app";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
@@ -153,5 +157,17 @@ async function handleDelete(uuid) {
     message.error("Failed to delete account: " + e.response.statusText)
   }
   store.fetchAccounts();
+}
+
+const as = useAppStore()
+async function handleLoginAs(account) {
+  try {
+    const { data } = await store.tokenFor(account.uuid)
+    const params = { token: data.token, title: account.title, back_token: as.token }
+
+    window.open(window.location.origin + '/#login?a=' + btoa(JSON.stringify(params)), '_blank', { incognito: true })
+  } catch (e) {
+    message.error("Failed to get token: " + e.response.statusText)
+  }
 }
 </script>

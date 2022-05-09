@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, inject } from "vue";
+import { ref, inject, onMounted } from "vue";
 import {
   NCard,
   NSpace,
@@ -26,7 +26,7 @@ import {
   NAlert,
   useLoadingBar,
 } from "naive-ui";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
 import ThemePicker from "@/components/core/theme-picker.vue";
 
@@ -70,6 +70,34 @@ async function login() {
       }
     });
 }
+
+const route = useRoute();
+
+onMounted(() => {
+  if (route.query.a) {
+    try {
+      const { token, title, back_token } = JSON.parse(atob(route.query.a))
+      store.token = token
+      store.me.title = title
+
+      const handle_unload = () => store.token = back_token
+
+      window.addEventListener("beforeunload", handle_unload, false);
+      setTimeout(() => {
+        handle_unload()
+        alert("Token expired. You have been logged out")
+        window.close()
+      }, 5 * 60 * 1000);
+
+      router.push({ name: "Root" });
+    } catch (e) {
+      console.error(e)
+      error.value = {
+        title: "Invalid login token"
+      }
+    }
+  }
+})
 </script>
 
 <style>

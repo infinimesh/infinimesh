@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { access_lvl_conv } from "@/utils/access";
+import { access_lvl_conv, check_token_expired } from "@/utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -49,17 +49,23 @@ export const useDevicesStore = defineStore("devices", {
   actions: {
     async fetchDevices(state = true, no_cache = false) {
       this.loading = true;
-      const { data } = await as.http.get("/devices");
 
-      if (no_cache) {
-        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
-      } else {
-        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {})};
+      try {
+        const { data } = await as.http.get("/devices");
+
+        if (no_cache) {
+          this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
+        } else {
+          this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {})};
+        }
+
+        if(state)
+          this.getDevicesState(data.devices.map((d) => d.uuid));
+
+      } catch (e) {
+        check_token_expired(e, as)
       }
       this.loading = false;
-
-      if(state)
-        this.getDevicesState(data.devices.map((d) => d.uuid));
     },
     async subscribe(devices) {
       let pool = this.subscribed.concat(devices);

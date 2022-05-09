@@ -1,6 +1,8 @@
 import { useAppStore } from "@/store/app";
 import { defineStore } from "pinia";
 
+import { check_token_expired } from "@/utils/access";
+
 const as = useAppStore();
 
 export const useNSStore = defineStore("namespaces", {
@@ -19,11 +21,17 @@ export const useNSStore = defineStore("namespaces", {
   actions: {
     async fetchNamespaces(no_cache = false) {
       this.loading = true;
-      const { data } = await as.http.get("/namespaces");
-      if (no_cache) {
-        this.namespaces = data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {});
-      } else {
-        this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
+
+      try {
+        const { data } = await as.http.get("/namespaces");
+
+        if (no_cache) {
+          this.namespaces = data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {});
+        } else {
+          this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
+        }
+      } catch (e) {
+        check_token_expired(e, as)
       }
       this.loading = false;
     },
