@@ -54,6 +54,7 @@ export default function AccessBadge(props) {
           style: {
             marginLeft: props.left
           },
+          disabled: props.disabled,
           onClick: () => props.cb(props.access)
         },
         {
