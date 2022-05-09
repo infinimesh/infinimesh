@@ -30,7 +30,7 @@ type AccountsServiceClient interface {
 	Update(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Toggle(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*accounts.Account, error)
 	Delete(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*DeleteResponse, error)
-	Deletables(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*access.Nodes, error)
+	Deletables(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*access.Nodes, error)
 	SetCredentials(ctx context.Context, in *SetCredentialsRequest, opts ...grpc.CallOption) (*SetCredentialsResponse, error)
 }
 
@@ -105,7 +105,7 @@ func (c *accountsServiceClient) Delete(ctx context.Context, in *accounts.Account
 	return out, nil
 }
 
-func (c *accountsServiceClient) Deletables(ctx context.Context, in *namespaces.Namespace, opts ...grpc.CallOption) (*access.Nodes, error) {
+func (c *accountsServiceClient) Deletables(ctx context.Context, in *accounts.Account, opts ...grpc.CallOption) (*access.Nodes, error) {
 	out := new(access.Nodes)
 	err := c.cc.Invoke(ctx, "/infinimesh.node.AccountsService/Deletables", in, out, opts...)
 	if err != nil {
@@ -134,7 +134,7 @@ type AccountsServiceServer interface {
 	Update(context.Context, *accounts.Account) (*accounts.Account, error)
 	Toggle(context.Context, *accounts.Account) (*accounts.Account, error)
 	Delete(context.Context, *accounts.Account) (*DeleteResponse, error)
-	Deletables(context.Context, *namespaces.Namespace) (*access.Nodes, error)
+	Deletables(context.Context, *accounts.Account) (*access.Nodes, error)
 	SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse, error)
 	mustEmbedUnimplementedAccountsServiceServer()
 }
@@ -164,7 +164,7 @@ func (UnimplementedAccountsServiceServer) Toggle(context.Context, *accounts.Acco
 func (UnimplementedAccountsServiceServer) Delete(context.Context, *accounts.Account) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedAccountsServiceServer) Deletables(context.Context, *namespaces.Namespace) (*access.Nodes, error) {
+func (UnimplementedAccountsServiceServer) Deletables(context.Context, *accounts.Account) (*access.Nodes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deletables not implemented")
 }
 func (UnimplementedAccountsServiceServer) SetCredentials(context.Context, *SetCredentialsRequest) (*SetCredentialsResponse, error) {
@@ -310,7 +310,7 @@ func _AccountsService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _AccountsService_Deletables_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(namespaces.Namespace)
+	in := new(accounts.Account)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -322,7 +322,7 @@ func _AccountsService_Deletables_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: "/infinimesh.node.AccountsService/Deletables",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountsServiceServer).Deletables(ctx, req.(*namespaces.Namespace))
+		return srv.(AccountsServiceServer).Deletables(ctx, req.(*accounts.Account))
 	}
 	return interceptor(ctx, in, info, handler)
 }

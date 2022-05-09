@@ -402,7 +402,7 @@ var (
 )
 
 func request_AccountsService_Deletables_0(ctx context.Context, marshaler runtime.Marshaler, client AccountsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq namespaces.Namespace
+	var protoReq accounts.Account
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -435,7 +435,7 @@ func request_AccountsService_Deletables_0(ctx context.Context, marshaler runtime
 }
 
 func local_request_AccountsService_Deletables_0(ctx context.Context, marshaler runtime.Marshaler, server AccountsServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq namespaces.Namespace
+	var protoReq accounts.Account
 	var metadata runtime.ServerMetadata
 
 	var (

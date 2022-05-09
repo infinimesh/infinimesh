@@ -360,6 +360,18 @@
             "type": "string"
           },
           {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "access.level",
             "in": "query",
             "required": false,
