@@ -1,11 +1,12 @@
-name: CI(Build Docker images)
+name: Build Docker Images
 
 on:
-  workflow_run:
-    workflows:
-      - tests
-    types:
-      - completed
+  push:
+    branches:
+      - master
+      - dev-*
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-r[0-9]+"
 
 env:
   REGISTRY: ghcr.io
@@ -21,15 +22,15 @@ jobs:
       - name: Set target tags
         id: set-tags-matrix
         run: echo "::set-output name=matrix::$(ls Dockerfiles | jq -cnR '[inputs | select(length>0)]')"
-      
+
     outputs:
       matrix: ${{steps.set-tags-matrix.outputs.matrix}}
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare ]
     strategy:
-      matrix: 
+      matrix:
         tag: ${{fromJson(needs.prepare.outputs.matrix)}}
     permissions:
       contents: read
@@ -61,3 +62,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: IMAGE_TAG=${{env.IMAGE_TAG}}
