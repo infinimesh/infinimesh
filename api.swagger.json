@@ -329,6 +329,73 @@
         ]
       }
     },
+    "/accounts/{uuid}/deletables": {
+      "get": {
+        "operationId": "AccountsService_Deletables",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accessNodes"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
     "/accounts/{uuid}/toggle": {
       "post": {
         "operationId": "AccountsService_Toggle",
@@ -1269,6 +1336,73 @@
         ]
       }
     },
+    "/namespaces/{uuid}/deletables": {
+      "get": {
+        "operationId": "NamespacesService_Deletables",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accessNodes"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
     "/namespaces/{uuid}/joins": {
       "get": {
         "summary": "Accounts having access to this namespace",
@@ -1395,6 +1529,31 @@
         "ROOT"
       ],
       "default": "NONE"
+    },
+    "accessNode": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "edge": {
+          "type": "string"
+        }
+      }
+    },
+    "accessNodes": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/accessNode"
+          }
+        }
+      }
     },
     "accessRole": {
       "type": "string",
