@@ -77,6 +77,9 @@ export const useAccountsStore = defineStore("accounts", {
         return;
       }
     },
+    deletables(uuid) {
+      return as.http.get(`/accounts/${uuid}/deletables`);
+    },
     async deleteAccount(uuid, bar) {
       bar.start();
       try {

@@ -69,27 +69,8 @@
                 <span>Click to {{ account.enabled ? "disable" : "enable" }} <b>{{ account.title }}'s</b> Account</span>
               </n-tooltip>
 
-              <n-tooltip v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'" trigger="hover">
-                <template #trigger>
-                  <n-button type="warning" @click="() => { active_account = account; show_mc = true }" tertiary circle>
-                    <template #icon>
-                      <n-icon>
-                        <lock-closed-outline />
-                      </n-icon>
-                    </template>
-                  </n-button>
-                </template>
-                <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
-              </n-tooltip>
-
-              <n-popconfirm @positive-click="() => handleDelete(account.uuid)">
-                <template #trigger>
-                  <n-button v-if="access_lvl_conv(account) > 2" type="error" round secondary>Delete</n-button>
-                </template>
-                <span>
-                  Are you sure about deleting <b>{{ account.title }}'s</b> account?
-                </span>
-              </n-popconfirm>
+              <acc-delete :o="account" :deletables="() => showDeletables(account.uuid)"
+                @confirm="() => handleDelete(account.uuid)" type="account" />
             </n-space>
           </td>
         </tr>
@@ -109,39 +90,54 @@ import {
   NIcon,
   NSpace,
   NTooltip,
-  NPopconfirm,
   NGrid,
   NGridItem,
   NH1,
-  NText, useLoadingBar
+  NText,
+  useLoadingBar, useMessage
 } from "naive-ui";
-import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
+import { CheckmarkOutline, BanOutline, RefreshOutline } from "@vicons/ionicons5";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
-import UuidBadge from "@/components/core/uuid-badge.vue";
-import AccessBadge from "@/components/core/access-badge"
 import AccountCreate from "@/components/accounts/create-drawer.vue";
-import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
 
-import { access_lvl_conv } from "@/utils/access";
+import UuidBadge from "@/components/core/uuid-badge.vue";
+
+import AccessBadge from "@/components/core/access-badge"
+import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
+import AccDelete from "@/components/core/recursive-delete-modal.vue";
+
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
 
 store.fetchAccounts();
 
-const bar = useLoadingBar();
-function handleDelete(uuid) {
-  store.deleteAccount(uuid, bar)
-}
-function handleToggleAccountEnabled(account) {
-  store.toggle(account.uuid, bar);
-}
-
 const show_mc = ref(false);
 const active_account = ref({})
 
 const nss = useNSStore()
+
+async function showDeletables(uuid) {
+  return store.deletables(uuid)
+}
+
+const bar = useLoadingBar();
+function handleToggleAccountEnabled(account) {
+  store.toggle(account.uuid, bar);
+}
+
+const message = useMessage()
+async function handleDelete(uuid) {
+  loading.value = true
+  try {
+    await store.deleteAccount(uuid, bar)
+    message.success("Account successfuly deleted")
+  } catch (e) {
+    message.error("Failed to delete account: " + e.response.statusText)
+  }
+  store.fetchAccounts();
+}
 </script>
