@@ -1,12 +1,11 @@
 <template>
     <n-tr>
-        <n-td colspan="1"></n-td>
-        <n-td colspan="1">
+        <n-td colspan="3" align="center">
             <n-text type="warning" strong>
                 List of Accounts, who has access to this Namespace
             </n-text>
         </n-td>
-        <n-td colspan="2">
+        <n-td colspan="1">
             <n-text type="warning" strong v-if="!loading && joins.length == 0">
                 No Accounts found
             </n-text>
