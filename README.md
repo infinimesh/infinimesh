@@ -14,7 +14,7 @@ Our API's (REST / gRPC) are considered als beta and may change in future. infini
 
 A kubernetes operator is also available, which is in an early stage. The simplest way to work with infinimesh is using a kubernetes based development environment: (<https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s>).
 
-# Documentation  
+## Documentation  
 
 Our [documentation](https://infinimesh.github.io/infinimesh/docs/#/) is getting better and better. Please file PR if you find mistakes or just want to add something. We review on daily basis.
 
@@ -40,13 +40,13 @@ You can reach out to the community via [Slack](https://launchpass.com/infinimesh
 We have built an automated local development setup based on microk8s.
 For Ubuntu please use:
 
-```
+```shell
 bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-ubuntu.sh)
 ```
 
 For OSX please use:
 
-```
+```shell
 bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
 ```
 
@@ -80,7 +80,7 @@ Get Objects: `curl -H 'Authorization: Bearer YOURTOKEN' localhost:8081/objects`
 
 Login locally via CLI:
 
-```
+```shell
 inf config set-context local --apiserver localhost:8000 --tls=false
 inf login
 ```
@@ -89,13 +89,13 @@ Use the users joe / test123 or admin/admin123 for local development.
 
 Register a device:
 
-```
+```shell
 inf device create sample-device --cert-file hack/device_certs/sample_1.crt
 ```
 
 Send sample message to the local instance:
 
-```
+```shell
 mosquitto_pub --cafile hack/server.crt   --cert hack/device_certs/sample_1.crt --key hack/device_certs/sample_1.key -m '{"sensor" : {"temp" : 41}}' -t "devices/0x6ddd1/state/reported/delta" -h localhost  --tls-version tlsv1.2 -d -p 8089
 ```
 
@@ -103,7 +103,7 @@ Remember to replace 0x6ddd1 with the ID of your device. Also use the certificate
 
 Send sample message via `mosquitto_pub` to the hosted SaaS instance:
 
-```
+```shell
 mosquitto_pub --cafile /etc/ssl/certs/ca-certificates.crt   --cert hack/server.crt --key hack/server.key -m "blaaa" -t "shadows/testdeviceX" -h mqtt.api.infinimesh.io  --tls-version tlsv1.2 -d -p 8883
 ```
 
@@ -120,7 +120,7 @@ Copyright 2018 - 2022, The infinimesh team
 Licensed under the Apache License, Version 2.0 (the "Licenses"); you may not use
 this file except in compliance with the License. You may obtain a copy of the License at
 
-       https://github.com/infinimesh/infinimesh/blob/master/LICENSE
+  [https://github.com/infinimesh/infinimesh/blob/master/LICENSE](https://github.com/infinimesh/infinimesh/blob/master/LICENSE)
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
