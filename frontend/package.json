@@ -23,7 +23,7 @@
     "typeface-exo": "1.1.13"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.17.10",
+    "@babel/preset-env": "^7.17.12",
     "@babel/core": "^7.17.12",
     "@nuxt/types": "^2.14.3",
     "@nuxtjs/color-mode": "^2.0.9",
