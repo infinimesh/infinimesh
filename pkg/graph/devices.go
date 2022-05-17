@@ -25,10 +25,10 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	access "github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	access "github.com/infinimesh/proto/node/access"
+	devpb "github.com/infinimesh/proto/node/devices"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -36,10 +36,10 @@ import (
 
 type Device struct {
 	*devpb.Device
-	driver.DocumentMeta	
+	driver.DocumentMeta
 }
 
-func (o *Device) ID() (driver.DocumentID) {
+func (o *Device) ID() driver.DocumentID {
 	return o.DocumentMeta.ID
 }
 
@@ -53,7 +53,7 @@ func (o *Device) SetAccessLevel(level access.Level) {
 	o.Access.Level = level
 }
 
-func NewBlankDeviceDocument(key string) (*Device) {
+func NewBlankDeviceDocument(key string) *Device {
 	return &Device{
 		Device: &devpb.Device{
 			Uuid: key,
@@ -64,7 +64,7 @@ func NewBlankDeviceDocument(key string) (*Device) {
 
 func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
 	return &Device{
-		Device: dev,
+		Device:       dev,
 		DocumentMeta: NewBlankDocument(schema.DEVICES_COL, dev.Uuid),
 	}
 }
@@ -74,7 +74,7 @@ type DevicesController struct {
 	log *zap.Logger
 
 	col driver.Collection // Devices Collection
-	db driver.Database
+	db  driver.Database
 
 	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
 
@@ -87,7 +87,7 @@ func NewDevicesController(log *zap.Logger, db driver.Database) *DevicesControlle
 
 	return &DevicesController{
 		log: log.Named("DevicesController"), col: col, db: db,
-		ns2dev: GetEdgeCol(ctx, db, schema.NS2DEV),
+		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -118,7 +118,7 @@ func sha256Fingerprint(cert *devpb.Certificate) (err error) {
 func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", req), zap.Any("context", ctx))
-	
+
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
@@ -189,7 +189,7 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
 	log := c.log.Named("Update")
 	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
-	
+
 	curr, err := c.Get(ctx, dev)
 	if err != nil {
 		return nil, err
@@ -212,7 +212,7 @@ func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*dev
 func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
 	log := c.log.Named("Update")
 	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
-	
+
 	curr, err := c.Get(ctx, dev)
 	if err != nil {
 		return nil, err
@@ -363,12 +363,10 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
-
 	return &pb.DeleteResponse{}, nil
 }
 
-const findByFingerprintQuery = 
-`FOR device IN @@devices
+const findByFingerprintQuery = `FOR device IN @@devices
 FILTER device.certificate.fingerprint == @fingerprint
 RETURN device`
 
@@ -380,7 +378,7 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	cr, err := c.db.Query(ctx, findByFingerprintQuery, map[string]interface{}{
-		"@devices": schema.DEVICES_COL,
+		"@devices":    schema.DEVICES_COL,
 		"fingerprint": req.GetFingerprint(),
 	})
 	if err != nil {

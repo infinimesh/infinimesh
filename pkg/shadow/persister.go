@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	jsonpatch "github.com/evanphx/json-patch"
-	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	pb "github.com/infinimesh/proto/shadow"
 	"go.uber.org/zap"
 )
 
@@ -66,7 +66,7 @@ func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string,
 		goto set
 	}
 
-	merge:
+merge:
 	log.Debug("Merging", zap.ByteString("old", []byte(m)), zap.ByteString("new", new))
 	merged, err = jsonpatch.MergePatch([]byte(m), new)
 	if err != nil {
@@ -79,7 +79,7 @@ func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string,
 	}
 	new = merged
 
-	set:
+set:
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
 		log.Error("Error Storing State", zap.String("key", key), zap.Error(err))

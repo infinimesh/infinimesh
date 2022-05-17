@@ -23,13 +23,13 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	accpb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
 
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	"github.com/infinimesh/proto/node/access"
+	nspb "github.com/infinimesh/proto/node/namespaces"
 )
 
 type Namespace struct {

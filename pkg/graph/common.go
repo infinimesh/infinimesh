@@ -24,15 +24,15 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
+	"github.com/infinimesh/proto/node/access"
 	"go.uber.org/zap"
 )
 
 type Access struct {
-	From driver.DocumentID `json:"_from"`
-	To driver.DocumentID `json:"_to"`
-	Level access.Level `json:"level"`
-	Role access.Role `json:"role,omitempty"`
+	From  driver.DocumentID `json:"_from"`
+	To    driver.DocumentID `json:"_to"`
+	Level access.Level      `json:"level"`
+	Role  access.Role       `json:"role,omitempty"`
 
 	driver.DocumentMeta
 }
@@ -43,14 +43,14 @@ type InfinimeshGraphNode interface {
 	SetAccessLevel(level access.Level)
 }
 
-func NewBlankDocument(col string, key string) (driver.DocumentMeta) {
+func NewBlankDocument(col string, key string) driver.DocumentMeta {
 	return driver.DocumentMeta{
 		Key: key,
-		ID: driver.NewDocumentID(col, key),
+		ID:  driver.NewDocumentID(col, key),
 	}
 }
 
-func GetEdgeCol(ctx context.Context, db driver.Database, name string) (driver.Collection) {
+func GetEdgeCol(ctx context.Context, db driver.Database, name string) driver.Collection {
 	g, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _, _ := g.EdgeCollection(ctx, name)
 	return col
@@ -65,11 +65,11 @@ func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from Inf
 	)
 
 	a := Access{
-		From: from.ID(),
-		To: to.ID(),
+		From:  from.ID(),
+		To:    to.ID(),
 		Level: lvl,
-		Role: role,
-		DocumentMeta: driver.DocumentMeta {
+		Role:  role,
+		DocumentMeta: driver.DocumentMeta{
 			Key: from.ID().Key() + "-" + to.ID().Key(),
 		},
 	}
@@ -78,7 +78,7 @@ func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from Inf
 		_, err := edge.RemoveDocument(ctx, a.Key)
 		return err
 	}
-	
+
 	if _, err := edge.UpdateDocument(ctx, a.DocumentMeta.Key, a); err == nil {
 		return nil
 	}
@@ -87,8 +87,8 @@ func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from Inf
 	return err
 }
 
-func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) (bool) {
-	r, err := edge.DocumentExists(ctx, from.ID().Key() + "-" + to.ID().Key())
+func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool {
+	r, err := edge.DocumentExists(ctx, from.ID().Key()+"-"+to.ID().Key())
 	return err == nil && r
 }
 
@@ -98,10 +98,11 @@ GRAPH @permissions SORT path.edges[0].level
     LET perm = path.edges[0]
 	RETURN MERGE(path.vertices[-1], { access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key }})
 `
-func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) (error) {
-	vars :=  map[string]interface{}{
-		"account": account.ID(),
-		"node": node.ID(),
+
+func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error {
+	vars := map[string]interface{}{
+		"account":     account.ID(),
+		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	}
 	c, err := db.Query(ctx, getWithAccessLevelRoleAndNS, vars)
@@ -110,7 +111,7 @@ func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database,
 		return err
 	}
 	defer c.Close()
-	
+
 	_, err = c.ReadDocument(ctx, &node)
 	if err != nil {
 		log.Debug("Error while reading node document", zap.Error(err))
@@ -136,6 +137,7 @@ FILTER edge.level > 0
     LET perm = path.edges[0]
 	RETURN MERGE(node, { uuid: node._key, access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key } })
 `
+
 // List children nodes
 // ctx - context
 // log - logger
@@ -145,10 +147,10 @@ FILTER edge.level > 0
 // depth
 func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
 	bindVars := map[string]interface{}{
-		"depth": depth,
-		"from": from.ID(),
+		"depth":             depth,
+		"from":              from.ID(),
 		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
-		"@kind": children,
+		"@kind":             children,
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
 	return db.Query(ctx, listObjectsOfKind, bindVars)
@@ -161,6 +163,7 @@ GRAPH Permissions
 FILTER !edge || edge.role == 1
     RETURN MERGE({ node: node._id }, edge ? { edge: edge._id, parent: edge._from } : { edge: null, parent: null })
 `
+
 func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (res *access.Nodes, err error) {
 	c, err := db.Query(ctx, listOwnedQuery, map[string]interface{}{
 		"from": from.ID(),
@@ -187,7 +190,7 @@ func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, fro
 	return &access.Nodes{Nodes: nodes}, nil
 }
 
-func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (error) {
+func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) error {
 	nodes, err := ListOwnedDeep(ctx, log, db, from)
 	if err != nil {
 		return err
@@ -197,7 +200,7 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 	for i := len(nodes.Nodes) - 1; i >= 0; i-- {
 		node := nodes.Nodes[i]
 		log.Debug("Deleting", zap.String("node", node.Node), zap.String("edge", node.Edge))
-		
+
 		if node.Node != "" {
 			err := handleDeleteNodeInRecursion(ctx, log, db, node.Node, cols)
 			if err != nil {
@@ -221,7 +224,7 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 
 func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver.Database, node string, cols map[string]driver.Collection) (err error) {
 	log.Debug("Handling deletion", zap.String("node", node))
-	
+
 	id := strings.SplitN(node, "/", 2)
 	log.Debug("Retrieving Collection", zap.String("collection", id[0]), zap.String("id", node))
 	col, ok := cols[id[0]]
@@ -267,8 +270,8 @@ func AccessLevel(ctx context.Context, db driver.Database, account *Account, node
 	}
 	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{
-		"account": account.ID(),
-		"node": node.ID(),
+		"account":     account.ID(),
+		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	})
 	if err != nil {
@@ -296,7 +299,8 @@ const toggleQuery = `
 LET o = DOCUMENT(@node)
 UPDATE o WITH {%[1]s: !o.%[1]s} IN @@col RETURN NEW 
 `
-func Toggle(ctx context.Context,  db driver.Database, node InfinimeshGraphNode, field string) (error) {
+
+func Toggle(ctx context.Context, db driver.Database, node InfinimeshGraphNode, field string) error {
 	c, err := db.Query(ctx, fmt.Sprintf(toggleQuery, field), map[string]interface{}{
 		"node": node.ID(),
 		"@col": node.ID().Collection(),

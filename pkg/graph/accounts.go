@@ -23,10 +23,10 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/node/access"
+	accpb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -37,7 +37,7 @@ type Account struct {
 	driver.DocumentMeta
 }
 
-func (o *Account) ID() (driver.DocumentID) {
+func (o *Account) ID() driver.DocumentID {
 	return o.DocumentMeta.ID
 }
 
@@ -62,7 +62,7 @@ func NewBlankAccountDocument(key string) *Account {
 
 func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 	return &Account{
-		Account: acc,
+		Account:      acc,
 		DocumentMeta: NewBlankDocument(schema.ACCOUNTS_COL, acc.Uuid),
 	}
 }
@@ -71,9 +71,9 @@ type AccountsController struct {
 	pb.UnimplementedAccountsServiceServer
 	log *zap.Logger
 
-	col driver.Collection // Accounts Collection
+	col  driver.Collection // Accounts Collection
 	cred driver.Collection
-	db driver.Database
+	db   driver.Database
 
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
@@ -118,14 +118,14 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
 
-		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds()) * 5
+		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds())*5
 	} else {
 		account, ok = c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
 		if !ok {
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
 	}
-	
+
 	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
 	if !account.Enabled {
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
@@ -175,7 +175,6 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
-
 
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL, 4)
 	if err != nil {
@@ -265,7 +264,7 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
-	requestorAccount := NewBlankAccountDocument(requestor)	
+	requestorAccount := NewBlankAccountDocument(requestor)
 
 	old := *NewBlankAccountDocument(acc.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
@@ -385,7 +384,7 @@ func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string,
 func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.Database) (Account, bool) {
 	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
 	c, err := db.Query(ctx, query, map[string]interface{}{
-		"credentials": cred,
+		"credentials":       cred,
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
@@ -402,7 +401,7 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []string, err error) {
 	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials._key`
 	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
-		"account": acc.ID().String(),
+		"account":           acc.ID().String(),
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
@@ -426,11 +425,11 @@ func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account)
 }
 
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
-func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) (error) {
+func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) error {
 	key := c.Type() + "-" + acc.Key
 	var oldLink credentials.Link
 	meta, err := edge.ReadDocument(ctx, key, &oldLink)
-	if err == nil {	
+	if err == nil {
 		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
 		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
 		if err != nil {
@@ -442,7 +441,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 	}
 	ctrl.log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
 
-	cred, err := ctrl.cred.CreateDocument(ctx, c)	
+	cred, err := ctrl.cred.CreateDocument(ctx, c)
 	if err != nil {
 		ctrl.log.Error("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
 		return status.Error(codes.Internal, "Couldn't create credentials")
@@ -450,9 +449,9 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 
 	_, err = edge.CreateDocument(ctx, credentials.Link{
 		From: acc.ID(),
-		To: cred.ID,
+		To:   cred.ID,
 		Type: c.Type(),
-		DocumentMeta: driver.DocumentMeta {
+		DocumentMeta: driver.DocumentMeta{
 			Key: key, // Ensures only one credentials vertex per type
 		},
 	})
@@ -477,7 +476,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 
 	if err != nil {
-		log.Error("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()) , zap.Error(err))
+		log.Error("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
 	}
 

@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	pb "github.com/infinimesh/proto/node"
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 
 	"github.com/gorilla/handlers"
@@ -35,12 +35,12 @@ import (
 )
 
 var (
-	log 			*zap.Logger
-	
-	apiserver 		string
-	corsAllowed 	[]string
-	secure 				bool
-	with_block 		bool
+	log *zap.Logger
+
+	apiserver   string
+	corsAllowed []string
+	secure      bool
+	with_block  bool
 )
 
 func init() {
@@ -56,13 +56,13 @@ func init() {
 	viper.SetDefault("SECURE", false)
 	viper.SetDefault("WITH_BLOCK", false)
 
-	apiserver   = viper.GetString("APISERVER_HOST")
+	apiserver = viper.GetString("APISERVER_HOST")
 	corsAllowedIn := viper.GetString("CORS_ALLOWED")
 	if corsAllowedIn != "" {
 		corsAllowed = strings.Split(corsAllowedIn, ",")
 	}
-	secure      = viper.GetBool("SECURE")
-	with_block  = viper.GetBool("WITH_BLOCK")
+	secure = viper.GetBool("SECURE")
+	with_block = viper.GetBool("WITH_BLOCK")
 }
 
 func main() {

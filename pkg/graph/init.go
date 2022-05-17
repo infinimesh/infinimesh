@@ -23,9 +23,9 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
-	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	"github.com/infinimesh/proto/node/access"
+	accpb "github.com/infinimesh/proto/node/accounts"
+	nspb "github.com/infinimesh/proto/node/namespaces"
 	"go.uber.org/zap"
 )
 
@@ -45,12 +45,12 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 	var meta driver.DocumentMeta
 	if !exists {
 		log.Debug("Root Account doesn't exist, creating")
-		meta, err = col.CreateDocument(ctx, Account{ 
+		meta, err = col.CreateDocument(ctx, Account{
 			Account: &accpb.Account{
-				Title: "infinimesh",
+				Title:   "infinimesh",
 				Enabled: true,
 			},
-			DocumentMeta: driver.DocumentMeta { Key: schema.ROOT_ACCOUNT_KEY },
+			DocumentMeta: driver.DocumentMeta{Key: schema.ROOT_ACCOUNT_KEY},
 		})
 		if err != nil {
 			log.Error("Error creating Root Account")
@@ -65,18 +65,18 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 		return err
 	}
 	root := &Account{
-		Account: &acc,
+		Account:      &acc,
 		DocumentMeta: meta,
 	}
 
 	ns_col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	exists, err = ns_col.DocumentExists(ctx, schema.ROOT_NAMESPACE_KEY)
 	if err != nil || !exists {
-		meta, err := ns_col.CreateDocument(ctx, Namespace{ 
+		meta, err := ns_col.CreateDocument(ctx, Namespace{
 			Namespace: &nspb.Namespace{
 				Title: "infinimesh",
 			},
-			DocumentMeta: driver.DocumentMeta { Key: schema.ROOT_NAMESPACE_KEY },
+			DocumentMeta: driver.DocumentMeta{Key: schema.ROOT_NAMESPACE_KEY},
 		})
 		if err != nil {
 			log.Error("Error creating Root Namespace")
@@ -92,7 +92,7 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 		return err
 	}
 	rootNS := &Namespace{
-		Namespace: &ns,
+		Namespace:    &ns,
 		DocumentMeta: meta,
 	}
 

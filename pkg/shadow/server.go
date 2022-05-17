@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	pb "github.com/infinimesh/proto/shadow"
 )
 
 type ShadowServiceServer struct {
@@ -35,14 +35,14 @@ type ShadowServiceServer struct {
 
 	log *zap.Logger
 	rdb *redis.Client
-	ps *pubsub.PubSub
+	ps  *pubsub.PubSub
 }
 
 func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSub) *ShadowServiceServer {
 	return &ShadowServiceServer{
 		log: log.Named("shadow"),
 		rdb: rdb,
-		ps: ps,
+		ps:  ps,
 	}
 }
 
@@ -51,10 +51,10 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 	pool := req.GetPool()
 	log.Debug("Request received", zap.Strings("pool", pool))
 
-	keys := make([]string, len(pool) * 2)
+	keys := make([]string, len(pool)*2)
 	for i, dev := range pool {
-		keys[i * 2] = Key(dev, "reported")
-		keys[i * 2 + 1] = Key(dev, "desired")
+		keys[i*2] = Key(dev, "reported")
+		keys[i*2+1] = Key(dev, "desired")
 	}
 	if len(keys) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "no devices specified")
@@ -69,22 +69,22 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 	shadows := make([]*pb.Shadow, len(pool))
 	for i := range shadows {
 		s := &pb.Shadow{
-			Device: pool[i],
+			Device:   pool[i],
 			Reported: &pb.State{},
-			Desired: &pb.State{},
+			Desired:  &pb.State{},
 		}
-		if states[i * 2] != nil {
-			state := states[i * 2].(string)
+		if states[i*2] != nil {
+			state := states[i*2].(string)
 			json.Unmarshal([]byte(state), s.Reported)
 		}
-		if states[i * 2 + 1] != nil {
-			state := states[i * 2 + 1].(string)
+		if states[i*2+1] != nil {
+			state := states[i*2+1].(string)
 			json.Unmarshal([]byte(state), s.Desired)
 		}
 		shadows[i] = s
 	}
 
-	return &pb.GetResponse{ Shadows: shadows }, nil
+	return &pb.GetResponse{Shadows: shadows}, nil
 }
 
 func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Shadow, error) {
@@ -144,6 +144,7 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 
 func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
 	go ps.Unsub(ch)
-	
-	for range ch {}
+
+	for range ch {
+	}
 }

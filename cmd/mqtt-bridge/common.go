@@ -25,8 +25,8 @@ import (
 
 	"github.com/cskr/pubsub"
 	structpb "github.com/golang/protobuf/ptypes/struct"
-	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
-	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	devpb "github.com/infinimesh/proto/node/devices"
+	pb "github.com/infinimesh/proto/shadow"
 	"github.com/slntopp/mqtt-go/packet"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
@@ -94,7 +94,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}
 
 	token := device.GetToken()
-	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 	for {
 		device, err = client.GetByToken(ctx, device)
 		if err != nil {
@@ -135,7 +135,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 				Device: device.Uuid,
 				Reported: &pb.State{
 					Timestamp: timestamppb.Now(),
-					Data: &data,
+					Data:      &data,
 				},
 			}
 			ps.Pub(payload, "mqtt.incoming")
@@ -147,7 +147,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			}
 
 			for _, sub := range p.Payload.Subscriptions {
-				ps.AddSub(backChannel, "mqtt.outgoing/" + device.Uuid)
+				ps.AddSub(backChannel, "mqtt.outgoing/"+device.Uuid)
 				go handleBackChannel(backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
 				log.Info("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
@@ -160,7 +160,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 					}
 					state := r.GetShadows()[0]
 					if state.Desired != nil {
-						ps.Pub(state, "mqtt.outgoing/" + device.Uuid)
+						ps.Pub(state, "mqtt.outgoing/"+device.Uuid)
 					}
 				}
 			}()
@@ -171,7 +171,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 				log.Error("Failed to write Unsubscription Acknowlegement", zap.Error(err))
 			}
 			for _, unsub := range p.Payload.UnSubscriptions {
-				ps.Unsub(backChannel, "mqtt.outgoing/" + device.Uuid)
+				ps.Unsub(backChannel, "mqtt.outgoing/"+device.Uuid)
 				log.Info("Removed Subscription", zap.String("topic", unsub.Topic), zap.String("device", device.Uuid))
 			}
 		}
@@ -202,6 +202,7 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 
 func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
 	go ps.Unsub(ch)
-	
-	for range ch {}
+
+	for range ch {
+	}
 }

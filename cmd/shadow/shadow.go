@@ -28,13 +28,13 @@ import (
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
-	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	pb "github.com/infinimesh/proto/shadow"
 )
 
 var (
-	port 					string
-	redisHost 		string
-	RabbitMQConn 	string
+	port         string
+	redisHost    string
+	RabbitMQConn string
 )
 
 func init() {
