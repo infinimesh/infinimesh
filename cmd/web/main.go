@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	pb "github.com/infinimesh/proto/node"
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 
 	"github.com/gorilla/handlers"
@@ -35,12 +35,12 @@ import (
 )
 
 var (
-	log 			*zap.Logger
-	
-	apiserver 		string
-	corsAllowed 	[]string
-	secure 				bool
-	with_block 		bool
+	log *zap.Logger
+
+	apiserver   string
+	corsAllowed []string
+	secure      bool
+	with_block  bool
 )
 
 func init() {
@@ -56,13 +56,13 @@ func init() {
 	viper.SetDefault("SECURE", false)
 	viper.SetDefault("WITH_BLOCK", false)
 
-	apiserver   = viper.GetString("APISERVER_HOST")
+	apiserver = viper.GetString("APISERVER_HOST")
 	corsAllowedIn := viper.GetString("CORS_ALLOWED")
 	if corsAllowedIn != "" {
 		corsAllowed = strings.Split(corsAllowedIn, ",")
 	}
-	secure      = viper.GetBool("SECURE")
-	with_block  = viper.GetBool("WITH_BLOCK")
+	secure = viper.GetBool("SECURE")
+	with_block = viper.GetBool("WITH_BLOCK")
 }
 
 func main() {
@@ -107,6 +107,13 @@ func main() {
 	err = pb.RegisterShadowServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
 	if err != nil {
 		log.Fatal("Failed to register ShadowService gateway", zap.Error(err))
+	}
+
+	log.Info("Registering Console Services Service")
+	init_cs(log)
+	err = gwmux.HandlePath("GET", "/console/services", cs_handler())
+	if err != nil {
+		log.Fatal("Failed to register ConsoleServices service", zap.Error(err))
 	}
 
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))

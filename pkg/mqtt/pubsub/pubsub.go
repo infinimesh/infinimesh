@@ -19,14 +19,14 @@ import (
 	"time"
 
 	"github.com/cskr/pubsub"
-	pb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	pb "github.com/infinimesh/proto/shadow"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
 
 var (
-	ps *pubsub.PubSub
+	ps     *pubsub.PubSub
 	logger *zap.Logger
 )
 
@@ -48,13 +48,13 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string) (*pubsub.Pub
 // Reading messages from PubSub and publishing them to RabbitMQ Queue
 func HandlePublish(ch *amqp.Channel, topic string) {
 	log := logger.Named("publish")
-	init:
+init:
 	q, err := ch.QueueDeclare(
 		topic,
 		true, false, false, true, nil,
 	)
 	if err != nil {
-		log.Error("Error declaring queue", zap.Error(err))
+		log.Warn("Error declaring queue", zap.Error(err))
 		time.Sleep(time.Second)
 		goto init
 	}
@@ -68,7 +68,7 @@ func HandlePublish(ch *amqp.Channel, topic string) {
 		log.Debug("Received message from PubSub", zap.Any("shadow", shadow))
 		payload, err := proto.Marshal(shadow)
 		if err != nil {
-			log.Error("Error while publishing message:", zap.Error(err))
+			log.Warn("Error while publishing message:", zap.Error(err))
 			continue
 		}
 		ch.Publish("", q.Name, false, false, amqp.Publishing{
@@ -80,22 +80,22 @@ func HandlePublish(ch *amqp.Channel, topic string) {
 // Reading messages from RabbitMQ Queue and publishing them to PubSub
 func HandleSubscribe(ch *amqp.Channel, topic string) {
 	log := logger.Named("subscribe")
-	init:
+init:
 	q, err := ch.QueueDeclare(
 		topic,
 		true, false, false, true, nil,
 	)
 	if err != nil {
-		log.Error("Error declaring queue", zap.Error(err))
+		log.Warn("Error declaring queue", zap.Error(err))
 		time.Sleep(time.Second)
 		goto init
 	}
 	log.Info("Queue declared", zap.String("name", q.Name))
 
-	consume:
+consume:
 	messages, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
-		log.Error("Error setting up consumer", zap.Error(err))
+		log.Warn("Error setting up consumer", zap.Error(err))
 		time.Sleep(time.Second)
 		goto consume
 	}
@@ -104,10 +104,10 @@ func HandleSubscribe(ch *amqp.Channel, topic string) {
 		shadow := &pb.Shadow{}
 		err = proto.Unmarshal(msg.Body, shadow)
 		if err != nil {
-			log.Error("Error while consuming message:", zap.Error(err))
+			log.Warn("Error while consuming message:", zap.Error(err))
 			continue
 		}
 		log.Debug("Received message from RabbitMQ", zap.Any("shadow", &shadow))
-		ps.Pub(shadow, topic, topic + "/" + shadow.Device)
+		ps.Pub(shadow, topic, topic+"/"+shadow.Device)
 	}
 }

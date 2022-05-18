@@ -24,12 +24,12 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/devices"
-	"github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/node/access"
+	"github.com/infinimesh/proto/node/accounts"
+	"github.com/infinimesh/proto/node/devices"
+	"github.com/infinimesh/proto/node/namespaces"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -38,12 +38,12 @@ import (
 )
 
 var (
-	log *zap.Logger
+	log          *zap.Logger
 	arangodbHost string
 	arangodbCred string
 
-	ctrl *AccountsController
-	ns_ctrl *NamespacesController
+	ctrl     *AccountsController
+	ns_ctrl  *NamespacesController
 	dev_ctrl *DevicesController
 
 	rootCtx context.Context
@@ -63,7 +63,7 @@ func init() {
 	arangodbCred = viper.GetString("DB_CRED")
 	rootPass := viper.GetString("INF_DEFAULT_ROOT_PASS")
 	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
-	
+
 	ctrl = NewAccountsController(log, db)
 	err := EnsureRootExists(log, db, rootPass)
 	if err != nil {
@@ -82,9 +82,9 @@ func init() {
 
 func CompareAccounts(a, b *accounts.Account) bool {
 	return a.GetUuid() == b.GetUuid() &&
-				 a.GetTitle() == b.GetTitle() &&
-				 a.GetEnabled() == b.GetEnabled() &&
-				 a.GetDefaultNamespace() == b.GetDefaultNamespace()
+		a.GetTitle() == b.GetTitle() &&
+		a.GetEnabled() == b.GetEnabled() &&
+		a.GetDefaultNamespace() == b.GetDefaultNamespace()
 }
 
 // AccountsController Tests
@@ -218,9 +218,9 @@ func TestAuthorizeStandardFail(t *testing.T) {
 
 	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
 		Auth: &accounts.Credentials{
-		Type: "standard",
-		Data: []string{username, password + "blah"},
-	},
+			Type: "standard",
+			Data: []string{username, password + "blah"},
+		},
 	})
 	if err == nil {
 		t.Fatal("Token request supposed to fail, but it didn't")
@@ -260,7 +260,7 @@ func TestUpdateAccount(t *testing.T) {
 	this.Uuid = uuid
 	this.Title = username + "-new"
 	this.Enabled = true
-	
+
 	that, err := ctrl.Update(rootCtx, this)
 	if err != nil {
 		t.Fatalf("Error udpating Account: %v", err)
@@ -301,7 +301,7 @@ func TestUpdateAccountDefaultNS(t *testing.T) {
 	uuid := res.GetAccount().GetUuid()
 	this.Uuid = uuid
 	this.DefaultNamespace = schema.ROOT_NAMESPACE_KEY
-	
+
 	that, err := ctrl.Update(rootCtx, this)
 	if err != nil {
 		t.Fatalf("Error udpating Account: %v", err)
@@ -497,7 +497,7 @@ func TestSetCredentialsStandard(t *testing.T) {
 	}
 
 	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
-			Auth: &accounts.Credentials{
+		Auth: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password + "-addon"},
 		},
@@ -555,7 +555,7 @@ func TestCreateNamespace(t *testing.T) {
 
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
 	var _access Access
-	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY + "-" + nspb.Uuid, &_access)
+	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY+"-"+nspb.Uuid, &_access)
 	if err != nil {
 		t.Fatalf("Can't read edge document or it doesn't exist: %v", err)
 	}
@@ -641,7 +641,7 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 			Title: username, Enabled: true,
 		},
 		Credentials: credentials,
-		Namespace: schema.ROOT_NAMESPACE_KEY,
+		Namespace:   schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatal("Error creating Account")
@@ -685,7 +685,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 			Title: username1, Enabled: true,
 		},
 		Credentials: credentials1,
-		Namespace: schema.ROOT_NAMESPACE_KEY,
+		Namespace:   schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatal("Error creating Account 1")
@@ -704,7 +704,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 			Title: username2, Enabled: true,
 		},
 		Credentials: credentials2,
-		Namespace: schema.ROOT_NAMESPACE_KEY,
+		Namespace:   schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatal("Error creating Account 2")
@@ -752,7 +752,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 			Title: username1, Enabled: true,
 		},
 		Credentials: credentials1,
-		Namespace: schema.ROOT_NAMESPACE_KEY,
+		Namespace:   schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatal("Error creating Account 1")
@@ -771,7 +771,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 			Title: username2, Enabled: true,
 		},
 		Credentials: credentials2,
-		Namespace: schema.ROOT_NAMESPACE_KEY,
+		Namespace:   schema.ROOT_NAMESPACE_KEY,
 	})
 	if err != nil {
 		t.Fatal("Error creating Account 2")
@@ -855,7 +855,7 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 
 	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
 		Device: &devices.Device{
-			Title: randomdata.SillyName(),
+			Title:   randomdata.SillyName(),
 			Enabled: true,
 			Certificate: &devices.Certificate{
 				PemData: cert,
@@ -875,19 +875,19 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 		t.Fatalf("Error getting device: %v", err)
 	}
 
-	if this.Uuid != that.Uuid	{
-			t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	if this.Uuid != that.Uuid {
+		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
 	}
 	if this.Title != that.Title {
-			t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
 	}
 	if this.Enabled != that.Enabled {
-			t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
 	}
 	thisc := string(this.Certificate.Fingerprint)
 	thatc := string(that.Certificate.Fingerprint)
 	if thisc != thatc {
-			t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
+		t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
 	}
 
 	_, err = dev_ctrl.Delete(rootCtx, this)
@@ -927,7 +927,7 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 
 	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
 		Device: &devices.Device{
-			Title: randomdata.SillyName(),
+			Title:   randomdata.SillyName(),
 			Enabled: true,
 			Certificate: &devices.Certificate{
 				PemData: cert,
@@ -991,7 +991,7 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 
 	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
 		Device: &devices.Device{
-			Title: randomdata.SillyName(),
+			Title:   randomdata.SillyName(),
 			Enabled: true,
 			Certificate: &devices.Certificate{
 				PemData: cert,
@@ -1013,19 +1013,19 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 		t.Fatalf("Error getting device: %v", err)
 	}
 
-	if this.Uuid != that.Uuid	{
-			t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	if this.Uuid != that.Uuid {
+		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
 	}
 	if this.Title != that.Title {
-			t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
 	}
 	if this.Enabled != that.Enabled {
-			t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
 	}
 	thisc := string(this.Certificate.Fingerprint)
 	thatc := string(that.Certificate.Fingerprint)
 	if thisc != thatc {
-			t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
+		t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
 	}
 
 	_, err = dev_ctrl.Delete(rootCtx, this)

@@ -24,24 +24,24 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	shadowpb "github.com/infinimesh/proto/shadow"
 )
 
 //ShadowAPI data strcuture
 type ShadowAPI struct {
 	pb.UnimplementedShadowServiceServer
 
-	log *zap.Logger
-	client        shadowpb.ShadowServiceClient
+	log    *zap.Logger
+	client shadowpb.ShadowServiceClient
 }
 
 func NewShadowAPI(log *zap.Logger, client shadowpb.ShadowServiceClient) *ShadowAPI {
 	return &ShadowAPI{
 		log: log.Named("ShadowAPI"), client: client,
 	}
-}	
+}
 
 func (s *ShadowAPI) Get(ctx context.Context, _ *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
 	log := s.log.Named("Get")
@@ -94,14 +94,13 @@ func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.S
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-
 	request.Devices = devices_scope
 
 	log.Debug("Stream API Method: Streaming started", zap.Strings("devices", devices_scope))
 
 	c, err := s.client.StreamShadow(srv.Context(), request)
 	if err != nil {
-		log.Error("Stream API Method: Failed to start the Stream", zap.Error(err))
+		log.Warn("Stream API Method: Failed to start the Stream", zap.Error(err))
 		return status.Error(codes.Unauthenticated, "Failed to start the Stream")
 	}
 

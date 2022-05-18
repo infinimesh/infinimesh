@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,34 +21,34 @@ import (
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	accountspb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	accountspb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
 )
 
 type Link struct {
 	From driver.DocumentID `json:"_from"`
-	To driver.DocumentID `json:"_to"`
-	Type string `json:"type"`
+	To   driver.DocumentID `json:"_to"`
+	Type string            `json:"type"`
 
 	driver.DocumentMeta
 }
 
 type Credentials interface {
-	// Check if given authorization data are mapped 
+	// Check if given authorization data are mapped
 	// to existent Credentials
-	Authorize(...string) bool;
+	Authorize(...string) bool
 	// Return Credentials type
-	Type() string;
+	Type() string
 	// Return Credentials Document Key
-	Key() string;
+	Key() string
 
 	// Find Credentials in database by authorisation data and Unmarshall it's data into struct
-	Find(context.Context, driver.Database) bool;
+	Find(context.Context, driver.Database) bool
 	// Find Credentials in database by document key and Unmarshall it's data into struct
-	FindByKey(context.Context, driver.Collection, string) error;
+	FindByKey(context.Context, driver.Collection, string) error
 
 	// Set Logger for Credentials methods
-	SetLogger(*zap.Logger);
+	SetLogger(*zap.Logger)
 }
 
 func Determine(auth_type string) (cred Credentials, ok bool) {
@@ -61,7 +61,7 @@ func Determine(auth_type string) (cred Credentials, ok bool) {
 }
 
 func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type string, args ...string) (cred Credentials, err error) {
-	var ok bool;
+	var ok bool
 	switch auth_type {
 	case "standard":
 		cred = &StandardCredentials{Username: args[0]}
@@ -87,9 +87,9 @@ func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Cred
 	if credentials == nil {
 		return nil, errors.New("credentials aren't given")
 	}
-	
-	var cred Credentials;
-	var err error;
+
+	var cred Credentials
+	var err error
 	switch credentials.Type {
 	case "standard":
 		cred, err = NewStandardCredentials(credentials.Data[0], credentials.Data[1])
@@ -109,9 +109,10 @@ GRAPH @credentials
     RETURN [ node._id, edge._id ]
 )
 `
+
 func ListCredentialsAndEdges(ctx context.Context, log *zap.Logger, db driver.Database, account driver.DocumentID) (nodes []string, err error) {
 	c, err := db.Query(ctx, listCredentialsAndEdgesQuery, map[string]interface{}{
-		"account": account,
+		"account":     account,
 		"credentials": schema.CREDENTIALS_COL,
 	})
 	if err != nil {

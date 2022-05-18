@@ -38,6 +38,7 @@ services:
       - traefik.http.services.web.loadbalancer.server.port=8000
     environment:
       APISERVER_HOST: repo:8000
+      HTTP_FS: "http://media.${BASE_DOMAIN}"
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -86,6 +87,7 @@ services:
       SHADOW_HOST: shadow:8000
       INF_DEFAULT_ROOT_PASS: infinimesh
       SIGNING_KEY: "${SIGNING_KEY}"
+
   shadow:
     image: ghcr.io/infinimesh/infinimesh/shadow:latest
     restart: unless-stopped
@@ -101,6 +103,7 @@ services:
 
   db:
     image: arangodb/arangodb:latest
+    restart: always
     environment:
       ARANGO_ROOT_PASSWORD: openSesame
     labels:
@@ -110,5 +113,18 @@ services:
     volumes:
       - data:/var/lib/arangodb3
 
+  # Comment this service and HTTP_FS env variable at web service to disable http-fs
+  http-fs:
+    image: ghcr.io/infinimesh/http-fs:latest
+    restart: always
+    labels:
+      - traefik.http.routers.http-fs.rule=Host(`media.${BASE_DOMAIN}`)
+      - traefik.http.routers.http-fs.entrypoints=http
+      - traefik.http.services.http-fs.loadbalancer.server.port=8000
+    volumes:
+      - user-media:/static
+      
+
 volumes:
   data:
+  user-media:

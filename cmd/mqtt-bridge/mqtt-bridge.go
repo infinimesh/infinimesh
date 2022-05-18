@@ -33,10 +33,10 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
-	stpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
+	pb "github.com/infinimesh/proto/node"
+	devpb "github.com/infinimesh/proto/node/devices"
+	stpb "github.com/infinimesh/proto/shadow"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
@@ -63,21 +63,21 @@ func getFingerprint(c []byte) []byte {
 }
 
 var (
-	conn        *grpc.ClientConn
-	client      pb.DevicesServiceClient
-	shadow   	stpb.ShadowServiceClient
-	debug       bool
+	conn   *grpc.ClientConn
+	client pb.DevicesServiceClient
+	shadow stpb.ShadowServiceClient
+	debug  bool
 
-	devicesHost    	string
-	shadowHost     	string
+	devicesHost string
+	shadowHost  string
 
-	RabbitMQConn	string
-	tlsCertFile     string
-	tlsKeyFile      string
+	RabbitMQConn string
+	tlsCertFile  string
+	tlsKeyFile   string
 
 	ps *pubsub.PubSub
 
-	log 				 *zap.Logger
+	log          *zap.Logger
 	internal_ctx context.Context
 )
 
@@ -127,7 +127,7 @@ func main() {
 
 	conn, err = grpc.Dial(shadowHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Error("Error dialing shadow registry", zap.Error(err))
+		log.Warn("Error dialing shadow registry", zap.Error(err))
 	} else {
 		shadow = stpb.NewShadowServiceClient(conn)
 	}
@@ -138,7 +138,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error making token", zap.Error(err))
 	}
-	internal_ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
+	internal_ctx = metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 
 	log.Info("Connecting to RabbitMQ", zap.String("url", RabbitMQConn))
 	rbmq, err := amqp.Dial(RabbitMQConn)
@@ -153,8 +153,8 @@ func main() {
 	}
 
 	tlsl, err := tls.Listen("tcp", ":8883", &tls.Config{
-		Certificates:          []tls.Certificate{serverCert},
-		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
 	if err != nil {
 		panic(err)
@@ -210,12 +210,12 @@ func main() {
 		fingerprint := getFingerprint(rawcert)
 		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
-		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
+		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
 			if device.Enabled {
 				log.Info("Device is enabled", zap.String("device", device.Uuid), zap.Strings("tags", device.Tags))
 				return true
 			} else {
-				log.Error("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
+				log.Warn("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
 				return false
 			}
 		})
@@ -235,7 +235,7 @@ func printConnState(con net.Conn) {
 	conn := con.(*tls.Conn)
 	state := conn.ConnectionState()
 
-	log.Info("Connection state", 
+	log.Info("Connection state",
 		zap.Uint16("version", state.Version),
 		zap.Bool("handshake-complete", state.HandshakeComplete),
 		zap.Bool("did-resume", state.DidResume),
@@ -249,7 +249,7 @@ func printConnState(con net.Conn) {
   input : topic, deviceId string
   output : topicAltered
 */
-func TopicChecker(topic, deviceId string) (string) {
+func TopicChecker(topic, deviceId string) string {
 	state := strings.Split(topic, "/")
 	state[1] = deviceId
 	topic = strings.Join(state, "/")
@@ -298,7 +298,7 @@ func schemaValidation(data []byte, version int) bool {
 	var payload mqtt.Payload
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
-		log.Error("invalid payload format", zap.Error(err))
+		log.Warn("invalid payload format", zap.Error(err))
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
@@ -307,12 +307,12 @@ func schemaValidation(data []byte, version int) bool {
 	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
-		log.Error("Loading new schema failed", zap.Error(err))
+		log.Warn("Loading new schema failed", zap.Error(err))
 		return false
 	}
 	result, err := schema.Validate(loader)
 	if err != nil {
-		log.Error("Schema validation failed", zap.Error(err))
+		log.Warn("Schema validation failed", zap.Error(err))
 		return false
 	}
 	return result.Valid()

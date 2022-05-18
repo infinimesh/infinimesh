@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"net"
 
-	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
+	devpb "github.com/infinimesh/proto/node/devices"
 	"github.com/slntopp/mqtt-go/packet"
 	"go.uber.org/zap"
 )
@@ -55,15 +55,15 @@ func HandleTCPConnections(tcp net.Listener) {
 
 		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
-		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) (bool) {
+		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
 			if device.Title != connectPacket.ConnectPayload.Username {
-				log.Error("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
+				log.Warn("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
 				return false
 			} else if !device.BasicEnabled {
-				log.Error("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))
+				log.Warn("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))
 				return false
 			} else if !device.Enabled {
-				log.Error("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
+				log.Warn("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
 				return false
 			} else {
 				log.Info("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))

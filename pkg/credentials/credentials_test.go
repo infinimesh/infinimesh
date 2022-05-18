@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	log *zap.Logger
+	log          *zap.Logger
 	arangodbHost string
 	arangodbCred string
 
@@ -47,7 +47,7 @@ func init() {
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
 	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
-	
+
 	md := metadata.New(map[string]string{
 		inf.INFINIMESH_ACCOUNT_CLAIM: schema.ROOT_ACCOUNT_KEY,
 	})

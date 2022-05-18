@@ -26,24 +26,24 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
-	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
+	shadowpb "github.com/infinimesh/proto/shadow"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
+	pb "github.com/infinimesh/proto/node"
 )
 
 var (
 	port string
 
-	arangodbHost  string
-	arangodbCred  string
-	rootPass 	  string
-	SIGNING_KEY   []byte
-	services 			map[string]bool
+	arangodbHost string
+	arangodbCred string
+	rootPass     string
+	SIGNING_KEY  []byte
+	services     map[string]bool
 )
 
 func init() {
@@ -78,7 +78,7 @@ func main() {
 	defer func() {
 		_ = log.Sync()
 	}()
-	
+
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
 	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
 	log.Info("DB connection established")
@@ -115,7 +115,7 @@ func main() {
 		log.Info("Registering namespaces service")
 		ns_ctrl := graph.NewNamespacesController(log, db)
 		pb.RegisterNamespacesServiceServer(s, ns_ctrl)
-		
+
 		ensure_root = true
 	}
 

@@ -23,20 +23,21 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	pb "github.com/infinimesh/proto/node"
+	accpb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
 
-	"github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	"github.com/infinimesh/proto/node/access"
+	nspb "github.com/infinimesh/proto/node/namespaces"
 )
+
 type Namespace struct {
 	*nspb.Namespace
 	driver.DocumentMeta
 }
 
-func (o *Namespace) ID() (driver.DocumentID) {
+func (o *Namespace) ID() driver.DocumentID {
 	return o.DocumentMeta.ID
 }
 
@@ -63,8 +64,8 @@ type NamespacesController struct {
 	pb.UnimplementedNamespacesServiceServer
 	log *zap.Logger
 
-	col driver.Collection // Namespaces Collection
-	accs driver.Collection // Accounts Collection
+	col    driver.Collection // Namespaces Collection
+	accs   driver.Collection // Accounts Collection
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
@@ -99,7 +100,7 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 	namespace := Namespace{Namespace: request}
 	meta, err := c.col.CreateDocument(ctx, namespace)
 	if err != nil {
-		log.Error("Error creating namespace", zap.Error(err))
+		log.Warn("Error creating namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while creating namespace")
 	}
 	namespace.Uuid = meta.ID.Key()
@@ -111,12 +112,35 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 		&namespace, access.Level_ADMIN, access.Role_OWNER,
 	)
 	if err != nil {
-		log.Error("Error creating edge", zap.Error(err))
+		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, namespace.Uuid)
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
 	return namespace.Namespace, nil
+}
+
+func (c *NamespacesController) Get(ctx context.Context, ns *nspb.Namespace) (res *nspb.Namespace, err error) {
+	log := c.log.Named("Get")
+	log.Debug("Get request received", zap.Any("request", ns))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	uuid := ns.GetUuid()
+	// Getting Namespace from DB
+	// and Check requestor access
+	result := *NewBlankNamespaceDocument(uuid)
+	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
+	if err != nil {
+		log.Warn("Failed to get Namespace and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
+	}
+	if result.Access.Level < access.Level_READ {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	return result.Namespace, nil
 }
 
 func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.Namespaces, error) {
@@ -133,7 +157,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 
 	var r []*nspb.Namespace
 	for {
-		var ns nspb.Namespace 
+		var ns nspb.Namespace
 		_, err := cr.ReadDocument(ctx, &ns)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -155,6 +179,7 @@ GRAPH Permissions
 FILTER edge.role != 1 && edge.level > 0
 RETURN MERGE(node, { uuid: node._key, access: { level: edge.level } })
 `
+
 func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespace) (*accpb.Accounts, error) {
 	log := c.log.Named("Joins")
 
@@ -164,7 +189,7 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 	ns := *NewBlankNamespaceDocument(request.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
-		log.Error("Error getting Namespace and access level", zap.Error(err))
+		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
 
@@ -176,7 +201,7 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 		"namespace": ns.ID(),
 	})
 	if err != nil {
-		log.Error("Error querying for joins", zap.Error(err))
+		log.Warn("Error querying for joins", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error querying for joins")
 	}
 	defer cr.Close()
@@ -188,7 +213,7 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			log.Error("Error unmarshalling Document", zap.Error(err))
+			log.Warn("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
 		log.Debug("Got document", zap.Any("account", &acc))
@@ -207,7 +232,7 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 	ns := *NewBlankNamespaceDocument(request.GetNamespace())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
-		log.Error("Error getting Namespace and access level", zap.Error(err))
+		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
 	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
@@ -217,7 +242,7 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 	acc := *NewBlankAccountDocument(request.GetAccount())
 	_, err = c.accs.ReadDocument(ctx, request.GetAccount(), &acc)
 	if err != nil {
-		log.Error("Error getting Account", zap.Error(err))
+		log.Warn("Error getting Account", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found")
 	}
 
@@ -227,7 +252,7 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 
 	err = Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
 	if err != nil {
-		log.Error("Error creating edge", zap.Error(err))
+		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
@@ -244,7 +269,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 	ns := *NewBlankNamespaceDocument(request.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
-		log.Error("Error getting Namespace and access level", zap.Error(err))
+		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
 	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
@@ -253,7 +278,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 
 	nodes, err := ListOwnedDeep(ctx, log, c.db, &ns)
 	if err != nil {
-		log.Error("Error getting owned nodes", zap.Error(err))
+		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
 	}
 
@@ -270,7 +295,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *nspb.Namespa
 	ns := *NewBlankNamespaceDocument(request.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
-		log.Error("Error getting Namespace and access level", zap.Error(err))
+		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
 	if ns.Access.Role != access.Role_OWNER && ns.Access.Level < access.Level_ROOT {
@@ -279,7 +304,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *nspb.Namespa
 
 	err = DeleteRecursive(ctx, log, c.db, &ns)
 	if err != nil {
-		log.Error("Error deleting namespace", zap.Error(err))
+		log.Warn("Error deleting namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
 	}
 

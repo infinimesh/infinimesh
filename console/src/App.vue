@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, inject } from "vue";
 import {
   NConfigProvider,
   NGlobalStyle,
@@ -31,7 +31,8 @@ import darkThemeOverrides from "@/assets/dark-theme-overrides.json"
 
 import hljs from "@/utils/hljs";
 
-const { theme: pick } = storeToRefs(useAppStore())
+const store = useAppStore()
+const { theme: pick, base_url } = storeToRefs(store)
 const theme = computed(() => {
   return {
     it: pick.value === "dark" ? darkTheme : lightTheme,
@@ -41,6 +42,22 @@ const theme = computed(() => {
 
 
 const watermark = ref(false)
+
+const axios = inject("axios");
+function loadConsoleServices() {
+  axios
+    .get(store.base_url + "/console/services")
+    .then((res) => {
+      store.console_services = res.data;
+    })
+    .catch((err) => {
+      console.error(err);
+      setTimeout(() => {
+        loadConsoleServices()
+      }, 1000)
+    });
+}
+loadConsoleServices()
 </script>
 
 <style>
