@@ -110,7 +110,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 		}
 		err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &account)
 		if err != nil {
-			log.Error("Failed to get Account and access level", zap.Error(err))
+			log.Warn("Failed to get Account and access level", zap.Error(err))
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
 		if account.Access.Level < access.Level_ROOT {
@@ -160,7 +160,7 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 	result := *NewBlankAccountDocument(uuid)
 	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
 	if err != nil {
-		log.Error("Failed to get Account and access level", zap.Error(err))
+		log.Warn("Failed to get Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
 	if result.Access.Level < access.Level_READ {
@@ -178,7 +178,7 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL, 4)
 	if err != nil {
-		log.Error("Error executing query", zap.Error(err))
+		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
 	defer cr.Close()
@@ -190,7 +190,7 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			log.Error("Error unmarshalling Document", zap.Error(err))
+			log.Warn("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
 		log.Debug("Got document", zap.Any("account", &acc))
@@ -226,7 +226,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	account := Account{Account: request.GetAccount()}
 	meta, err := c.col.CreateDocument(ctx, account)
 	if err != nil {
-		log.Error("Error creating Account", zap.Error(err))
+		log.Warn("Error creating Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while creating Account")
 	}
 	account.Uuid = meta.ID.Key()
@@ -236,7 +236,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	err = Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
-		log.Error("Error Linking Namespace to Account", zap.Error(err))
+		log.Warn("Error Linking Namespace to Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -244,14 +244,14 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	cred, err := credentials.MakeCredentials(request.GetCredentials(), log)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
-		log.Error("Error making Credentials for Account", zap.Error(err))
+		log.Warn("Error making Credentials for Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	err = c.SetCredentialsCtrl(ctx, account, col, cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
-		log.Error("Error setting Credentials for Account", zap.Error(err))
+		log.Warn("Error setting Credentials for Account", zap.Error(err))
 		return nil, err
 	}
 
@@ -281,7 +281,7 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 
 	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
 	if err != nil {
-		log.Error("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
+		log.Warn("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
@@ -304,7 +304,7 @@ func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*a
 	res := NewAccountFromPB(curr)
 	err = Toggle(ctx, c.db, res, "enabled")
 	if err != nil {
-		log.Error("Error updating Account", zap.Error(err))
+		log.Warn("Error updating Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
@@ -321,7 +321,7 @@ func (c *AccountsController) Deletables(ctx context.Context, request *accpb.Acco
 	acc := *NewBlankAccountDocument(request.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
-		log.Error("Error getting Account and access level", zap.Error(err))
+		log.Warn("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
 	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
@@ -330,7 +330,7 @@ func (c *AccountsController) Deletables(ctx context.Context, request *accpb.Acco
 
 	nodes, err := ListOwnedDeep(ctx, log, c.db, &acc)
 	if err != nil {
-		log.Error("Error getting owned nodes", zap.Error(err))
+		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
 	}
 
@@ -347,7 +347,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
-		log.Error("Error getting Account and access level", zap.Error(err))
+		log.Warn("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
 	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
@@ -356,7 +356,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 
 	err = DeleteRecursive(ctx, log, c.db, &acc)
 	if err != nil {
-		log.Error("Error deleting account", zap.Error(err))
+		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting account")
 	}
 
@@ -405,7 +405,7 @@ func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account)
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
-		ctrl.log.Error("Error executing query", zap.Error(err))
+		ctrl.log.Warn("Error executing query", zap.Error(err))
 		return nil, err
 	}
 	defer c.Close()
@@ -433,7 +433,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
 		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
 		if err != nil {
-			ctrl.log.Error("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
+			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
 			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
 		}
 
@@ -443,7 +443,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 
 	cred, err := ctrl.cred.CreateDocument(ctx, c)
 	if err != nil {
-		ctrl.log.Error("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
+		ctrl.log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
 		return status.Error(codes.Internal, "Couldn't create credentials")
 	}
 
@@ -456,7 +456,7 @@ func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Acco
 		},
 	})
 	if err != nil {
-		ctrl.log.Error("Error Linking Credentials to Account",
+		ctrl.log.Warn("Error Linking Credentials to Account",
 			zap.String("account", acc.Key), zap.String("type", c.Type()), zap.Error(err),
 		)
 		ctrl.cred.RemoveDocument(ctx, cred.Key)
@@ -476,7 +476,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
 
 	if err != nil {
-		log.Error("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
+		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
 	}
 

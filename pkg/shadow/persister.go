@@ -56,7 +56,7 @@ func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string,
 
 	new, err = json.Marshal(state)
 	if err != nil {
-		log.Error("Error Marshalling State", zap.String("key", key), zap.Error(err))
+		log.Warn("Error Marshalling State", zap.String("key", key), zap.Error(err))
 		return
 	}
 
@@ -74,7 +74,7 @@ merge:
 			m = "{}"
 			goto merge
 		}
-		log.Error("Error Merging State", zap.String("key", key), zap.Error(err))
+		log.Warn("Error Merging State", zap.String("key", key), zap.Error(err))
 		return
 	}
 	new = merged
@@ -82,7 +82,7 @@ merge:
 set:
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
-		log.Error("Error Storing State", zap.String("key", key), zap.Error(err))
+		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))
 		return
 	}
 }

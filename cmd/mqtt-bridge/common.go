@@ -53,7 +53,7 @@ func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (device 
 // Log Error, Send Acknowlegement(ACK) packet and Close the connection
 // ACK Packet needs to be sent to prevent MQTT Client sending CONN packets further
 func LogErrorAndClose(c net.Conn, err error) {
-	log.Error("Closing connection on error", zap.Error(err))
+	log.Warn("Closing connection on error", zap.Error(err))
 	resp := packet.ConnAckControlPacket{
 		FixedHeader: packet.FixedHeader{
 			ControlPacketType: packet.CONNACK,
@@ -89,7 +89,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 	_, err := resp.WriteTo(c)
 	if err != nil {
-		log.Error("Failed to write Connection Acknowlegement", zap.Error(err))
+		log.Warn("Failed to write Connection Acknowlegement", zap.Error(err))
 		return
 	}
 
@@ -98,7 +98,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	for {
 		device, err = client.GetByToken(ctx, device)
 		if err != nil {
-			log.Error("Can't retrieve device status from registry", zap.Error(err))
+			log.Warn("Can't retrieve device status from registry", zap.Error(err))
 		}
 		if !device.Enabled {
 			log.Debug("Device is disabled, disconnecting", zap.String("device", device.Uuid), zap.Bool("enabled", device.Enabled))
@@ -111,7 +111,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			if err == io.EOF {
 				log.Info("Client closed connection", zap.String("client", connectPacket.ConnectPayload.ClientID))
 			} else {
-				log.Error("Failed to read packet", zap.Error(err))
+				log.Warn("Failed to read packet", zap.Error(err))
 			}
 			_ = c.Close() // nolint: gosec
 			break
@@ -122,13 +122,13 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			pong := packet.NewPingRespControlPacket()
 			_, err := pong.WriteTo(c)
 			if err != nil {
-				log.Error("Failed to write Ping Response", zap.Error(err))
+				log.Warn("Failed to write Ping Response", zap.Error(err))
 			}
 		case *packet.PublishControlPacket:
 			var data structpb.Struct
 			err = data.UnmarshalJSON(p.Payload)
 			if err != nil {
-				log.Error("Failed to handle Publish", zap.Error(err))
+				log.Warn("Failed to handle Publish", zap.Error(err))
 				continue
 			}
 			payload := &pb.Shadow{
@@ -143,7 +143,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
-				log.Error("Failed to write Subscription Acknowlegement", zap.Error(err))
+				log.Warn("Failed to write Subscription Acknowlegement", zap.Error(err))
 			}
 
 			for _, sub := range p.Payload.Subscriptions {
@@ -168,7 +168,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			response := packet.NewUnSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
 			_, err := response.WriteTo(c)
 			if err != nil {
-				log.Error("Failed to write Unsubscription Acknowlegement", zap.Error(err))
+				log.Warn("Failed to write Unsubscription Acknowlegement", zap.Error(err))
 			}
 			for _, unsub := range p.Payload.UnSubscriptions {
 				ps.Unsub(backChannel, "mqtt.outgoing/"+device.Uuid)
@@ -189,7 +189,7 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 		}
 		payload, err := shadow.Desired.Data.MarshalJSON()
 		if err != nil {
-			log.Error("Failed to marshal shadow", zap.Error(err))
+			log.Warn("Failed to marshal shadow", zap.Error(err))
 			continue
 		}
 		p := packet.NewPublish(topic, 0, payload, protocolLevel)

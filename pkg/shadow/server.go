@@ -134,7 +134,7 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 		}
 		err := srv.Send(shadow)
 		if err != nil {
-			log.Error("Unable to send message", zap.Error(err))
+			log.Warn("Unable to send message", zap.Error(err))
 			break
 		}
 	}

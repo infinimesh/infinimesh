@@ -54,7 +54,7 @@ init:
 		true, false, false, true, nil,
 	)
 	if err != nil {
-		log.Error("Error declaring queue", zap.Error(err))
+		log.Warn("Error declaring queue", zap.Error(err))
 		time.Sleep(time.Second)
 		goto init
 	}
@@ -68,7 +68,7 @@ init:
 		log.Debug("Received message from PubSub", zap.Any("shadow", shadow))
 		payload, err := proto.Marshal(shadow)
 		if err != nil {
-			log.Error("Error while publishing message:", zap.Error(err))
+			log.Warn("Error while publishing message:", zap.Error(err))
 			continue
 		}
 		ch.Publish("", q.Name, false, false, amqp.Publishing{
@@ -86,7 +86,7 @@ init:
 		true, false, false, true, nil,
 	)
 	if err != nil {
-		log.Error("Error declaring queue", zap.Error(err))
+		log.Warn("Error declaring queue", zap.Error(err))
 		time.Sleep(time.Second)
 		goto init
 	}
@@ -95,7 +95,7 @@ init:
 consume:
 	messages, err := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
-		log.Error("Error setting up consumer", zap.Error(err))
+		log.Warn("Error setting up consumer", zap.Error(err))
 		time.Sleep(time.Second)
 		goto consume
 	}
@@ -104,7 +104,7 @@ consume:
 		shadow := &pb.Shadow{}
 		err = proto.Unmarshal(msg.Body, shadow)
 		if err != nil {
-			log.Error("Error while consuming message:", zap.Error(err))
+			log.Warn("Error while consuming message:", zap.Error(err))
 			continue
 		}
 		log.Debug("Received message from RabbitMQ", zap.Any("shadow", &shadow))

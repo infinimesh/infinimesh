@@ -143,7 +143,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 
 	meta, err := c.col.CreateDocument(ctx, device)
 	if err != nil {
-		log.Error("Error creating Device", zap.Error(err))
+		log.Warn("Error creating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while creating Device")
 	}
 	device.Uuid = meta.ID.Key()
@@ -151,7 +151,7 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 
 	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
-		log.Error("Error creating edge", zap.Error(err))
+		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
@@ -179,7 +179,7 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 
 	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
 	if err != nil {
-		log.Error("Error updating Device", zap.Error(err))
+		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
@@ -202,7 +202,7 @@ func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*dev
 	res := NewDeviceFromPB(curr)
 	err = Toggle(ctx, c.db, res, "enabled")
 	if err != nil {
-		log.Error("Error updating Device", zap.Error(err))
+		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
@@ -225,7 +225,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) 
 	res := NewDeviceFromPB(curr)
 	err = Toggle(ctx, c.db, res, "basic_enabled")
 	if err != nil {
-		log.Error("Error updating Device", zap.Error(err))
+		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
@@ -305,7 +305,7 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL, 4)
 	if err != nil {
-		log.Error("Error executing query", zap.Error(err))
+		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
 	defer cr.Close()
@@ -317,7 +317,7 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			log.Error("Error unmarshalling Document", zap.Error(err))
+			log.Warn("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
 		if dev.Access.Level < access.Level_MGMT {
@@ -350,7 +350,7 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 
 	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
-		log.Error("Error removing document", zap.Error(err))
+		log.Warn("Error removing document", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting Device")
 	}
 
@@ -392,7 +392,7 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 		return nil, status.Error(codes.NotFound, "Device not found")
 	}
 	if err != nil {
-		log.Error("Error unmarshalling Document", zap.Error(err))
+		log.Warn("Error unmarshalling Document", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error executing query")
 	}
 	r.Uuid = meta.ID.Key()

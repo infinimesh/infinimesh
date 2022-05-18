@@ -127,7 +127,7 @@ func main() {
 
 	conn, err = grpc.Dial(shadowHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Error("Error dialing shadow registry", zap.Error(err))
+		log.Warn("Error dialing shadow registry", zap.Error(err))
 	} else {
 		shadow = stpb.NewShadowServiceClient(conn)
 	}
@@ -215,7 +215,7 @@ func main() {
 				log.Info("Device is enabled", zap.String("device", device.Uuid), zap.Strings("tags", device.Tags))
 				return true
 			} else {
-				log.Error("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
+				log.Warn("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
 				return false
 			}
 		})
@@ -298,7 +298,7 @@ func schemaValidation(data []byte, version int) bool {
 	var payload mqtt.Payload
 	err := json.Unmarshal(data, &payload)
 	if err != nil {
-		log.Error("invalid payload format", zap.Error(err))
+		log.Warn("invalid payload format", zap.Error(err))
 		return false
 	}
 	loader := gojsonschema.NewGoLoader(payload)
@@ -307,12 +307,12 @@ func schemaValidation(data []byte, version int) bool {
 	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
 	schema, err := gojsonschema.NewSchema(schemaLoader)
 	if err != nil {
-		log.Error("Loading new schema failed", zap.Error(err))
+		log.Warn("Loading new schema failed", zap.Error(err))
 		return false
 	}
 	result, err := schema.Validate(loader)
 	if err != nil {
-		log.Error("Schema validation failed", zap.Error(err))
+		log.Warn("Schema validation failed", zap.Error(err))
 		return false
 	}
 	return result.Valid()

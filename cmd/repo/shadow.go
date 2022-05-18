@@ -100,7 +100,7 @@ func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.S
 
 	c, err := s.client.StreamShadow(srv.Context(), request)
 	if err != nil {
-		log.Error("Stream API Method: Failed to start the Stream", zap.Error(err))
+		log.Warn("Stream API Method: Failed to start the Stream", zap.Error(err))
 		return status.Error(codes.Unauthenticated, "Failed to start the Stream")
 	}
 
