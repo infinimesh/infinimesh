@@ -109,6 +109,13 @@ func main() {
 		log.Fatal("Failed to register ShadowService gateway", zap.Error(err))
 	}
 
+	log.Info("Registering Console Services Service")
+	init_cs(log)
+	err = gwmux.HandlePath("GET", "/console/services", cs_handler())
+	if err != nil {
+		log.Fatal("Failed to register ConsoleServices service", zap.Error(err))
+	}
+
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))
 	handler := handlers.CORS(
 		handlers.AllowedOrigins(corsAllowed),
