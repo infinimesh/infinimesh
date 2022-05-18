@@ -53,6 +53,14 @@ const routes = [
         meta: {
           title: "Namespaces",
         },
+      },
+      {
+        path: "media",
+        name: "Media",
+        component: () => import("@/views/dashboard/Media.vue"),
+        meta: {
+          title: "Media",
+        },
       }
     ],
   },

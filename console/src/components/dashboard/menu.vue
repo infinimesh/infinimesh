@@ -9,7 +9,10 @@ import { RouterLink, useRoute } from "vue-router";
 import { NMenu } from "naive-ui";
 
 import { renderIcon } from "@/utils";
-import { HardwareChipOutline, PeopleOutline, GitNetworkOutline } from "@vicons/ionicons5";
+import { HardwareChipOutline, PeopleOutline, GitNetworkOutline, ImagesOutline } from "@vicons/ionicons5";
+
+import { useAppStore } from "@/store/app"
+import { storeToRefs } from "pinia"
 
 const props = defineProps({
   collapsed: {
@@ -36,6 +39,21 @@ function renderLabelLink(route, label = false) {
   )
 }
 
+const { console_services } = storeToRefs(useAppStore())
+
+const services = computed(() => {
+  let r = []
+  console.log(console_services.value.http_fs)
+  if (console_services.value.http_fs) {
+    r.push({
+      label: renderLabelLink("Media"),
+      key: "Media",
+      icon: renderIcon(ImagesOutline),
+    })
+  }
+  return r
+})
+
 const menuOptions = ref([
   {
     label: renderLabelLink("Devices"),
@@ -51,7 +69,8 @@ const menuOptions = ref([
     label: renderLabelLink("Namespaces"),
     key: "Namespaces",
     icon: renderIcon(GitNetworkOutline),
-  }
+  },
+  ...services.value,
 ]);
 
 const collapsed = computed(() => props.collapsed);
