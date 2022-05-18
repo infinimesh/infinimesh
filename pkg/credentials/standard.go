@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,20 +24,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
-
 type StandardCredentials struct {
-	Username string `json:"username"`
+	Username     string `json:"username"`
 	PasswordHash string `json:"password_hash"`
 
-    log *zap.Logger
+	log *zap.Logger
 	driver.DocumentMeta
 }
 
 func NewStandardCredentials(username, password string) (Credentials, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-    return &StandardCredentials{
-		Username: username,
+	return &StandardCredentials{
+		Username:     username,
 		PasswordHash: string(bytes),
 	}, err
 }
@@ -45,7 +43,7 @@ func NewStandardCredentials(username, password string) (Credentials, error) {
 // Authorize method for StandardCredentials assumes that args consist of username and password stored at 0 and 1 accordingly
 func (c *StandardCredentials) Authorize(args ...string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(c.PasswordHash), []byte(args[1]))
-    return err == nil
+	return err == nil
 }
 
 func (*StandardCredentials) Type() string {
@@ -57,13 +55,13 @@ func (sc *StandardCredentials) Key() string {
 }
 
 func (c *StandardCredentials) SetLogger(log *zap.Logger) {
-    c.log = log.Named("Standard Auth")
+	c.log = log.Named("Standard Auth")
 }
 
-func (cred *StandardCredentials) Find(ctx context.Context, db driver.Database) (bool) {
+func (cred *StandardCredentials) Find(ctx context.Context, db driver.Database) bool {
 	query := `FOR cred IN @@credentials FILTER cred.username == @username RETURN cred`
 	c, err := db.Query(ctx, query, map[string]interface{}{
-		"username": cred.Username,
+		"username":     cred.Username,
 		"@credentials": schema.CREDENTIALS_COL,
 	})
 	if err != nil {
@@ -75,7 +73,7 @@ func (cred *StandardCredentials) Find(ctx context.Context, db driver.Database) (
 	return err == nil
 }
 
-func (cred *StandardCredentials) FindByKey(ctx context.Context, col driver.Collection, key string) (error) {
+func (cred *StandardCredentials) FindByKey(ctx context.Context, col driver.Collection, key string) error {
 	_, err := col.ReadDocument(ctx, key, cred)
 	return err
 }

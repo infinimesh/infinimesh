@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,19 +22,19 @@ import (
 )
 
 func convert(i interface{}) interface{} {
-    switch x := i.(type) {
-    case map[interface{}]interface{}:
-        m2 := map[string]interface{}{}
-        for k, v := range x {
-            m2[k.(string)] = convert(v)
-        }
-        return m2
-    case []interface{}:
-        for i, v := range x {
-            x[i] = convert(v)
-        }
-    }
-    return i
+	switch x := i.(type) {
+	case map[interface{}]interface{}:
+		m2 := map[string]interface{}{}
+		for k, v := range x {
+			m2[k.(string)] = convert(v)
+		}
+		return m2
+	case []interface{}:
+		for i, v := range x {
+			x[i] = convert(v)
+		}
+	}
+	return i
 }
 
 // Convert YAML to JSON
@@ -48,4 +48,4 @@ func ConvertBytes(in []byte) (out []byte, err error) {
 	middle = convert(middle)
 
 	return json.Marshal(middle)
-} 
+}

@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import (
 )
 
 var (
-	log *zap.Logger
-	SIGNING_KEY		[]byte
+	log         *zap.Logger
+	SIGNING_KEY []byte
 )
 
 func SetContext(logger *zap.Logger, key []byte) {
@@ -57,12 +57,12 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 	// Middleware selector
 	var middleware func(context.Context) (context.Context, error)
 	switch {
-		case info.FullMethod == "/infinimesh.node.DevicesService/GetByToken":
-			middleware = JwtDeviceAuthMiddleware
-		case strings.HasPrefix(info.FullMethod, "/infinimesh.node.ShadowService/"):
-			middleware = JwtDeviceAuthMiddleware
-		default:
-			middleware = JwtStandardAuthMiddleware
+	case info.FullMethod == "/infinimesh.node.DevicesService/GetByToken":
+		middleware = JwtDeviceAuthMiddleware
+	case strings.HasPrefix(info.FullMethod, "/infinimesh.node.ShadowService/"):
+		middleware = JwtDeviceAuthMiddleware
+	default:
+		middleware = JwtStandardAuthMiddleware
 	}
 
 	ctx, err := middleware(ctx)
@@ -155,7 +155,7 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 		}
 		return SIGNING_KEY, nil
 	})
-	
+
 	if err != nil {
 		return nil, err
 	}
