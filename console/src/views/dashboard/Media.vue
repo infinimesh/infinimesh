@@ -30,63 +30,85 @@
       </n-space>
     </n-alert>
   </n-space>
-  <n-table v-else :bordered="false" :single-line="false">
-    <thead>
-      <tr>
-        <th style="width: 55%">File</th>
-        <th style="width: 15%">Size</th>
-        <th style="width: 15%">Last modified</th>
-        <th style="width: 15%">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="file in files" :key="file.name">
-        <td @contextmenu.prevent="e => handleCopyLinkToClipboard(file.link)">
-          <n-tooltip trigger="hover">
-            <template #trigger>
-              <a :download="file.name" :href="file.link" target="_blank" style="color: var(--n-td-text-color)">
-                {{ file.name }}
-              </a>
-            </template>
-            Click to see the preview or download the file or the Right Click to copy the link
-          </n-tooltip>
-        </td>
-        <td>
-          <n-tooltip trigger="hover">
-            <template #trigger>
-              {{ sizeConv(file.size) }}
-            </template>
-            {{ file.size }} bytes
-          </n-tooltip>
-        </td>
-        <td>{{ timeConf(file.mod_time) }}</td>
-        <td>
-          <n-popconfirm @positive-click="e => rm(file.link)">
-            <template #trigger>
-              <n-button round secondary type="error">
-                <template #icon>
-                  <n-icon>
-                    <trash-outline />
-                  </n-icon>
-                </template>
-                Delete
-              </n-button>
-            </template>
-            <span>
-              Are you sure about deleting this file?
-            </span>
-          </n-popconfirm>
-        </td>
-      </tr>
-    </tbody>
-  </n-table>
+  <template v-else>
+    <n-space justify="center">
+      <n-upload directory-dnd @before-upload="handleBeforeUpload">
+        <n-upload-dragger>
+          <div style="margin-bottom: 12px">
+            <n-icon size="48" :depth="3">
+              <archive-outline />
+            </n-icon>
+          </div>
+          <n-text style="font-size: 16px">
+            Click or drag a file to this area to upload
+          </n-text>
+          <n-p depth="3" style="margin: 8px 0 0 0">
+            Strictly prohibit from uploading sensitive information. All files will be publicly accessible.
+          </n-p>
+          <n-p depth="3" style="margin: 8px 0 0 0">
+            Also note that all special characters will be removed.
+          </n-p>
+        </n-upload-dragger>
+      </n-upload>
+    </n-space>
+    <n-table :bordered="false" :single-line="false">
+      <thead>
+        <tr>
+          <th style="width: 55%">File</th>
+          <th style="width: 15%">Size</th>
+          <th style="width: 15%">Last modified</th>
+          <th style="width: 15%">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="file in files" :key="file.name">
+          <td @contextmenu.prevent="e => handleCopyLinkToClipboard(file.link)">
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <a :download="file.name" :href="file.link" target="_blank" style="color: var(--n-td-text-color)">
+                  {{ file.name }}
+                </a>
+              </template>
+              Click to see the preview or download the file or the Right Click to copy the link
+            </n-tooltip>
+          </td>
+          <td>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                {{ sizeConv(file.size) }}
+              </template>
+              {{ file.size }} bytes
+            </n-tooltip>
+          </td>
+          <td>{{ timeConf(file.mod_time) }}</td>
+          <td>
+            <n-popconfirm @positive-click="e => rm(file.link)">
+              <template #trigger>
+                <n-button round secondary type="error">
+                  <template #icon>
+                    <n-icon>
+                      <trash-outline />
+                    </n-icon>
+                  </template>
+                  Delete
+                </n-button>
+              </template>
+              <span>
+                Are you sure about deleting this file?
+              </span>
+            </n-popconfirm>
+          </td>
+        </tr>
+      </tbody>
+    </n-table>
+  </template>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from "vue"
 
-import { NH1, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage, NPopconfirm } from 'naive-ui';
-import { RefreshOutline, GitNetworkOutline, TrashOutline } from '@vicons/ionicons5';
+import { NH1, NP, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage, NPopconfirm, NUpload, NUploadDragger } from 'naive-ui';
+import { RefreshOutline, GitNetworkOutline, TrashOutline, ArchiveOutline } from '@vicons/ionicons5';
 
 import { useAppStore } from '@/store/app';
 import { useNSStore } from '@/store/namespaces';
@@ -153,4 +175,28 @@ async function handleCopyLinkToClipboard(link) {
 onMounted(() => {
   stat()
 })
+
+function handleBeforeUpload({ file }) {
+  console.log(file)
+
+  console.log(file.name.replace(/[^a-zA-Z0-9\.]/g, ""))
+  let filename = file.name.replace(/[^a-zA-Z0-9\.]/g, "")
+
+  let data = new FormData();
+  data.append('file', file.file, filename);
+
+  message.info('Uploading file...')
+  store.http({
+    method: 'POST',
+    url: base_url + '/' + selected.value + '/' + filename,
+    data
+  }).then(res => {
+    message.success('File uploaded successfuly')
+    stat()
+  }).catch(err => {
+    message.error(err.response.data.message)
+  })
+
+  return false
+}
 </script>
