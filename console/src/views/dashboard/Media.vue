@@ -39,6 +39,10 @@
               <archive-outline />
             </n-icon>
           </div>
+          <n-p style="font-size: 16px">
+            Limit is:
+            <n-number-animation :from="0" :to="limit[0]" /> {{ limit[1] }}
+          </n-p>
           <n-text style="font-size: 16px">
             Click or drag a file to this area to upload
           </n-text>
@@ -107,7 +111,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue"
 
-import { NH1, NP, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage, NPopconfirm, NUpload, NUploadDragger } from 'naive-ui';
+import { NH1, NP, NNumberAnimation, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage, NPopconfirm, NUpload, NUploadDragger } from 'naive-ui';
 import { RefreshOutline, GitNetworkOutline, TrashOutline, ArchiveOutline } from '@vicons/ionicons5';
 
 import { useAppStore } from '@/store/app';
@@ -120,7 +124,7 @@ const { selected } = storeToRefs(useNSStore())
 const store = useAppStore()
 
 const files = ref([])
-const limit = ref(0)
+const limit = ref([0, "bytes"])
 
 const base_url = `${store.console_services.http_fs}`
 
@@ -149,7 +153,8 @@ function stat() {
       el.link = makeLink(el)
       return el
     })
-    limit.value = res.data.file_limit
+    let label = sizeConv(res.data.file_limit)
+    limit.value = label.split(' ')
   })
 }
 watch(selected, stat);
