@@ -41,16 +41,15 @@
     </thead>
     <tbody>
       <tr v-for="file in files" :key="file.name">
-        <td>
+        <td @contextmenu.prevent="e => handleCopyLinkToClipboard(makeLink(file))">
           <n-tooltip trigger="hover">
             <template #trigger>
               <a :download="file.name" :href="makeLink(file)" target="_blank" style="color: var(--n-td-text-color)">
                 {{ file.name }}
               </a>
             </template>
-            Click to see the preview or download the file
+            Click to see the preview or download the file or the Right Click to copy the link
           </n-tooltip>
-
         </td>
         <td>
           <n-tooltip trigger="hover">
@@ -68,9 +67,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, onMounted } from "vue"
 
-import { NH1, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip } from 'naive-ui';
+import { NH1, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage } from 'naive-ui';
 import { RefreshOutline, GitNetworkOutline } from '@vicons/ionicons5';
 
 import { useAppStore } from '@/store/app';
@@ -112,16 +111,17 @@ function stat() {
 }
 watch(selected, stat);
 
-function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
+const message = useMessage()
+async function handleCopyLinkToClipboard(link) {
+  try {
+    await navigator.clipboard.writeText(link);
+    message.success("Link copied to clipboard");
+  } catch {
+    message.error("Failed to copy Link to clipboard");
+  }
 }
+
+onMounted(() => {
+  stat()
+})
 </script>
