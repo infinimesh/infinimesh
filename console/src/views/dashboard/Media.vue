@@ -41,10 +41,10 @@
     </thead>
     <tbody>
       <tr v-for="file in files" :key="file.name">
-        <td @contextmenu.prevent="e => handleCopyLinkToClipboard(makeLink(file))">
+        <td @contextmenu.prevent="e => handleCopyLinkToClipboard(file.link)">
           <n-tooltip trigger="hover">
             <template #trigger>
-              <a :download="file.name" :href="makeLink(file)" target="_blank" style="color: var(--n-td-text-color)">
+              <a :download="file.name" :href="file.link" target="_blank" style="color: var(--n-td-text-color)">
                 {{ file.name }}
               </a>
             </template>
@@ -60,7 +60,23 @@
           </n-tooltip>
         </td>
         <td>{{ timeConf(file.mod_time) }}</td>
-        <td></td>
+        <td>
+          <n-popconfirm @positive-click="e => rm(file.link)">
+            <template #trigger>
+              <n-button round secondary type="error">
+                <template #icon>
+                  <n-icon>
+                    <trash-outline />
+                  </n-icon>
+                </template>
+                Delete
+              </n-button>
+            </template>
+            <span>
+              Are you sure about deleting this file?
+            </span>
+          </n-popconfirm>
+        </td>
       </tr>
     </tbody>
   </n-table>
@@ -69,8 +85,8 @@
 <script setup>
 import { ref, watch, onMounted } from "vue"
 
-import { NH1, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage } from 'naive-ui';
-import { RefreshOutline, GitNetworkOutline } from '@vicons/ionicons5';
+import { NH1, NText, NGrid, NGridItem, NButton, NIcon, NSpace, NAlert, NTable, NTooltip, useMessage, NPopconfirm } from 'naive-ui';
+import { RefreshOutline, GitNetworkOutline, TrashOutline } from '@vicons/ionicons5';
 
 import { useAppStore } from '@/store/app';
 import { useNSStore } from '@/store/namespaces';
@@ -82,6 +98,7 @@ const { selected } = storeToRefs(useNSStore())
 const store = useAppStore()
 
 const files = ref([])
+const limit = ref(0)
 
 const base_url = `${store.console_services.http_fs}`
 
@@ -106,10 +123,22 @@ function stat() {
     return
   }
   store.http.get(base_url + '/' + selected.value).then(res => {
-    files.value = res.data
+    files.value = res.data.files.map(el => {
+      el.link = makeLink(el)
+      return el
+    })
+    limit.value = res.data.file_limit
   })
 }
 watch(selected, stat);
+function rm(link) {
+  store.http.delete(link).then(res => {
+    message.success('File deleted successfuly')
+    stat()
+  }).catch(err => {
+    message.error(err.response.data.message)
+  })
+}
 
 const message = useMessage()
 async function handleCopyLinkToClipboard(link) {
