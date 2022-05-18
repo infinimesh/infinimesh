@@ -199,7 +199,8 @@ function handleBeforeUpload({ file }) {
     message.success('File uploaded successfuly')
     stat()
   }).catch(err => {
-    message.error(err.response.data.message)
+    console.log(err.response)
+    message.error(err.response.data)
   })
 
   return false
