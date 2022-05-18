@@ -11,6 +11,7 @@ export const useAppStore = defineStore("app", {
     },
     theme: "dark",
     theme_pick: "system",
+    console_services: {}
   }),
   getters: {
     base_url: () => baseURL,
