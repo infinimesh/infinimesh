@@ -38,7 +38,7 @@ services:
       - traefik.http.services.web.loadbalancer.server.port=8000
     environment:
       APISERVER_HOST: repo:8000
-      HTTP_FS: "media.${BASE_DOMAIN}"
+      HTTP_FS: "http://media.${BASE_DOMAIN}"
 
   rabbitmq:
     image: rabbitmq:3.9-management
