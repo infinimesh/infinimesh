@@ -154,8 +154,8 @@ func main() {
 	ps = pubsub.New(10)
 
 	tlsl, err := tls.Listen("tcp", ":8089", &tls.Config{
-		Certificates:          []tls.Certificate{serverCert},
-		ClientAuth:            tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.RequireAnyClientCert, // Any Client Cert is OK in terms of what the go TLS package checks, further validation, e.g. if the cert belongs to a registered device, is performed in the VerifyPeerCertificate function
 	})
 	if err != nil {
 		panic(err)
@@ -218,7 +218,7 @@ func main() {
 			fmt.Println("Fingerprint", fingerprint)
 		}
 
-		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) (bool) {
+		possibleIDs, err := GetByFingerprintAndVerify(fingerprint, func(device *registrypb.Device) bool {
 			if device.Enabled.Value {
 				fmt.Println(device.Tags)
 				return true
@@ -320,7 +320,7 @@ func handlePublish(p *packet.PublishControlPacket, c net.Conn, deviceID string, 
   input : topic, deviceId string
   output : topicAltered
 */
-func TopicChecker(topic, deviceId string) (string) {
+func TopicChecker(topic, deviceId string) string {
 	state := strings.Split(topic, "/")
 	state[1] = deviceId
 	topic = strings.Join(state, "/")
