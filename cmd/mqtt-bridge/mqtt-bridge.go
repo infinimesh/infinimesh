@@ -31,6 +31,7 @@ import (
 
 	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
+	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
@@ -38,6 +39,7 @@ import (
 	devpb "github.com/infinimesh/proto/node/devices"
 	stpb "github.com/infinimesh/proto/shadow"
 	"github.com/slntopp/mqtt-go/packet"
+	"github.com/slntopp/nocloud-tunnel-mesh/pkg/acme"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"github.com/xeipuuv/gojsonschema"
@@ -45,8 +47,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-
-	inflog "github.com/infinimesh/infinimesh/pkg/log"
 )
 
 func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
@@ -72,6 +72,7 @@ var (
 	shadowHost  string
 
 	RabbitMQConn string
+	acme_path    string
 	tlsCertFile  string
 	tlsKeyFile   string
 
@@ -94,6 +95,7 @@ func init() {
 	viper.SetDefault("SHADOW_HOST", "shadow:8080")
 	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
+	viper.SetDefault("ACME", "")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
 	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
 	viper.SetDefault("DEBUG", false)
@@ -102,6 +104,7 @@ func init() {
 	devicesHost = viper.GetString("DEVICES_HOST")
 	shadowHost = viper.GetString("SHADOW_HOST")
 	RabbitMQConn = viper.GetString("RABBITMQ_CONN")
+	acme_path = viper.GetString("ACME")
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 	debug = viper.GetBool("DEBUG")
@@ -113,7 +116,16 @@ func main() {
 	}()
 
 	log.Info("Starting MQTT Bridge")
-	serverCert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
+
+	var serverCert tls.Certificate
+	var err error
+	if acme_path != "" {
+		serverCert, err = acme.Load(acme_path)
+	} else {
+		//openssl req -new -newkey rsa:4096 -x509 -sha256 -days 30 -nodes -out server.crt -keyout server.key
+		serverCert, err = tls.LoadX509KeyPair("/cert/tls.crt", "/cert/tls.key")
+	}
+
 	if err != nil {
 		log.Fatal("Error loading server certificate", zap.Error(err))
 	}
