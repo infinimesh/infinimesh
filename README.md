@@ -54,7 +54,7 @@ Source: <https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s>
 
 ### Generating proto files
 
-Clone [proto repo](github.com/infinimesh/proto)
+Clone [proto repo](https://github.com/infinimesh/proto)
 
 Navigate to cloned repo directory and run:
 
@@ -64,7 +64,7 @@ docker run -it \
   ghcr.io/infinimesh/proto/buf:latest
 ```
 
-Right now we keep protos generated only for Go. If you need one of the other languages, add according module to `buf.gen.taml`.
+Right now we keep protos generated only for Go. If you need one of the other languages, add according module to `buf.gen.yaml`.
 
 PRs are as always welcome.
 
