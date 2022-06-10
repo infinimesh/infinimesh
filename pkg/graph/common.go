@@ -94,7 +94,7 @@ func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraph
 
 const getWithAccessLevelRoleAndNS = `
 FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
-GRAPH @permissions SORT path.edges[0].level
+GRAPH @permissions SORT path.edges[0].level DESC
     LET perm = path.edges[0]
 	RETURN MERGE(path.vertices[-1], { access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key }})
 `
