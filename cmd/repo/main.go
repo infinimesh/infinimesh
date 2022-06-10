@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2022 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2021-2022 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import (
 )
 
 var (
+	log *zap.Logger
+
 	port string
 
 	arangodbHost string
@@ -48,6 +50,8 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
+
+	log = logger.NewLogger()
 
 	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("DB_HOST", "db:8529")
@@ -71,10 +75,6 @@ func init() {
 }
 
 func main() {
-	log, err := logger.NewProdOrDev()
-	if err != nil {
-		panic(err)
-	}
 	defer func() {
 		_ = log.Sync()
 	}()

@@ -32,6 +32,8 @@ import (
 )
 
 var (
+	log *zap.Logger
+
 	port         string
 	redisHost    string
 	RabbitMQConn string
@@ -39,6 +41,8 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
+
+	log = logger.NewLogger()
 
 	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
@@ -50,10 +54,6 @@ func init() {
 }
 
 func main() {
-	log, err := logger.NewProdOrDev()
-	if err != nil {
-		panic(err)
-	}
 	defer func() {
 		_ = log.Sync()
 	}()

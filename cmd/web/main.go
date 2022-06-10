@@ -45,11 +45,7 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
-	Log, err := logger.NewProdOrDev()
-	if err != nil {
-		panic(err)
-	}
-	log = Log
+	log = logger.NewLogger()
 
 	viper.SetDefault("CORS_ALLOWED", []string{"*"})
 	viper.SetDefault("APISERVER_HOST", "proxy:8000")

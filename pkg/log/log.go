@@ -1,48 +1,41 @@
-//--------------------------------------------------------------------------
-// Copyright 2018 infinimesh
-// www.infinimesh.io
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//--------------------------------------------------------------------------
+/*
+Copyright © 2021-2022 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package log
 
 import (
-	"io/ioutil"
-	"strings"
+	"os"
 
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// NewProdOrDev returns a Prod logger if the application is running in Docker,
-// otherwise it returns a Dev logger.
-func NewProdOrDev() (log *zap.Logger, err error) {
-	if runningInDocker() {
-		return zap.NewProduction()
-	} else {
-		return zap.NewDevelopment()
-	}
-}
+func NewLogger() (log *zap.Logger) {
+	viper.SetDefault("LOG_LEVEL", 0)
+	level := viper.GetInt("LOG_LEVEL")
 
-// TODO Will this work with CRI-O, rkt and other container runtimes beside docker?
-func runningInDocker() bool {
-	f, err := ioutil.ReadFile("/proc/1/cgroup")
-	if err != nil {
-		return false
-	}
+	atom := zap.NewAtomicLevel()
+	atom.SetLevel(zapcore.Level(level))
 
-	if strings.Contains(string(f), "docker") {
-		return true
-	}
-	return false
+	encoderCfg := zap.NewProductionEncoderConfig()
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	return zap.New(zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderCfg),
+		zapcore.Lock(os.Stdout),
+		atom,
+	))
 }
