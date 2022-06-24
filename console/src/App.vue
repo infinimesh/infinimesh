@@ -43,6 +43,7 @@ const theme = computed(() => {
 
 const watermark = ref(false)
 
+let timeout = 1000
 const axios = inject("axios");
 function loadConsoleServices() {
   axios
@@ -54,7 +55,7 @@ function loadConsoleServices() {
       console.error(err);
       setTimeout(() => {
         loadConsoleServices()
-      }, 1000)
+      }, timeout < 30000 ? timeout += 1000 : timeout)
     });
 }
 loadConsoleServices()
