@@ -8,7 +8,7 @@
       </n-grid-item>
       <n-grid-item span="0 600:2 700:4 1000:12 1400:14"> </n-grid-item>
       <n-grid-item span="24 300:12 500:7 600:6 700:5 1000:4 1400:3">
-        <n-button strong secondary round type="info" @click="emit('refresh')">
+        <n-button strong secondary round type="info" @click="handleRefresh">
           <template #icon>
             <n-icon>
               <refresh-outline />
@@ -37,4 +37,8 @@ const store = useDevicesStore();
 const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
 
 store.fetchDevices(true, true);
+
+function handleRefresh() {
+  store.fetchDevices(true);
+}
 </script>
