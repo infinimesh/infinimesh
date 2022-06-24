@@ -37,20 +37,22 @@ You can reach out to the community via [Slack](https://launchpass.com/infinimesh
 
 ### Local development installation
 
-We have built an automated local development setup based on microk8s.
-For Ubuntu please use:
+We have built an automated local development setup based on Docker.
 
-```shell
-bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-ubuntu.sh)
-```
+1. Add this entries to `/etc/hosts`:
 
-For OSX please use:
+  ```hosts
+  127.0.0.1 api.infinimesh.local 
+  127.0.0.1 console.infinimesh.local
+  127.0.0.1 traefik.infinimesh.local
+  127.0.0.1 rbmq.infinimesh.local
+  127.0.0.1 db.infinimesh.local
+  127.0.0.1 media.infinimesh.local
+  127.0.0.1 mqtt.infinimesh.local
+  ```
 
-```shell
-bash <(curl -s https://raw.githubusercontent.com/infinimesh/infinimesh/master/hack/microk8s/infinimesh-setup-osx.sh)
-```
-
-Source: <https://github.com/infinimesh/infinimesh/tree/master/hack/microk8s>
+2. Close this repo
+3. Run `docker compose up`
 
 ### Generating proto files
 
