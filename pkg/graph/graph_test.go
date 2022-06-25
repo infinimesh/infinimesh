@@ -1113,8 +1113,6 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 // Plugins Test
 
 func TestPluginsRepo(t *testing.T) {
-	t.Log("Creating sample account")
-
 	name := randomdata.SillyName()
 	desc := randomdata.Letters(256)
 	this := &plugins.Plugin{
@@ -1130,10 +1128,8 @@ func TestPluginsRepo(t *testing.T) {
 	}
 
 	this.Kind = plugins.PluginKind_EMBEDDED
-	this.Conf = &plugins.Plugin_EmbeddedConf{
-		EmbeddedConf: &plugins.EmbededPluginConf{
-			FrameUrl: randomdata.Letters(16),
-		},
+	this.EmbeddedConf = &plugins.EmbededPluginConf{
+		FrameUrl: randomdata.Letters(16),
 	}
 
 	this, err = plug_ctrl.Create(rootCtx, this)
@@ -1141,7 +1137,7 @@ func TestPluginsRepo(t *testing.T) {
 		t.Fatalf("Error creating Plugin: %v", err)
 	}
 
-	plugs, err := plug_ctrl.List(rootCtx, &plugins.EmptyMessage{})
+	plugs, err := plug_ctrl.List(rootCtx, &plugins.ListRequest{})
 	if err != nil {
 		t.Fatalf("Error listing plugins: %v", err)
 	}
