@@ -12,7 +12,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/handlers v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/infinimesh/proto v0.0.0-20220625151555-c51ae9f98727
+	github.com/infinimesh/proto v0.0.0-20220625192603-196938020d01
 	github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b
 	github.com/spf13/viper v1.12.0
 	github.com/streadway/amqp v1.0.0
