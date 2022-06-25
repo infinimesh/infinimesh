@@ -94,3 +94,27 @@ func ValidatePluginDocument(p *pb.Plugin) string {
 
 	return ""
 }
+
+func (c *PluginsController) Create(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+	log := c.log.Named("Created")
+
+	if !ValidateRoot(ctx) {
+		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to create Plugin")
+	}
+
+	msg := ValidatePluginDocument(plug)
+	if msg != "" {
+		return nil, status.Error(codes.InvalidArgument, msg)
+	}
+
+	plugin := Plugin{Plugin: plug}
+	meta, err := c.col.CreateDocument(ctx, plugin)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error while creating Plugin in DB: %v", err)
+	}
+	plugin.Uuid = meta.ID.Key()
+	plugin.DocumentMeta = meta
+
+	log.Debug("Created", zap.Any("plugin", plugin))
+	return plugin.Plugin, nil
+}
