@@ -30,6 +30,7 @@ import (
 	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/devices"
 	"github.com/infinimesh/proto/node/namespaces"
+	"github.com/infinimesh/proto/plugins"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -42,9 +43,10 @@ var (
 	arangodbHost string
 	arangodbCred string
 
-	ctrl     *AccountsController
-	ns_ctrl  *NamespacesController
-	dev_ctrl *DevicesController
+	ctrl      *AccountsController
+	ns_ctrl   *NamespacesController
+	dev_ctrl  *DevicesController
+	plug_ctrl *PluginsController
 
 	rootCtx context.Context
 
@@ -72,6 +74,8 @@ func init() {
 
 	ns_ctrl = NewNamespacesController(log, db)
 	dev_ctrl = NewDevicesController(log, db)
+
+	plug_ctrl = NewPluginsController(log, db)
 
 	md := metadata.New(map[string]string{
 		inf.INFINIMESH_ACCOUNT_CLAIM: schema.ROOT_ACCOUNT_KEY,
@@ -1070,3 +1074,76 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 // 		t.Fatalf("Error deleting nodes: %v", err)
 // 	}
 // }
+
+// Plugins Test
+
+func TestPluginsRepo(t *testing.T) {
+	t.Log("Creating sample account")
+
+	name := randomdata.SillyName()
+	desc := randomdata.Letters(256)
+	this := &plugins.Plugin{
+		Title:       name,
+		Description: desc,
+		Public:      false,
+		Kind:        plugins.PluginKind_UNKNOWN,
+	}
+
+	_, err := plug_ctrl.Create(rootCtx, this)
+	if err == nil {
+		t.Fatal("Creation must have failed, because kind is unknown, but error is nil")
+	}
+
+	this.Kind = plugins.PluginKind_EMBEDDED
+	this.Conf = &plugins.Plugin_EmbeddedConf{
+		EmbeddedConf: &plugins.EmbededPluginConf{
+			FrameUrl: randomdata.Letters(16),
+		},
+	}
+
+	this, err = plug_ctrl.Create(rootCtx, this)
+	if err != nil {
+		t.Fatalf("Error creating Plugin: %v", err)
+	}
+
+	plugs, err := plug_ctrl.List(rootCtx, &plugins.EmptyMessage{})
+	if err != nil {
+		t.Fatalf("Error listing plugins: %v", err)
+	}
+
+	found := false
+	for _, plug := range plugs.Pool {
+		if plug.Uuid == this.Uuid {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("Freshly created plugin not found in pool")
+	}
+
+	that := &(*this)
+	that.Title = randomdata.SillyName()
+	that.Public = true
+	that, err = plug_ctrl.Update(rootCtx, that)
+	if err != nil {
+		t.Fatalf("Error updating plugin: %v", err)
+	}
+
+	if this.Title == that.Title {
+		t.Fatal("Plugin Title didn't update")
+	}
+	if !that.Public {
+		t.Fatal("Plugin <public> property didn't update")
+	}
+
+	that, err = plug_ctrl.Get(rootCtx, that)
+	if err != nil {
+		t.Fatalf("Couldn't get Plugin: %v", err)
+	}
+
+	_, err = plug_ctrl.Delete(rootCtx, that)
+	if err != nil {
+		t.Fatalf("Couldn't delete Plugin: %v", err)
+	}
+}

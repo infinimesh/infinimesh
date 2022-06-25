@@ -20,44 +20,51 @@ var (
 )
 
 type infinimeshClaim string
+
 const (
 	InfinimeshAccount infinimeshClaim = "requestorID"
 )
 
 const (
-	ROOT_ACCOUNT_KEY = "infinimesh"
+	ROOT_ACCOUNT_KEY   = "infinimesh"
 	ROOT_NAMESPACE_KEY = "infinimesh"
 )
 
 const (
 	ACCOUNTS_COL = "Accounts"
-	ACC2NS = ACCOUNTS_COL + "2" + NAMESPACES_COL
-	ACC2CRED = ACCOUNTS_COL + "2" + CREDENTIALS_COL
+	ACC2NS       = ACCOUNTS_COL + "2" + NAMESPACES_COL
+	ACC2CRED     = ACCOUNTS_COL + "2" + CREDENTIALS_COL
 )
 
 const (
 	NAMESPACES_COL = "Namespaces"
-	NS2ACC = NAMESPACES_COL + "2" + ACCOUNTS_COL
+	NS2ACC         = NAMESPACES_COL + "2" + ACCOUNTS_COL
 )
 
 const (
-	CREDENTIALS_COL = "Credentials"
+	CREDENTIALS_COL      = "Credentials"
 	CREDENTIALS_EDGE_COL = ACCOUNTS_COL + "2" + CREDENTIALS_COL
 )
 
 const (
 	DEVICES_COL = "Devices"
-	NS2DEV = NAMESPACES_COL + "2" + DEVICES_COL
+	NS2DEV      = NAMESPACES_COL + "2" + DEVICES_COL
+)
+
+const (
+	PLUGINS_COL = "Plugins"
+	NS2PLUG     = NAMESPACES_COL + "2" + PLUGINS_COL
 )
 
 type InfinimeshGraphSchema struct {
-	Name string
+	Name  string
 	Edges [][]string
 }
 
 var COLLECTIONS = []string{
 	ACCOUNTS_COL, NAMESPACES_COL,
 	CREDENTIALS_COL, DEVICES_COL,
+	PLUGINS_COL,
 }
 
 var PERMISSIONS_GRAPH = InfinimeshGraphSchema{
