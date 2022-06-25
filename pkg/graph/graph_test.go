@@ -1153,7 +1153,14 @@ func TestPluginsRepo(t *testing.T) {
 		t.Fatal("Freshly created plugin not found in pool")
 	}
 
-	that := &(*this)
+	that := &plugins.Plugin{
+		Uuid:         this.Uuid,
+		Title:        this.Title,
+		Description:  this.Description,
+		Public:       this.Public,
+		Kind:         this.Kind,
+		EmbeddedConf: this.EmbeddedConf,
+	}
 	that.Title = randomdata.SillyName()
 	that.Public = true
 	that, err = plug_ctrl.Update(rootCtx, that)
