@@ -19,7 +19,10 @@ import (
 	"context"
 
 	"github.com/arangodb/go-driver"
+	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/proto/node/access"
@@ -170,3 +173,28 @@ func (c *PluginsController) List(ctx context.Context, r *pb.ListRequest) (*pb.Pl
 	}, nil
 }
 
+func (c *PluginsController) Update(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+	log := c.log.Named("Update")
+
+	if !ValidateRoot(ctx) {
+		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to update Plugin")
+	}
+
+	msg := ValidatePluginDocument(plug)
+	if msg != "" {
+		return nil, status.Error(codes.InvalidArgument, msg)
+	}
+
+	if plug.Uuid == "" {
+		return nil, status.Error(codes.InvalidArgument, "No Plugin UUID has been provided")
+	}
+
+	plugin := Plugin{Plugin: plug}
+	_, err := c.col.ReplaceDocument(ctx, plug.Uuid, plugin)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error while updating Plugin in DB: %v", err)
+	}
+
+	log.Debug("Updated", zap.Any("plugin", plugin))
+	return plugin.Plugin, nil
+}
