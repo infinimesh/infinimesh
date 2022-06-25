@@ -264,13 +264,13 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 	return err
 }
 
-func AccessLevel(ctx context.Context, db driver.Database, account *Account, node InfinimeshGraphNode) (bool, access.Level) {
-	if account.ID() == node.ID() {
+func AccessLevel(ctx context.Context, db driver.Database, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level) {
+	if requestor.ID() == node.ID() {
 		return true, access.Level_ROOT
 	}
-	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node GRAPH @permissions RETURN path.edges[0].level`
+	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @requestor TO @node GRAPH @permissions RETURN path.edges[0].level`
 	c, err := db.Query(ctx, query, map[string]interface{}{
-		"account":     account.ID(),
+		"requestor":   requestor.ID(),
 		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	})
