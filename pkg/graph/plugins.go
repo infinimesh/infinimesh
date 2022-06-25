@@ -70,3 +70,13 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 		log: log.Named("PluginsController"), col: col, db: db,
 	}
 }
+
+func ValidateRoot(ctx context.Context) bool {
+	rootV := ctx.Value(inf.InfinimeshRootCtxKey)
+	if rootV == nil {
+		return false
+	}
+
+	root, ok := rootV.(bool)
+	return ok && root
+}
