@@ -25,7 +25,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func MakeDBConnection(log *zap.Logger, host, cred string) (driver.Database) {
+func MakeDBConnection(log *zap.Logger, host, cred string) driver.Database {
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{"http://" + cred + "@" + host},
 	})
@@ -44,13 +44,13 @@ func MakeDBConnection(log *zap.Logger, host, cred string) (driver.Database) {
 	log.Debug("Instantiated DB client", zap.Any("client", c))
 
 	db_connect_attempts := 0
-	db_connect:
+db_connect:
 	log.Info("Trying to connect to DB")
 	db, err := c.Database(context.TODO(), schema.DB_NAME)
 	if err != nil {
 		db_connect_attempts++
-		log.Error("Failed to connect DB", zap.Error(err), zap.Int("attempts", db_connect_attempts), zap.Int("next_attempt", db_connect_attempts * 5))
-		time.Sleep(time.Duration(db_connect_attempts * 5) * time.Second)
+		log.Error("Failed to connect DB", zap.Error(err), zap.Int("attempts", db_connect_attempts), zap.Int("next_attempt", db_connect_attempts*5))
+		time.Sleep(time.Duration(db_connect_attempts*5) * time.Second)
 		goto db_connect
 	}
 	return db
