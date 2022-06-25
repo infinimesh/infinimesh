@@ -158,12 +158,14 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 	var r []*nspb.Namespace
 	for {
 		var ns nspb.Namespace
-		_, err := cr.ReadDocument(ctx, &ns)
+		meta, err := cr.ReadDocument(ctx, &ns)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			return nil, err
 		}
+		ns.Uuid = meta.ID.Key()
+
 		log.Debug("Got document", zap.Any("namespace", &ns))
 		r = append(r, &ns)
 	}

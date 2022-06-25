@@ -313,16 +313,18 @@ func (c *DevicesController) List(ctx context.Context, _ *pb.EmptyMessage) (*devp
 	var r []*devpb.Device
 	for {
 		var dev devpb.Device
-		_, err := cr.ReadDocument(ctx, &dev)
+		meta, err := cr.ReadDocument(ctx, &dev)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			log.Warn("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
+		dev.Uuid = meta.ID.Key()
 		if dev.Access.Level < access.Level_MGMT {
 			dev.Certificate = nil
 		}
+
 		log.Debug("Got document", zap.Any("device", &dev))
 		r = append(r, &dev)
 	}

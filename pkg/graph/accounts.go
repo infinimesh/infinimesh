@@ -191,13 +191,15 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 	var r []*accpb.Account
 	for {
 		var acc accpb.Account
-		_, err := cr.ReadDocument(ctx, &acc)
+		meta, err := cr.ReadDocument(ctx, &acc)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
 			log.Warn("Error unmarshalling Document", zap.Error(err))
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
+		acc.Uuid = meta.ID.Key()
+
 		log.Debug("Got document", zap.Any("account", &acc))
 		r = append(r, &acc)
 	}
