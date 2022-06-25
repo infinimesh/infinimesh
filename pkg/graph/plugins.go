@@ -118,3 +118,55 @@ func (c *PluginsController) Create(ctx context.Context, plug *pb.Plugin) (*pb.Pl
 	log.Debug("Created", zap.Any("plugin", plugin))
 	return plugin.Plugin, nil
 }
+
+const listAllPluginsQuery = `FOR plug IN @@plugins RETURN plug`
+const listAllPublicPluginsQuery = `
+FOR plug IN @@plugins
+FILTER plug.public
+    RETURN plug
+`
+
+func (c *PluginsController) List(ctx context.Context, r *pb.ListRequest) (*pb.Plugins, error) {
+	log := c.log.Named("List")
+
+	var cr driver.Cursor
+	var err error
+
+	if ValidateRoot(ctx) {
+		cr, err = c.db.Query(ctx, listAllPluginsQuery, map[string]interface{}{
+			"@plugins": schema.PLUGINS_COL,
+		})
+
+	} else if r.Namespace == nil || *r.Namespace != "" {
+		cr, err = ListQuery(ctx, log, c.db, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL, 1)
+	} else {
+		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
+			"@plugins": schema.PLUGINS_COL,
+		})
+	}
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+	}
+	defer cr.Close()
+
+	var res []*pb.Plugin
+	for {
+		var plug pb.Plugin
+		meta, err := cr.ReadDocument(ctx, &plug)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		plug.Uuid = meta.ID.Key()
+
+		log.Debug("Got document", zap.Any("plugin", &plug))
+		res = append(res, &plug)
+	}
+
+	return &pb.Plugins{
+		Pool: res,
+	}, nil
+}
+
