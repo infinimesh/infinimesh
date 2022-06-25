@@ -80,3 +80,17 @@ func ValidateRoot(ctx context.Context) bool {
 	root, ok := rootV.(bool)
 	return ok && root
 }
+
+func ValidatePluginDocument(p *pb.Plugin) string {
+	if p.Title == "" {
+		return "Title cannot be empty"
+	}
+
+	if p.Kind == pb.PluginKind_UNKNOWN {
+		return "Kind can't be Unknown"
+	} else if p.Kind == pb.PluginKind_EMBEDDED && p.EmbeddedConf == nil {
+		return "Kind is set to Embedded, but no conf provided"
+	}
+
+	return ""
+}
