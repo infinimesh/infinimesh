@@ -27,6 +27,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
+	"github.com/infinimesh/proto/plugins"
 	shadowpb "github.com/infinimesh/proto/shadow"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -59,7 +60,7 @@ func init() {
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow")
+	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow,plugins")
 
 	port = viper.GetString("PORT")
 
@@ -142,6 +143,12 @@ func main() {
 		}
 		client := shadowpb.NewShadowServiceClient(conn)
 		pb.RegisterShadowServiceServer(s, NewShadowAPI(log, client))
+	}
+
+	if _, ok := services["plugins"]; ok {
+		log.Info("Registering plugins service")
+		plug_ctrl := graph.NewPluginsController(log, db)
+		plugins.RegisterPluginsServiceServer(s, plug_ctrl)
 	}
 
 	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))

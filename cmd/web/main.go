@@ -23,6 +23,7 @@ import (
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	pb "github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/plugins"
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
 
 	"github.com/gorilla/handlers"
@@ -103,6 +104,12 @@ func main() {
 	err = pb.RegisterShadowServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
 	if err != nil {
 		log.Fatal("Failed to register ShadowService gateway", zap.Error(err))
+	}
+
+	log.Info("Registering Plugins Service")
+	err = plugins.RegisterPluginsServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register PluginsService gateway")
 	}
 
 	log.Info("Registering Console Services Service")
