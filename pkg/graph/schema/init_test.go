@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	log *zap.Logger
+	log          *zap.Logger
 	arangodbHost string
 	arangodbCred string
 )
