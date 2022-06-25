@@ -117,7 +117,7 @@ func main() {
 		serverCert, err = acme.Load(acme_path)
 	} else {
 		//openssl req -new -newkey rsa:4096 -x509 -sha256 -days 30 -nodes -out server.crt -keyout server.key
-		serverCert, err = tls.LoadX509KeyPair("/cert/tls.crt", "/cert/tls.key")
+		serverCert, err = tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
 	}
 
 	if err != nil {
