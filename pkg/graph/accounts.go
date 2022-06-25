@@ -135,6 +135,11 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	claims[inf.INFINIMESH_ACCOUNT_CLAIM] = account.Key
 	claims["exp"] = req.Exp
 
+	if req.Inf != nil && *req.Inf {
+		ok, lvl := AccessLevel(ctx, c.db, &account, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY))
+		claims[inf.INFINIMESH_ROOT_CLAIM] = ok && lvl > access.Level_ADMIN
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token_string, err := token.SignedString(c.SIGNING_KEY)
 	if err != nil {

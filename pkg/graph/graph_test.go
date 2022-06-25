@@ -81,6 +81,7 @@ func init() {
 		inf.INFINIMESH_ACCOUNT_CLAIM: schema.ROOT_ACCOUNT_KEY,
 	})
 	rootCtx = metadata.NewIncomingContext(context.Background(), md)
+	rootCtx = context.WithValue(rootCtx, inf.InfinimeshRootCtxKey, true)
 	rootCtx = context.WithValue(rootCtx, inf.InfinimeshAccountCtxKey, schema.ROOT_ACCOUNT_KEY)
 }
 
@@ -92,6 +93,40 @@ func CompareAccounts(a, b *accounts.Account) bool {
 }
 
 // AccountsController Tests
+
+func TestAuthorizeAsRoot(t *testing.T) {
+	i := true
+	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
+		Auth: &accounts.Credentials{
+			Type: "standard",
+			Data: []string{"infinimesh", viper.GetString("INF_DEFAULT_ROOT_PASS")},
+		},
+		Inf: &i,
+	})
+	if err != nil {
+		t.Fatalf("Error authorizing with root credentials: %v", err)
+	}
+
+	token, _ := jwt.Parse(res.Token, func(t *jwt.Token) (interface{}, error) { return []byte("placeholder"), nil })
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		t.Fatal("Error parsing token claims")
+	}
+
+	root := claims[inf.INFINIMESH_ROOT_CLAIM]
+	if root == nil {
+		t.Fatal("Root claim is nil")
+	}
+
+	r, ok := root.(bool)
+	if !ok {
+		t.Fatal("Root claim is not bool")
+	}
+
+	if !r {
+		t.Fatal("Root account got false root claim")
+	}
+}
 
 func TestNewBlankAccountDocument(t *testing.T) {
 	uuid := randomdata.StringNumber(10, "-")

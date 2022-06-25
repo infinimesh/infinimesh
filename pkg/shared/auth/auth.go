@@ -99,6 +99,13 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
 	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, uuid)
 
+	if root := token[infinimesh.INFINIMESH_ROOT_CLAIM]; root != nil {
+		r, ok := root.(bool)
+		if ok {
+			ctx = context.WithValue(ctx, infinimesh.InfinimeshRootCtxKey, r)
+		}
+	}
+
 	return ctx, nil
 }
 
