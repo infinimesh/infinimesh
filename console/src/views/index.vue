@@ -8,8 +8,6 @@ import { useRouter } from "vue-router";
 const nss = useNSStore()
 const router = useRouter();
 
-console.log(nss.namespaces, nss.selected)
-
 let ns = nss.namespaces[nss.selected]
 if (!ns || !ns.plugin) {
     console.log("No Namespace selected or Namespace has no Plugins")

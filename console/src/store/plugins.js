@@ -30,6 +30,9 @@ export const usePluginsStore = defineStore("plugins", {
 
       this.loading = false;
     },
+    async get(uuid) {
+      return as.http.get(`/plugins/${uuid}`);
+    },
     async create(plugin) {
       return as.http.put("/plugins", plugin);
     },
