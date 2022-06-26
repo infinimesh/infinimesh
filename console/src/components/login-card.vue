@@ -56,13 +56,19 @@ async function login() {
   error.value = false;
   bar.start();
 
+  const data = {
+    auth: {
+      type: "standard",
+      data: [username.value, password.value],
+    },
+  }
+
+  if (store.dev) {
+    data.inf = true
+  }
+
   axios
-    .post(store.base_url + "/token", {
-      auth: {
-        type: "standard",
-        data: [username.value, password.value],
-      },
-    })
+    .post(store.base_url + "/token", data)
     .then((res) => {
       success.value = true;
       store.token = res.data.token;

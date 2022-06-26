@@ -61,6 +61,14 @@ const routes = [
         meta: {
           title: "Media",
         },
+      },
+      {
+        path: "plugins",
+        name: "Plugins",
+        component: () => import("@/views/dashboard/Plugins.vue"),
+        meta: {
+          title: "Plugins"
+        }
       }
     ],
   },
