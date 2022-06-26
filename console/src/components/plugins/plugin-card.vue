@@ -13,14 +13,13 @@
                     </template>
                     {{ kinds[plugin.kind].desc }}
                 </n-tooltip>
-                <n-tooltip trigger="hover" @click="handleUUIDClicked">
+                <n-tooltip trigger="hover" @click="handleToggle" v-if="!plugin.public">
                     <template #trigger>
-                        <n-tag :color="{ textColor: '#52c41a', borderColor: '#52c41a' }" style="margin-left: 5px"
-                            size="large" round @click="handleUUIDClicked">
-                            {{ plugin.uuid_short }}
-                        </n-tag>
+                        <n-icon size="2vh" color="#f2c97d" @click="handleToggle">
+                            <lock-closed-outline />
+                        </n-icon>
                     </template>
-                    {{ plugin.uuid }}
+                    This Plugin is Private
                 </n-tooltip>
             </template>
 
@@ -36,6 +35,15 @@
             </template>
 
             <template #footer>
+                <n-tooltip trigger="hover" @click="handleUUIDClicked">
+                    <template #trigger>
+                        <n-tag :color="{ textColor: '#52c41a', borderColor: '#52c41a' }" style="margin-left: 5px"
+                            size="large" round @click="handleUUIDClicked">
+                            {{ plugin.uuid_short }}
+                        </n-tag>
+                    </template>
+                    {{ plugin.uuid }}
+                </n-tooltip>
                 <vue-markdown-it :source='plugin.description' />
             </template>
 
@@ -77,7 +85,7 @@ import {
     NButton,
     NPopconfirm,
 } from "naive-ui";
-import { AddOutline, ImageOutline } from "@vicons/ionicons5"
+import { AddOutline, ImageOutline, LockClosedOutline } from "@vicons/ionicons5"
 
 import VueMarkdownIt from 'vue3-markdown-it';
 
