@@ -2,7 +2,7 @@ import { nextTick } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { useAppStore } from "@/store/app";
 
-const BASE_TITLE = 'infinimesh';
+const BASE_TITLE = "infinimesh";
 const routes = [
   {
     path: "/login",
@@ -16,7 +16,7 @@ const routes = [
   {
     path: "/",
     name: "Root",
-    redirect: { path: "/dashboard/devices" },
+    component: () => import("@/views/index.vue"),
     meta: {
       requiresAuth: true,
     },
@@ -31,12 +31,20 @@ const routes = [
     },
     children: [
       {
+        path: "",
+        name: "DashboardMain",
+        component: () => import("@/views/dashboard/index.vue"),
+        meta: {
+          title: "Dashboard",
+        },
+      },
+      {
         path: "devices",
         name: "Devices",
         component: () => import("@/views/dashboard/Devices.vue"),
         meta: {
           title: "Devices",
-        }
+        },
       },
       {
         path: "accounts",
@@ -44,7 +52,7 @@ const routes = [
         component: () => import("@/views/dashboard/Accounts.vue"),
         meta: {
           title: "Accounts",
-        }
+        },
       },
       {
         path: "namespaces",
@@ -67,9 +75,9 @@ const routes = [
         name: "Plugins",
         component: () => import("@/views/dashboard/Plugins.vue"),
         meta: {
-          title: "Plugins"
-        }
-      }
+          title: "Plugins",
+        },
+      },
     ],
   },
 ];

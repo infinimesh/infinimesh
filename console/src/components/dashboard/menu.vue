@@ -9,7 +9,7 @@ import { RouterLink, useRoute } from "vue-router";
 import { NMenu } from "naive-ui";
 
 import { renderIcon } from "@/utils";
-import { HardwareChipOutline, PeopleOutline, GitNetworkOutline, ImagesOutline, ExtensionPuzzleOutline } from "@vicons/ionicons5";
+import { GridOutline, HardwareChipOutline, PeopleOutline, GitNetworkOutline, ImagesOutline, ExtensionPuzzleOutline } from "@vicons/ionicons5";
 
 import { useAppStore } from "@/store/app"
 import { storeToRefs } from "pinia"
@@ -54,6 +54,11 @@ const services = computed(() => {
 })
 
 const menuOptions = ref([
+  {
+    label: renderLabelLink("DashboardMain", "Dashboard"),
+    key: "Dashboard",
+    icon: renderIcon(GridOutline),
+  },
   {
     label: renderLabelLink("Devices"),
     key: "Devices",
