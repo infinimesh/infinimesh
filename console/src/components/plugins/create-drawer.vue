@@ -23,6 +23,16 @@
                         <n-form-item label="Title" path="title">
                             <n-input v-model:value="model.title" placeholder="Make it bright" />
                         </n-form-item>
+                        <n-form-item label="Public" path="public">
+                            <n-switch v-model:value="model.public">
+                                <template #checked>
+                                    Will be available to all platform namespaces
+                                </template>
+                                <template #unchecked>
+                                    Will be only available to partiular namespaces
+                                </template>
+                            </n-switch>
+                        </n-form-item>
                         <n-form-item label="Logo" path="logo">
                             <n-input v-model:value="model.logo" placeholder="App/Plugin Logo image URL" />
                         </n-form-item>
@@ -85,9 +95,10 @@
 import { ref, watch } from "vue"
 import {
     useLoadingBar, NButton, NIcon, NDrawer, NDrawerContent, NSpace, NForm, NFormItem, NInput, NAlert,
-    NGrid, NGridItem, NDivider, NRadioGroup, NRadioButton
+    NGrid, NGridItem, NDivider, NRadioGroup, NRadioButton, NSwitch
 } from 'naive-ui';
 import { AddOutline, LogoMarkdown, BookmarkOutline } from '@vicons/ionicons5';
+
 import { usePluginsStore } from "@/store/plugins"
 
 import PluginCard from "./plugin-card.vue";
@@ -106,7 +117,7 @@ const model = ref({
     title: "Lorem Ipsum",
     description: "",
     kind: "EMBEDDED",
-    public: false,
+    public: true,
     logo: "",
     embedded_conf: {
         frame: ""
@@ -121,7 +132,7 @@ function reset() {
         title: "Lorem Ipsum",
         description: "",
         kind: "EMBEDDED",
-        public: false,
+        public: true,
         logo: "",
         embedded_conf: {
             frame: ""
