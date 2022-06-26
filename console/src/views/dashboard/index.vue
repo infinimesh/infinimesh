@@ -67,7 +67,7 @@ import { GitNetworkOutline, ExtensionPuzzleOutline, OpenOutline } from "@vicons/
 import NsSelector from "@/components/core/ns-selector.vue";
 import { useNSStore } from '@/store/namespaces';
 import { usePluginsStore } from "@/store/plugins";
-import { useAppStore } from "@/store/app";
+import { baseURL, useAppStore } from "@/store/app";
 
 const as = useAppStore()
 const nss = useNSStore()
@@ -97,7 +97,7 @@ watch(ns, async () => {
 
 const src = computed(() => {
     if (plugin.value.state != undefined) return ""
-    const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme }
+    const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme, api: baseURL }
     const src = `${plugin.value.embeddedConf.frameUrl}?a=${btoa(JSON.stringify(params))}`
     return src
 })
