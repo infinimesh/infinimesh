@@ -3,10 +3,12 @@
     <div v-else>
         <n-grid cols="1 s:1 m:2 l:3 xl:4 2xl:4" ref="grid" responsive="screen" style="margin-top: 10px">
             <n-grid-item v-for="(col, i) in pool" :key="i">
-                <plugin-card v-for="plugin in col" :key="plugin.uuid" :plugin="plugin" />
+                <plugin-card v-for="plugin in col" :key="plugin.uuid" :plugin="plugin"
+                    :show-modal-handler="ShowUseModal" />
             </n-grid-item>
         </n-grid>
     </div>
+    <plugin-use :show="showUseModal" @close="showUseModal = false" :plugin="usePlugin" />
 </template>
 
 <script setup>
@@ -14,6 +16,7 @@ import { ref, computed } from "vue";
 import { NEmpty, NGrid, NGridItem, } from "naive-ui";
 
 import PluginCard from "./plugin-card.vue";
+import PluginUse from "./use-modal.vue"
 
 const grid = ref({ responsiveCols: 0 });
 
@@ -47,4 +50,12 @@ const pool = computed(() => {
         return [];
     }
 });
+
+const showUseModal = ref(false)
+const usePlugin = ref({})
+function ShowUseModal(plugin) {
+    console.log(plugin)
+    usePlugin.value = plugin
+    showUseModal.value = true
+}
 </script>

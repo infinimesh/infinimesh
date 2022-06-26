@@ -1,6 +1,5 @@
 <template>
     <n-spin :show="patching">
-
         <n-card hoverable :title="plugin.title" :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
             <template #header-extra>
                 <n-tooltip trigger="hover" @click="handleUUIDClicked">
@@ -13,9 +12,9 @@
                     </template>
                     {{ kinds[plugin.kind].desc }}
                 </n-tooltip>
-                <n-tooltip trigger="hover" @click="handleToggle" v-if="!plugin.public">
+                <n-tooltip trigger="hover" v-if="!plugin.public">
                     <template #trigger>
-                        <n-icon size="2vh" color="#f2c97d" @click="handleToggle">
+                        <n-icon size="2vh" color="#f2c97d">
                             <lock-closed-outline />
                         </n-icon>
                     </template>
@@ -49,7 +48,8 @@
 
             <template #action v-if="!props.preview">
                 <n-space justify="start">
-                    <n-button strong secondary round type="success" v-if="plugin.kind != 'UNKNOWN'">
+                    <n-button strong secondary round type="success" v-if="plugin.kind != 'UNKNOWN' && !update"
+                        @click="handleUse">
                         <template #icon>
                             <n-icon>
                                 <add-outline />
@@ -58,14 +58,32 @@
                         Use it with your Namespace
                     </n-button>
 
-                    <n-popconfirm @positive-click="handleDelete">
-                        <template #trigger>
-                            <n-button v-if="dev" type="error" round secondary>
-                                Delete
+                    <template v-if="dev">
+
+                        <template v-if="update">
+                            <n-button type="warning" round secondary>
+                                Submit
+                            </n-button>
+                            <n-button type="info" round secondary @click="update = false">
+                                Cancel
                             </n-button>
                         </template>
-                        Are you sure about deleting this plugin?
-                    </n-popconfirm>
+                        <template v-else>
+
+                            <n-button type="warning" round secondary @click="handleUpdate">
+                                Edit
+                            </n-button>
+
+                            <n-popconfirm @positive-click="handleDelete">
+                                <template #trigger>
+                                    <n-button type="error" round secondary>
+                                        Delete
+                                    </n-button>
+                                </template>
+                                Are you sure about deleting this plugin?
+                            </n-popconfirm>
+                        </template>
+                    </template>
                 </n-space>
             </template>
         </n-card>
@@ -108,6 +126,9 @@ const props = defineProps({
     preview: {
         type: Boolean,
         default: false
+    },
+    showModalHandler: {
+        type: Function,
     }
 });
 
@@ -158,4 +179,12 @@ async function handleDelete() {
     patching.value = false
 }
 
+const update = ref(false)
+function handleUpdate() {
+    update.value = true
+}
+
+function handleUse() {
+    props.showModalHandler(plugin.value)
+}
 </script>
