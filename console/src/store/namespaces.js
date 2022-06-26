@@ -14,8 +14,8 @@ export const useNSStore = defineStore("namespaces", {
 
   getters: {
     namespaces_list: (state) => {
-      return Object.values(state.namespaces)
-    }
+      return Object.values(state.namespaces);
+    },
   },
 
   actions: {
@@ -26,25 +26,38 @@ export const useNSStore = defineStore("namespaces", {
         const { data } = await as.http.get("/namespaces");
 
         if (no_cache) {
-          this.namespaces = data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {});
+          this.namespaces = data.namespaces.reduce((r, ns) => {
+            r[ns.uuid] = ns;
+            return r;
+          }, {});
         } else {
-          this.namespaces = { ...this.namespaces, ...data.namespaces.reduce((r, ns) => { r[ns.uuid] = ns; return r }, {})}
+          this.namespaces = {
+            ...this.namespaces,
+            ...data.namespaces.reduce((r, ns) => {
+              r[ns.uuid] = ns;
+              return r;
+            }, {}),
+          };
         }
       } catch (e) {
-        check_token_expired(e, as)
+        check_token_expired(e, as);
       }
       this.loading = false;
     },
     loadJoins(ns) {
-      return as.http.get(`/namespaces/${ns}/joins`)
+      return as.http.get(`/namespaces/${ns}/joins`);
     },
     join(ns, acc, lvl) {
       return as.http.post(`/namespaces/${ns}/join`, {
-        account: acc, access: lvl,
-      })
+        account: acc,
+        access: lvl,
+      });
     },
     create(namespace) {
       return as.http.put("/namespaces", namespace);
+    },
+    update(namespace) {
+      return as.http.patch(`/namespaces/${namespace.uuid}`, namespace);
     },
     deletables(uuid) {
       return as.http.get(`/namespaces/${uuid}/deletables`);
@@ -52,7 +65,7 @@ export const useNSStore = defineStore("namespaces", {
     delete(uuid) {
       delete this.namespaces[uuid];
       return as.http.delete(`/namespaces/${uuid}`);
-    }
+    },
   },
 
   persist: {
