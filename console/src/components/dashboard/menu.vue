@@ -56,7 +56,7 @@ const services = computed(() => {
 const menuOptions = ref([
   {
     label: renderLabelLink("DashboardMain", "Dashboard"),
-    key: "Dashboard",
+    key: "DashboardMain",
     icon: renderIcon(GridOutline),
   },
   {
