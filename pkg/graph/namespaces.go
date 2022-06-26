@@ -143,6 +143,46 @@ func (c *NamespacesController) Get(ctx context.Context, ns *nspb.Namespace) (res
 	return result.Namespace, nil
 }
 
+func (c *NamespacesController) Update(ctx context.Context, ns *nspb.Namespace) (res *nspb.Namespace, err error) {
+	log := c.log.Named("Update")
+	log.Debug("Request received", zap.Any("namespace", ns))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	curr := *NewBlankNamespaceDocument(ns.Uuid)
+	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &curr)
+
+	if err != nil {
+		log.Warn("Can't get Namespaces from DB", zap.String("namespace", ns.Uuid), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Can't get Namespaces from DB")
+	}
+
+	if curr.Access.Level < 3 {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to Update this Namespace")
+	}
+
+	changed := false
+	if ns.Title != "" {
+		curr.Title = ns.Title
+		changed = true
+	}
+
+	if ns.Plugin != nil {
+		curr.Plugin = ns.Plugin
+		changed = true
+	}
+
+	if changed {
+		_, err := c.col.ReplaceDocument(ctx, curr.Uuid, curr)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Error while updating Namespace in DB: %v", err)
+		}
+	}
+
+	return curr.Namespace, nil
+}
+
 func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.Namespaces, error) {
 	log := c.log.Named("List")
 

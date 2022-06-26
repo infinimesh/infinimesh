@@ -576,7 +576,7 @@ func TestSetCredentialsStandard(t *testing.T) {
 
 // NamespacesController Tests
 
-func TestCreateNamespace(t *testing.T) {
+func TestCreateUpdateNamespace(t *testing.T) {
 	title := randomdata.SillyName()
 	nspb, err := ns_ctrl.Create(rootCtx, &namespaces.Namespace{
 		Title: title,
@@ -601,6 +601,18 @@ func TestCreateNamespace(t *testing.T) {
 
 	if _access.Level < access.Level_ADMIN {
 		t.Fatalf("Access level incorrect(%d), must be: %d", _access.Level, access.Level_ADMIN)
+	}
+
+	new, err := ns_ctrl.Update(rootCtx, &namespaces.Namespace{
+		Uuid:  nspb.Uuid,
+		Title: randomdata.SillyName(),
+	})
+	if err != nil {
+		t.Fatalf("Failed to update Namespace: %v", err)
+	}
+
+	if new.Title == title {
+		t.Fatalf("Namespace didn't update: old(%s) == new(%s)", title, new.Title)
 	}
 }
 
