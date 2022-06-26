@@ -1,19 +1,28 @@
 <template>
-  <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
-    header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
-    <template #header-extra>
-      <n-space>
-        <theme-picker />
-        <n-button type="info" ghost @click="login">Login</n-button>
-      </n-space>
+  <n-tooltip :show="min_dpressed" placement="bottom">
+    <template #trigger>
+
+      <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
+        header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
+        <template #header-extra>
+          <n-space>
+            <theme-picker />
+            <n-button type="info" ghost @click="login">Login</n-button>
+          </n-space>
+        </template>
+        <n-space vertical>
+          <n-input v-model:value="username" placeholder="Username" @focus="() => handleDBlock(true)"
+            @blur="() => handleDBlock(false)"></n-input>
+          <n-input v-model:value="password" type="password" placeholder="Password" @focus="() => handleDBlock(true)"
+            @blur="() => handleDBlock(false)"></n-input>
+          <n-alert :title="error.title" type="error" v-if="error" />
+          <n-alert title="Success! Redirecting..." type="success" v-if="success" />
+        </n-space>
+      </n-card>
     </template>
-    <n-space vertical>
-      <n-input v-model:value="username" placeholder="Username"></n-input>
-      <n-input v-model:value="password" type="password" placeholder="Password"></n-input>
-      <n-alert :title="error.title" type="error" v-if="error" />
-      <n-alert title="Success! Redirecting..." type="success" v-if="success" />
-    </n-space>
-  </n-card>
+    <span v-if="store.dev"> You are now in the developer mode</span>
+    <span v-else> You are {{ 10 - dpressed }} d's away from Developer mode</span>
+  </n-tooltip>
 </template>
 
 <script setup>
@@ -24,7 +33,7 @@ import {
   NInput,
   NButton,
   NAlert,
-  useLoadingBar,
+  useLoadingBar, NTooltip
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
@@ -73,6 +82,14 @@ async function login() {
 
 const route = useRoute();
 
+const dpressed = ref(0)
+const min_dpressed = ref(false)
+const block_dpressed = ref(false)
+
+function handleDBlock(lock) {
+  block_dpressed.value = lock
+}
+
 onMounted(() => {
   if (route.query.a) {
     try {
@@ -97,6 +114,29 @@ onMounted(() => {
       }
     }
   }
+
+  window.addEventListener("keypress", function (e) {
+    if (String.fromCharCode(e.keyCode) != 'd' || block_dpressed.value || store.dev) {
+      return
+    }
+
+    if (block_dpressed.value) {
+      return
+    }
+
+    dpressed.value += 1
+    if (dpressed.value > 2) {
+      min_dpressed.value = true
+
+      setTimeout(() => {
+        min_dpressed.value = false
+        dpressed.value = 0
+      }, 3000)
+    }
+    if (dpressed.value > 9) {
+      store.dev = true
+    }
+  });
 })
 </script>
 

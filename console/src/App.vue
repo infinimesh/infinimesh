@@ -4,8 +4,8 @@
       <n-message-provider>
         <n-global-style />
         <router-view />
-        <n-watermark v-if="watermark" content="development preview" cross fullscreen :font-size="16" :line-height="16"
-          :width="250" :height="150" :x-offset="12" :y-offset="80" :rotate="-15" />
+        <n-watermark v-if="dev" content="dev mode" cross fullscreen :font-size="16" :line-height="16" :width="250"
+          :height="150" :x-offset="12" :y-offset="80" :rotate="-15" />
       </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
@@ -32,7 +32,7 @@ import darkThemeOverrides from "@/assets/dark-theme-overrides.json"
 import hljs from "@/utils/hljs";
 
 const store = useAppStore()
-const { theme: pick, base_url } = storeToRefs(store)
+const { theme: pick, dev } = storeToRefs(store)
 const theme = computed(() => {
   return {
     it: pick.value === "dark" ? darkTheme : lightTheme,
@@ -40,8 +40,6 @@ const theme = computed(() => {
   }
 })
 
-
-const watermark = ref(false)
 
 let timeout = 1000
 const axios = inject("axios");
