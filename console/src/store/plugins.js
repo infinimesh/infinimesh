@@ -23,7 +23,6 @@ export const usePluginsStore = defineStore("plugins", {
             : `/plugins?namespace=${nss.selected}`
         );
 
-        console.log(data);
         this.plugins = data.pool;
       } catch (e) {
         check_token_expired(e, as);
@@ -33,6 +32,9 @@ export const usePluginsStore = defineStore("plugins", {
     },
     async create(plugin) {
       return as.http.put("/plugins", plugin);
+    },
+    async delete(uuid) {
+      return as.http.delete("/plugins/" + uuid);
     },
   },
 });
