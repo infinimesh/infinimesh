@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from "vue";
+import { computed, inject } from "vue";
 import {
   NConfigProvider,
   NGlobalStyle,
