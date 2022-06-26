@@ -17,7 +17,7 @@
                     Refresh
                 </n-button>
             </n-grid-item>
-            <n-grid-item span="24 300:12 500:7 600:6 700:5 1000:4 1400:2">
+            <n-grid-item span="24 300:12 500:7 600:6 700:5 1000:4 1400:2" v-if="dev">
                 <plugin-create />
             </n-grid-item>
         </n-grid>
@@ -42,15 +42,18 @@
 import { NSpin, NGrid, NGridItem, NH1, NText, NButton, NIcon, NSpace, NAlert } from 'naive-ui';
 import { RefreshOutline, GitNetworkOutline } from '@vicons/ionicons5';
 
+import { useAppStore } from "@/store/app";
 import { usePluginsStore } from "@/store/plugins"
 import { storeToRefs } from 'pinia';
 
 import PluginsPool from "@/components/plugins/pool.vue"
 import PluginCreate from "@/components/plugins/create-drawer.vue"
 
+const as = useAppStore()
 const store = usePluginsStore()
 
 const { loading, plugins } = storeToRefs(store)
+const { dev } = storeToRefs(as)
 
 
 store.fetchPlugins()
