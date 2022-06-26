@@ -53,7 +53,7 @@
                 </ul>
             </n-alert>
         </n-space>
-        <iframe v-else style="min-width: 90vw; min-height: 85vh" :src="src"></iframe>
+        <iframe v-else style="min-width: 90vw; min-height: 85vh; border-color: var(--n-color)" :src="src"></iframe>
     </n-spin>
 </template>
 
