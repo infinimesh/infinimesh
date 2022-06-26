@@ -8,7 +8,7 @@
         @mouseover="collapsed = false" @mouseleave="collapsed = true">
         <dashboard-menu :collapsed="collapsed" />
       </n-layout-sider>
-      <n-layout-content content-style="padding: 24px;" :native-scrollbar="false">
+      <n-layout-content :content-style="{ padding: noContentPadding ? 0 : 24 }" :native-scrollbar="false">
         <router-view />
       </n-layout-content>
     </n-layout>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   NLayout,
   NLayoutHeader,
@@ -30,12 +30,14 @@ import {
 import DashboardNav from "@/components/dashboard/nav.vue";
 import DashboardMenu from "@/components/dashboard/menu.vue";
 import DashboardFooter from "@/components/core/footer.vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { inject } from "vue";
 import { useAppStore } from "@/store/app";
 const store = useAppStore();
 
 const axios = inject("axios");
+const route = useRoute();
 
 (async () => {
   axios
@@ -50,4 +52,7 @@ const axios = inject("axios");
 })();
 
 const collapsed = ref(true);
+const noContentPadding = computed(() => {
+  return route.name == 'DashboardMain'
+})
 </script>
