@@ -8,7 +8,7 @@
         @mouseover="collapsed = false" @mouseleave="collapsed = true">
         <dashboard-menu :collapsed="collapsed" />
       </n-layout-sider>
-      <n-layout-content :content-style="{ padding: noContentPadding ? 0 : 24 }" :native-scrollbar="false">
+      <n-layout-content :content-style="{ padding: noContentPadding ? 0 : '24px' }" :native-scrollbar="false">
         <router-view />
       </n-layout-content>
     </n-layout>
