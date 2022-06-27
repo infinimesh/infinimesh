@@ -61,13 +61,13 @@
           Submit
         </n-button>
       </template>
-      <n-input v-model:value="state" type="textarea" placeholder="Desired State" :status="validation" />
+      <n-input v-model:value="desired_state" type="textarea" placeholder="Desired State" :status="validation" />
     </n-collapse-item>
   </n-collapse>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   NCode,
   NCollapse,
@@ -75,9 +75,6 @@ import {
   NDatePicker,
   useMessage,
   NInput,
-  NSpace,
-  NStatistic,
-  NNumberAnimation,
   NButton,
   NIcon,
   NGrid,
@@ -136,10 +133,14 @@ async function handleCopy(state) {
   }
 }
 
-const state = ref(JSON.stringify(desired.value.data, null, 2));
+const desired_state = ref(JSON.stringify(desired.value.data, null, 2));
+watch(props.patch, () => {
+  desired_state.value = ref(JSON.stringify(desired.value.data, null, 2));
+})
+
 const validation = computed(() => {
   try {
-    let d = JSON.parse(state.value);
+    let d = JSON.parse(desired_state.value);
     if (typeof d != "object") return "error";
     return "success";
   } catch {
@@ -148,6 +149,6 @@ const validation = computed(() => {
 });
 
 function handleSubmit() {
-  emit("submit", JSON.parse(state.value));
+  emit("submit", JSON.parse(desired_state.value));
 }
 </script>
