@@ -20,19 +20,18 @@
             <n-grid-item span="24 300:12 500:7 600:6 700:5 1000:4 1400:2" v-if="dev">
                 <plugin-create />
             </n-grid-item>
+            <n-grid-item span="24">
+                <n-alert title="Disclaimer" type="info">
+                    <template #icon>
+                        <n-icon>
+                            <git-network-outline />
+                        </n-icon>
+                    </template>
+                    Some Apps & Plugins are binded to Namespaces, so number of available ones may differ from Namespace
+                    to Namespace.
+                </n-alert>
+            </n-grid-item>
         </n-grid>
-        <n-space align="center" justify="left" class="fullscreen">
-            <n-alert title="Disclaimer" type="info">
-                <template #icon>
-                    <n-icon>
-                        <git-network-outline />
-                    </n-icon>
-                </template>
-                Some Apps & Plugins are binded to Namespaces, so number of available ones may differ from Namespace
-                to Namespace.
-            </n-alert>
-        </n-space>
-
         <plugins-pool :plugins="plugins" />
     </n-spin>
 </template>
