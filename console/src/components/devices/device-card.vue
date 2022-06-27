@@ -34,7 +34,8 @@
       </template>
 
       <template #action>
-        <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" @submit="handlePatchDesired" />
+        <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" :debug="debug"
+          @submit="handlePatchDesired" @submit-debug="handlePatchReported" />
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">{{ subscribed ?
               "Subscribed" : "Subscribe"
@@ -52,6 +53,26 @@
             </template>
             Are you sure about deleting this device?
           </n-popconfirm>
+
+          <template v-if="dev">
+
+            <n-button round tertiary type="success" @click="debug = false" v-if="debug">
+              <template #icon>
+                <n-icon>
+                  <bug-outline />
+                </n-icon>
+              </template>
+              Cancel debug
+            </n-button>
+            <n-button secondary circle type="success" @click="debug = true" v-else>
+              <template #icon>
+                <n-icon>
+                  <bug-outline />
+                </n-icon>
+              </template>
+            </n-button>
+
+          </template>
         </n-space>
       </template>
     </n-card>
@@ -72,13 +93,15 @@ import {
   NButton,
   NPopconfirm,
 } from "naive-ui";
-import { Bulb } from "@vicons/ionicons5";
+import { Bulb, BugOutline } from "@vicons/ionicons5";
 import DeviceStateCollapse from "./state-collapse.vue";
 
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
+import { useAppStore } from "@/store/app";
 
 import { access_lvl_conv } from "@/utils/access";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
   device: {
@@ -122,12 +145,22 @@ function handleSubscribe() {
   store.subscribe([device.value.uuid]);
 }
 
+const { dev } = storeToRefs(useAppStore())
+
 const bar = useLoadingBar();
 const patch = ref(false);
 const patching = ref(false);
 async function handlePatchDesired(state) {
   patching.value = true;
   await store.patchDesiredState(device.value.uuid, state, bar);
+  patch.value = false;
+  patching.value = false;
+}
+
+const debug = ref(false)
+async function handlePatchReported(state) {
+  patching.value = true;
+  await store.patchReportedState(device.value.uuid, state, bar);
   patch.value = false;
   patching.value = false;
 }

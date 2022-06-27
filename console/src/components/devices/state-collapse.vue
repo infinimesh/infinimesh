@@ -19,6 +19,7 @@
       ">
       </n-code>
     </n-collapse-item>
+
     <n-grid responsive="screen" :collapsed-rows="2" v-if="reported && expanded.includes('reported')">
       <n-grid-item :span="8">
         <span>Timestamp</span>
@@ -28,6 +29,17 @@
           class="pseudo-disabled" />
       </n-grid-item>
     </n-grid>
+
+    <n-collapse-item title="Patch Reported" name="reported_patch" v-if="debug">
+      <template #header-extra v-if="reported_validation == 'success'">
+        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmitReported">
+          Submit
+        </n-button>
+      </template>
+      <n-input v-model:value="reported_state" type="textarea" placeholder="Reported State"
+        :status="reported_validation" />
+    </n-collapse-item>
+
     <n-collapse-item title="Desired State" name="desired">
       <template #header-extra v-if="desired">
         <n-button tertiary circle type="info" @click.stop.prevent="
@@ -46,6 +58,7 @@
           : '// No Desired state have been set yet'
       " />
     </n-collapse-item>
+
     <n-grid responsive="screen" :collapsed-rows="2" v-if="desired && expanded.includes('desired')">
       <n-grid-item :span="8">
         <span>Timestamp</span>
@@ -55,6 +68,7 @@
           class="pseudo-disabled" />
       </n-grid-item>
     </n-grid>
+
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
       <template #header-extra v-if="validation == 'success'">
         <n-button tertiary round type="warning" @click.stop.prevent="handleSubmit">
@@ -67,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, toRef } from "vue";
 import {
   NCode,
   NCollapse,
@@ -91,12 +105,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  debug: {
+    type: Boolean,
+    default: false,
+  }
 });
 const emit = defineEmits(["submit"]);
 
 const expanded_val = ref(["reported"]);
 const expanded = computed({
   get() {
+    if (props.debug) {
+      return ["reported", "reported_patch", "desired", "patch"];
+
+    }
     if (props.patch) {
       return ["reported", "desired", "patch"];
     }
@@ -134,7 +156,7 @@ async function handleCopy(state) {
 }
 
 const desired_state = ref(JSON.stringify(desired.value.data, null, 2));
-watch(props.patch, () => {
+watch(toRef(props.patch), () => {
   desired_state.value = ref(JSON.stringify(desired.value.data, null, 2));
 })
 
@@ -150,5 +172,24 @@ const validation = computed(() => {
 
 function handleSubmit() {
   emit("submit", JSON.parse(desired_state.value));
+}
+
+const reported_state = ref(JSON.stringify(reported.value.data, null, 2));
+watch(toRef(props.debug), () => {
+  reported_state.value = ref(JSON.stringify(reported.value.data, null, 2));
+})
+
+const reported_validation = computed(() => {
+  try {
+    let d = JSON.parse(reported_state.value);
+    if (typeof d != "object") return "error";
+    return "success";
+  } catch {
+    return "error";
+  }
+});
+
+function handleSubmitReported() {
+  emit("submit-debug", JSON.parse(reported_state.value));
 }
 </script>

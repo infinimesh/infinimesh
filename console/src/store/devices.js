@@ -56,10 +56,10 @@ export const useDevicesStore = defineStore("devices", {
         if (no_cache) {
           this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
         } else {
-          this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {})};
+          this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {}) };
         }
 
-        if(state)
+        if (state)
           this.getDevicesState(data.devices.map((d) => d.uuid));
 
       } catch (e) {
@@ -131,6 +131,24 @@ export const useDevicesStore = defineStore("devices", {
         let token = await this.makeDevicesToken([device], true);
         await as.http.post(`/devices/states`, {
           device, desired: { data: state },
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        this.getDevicesState([device], token);
+        bar.finish();
+      } catch (e) {
+        console.error(e);
+        bar.error();
+      }
+    },
+    async patchReportedState(device, state, bar) {
+      bar.start();
+      try {
+        let token = await this.makeDevicesToken([device], true);
+        await as.http.post(`/devices/states`, {
+          device, reported: { data: state },
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
