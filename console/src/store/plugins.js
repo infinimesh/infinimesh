@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { access_lvl_conv, check_token_expired } from "@/utils/access";
+import { check_token_expired } from "@/utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();

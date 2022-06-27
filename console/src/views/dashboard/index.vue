@@ -1,5 +1,5 @@
 <template>
-    <n-space v-if="!ns" align="center" justify="center" class="fullscreen">
+    <n-space v-if="!ns" align="center" justify="center" class="fullscreen padded">
         <n-alert title="No Namespace Selected" type="info">
             <template #icon>
                 <n-icon>
@@ -12,7 +12,7 @@
             </n-space>
         </n-alert>
     </n-space>
-    <n-space v-else-if="!ns.plugin" align="center" justify="center" class="fullscreen">
+    <n-space v-else-if="!ns.plugin" align="center" justify="center" class="fullscreen padded">
         <n-alert title="Namespace has no Plugin connected" type="info">
             <template #icon>
                 <n-icon>
@@ -33,7 +33,7 @@
         </n-alert>
     </n-space>
     <n-spin :show="plugin.state == 'loading'" style="min-width: 90%;" v-else>
-        <n-space v-if="plugin.state == 'notfound'" align="center" justify="center" class="fullscreen">
+        <n-space v-if="plugin.state == 'notfound'" align="center" justify="center" class="fullscreen padded">
             <n-alert title="Coudln't get plugin :(" type="error" style="min-width: 40vh;">
                 <template #icon>
                     <n-icon>
@@ -102,3 +102,9 @@ const src = computed(() => {
     return src
 })
 </script>
+
+<style scoped>
+.padded {
+    padding-top: 24px
+}
+</style>

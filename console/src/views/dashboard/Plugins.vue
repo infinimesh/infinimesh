@@ -38,18 +38,20 @@
 </template>
 
 <script setup>
-
+import { watch } from 'vue'
 import { NSpin, NGrid, NGridItem, NH1, NText, NButton, NIcon, NSpace, NAlert } from 'naive-ui';
 import { RefreshOutline, GitNetworkOutline } from '@vicons/ionicons5';
 
 import { useAppStore } from "@/store/app";
 import { usePluginsStore } from "@/store/plugins"
+import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from 'pinia';
 
 import PluginsPool from "@/components/plugins/pool.vue"
 import PluginCreate from "@/components/plugins/create-drawer.vue"
 
 const as = useAppStore()
+const nss = useNSStore();
 const store = usePluginsStore()
 
 const { loading, plugins } = storeToRefs(store)
@@ -57,4 +59,10 @@ const { dev } = storeToRefs(as)
 
 
 store.fetchPlugins()
+
+const { selected } = storeToRefs(nss)
+
+watch(selected, () => {
+    store.fetchPlugins()
+})
 </script>
