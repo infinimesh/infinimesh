@@ -83,9 +83,15 @@ export const useDevicesStore = defineStore("devices", {
         }
 
         if (response.reported) {
+          if (this.reported.get(response.device)) {
+            response.reported.data = { ...this.reported.get(response.device).data, ...response.reported.data }
+          }
           this.reported.set(response.device, response.reported);
         }
         if (response.desired) {
+          if (this.desired.get(response.device)) {
+            response.desired.data = { ...this.desired.get(response.device).data, ...response.desired.data }
+          }
           this.desired.set(response.device, response.desired);
         }
       };
