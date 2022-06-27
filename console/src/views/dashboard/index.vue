@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue"
+import { ref, computed, watch, onMounted } from "vue"
 import { useRouter } from "vue-router";
 
 import { NSpace, NAlert, NIcon, NButton, NSpin } from "naive-ui";
@@ -77,22 +77,23 @@ const router = useRouter();
 const ns = computed(() => nss.namespaces[nss.selected])
 const plugin = ref({ state: "loading" })
 
-watch(ns, async () => {
-    console.log(ns.value, ns.value.plugin)
+async function loadPlugin() {
     let uuid = ns.value.plugin
     if (!uuid) {
         return
     }
 
     try {
-
-        console.log(uuid)
         const { data } = await plugs.get(uuid)
-        console.log(data)
         plugin.value = data
     } catch (e) {
         plugin.value = { state: 'notfound' }
     }
+}
+
+onMounted(async () => {
+    await loadPlugin()
+    watch(ns, loadPlugin)
 })
 
 const src = computed(() => {
