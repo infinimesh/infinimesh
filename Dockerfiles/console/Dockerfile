@@ -30,8 +30,6 @@ RUN adduser -D static
 # Switch to the scratch image
 FROM scratch
 
-EXPOSE 3000
-
 # Copy over the user
 COPY --from=builder /etc/passwd /etc/passwd
 
