@@ -53,8 +53,8 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 
 	keys := make([]string, len(pool)*2)
 	for i, dev := range pool {
-		keys[i*2] = Key(dev, "reported")
-		keys[i*2+1] = Key(dev, "desired")
+		keys[i*2] = Key(dev, pb.StateKey_REPORTED)
+		keys[i*2+1] = Key(dev, pb.StateKey_DESIRED)
 	}
 	if len(keys) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "no devices specified")
@@ -109,6 +109,52 @@ func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Sh
 	s.ps.Pub(req, topics...)
 
 	return req, nil
+}
+
+func (s *ShadowServiceServer) Remove(ctx context.Context, req *pb.RemoveRequest) (*pb.Shadow, error) {
+	log := s.log.Named("remove")
+	log.Debug("Request received", zap.Any("req", req))
+
+	if req.GetDevice() == "" {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
+	}
+	if req.GetKey() == "" {
+		return nil, status.Error(codes.InvalidArgument, "key not specified")
+	}
+
+	skey := Key(req.GetDevice(), req.StateKey)
+	r := s.rdb.Get(ctx, skey)
+	raw, err := r.Result()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to get Shadow")
+	}
+
+	var state pb.State
+	err = json.Unmarshal([]byte(raw), &state)
+	if err != nil {
+		log.Warn("Cannot unmarshal state", zap.String("raw", raw), zap.Error(err))
+		return nil, status.Error(codes.Internal, "cannot Unmarshal state")
+	}
+
+	fields := state.Data.Fields
+	delete(fields, req.GetKey())
+
+	state.Timestamp = timestamppb.Now()
+	log.Debug("Result", zap.Any("state", state))
+
+	s.Store(log, req.Device, req.StateKey, &state)
+
+	result := &pb.Shadow{
+		Device: req.GetDevice(),
+	}
+
+	if req.StateKey == pb.StateKey_REPORTED {
+		result.Reported = &state
+	} else {
+		result.Desired = &state
+	}
+
+	return result, nil
 }
 
 func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {

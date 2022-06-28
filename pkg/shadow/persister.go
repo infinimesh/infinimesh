@@ -25,8 +25,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func Key(device, key string) string {
-	return fmt.Sprintf("%s:%s", device, key)
+func Key(device string, key pb.StateKey) string {
+	var k string
+	if key == pb.StateKey_DESIRED {
+		k = "desired"
+	} else if key == pb.StateKey_REPORTED {
+		k = "reported"
+	} else {
+		k = "garbage"
+	}
+	return fmt.Sprintf("%s:%s", device, k)
 }
 
 func (s *ShadowServiceServer) Persister() {
@@ -39,17 +47,17 @@ func (s *ShadowServiceServer) Persister() {
 		log.Debug("Message received", zap.Any("shadow", shadow))
 		if shadow.Reported != nil {
 			log.Debug("Reporting", zap.String("device", shadow.Device))
-			s.MergeAndStore(log, shadow.Device, "reported", shadow.Reported)
+			s.MergeAndStore(log, shadow.Device, pb.StateKey_REPORTED, shadow.Reported)
 		}
 		if shadow.Desired != nil {
 			log.Debug("Desiring", zap.String("device", shadow.Device))
-			s.MergeAndStore(log, shadow.Device, "desired", shadow.Desired)
+			s.MergeAndStore(log, shadow.Device, pb.StateKey_DESIRED, shadow.Desired)
 		}
 	}
 }
 
-func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device, key string, state *pb.State) {
-	key = Key(device, key)
+func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device string, skey pb.StateKey, state *pb.State) {
+	key := Key(device, skey)
 
 	var new, merged []byte
 	var err error
@@ -80,6 +88,22 @@ merge:
 	new = merged
 
 set:
+	r := s.rdb.Set(context.Background(), key, string(new), 0)
+	if r.Err() != nil {
+		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))
+		return
+	}
+}
+
+func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.StateKey, state *pb.State) {
+	key := Key(device, skey)
+
+	new, err := json.Marshal(state)
+	if err != nil {
+		log.Warn("Error Marshalling State", zap.String("key", key), zap.Error(err))
+		return
+	}
+
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
 		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))

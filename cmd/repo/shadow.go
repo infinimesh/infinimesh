@@ -26,6 +26,7 @@ import (
 
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	pb "github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/shadow"
 	shadowpb "github.com/infinimesh/proto/shadow"
 )
 
@@ -82,6 +83,34 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *shadowpb.Shadow) (respon
 	}
 
 	return s.client.Patch(ctx, request)
+}
+
+func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (response *shadowpb.Shadow, err error) {
+	log := s.log.Named("RemoveStateKey")
+
+	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
+	if !ok || !post_allowed {
+		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+	}
+
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+	}
+	log.Debug("Scope", zap.Strings("devices", devices_scope))
+
+	found := false
+	for _, device := range devices_scope {
+		if device == request.Device {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
+	}
+
+	return s.client.Remove(ctx, request)
 }
 
 //StreamShadow is a method to get the stream for a device
