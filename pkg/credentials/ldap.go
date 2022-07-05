@@ -104,3 +104,82 @@ type LDAPProvider struct {
 	SizeLimit    int    `yaml:"size_limit"`
 	TimeLimit    int    `yaml:"time_limit"`
 }
+
+type LDAPCredentials struct {
+	Username    string `json:"username"`
+	ProviderKey string `json:"key"`
+
+	log *zap.Logger
+	driver.DocumentMeta
+}
+
+func NewLDAPCredentials(username, key string) (Credentials, error) {
+	if _, ok := LDAP.Providers[key]; !ok {
+		return nil, fmt.Errorf("requested Provider Key(%s) is not registered", key)
+	}
+	return &LDAPCredentials{
+		Username: username, ProviderKey: key,
+	}, nil
+}
+
+func (c *LDAPCredentials) Authorize(args ...string) bool {
+	provider, ok := LDAP.Providers[c.ProviderKey]
+	if !ok {
+		c.log.Warn("Existent Credentials have wrong Provider Key", zap.String("key", c.ProviderKey))
+		return false
+	}
+
+	req := ldap.NewSearchRequest(
+		provider.BaseDN, provider.Scope, provider.DerefAliases,
+		provider.SizeLimit, provider.TimeLimit, false,
+		fmt.Sprintf("(&(objectClass=organizationalPerson)(uid=%s))", c.Username),
+		[]string{"dn"}, nil,
+	)
+	res, err := provider.Conn.Search(req)
+	if err != nil {
+		c.log.Warn("Error while executing LDAP Tree search", zap.Error(err))
+		return false
+	}
+	if len(res.Entries) != 1 {
+		c.log.Warn("Result has none or too many results", zap.Int("length", len(res.Entries)))
+	}
+
+	err = provider.Conn.Bind(res.Entries[0].DN, args[1])
+	if err != nil {
+		c.log.Warn("Error Binding", zap.Error(err))
+		return false
+	}
+	return true
+}
+
+func (*LDAPCredentials) Type() string {
+	return "ldap"
+}
+
+func (sc *LDAPCredentials) Key() string {
+	return sc.ID.Key()
+}
+
+func (c *LDAPCredentials) SetLogger(log *zap.Logger) {
+	c.log = log.Named("LDAP Auth")
+}
+
+func (cred *LDAPCredentials) Find(ctx context.Context, db driver.Database) bool {
+	query := `FOR cred IN @@credentials FILTER cred.username == @username RETURN cred`
+	c, err := db.Query(ctx, query, map[string]interface{}{
+		"username":     cred.Username,
+		"@credentials": schema.CREDENTIALS_COL,
+	})
+	if err != nil {
+		return false
+	}
+	defer c.Close()
+
+	_, err = c.ReadDocument(ctx, &cred)
+	return err == nil
+}
+
+func (cred *LDAPCredentials) FindByKey(ctx context.Context, col driver.Collection, key string) error {
+	_, err := col.ReadDocument(ctx, key, cred)
+	return err
+}

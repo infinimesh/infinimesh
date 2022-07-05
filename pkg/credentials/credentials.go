@@ -65,6 +65,8 @@ func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type st
 	switch auth_type {
 	case "standard":
 		cred = &StandardCredentials{Username: args[0]}
+	case "ldap":
+		cred = &LDAPCredentials{Username: args[0]}
 	default:
 		return nil, errors.New("unknown auth type")
 	}
@@ -93,13 +95,21 @@ func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Cred
 	switch credentials.Type {
 	case "standard":
 		cred, err = NewStandardCredentials(credentials.Data[0], credentials.Data[1])
+	case "ldap":
+		if len(credentials.Data) != 2 {
+			return nil, errors.New("missing LDAP provider key")
+		}
+		cred, err = NewLDAPCredentials(credentials.Data[0], credentials.Data[1])
 	default:
 		return nil, errors.New("auth type is wrong")
 	}
 
-	cred.SetLogger(log)
+	if err != nil {
+		return nil, err
+	}
 
-	return cred, err
+	cred.SetLogger(log)
+	return cred, nil
 }
 
 const listCredentialsAndEdgesQuery = `
