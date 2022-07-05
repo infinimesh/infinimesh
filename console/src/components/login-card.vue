@@ -16,6 +16,14 @@
           <n-input v-model:value="password" type="password" placeholder="Password" @focus="() => handleDBlock(true)"
             @blur="() => handleDBlock(false)"></n-input>
           <n-alert :title="error.title" type="error" v-if="error" />
+
+          <n-space justify="center">
+            <n-radio-group v-model:value="type" name="credentials_type">
+              <n-radio-button value="standard" label="Standard" />
+              <n-radio-button value="ldap" label="LDAP" />
+            </n-radio-group>
+          </n-space>
+
           <n-alert title="Success! Redirecting..." type="success" v-if="success" />
         </n-space>
       </n-card>
@@ -31,8 +39,8 @@ import {
   NCard,
   NSpace,
   NInput,
-  NButton,
-  NAlert,
+  NButton, NRadioButton,
+  NAlert, NRadioGroup,
   useLoadingBar, NTooltip
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
@@ -44,6 +52,7 @@ const router = useRouter();
 
 const username = ref("");
 const password = ref("");
+const type = ref("standard")
 
 const error = ref(false);
 const success = ref(false);
@@ -58,7 +67,7 @@ async function login() {
 
   const data = {
     auth: {
-      type: "standard",
+      type: type.value,
       data: [username.value, password.value],
     },
   }
