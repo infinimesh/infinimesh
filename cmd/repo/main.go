@@ -60,7 +60,7 @@ func init() {
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow,plugins")
+	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow,plugins,internal")
 
 	port = viper.GetString("PORT")
 
@@ -149,6 +149,12 @@ func main() {
 		log.Info("Registering plugins service")
 		plug_ctrl := graph.NewPluginsController(log, db)
 		plugins.RegisterPluginsServiceServer(s, plug_ctrl)
+	}
+
+	if _, ok := services["internal"]; ok {
+		log.Info("Registering Internal service")
+		is := graph.InternalService{}
+		pb.RegisterInternalServiceServer(s, &is)
 	}
 
 	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
