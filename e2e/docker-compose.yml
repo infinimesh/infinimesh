@@ -11,6 +11,16 @@ services:
       - data:/var/lib/arangodb3
     networks:
       - arangodb
+  
+  openldap:
+    image: bitnami/openldap:2
+    ports:
+      - '1389:1389'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=admin
+      - LDAP_USERS=user
+      - LDAP_PASSWORDS=password
 
 networks:
   arangodb:
