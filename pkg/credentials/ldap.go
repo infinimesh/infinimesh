@@ -64,6 +64,7 @@ func init() {
 		if err != nil {
 			log.Error("Couldn't Dial LDAP provider, skipping",
 				zap.String("url", provider.URL), zap.Error(err))
+			delete(LDAP.Providers, key)
 			continue
 		}
 		log.Info("Success dialing LDAP provider", zap.String("url", provider.URL))
