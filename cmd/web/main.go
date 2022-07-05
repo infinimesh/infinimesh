@@ -112,6 +112,12 @@ func main() {
 		log.Fatal("Failed to register PluginsService gateway")
 	}
 
+	log.Info("Registering Internal Service")
+	err = pb.RegisterInternalServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register InternalService gateway")
+	}
+
 	log.Info("Registering Console Services Service")
 	init_cs(log)
 	err = gwmux.HandlePath("GET", "/console/services", cs_handler())
