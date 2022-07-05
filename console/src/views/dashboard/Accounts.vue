@@ -152,11 +152,11 @@ async function handleDelete(uuid) {
   loading.value = true
   try {
     await store.deleteAccount(uuid, bar)
+    delete store.accounts[uuid]
     message.success("Account successfuly deleted")
   } catch (e) {
     message.error("Failed to delete account: " + e.response.statusText)
   }
-  store.fetchAccounts();
 }
 
 const as = useAppStore()
