@@ -28,7 +28,7 @@
           <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
         </n-form-item>
         Credentials:
-        <n-tabs v-model="model.credentials.type">
+        <n-tabs v-model:value="model.credentials.type">
           <n-tab-pane name="standard" display-directive="if" tab="Standard(user/pass)">
             <n-form-item label="Username" path="credentials.data[0]">
               <n-input v-model:value="model.credentials.data[0]" />
@@ -44,6 +44,14 @@
               </n-input>
             </n-form-item>
           </n-tab-pane>
+          <n-tab-pane name="ldap" tab="LDAP" v-if="ldap.enabled">
+            <n-form-item label="Provider" path="credentials.data[1]">
+              <n-select v-model:value="model.credentials.data[1]" :options="ldap.providers" />
+            </n-form-item>
+            <n-form-item label="Username(Login)" path="credentials.data[0]">
+              <n-input v-model:value="model.credentials.data[0]" />
+            </n-form-item>
+          </n-tab-pane>
         </n-tabs>
       </n-form>
     </n-drawer-content>
@@ -51,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import {
   NButton,
   NDrawer,
@@ -68,6 +76,8 @@ import {
   useLoadingBar,
 } from "naive-ui";
 import { AddOutline, EyeOffOutline, EyeOutline } from "@vicons/ionicons5";
+
+import { useIStore } from "@/store/internal"
 import { useNSStore } from "@/store/namespaces";
 import { useAccountsStore } from "@/store/accounts";
 
@@ -138,4 +148,19 @@ function handleSubmit() {
     }
   })
 }
+
+
+const i = useIStore()
+const ldap = computed(() => {
+  return {
+    enabled: Object.keys(i.ldap_providers).length > 0,
+    providers: Object.entries(i.ldap_providers).map(([key, title]) => ({
+      value: key, label: title == "" ? key : title
+    })),
+  }
+})
+
+onMounted(() => {
+  i.getLDAPProviders()
+})
 </script>
