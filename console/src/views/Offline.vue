@@ -49,11 +49,9 @@
                                 Offline :(
                             </n-text>
                         </n-h1>
-                        <n-h4>
-                            <n-text type="primary">
-                                Try again later
-                            </n-text>
-                        </n-h4>
+                        <n-button type="info" dashed @click="attempt">
+                            Try Again
+                        </n-button>
                     </n-space>
                 </n-space>
             </n-layout-content>
@@ -72,12 +70,19 @@ import {
     NLayoutSider,
     NLayoutFooter,
     NSpace, NSkeleton,
-    NIcon,
-    NH1, NText, NH4
+    NIcon, NButton,
+    NH1, NText,
 } from "naive-ui";
 import { CloudOfflineOutline } from "@vicons/ionicons5";
+import { useRouter } from "vue-router"
+
 import DashboardFooter from "@/components/core/footer.vue";
 
+const router = useRouter()
+
+function attempt() {
+    router.push({ name: 'Root' })
+}
 </script>
 
 <style scoped>
