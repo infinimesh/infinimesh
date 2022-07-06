@@ -1,7 +1,7 @@
-import { createApp } from "vue";
+import { createApp, markRaw } from "vue";
 import App from "./App.vue";
 
-import router from "./router/router";
+import router from "@/router";
 
 import axios from "axios";
 import VueAxios from "vue-axios";
@@ -11,6 +11,9 @@ import piniaPersist from "pinia-plugin-persist";
 
 const pinia = createPinia();
 pinia.use(piniaPersist);
+pinia.use(({ store }) => {
+  store.$router = markRaw(router)
+})
 
 const app = createApp(App);
 
