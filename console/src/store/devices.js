@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { access_lvl_conv, check_token_expired } from "@/utils/access";
+import { access_lvl_conv } from "@/utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -50,21 +50,16 @@ export const useDevicesStore = defineStore("devices", {
     async fetchDevices(state = true, no_cache = false) {
       this.loading = true;
 
-      try {
-        const { data } = await as.http.get("/devices");
+      const { data } = await as.http.get("/devices");
 
-        if (no_cache) {
-          this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
-        } else {
-          this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {}) };
-        }
-
-        if (state)
-          this.getDevicesState(data.devices.map((d) => d.uuid));
-
-      } catch (e) {
-        check_token_expired(e, as)
+      if (no_cache) {
+        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
+      } else {
+        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {}) };
       }
+
+      if (state)
+        this.getDevicesState(data.devices.map((d) => d.uuid));
       this.loading = false;
     },
     async subscribe(devices) {

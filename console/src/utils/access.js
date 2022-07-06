@@ -18,3 +18,13 @@ export function check_token_expired(err, store) {
     }
   }
 }
+
+export function check_offline(err, store) {
+  if (!err.isAxiosError) {
+    return
+  }
+
+  if (err.message == "Network Error") {
+    store.offline()
+  }
+}

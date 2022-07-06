@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { access_lvl_conv, check_token_expired } from "@/utils/access";
+import { access_lvl_conv } from "@/utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -32,17 +32,14 @@ export const useAccountsStore = defineStore("accounts", {
     async fetchAccounts(no_cache = false) {
       this.loading = true;
 
-      try {
-        const { data } = await as.http.get("/accounts");
+      const { data } = await as.http.get("/accounts");
 
-        if (no_cache) {
-          this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
-        } else {
-          this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {})};
-        }
-      } catch (e) {
-        check_token_expired(e, as)
+      if (no_cache) {
+        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
+      } else {
+        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {}) };
       }
+
 
       this.loading = false;
     },
@@ -106,7 +103,7 @@ export const useAccountsStore = defineStore("accounts", {
     async setCredentials(uuid, credentials, bar) {
       bar.start();
       try {
-        await as.http.post(`/accounts/${uuid}/credentials`, {credentials});
+        await as.http.post(`/accounts/${uuid}/credentials`, { credentials });
         bar.finish();
 
         this.fetchAccounts();

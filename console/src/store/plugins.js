@@ -2,8 +2,6 @@ import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
-import { check_token_expired } from "@/utils/access";
-
 const as = useAppStore();
 const nss = useNSStore();
 
@@ -16,17 +14,14 @@ export const usePluginsStore = defineStore("plugins", {
   actions: {
     async fetchPlugins() {
       this.loading = true;
-      try {
-        const { data } = await as.http.get(
-          nss.selected == "all"
-            ? "/plugins"
-            : `/plugins?namespace=${nss.selected}`
-        );
+      const { data } = await as.http.get(
+        nss.selected == "all"
+          ? "/plugins"
+          : `/plugins?namespace=${nss.selected}`
+      );
 
-        this.plugins = data.pool;
-      } catch (e) {
-        check_token_expired(e, as);
-      }
+      this.plugins = data.pool;
+
 
       this.loading = false;
     },
