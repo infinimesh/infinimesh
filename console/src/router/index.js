@@ -80,6 +80,14 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/offline",
+    name: "Offline",
+    component: () => import("@/views/Offline.vue"),
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({

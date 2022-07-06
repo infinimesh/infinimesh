@@ -32,6 +32,7 @@ export const useAppStore = defineStore("app", {
       const store = this
       function err_check(err) {
         check_token_expired(err, store)
+        check_offline(err, store)
       }
 
       instance.interceptors.response.use((r) => r, err_check)
@@ -42,6 +43,9 @@ export const useAppStore = defineStore("app", {
     logout() {
       this.$reset();
     },
+    offline() {
+      this.$router.push({ name: 'Offline' })
+    }
   },
 
   persist: {
