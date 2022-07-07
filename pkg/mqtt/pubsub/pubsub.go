@@ -105,9 +105,11 @@ consume:
 		err = proto.Unmarshal(msg.Body, shadow)
 		if err != nil {
 			log.Warn("Error while consuming message:", zap.Error(err))
+			msg.Nack(false, false)
 			continue
 		}
 		log.Debug("Received message from RabbitMQ", zap.Any("shadow", &shadow))
 		ps.Pub(shadow, topic, topic+"/"+shadow.Device)
+		msg.Ack(false)
 	}
 }
