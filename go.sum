@@ -236,6 +236,8 @@ github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b h1:D+anjY8F1Trw6hMOr2GbZ9cwNb8DnNfRaJ/msI1fRKE=
 github.com/slntopp/mqtt-go v0.0.0-20220119160507-2f6624a3523b/go.mod h1:4CSLUJHzRPlhlxfTYY9P0XV4BU5jwQvHT/W9feoYC9U=
+github.com/slntopp/mqtt-go v0.0.0-20220711122714-995aa0b1c886 h1:+0UWZV7uGd1iKVUVUmVzFhzNCEWN1bjg4ccXDnBySO4=
+github.com/slntopp/mqtt-go v0.0.0-20220711122714-995aa0b1c886/go.mod h1:4CSLUJHzRPlhlxfTYY9P0XV4BU5jwQvHT/W9feoYC9U=
 github.com/spf13/afero v1.8.2 h1:xehSyVa0YnHWsJ49JFljMpg1HX19V6NDZ1fkm1Xznbo=
 github.com/spf13/afero v1.8.2/go.mod h1:CtAatgMJh6bJEIs48Ay/FOnkljP3WeGUG0MC1RfAqwo=
 github.com/spf13/cast v1.5.0 h1:rj3WzYc11XZaIZMPKmwP96zkFEnnAmV8s6XbB2aY32w=
