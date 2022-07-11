@@ -192,6 +192,12 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/infinimesh/proto v0.0.0-20220627123816-5352698fa490 h1:tDSf7A+3stHvMPcIkoQrjxt38hWIExEG4bAI3biLhS0=
 github.com/infinimesh/proto v0.0.0-20220627123816-5352698fa490/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220711180335-d35f03f56062 h1:tLKSXUtIcRfsGFYvJzco7Y0lCw1UB2giNjlnD67sG3g=
+github.com/infinimesh/proto v0.0.0-20220711180335-d35f03f56062/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220711180752-169281d6038f h1:N3MwRH9XGQPruOn4vjtriGLtSvsYw6ALND9pO2iYmvo=
+github.com/infinimesh/proto v0.0.0-20220711180752-169281d6038f/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755 h1:pDpm3xr0T6EQe3iW6yo+6606iNOO9FacBswEHnai0KU=
+github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=

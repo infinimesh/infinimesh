@@ -16,6 +16,10 @@ limitations under the License.
 package handsfree
 
 import (
+	"context"
+	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	pb "github.com/infinimesh/proto/handsfree"
@@ -24,43 +28,70 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 type HandsfreeServer struct {
 	pb.UnimplementedHandsfreeServiceServer
 
 	log *zap.Logger
-	db  map[string](chan string)
+	db  map[string](chan []string)
 }
 
 func NewHandsfreeServer(log *zap.Logger) *HandsfreeServer {
 	return &HandsfreeServer{
-		log: log.Named("HandsfreeServer"), db: make(map[string]chan string),
+		log: log.Named("HandsfreeServer"), db: make(map[string]chan []string),
 	}
 }
 
-func (s *HandsfreeServer) GetToken(req *pb.ConnectionRequest, srv pb.HandsfreeService_GetTokenServer) error {
-	log := s.log.Named("GetToken")
+func GenerateCode[T any](db map[string]T) (r string) {
+begin:
+	for i := 0; i < 6; i++ {
+		n := rand.Intn(16)
+		r += strconv.FormatInt(int64(n), 16)
+	}
+	if _, exists := db[r]; exists {
+		r = ""
+		goto begin
+	}
+	return r
+}
+
+func (s *HandsfreeServer) Send(ctx context.Context, req *pb.ControlPacket) (*pb.ControlPacket, error) {
+	log := s.log.Named("Send")
+	if len(req.GetPayload()) < 2 {
+		return nil, status.Error(codes.InvalidArgument, "Payload must consist of code and actual payload")
+	}
+	log.Debug("Request received", zap.Strings("payload", req.GetPayload()))
+
+	code := strings.ToLower(req.GetPayload()[0])
+
+	ch, ok := s.db[code]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "No App's awaiting with this code")
+	}
+
+	ch <- req.GetPayload()[1:]
+
+	return &pb.ControlPacket{
+		Code: pb.Code_SUCCESS,
+	}, nil
+}
+
+func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeService_ConnectServer) error {
+	log := s.log.Named("Connect")
 	log.Debug("Request received", zap.String("app", req.GetAppId()))
 
 	if req.GetAppId() == "" {
 		return status.Error(codes.InvalidArgument, "Application ID must be present upon connection")
 	}
 
-	hash, err := GenerateCodeLong(req.GetAppId())
-	if err != nil {
-		log.Warn("Error during generating hash", zap.Error(err))
-		return status.Error(codes.Internal, "Internal Error while generating code. Check your Application ID validity")
-	}
+	code := GenerateCode(s.db)
+	s.db[code] = make(chan []string)
 
-	code, err := ShortenToFit(hash, s.db)
-	if err != nil {
-		log.Warn("Error during shortening the hash to make code", zap.Error(err))
-		return status.Error(codes.Internal, "Internal Error while generating code. Check your Application ID validity and have some mercy on our servers")
-	}
-
-	s.db[code] = make(chan string)
-
-	err = srv.Send(&pb.ControlPacket{
-		Code: pb.Code_AUTH_CODE, Payload: code,
+	err := srv.Send(&pb.ControlPacket{
+		Code: pb.Code_AUTH, Payload: []string{code},
 	})
 	if err != nil {
 		return nil
@@ -71,28 +102,18 @@ func (s *HandsfreeServer) GetToken(req *pb.ConnectionRequest, srv pb.HandsfreeSe
 	for {
 		select {
 		case <-refresh.C:
-			hash, err := GenerateCodeLong(req.GetAppId())
-			if err != nil {
-				log.Warn("Error during generating hash", zap.Error(err))
-				return status.Error(codes.Internal, "Internal Error while generating code. Check your Application ID validity")
-			}
-
-			code, err = ShortenToFit(hash, s.db)
-			if err != nil {
-				log.Warn("Error during shortening the hash to make code", zap.Error(err))
-				return status.Error(codes.Internal, "Internal Error while generating code. Check your Application ID validity and have some mercy on our servers")
-			}
-			s.db[code] = make(chan string)
+			code := GenerateCode(s.db)
+			s.db[code] = make(chan []string)
 
 			err = srv.Send(&pb.ControlPacket{
-				Code: pb.Code_AUTH_CODE, Payload: code,
+				Code: pb.Code_AUTH, Payload: []string{code},
 			})
 			if err != nil {
 				return nil
 			}
-		case token := <-s.db[code]:
+		case payload := <-s.db[code]:
 			srv.Send(&pb.ControlPacket{
-				Code: pb.Code_TOKEN, Payload: token,
+				Code: pb.Code_DATA, Payload: payload,
 			})
 
 			refresh.Stop()
