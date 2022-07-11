@@ -44,6 +44,8 @@ WORKDIR /home/static
 # Use the .dockerignore file to control what ends up inside the image!
 COPY --from=console-builder /console/dist/ ./
 
+EXPOSE 80
+
 LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
 
 # Run thttpd
