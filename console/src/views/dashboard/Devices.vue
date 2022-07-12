@@ -28,16 +28,19 @@
 </template>
 
 <script setup>
+import { defineAsyncComponent } from "vue"
 import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace } from "naive-ui";
-import { RefreshOutline } from "@vicons/ionicons5";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
 import { storeToRefs } from "pinia";
 
-import DevicesPool from "@/components/devices/pool.vue";
-import DeviceCreate from "@/components/devices/create-drawer.vue";
-import DeviceRegister from "@/components/devices/register-modal.vue";
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
+const DevicesPool = defineAsyncComponent(() => import("@/components/devices/pool.vue"))
+
+const DeviceCreate = defineAsyncComponent(() => import("@/components/devices/create-drawer.vue"))
+const DeviceRegister = defineAsyncComponent(() => import("@/components/devices/register-modal.vue"))
+
 
 const store = useDevicesStore();
 const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
