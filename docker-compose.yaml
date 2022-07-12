@@ -96,6 +96,8 @@ services:
     environment:
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       REDIS_HOST: redis:6379
+      DEVICES_HOST: repo:8000
+      SIGNING_KEY: "${SIGNING_KEY}"
       
   redis:
     image: redis:latest
