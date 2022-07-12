@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineAsyncComponent } from "vue";
 import {
   NCard,
   NTooltip,
@@ -93,8 +93,6 @@ import {
   NButton,
   NPopconfirm,
 } from "naive-ui";
-import { Bulb, BugOutline } from "@vicons/ionicons5";
-import DeviceStateCollapse from "./state-collapse.vue";
 
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
@@ -102,6 +100,11 @@ import { useAppStore } from "@/store/app";
 
 import { access_lvl_conv } from "@/utils/access";
 import { storeToRefs } from "pinia";
+
+const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
+const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
+
+const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
 
 const props = defineProps({
   device: {

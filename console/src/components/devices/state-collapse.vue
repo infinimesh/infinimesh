@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, toRef } from "vue";
+import { ref, computed, watch, toRef, defineAsyncComponent } from "vue";
 import {
   NCode,
   NCollapse,
@@ -94,7 +94,8 @@ import {
   NGrid,
   NGridItem,
 } from "naive-ui";
-import { CopyOutline } from "@vicons/ionicons5";
+
+const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
 
 const props = defineProps({
   state: {

@@ -45,11 +45,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, defineAsyncComponent } from "vue";
 import { NModal, NCard, NForm, NFormItem, NInput, NIcon, NButton, NSpace, useMessage, useLoadingBar, NTabs, NTabPane } from 'naive-ui';
-import { CloseOutline, EyeOffOutline, EyeOutline } from '@vicons/ionicons5';
 
 import { useAccountsStore } from "@/store/accounts";
+
+const CloseOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloseOutline"))
+const EyeOffOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOffOutline"))
+const EyeOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOutline"))
 
 const store = useAccountsStore();
 

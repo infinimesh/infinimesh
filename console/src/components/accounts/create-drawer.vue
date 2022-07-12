@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, computed, onMounted, defineAsyncComponent } from "vue";
 import {
   NButton,
   NDrawer,
@@ -75,11 +75,14 @@ import {
   NTabPane,
   useLoadingBar,
 } from "naive-ui";
-import { AddOutline, EyeOffOutline, EyeOutline } from "@vicons/ionicons5";
 
 import { useIStore } from "@/store/internal"
 import { useNSStore } from "@/store/namespaces";
 import { useAccountsStore } from "@/store/accounts";
+
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const EyeOffOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOffOutline"))
+const EyeOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOutline"))
 
 const show = ref(false);
 watch(

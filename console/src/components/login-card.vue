@@ -1,7 +1,6 @@
 <template>
   <n-tooltip :show="min_dpressed" placement="bottom">
     <template #trigger>
-
       <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
         header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
         <template #header-extra>
@@ -34,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from "vue";
+import { ref, inject, onMounted, defineAsyncComponent } from "vue";
 import {
   NCard,
   NSpace,
@@ -45,7 +44,8 @@ import {
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
-import ThemePicker from "@/components/core/theme-picker.vue";
+
+const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-picker.vue"))
 
 const store = useAppStore();
 const router = useRouter();
@@ -157,6 +157,6 @@ onMounted(() => {
 
 <style>
 .login-card {
-  min-width: 30vh;
+  min-width: 40vw;
 }
 </style>

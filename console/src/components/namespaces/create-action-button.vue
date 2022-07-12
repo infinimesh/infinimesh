@@ -29,11 +29,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, defineAsyncComponent } from "vue"
 
 import { NButtonGroup, NButton, NIcon, NInputGroup, NInput } from 'naive-ui';
-import { AddOutline, CheckmarkOutline, BanOutline } from '@vicons/ionicons5';
 import { useNSStore } from "@/store/namespaces";
+
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const CheckmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CheckmarkOutline"))
+const BanOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BanOutline"))
 
 const show = ref(false)
 const title = ref("")

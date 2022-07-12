@@ -108,16 +108,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, defineAsyncComponent } from "vue"
 import { NTr, NTd, NProgress, NText, NButton, NIcon, NSpace, NSelect } from "naive-ui"
-import { RefreshOutline, AddOutline, RemoveOutline } from "@vicons/ionicons5";
-
-import UuidBadge from "@/components/core/uuid-badge.vue";
-import AccessBadge from "@/components/core/access-badge"
 
 import { useNSStore } from "@/store/namespaces"
 import { useAccountsStore } from "@/store/accounts"
 import { access_levels } from "@/utils/access";
+
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
+
+const UuidBadge = defineAsyncComponent(() => import("@/components/core/uuid-badge.vue"))
+const AccessBadge = defineAsyncComponent(() => import("@/components/core/access-badge"))
+
+const RemoveOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RemoveOutline"))
 
 const store = useNSStore()
 const accs = useAccountsStore()

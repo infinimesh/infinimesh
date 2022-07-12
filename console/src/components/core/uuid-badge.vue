@@ -15,8 +15,10 @@
 </template>
 
 <script setup>
+import { defineAsyncComponent } from "vue"
 import { NTooltip, NIcon, NButton, useMessage } from 'naive-ui';
-import { CopyOutline } from '@vicons/ionicons5';
+
+const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
 
 const { uuid, type } = defineProps({
     uuid: {

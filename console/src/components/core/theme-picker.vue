@@ -7,14 +7,16 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue"
+import { ref, watch, onMounted, defineAsyncComponent } from "vue"
 import { NDropdown, NButton, NIcon, useOsTheme } from 'naive-ui';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from "@/store/app"
 
-import { MoonOutline, SunnyOutline, CogOutline } from '@vicons/ionicons5';
-
 import { renderIcon } from "@/utils";
+
+const MoonOutline = defineAsyncComponent(() => import("@vicons/ionicons5/MoonOutline"))
+const SunnyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/SunnyOutline"))
+const CogOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CogOutline"))
 
 const { theme, theme_pick: pick } = storeToRefs(useAppStore())
 
