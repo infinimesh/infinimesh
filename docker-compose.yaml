@@ -1,6 +1,6 @@
 version: "3.2"
 services:
-  
+
   proxy:
     image: traefik:latest
     labels:
@@ -96,10 +96,10 @@ services:
     environment:
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       REDIS_HOST: redis:6379
-      
+
   redis:
     image: redis:latest
-    command: ["redis-server", "--appendonly", "yes"]
+    command: [ "redis-server", "--appendonly", "yes" ]
 
   db:
     image: arangodb/arangodb:latest
@@ -123,7 +123,7 @@ services:
       - traefik.http.services.http-fs.loadbalancer.server.port=8000
     volumes:
       - user-media:/static
-  
+
   # Comment this service and HF env variable at web service to disable handsfree service
   handsfree:
     image: ghcr.io/infinimesh/infinimesh/handsfree:latest
