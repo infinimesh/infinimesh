@@ -139,7 +139,7 @@ const store = useNSStore();
 const { loading, namespaces_list: namespaces } = storeToRefs(store);
 
 const pool = computed(() => groupBy(namespaces.value, (e) => {
-  if (e.access.role == "OWNER" || access_lvl_conv(e) >= 3) {
+  if ((e.access ?? { role: "" }).role == "OWNER" || access_lvl_conv(e) >= 3) {
     return "admin"
   }
   return "user"
