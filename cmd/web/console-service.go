@@ -37,6 +37,14 @@ func init_cs(log *zap.Logger) {
 		enabled["http_fs"] = http_fs
 	}
 
+	viper.SetDefault("HANDSFREE", false)
+	handsfree := viper.GetBool("HANDSFREE")
+	log.Debug("HANDSFREE", zap.Bool("value", handsfree))
+	if handsfree {
+		log.Info("Handsfree service is enabled")
+		enabled["handsfree"] = ""
+	}
+
 	var err error
 	SERVICES_ENABLED, err = json.Marshal(enabled)
 	if err != nil {
