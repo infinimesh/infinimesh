@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   console:
-    image: ghcr.io/infinimesh/infinimesh/console:latest
+    image: ghcr.io/infinimesh/infinimesh/console:v3.0.0
     restart: always
     depends_on:
       - proxy
@@ -26,7 +26,7 @@ services:
       - traefik.http.routers.console.service=console@docker
       - traefik.http.services.console.loadbalancer.server.port=80
   web:
-    image: ghcr.io/infinimesh/infinimesh/web:latest
+    image: ghcr.io/infinimesh/infinimesh/web:v3.0.0
     restart: always
     depends_on:
       - repo
@@ -51,7 +51,7 @@ services:
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
 
   mqtt:
-    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
+    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:v3.0.0
     restart: always
     depends_on:
       - rabbitmq
@@ -71,7 +71,7 @@ services:
       SIGNING_KEY: "${SIGNING_KEY}"
 
   repo:
-    image: ghcr.io/infinimesh/infinimesh/repo:latest
+    image: ghcr.io/infinimesh/infinimesh/repo:v3.0.0
     restart: always
     labels:
       - traefik.http.routers.repo.rule=Host(`api.${BASE_DOMAIN}`)
@@ -89,7 +89,7 @@ services:
       SIGNING_KEY: "${SIGNING_KEY}"
 
   shadow:
-    image: ghcr.io/infinimesh/infinimesh/shadow:latest
+    image: ghcr.io/infinimesh/infinimesh/shadow:v3.0.0
     restart: unless-stopped
     depends_on:
       - redis
