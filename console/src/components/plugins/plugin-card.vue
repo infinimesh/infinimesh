@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineAsyncComponent } from "vue";
 import {
     NCard,
     NTooltip,
@@ -103,13 +103,16 @@ import {
     NButton,
     NPopconfirm,
 } from "naive-ui";
-import { AddOutline, ImageOutline, LockClosedOutline } from "@vicons/ionicons5"
-
-import VueMarkdownIt from 'vue3-markdown-it';
 
 import { useAppStore } from "@/store/app";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
+
+const VueMarkdownIt = defineAsyncComponent(() => import("vue3-markdown-it"))
+
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const ImageOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ImageOutline"))
+const LockClosedOutline = defineAsyncComponent(() => import("@vicons/ionicons5/LockClosedOutline"))
 
 const as = useAppStore()
 const { dev } = storeToRefs(as)

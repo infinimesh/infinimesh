@@ -37,17 +37,19 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
-import { NSpin, NGrid, NGridItem, NH1, NText, NButton, NIcon, NSpace, NAlert } from 'naive-ui';
-import { RefreshOutline, GitNetworkOutline } from '@vicons/ionicons5';
+import { watch, defineAsyncComponent } from 'vue'
+import { NSpin, NGrid, NGridItem, NH1, NText, NButton, NIcon, NAlert } from 'naive-ui';
 
 import { useAppStore } from "@/store/app";
 import { usePluginsStore } from "@/store/plugins"
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from 'pinia';
 
-import PluginsPool from "@/components/plugins/pool.vue"
-import PluginCreate from "@/components/plugins/create-drawer.vue"
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
+const GitNetworkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/GitNetworkOutline"))
+
+const PluginsPool = defineAsyncComponent(() => import("@/components/plugins/pool.vue"))
+const PluginCreate = defineAsyncComponent(() => import("@/components/plugins/create-drawer.vue"))
 
 const as = useAppStore()
 const nss = useNSStore();
@@ -55,7 +57,6 @@ const store = usePluginsStore()
 
 const { loading, plugins } = storeToRefs(store)
 const { dev } = storeToRefs(as)
-
 
 store.fetchPlugins()
 
