@@ -16,12 +16,12 @@ import ThemePicker from "@/components/core/theme-picker.vue";
 
 <style>
 span.infinimesh {
-  font-size: 2vh;
+  font-size: 3vh;
   font-family: "Exo 2", sans-serif;
 }
 
 span.copyright {
   vertical-align: super;
-  font-size: 0.8vh;
+  font-size: 1.2vh;
 }
 </style>
