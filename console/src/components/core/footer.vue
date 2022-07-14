@@ -34,7 +34,6 @@ const min_clicked = ref(false)
 const block_clicked = ref(false)
 
 function handler() {
-  console.log('clicked')
   if (block_clicked.value) {
     return
   }
