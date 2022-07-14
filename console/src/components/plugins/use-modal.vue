@@ -100,7 +100,6 @@ async function submit() {
         return
     }
 
-    console.log({ ...ns, plugin: props.plugin.uuid })
     await nss.update({ ...ns, plugin: props.plugin.uuid })
 
     emit('close')

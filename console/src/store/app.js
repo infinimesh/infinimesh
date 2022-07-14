@@ -33,6 +33,7 @@ export const useAppStore = defineStore("app", {
       function err_check(err) {
         check_token_expired(err, store)
         check_offline(err, store)
+        return err
       }
 
       instance.interceptors.response.use((r) => r, err_check)
