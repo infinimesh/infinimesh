@@ -25,7 +25,7 @@ import (
 )
 
 var SERVICES_ENABLED = []byte("{}")
-var SERVICES_ENABLED_MAP = map[string]bool{}
+var SERVICES_ENABLED_MAP = map[string]string{}
 
 func init_cs(log *zap.Logger) {
 	var enabled = map[string]string{}
@@ -36,16 +36,16 @@ func init_cs(log *zap.Logger) {
 	if http_fs != "" {
 		log.Info("HTTP-FS is set", zap.String("url", http_fs))
 		enabled["http_fs"] = http_fs
-		SERVICES_ENABLED_MAP["http_fs"] = true
+		SERVICES_ENABLED_MAP["http_fs"] = http_fs
 	}
 
-	viper.SetDefault("HANDSFREE", false)
-	handsfree := viper.GetBool("HANDSFREE")
-	log.Debug("HANDSFREE", zap.Bool("value", handsfree))
-	if handsfree {
+	viper.SetDefault("HANDSFREE", "")
+	handsfree := viper.GetString("HANDSFREE")
+	log.Debug("HANDSFREE", zap.String("value", handsfree))
+	if handsfree != "" {
 		log.Info("Handsfree service is enabled")
 		enabled["handsfree"] = ""
-		SERVICES_ENABLED_MAP["handsfree"] = true
+		SERVICES_ENABLED_MAP["handsfree"] = handsfree
 	}
 
 	var err error

@@ -126,9 +126,9 @@ func main() {
 		log.Fatal("Failed to register ConsoleServices service", zap.Error(err))
 	}
 
-	if e, ok := SERVICES_ENABLED_MAP["handsfree"]; e && ok {
+	if e, ok := SERVICES_ENABLED_MAP["handsfree"]; ok {
 		log.Info("Handsfree enabled, registering Gateway")
-		err = hfpb.RegisterHandsfreeServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+		err = hfpb.RegisterHandsfreeServiceHandlerFromEndpoint(context.Background(), gwmux, e, opts)
 		if err != nil {
 			log.Fatal("Failed to register Handsfree service gateway", zap.Error(err))
 		}
