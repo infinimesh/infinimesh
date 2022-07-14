@@ -24,11 +24,15 @@ const chars = ref(new Array(6))
 
 function update(id, value) {
   chars.value[id] = value.toUpperCase()
-
-  if (value == "" && id > 0) {
-    chars_refs.value[id - 1].value[0].focus()
-  } else if (value != "" && id < 5) {
-    chars_refs.value[id + 1].value[0].focus()
+  try {
+    if (value == "" && id > 0) {
+      chars_refs.value[id - 1].value[0].focus()
+    } else if (value != "" && id < 5) {
+      chars_refs.value[id + 1].value[0].focus()
+    }
+  } catch (e) {
+    console.error(e)
+    console.log("this might help", id, chars_refs)
   }
 }
 
@@ -47,12 +51,6 @@ watch(chars, () => {
 }, {
   deep: true
 })
-
-// window.addEventListener("keydown", function (e) {
-//   if (e.keyCode == 8) {
-//     console.log('go back')
-//   }
-// });
 
 </script>
 
