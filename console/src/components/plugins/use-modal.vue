@@ -36,14 +36,17 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits } from 'vue';
+import { ref, computed, defineProps, defineEmits, defineAsyncComponent } from 'vue';
 
 import { NCard, NModal, NButton, NIcon, NSelect, NAlert, NSpace } from "naive-ui"
-import { CloseOutline, GitNetworkOutline, ExtensionPuzzleOutline } from '@vicons/ionicons5';
 
 import { useNSStore } from "@/store/namespaces";
 
 import { access_lvl_conv } from "@/utils/access";
+
+const CloseOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloseOutline"))
+const GitNetworkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/GitNetworkOutline"))
+const ExtensionPuzzleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ExtensionPuzzleOutline"))
 
 const nss = useNSStore();
 
@@ -97,7 +100,6 @@ async function submit() {
         return
     }
 
-    console.log({ ...ns, plugin: props.plugin.uuid })
     await nss.update({ ...ns, plugin: props.plugin.uuid })
 
     emit('close')

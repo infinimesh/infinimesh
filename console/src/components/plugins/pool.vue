@@ -12,11 +12,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineAsyncComponent } from "vue";
 import { NEmpty, NGrid, NGridItem, } from "naive-ui";
 
-import PluginCard from "./plugin-card.vue";
-import PluginUse from "./use-modal.vue"
+const PluginCard = defineAsyncComponent(() => import("./plugin-card.vue"))
+const PluginUse = defineAsyncComponent(() => import("./use-modal.vue"))
 
 const grid = ref({ responsiveCols: 0 });
 
@@ -54,7 +54,6 @@ const pool = computed(() => {
 const showUseModal = ref(false)
 const usePlugin = ref({})
 function ShowUseModal(plugin) {
-    console.log(plugin)
     usePlugin.value = plugin
     showUseModal.value = true
 }

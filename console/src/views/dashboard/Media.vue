@@ -182,9 +182,6 @@ onMounted(() => {
 })
 
 function handleBeforeUpload({ file }) {
-  console.log(file)
-
-  console.log(file.name.replace(/[^a-zA-Z0-9\.]/g, ""))
   let filename = file.name.replace(/[^a-zA-Z0-9\.]/g, "")
 
   let data = new FormData();

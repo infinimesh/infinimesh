@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
+	hfpb "github.com/infinimesh/proto/handsfree"
 	pb "github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/plugins"
 	"github.com/tmc/grpc-websocket-proxy/wsproxy"
@@ -123,6 +124,14 @@ func main() {
 	err = gwmux.HandlePath("GET", "/console/services", cs_handler())
 	if err != nil {
 		log.Fatal("Failed to register ConsoleServices service", zap.Error(err))
+	}
+
+	if e, ok := SERVICES_ENABLED_MAP["handsfree"]; ok {
+		log.Info("Handsfree enabled, registering Gateway")
+		err = hfpb.RegisterHandsfreeServiceHandlerFromEndpoint(context.Background(), gwmux, e, opts)
+		if err != nil {
+			log.Fatal("Failed to register Handsfree service gateway", zap.Error(err))
+		}
 	}
 
 	log.Info("Allowed Origins", zap.Strings("hosts", corsAllowed))

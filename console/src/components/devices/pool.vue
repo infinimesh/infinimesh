@@ -10,9 +10,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, defineAsyncComponent } from "vue";
 import { NEmpty, NGrid, NGridItem, } from "naive-ui";
-import DeviceCard from "./device-card.vue";
+
+const DeviceCard = defineAsyncComponent(() => import("./device-card.vue"))
 
 const grid = ref({ responsiveCols: 0 });
 

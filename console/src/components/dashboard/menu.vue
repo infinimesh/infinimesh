@@ -4,15 +4,21 @@
 </template>
 
 <script setup>
-import { ref, h, computed } from "vue";
+import { ref, h, computed, defineAsyncComponent } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { NMenu } from "naive-ui";
 
 import { renderIcon } from "@/utils";
-import { GridOutline, HardwareChipOutline, PeopleOutline, GitNetworkOutline, ImagesOutline, ExtensionPuzzleOutline } from "@vicons/ionicons5";
 
 import { useAppStore } from "@/store/app"
 import { storeToRefs } from "pinia"
+
+const GridOutline = defineAsyncComponent(() => import("@vicons/ionicons5/GridOutline"))
+const HardwareChipOutline = defineAsyncComponent(() => import("@vicons/ionicons5/HardwareChipOutline"))
+const PeopleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/PeopleOutline"))
+const GitNetworkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/GitNetworkOutline"))
+const ImagesOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ImagesOutline"))
+const ExtensionPuzzleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ExtensionPuzzleOutline"))
 
 const props = defineProps({
   collapsed: {

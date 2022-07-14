@@ -98,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, defineAsyncComponent } from "vue";
 import {
   NSpin,
   NTable,
@@ -112,21 +112,24 @@ import {
   NText,
   useLoadingBar, useMessage
 } from "naive-ui";
-import { CheckmarkOutline, BanOutline, RefreshOutline, LockClosedOutline } from "@vicons/ionicons5";
+
 import { useAppStore } from "@/store/app";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
-import AccountCreate from "@/components/accounts/create-drawer.vue";
-
-import UuidBadge from "@/components/core/uuid-badge.vue";
-
-import AccessBadge from "@/components/core/access-badge"
 import { access_lvl_conv } from "@/utils/access";
-import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
-import AccDelete from "@/components/core/recursive-delete-modal.vue";
 
+const CheckmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CheckmarkOutline"))
+const BanOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BanOutline"))
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
+const LockClosedOutline = defineAsyncComponent(() => import("@vicons/ionicons5/LockClosedOutline"))
+
+const UuidBadge = defineAsyncComponent(() => import("@/components/core/uuid-badge.vue"))
+const AccessBadge = defineAsyncComponent(() => import("@/components/core/access-badge"))
+const AccountCreate = defineAsyncComponent(() => import("@/components/accounts/create-drawer.vue"))
+const setCredentialsModal = defineAsyncComponent(() => import("@/components/accounts/set-credentials-modal.vue"))
+const AccDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);

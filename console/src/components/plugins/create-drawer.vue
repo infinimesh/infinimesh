@@ -92,16 +92,19 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, defineAsyncComponent } from "vue"
 import {
     useLoadingBar, NButton, NIcon, NDrawer, NDrawerContent, NSpace, NForm, NFormItem, NInput, NAlert,
     NGrid, NGridItem, NDivider, NRadioGroup, NRadioButton, NSwitch
 } from 'naive-ui';
-import { AddOutline, LogoMarkdown, BookmarkOutline } from '@vicons/ionicons5';
 
 import { usePluginsStore } from "@/store/plugins"
 
-import PluginCard from "./plugin-card.vue";
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const LogoMarkdown = defineAsyncComponent(() => import("@vicons/ionicons5/LogoMarkdown"))
+const BookmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BookmarkOutline"))
+
+const PluginCard = defineAsyncComponent(() => import("./plugin-card.vue"))
 
 const show = ref(false);
 

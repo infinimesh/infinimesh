@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed, defineAsyncComponent } from "vue"
 import { useRouter } from "vue-router"
 import {
   NSpin,
@@ -120,7 +120,6 @@ import {
   NText,
   useMessage
 } from "naive-ui";
-import { RefreshOutline, ChevronForwardOutline, ChevronDownOutline } from "@vicons/ionicons5";
 
 import { useNSStore } from "@/store/namespaces";
 
@@ -128,18 +127,22 @@ import { storeToRefs } from "pinia";
 import { access_lvl_conv } from "@/utils/access";
 import { groupBy } from "lodash";
 
-import NsCreate from "@/components/namespaces/create-action-button.vue"
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
+const ChevronForwardOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ChevronForwardOutline"))
+const ChevronDownOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ChevronDownOutline"))
 
-import UuidBadge from "@/components/core/uuid-badge.vue";
-import AccessBadge from "@/components/core/access-badge";
-import NsDelete from "@/components/core/recursive-delete-modal.vue";
-import NsJoins from "@/components/namespaces/joins.vue";
+const UuidBadge = defineAsyncComponent(() => import("@/components/core/uuid-badge.vue"))
+const AccessBadge = defineAsyncComponent(() => import("@/components/core/access-badge"))
+
+const NsCreate = defineAsyncComponent(() => import("@/components/namespaces/create-action-button.vue"))
+const NsJoins = defineAsyncComponent(() => import("@/components/namespaces/joins.vue"))
+const NsDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
 
 const store = useNSStore();
 const { loading, namespaces_list: namespaces } = storeToRefs(store);
 
 const pool = computed(() => groupBy(namespaces.value, (e) => {
-  if (e.access.role == "OWNER" || access_lvl_conv(e) >= 3) {
+  if ((e.access ?? { role: "" }).role == "OWNER" || access_lvl_conv(e) >= 3) {
     return "admin"
   }
   return "user"

@@ -1,6 +1,6 @@
 version: "3.2"
 services:
-  
+
   proxy:
     image: traefik:latest
     labels:
@@ -39,6 +39,7 @@ services:
     environment:
       APISERVER_HOST: repo:8000
       HTTP_FS: "http://media.${BASE_DOMAIN}"
+      HANDSFREE: handsfree:8000
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -98,10 +99,10 @@ services:
       REDIS_HOST: redis:6379
       DEVICES_HOST: repo:8000
       SIGNING_KEY: "${SIGNING_KEY}"
-      
+
   redis:
     image: redis:latest
-    command: ["redis-server", "--appendonly", "yes"]
+    command: [ "redis-server", "--appendonly", "yes" ]
 
   db:
     image: arangodb/arangodb:latest
@@ -125,7 +126,18 @@ services:
       - traefik.http.services.http-fs.loadbalancer.server.port=8000
     volumes:
       - user-media:/static
-      
+
+  # Comment this service and HF env variable at web service to disable handsfree service
+  handsfree:
+    image: ghcr.io/infinimesh/infinimesh/handsfree:latest
+    restart: always
+    environment:
+      SIGNING_KEY: "${SIGNING_KEY}"
+    labels:
+      - traefik.http.routers.handsfree.rule=Host(`api.${BASE_DOMAIN}`)&&PathPrefix("/infinimesh.handsfree.")
+      - traefik.http.routers.handsfree.entrypoints=grpc
+      - traefik.http.services.handsfree.loadbalancer.server.port=8000
+      - traefik.http.services.handsfree.loadbalancer.server.scheme=h2c
 
 volumes:
   data:

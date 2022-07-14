@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, defineAsyncComponent } from "vue";
 import {
   NButton,
   NDrawer,
@@ -78,10 +78,12 @@ import {
   NAlert,
   useLoadingBar,
 } from "naive-ui";
-import { AddOutline, CloudUploadOutline } from "@vicons/ionicons5";
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { access_lvl_conv } from "@/utils/access";
+
+const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const CloudUploadOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloudUploadOutline"))
 
 const show = ref(false);
 

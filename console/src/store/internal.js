@@ -10,10 +10,12 @@ export const useIStore = defineStore("internal", {
 
     actions: {
         async getLDAPProviders() {
-            const { data } = await as.http.get("/i/ldapp");
-
-            this.ldap_providers = data.providers
-
+            try {
+                const { data } = await as.http.get("/i/ldapp");
+                this.ldap_providers = data.providers
+            } catch (e) {
+                console.warn("Error while getting LDAP providers", e)
+            }
         }
     }
 })
