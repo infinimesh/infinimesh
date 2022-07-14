@@ -8,7 +8,7 @@
         Enter Code
     </n-button>
     <n-modal :show="show" @update:show="e => show = e">
-        <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true">
+        <n-card style="min-width: 60vw" :bordered="false" size="huge" role="dialog" aria-modal="true">
             <template #header>
                 Authorize device(s) with the Code
             </template>
@@ -65,8 +65,8 @@ const Code = defineAsyncComponent(() => import("./register_modal/code.vue"))
 const store = useDevicesStore()
 const as = useAppStore()
 
-const show = ref(false)
-const step = ref(1)
+const show = ref(true)
+const step = ref(2)
 const next_enabled = ref(false)
 const loading = ref(false)
 const error = ref(false)

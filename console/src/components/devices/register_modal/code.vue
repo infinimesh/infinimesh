@@ -1,10 +1,10 @@
 <template>
   <n-space justify="center" align="center">
-    <n-input v-for="n in 3" minlength="1" maxlength="1" style="max-width: 3.5vw" placeholder="" :ref="'char' + (n - 1)"
-      @update:value="v => update(n - 1, v)" :value="chars[n - 1]" />
+    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="'char' + (n - 1)"
+      @update:value="v => update(n - 1, v)" :value="chars[n - 1]" class="char-input" size="large" />
     <span>-</span>
-    <n-input v-for="n in 3" minlength="1" maxlength="1" style="max-width: 3.5vw" placeholder="" :ref="'char' + (2 + n)"
-      @update:value="v => update(n + 2, v)" :value="chars[n + 2]" />
+    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="'char' + (2 + n)"
+      @update:value="v => update(n + 2, v)" :value="chars[n + 2]" class="char-input" size="large" />
   </n-space>
 </template>
 
@@ -48,10 +48,17 @@ watch(chars, () => {
   deep: true
 })
 
-window.addEventListener("keydown", function (e) {
-  if (e.keyCode == 8) {
-    console.log('go back')
-  }
-});
+// window.addEventListener("keydown", function (e) {
+//   if (e.keyCode == 8) {
+//     console.log('go back')
+//   }
+// });
 
 </script>
+
+<style>
+.char-input {
+  text-align: center;
+  max-width: calc(3 * var(--n-font-size));
+}
+</style>
