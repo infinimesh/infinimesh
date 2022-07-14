@@ -106,7 +106,7 @@ async function next() {
     try {
         switch (step.value) {
             case 1:
-                token = await store.makeDevicesToken(tokenRequest.selected, tokenRequest.post)
+                token = await store.makeDevicesToken(tokenRequest.devices, tokenRequest.post)
                 step.value++
                 break
             case 2:
