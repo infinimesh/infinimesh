@@ -8,7 +8,7 @@
         Enter Code
     </n-button>
     <n-modal :show="show" @update:show="e => show = e">
-        <n-card style="min-width: 60vw" :bordered="false" size="huge" role="dialog" aria-modal="true">
+        <n-card style="min-width: 60vw; max-width: 90vw;" :bordered="false" size="huge" role="dialog" aria-modal="true">
             <template #header>
                 Authorize device(s) with the Code
             </template>
