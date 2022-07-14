@@ -1,35 +1,34 @@
 <template>
   <n-space justify="center" align="center">
-    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="'char' + (n - 1)"
+    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="el => chars_refs[n - 1] = el"
       @update:value="v => update(n - 1, v)" :value="chars[n - 1]" class="char-input" size="large" />
     <span>-</span>
-    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="'char' + (2 + n)"
+    <n-input v-for="n in 3" minlength="1" maxlength="1" placeholder="" :ref="el => chars_refs[n + 2] = el"
       @update:value="v => update(n + 2, v)" :value="chars[n + 2]" class="char-input" size="large" />
   </n-space>
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, onBeforeUpdate } from "vue"
 import { NSpace, NInput } from "naive-ui"
 
-const char0 = ref(null)
-const char1 = ref(null)
-const char2 = ref(null)
-const char3 = ref(null)
-const char4 = ref(null)
-const char5 = ref(null)
+const chars_refs = ref([])
 
-const chars_refs = ref([char0, char1, char2, char3, char4, char5])
 const chars = ref(new Array(6))
 
 function update(id, value) {
+  console.log(id, value)
   chars.value[id] = value.toUpperCase()
   try {
-    if (value == "" && id > 0) {
-      chars_refs.value[id - 1].value[0].focus()
-    } else if (value != "" && id < 5) {
-      chars_refs.value[id + 1].value[0].focus()
+    let input;
+    if (value == "" && id > 0) { // char removed after the first input
+      input = chars_refs.value[id - 1] // focus on the previous one
+    } else if (value != "" && id < 5) { // char enterd anywhere except the last input
+      input = chars_refs.value[id + 1] // focus on the next one
+    } else {
+      return
     }
+    input.focus()
   } catch (e) {
     console.error(e)
     console.log("this might help", id, chars_refs)
