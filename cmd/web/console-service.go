@@ -25,6 +25,7 @@ import (
 )
 
 var SERVICES_ENABLED = []byte("{}")
+var SERVICES_ENABLED_MAP = map[string]bool{}
 
 func init_cs(log *zap.Logger) {
 	var enabled = map[string]string{}
@@ -35,6 +36,7 @@ func init_cs(log *zap.Logger) {
 	if http_fs != "" {
 		log.Info("HTTP-FS is set", zap.String("url", http_fs))
 		enabled["http_fs"] = http_fs
+		SERVICES_ENABLED_MAP["http_fs"] = true
 	}
 
 	viper.SetDefault("HANDSFREE", false)
@@ -43,6 +45,7 @@ func init_cs(log *zap.Logger) {
 	if handsfree {
 		log.Info("Handsfree service is enabled")
 		enabled["handsfree"] = ""
+		SERVICES_ENABLED_MAP["handsfree"] = true
 	}
 
 	var err error
