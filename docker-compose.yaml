@@ -129,7 +129,7 @@ services:
 
   # Comment this service and HF env variable at web service to disable handsfree service
   handsfree:
-    image: ghcr.io/infinimesh/infinimesh/handsfree:latest
+    image: ghcr.io/infinimesh/infinimesh/handsfree:v3.0.0
     restart: always
     environment:
       SIGNING_KEY: "${SIGNING_KEY}"
