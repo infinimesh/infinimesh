@@ -31,8 +31,9 @@
     </n-grid>
 
     <n-collapse-item title="Patch Reported" name="reported_patch" v-if="debug">
-      <template #header-extra v-if="reported_validation == 'success'">
-        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmitReported">
+      <template #header-extra>
+        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmitReported"
+          :disabled="reported_validation != 'success'">
           Submit
         </n-button>
       </template>
@@ -70,8 +71,8 @@
     </n-grid>
 
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
-      <template #header-extra v-if="validation == 'success'">
-        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmit">
+      <template #header-extra>
+        <n-button tertiary round type="warning" @click.stop.prevent="handleSubmit" :disabled="validation != 'success'">
           Submit
         </n-button>
       </template>
