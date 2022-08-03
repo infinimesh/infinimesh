@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
-    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-env": "^7.18.10",
     "@nuxt/types": "^2.14.3",
     "@nuxtjs/color-mode": "^2.0.9",
     "@nuxtjs/vuetify": "^1.11.2",
