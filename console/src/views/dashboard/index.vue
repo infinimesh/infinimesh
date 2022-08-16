@@ -96,10 +96,21 @@ onMounted(async () => {
     watch(ns, loadPlugin)
 })
 
+function makeid(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
+}
+
 const src = computed(() => {
     if (plugin.value.state != undefined) return ""
     const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme, api: baseURL }
-    const src = `${plugin.value.embeddedConf.frameUrl}?a=${btoa(JSON.stringify(params))}`
+    const src = `${plugin.value.embeddedConf.frameUrl}?a=${btoa(JSON.stringify(params))}&${makeid(6)}=${makeid(10)}`
     return src
 })
 </script>
