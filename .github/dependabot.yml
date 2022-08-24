@@ -9,17 +9,33 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    reviewers:
+      - slntopp
+    assignees:
+      - slntopp
   - package-ecosystem: "npm"
     directory: "frontend"
     schedule:
       interval: "daily"
+    reviewers:
+      - slntopp
+    assignees:
+      - slntopp
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    reviewers:
+      - slntopp
+    assignees:
+      - slntopp
     target-branch: v3.0
   - package-ecosystem: "npm"
     directory: "frontend"
     schedule:
       interval: "daily"
+    reviewers:
+      - slntopp
+    assignees:
+      - slntopp
     target-branch: v3.0
