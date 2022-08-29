@@ -1,6 +1,14 @@
 <template>
   <n-spin :show="patching" @mouseover="hover = true" @mouseleave="hover = false">
-    <n-card hoverable :title="device.title" :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
+    <n-card hoverable :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
+      <template #header>
+        <n-space aligh="center">
+          {{  device.title  }}
+          <div :style="{ visibility: hover ? '' : 'hidden' }">
+            <edit-dev-title-modal :device="device" @save="handleUpdateTitle" />
+          </div>
+        </n-space>
+      </template>
       <template #header-extra>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
@@ -74,7 +82,6 @@
                 </n-icon>
               </template>
             </n-button>
-
           </template>
         </n-space>
       </template>
@@ -107,6 +114,7 @@ import { storeToRefs } from "pinia";
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
 
+const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
 
@@ -197,8 +205,16 @@ async function handleMakeToken() {
 
 async function handleUpdateTags(tags, resolve, reject) {
   try {
-    console.log('updating', device.value.uuid, tags)
     await store.updateDevice(device.value.uuid, { title: device.value.title, tags: tags })
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
+}
+
+async function handleUpdateTitle(title, resolve, reject) {
+  try {
+    await store.updateDevice(device.value.uuid, { title: title, tags: device.value.tags })
     resolve()
   } catch (e) {
     reject(e)

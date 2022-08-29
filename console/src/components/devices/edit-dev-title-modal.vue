@@ -1,21 +1,20 @@
 <template>
-    <n-button type="info" round tertiary @click="show = true">
+    <n-button type="info" round quaternary @click="show = true">
         <template #icon>
             <n-icon>
-                <add-outline />
+                <pencil-outline />
             </n-icon>
         </template>
-        {{  device.tags.length > 0 ? 'Edit' : 'Add'  }} Tags
     </n-button>
     <n-modal :show="show" @update:show="e => show = e">
         <n-spin :show="loading">
             <template #description>
-                Updating Tags...
+                Updating Title...
             </template>
             <n-card style="min-width: 30vw; max-width: 90vw;" :bordered="false" size="huge" role="dialog"
                 aria-modal="true">
                 <template #header>
-                    Edit Device({{  device.title  }}) Tags
+                    Edit Device({{  device.title  }}) Title
                 </template>
                 <template #header-extra>
                     <n-button @click="show = false" quaternary circle size="large">
@@ -28,7 +27,7 @@
                 </template>
 
                 <n-space vertical justify="space-between">
-                    <n-dynamic-tags v-model:value="tags" type="warning" round size="large" />
+                    <n-input v-model:value="title" placeholder="Make it bright" />
                 </n-space>
 
                 <n-space justify="end" align="center" style="margin-top: 2vh">
@@ -42,9 +41,9 @@
 
 <script setup>
 import { ref, toRefs, watch, defineAsyncComponent } from "vue"
-import { useMessage, NButton, NIcon, NCard, NModal, NSpace, NDynamicTags, NSpin } from 'naive-ui';
+import { useMessage, NButton, NIcon, NCard, NModal, NSpace, NInput, NSpin } from 'naive-ui';
 
-const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
+const PencilOutline = defineAsyncComponent(() => import("@vicons/ionicons5/PencilOutline"))
 const CloseOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloseOutline"))
 
 const props = defineProps({
@@ -57,10 +56,10 @@ const { device } = toRefs(props)
 
 const show = ref(false)
 const loading = ref(false)
+const title = ref("")
 
-const tags = ref([])
 watch(show, () => {
-    tags.value = show.value ? device.value.tags : []
+    title.value = show.value ? device.value.title : ""
     loading.value = false
 })
 
@@ -69,7 +68,7 @@ const message = useMessage()
 
 function handleSubmit() {
     loading.value = true
-    emit('save', tags.value, () => {
+    emit('save', title.value, () => {
         show.value = false
     }, (msg) => {
         message.error(msg)
