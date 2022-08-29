@@ -1,15 +1,15 @@
 <template>
-  <n-spin :show="patching">
+  <n-spin :show="patching" @mouseover="hover = true" @mouseleave="hover = false">
     <n-card hoverable :title="device.title" :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
       <template #header-extra>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
             <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
               @click="handleUUIDClicked">
-              {{ device.uuid_short }}
+              {{  device.uuid_short  }}
             </n-tag>
           </template>
-          {{ device.uuid }}
+          {{  device.uuid  }}
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
@@ -23,27 +23,30 @@
 
       <template #footer>
         <template v-if="show_ns">
-          Namespace: <strong>{{ nss.namespaces[device.access.namespace]?.title || device.access.namespace }}</strong>
+          Namespace: <strong>{{  nss.namespaces[device.access.namespace]?.title || device.access.namespace  }}</strong>
         </template><br />
         <template v-if="device.tags.length > 0">
           Tags:
           <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
-            {{ tag }}
+            {{  tag  }}
           </n-tag>
         </template>
+        <div :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
+          <edit-tags-modal :device="device" @save="handleUpdateTags" />
+        </div>
       </template>
 
       <template #action>
         <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" :debug="debug"
           @submit="handlePatchDesired" @submit-debug="handlePatchReported" />
         <n-space justify="start" align="center" style="margin-top: 1vh">
-          <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">{{ subscribed ?
-              "Subscribed" : "Subscribe"
-          }}</n-button>
+          <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
+            {{  subscribed ? "Subscribed" : "Subscribe"  }}
+          </n-button>
 
-          <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">{{ patch ?
-              "Cancel Patch" : "Patch Desired"
-          }}</n-button>
+          <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
+            {{  patch ? "Cancel Patch" : "Patch Desired"  }}
+          </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
@@ -104,6 +107,7 @@ import { storeToRefs } from "pinia";
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
 
+const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
 
 const props = defineProps({
@@ -191,5 +195,17 @@ async function handleMakeToken() {
   }
 }
 
+async function handleUpdateTags(tags, resolve, reject) {
+  try {
+    console.log('updating', device.value.uuid, tags)
+    await store.updateDevice(device.value.uuid, { title: device.value.title, tags: tags })
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
+}
+
 const nss = useNSStore()
+
+const hover = ref(false)
 </script>

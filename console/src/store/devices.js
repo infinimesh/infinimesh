@@ -53,9 +53,9 @@ export const useDevicesStore = defineStore("devices", {
       const { data } = await as.http.get("/devices");
 
       if (no_cache) {
-        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {});
+        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r; }, {});
       } else {
-        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r }, {}) };
+        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r; }, {}) };
       }
 
       if (state)
@@ -79,13 +79,13 @@ export const useDevicesStore = defineStore("devices", {
 
         if (response.reported) {
           if (this.reported.get(response.device)) {
-            response.reported.data = { ...this.reported.get(response.device).data, ...response.reported.data }
+            response.reported.data = { ...this.reported.get(response.device).data, ...response.reported.data };
           }
           this.reported.set(response.device, response.reported);
         }
         if (response.desired) {
           if (this.desired.get(response.device)) {
-            response.desired.data = { ...this.desired.get(response.device).data, ...response.desired.data }
+            response.desired.data = { ...this.desired.get(response.device).data, ...response.desired.data };
           }
           this.desired.set(response.device, response.desired);
         }
@@ -110,7 +110,7 @@ export const useDevicesStore = defineStore("devices", {
     },
     // pool - array of devices UUIDs
     async getDevicesState(pool, token) {
-      if (pool.length == 0) return
+      if (pool.length == 0) return;
       if (!token) {
         token = await this.makeDevicesToken(pool);
       }
@@ -124,6 +124,16 @@ export const useDevicesStore = defineStore("devices", {
       for (let shadow of data.shadows) {
         this.reported.set(shadow.device, shadow.reported);
         this.desired.set(shadow.device, shadow.desired);
+      }
+    },
+    async updateDevice(device, patch) {
+      if (!patch.title || !patch.tags) throw "Both device Title and Tags must be specified while update";
+      try {
+        const { data } = await as.http.patch(`/devices/${device}`, patch);
+        this.devices[device] = data;
+      } catch (e) {
+        console.error(e);
+        throw `Error Updating Device: ${err.response.data.message}`;
       }
     },
     async patchDesiredState(device, state, bar) {
