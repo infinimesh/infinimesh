@@ -3,9 +3,9 @@ import { defineStore } from "pinia";
 
 import { check_token_expired, check_offline } from "@/utils/access";
 
-export const baseURL = import.meta.env.DEV
-  ? "http://api.infinimesh.local"
-  : window.location.origin.replace("console.", "api.");
+export const baseURL =
+  import.meta.env.DEV ? "http://api.infinimesh.local" // jshint ignore:line
+    : window.location.origin.replace("console.", "api.");
 
 export const useAppStore = defineStore("app", {
   state: () => ({
@@ -29,15 +29,15 @@ export const useAppStore = defineStore("app", {
         },
       });
 
-      const store = this
+      const store = this;
       function err_check(err) {
-        check_token_expired(err, store)
-        check_offline(err, store)
-        return err
+        check_token_expired(err, store);
+        check_offline(err, store);
+        return err;
       }
 
-      instance.interceptors.response.use((r) => r, err_check)
-      return instance
+      instance.interceptors.response.use((r) => r, err_check);
+      return instance;
     },
   },
   actions: {
@@ -45,7 +45,7 @@ export const useAppStore = defineStore("app", {
       this.$reset();
     },
     offline() {
-      this.$router.push({ name: 'Offline' })
+      this.$router.push({ name: 'Offline' });
     }
   },
 
