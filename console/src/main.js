@@ -12,8 +12,8 @@ import piniaPersist from "pinia-plugin-persist";
 const pinia = createPinia();
 pinia.use(piniaPersist);
 pinia.use(({ store }) => {
-  store.$router = markRaw(router)
-})
+  store.$router = markRaw(router);
+});
 
 const app = createApp(App);
 
