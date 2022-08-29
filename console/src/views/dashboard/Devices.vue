@@ -5,6 +5,9 @@
         <n-space justify="space-between">
           <n-h1 prefix="bar" align-text type="info">
             <n-text type="info"> Devices </n-text>
+            (
+            <n-number-animation :from="0" :to="devices.length" />
+            )
           </n-h1>
           <n-button strong secondary round type="info" @click="handleRefresh">
             <template #icon>
@@ -29,7 +32,7 @@
 
 <script setup>
 import { defineAsyncComponent } from "vue"
-import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace } from "naive-ui";
+import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
