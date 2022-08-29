@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -172,6 +172,10 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 
 	if curr.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	}
+
+	if dev.Title == "" {
+		return nil, status.Error(codes.InvalidArgument, "Device Title cannot be empty")
 	}
 
 	curr.Tags = dev.Tags
