@@ -172,7 +172,7 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	if req.Sync {
 		func() {
 			log.Debug("Sending current state")
-			r, err := s.Get(context.Background(), &pb.GetRequest{
+			r, err := s.Get(srv.Context(), &pb.GetRequest{
 				Pool: req.GetDevices(),
 			})
 			if err != nil {
