@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import (
 	shadowpb "github.com/infinimesh/proto/shadow"
 )
 
-//ShadowAPI data strcuture
+// ShadowAPI data strcuture
 type ShadowAPI struct {
 	pb.UnimplementedShadowServiceServer
 
@@ -56,7 +56,7 @@ func (s *ShadowAPI) Get(ctx context.Context, _ *shadowpb.GetRequest) (response *
 	return s.client.Get(ctx, &shadowpb.GetRequest{Pool: devices_scope})
 }
 
-//PatchDesiredState is a method to update the current state of the device
+// PatchDesiredState is a method to update the current state of the device
 func (s *ShadowAPI) Patch(ctx context.Context, request *shadowpb.Shadow) (response *shadowpb.Shadow, err error) {
 	log := s.log.Named("PatchDesiredState")
 
@@ -113,7 +113,7 @@ func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (
 	return s.client.Remove(ctx, request)
 }
 
-//StreamShadow is a method to get the stream for a device
+// StreamShadow is a method to get the stream for a device
 func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
 	log := s.log.Named("StreamReportedStateChanges")
 
@@ -146,4 +146,9 @@ func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.S
 			return err
 		}
 	}
+}
+
+func (s *ShadowAPI) StreamShadowSync(request *shadowpb.StreamShadowRequest, srv pb.ShadowService_StreamShadowSyncServer) (err error) {
+	request.Sync = true
+	return s.StreamShadow(request, srv)
 }

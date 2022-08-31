@@ -181,6 +181,12 @@ github.com/infinimesh/proto v0.0.0-20220714085139-ef57e42cbc97 h1:sZe3cYbw7nqRdi
 github.com/infinimesh/proto v0.0.0-20220714085139-ef57e42cbc97/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/infinimesh/proto v0.0.0-20220831201531-0cfe38d3e864 h1:Ii6jJANZgTnZ5HOfyHhl3ifbYlD67pqR1bUL273fu7g=
 github.com/infinimesh/proto v0.0.0-20220831201531-0cfe38d3e864/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220831205352-28310646d1cc h1:Zg36iYApZKSs4d0A6o/cD33tBbHMNqlfJiJ+IHMDPIU=
+github.com/infinimesh/proto v0.0.0-20220831205352-28310646d1cc/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220831205718-93f6ef9addb9 h1:exiuLy76o8IPtBb6MTc9gZOkBPxoGXABcZ1yHhekDU4=
+github.com/infinimesh/proto v0.0.0-20220831205718-93f6ef9addb9/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220831205838-b5a2435b66e4 h1:p4tNt8hQYxG5U6La4d8Ara6wVUU/LFalBAfZyecI2/Q=
+github.com/infinimesh/proto v0.0.0-20220831205838-b5a2435b66e4/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
