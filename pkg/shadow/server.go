@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -167,6 +167,22 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	devices := map[string]bool{}
 	for _, id := range req.GetDevices() {
 		devices[id] = true
+	}
+
+	if req.Sync {
+		func() {
+			log.Debug("Sending current state")
+			r, err := s.Get(context.Background(), &pb.GetRequest{
+				Pool: req.GetDevices(),
+			})
+			if err != nil {
+				log.Warn("Couldn't get current devices Shadow state", zap.Error(err))
+				return
+			}
+			for _, s := range r.GetShadows() {
+				srv.Send(s)
+			}
+		}()
 	}
 
 	messages := make(chan interface{}, 10)
