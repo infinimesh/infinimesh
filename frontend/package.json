@@ -32,7 +32,7 @@
     "ant-design-vue": "^1.7.5",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "babel-jest": "^29.0.1",
+    "babel-jest": "^29.0.2",
     "css-what": "^6.1.0",
     "eslint": "^7.27.0",
     "eslint-friendly-formatter": "^4.0.1",
