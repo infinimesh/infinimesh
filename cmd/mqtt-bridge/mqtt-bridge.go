@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -30,7 +29,6 @@ import (
 	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
-	"github.com/infinimesh/infinimesh/pkg/mqtt"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/acme"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
@@ -40,7 +38,6 @@ import (
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -251,9 +248,11 @@ func printConnState(con net.Conn) {
 	)
 }
 
-/*TopicChecker: to validate the subscribed topic name
-  input : topic, deviceId string
-  output : topicAltered
+/*
+TopicChecker: to validate the subscribed topic name
+
+	input : topic, deviceId string
+	output : topicAltered
 */
 func TopicChecker(topic, deviceId string) string {
 	state := strings.Split(topic, "/")
@@ -262,64 +261,64 @@ func TopicChecker(topic, deviceId string) string {
 	return topic
 }
 
-//MQTT5 schema
-const mqtt5Schema = `{
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "object",
-    "properties": {
-      "Timestamp": {
-        "type": "string"
-      },
-      "Message": {
-        "type": "array",
-        "items": [
-          {
-            "type": "object",
-            "properties": {
-              "Topic": {
-                "type": "string"
-              },
-              "Data": {
-                "type": "object"
-              }
-            },
-            "required": [
-              "Topic",
-              "Data"
-            ]
-          }
-        ]
-      }
-    },
-    "required": [
-      "Timestamp",
-      "Message"
-    ]
-  }`
+// MQTT5 schema
+// const mqtt5Schema = `{
+//     "$schema": "http://json-schema.org/draft-04/schema#",
+//     "type": "object",
+//     "properties": {
+//       "Timestamp": {
+//         "type": "string"
+//       },
+//       "Message": {
+//         "type": "array",
+//         "items": [
+//           {
+//             "type": "object",
+//             "properties": {
+//               "Topic": {
+//                 "type": "string"
+//               },
+//               "Data": {
+//                 "type": "object"
+//               }
+//             },
+//             "required": [
+//               "Topic",
+//               "Data"
+//             ]
+//           }
+//         ]
+//       }
+//     },
+//     "required": [
+//       "Timestamp",
+//       "Message"
+//     ]
+//   }`
 
-func schemaValidation(data []byte, version int) bool {
-	if version == 4 {
-		return true
-	}
-	var payload mqtt.Payload
-	err := json.Unmarshal(data, &payload)
-	if err != nil {
-		log.Warn("invalid payload format", zap.Error(err))
-		return false
-	}
-	loader := gojsonschema.NewGoLoader(payload)
-	//filename := "file:///mqtt-bridge/schema-mqtt5.json"
-	//log.Printf("json file path: %v", filename)
-	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
-	schema, err := gojsonschema.NewSchema(schemaLoader)
-	if err != nil {
-		log.Warn("Loading new schema failed", zap.Error(err))
-		return false
-	}
-	result, err := schema.Validate(loader)
-	if err != nil {
-		log.Warn("Schema validation failed", zap.Error(err))
-		return false
-	}
-	return result.Valid()
-}
+// func schemaValidation(data []byte, version int) bool {
+// 	if version == 4 {
+// 		return true
+// 	}
+// 	var payload mqtt.Payload
+// 	err := json.Unmarshal(data, &payload)
+// 	if err != nil {
+// 		log.Warn("invalid payload format", zap.Error(err))
+// 		return false
+// 	}
+// 	loader := gojsonschema.NewGoLoader(payload)
+// 	//filename := "file:///mqtt-bridge/schema-mqtt5.json"
+// 	//log.Printf("json file path: %v", filename)
+// 	schemaLoader := gojsonschema.NewStringLoader(mqtt5Schema)
+// 	schema, err := gojsonschema.NewSchema(schemaLoader)
+// 	if err != nil {
+// 		log.Warn("Loading new schema failed", zap.Error(err))
+// 		return false
+// 	}
+// 	result, err := schema.Validate(loader)
+// 	if err != nil {
+// 		log.Warn("Schema validation failed", zap.Error(err))
+// 		return false
+// 	}
+// 	return result.Valid()
+// }
