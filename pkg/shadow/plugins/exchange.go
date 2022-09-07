@@ -52,8 +52,11 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, ps *pubsub.PubSub, fetcher Fe
 
 	go func(messages chan interface{}) {
 		for msg := range messages {
-			logger.Debug("Received message to Broadcast")
-			shadow := msg.(*pb.Shadow)
+			logger.Debug("Received message to Broadcast", zap.Any("msg", msg))
+			shadow, ok := msg.(*pb.Shadow)
+			if !ok {
+				logger.Warn("Message corrupted, couldn't convert to Shadow")
+			}
 			dev := fetcher(shadow.GetDevice())
 			if dev == nil {
 				logger.Warn("Couldn't get Device from Shadow")
