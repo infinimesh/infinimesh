@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/infinimesh/proto v0.0.0-20220831205838-b5a2435b66e4
-	github.com/slntopp/mqtt-go v0.0.0-20220711122714-995aa0b1c886
+	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.13.0
 	github.com/streadway/amqp v1.0.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75

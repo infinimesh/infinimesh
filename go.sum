@@ -220,8 +220,12 @@ github.com/rs/zerolog v1.19.0/go.mod h1:IzD0RJ65iWH0w97OQQebJEvTZYvsCUm9WVLWBQrJ
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
+github.com/slntopp/mqtt-go v0.0.0-20220711122557-dd2bc8ac69c9 h1:Djxfvi6DD9dk0up2rNAzV0INCKN467nwal69vgtgwfw=
+github.com/slntopp/mqtt-go v0.0.0-20220711122557-dd2bc8ac69c9/go.mod h1:4CSLUJHzRPlhlxfTYY9P0XV4BU5jwQvHT/W9feoYC9U=
 github.com/slntopp/mqtt-go v0.0.0-20220711122714-995aa0b1c886 h1:+0UWZV7uGd1iKVUVUmVzFhzNCEWN1bjg4ccXDnBySO4=
 github.com/slntopp/mqtt-go v0.0.0-20220711122714-995aa0b1c886/go.mod h1:4CSLUJHzRPlhlxfTYY9P0XV4BU5jwQvHT/W9feoYC9U=
+github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b h1:0DKsqWWp1AI4CgyX0GT9nsYu6ea884MnK2Ri89S102E=
+github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b/go.mod h1:OLZ2TW4IseFSr/zr0COcPMWjZu/xi0H9ZMfE1naxJ0Y=
 github.com/spf13/afero v1.8.2 h1:xehSyVa0YnHWsJ49JFljMpg1HX19V6NDZ1fkm1Xznbo=
 github.com/spf13/afero v1.8.2/go.mod h1:CtAatgMJh6bJEIs48Ay/FOnkljP3WeGUG0MC1RfAqwo=
 github.com/spf13/cast v1.5.0 h1:rj3WzYc11XZaIZMPKmwP96zkFEnnAmV8s6XbB2aY32w=
