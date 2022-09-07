@@ -187,7 +187,7 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 	for msg := range ch {
 		shadow := msg.(*pb.Shadow)
 		log.Debug("Received message", zap.String("topic", topic), zap.String("device", shadow.Device))
-		if shadow.Desired == nil {
+		if shadow.Desired == nil || shadow.Desired.Timestamp == nil {
 			log.Debug("Skipping empty Desired state")
 			continue
 		}
