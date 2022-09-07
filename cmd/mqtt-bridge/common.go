@@ -64,8 +64,13 @@ func LogErrorAndClose(c net.Conn, err error) {
 
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
-	defer log.Info("Client disconnected", zap.String("client", connectPacket.ConnectPayload.ClientID))
-	log.Info("Client connected", zap.String("device", device.Uuid), zap.String("client", connectPacket.ConnectPayload.ClientID))
+	defer log.Debug("Client disconnected", zap.String("client", connectPacket.ConnectPayload.ClientID))
+	log.Debug(
+		"Client connected", zap.String("device", device.Uuid),
+		zap.String("client", connectPacket.ConnectPayload.ClientID),
+		zap.Int("protocol_level", int(connectPacket.VariableHeader.ProtocolLevel)),
+		zap.String("protocol", connectPacket.VariableHeader.ProtocolName),
+	)
 	// TODO ignore/compare this ID with the given ID from the verify function
 
 	//TODO : MQTT CONNACK Properties need to add here
@@ -107,11 +112,11 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 		if err != nil {
 			if err == io.EOF {
-				log.Info("Client closed connection", zap.String("client", connectPacket.ConnectPayload.ClientID))
+				log.Debug("Client closed connection", zap.String("client", connectPacket.ConnectPayload.ClientID))
 			} else {
 				log.Warn("Failed to read packet", zap.Error(err))
 			}
-			_ = c.Close() // nolint: gosec
+			_ = c.Close()
 			break
 		}
 
@@ -138,10 +143,10 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			}
 			ps.Pub(payload, "mqtt.incoming")
 
-			_, err := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)).WriteTo(c)
-			if err != nil {
-				log.Warn("Failed to write Publish Acknowlegement", zap.Error(err))
-			}
+			// _, err := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)).WriteTo(c)
+			// if err != nil {
+			// 	log.Warn("Failed to write Publish Acknowlegement", zap.Error(err))
+			// }
 
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
@@ -153,7 +158,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, "mqtt.outgoing/"+device.Uuid)
 				go handleBackChannel(backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
-				log.Info("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
+				log.Debug("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
 
 			go func() {
@@ -176,7 +181,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			}
 			for _, unsub := range p.Payload.UnSubscriptions {
 				ps.Unsub(backChannel, "mqtt.outgoing/"+device.Uuid)
-				log.Info("Removed Subscription", zap.String("topic", unsub.Topic), zap.String("device", device.Uuid))
+				log.Debug("Removed Subscription", zap.String("topic", unsub.Topic), zap.String("device", device.Uuid))
 			}
 		}
 	}

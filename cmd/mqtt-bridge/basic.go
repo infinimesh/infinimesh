@@ -64,7 +64,7 @@ func HandleTCPConnections(tcp net.Listener) {
 				log.Warn("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
 				return false
 			} else {
-				log.Info("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))
+				log.Debug("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))
 				return true
 			}
 		})
