@@ -144,10 +144,10 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			}
 			ps.Pub(payload, "mqtt.incoming")
 
-			// _, err := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)).WriteTo(c)
-			// if err != nil {
-			// 	log.Warn("Failed to write Publish Acknowlegement", zap.Error(err))
-			// }
+			_, err := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)).WriteTo(c)
+			if err != nil {
+				log.Warn("Failed to write Publish Acknowlegement", zap.Error(err))
+			}
 
 		case *packet.SubscribeControlPacket:
 			response := packet.NewSubAck(uint16(p.VariableHeader.PacketID), connectPacket.VariableHeader.ProtocolLevel, []byte{1})
