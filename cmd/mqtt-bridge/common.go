@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -181,6 +181,10 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 	for msg := range ch {
 		shadow := msg.(*pb.Shadow)
 		log.Debug("Received message", zap.String("topic", topic), zap.String("device", shadow.Device))
+		if shadow.Desired == nil {
+			log.Debug("Skipping empty Desired state")
+			continue
+		}
 		if shadow.Desired.Timestamp.Seconds < ts {
 			log.Debug("Skipping message", zap.String("topic", topic), zap.String("device", shadow.Device))
 			continue
