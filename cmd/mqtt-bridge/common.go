@@ -70,6 +70,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		zap.String("client", connectPacket.ConnectPayload.ClientID),
 		zap.Int("protocol_level", int(connectPacket.VariableHeader.ProtocolLevel)),
 		zap.String("protocol", connectPacket.VariableHeader.ProtocolName),
+		zap.Int("QoS", connectPacket.VariableHeader.ConnectFlags.WillQoS),
 	)
 	// TODO ignore/compare this ID with the given ID from the verify function
 
