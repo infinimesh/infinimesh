@@ -27,7 +27,6 @@ import (
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	pb "github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/shadow"
-	shadowpb "github.com/infinimesh/proto/shadow"
 )
 
 // ShadowAPI data strcuture
@@ -35,16 +34,16 @@ type ShadowAPI struct {
 	pb.UnimplementedShadowServiceServer
 
 	log    *zap.Logger
-	client shadowpb.ShadowServiceClient
+	client shadow.ShadowServiceClient
 }
 
-func NewShadowAPI(log *zap.Logger, client shadowpb.ShadowServiceClient) *ShadowAPI {
+func NewShadowAPI(log *zap.Logger, client shadow.ShadowServiceClient) *ShadowAPI {
 	return &ShadowAPI{
 		log: log.Named("ShadowAPI"), client: client,
 	}
 }
 
-func (s *ShadowAPI) Get(ctx context.Context, _ *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
+func (s *ShadowAPI) Get(ctx context.Context, _ *shadow.GetRequest) (response *shadow.GetResponse, err error) {
 	log := s.log.Named("Get")
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
@@ -53,11 +52,11 @@ func (s *ShadowAPI) Get(ctx context.Context, _ *shadowpb.GetRequest) (response *
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-	return s.client.Get(ctx, &shadowpb.GetRequest{Pool: devices_scope})
+	return s.client.Get(ctx, &shadow.GetRequest{Pool: devices_scope})
 }
 
 // PatchDesiredState is a method to update the current state of the device
-func (s *ShadowAPI) Patch(ctx context.Context, request *shadowpb.Shadow) (response *shadowpb.Shadow, err error) {
+func (s *ShadowAPI) Patch(ctx context.Context, request *shadow.Shadow) (response *shadow.Shadow, err error) {
 	log := s.log.Named("PatchDesiredState")
 
 	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
@@ -85,7 +84,7 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *shadowpb.Shadow) (respon
 	return s.client.Patch(ctx, request)
 }
 
-func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (response *shadowpb.Shadow, err error) {
+func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (response *shadow.Shadow, err error) {
 	log := s.log.Named("RemoveStateKey")
 
 	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
@@ -114,7 +113,7 @@ func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (
 }
 
 // StreamShadow is a method to get the stream for a device
-func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
+func (s *ShadowAPI) StreamShadow(request *shadow.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
 	log := s.log.Named("StreamReportedStateChanges")
 
 	devices_scope, ok := srv.Context().Value(inf.InfinimeshDevicesCtxKey).([]string)
@@ -148,7 +147,7 @@ func (s *ShadowAPI) StreamShadow(request *shadowpb.StreamShadowRequest, srv pb.S
 	}
 }
 
-func (s *ShadowAPI) StreamShadowSync(request *shadowpb.StreamShadowRequest, srv pb.ShadowService_StreamShadowSyncServer) (err error) {
+func (s *ShadowAPI) StreamShadowSync(request *shadow.StreamShadowRequest, srv pb.ShadowService_StreamShadowSyncServer) (err error) {
 	request.Sync = true
 	return s.StreamShadow(request, srv)
 }
