@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -109,11 +109,14 @@ func main() {
 	}
 	client := nodepb.NewDevicesServiceClient(conn)
 
+	fetcher_log := log.Named("DevicesFetcher")
 	plugins.Setup(log, rbmq, ps, func(uuid string) *devpb.Device {
+		fetcher_log.Debug("Attempt getting device", zap.String("uuid", uuid))
 		dev, err := client.Get(internal_ctx, &devpb.Device{
 			Uuid: uuid,
 		})
 		if err != nil {
+			fetcher_log.Warn("Coudln't get device", zap.Error(err))
 			return nil
 		}
 		return dev

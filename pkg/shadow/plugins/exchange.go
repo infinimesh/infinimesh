@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,10 +52,11 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, ps *pubsub.PubSub, fetcher Fe
 
 	go func(messages chan interface{}) {
 		for msg := range messages {
-			logger.Info("Received message to Broadcast")
+			logger.Debug("Received message to Broadcast")
 			shadow := msg.(*pb.Shadow)
 			dev := fetcher(shadow.GetDevice())
 			if dev == nil {
+				logger.Warn("Couldn't get Device from Shadow")
 				continue
 			}
 
@@ -67,8 +68,11 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, ps *pubsub.PubSub, fetcher Fe
 }
 
 func Publish(dev *devpb.Device, state *pb.Shadow) {
+	log := logger.Named(dev.GetUuid())
+	log.Debug("Handling publish to Plugin Queue")
 	for _, tag := range dev.Tags {
 		plugin := strings.TrimPrefix(tag, "plugin:")
+		log.Debug("Device data", zap.String("tag", tag), zap.String("plugin", plugin))
 		if plugin != tag {
 			PublishSingle(plugin, state)
 		}
