@@ -65,7 +65,7 @@ func LogErrorAndClose(c net.Conn, err error) {
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
 	defer log.Info("Client disconnected", zap.String("client", connectPacket.ConnectPayload.ClientID))
-	log.Info("Client connected", zap.String("client", connectPacket.ConnectPayload.ClientID))
+	log.Info("Client connected", zap.String("device", device.Uuid), zap.String("client", connectPacket.ConnectPayload.ClientID))
 	// TODO ignore/compare this ID with the given ID from the verify function
 
 	//TODO : MQTT CONNACK Properties need to add here

@@ -227,8 +227,6 @@ func main() {
 			continue
 		}
 
-		log.Info("Client connected", zap.String("device", device.Uuid))
-
 		go HandleConn(conn, connectPacket, device)
 	}
 
