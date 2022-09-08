@@ -65,8 +65,8 @@
                             Hover your cursor over kind label in preview to see the differences
                         </n-alert>
 
-                        <n-form-item label="Frame URL" path="embedded_conf.frame" style="margin-top: 5px">
-                            <n-input v-model:value="model.embedded_conf.frame" placeholder="IFrame URL to embed" />
+                        <n-form-item label="Frame URL" path="embedded_conf.frameUrl" style="margin-top: 5px">
+                            <n-input v-model:value="model.embedded_conf.frameUrl" placeholder="IFrame URL to embed" />
                         </n-form-item>
                     </n-form>
 
@@ -123,7 +123,7 @@ const model = ref({
     public: true,
     logo: "",
     embedded_conf: {
-        frame: ""
+        frameUrl: ""
     }
 });
 const rules = ref({
@@ -138,7 +138,7 @@ function reset() {
         public: true,
         logo: "",
         embedded_conf: {
-            frame: ""
+            frameUrl: ""
         }
     };
 }
