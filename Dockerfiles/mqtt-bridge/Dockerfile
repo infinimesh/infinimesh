@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" ./cmd/mqtt-bridge
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -buildvcs=false ./cmd/mqtt-bridge
 RUN upx ./mqtt-bridge
 
 FROM scratch

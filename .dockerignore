@@ -1,3 +1,5 @@
 /docs/
-/hack/
 /README.md
+/console/node_modules
+/console/dist
+.git

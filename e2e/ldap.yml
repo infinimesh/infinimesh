@@ -1,0 +1,8 @@
+providers:
+  local:
+    url: ldap://openldap:1389
+    base_dn: "dc=example,dc=org"
+    scope: 2 # ScopeBaseObject - 0, ScopeSingleLevel - 1, ScopeWholeSubtree - 2
+    deref_aliases: 0 # NeverDerefAliases - 0, DerefInSearching - 1, DerefFindingBaseObj - 2, DerefAlways - 3
+    size_limit: 0
+    time_limit: 0

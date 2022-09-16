@@ -1,273 +1,212 @@
-//--------------------------------------------------------------------------
-// Copyright 2018 infinimesh
-// www.infinimesh.io
-//
-//   Licensed under the Apache License, Version 2.0 (the "License");
-//   you may not use this file except in compliance with the License.
-//   You may obtain a copy of the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in writing, software
-//   distributed under the License is distributed on an "AS IS" BASIS,
-//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   See the License for the specific language governing permissions and
-//   limitations under the License.
-//--------------------------------------------------------------------------
+/*
+Copyright © 2021-2022 Infinite Devices GmbH Nikita Ivanovski info@slnt-opp.xyz
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package shadow
 
 import (
-	"bytes"
 	"context"
+
 	"encoding/json"
-	"errors"
 
-	"github.com/Shopify/sarama"
 	"github.com/cskr/pubsub"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
-	structpb "github.com/golang/protobuf/ptypes/struct"
+	redis "github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/infinimesh/infinimesh/pkg/shadow/shadowpb"
+	pb "github.com/infinimesh/proto/shadow"
 )
 
-//Server is a data strcuture for shadow server
-type Server struct {
-	shadowpb.UnimplementedShadowsServer
+type ShadowServiceServer struct {
+	pb.UnimplementedShadowServiceServer
 
-	Repo         Repo
-	Producer     sarama.SyncProducer // Sync producer, we want to guarantee execution
-	ProduceTopic string
-	Log          *zap.Logger
-
-	PubSub *pubsub.PubSub
+	log *zap.Logger
+	rdb *redis.Client
+	ps  *pubsub.PubSub
 }
 
-//Get is a method to get a device state
-func (s *Server) Get(context context.Context, request *shadowpb.GetRequest) (response *shadowpb.GetResponse, err error) {
-
-	log := s.Log.Named("Get State Controller")
-	log.Debug("Function Invoked", zap.String("Device", request.Id))
-
-	response = &shadowpb.GetResponse{
-		Shadow: &shadowpb.Shadow{},
+func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSub) *ShadowServiceServer {
+	return &ShadowServiceServer{
+		log: log.Named("shadow"),
+		rdb: rdb,
+		ps:  ps,
 	}
-
-	// TODO fetch device from registry, 404 if not found
-
-	reportedState, err := s.Repo.GetReported(request.Id)
-	if err != nil {
-		reportedState.ID = request.Id
-		reportedState.State = DeviceStateMessage{
-			Version: uint64(0),
-			State:   json.RawMessage([]byte("{}")),
-		}
-	}
-
-	desiredState, err := s.Repo.GetDesired(request.Id)
-	if err != nil {
-		desiredState.ID = request.Id
-		desiredState.State = DeviceStateMessage{
-			Version: uint64(0),
-			State:   json.RawMessage([]byte("{}")),
-		}
-	}
-
-	u := &jsonpb.Unmarshaler{}
-
-	var reportedValue structpb.Value
-	if err := u.Unmarshal(bytes.NewReader(reportedState.State.State), &reportedValue); err != nil {
-		log.Error("Failed to unmarshal reported JSON from database", zap.Error(err))
-	} else {
-		ts, err := ptypes.TimestampProto(reportedState.State.Timestamp)
-		if err != nil {
-			return nil, err
-		}
-		response.Shadow.Reported = &shadowpb.VersionedValue{
-			Version:   uint64(reportedState.State.Version),
-			Data:      &reportedValue,
-			Timestamp: ts,
-		}
-	}
-
-	var desiredValue structpb.Value
-	if err := u.Unmarshal(bytes.NewReader(desiredState.State.State), &desiredValue); err != nil {
-		log.Error("Failed to unmarshal desired JSON from database", zap.Error(err))
-	} else {
-		ts, err := ptypes.TimestampProto(desiredState.State.Timestamp)
-		if err != nil {
-			return nil, err
-		}
-
-		response.Shadow.Desired = &shadowpb.VersionedValue{
-			Version:   uint64(desiredState.State.Version),
-			Data:      &desiredValue,
-			Timestamp: ts,
-		}
-	}
-
-	return response, nil
 }
 
-//PatchDesiredState is a method to patch a message to a device state
-func (s *Server) PatchDesiredState(context context.Context, request *shadowpb.PatchDesiredStateRequest) (response *shadowpb.PatchDesiredStateResponse, err error) {
+func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
+	log := s.log.Named("get")
+	pool := req.GetPool()
+	log.Debug("Request received", zap.Strings("pool", pool))
 
-	log := s.Log.Named("Patch Desired State Controller")
-	log.Debug("Function Invoked", zap.String("Device", request.Id))
-
-	// TODO sanity-check request
-
-	var marshaler jsonpb.Marshaler
-	var b bytes.Buffer
-	err = marshaler.Marshal(&b, request.GetData())
+	keys := make([]string, len(pool)*2)
+	for i, dev := range pool {
+		keys[i*2] = Key(dev, pb.StateKey_REPORTED)
+		keys[i*2+1] = Key(dev, pb.StateKey_DESIRED)
+	}
+	if len(keys) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "no devices specified")
+	}
+	r := s.rdb.MGet(ctx, keys...)
+	states, err := r.Result()
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "failed to get Shadows")
 	}
 
-	_, _, err = s.Producer.SendMessage(&sarama.ProducerMessage{
-		Topic: s.ProduceTopic,
-		Key:   sarama.StringEncoder(request.GetId()),
-		Value: sarama.ByteEncoder(b.Bytes()),
-	})
-	if err != nil {
-		return nil, err
+	log.Debug("Got states", zap.Int("count", len(states)))
+	shadows := make([]*pb.Shadow, len(pool))
+	for i := range shadows {
+		s := &pb.Shadow{
+			Device:   pool[i],
+			Reported: &pb.State{},
+			Desired:  &pb.State{},
+		}
+		if states[i*2] != nil {
+			state := states[i*2].(string)
+			json.Unmarshal([]byte(state), s.Reported)
+		}
+		if states[i*2+1] != nil {
+			state := states[i*2+1].(string)
+			json.Unmarshal([]byte(state), s.Desired)
+		}
+		shadows[i] = s
 	}
-	return &shadowpb.PatchDesiredStateResponse{}, nil
+
+	return &pb.GetResponse{Shadows: shadows}, nil
 }
 
-//StreamReportedStateChanges is a method to start streaming of data from a device
-func (s *Server) StreamReportedStateChanges(request *shadowpb.StreamReportedStateChangesRequest, srv shadowpb.Shadows_StreamReportedStateChangesServer) (err error) {
+func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Shadow, error) {
+	log := s.log.Named("patch")
+	log.Debug("Request received", zap.Any("req", req))
 
-	log := s.Log.Named("Stream State Controller")
-	log.Debug("Function Invoked", zap.String("Device", request.Id), zap.Bool("Delta Flag", request.OnlyDelta))
-
-	// TODO validate request/Id
-
-	var subPathReported string
-	if request.OnlyDelta {
-		subPathReported = "/reported/delta"
-	} else {
-		subPathReported = "/reported/full"
+	if req.GetDevice() == "" {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
 	}
 
-	topicEvents := request.Id + subPathReported
-	events := s.PubSub.Sub(topicEvents)
-
-	log.Debug("Reported Streaming Details", zap.String("Topic Events", topicEvents), zap.Any("Events", events))
-
-	defer func() {
-
-		go func() {
-			s.PubSub.Unsub(events)
-		}()
-
-		// Drain
-
-		for range events {
-
-		}
-
-		log.Info("Drained Reported Channel")
-	}()
-
-	var subPathDesired string
-	if request.OnlyDelta {
-		subPathDesired = "/desired/delta"
-	} else {
-		subPathDesired = "/desired/full"
+	now := timestamppb.Now()
+	topics := []string{}
+	if req.Reported != nil {
+		req.Reported.Timestamp = now
+		topics = append(topics, "mqtt.incoming")
+	}
+	if req.Desired != nil {
+		req.Desired.Timestamp = now
+		topics = append(topics, "mqtt.outgoing")
 	}
 
-	topicEventsDesired := request.Id + subPathDesired
-	eventsDesired := s.PubSub.Sub(topicEventsDesired)
+	s.ps.Pub(req, topics...)
 
-	log.Debug("Desired Streaming Details", zap.String("Topic Events", topicEventsDesired))
+	return req, nil
+}
 
-	defer func() {
+func (s *ShadowServiceServer) Remove(ctx context.Context, req *pb.RemoveRequest) (*pb.Shadow, error) {
+	log := s.log.Named("remove")
+	log.Debug("Request received", zap.Any("req", req))
 
-		go func() {
-			s.PubSub.Unsub(eventsDesired)
-		}()
+	if req.GetDevice() == "" {
+		return nil, status.Error(codes.InvalidArgument, "no device specified")
+	}
+	if req.GetKey() == "" {
+		return nil, status.Error(codes.InvalidArgument, "key not specified")
+	}
 
-		// Drain
+	skey := Key(req.GetDevice(), req.StateKey)
+	r := s.rdb.Get(ctx, skey)
+	raw, err := r.Result()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to get Shadow")
+	}
 
-		for range eventsDesired {
+	var state pb.State
+	err = json.Unmarshal([]byte(raw), &state)
+	if err != nil {
+		log.Warn("Cannot unmarshal state", zap.String("raw", raw), zap.Error(err))
+		return nil, status.Error(codes.Internal, "cannot Unmarshal state")
+	}
 
-		}
+	fields := state.Data.Fields
+	delete(fields, req.GetKey())
 
-		log.Debug("Drained Desired Channel")
-	}()
-outer:
-	for {
-		log.Debug("Looping through Stream")
-		select {
-		case reportedEvent := <-events:
-			log.Debug("Inside reported event reading")
-			value, err := toProto(reportedEvent, log)
-			if err != nil {
-				log.Error("Unable to Unmarshal data", zap.Error(err))
-				break outer
-			}
+	state.Timestamp = timestamppb.Now()
+	log.Debug("Result", zap.Any("state", state))
 
-			log.Debug("Reported", zap.Any("Reported Value", value))
+	s.Store(log, req.Device, req.StateKey, &state)
 
-			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
-				ReportedState: value,
+	result := &pb.Shadow{
+		Device: req.GetDevice(),
+	}
+
+	if req.StateKey == pb.StateKey_REPORTED {
+		result.Reported = &state
+	} else {
+		result.Desired = &state
+	}
+
+	return result, nil
+}
+
+func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
+	log := s.log.Named("stream")
+	log.Debug("Request received", zap.Any("req", req))
+
+	if len(req.GetDevices()) == 0 {
+		return status.Error(codes.InvalidArgument, "no devices specified")
+	}
+	devices := map[string]bool{}
+	for _, id := range req.GetDevices() {
+		devices[id] = true
+	}
+
+	if req.Sync {
+		func() {
+			log.Debug("Sending current state")
+			r, err := s.Get(srv.Context(), &pb.GetRequest{
+				Pool: req.GetDevices(),
 			})
 			if err != nil {
-				log.Error("Unable to send Reported data", zap.Error(err))
-				break outer
+				log.Warn("Couldn't get current devices Shadow state", zap.Error(err))
+				return
 			}
-		case desiredEvent := <-eventsDesired:
-			log.Debug("Inside desired event reading")
-			value, err := toProto(desiredEvent, log)
-			if err != nil {
-				log.Error("Unable to Unmarshal data", zap.Error(err))
-				break outer
+			for _, s := range r.GetShadows() {
+				srv.Send(s)
 			}
-
-			log.Debug("Desired", zap.Any("Desired Value", value))
-
-			err = srv.Send(&shadowpb.StreamReportedStateChangesResponse{
-				DesiredState: value,
-			})
-			if err != nil {
-				log.Error("Unable to send Desired data", zap.Error(err))
-				break outer
-			}
-		case <-srv.Context().Done():
-			log.Debug("Streaming is Done")
-			break outer
-
-		}
-
+		}()
 	}
+
+	messages := make(chan interface{}, 10)
+	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
+	defer unsub(s.ps, messages)
+
+	for msg := range messages {
+		shadow := msg.(*pb.Shadow)
+		if _, ok := devices[shadow.GetDevice()]; !ok {
+			continue
+		}
+		err := srv.Send(shadow)
+		if err != nil {
+			log.Warn("Unable to send message", zap.Error(err))
+			break
+		}
+	}
+
 	return nil
 }
 
-func toProto(event interface{}, log *zap.Logger) (result *shadowpb.VersionedValue, err error) {
-	var value structpb.Value
-	if raw, ok := event.(*DeviceStateMessage); ok {
-		var u jsonpb.Unmarshaler
-		err = u.Unmarshal(bytes.NewReader(raw.State), &value)
-		if err != nil {
-			log.Error("Failed to unmarshal jsonpb", zap.Error(err))
-			return nil, err
-		}
+func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+	go ps.Unsub(ch)
 
-		ts, err := ptypes.TimestampProto(raw.Timestamp)
-		if err != nil {
-			log.Error("Invalid timestamp", zap.Error(err))
-			return nil, err
-		}
-
-		return &shadowpb.VersionedValue{
-			Version:   raw.Version,
-			Data:      &value,
-			Timestamp: ts, // TODO
-		}, nil
+	for range ch {
 	}
-	return nil, errors.New("Failed type assertion")
-
 }

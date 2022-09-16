@@ -1,154 +1,144 @@
 version: "3.2"
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-  kafka:
-    image: confluentinc/cp-kafka:latest
+
+  proxy:
+    image: traefik:latest
+    labels:
+      - traefik.http.routers.api.rule=Host(`traefik.${BASE_DOMAIN}`)
+      - traefik.http.routers.api.entrypoints=http
+      - traefik.http.routers.api.service=api@internal
+    ports:
+      - 80:80
+      - 8000:8000
+    volumes:
+      - ./traefik.yml:/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  console:
+    image: ghcr.io/infinimesh/infinimesh/console:v3.0.0
+    restart: always
     depends_on:
-      - zookeeper
-    restart: unless-stopped
-    ports:
-      - 9092:9092
+      - proxy
+      - web
+    labels:
+      - traefik.http.routers.console.rule=Host(`console.${BASE_DOMAIN}`)
+      - traefik.http.routers.console.entrypoints=http
+      - traefik.http.routers.console.service=console@docker
+      - traefik.http.services.console.loadbalancer.server.port=80
+  web:
+    image: ghcr.io/infinimesh/infinimesh/web:v3.0.0
+    restart: always
+    depends_on:
+      - repo
+      - proxy
+    labels:
+      - traefik.http.routers.web.rule=Host(`api.${BASE_DOMAIN}`)
+      - traefik.http.routers.web.entrypoints=http
+      - traefik.http.routers.web.service=web@docker
+      - traefik.http.services.web.loadbalancer.server.port=8000
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  mqtt-bridge:
-    image: ghcr.io/slntopp/infinimesh/mqtt-bridge:latest
+      APISERVER_HOST: repo:8000
+      HTTP_FS: "http://media.${BASE_DOMAIN}"
+      HANDSFREE: handsfree:8000
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    labels:
+      - traefik.http.routers.rabbitmq.rule=Host(`rbmq.infinimesh.local`)
+      - traefik.http.routers.rabbitmq.entrypoints=http
+      - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+
+  mqtt:
+    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:v3.0.0
+    restart: always
+    depends_on:
+      - rabbitmq
+      - repo
+      - proxy
     ports:
-      - "8090:8080" # BasicAuth(non-TLS)
-      - "8089:8089" # Standard(TLS)
+      - 1883:1883 # BasicAuth(non-TLS)
+      - 8883:8883 # Standard(TLS)
     volumes:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
     environment:
       DEBUG: "true"
-      KAFKA_HOST: kafka:29092
-      DEVICE_REGISTRY_URL: device-registry:8080
+      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      DEVICES_HOST: repo:8000
+      SHADOW_HOST: shadow:8000
+      SIGNING_KEY: "${SIGNING_KEY}"
+
+  repo:
+    image: ghcr.io/infinimesh/infinimesh/repo:v3.0.0
+    restart: always
+    labels:
+      - traefik.http.routers.repo.rule=Host(`api.${BASE_DOMAIN}`)
+      - traefik.http.routers.repo.entrypoints=grpc
+      - traefik.http.services.repo.loadbalancer.server.port=8000
+      - traefik.http.services.repo.loadbalancer.server.scheme=h2c
     depends_on:
-      - kafka
-    restart: unless-stopped
-  telemetry-router:
-    image: ghcr.io/slntopp/infinimesh/telemetry-router:latest
+      - db
+      - proxy
     environment:
-      KAFKA_HOST: kafka:29092
-    depends_on:
-      - kafka
-    restart: unless-stopped
-  device-registry:
-    image: ghcr.io/slntopp/infinimesh/device-registry:latest
-    ports:
-      - "8070:8080"
-    environment:
-      DGRAPH_HOST: alpha:9080
-      DB_ADDR2: redis:6379
-    restart: unless-stopped
-  shadow-delta-merger:
-    image: ghcr.io/slntopp/infinimesh/shadow-delta-merger:latest
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-    restart: unless-stopped
-  shadow-api:
-    image: ghcr.io/slntopp/infinimesh/shadow-api:latest
-    ports:
-      - "8096:8096"
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-      DB_ADDR: redis:6379
-    restart: unless-stopped
-  shadow-persister:
-    image: ghcr.io/slntopp/infinimesh/shadow-persister:latest
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_HOST: kafka:29092
-      DB_ADDR: redis:6379
-    restart: unless-stopped
-  frontend:
-    ports:
-      - "80:80"
-    image: ghcr.io/slntopp/infinimesh/frontend:latest
-    environment:
-      APISERVER_URL: http://apiserver-rest:8081
-  apiserver:
-    ports:
-      - "8080:8080"
-    image: ghcr.io/slntopp/infinimesh/apiserver:latest
-    environment:
-      JWT_SIGNING_KEY: c3VwZXIgc2VjcmV0IGtleQo=
-    depends_on:
-      - device-registry
-      - shadow-api
-      - nodeserver
-    restart: unless-stopped
-  apiserver-rest:
-    image: ghcr.io/slntopp/infinimesh/apiserver-rest:latest
-    environment:
-      APISERVER_ENDPOINT: apiserver:8080
-    ports:
-      - "8081:8081"
-    depends_on:
-      - apiserver
-    restart: unless-stopped
-  nodeserver:
-    image: ghcr.io/slntopp/infinimesh/nodeserver:latest
+      DB_HOST: db:8529
+      DB_CRED: root:openSesame
+      SHADOW_HOST: shadow:8000
+      INF_DEFAULT_ROOT_PASS: infinimesh
+      SIGNING_KEY: "${SIGNING_KEY}"
+
+  shadow:
+    image: ghcr.io/infinimesh/infinimesh/shadow:v3.0.0
     restart: unless-stopped
     depends_on:
-      - alpha
+      - redis
     environment:
-      DGRAPH_HOST: alpha:9080
-  # dgraph
-  zero:
-    image: dgraph/dgraph:v1.0.14
-    volumes:
-      - type: volume
-        source: dgraph
-        target: /dgraph
-        volume:
-          nocopy: true
-    ports:
-      - 5080:5080
-      - 6080:6080
-    restart: on-failure
-    command: dgraph zero --my=zero:5080
-  alpha:
-    image: dgraph/dgraph:v1.0.14
-    volumes:
-      - type: volume
-        source: dgraph
-        target: /dgraph
-        volume:
-          nocopy: true
-    ports:
-      - 8084:8080
-      - 9080:9080
-    restart: on-failure
-    command: dgraph alpha --my=server:7080 --lru_mb=2048 --zero=zero:5080
-  ratel:
-    image: dgraph/dgraph:v1.0.14
-    volumes:
-      - type: volume
-        source: dgraph
-        target: /dgraph
-        volume:
-          nocopy: true
-    ports:
-      - 8000:8000
-    command: dgraph-ratel
+      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      REDIS_HOST: redis:6379
+      DEVICES_HOST: repo:8000
+      SIGNING_KEY: "${SIGNING_KEY}"
+
   redis:
     image: redis:latest
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
+    command: [ "redis-server", "--appendonly", "yes" ]
+
+  db:
+    image: arangodb/arangodb:latest
+    restart: always
+    environment:
+      ARANGO_ROOT_PASSWORD: openSesame
+    labels:
+      - traefik.http.routers.db.rule=Host(`db.${BASE_DOMAIN}`)
+      - traefik.http.routers.db.entrypoints=http
+      - traefik.http.services.db.loadbalancer.server.port=8529
+    volumes:
+      - data:/var/lib/arangodb3
+
+  # Comment this service and HTTP_FS env variable at web service to disable http-fs
+  http-fs:
+    image: ghcr.io/infinimesh/http-fs:latest
+    restart: always
+    labels:
+      - traefik.http.routers.http-fs.rule=Host(`media.${BASE_DOMAIN}`)
+      - traefik.http.routers.http-fs.entrypoints=http
+      - traefik.http.services.http-fs.loadbalancer.server.port=8000
+    volumes:
+      - user-media:/static
+
+  # Comment this service and HF env variable at web service to disable handsfree service
+  handsfree:
+    image: ghcr.io/infinimesh/infinimesh/handsfree:v3.0.0
+    restart: always
+    environment:
+      SIGNING_KEY: "${SIGNING_KEY}"
+    labels:
+      - traefik.http.routers.handsfree.rule=Host(`api.${BASE_DOMAIN}`)&&PathPrefix("/infinimesh.handsfree.")
+      - traefik.http.routers.handsfree.entrypoints=grpc
+      - traefik.http.services.handsfree.loadbalancer.server.port=8000
+      - traefik.http.services.handsfree.loadbalancer.server.scheme=h2c
+
 volumes:
-  dgraph:
+  data:
+  user-media:
