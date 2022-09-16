@@ -18,8 +18,6 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/streadway/amqp v1.0.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
-	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yosssi/gmq v0.0.1
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	google.golang.org/grpc v1.49.0
@@ -50,7 +48,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
@@ -65,5 +62,4 @@ require (
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
-	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 )
