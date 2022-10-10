@@ -78,11 +78,9 @@ const ns = computed(() => nss.namespaces[nss.selected])
 const plugin = ref({ state: "loading" })
 
 async function loadPlugin() {
-    let uuid = ns.value.plugin
-    if (!uuid) {
-        return
-    }
+    if (!ns.value.plugin || !ns.value.plugin.uuid) return
 
+    let uuid = ns.value.plugin.uuid
     try {
         const { data } = await plugs.get(uuid)
         plugin.value = data
