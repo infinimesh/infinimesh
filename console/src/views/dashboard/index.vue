@@ -80,13 +80,16 @@ const plugin = ref({ state: "loading" })
 async function loadPlugin() {
     if (!ns.value.plugin || !ns.value.plugin.uuid) return
 
-    let uuid = ns.value.plugin.uuid
+    let { uuid, vars } = ns.value.plugin
+
     try {
         const { data } = await plugs.get(uuid)
+        if (vars) data.vars = vars
         plugin.value = data
     } catch (e) {
         plugin.value = { state: 'notfound' }
     }
+    console.log("!", plugin.value)
 }
 
 onMounted(async () => {
@@ -107,7 +110,7 @@ function makeid(length) {
 
 const src = computed(() => {
     if (plugin.value.state != undefined) return ""
-    const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme, api: baseURL }
+    const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme, api: baseURL, vars: plugin.value.vars }
     const src = `${plugin.value.embeddedConf.frameUrl}?a=${btoa(JSON.stringify(params))}&${makeid(6)}=${makeid(10)}`
     return src
 })
