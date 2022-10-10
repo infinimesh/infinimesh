@@ -11,7 +11,7 @@
         <n-card style="width: 600px" :bordered="false" size="huge" role="dialog" aria-modal="true"
             :mask-closable="true">
             <template #header>
-                Configure <b>PLUGIN</b> vars
+                Configure <b>{{plugin.title}}</b> plugin variables
             </template>
             <template #header-extra>
                 <n-button @click="show = false" quaternary circle size="large">
