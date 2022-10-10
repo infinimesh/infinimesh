@@ -3,7 +3,8 @@ FROM node:latest AS console-builder
 ADD console /console
 WORKDIR /console
 
-RUN yarn && yarn build
+RUN npm install -g pnpm
+RUN pnpm i && pnpm build
 
 # Many thanks to @lipanski for his work on the original script
 
