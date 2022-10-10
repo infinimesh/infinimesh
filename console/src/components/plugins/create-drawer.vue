@@ -82,6 +82,23 @@
                         <n-grid-item span="23">
                             <h3>Marketplace Preview:</h3>
                             <plugin-card :plugin="model" :preview="true" />
+
+                            <h3>Variables:</h3>
+                            <n-table>
+                                <tbody>
+                                    <tr v-for="(v, i) in model.vars" :key="i">
+                                        <td>
+                                            <n-input v-model:value="model.vars[i]" placeholder="Enter variable name" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <n-button @click="() => model.vars.push('')">Add
+                                                Variable</n-button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </n-table>
                         </n-grid-item>
                     </n-grid>
                 </n-grid-item>
@@ -95,7 +112,7 @@
 import { ref, watch, defineAsyncComponent } from "vue"
 import {
     useLoadingBar, NButton, NIcon, NDrawer, NDrawerContent, NSpace, NForm, NFormItem, NInput, NAlert,
-    NGrid, NGridItem, NDivider, NRadioGroup, NRadioButton, NSwitch
+    NGrid, NGridItem, NDivider, NRadioGroup, NRadioButton, NSwitch, NTable
 } from 'naive-ui';
 
 import { usePluginsStore } from "@/store/plugins"
@@ -124,7 +141,8 @@ const model = ref({
     logo: "",
     embedded_conf: {
         frameUrl: ""
-    }
+    },
+    vars: []
 });
 const rules = ref({
     title: [{ required: true, message: "Please input title" }],
@@ -139,7 +157,8 @@ function reset() {
         logo: "",
         embedded_conf: {
             frameUrl: ""
-        }
+        },
+        vars: []
     };
 }
 
