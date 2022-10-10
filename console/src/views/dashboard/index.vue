@@ -89,7 +89,6 @@ async function loadPlugin() {
     } catch (e) {
         plugin.value = { state: 'notfound' }
     }
-    console.log("!", plugin.value)
 }
 
 onMounted(async () => {

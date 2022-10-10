@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, defineProps, defineEmits, defineAsyncComponent, toRefs } from 'vue';
+import { ref, computed, watch, defineAsyncComponent, toRefs } from 'vue';
 
 import { NCard, NModal, NButton, NIcon, NSelect, NAlert, NSpace, NTable, NInput } from "naive-ui"
 
