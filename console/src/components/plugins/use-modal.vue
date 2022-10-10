@@ -27,6 +27,23 @@
                 {{ validator_state.message }}
             </n-alert>
 
+            <n-table v-if="vars" style="margin-top: 2vh; min-width: 50%">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="k in Object.keys(vars)" :key="k">
+                        <td>{{k}}</td>
+                        <td>
+                            <n-input v-model:value="vars[k]" type="text" :placeholder="`Enter ${k} value`" />
+                        </td>
+                    </tr>
+                </tbody>
+            </n-table>
+
             <n-space justify="end" align="center" style="margin-top: 2vh">
                 <n-button type="error" round secondary @click="emit('close')">Cancel</n-button>
                 <n-button type="warning" round @click="submit">Submit</n-button>
@@ -36,9 +53,9 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits, defineAsyncComponent } from 'vue';
+import { ref, computed, watch, defineProps, defineEmits, defineAsyncComponent, toRefs } from 'vue';
 
-import { NCard, NModal, NButton, NIcon, NSelect, NAlert, NSpace } from "naive-ui"
+import { NCard, NModal, NButton, NIcon, NSelect, NAlert, NSpace, NTable, NInput } from "naive-ui"
 
 import { useNSStore } from "@/store/namespaces";
 
@@ -71,7 +88,25 @@ const props = defineProps({
     }
 })
 
+const { show } = toRefs(props)
+
 const namespace = ref(nss.selected)
+const vars = ref(false)
+
+watch(show, (show) => {
+    if (!show) {
+        vars.value = false
+        return
+    }
+
+    const plugin = props.plugin
+    if (!plugin || !plugin.vars || plugin.vars.length == 0) { vars.value = false; return };
+
+    vars.value = plugin.vars.reduce((r, v) => {
+        r[v] = ''; return r
+    }, {})
+})
+
 
 const validator_state = computed(() => {
     if (namespace.value == "all") {
@@ -100,7 +135,7 @@ async function submit() {
         return
     }
 
-    await nss.update({ ...ns, plugin: props.plugin.uuid })
+    await nss.update({ ...ns, plugin: { uuid: props.plugin.uuid, vars: vars.value } })
 
     emit('close')
 }
