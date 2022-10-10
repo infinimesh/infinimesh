@@ -171,8 +171,6 @@ PRs are as always welcome.
 
 Start the local dev environment via `docker compose up -d`.
 
-Load test data into the database via `go run hack/import_dgraph_sample_data.go`
-
 Login locally via CLI:
 
 ```shell
