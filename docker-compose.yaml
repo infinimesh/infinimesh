@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   console:
-    image: ghcr.io/infinimesh/infinimesh/console:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/console:latest
     restart: always
     depends_on:
       - proxy
@@ -26,7 +26,7 @@ services:
       - traefik.http.routers.console.service=console@docker
       - traefik.http.services.console.loadbalancer.server.port=80
   web:
-    image: ghcr.io/infinimesh/infinimesh/web:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/web:latest
     restart: always
     depends_on:
       - repo
@@ -52,7 +52,7 @@ services:
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
 
   mqtt:
-    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/mqtt-bridge:latest
     restart: always
     depends_on:
       - rabbitmq
@@ -72,7 +72,7 @@ services:
       SIGNING_KEY: "${SIGNING_KEY}"
 
   repo:
-    image: ghcr.io/infinimesh/infinimesh/repo:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/repo:latest
     restart: always
     labels:
       - traefik.http.routers.repo.rule=Host(`api.${BASE_DOMAIN}`)
@@ -90,7 +90,7 @@ services:
       SIGNING_KEY: "${SIGNING_KEY}"
 
   shadow:
-    image: ghcr.io/infinimesh/infinimesh/shadow:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/shadow:latest
     restart: unless-stopped
     depends_on:
       - redis
@@ -129,7 +129,7 @@ services:
 
   # Comment this service and HF env variable at web service to disable handsfree service
   handsfree:
-    image: ghcr.io/infinimesh/infinimesh/handsfree:v3.0.0
+    image: ghcr.io/infinimesh/infinimesh/handsfree:latest
     restart: always
     environment:
       SIGNING_KEY: "${SIGNING_KEY}"
