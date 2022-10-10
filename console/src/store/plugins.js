@@ -9,6 +9,8 @@ export const usePluginsStore = defineStore("plugins", {
   state: () => ({
     loading: false,
     plugins: [],
+
+    current: false
   }),
 
   actions: {
@@ -34,5 +36,8 @@ export const usePluginsStore = defineStore("plugins", {
     async delete(uuid) {
       return as.http.delete("/plugins/" + uuid);
     },
+    async update(uuid, data) {
+      return as.http.post("/plugins/" + uuid, data);
+    }
   },
 });

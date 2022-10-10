@@ -78,16 +78,21 @@ const ns = computed(() => nss.namespaces[nss.selected])
 const plugin = ref({ state: "loading" })
 
 async function loadPlugin() {
-    if (!ns.value.plugin || !ns.value.plugin.uuid) return
+    if (!ns.value || !ns.value.plugin || !ns.value.plugin.uuid) {
+        plugs.current = false
+        return
+    }
 
     let { uuid, vars } = ns.value.plugin
 
     try {
         const { data } = await plugs.get(uuid)
         if (vars) data.vars = vars
+        plugs.current = data
         plugin.value = data
     } catch (e) {
         plugin.value = { state: 'notfound' }
+        plugs.current = false
     }
 }
 
