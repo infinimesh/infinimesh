@@ -17,7 +17,6 @@ const chars_refs = ref([])
 const chars = ref(new Array(6))
 
 function update(id, value) {
-  console.log(id, value)
   chars.value[id] = value.toUpperCase()
   try {
     let input;
