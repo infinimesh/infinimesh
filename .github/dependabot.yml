@@ -21,3 +21,12 @@ updates:
       - slntopp
     assignees:
       - slntopp
+  - package-ecosystem: github-actions
+    directory: ".github/workflows/*"
+    schedule:
+      interval: daily
+      time: '06:00'
+    reviewers:
+      - slntopp
+    assignees:
+      - slntopp
