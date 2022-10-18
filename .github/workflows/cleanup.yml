@@ -13,8 +13,14 @@ jobs:
 
       - name: Set target tags
         id: set-tags-matrix
-        run: echo "::set-output name=matrix::$(ls Dockerfiles | jq -cnR '[inputs | select(length>0)]')"
-
+        run: |
+          TAGS_JSON=$(ls Dockerfiles | jq -cnR '[inputs | select(length>0)]')
+          echo "matrix=$TAGS_JSON" >> $GITHUB_OUTPUT
+          echo "### Discovered Containers :whale:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for title in $(echo $TAGS_JSON | jq -r '.[]'); do
+            echo "* $title" |  tr '-' ' ' >> $GITHUB_STEP_SUMMARY
+          done
     outputs:
       matrix: ${{steps.set-tags-matrix.outputs.matrix}}
   clean-ghcr:
@@ -34,6 +40,18 @@ jobs:
           org-name: infinimesh
           untagged-only: true
           token: ${{ secrets.PACKAGES_PAT }}
+      - name: Summary
+        run: |
+          echo "### Deleted Untagged Images :wastebasket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for c in $(echo ${{ steps.untagged.deleted }} | sed "s/,/ /g"); do
+              echo " - $c" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "### Failed to delete Untagged Images :warning:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for c in $(echo ${{ steps.untagged.failed }} | sed "s/,/ /g"); do
+              echo " - $c" >> $GITHUB_STEP_SUMMARY
+          done
 
       - name: Dev Images (> 2 weeks)
         uses: snok/container-retention-policy@v1
@@ -45,3 +63,15 @@ jobs:
           filter-tags: dev-*
           filter-include-untagged: true
           token: ${{ secrets.PACKAGES_PAT }}
+      - name: Summary
+        run: |
+          echo "### Deleted Dev Images :wastebasket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for c in $(echo ${{ steps.dev.deleted }} | sed "s/,/ /g"); do
+              echo " - $c" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "### Failed to delete Untagged Images :warning:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for c in $(echo ${{ steps.dev.failed }} | sed "s/,/ /g"); do
+              echo " - $c" >> $GITHUB_STEP_SUMMARY
+          done
