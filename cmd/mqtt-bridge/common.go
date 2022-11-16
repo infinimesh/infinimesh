@@ -210,7 +210,8 @@ func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLe
 		p := packet.NewPublish(topic, 0, payload, protocolLevel)
 		_, err = p.WriteTo(c)
 		if err != nil {
-			panic(err)
+			log.Error("Failed to write packet", zap.Error(err))
+			return
 		}
 	}
 }
