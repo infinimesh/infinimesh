@@ -193,7 +193,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 }
 
 func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
-func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
+	defer log.Debug("BackChannel handler closed")
 	var ts int64 = 0
 	for msg := range ch {
 		shadow := msg.(*pb.Shadow)
