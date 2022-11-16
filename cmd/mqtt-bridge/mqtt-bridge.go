@@ -225,7 +225,7 @@ func main() {
 
 		rawcert := conn.ConnectionState().PeerCertificates[0].Raw
 		fingerprint := getFingerprint(rawcert)
-		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
+		log.Debug("Fingerprint", zap.Binary("fingerprint", fingerprint))
 
 		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
 			if device.Enabled {
