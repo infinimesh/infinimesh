@@ -110,15 +110,17 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			log.Warn("Error closing connection", zap.Error(err))
 			break
 		}
-		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 
+		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
 		if err != nil {
 			if err == io.EOF {
 				log.Debug("Client closed connection", zap.String("client", connectPacket.ConnectPayload.ClientID))
 			} else {
 				log.Warn("Failed to read packet", zap.Error(err))
 			}
-			_ = c.Close()
+			if err := c.Close(); err != nil {
+				log.Warn("Couldn't close connection", zap.Error(err))
+			}
 			break
 		}
 
