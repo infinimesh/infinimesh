@@ -162,7 +162,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, "mqtt.outgoing/"+device.Uuid)
-				go handleBackChannel(backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
+				go handleBackChannel(log, backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
 				log.Debug("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
 
@@ -192,6 +192,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}
 }
 
+func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
 func handleBackChannel(ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
 	var ts int64 = 0
 	for msg := range ch {
