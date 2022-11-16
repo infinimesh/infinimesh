@@ -64,10 +64,11 @@ func LogErrorAndClose(c net.Conn, err error) {
 
 // Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
-	defer log.Debug("Client disconnected", zap.String("client", connectPacket.ConnectPayload.ClientID))
+	log := log.Named(device.GetUuid()).Named(connectPacket.ConnectPayload.ClientID)
+	defer log.Debug("Client disconnected")
+
 	log.Debug(
 		"Client connected", zap.String("device", device.Uuid),
-		zap.String("client", connectPacket.ConnectPayload.ClientID),
 		zap.Int("protocol_level", int(connectPacket.VariableHeader.ProtocolLevel)),
 		zap.String("protocol", connectPacket.VariableHeader.ProtocolName),
 		zap.Int("QoS", connectPacket.VariableHeader.ConnectFlags.WillQoS),
