@@ -169,14 +169,28 @@ func main() {
 
 	go HandleTCPConnections(tcp)
 	for {
-		conn, _ := tlsl.Accept() // nolint: gosec
-		if debug {
-			printConnState(conn)
+		c, err := tlsl.Accept() // nolint: gosec
+		if err != nil {
+			log.Warn("Couldn't accept TLS Connection", zap.Error(err))
+			continue
 		}
+		if debug {
+			printConnState(c)
+		}
+
+		conn, ok := c.(*tls.Conn)
+		if !ok {
+			log.Warn("Couldn't cast conection to tls.Connection")
+			if err := conn.Close(); err != nil {
+				log.Warn("Couldn't close connection", zap.Error(err))
+			}
+			continue
+		}
+
 		timeout := time.Second * 30
 		errChannel := make(chan error, 2)
 		go func() {
-			errChannel <- conn.(*tls.Conn).Handshake()
+			errChannel <- conn.Handshake()
 		}()
 		select {
 		case err := <-errChannel:
@@ -185,7 +199,7 @@ func main() {
 				continue
 			}
 		case <-time.After(timeout):
-			LogErrorAndClose(conn, errors.New("handshake failed due to timeout"))
+			LogErrorAndClose(c, errors.New("handshake failed due to timeout"))
 			continue
 		}
 
@@ -204,12 +218,12 @@ func main() {
 		}
 		log.Debug("ConnectPacket", zap.Any("packet", p))
 
-		if len(conn.(*tls.Conn).ConnectionState().PeerCertificates) == 0 {
+		if len(conn.ConnectionState().PeerCertificates) == 0 {
 			LogErrorAndClose(conn, errors.New("no certificate given"))
 			continue
 		}
 
-		rawcert := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Raw
+		rawcert := conn.ConnectionState().PeerCertificates[0].Raw
 		fingerprint := getFingerprint(rawcert)
 		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
