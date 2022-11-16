@@ -106,7 +106,8 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		}
 		if !device.Enabled {
 			log.Debug("Device is disabled, disconnecting", zap.String("device", device.Uuid), zap.Bool("enabled", device.Enabled))
-			_ = c.Close()
+			err = c.Close()
+			log.Warn("Error closing connection", zap.Error(err))
 			break
 		}
 		p, err := packet.ReadPacket(c, connectPacket.VariableHeader.ProtocolLevel)
