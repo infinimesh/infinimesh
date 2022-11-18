@@ -45,6 +45,7 @@ func (s *ShadowServiceServer) Persister() {
 
 	messages := make(chan interface{}, 10)
 	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
+	defer unsub(s.ps, messages)
 
 	for msg := range messages {
 		shadow := msg.(*pb.Shadow)
