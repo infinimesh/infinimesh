@@ -128,11 +128,15 @@ func main() {
 	}
 
 	srv := shadow.NewShadowServiceServer(log, rdb, ps)
-	go srv.Persister()
 
 	s := grpc.NewServer()
 	pb.RegisterShadowServiceServer(s, srv)
+	go func() {
+		log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
+		log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))
+	}()
 
-	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
-	log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))
+	srv.Persister()
+
+	s.Stop()
 }
