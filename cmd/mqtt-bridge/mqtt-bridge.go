@@ -73,8 +73,9 @@ var (
 
 	ps *pubsub.PubSub
 
-	log          *zap.Logger
-	internal_ctx context.Context
+	log             *zap.Logger
+	internal_ctx    context.Context
+	buffer_capacity int
 )
 
 func init() {
@@ -91,6 +92,7 @@ func init() {
 	viper.SetDefault("TLS_KEY_FILE", "/cert/tls.key")
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
+	viper.SetDefault("BUFFER_CAPACITY", 10)
 
 	devicesHost = viper.GetString("DEVICES_HOST")
 	shadowHost = viper.GetString("SHADOW_HOST")
@@ -99,6 +101,7 @@ func init() {
 	tlsCertFile = viper.GetString("TLS_CERT_FILE")
 	tlsKeyFile = viper.GetString("TLS_KEY_FILE")
 	debug = viper.GetBool("DEBUG")
+	buffer_capacity = viper.GetInt("BUFFER_CAPACITY")
 }
 
 func main() {
@@ -150,7 +153,7 @@ func main() {
 	}
 	defer rbmq.Close()
 
-	ps, err = mqttps.Setup(log, rbmq, "mqtt.incoming", "mqtt.outgoing")
+	ps, err = mqttps.Setup(log, rbmq, "mqtt.incoming", "mqtt.outgoing", buffer_capacity)
 	if err != nil {
 		log.Fatal("Error setting up pubsub", zap.Error(err))
 	}

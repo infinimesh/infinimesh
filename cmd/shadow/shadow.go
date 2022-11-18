@@ -42,11 +42,12 @@ import (
 var (
 	log *zap.Logger
 
-	port         string
-	redisHost    string
-	devicesHost  string
-	RabbitMQConn string
-	SIGNING_KEY  string
+	port            string
+	redisHost       string
+	devicesHost     string
+	RabbitMQConn    string
+	SIGNING_KEY     string
+	buffer_capacity int
 )
 
 func init() {
@@ -59,12 +60,14 @@ func init() {
 	viper.SetDefault("DEVICES_HOST", "repo:8000")
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@rabbitmq:5672/")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
+	viper.SetDefault("BUFFER_CAPACITY", 10)
 
 	port = viper.GetString("PORT")
 	redisHost = viper.GetString("REDIS_HOST")
 	devicesHost = viper.GetString("DEVICES_HOST")
 	RabbitMQConn = viper.GetString("RABBITMQ_CONN")
 	SIGNING_KEY = viper.GetString("SIGNING_KEY")
+	buffer_capacity = viper.GetInt("BUFFER_CAPACITY")
 }
 
 func main() {
@@ -88,7 +91,7 @@ func main() {
 	log.Info("Connected to RabbitMQ")
 
 	log.Info("Setting up Pub/Sub")
-	ps, err := pubsub.Setup(log, rbmq, "mqtt.outgoing", "mqtt.incoming")
+	ps, err := pubsub.Setup(log, rbmq, "mqtt.outgoing", "mqtt.incoming", buffer_capacity)
 	if err != nil {
 		log.Fatal("Error setting up pubsub", zap.Error(err))
 	}
