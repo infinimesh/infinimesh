@@ -15,7 +15,7 @@ updates:
     assignees:
       - slntopp
   - package-ecosystem: "npm"
-    directory: "frontend"
+    directory: "/console"
     schedule:
       interval: daily
       time: "06:00"
