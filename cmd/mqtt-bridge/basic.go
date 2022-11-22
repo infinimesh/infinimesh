@@ -28,7 +28,12 @@ import (
 func HandleTCPConnections(tcp net.Listener) {
 	log := log.Named("TCP")
 	for {
-		conn, _ := tcp.Accept() // nolint: gosec
+		conn, err := tcp.Accept()
+		if err != nil {
+			log.Warn("Couldn't accept connection", zap.Error(err))
+			continue
+		}
+		log.Debug("Connection Accepted", zap.String("remote", conn.RemoteAddr().String()))
 
 		p, err := packet.ReadPacket(conn, 0)
 		if err != nil {

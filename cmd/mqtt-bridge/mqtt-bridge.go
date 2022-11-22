@@ -183,6 +183,7 @@ func main() {
 			if debug {
 				printConnState(c)
 			}
+			log.Debug("Connection Accepted", zap.String("remote", c.RemoteAddr().String()))
 
 			conn, ok := c.(*tls.Conn)
 			if !ok {
