@@ -185,70 +185,73 @@ func main() {
 			}
 			log.Debug("Connection Accepted", zap.String("remote", c.RemoteAddr().String()))
 
-			conn, ok := c.(*tls.Conn)
-			if !ok {
-				log.Warn("Couldn't cast conection to tls.Connection")
-				if err := conn.Close(); err != nil {
-					log.Warn("Couldn't close connection", zap.Error(err))
-				}
-				continue
-			}
+			go func(c net.Conn) {
 
-			timeout := time.Second * 30
-			errChannel := make(chan error, 2)
-			go func() {
-				errChannel <- conn.Handshake()
-			}()
-			select {
-			case err := <-errChannel:
+				conn, ok := c.(*tls.Conn)
+				if !ok {
+					log.Warn("Couldn't cast conection to tls.Connection")
+					if err := conn.Close(); err != nil {
+						log.Warn("Couldn't close connection", zap.Error(err))
+					}
+					return
+				}
+
+				timeout := time.Second * 30
+				errChannel := make(chan error, 2)
+				go func() {
+					errChannel <- conn.Handshake()
+				}()
+				select {
+				case err := <-errChannel:
+					if err != nil {
+						log.Info("Handshake failed", zap.Error(err))
+						return
+					}
+				case <-time.After(timeout):
+					LogErrorAndClose(c, errors.New("handshake failed due to timeout"))
+					return
+				}
+
+				p, err := packet.ReadPacket(conn, 0)
 				if err != nil {
-					log.Info("Handshake failed", zap.Error(err))
-					continue
+					LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
+					return
 				}
-			case <-time.After(timeout):
-				LogErrorAndClose(c, errors.New("handshake failed due to timeout"))
-				continue
-			}
 
-			p, err := packet.ReadPacket(conn, 0)
-			if err != nil {
-				LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
-				continue
-			}
+				log.Debug("Control packet", zap.Any("packet", p))
 
-			log.Debug("Control packet", zap.Any("packet", p))
-
-			connectPacket, ok := p.(*packet.ConnectControlPacket)
-			if !ok {
-				LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
-				continue
-			}
-			log.Debug("ConnectPacket", zap.Any("packet", p))
-
-			if len(conn.ConnectionState().PeerCertificates) == 0 {
-				LogErrorAndClose(conn, errors.New("no certificate given"))
-				continue
-			}
-
-			rawcert := conn.ConnectionState().PeerCertificates[0].Raw
-			fingerprint := getFingerprint(rawcert)
-			log.Debug("Fingerprint", zap.Binary("fingerprint", fingerprint))
-
-			device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
-				if device.Enabled {
-					log.Info("Device is enabled", zap.String("device", device.Uuid), zap.Strings("tags", device.Tags))
-					return true
-				} else {
-					log.Warn("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
-					return false
+				connectPacket, ok := p.(*packet.ConnectControlPacket)
+				if !ok {
+					LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
+					return
 				}
-			})
-			if err != nil {
-				LogErrorAndClose(conn, err)
-				continue
-			}
+				log.Debug("ConnectPacket", zap.Any("packet", p))
 
-			go HandleConn(conn, connectPacket, device)
+				if len(conn.ConnectionState().PeerCertificates) == 0 {
+					LogErrorAndClose(conn, errors.New("no certificate given"))
+					return
+				}
+
+				rawcert := conn.ConnectionState().PeerCertificates[0].Raw
+				fingerprint := getFingerprint(rawcert)
+				log.Debug("Fingerprint", zap.Binary("fingerprint", fingerprint))
+
+				device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
+					if device.Enabled {
+						log.Info("Device is enabled", zap.String("device", device.Uuid), zap.Strings("tags", device.Tags))
+						return true
+					} else {
+						log.Warn("Failed to verify client as the device is not enabled", zap.String("device", device.Uuid))
+						return false
+					}
+				})
+				if err != nil {
+					LogErrorAndClose(conn, err)
+					return
+				}
+
+				go HandleConn(conn, connectPacket, device)
+			}(c)
 		}
 	}
 }

@@ -35,49 +35,51 @@ func HandleTCPConnections(tcp net.Listener) {
 		}
 		log.Debug("Connection Accepted", zap.String("remote", conn.RemoteAddr().String()))
 
-		p, err := packet.ReadPacket(conn, 0)
-		if err != nil {
-			LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
-			continue
-		}
-		log.Debug("ControlPacket", zap.Any("packet", p))
-
-		connectPacket, ok := p.(*packet.ConnectControlPacket)
-		if !ok {
-			LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
-			continue
-		}
-		log.Debug("ConnectPacket", zap.Any("packet", p))
-
-		var fingerprint []byte
-		fingerprint, err = verifyBasicAuth(connectPacket)
-		if err != nil {
-			LogErrorAndClose(conn, fmt.Errorf("error verifying Basic Auth: %v", err))
-			continue
-		}
-
-		log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
-
-		device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
-			if device.Title != connectPacket.ConnectPayload.Username {
-				log.Warn("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
-				return false
-			} else if !device.BasicEnabled {
-				log.Warn("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))
-				return false
-			} else if !device.Enabled {
-				log.Warn("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
-				return false
-			} else {
-				log.Debug("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))
-				return true
+		go func(conn net.Conn) {
+			p, err := packet.ReadPacket(conn, 0)
+			if err != nil {
+				LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
+				return
 			}
-		})
-		if err != nil {
-			LogErrorAndClose(conn, err)
-			continue
-		}
+			log.Debug("ControlPacket", zap.Any("packet", p))
 
-		go HandleConn(conn, connectPacket, device)
+			connectPacket, ok := p.(*packet.ConnectControlPacket)
+			if !ok {
+				LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
+				return
+			}
+			log.Debug("ConnectPacket", zap.Any("packet", p))
+
+			var fingerprint []byte
+			fingerprint, err = verifyBasicAuth(connectPacket)
+			if err != nil {
+				LogErrorAndClose(conn, fmt.Errorf("error verifying Basic Auth: %v", err))
+				return
+			}
+
+			log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
+
+			device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
+				if device.Title != connectPacket.ConnectPayload.Username {
+					log.Warn("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
+					return false
+				} else if !device.BasicEnabled {
+					log.Warn("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))
+					return false
+				} else if !device.Enabled {
+					log.Warn("Failed to verify client as the device is not enabled", zap.String("uuid", device.Uuid))
+					return false
+				} else {
+					log.Debug("Verified client as the device is enabled", zap.String("uuid", device.Uuid), zap.Strings("tags", device.Tags))
+					return true
+				}
+			})
+			if err != nil {
+				LogErrorAndClose(conn, err)
+				return
+			}
+
+			go HandleConn(conn, connectPacket, device)
+		}(conn)
 	}
 }
