@@ -26,7 +26,7 @@ import (
 )
 
 func HandleTCPConnections(tcp net.Listener) {
-	log := log.Named("HandleTCPConnections")
+	log := log.Named("TCP")
 	for {
 		conn, _ := tcp.Accept() // nolint: gosec
 
