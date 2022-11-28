@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="k in Object.keys(vars)" :key="k">
-                        <td>{{k}}</td>
+                        <td>{{ k }}</td>
                         <td>
                             <n-input v-model:value="vars[k]" type="text" :placeholder="`Enter ${k} value`" />
                         </td>
@@ -135,7 +135,12 @@ async function submit() {
         return
     }
 
-    await nss.update({ ...ns, plugin: { uuid: props.plugin.uuid, vars: vars.value } })
+    let vars_raw = vars.value
+    if (!vars_raw) {
+        vars_raw = {}
+    }
+
+    await nss.update({ ...ns, plugin: { uuid: props.plugin.uuid, vars: vars_raw } })
 
     emit('close')
 }
