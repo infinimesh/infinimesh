@@ -32,6 +32,19 @@
             </n-space>
         </n-alert>
     </n-space>
+    <n-space v-else-if="plugin.kind != 'EMBEDDED'" align="center" justify="center" class="fullscreen padded">
+        <n-alert :title="`Namespace has ${plugin.kind} Plugin connected`" type="warning">
+            <template #icon>
+                <n-icon>
+                    <extension-puzzle-outline />
+                </n-icon>
+            </template>
+            Plugin assosiated with this Namespace is not compatible with Dashboard page
+            <n-space justify="center" style="margin-top: 20px">
+                <ns-selector />
+            </n-space>
+        </n-alert>
+    </n-space>
     <n-spin :show="plugin.state == 'loading'" style="min-width: 90%;" v-else>
         <n-space v-if="plugin.state == 'notfound'" align="center" justify="center" class="fullscreen padded">
             <n-alert title="Coudln't get plugin :(" type="error" style="min-width: 40vh;">
