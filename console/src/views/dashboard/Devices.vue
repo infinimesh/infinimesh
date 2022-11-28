@@ -31,11 +31,13 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent } from "vue"
+import { defineAsyncComponent, watch } from "vue"
 import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
+import { useNSStore } from "@/store/namespaces";
+import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
 
 const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
@@ -50,9 +52,39 @@ const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
 
 store.fetchDevices(true, true);
 
-const { console_services } = storeToRefs(useAppStore())
+const app = useAppStore()
+const { console_services } = storeToRefs(app)
+
+const { selected, namespaces } = storeToRefs(useNSStore())
+const plugins = usePluginsStore()
+
+async function load_plugin() {
+  if (selected.value == 'all') {
+    plugins.current = false
+    return
+  }
+
+  console.log('selected updated', namespaces.value)
+
+  let ns = namespaces.value[selected.value]
+
+  if (!ns || !ns.plugin) {
+    plugins.current = false
+    return
+  }
+
+  console.log('selected updated | plugin', ns.plugin.uuid)
+
+  const { data } = await plugins.get(ns.plugin.uuid)
+  if (ns.vars) data.vars = ns.vars
+  plugins.current = data
+}
+
+watch(selected, load_plugin)
 
 function handleRefresh() {
   store.fetchDevices(true);
 }
+
+load_plugin()
 </script>
