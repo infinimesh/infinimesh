@@ -3,7 +3,7 @@
     <n-card hoverable :header-style="{ fontFamily: 'Exo 2' }" style="border-radius: 0">
       <template #header>
         <n-space aligh="center">
-          {{  device.title  }}
+          {{ device.title }}
           <div :style="{ visibility: hover ? '' : 'hidden' }">
             <edit-dev-title-modal :device="device" @save="handleUpdateTitle" />
           </div>
@@ -14,10 +14,10 @@
           <template #trigger>
             <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
               @click="handleUUIDClicked">
-              {{  device.uuid_short  }}
+              {{ device.uuid_short }}
             </n-tag>
           </template>
-          {{  device.uuid  }}
+          {{ device.uuid }}
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
@@ -31,12 +31,12 @@
 
       <template #footer>
         <template v-if="show_ns">
-          Namespace: <strong>{{  nss.namespaces[device.access.namespace]?.title || device.access.namespace  }}</strong>
+          Namespace: <strong>{{ nss.namespaces[device.access.namespace]?.title || device.access.namespace }}</strong>
         </template><br />
         <template v-if="device.tags.length > 0">
           Tags:
           <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
-            {{  tag  }}
+            {{ tag }}
           </n-tag>
         </template>
         <div :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
@@ -45,15 +45,37 @@
       </template>
 
       <template #action>
-        <device-state-collapse :state="store.device_state(device.uuid)" :patch="patch" :debug="debug"
-          @submit="handlePatchDesired" @submit-debug="handlePatchReported" />
+        <template v-if="plugin && plugin.kind == 'DEVICE'">
+          <n-tabs type="segment">
+            <n-tab-pane :name="plugin.uuid" :tab="plugin.title">
+              <div v-if="frame_url" style="width: 100%; height: max-content; overflow: visible;">
+                <iframe :style="{ border: 'none', width: '100%', height: plugins.height(device.uuid) }" :src="frame_url"
+                  ref="frame" scrolling="no" @load="iframeLoad"></iframe>
+              </div>
+              <n-alert title="Loading..." type="info" v-else>
+                We're loading the device plugin frame
+              </n-alert>
+            </n-tab-pane>
+
+            <n-tab-pane name="default" tab="JSON">
+              <device-state-collapse :state="state" :patch="patch" :debug="debug" @submit="handlePatchDesired"
+                @submit-debug="handlePatchReported" />
+            </n-tab-pane>
+          </n-tabs>
+
+        </template>
+        <template v-else>
+          <device-state-collapse :state="state" :patch="patch" :debug="debug" @submit="handlePatchDesired"
+            @submit-debug="handlePatchReported" />
+        </template>
+
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
-            {{  subscribed ? "Subscribed" : "Subscribe"  }}
+            {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
-            {{  patch ? "Cancel Patch" : "Patch Desired"  }}
+            {{ patch ? "Cancel Patch" : "Patch Desired" }}
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
@@ -90,23 +112,19 @@
 </template>
 
 <script setup>
-import { ref, computed, defineAsyncComponent } from "vue";
+import { ref, computed, defineAsyncComponent, watch, onMounted, nextTick } from "vue";
 import {
-  NCard,
-  NTooltip,
-  NIcon,
-  useMessage,
-  NSpin,
-  useLoadingBar,
-  NTag,
-  NSpace,
-  NButton,
-  NPopconfirm,
+  NCard, NTooltip, NAlert,
+  NIcon, useMessage,
+  NSpin, useLoadingBar,
+  NTag, NSpace, NButton,
+  NPopconfirm, NTabs, NTabPane
 } from "naive-ui";
 
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
-import { useAppStore } from "@/store/app";
+import { baseURL, useAppStore } from "@/store/app";
+import { usePluginsStore } from "@/store/plugins";
 
 import { access_lvl_conv } from "@/utils/access";
 import { storeToRefs } from "pinia";
@@ -141,6 +159,8 @@ const subscribed = computed(() => {
   return store.device_subscribed(device.value.uuid);
 });
 
+const state = computed(() => store.device_state(device.value.uuid))
+
 const bulb_color = computed(() => {
   if (device.value.enabled === null) return "gray";
   return device.value.enabled ? "#52c41a" : "#eb2f96";
@@ -160,7 +180,38 @@ function handleSubscribe() {
   store.subscribe([device.value.uuid]);
 }
 
-const { dev } = storeToRefs(useAppStore())
+const { dev, theme } = storeToRefs(useAppStore())
+
+const plugins = usePluginsStore()
+const { current: plugin } = storeToRefs(plugins)
+let token = false
+const frame = ref(null)
+const frame_url = ref(false)
+
+async function prepare_frame() {
+  frame_url.value = false
+  if (!plugin.value) {
+    return
+  }
+
+  const uuid = props.device.uuid
+
+  if (!token) {
+    token = await store.makeDevicesToken([uuid], true)
+  }
+
+  let params = {
+    token, device: uuid,
+    theme: theme.value, api: baseURL,
+    vars: plugin.value.vars,
+    ...state.value
+  }
+
+  const src = `${plugin.value.deviceConf.viewUrl}?a=${btoa(JSON.stringify(params))}`
+  frame_url.value = src
+}
+watch([plugin, theme, state], prepare_frame)
+prepare_frame()
 
 const bar = useLoadingBar();
 const patch = ref(false);
