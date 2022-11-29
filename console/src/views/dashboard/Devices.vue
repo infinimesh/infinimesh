@@ -59,12 +59,10 @@ const { selected, namespaces } = storeToRefs(useNSStore())
 const plugins = usePluginsStore()
 
 async function load_plugin() {
+  plugins.current = false
   if (selected.value == 'all') {
-    plugins.current = false
     return
   }
-
-  console.log('selected updated', namespaces.value)
 
   let ns = namespaces.value[selected.value]
 
@@ -72,8 +70,6 @@ async function load_plugin() {
     plugins.current = false
     return
   }
-
-  console.log('selected updated | plugin', ns.plugin.uuid)
 
   const { data } = await plugins.get(ns.plugin.uuid)
   if (ns.vars) data.vars = ns.vars
