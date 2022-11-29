@@ -29,8 +29,6 @@ const store = useAppStore()
 const route = useRoute()
 
 function RouterAction() {
-  console.log(route.name)
-  console.log(store.dev)
   if (route.name == "DashboardMain" && store.dev)
     return h(PluginVars)
 
