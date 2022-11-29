@@ -10,7 +10,9 @@ export const usePluginsStore = defineStore("plugins", {
     loading: false,
     plugins: [],
 
-    current: false
+    current: false,
+
+    heights: new Map()
   }),
 
   actions: {
@@ -38,6 +40,18 @@ export const usePluginsStore = defineStore("plugins", {
     },
     async update(uuid, data) {
       return as.http.post("/plugins/" + uuid, data);
+    },
+    height(device) {
+      let height = this.heights.get(device);
+      if (!height) return '10vh';
+      return height + 'px';
     }
   },
+});
+
+window.addEventListener('message', ({ data }) => {
+  if (data.type == "frame-height") {
+    console.log(`Setting plugin frame height for ${data.device} to ${data.height}`)
+    usePluginsStore().heights.set(data.device, data.height)
+  }
 });
