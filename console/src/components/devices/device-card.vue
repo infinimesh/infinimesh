@@ -46,7 +46,7 @@
 
       <template #action>
         <template v-if="plugin && plugin.kind == 'DEVICE'">
-          <n-tabs type="segment">
+          <n-tabs type="segment" @update:value="handleStateTabChanged" :value="state_tab">
             <n-tab-pane :name="plugin.uuid" :tab="plugin.title">
               <div v-if="frame_url" style="width: 100%; height: max-content; overflow: visible;">
                 <iframe :style="{ border: 'none', width: '100%', height: plugins.height(device.uuid) }" :src="frame_url"
@@ -108,14 +108,21 @@
         </n-space>
       </template>
     </n-card>
+    <n-modal :show="plugin_edit_modal && plugin_edit_modal.show" preset="dialog" size="huge"
+      @update:show="(v) => !v && (patch = false)" style="width: 90vw">
+      <n-space justify="space-around">
+        <iframe :style="{ border: 'none', width: '85vw', height: '80vh' }" :src="plugin_edit_modal.frame">
+        </iframe>
+      </n-space>
+    </n-modal>
   </n-spin>
 </template>
 
 <script setup>
-import { ref, computed, defineAsyncComponent, watch, onMounted, nextTick } from "vue";
+import { ref, computed, defineAsyncComponent, watch } from "vue";
 import {
   NCard, NTooltip, NAlert,
-  NIcon, useMessage,
+  NIcon, useMessage, NModal,
   NSpin, useLoadingBar,
   NTag, NSpace, NButton,
   NPopconfirm, NTabs, NTabPane
@@ -188,8 +195,7 @@ let token = false
 const frame = ref(null)
 const frame_url = ref(false)
 
-async function prepare_frame() {
-  frame_url.value = false
+async function frame_src(view = 'viewUrl') {
   if (!plugin.value) {
     return
   }
@@ -207,8 +213,14 @@ async function prepare_frame() {
     ...state.value
   }
 
-  const src = `${plugin.value.deviceConf.viewUrl}?a=${btoa(JSON.stringify(params))}`
-  frame_url.value = src
+  const src = `${plugin.value.deviceConf[view]}?a=${btoa(JSON.stringify(params))}`
+  return src
+}
+
+async function prepare_frame() {
+  frame_url.value = false
+
+  frame_url.value = await frame_src()
 }
 watch([plugin, theme, state], prepare_frame)
 prepare_frame()
@@ -223,7 +235,32 @@ async function handlePatchDesired(state) {
   patching.value = false;
 }
 
-const debug = ref(false)
+const state_tab = ref((plugin.value && plugin.value.uuid) || 'default')
+const plugin_edit_modal = ref(false)
+
+function handleStateTabChanged(v) {
+  console.log('tab changed', v)
+  state_tab.value = v
+}
+
+watch(patch, async (n) => {
+  if (!plugin.value) return
+
+  if (!n) {
+    plugin_edit_modal.value = false
+    return
+  }
+
+  plugin_edit_modal.value = {
+    show: true,
+    frame: await frame_src('desiredUrl')
+  }
+})
+
+
+const debug = ref(false) // Enables Reported state editor
+
+// API handlers
 async function handlePatchReported(state) {
   patching.value = true;
   await store.patchReportedState(device.value.uuid, state, bar);
