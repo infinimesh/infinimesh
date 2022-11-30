@@ -63,8 +63,8 @@ window.addEventListener('message', ({ origin, data }) => {
       store.heights.set(data.device, data.height);
       break;
     case "desired":
-      console.log(`Received Patch Desired State intent from`, origin);
-      console.log(`Device: ${data.device}`, data.state);
+      console.log(`Received Patch Desired State intent from ${origin}`);
+      console.log('Device', data.device, 'state', data.state);
 
       if (!store.current) {
         console.warn(`Plugin ${origin} attempted to patch desired state while not active`);
