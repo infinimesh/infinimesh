@@ -60,6 +60,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.14.0
 )
