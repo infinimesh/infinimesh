@@ -137,7 +137,7 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async patchDesiredState(device, state, bar) {
-      bar.start();
+      if (bar) bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
         await as.http.post(`/devices/states`, {
@@ -148,10 +148,10 @@ export const useDevicesStore = defineStore("devices", {
           },
         });
         this.getDevicesState([device], token);
-        bar.finish();
+        if (bar) bar.finish();
       } catch (e) {
         console.error(e);
-        bar.error();
+        if (bar) bar.error();
       }
     },
     async patchReportedState(device, state, bar) {

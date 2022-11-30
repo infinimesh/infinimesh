@@ -9,7 +9,7 @@ const nss = useNSStore()
 const router = useRouter();
 
 let ns = nss.namespaces[nss.selected]
-if (!ns || !ns.plugin) {
+if (!ns || !ns.plugin || ns.plugin.kind != "EMBEDDED") {
     console.log("No Namespace selected or Namespace has no Plugins")
     router.push({ name: "Devices" })
 } else {

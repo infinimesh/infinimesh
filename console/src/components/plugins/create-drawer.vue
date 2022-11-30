@@ -20,6 +20,14 @@
             <n-grid cols="2" responsive="self" :x-gap="20">
                 <n-grid-item span="s:2 m:2 l:1 xl:1 2xl:1">
                     <n-form ref="form" :model="model" :rules="rules" label-placement="top">
+                        <n-form-item label="Kind" path="kind" label-placement="left" style="margin-top: 5px">
+                            <n-radio-group v-model:value="model.kind" name="kind" @update:value="handleKindUpdate">
+                                <n-radio-button value="UNKNOWN" :disabled="true" label="Unknown" />
+                                <n-radio-button value="EMBEDDED" label="Embedded" />
+                                <n-radio-button value="DEVICE" label="Device" />
+                            </n-radio-group>
+                        </n-form-item>
+
                         <n-form-item label="Title" path="title">
                             <n-input v-model:value="model.title" placeholder="Make it bright" />
                         </n-form-item>
@@ -50,12 +58,6 @@
                             Start with level 3(###) if you're using headers :)
                         </n-alert>
 
-                        <n-form-item label="Kind" path="kind" style="margin-top: 5px">
-                            <n-radio-group v-model:value="model.kind" name="kind">
-                                <n-radio-button value="UNKNOWN" :disabled="true" label="Unknown" />
-                                <n-radio-button value="EMBEDDED" label="Embedded" />
-                            </n-radio-group>
-                        </n-form-item>
                         <n-alert title="Note" type="info">
                             <template #icon>
                                 <n-icon>
@@ -65,9 +67,22 @@
                             Hover your cursor over kind label in preview to see the differences
                         </n-alert>
 
-                        <n-form-item label="Frame URL" path="embedded_conf.frameUrl" style="margin-top: 5px">
-                            <n-input v-model:value="model.embedded_conf.frameUrl" placeholder="IFrame URL to embed" />
-                        </n-form-item>
+                        <template v-if="model.kind == 'EMBEDDED'">
+                            <n-form-item label="Frame URL" path="embedded_conf.frameUrl" style="margin-top: 5px">
+                                <n-input v-model:value="model.embedded_conf.frameUrl"
+                                    placeholder="IFrame URL to embed" />
+                            </n-form-item>
+                        </template>
+                        <template v-else-if="model.kind == 'DEVICE'">
+                            <n-form-item label="State View Frame URL" path="device_conf.viewUrl"
+                                style="margin-top: 5px">
+                                <n-input v-model:value="model.device_conf.viewUrl" />
+                            </n-form-item>
+                            <n-form-item label="Desired Editor Frame URL" path="device_conf.desiredUrl"
+                                style="margin-top: 5px">
+                                <n-input v-model:value="model.device_conf.desiredUrl" />
+                            </n-form-item>
+                        </template>
                     </n-form>
 
                     <n-alert title="Error creating App/Plugin" type="error" v-if="error">
@@ -93,8 +108,9 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <n-button @click="() => model.vars.push('')">Add
-                                                Variable</n-button>
+                                            <n-button @click="() => model.vars.push('')">
+                                                Add Variable
+                                            </n-button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -160,6 +176,35 @@ function reset() {
         },
         vars: []
     };
+    handleKindUpdate()
+}
+
+function handleKindUpdate() {
+    switch (model.value.kind) {
+        case 'EMBEDDED':
+            delete model.value.device_conf
+            delete rules.value.device_conf
+
+            model.value.embedded_conf = {
+                frameUrl: ""
+            }
+            rules.value.embedded_conf = {
+                frameUrl: [{ required: true, message: "Please input iframe URL" }]
+            }
+            break
+        case 'DEVICE':
+            delete model.value.embedded_conf
+            delete rules.value.embedded_conf
+            model.value.device_conf = {
+                viewUrl: "",
+                desiredUrl: ""
+            }
+            rules.value.device_conf = {
+                viewUrl: [{ required: true, message: "Please input iframe URL" }],
+                desiredUrl: [{ required: true, message: "Please input iframe URL" }]
+            }
+            break
+    }
 }
 
 const store = usePluginsStore()

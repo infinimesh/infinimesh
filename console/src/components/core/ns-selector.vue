@@ -1,15 +1,24 @@
 <template>
   <n-space justify="space-between" align="center">
     <n-spin size="small" v-show="loading" />
-    <n-select v-model:value="selected" :options="options" :style="{ minWidth: '15vw' }" @update:show="handleShow" />
+    <n-select v-model:value="selected" :options="options" :style="{ minWidth: '15vw' }" />
+    <n-button type="primary" size="small" ghost circle @click="() => store.fetchNamespaces()">
+      <template #icon>
+        <n-icon>
+          <refresh-outline />
+        </n-icon>
+      </template>
+    </n-button>
   </n-space>
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
-import { NSpace, NSpin, NSelect } from "naive-ui";
+import { computed, watch, defineAsyncComponent } from "vue";
+import { NSpace, NSpin, NSelect, NIcon, NButton } from "naive-ui";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
+
+const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
 
 const store = useNSStore();
 
@@ -27,12 +36,6 @@ const options = computed(() => {
     })),
   ];
 });
-
-function handleShow(show) {
-  if (show) {
-    store.fetchNamespaces();
-  }
-}
 
 watch(namespaces, () => {
   if (!selected.value) {
