@@ -6,13 +6,16 @@
         <router-view />
         <n-watermark v-if="dev" content="dev mode" cross fullscreen :font-size="16" :line-height="16" :width="250"
           :height="150" :x-offset="12" :y-offset="80" :rotate="-15" />
+
+        <current_thing />
+
       </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
+import { computed, inject, defineAsyncComponent, watchEffect, h, onMounted } from "vue";
 import {
   NConfigProvider,
   NGlobalStyle,
@@ -57,6 +60,34 @@ function loadConsoleServices() {
     });
 }
 loadConsoleServices()
+
+onMounted(() => {
+  let now = new Date()
+  let m = now.getMonth() + 1, d = now.getDate()
+
+  if ((m == 12 && d >= 20) || (m == 1 && d < 14)) { // from 20.12 till 14.01
+    store.current_thing = {
+      k: 'jolly', on: true
+    }
+  } else {
+    store.current_thing = false
+  }
+})
+
+const snowflakes = defineAsyncComponent(() => import("@/components/core/snowflakes.vue"))
+
+function current_thing() {
+  if (!store.current_thing) h('')
+
+  switch (store.current_thing.k) {
+    case 'jolly':
+      if (store.current_thing.on) return h(snowflakes)
+      break
+  }
+
+  return h('')
+}
+
 </script>
 
 <style>

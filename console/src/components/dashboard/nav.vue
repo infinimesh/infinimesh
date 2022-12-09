@@ -1,6 +1,7 @@
 <template>
   <n-space justify="space-between" :style="{ padding: '15px' }" align="center">
-    <span class="infinimesh">infinimesh<span class="copyright">©</span></span>
+    <current_thing />
+
     <ns-selector />
     <div style="margin-left: 5px">
       <n-space justify="space-between">
@@ -34,6 +35,28 @@ function RouterAction() {
 
   return null
 }
+
+function infinimesh() {
+  return h('span', { class: "infinimesh" }, [
+    "infinimesh", h('span', { class: "copyright" }, "©")
+  ])
+}
+
+const jollymesh = defineAsyncComponent(() => import("@/assets/icons/jollymesh_test.svg"))
+
+/* <span class="infinimesh">infinimesh<span class="copyright">©</span></span> */
+function current_thing() {
+  if (!store.current_thing)
+    return infinimesh()
+
+  switch (store.current_thing.k) {
+    case 'jolly':
+      return h(jollymesh, { id: "svgmesh", style: { height: '5vh' } })
+  }
+
+  return infinimesh()
+
+}
 </script>
 
 <style>
@@ -45,5 +68,9 @@ span.infinimesh {
 span.copyright {
   vertical-align: super;
   font-size: 1.2vh;
+}
+
+#svgmesh text {
+  fill: var(--n-text-color);
 }
 </style>
