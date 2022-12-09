@@ -42,9 +42,8 @@ function infinimesh() {
   ])
 }
 
-const jollymesh = defineAsyncComponent(() => import("@/assets/icons/jollymesh_test.svg"))
+const jollymesh = defineAsyncComponent(() => import("@/assets/icons/jollymesh.svg"))
 
-/* <span class="infinimesh">infinimesh<span class="copyright">©</span></span> */
 function current_thing() {
   if (!store.current_thing)
     return infinimesh()
