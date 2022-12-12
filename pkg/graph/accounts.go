@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -487,7 +487,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
 	}
 
-	if acc.Access.Level < access.Level_ROOT || acc.Access.Role != access.Role_OWNER {
+	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
