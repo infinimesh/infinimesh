@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.8"
 services:
 
   proxy:
@@ -62,8 +62,8 @@ services:
       - 1883:1883 # BasicAuth(non-TLS)
       - 8883:8883 # Standard(TLS)
     volumes:
-      - $PWD/hack/server.crt:/cert/tls.crt
-      - $PWD/hack/server.key:/cert/tls.key
+      - ./hack/server.crt:/cert/tls.crt
+      - ./hack/server.key:/cert/tls.key
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
