@@ -50,7 +50,9 @@ function current_thing() {
 
   switch (store.current_thing.k) {
     case 'jolly':
-      return h(jollymesh, { id: "svgmesh", style: { height: '5vh' } })
+      return h(jollymesh, {
+        id: "svgmesh", style: { height: '5vh', cursor: 'pointer' }, onClick: () => store.current_thing.on = !store.current_thing.on
+      })
   }
 
   return infinimesh()

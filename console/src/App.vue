@@ -65,13 +65,17 @@ onMounted(() => {
   let now = new Date()
   let m = now.getMonth() + 1, d = now.getDate()
 
-  if ((m == 12 && d >= 20) || (m == 1 && d < 14)) { // from 20.12 till 14.01
-    store.current_thing = {
+  let todo = false
+
+  if ((m == 12) || (m == 1 && d < 14)) { // from 20.12 till 14.01
+    todo = {
       k: 'jolly', on: true
     }
-  } else {
-    store.current_thing = false
   }
+
+  if (todo && store.current_thing && !store.current_thing.on) return
+
+  store.current_thing = todo
 })
 
 const snowflakes = defineAsyncComponent(() => import("@/components/core/snowflakes.vue"))
@@ -85,7 +89,7 @@ function current_thing() {
       break
   }
 
-  return h('')
+  return null
 }
 
 </script>
