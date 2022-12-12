@@ -51,10 +51,11 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 	pool := req.GetPool()
 	log.Debug("Request received", zap.Strings("pool", pool))
 
-	keys := make([]string, len(pool)*2)
+	keys := make([]string, len(pool)*3)
 	for i, dev := range pool {
-		keys[i*2] = Key(dev, pb.StateKey_REPORTED)
-		keys[i*2+1] = Key(dev, pb.StateKey_DESIRED)
+		keys[i*3] = Key(dev, pb.StateKey_REPORTED)
+		keys[i*3+1] = Key(dev, pb.StateKey_DESIRED)
+		keys[i*3+2] = Key(dev, pb.StateKey_CONNECTION)
 	}
 	if len(keys) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "no devices specified")
@@ -69,17 +70,23 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 	shadows := make([]*pb.Shadow, len(pool))
 	for i := range shadows {
 		s := &pb.Shadow{
-			Device:   pool[i],
-			Reported: &pb.State{},
-			Desired:  &pb.State{},
+			Device:     pool[i],
+			Reported:   &pb.State{},
+			Desired:    &pb.State{},
+			Connection: &pb.ConnectionState{},
 		}
-		if states[i*2] != nil {
-			state := states[i*2].(string)
+		if states[i*3] != nil {
+			state := states[i*3].(string)
 			json.Unmarshal([]byte(state), s.Reported)
 		}
-		if states[i*2+1] != nil {
-			state := states[i*2+1].(string)
+		if states[i*3+1] != nil {
+			state := states[i*3+1].(string)
 			json.Unmarshal([]byte(state), s.Desired)
+		}
+		if states[i*3+2] != nil {
+			state := states[i*3+2].(string)
+			json.Unmarshal([]byte(state), s.Connection)
+
 		}
 		shadows[i] = s
 	}

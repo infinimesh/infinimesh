@@ -108,6 +108,8 @@
           </template>
         </n-space>
       </template>
+
+      <status-corner :connection="state.connection" />
     </n-card>
     <n-modal :show="plugin_edit_modal && plugin_edit_modal.show" preset="dialog" size="huge"
       @update:show="(v) => !v && (patch = false)" style="width: 90vw">
@@ -143,6 +145,8 @@ const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutli
 const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
+
+const StatusCorner = defineAsyncComponent(() => import("./status-corner.vue"))
 
 const props = defineProps({
   device: {

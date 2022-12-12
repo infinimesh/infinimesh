@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
 	pb "github.com/infinimesh/proto/shadow"
@@ -27,13 +28,18 @@ import (
 
 func Key(device string, key pb.StateKey) string {
 	var k string
-	if key == pb.StateKey_DESIRED {
+
+	switch key {
+	case pb.StateKey_DESIRED:
 		k = "desired"
-	} else if key == pb.StateKey_REPORTED {
+	case pb.StateKey_REPORTED:
 		k = "reported"
-	} else {
+	case pb.StateKey_CONNECTION:
+		k = "connection"
+	default:
 		k = "garbage"
 	}
+
 	return fmt.Sprintf("%s:%s", device, k)
 }
 
@@ -57,6 +63,9 @@ func (s *ShadowServiceServer) Persister() {
 		if shadow.Desired != nil {
 			log.Debug("Desiring", zap.String("device", shadow.Device))
 			s.MergeAndStore(log, shadow.Device, pb.StateKey_DESIRED, shadow.Desired)
+		}
+		if shadow.Connection != nil {
+			s.StoreConnectionState(log, shadow.Device, shadow.Connection)
 		}
 	}
 }
@@ -100,18 +109,33 @@ set:
 	}
 }
 
-func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.StateKey, state *pb.State) {
+func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.StateKey, state interface{}) (string, bool) {
 	key := Key(device, skey)
 
 	new, err := json.Marshal(state)
 	if err != nil {
 		log.Warn("Error Marshalling State", zap.String("key", key), zap.Error(err))
-		return
+		return key, false
 	}
 
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
 		log.Warn("Error Storing State", zap.String("key", key), zap.Error(r.Err()))
+		return key, false
+	}
+
+	return key, true
+}
+
+func (s *ShadowServiceServer) StoreConnectionState(log *zap.Logger, device string, state *pb.ConnectionState) {
+
+	key, ok := s.Store(log, device, pb.StateKey_CONNECTION, state)
+	if !ok {
 		return
+	}
+
+	r := s.rdb.Expire(context.Background(), key, time.Hour*24)
+	if r.Err() != nil {
+		log.Warn("Couldn't set key expiration", zap.String("key", key), zap.Error(r.Err()))
 	}
 }

@@ -11,9 +11,11 @@ export const useDevicesStore = defineStore("devices", {
   state: () => ({
     loading: false,
     devices: {},
+    subscribed: [],
+
     reported: new Map(),
     desired: new Map(),
-    subscribed: [],
+    connection: new Map(),
   }),
 
   getters: {
@@ -38,6 +40,7 @@ export const useDevicesStore = defineStore("devices", {
         return {
           reported: state.reported.get(device_id) ?? {},
           desired: state.desired.get(device_id) ?? {},
+          connection: state.connection.get(device_id) ?? {},
         };
       };
     },
@@ -89,6 +92,9 @@ export const useDevicesStore = defineStore("devices", {
           }
           this.desired.set(response.device, response.desired);
         }
+        if (response.connection) {
+          this.connection.set(response.device, response.connection);
+        }
       };
       socket.onclose = () => {
         this.subscribed = [];
@@ -124,6 +130,7 @@ export const useDevicesStore = defineStore("devices", {
       for (let shadow of data.shadows) {
         this.reported.set(shadow.device, shadow.reported);
         this.desired.set(shadow.device, shadow.desired);
+        this.connection.set(shadow.device, shadow.connection);
       }
     },
     async updateDevice(device, patch) {
