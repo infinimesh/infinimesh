@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { computed, watch, defineAsyncComponent } from "vue";
+import { computed, watch, defineAsyncComponent, onMounted } from "vue";
 import { NSpace, NSpin, NSelect, NIcon, NButton } from "naive-ui";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
@@ -43,5 +43,9 @@ watch(namespaces, () => {
   }
 });
 
-store.fetchNamespaces();
+onMounted(() => {
+  if (Object.keys(store.namespaces).length == 0) {
+    store.fetchNamespaces();
+  }
+})
 </script>
