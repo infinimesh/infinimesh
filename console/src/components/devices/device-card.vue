@@ -198,7 +198,7 @@ const frame = ref(null)
 const frame_url = ref(false)
 
 async function frame_src(view = 'viewUrl') {
-  if (!plugin.value) {
+  if (!plugin.value || plugin.value.kind != 'DEVICE') {
     return
   }
 
