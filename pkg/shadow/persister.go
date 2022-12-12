@@ -111,7 +111,7 @@ func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.Stat
 
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
-		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))
+		log.Warn("Error Storing State", zap.String("key", key), zap.Error(r.Err()))
 		return
 	}
 }
