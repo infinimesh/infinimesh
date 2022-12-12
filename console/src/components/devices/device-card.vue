@@ -21,7 +21,7 @@
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw; "
+            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
               :class="toggle_animation ? 'jump-shaking-animation' : ''" @click="handleToggle">
               <bulb />
             </n-icon>
