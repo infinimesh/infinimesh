@@ -21,7 +21,8 @@
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw" @click="handleToggle">
+            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw; "
+              :class="toggle_animation ? 'jump-shaking-animation' : ''" @click="handleToggle">
               <bulb />
             </n-icon>
           </template>
@@ -172,6 +173,7 @@ const bulb_color = computed(() => {
   if (device.value.enabled === null) return "gray";
   return device.value.enabled ? "#52c41a" : "#eb2f96";
 });
+const toggle_animation = ref(false)
 
 const message = useMessage();
 async function handleUUIDClicked() {
@@ -275,7 +277,9 @@ async function handleDelete() {
 }
 
 async function handleToggle() {
-  store.toggle(device.value.uuid, bar);
+  toggle_animation.value = false
+  await store.toggle(device.value.uuid, bar);
+  toggle_animation.value = true
 }
 
 async function handleMakeToken() {
