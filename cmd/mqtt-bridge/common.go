@@ -98,6 +98,24 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		return
 	}
 
+	ps.Pub(&pb.Shadow{
+		Device: device.Uuid,
+		Connection: &pb.ConnectionState{
+			Connected: true,
+			Timestamp: timestamppb.Now(),
+		},
+	}, "mqtt.incoming")
+
+	defer func() {
+		ps.Pub(&pb.Shadow{
+			Device: device.Uuid,
+			Connection: &pb.ConnectionState{
+				Connected: false,
+				Timestamp: timestamppb.Now(),
+			},
+		}, "mqtt.incoming")
+	}()
+
 	token := device.GetToken()
 	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 	for {
@@ -145,6 +163,10 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 					Timestamp: timestamppb.Now(),
 					Data:      &data,
 				},
+				Connection: &pb.ConnectionState{
+					Connected: true,
+					Timestamp: timestamppb.Now(),
+				},
 			}
 			ps.Pub(payload, "mqtt.incoming")
 
@@ -162,7 +184,15 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, "mqtt.outgoing/"+device.Uuid)
-				go handleBackChannel(log, backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel)
+				go handleBackChannel(log, backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel, func() {
+					ps.Pub(&pb.Shadow{
+						Device: device.Uuid,
+						Connection: &pb.ConnectionState{
+							Connected: true,
+							Timestamp: timestamppb.Now(),
+						},
+					}, "mqtt.incoming")
+				})
 				log.Debug("Added Subscription", zap.String("topic", sub.Topic), zap.String("device", device.Uuid))
 			}
 
@@ -192,7 +222,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}
 }
 
-func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic string, protocolLevel byte) {
+func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic string, protocolLevel byte, connected func()) {
 	defer log.Debug("BackChannel handler closed")
 	var ts int64 = 0
 	for msg := range ch {
@@ -217,6 +247,8 @@ func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic s
 			log.Error("Failed to write packet", zap.Error(err))
 			return
 		}
+
+		connected()
 	}
 }
 
