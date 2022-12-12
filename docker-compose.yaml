@@ -65,7 +65,7 @@ services:
       - $PWD/hack/server.crt:/cert/tls.crt
       - $PWD/hack/server.key:/cert/tls.key
     environment:
-      DEBUG: "true"
+      LOG_LEVEL: ${LOG_LEVEL}
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       DEVICES_HOST: repo:8000
       SHADOW_HOST: shadow:8000
@@ -83,6 +83,7 @@ services:
       - db
       - proxy
     environment:
+      LOG_LEVEL: ${LOG_LEVEL}
       DB_HOST: db:8529
       DB_CRED: root:openSesame
       SHADOW_HOST: shadow:8000
@@ -95,6 +96,7 @@ services:
     depends_on:
       - redis
     environment:
+      LOG_LEVEL: ${LOG_LEVEL}
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       REDIS_HOST: redis:6379
       DEVICES_HOST: repo:8000
@@ -132,6 +134,7 @@ services:
     image: ghcr.io/infinimesh/infinimesh/handsfree:latest
     restart: always
     environment:
+      LOG_LEVEL: ${LOG_LEVEL}
       SIGNING_KEY: "${SIGNING_KEY}"
     labels:
       - traefik.http.routers.handsfree.rule=Host(`api.${BASE_DOMAIN}`)&&PathPrefix("/infinimesh.handsfree.")
