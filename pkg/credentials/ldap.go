@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ package credentials
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -114,6 +115,12 @@ type LDAPCredentials struct {
 	driver.DocumentMeta
 }
 
+func (c *LDAPCredentials) Listable() []string {
+	return []string{
+		c.Username, c.ProviderKey,
+	}
+}
+
 func NewLDAPCredentials(username, key string) (Credentials, error) {
 	if _, ok := LDAP.Providers[key]; !ok {
 		return nil, fmt.Errorf("requested Provider Key(%s) is not registered", key)
@@ -121,6 +128,35 @@ func NewLDAPCredentials(username, key string) (Credentials, error) {
 	return &LDAPCredentials{
 		Username: username, ProviderKey: key,
 	}, nil
+}
+
+func LDAPFromMap(d map[string]interface{}) (ListableCredentials, error) {
+	c := &LDAPCredentials{}
+
+	iuser, ok := d["username"]
+	if !ok {
+		return c, errors.New("'username' is not present")
+	}
+
+	user, ok := iuser.(string)
+	if !ok {
+		return c, errors.New("'username' is not string")
+	}
+
+	c.Username = user
+
+	iprovider, ok := d["key"]
+	if !ok {
+		return c, errors.New("provider 'key' is not present")
+	}
+
+	provider, ok := iprovider.(string)
+	if !ok {
+		return c, errors.New("provider 'key' is not string")
+	}
+	c.ProviderKey = provider
+
+	return c, nil
 }
 
 func (c *LDAPCredentials) Authorize(args ...string) bool {

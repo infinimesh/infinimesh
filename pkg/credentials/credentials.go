@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package credentials
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -132,4 +133,23 @@ func ListCredentialsAndEdges(ctx context.Context, log *zap.Logger, db driver.Dat
 
 	_, err = c.ReadDocument(ctx, &nodes)
 	return nodes, err
+}
+
+type ListableCredentials interface {
+	Listable() []string
+}
+type ListableFabric func(map[string]interface{}) (ListableCredentials, error)
+
+var _Listables = map[string]ListableFabric{
+	"standard": StandardFromMap,
+}
+
+// Accepts Credentials type as string t and Credentials data as map[string]interface{} d
+func MakeListable(t string, d map[string]interface{}) (ListableCredentials, error) {
+	f, ok := _Listables[t]
+	if !ok {
+		return nil, fmt.Errorf("Credentials of type %s aren't Listable", t)
+	}
+
+	return f(d)
 }
