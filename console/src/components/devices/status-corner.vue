@@ -24,6 +24,10 @@ function render() {
         if (props.connection.timestamp) {
             let d = new Date(props.connection.timestamp)
             seen = d.toString().split(' (')[0]
+
+            if (((new Date) - d) / 1000 >= 3600) {
+                status = 'onlineish'
+            }
         }
     }
 
@@ -53,6 +57,10 @@ function render() {
 
 .online {
     border-color: transparent transparent transparent #52c41a;
+}
+
+.onlineish {
+    border-color: transparent transparent transparent #f2c97d;
 }
 
 .offline {
