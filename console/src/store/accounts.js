@@ -35,9 +35,9 @@ export const useAccountsStore = defineStore("accounts", {
       const { data } = await as.http.get("/accounts");
 
       if (no_cache) {
-        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {});
+        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r; }, {});
       } else {
-        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r }, {}) };
+        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r; }, {}) };
       }
 
 
@@ -98,6 +98,15 @@ export const useAccountsStore = defineStore("accounts", {
       } catch (e) {
         console.error(e);
         bar.error();
+      }
+    },
+    async getCredentials(uuid) {
+      try {
+        const { data } = await as.http.get(`/accounts/${uuid}/credentials`);
+
+        return data;
+      } catch (e) {
+        console.error(e);
       }
     },
     async setCredentials(uuid, credentials, bar) {

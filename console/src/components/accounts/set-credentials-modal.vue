@@ -78,11 +78,24 @@ function reset() {
         type: 'standard',
         data: [props.account.title, ''],
     };
+
+    default_data()
+}
+
+function default_data() {
+    store.getCredentials(props.account.uuid).then((data) => {
+        if (!data || !data.credentials) return
+        for (let cred of data.credentials) {
+            if (cred.type == model.value.type) {
+                model.value.data = cred.data
+            }
+        }
+    })
 }
 
 watch(
     () => props.show,
-    (val) => {
+    () => {
         reset();
     }
 );
