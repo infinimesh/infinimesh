@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,8 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 
@@ -72,6 +74,7 @@ func main() {
 
 	srv := handsfree.NewHandsfreeServer(log)
 	pb.RegisterHandsfreeServiceServer(s, srv)
+	healthpb.RegisterHealthServer(s, health.NewServer())
 
 	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
 	log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))

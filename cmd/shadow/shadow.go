@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -134,6 +136,9 @@ func main() {
 
 	s := grpc.NewServer()
 	pb.RegisterShadowServiceServer(s, srv)
+
+	healthpb.RegisterHealthServer(s, health.NewServer())
+
 	go func() {
 		log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
 		log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))
