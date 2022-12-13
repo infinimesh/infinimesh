@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -120,7 +120,7 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 	ctrl := NewAccountsController(log, db)
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
-		err = ctrl.SetCredentialsCtrl(ctx, *root, cred_edge_col, cred)
+		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)
 		if err != nil {
 			log.Warn("Error setting Root Account Credentials")
 			return err

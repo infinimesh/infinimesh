@@ -255,7 +255,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = c.SetCredentialsCtrl(ctx, account, col, cred)
+	err = c._SetCredentials(ctx, account, col, cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
@@ -404,35 +404,47 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 	return r, err == nil
 }
 
-// Return Credentials linked to Account
-func (ctrl *AccountsController) GetCredentials(ctx context.Context, acc Account) (r []string, err error) {
-	query := `FOR credentials IN 1 OUTBOUND @account GRAPH @credentials_graph RETURN credentials._key`
-	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
-		"account":           acc.ID().String(),
-		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
-	})
-	if err != nil {
-		ctrl.log.Warn("Error executing query", zap.Error(err))
-		return nil, err
-	}
-	defer c.Close()
+func (c *AccountsController) GetCredentials(ctx context.Context, req *pb.GetCredentialsRequest) (*pb.GetCredentialsResponse, error) {
+	log := c.log.Named("GetCredentials")
+	log.Debug("Get Credentials request received", zap.String("account", req.GetUuid()))
 
-	for {
-		var cred string
-		_, err := c.ReadDocument(ctx, &cred)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			ctrl.log.Debug("Error unmarshalling credentials", zap.Error(err))
-			return nil, err
-		}
-		r = append(r, cred)
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	acc := *NewBlankAccountDocument(req.GetUuid())
+	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+
+	if err != nil {
+		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
 	}
-	return r, nil
+
+	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+	}
+
+	linked, err := credentials.ListCredentials(ctx, log, c.db, acc.ID())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Error listing Account's Credentials")
+	}
+
+	var creds []*accpb.Credentials
+	for _, res := range linked {
+		listable, err := credentials.MakeListable(res)
+		if err != nil {
+			log.Warn("Couldn't make Listable", zap.Error(err))
+			continue
+		}
+		creds = append(creds, &accpb.Credentials{
+			Type: res.Type, Data: listable.Listable(),
+		})
+	}
+
+	return &pb.GetCredentialsResponse{Credentials: creds}, nil
 }
 
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
-func (ctrl *AccountsController) SetCredentialsCtrl(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) error {
+func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) error {
 	key := c.Type() + "-" + acc.Key
 	var oldLink credentials.Link
 	meta, err := edge.ReadDocument(ctx, key, &oldLink)
@@ -497,7 +509,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = c.SetCredentialsCtrl(ctx, acc, col, cred)
+	err = c._SetCredentials(ctx, acc, col, cred)
 	if err != nil {
 		return nil, err
 	}

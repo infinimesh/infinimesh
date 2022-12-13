@@ -135,6 +135,44 @@ func ListCredentialsAndEdges(ctx context.Context, log *zap.Logger, db driver.Dat
 	return nodes, err
 }
 
+type ListCredentialsResponse struct {
+	Type string                 `json:"type"`
+	D    map[string]interface{} `json:"credentials"`
+}
+
+const listCredentialsQuery = `
+FOR credentials, edge IN 1 OUTBOUND @account
+GRAPH @credentials_graph
+RETURN { type: edge.type, credentials }
+`
+
+// Return Credentials linked to Account
+func ListCredentials(ctx context.Context, log *zap.Logger, db driver.Database, acc driver.DocumentID) (r []ListCredentialsResponse, err error) {
+	c, err := db.Query(ctx, listCredentialsQuery, map[string]interface{}{
+		"account":           acc.String(),
+		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
+	})
+	if err != nil {
+		log.Warn("Error executing query", zap.Error(err))
+		return nil, err
+	}
+	defer c.Close()
+
+	for {
+		var cred ListCredentialsResponse
+		_, err := c.ReadDocument(ctx, &cred)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			log.Debug("Error unmarshalling credentials response", zap.Error(err))
+			return nil, err
+		}
+		r = append(r, cred)
+	}
+
+	return r, nil
+}
+
 type ListableCredentials interface {
 	Listable() []string
 }
@@ -145,11 +183,11 @@ var _Listables = map[string]ListableFabric{
 }
 
 // Accepts Credentials type as string t and Credentials data as map[string]interface{} d
-func MakeListable(t string, d map[string]interface{}) (ListableCredentials, error) {
-	f, ok := _Listables[t]
+func MakeListable(r ListCredentialsResponse) (ListableCredentials, error) {
+	f, ok := _Listables[r.Type]
 	if !ok {
-		return nil, fmt.Errorf("Credentials of type %s aren't Listable", t)
+		return nil, fmt.Errorf("Credentials of type %s aren't Listable", r.Type)
 	}
 
-	return f(d)
+	return f(r.D)
 }
