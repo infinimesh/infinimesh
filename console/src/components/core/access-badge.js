@@ -1,4 +1,4 @@
-import { h } from "vue"
+import { h } from "vue";
 import { NTooltip, NButton } from "naive-ui";
 
 const accessLevels = {
@@ -29,12 +29,12 @@ const accessLevels = {
 };
 
 export default function AccessBadge(props) {
-  let key = "account"
-  if (props.account != undefined) key = "account"
-  if (props.namespace != undefined) key = "namespace"
-  if (props.join != undefined) key = "join"
+  let key = "account";
+  if (props.account != undefined) key = "account";
+  if (props.namespace != undefined) key = "namespace";
+  if (props.join != undefined) key = "join";
 
-  if (props.cb == undefined) props.cb = () => {}
+  if (props.cb == undefined) props.cb = () => { };
 
   let conf = accessLevels[key][props.access];
   return h(
@@ -63,5 +63,5 @@ export default function AccessBadge(props) {
       ),
       default: () => conf[3]
     }
-  )
+  );
 }
