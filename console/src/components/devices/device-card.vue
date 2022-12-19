@@ -245,12 +245,11 @@ const state_tab = ref((plugin.value && plugin.value.uuid) || 'default')
 const plugin_edit_modal = ref(false)
 
 function handleStateTabChanged(v) {
-  console.log('tab changed', v)
   state_tab.value = v
 }
 
 watch(patch, async (n) => {
-  if (!plugin.value) return
+  if (!plugin.value || plugin.value.kind != 'DEVICE') return
 
   if (!n) {
     plugin_edit_modal.value = false
