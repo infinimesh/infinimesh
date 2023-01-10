@@ -5,7 +5,7 @@
       <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
         <strong>GitHub</strong>
       </a>
-      ©2020-2022
+      ©2020-2023
     </span>
     <span @click="e => e.preventDefault()">
       <span style="font-family: 'Exo 2'">infinimesh</span> - <n-tooltip :show="min_clicked" placement="top">

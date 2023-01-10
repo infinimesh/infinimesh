@@ -176,6 +176,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/infinimesh/proto v0.0.0-20221213152957-1457e8ee71c7 h1:/5t06gzbZNLuLBsl2WT2eZf5rO0K0gY8Z0dSgIzDy+k=
 github.com/infinimesh/proto v0.0.0-20221213152957-1457e8ee71c7/go.mod h1:f6FITUScmUq/O1GaxnJ9NnRQ1t2l7VkpF6+O7vKyyA8=
+github.com/infinimesh/proto v0.0.0-20230110140957-00ee8a70ad22 h1:LJDgSXb/FcyU9Ja1pYPgCZI8kxU50bdn4VgyNYp46Ug=
+github.com/infinimesh/proto v0.0.0-20230110140957-00ee8a70ad22/go.mod h1:f6FITUScmUq/O1GaxnJ9NnRQ1t2l7VkpF6+O7vKyyA8=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
