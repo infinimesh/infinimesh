@@ -152,6 +152,8 @@ We have built an automated local development setup based on Docker.
 3. cd into the fresh cloned repo
 4. Run `docker compose up`
 
+Swagger API: https://infinimesh.github.io/infinimesh/
+
 ### Generating proto files
 
 Clone [proto repo](https://github.com/infinimesh/proto)
