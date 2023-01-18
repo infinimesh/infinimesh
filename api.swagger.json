@@ -1,125 +1,56 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Infinimesh IoT Platform",
+    "title": "infinimesh IoT Platform",
     "description": "Cloud Native IoT Platform",
-    "version": "0.0.10",
+    "version": "3.0.0",
     "contact": {
-      "name": "Infinimesh",
+      "name": "Infinite Devices",
       "url": "https://www.infinitedevices.io",
       "email": "engineering@infinitedevices.io"
     }
   },
   "tags": [
     {
-      "name": "Devices"
+      "name": "HandsfreeService"
     },
     {
-      "name": "States"
+      "name": "ShadowService"
     },
     {
-      "name": "Accounts"
+      "name": "AccountsService"
     },
     {
-      "name": "Objects"
+      "name": "NamespacesService"
     },
     {
-      "name": "Namespaces"
+      "name": "DevicesService"
     },
     {
-      "name": "AccountService"
+      "name": "ShadowService"
     },
     {
-      "name": "ObjectService"
+      "name": "InternalService"
     },
     {
-      "name": "Namespaces"
-    },
-    {
-      "name": "Devices"
-    },
-    {
-      "name": "Shadows"
-    },
-    {
-      "name": "Repos"
+      "name": "PluginsService"
     }
   ],
-  "host": "api.infinimesh.io",
-  "schemes": [
-    "https"
-  ],
   "consumes": [
-    "application/json",
-    "text/event-stream"
+    "application/json"
   ],
   "produces": [
-    "application/json",
-    "text/event-stream"
+    "application/json"
   ],
   "paths": {
-    "/account": {
-      "get": {
-        "operationId": "Accounts_SelfAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeAccount"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/account/token": {
-      "post": {
-        "operationId": "Accounts_Token",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/apiTokenResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiTokenRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
     "/accounts": {
       "get": {
-        "operationId": "Accounts_ListAccounts",
+        "operationId": "AccountsService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeListAccountsResponse"
+              "$ref": "#/definitions/accountsAccounts"
             }
           },
           "default": {
@@ -130,126 +61,16 @@
           }
         },
         "tags": [
-          "Accounts"
-        ]
-      },
-      "post": {
-        "operationId": "Accounts_CreateUserAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeCreateUserAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeCreateUserAccountRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{account.uid}": {
-      "patch": {
-        "operationId": "Accounts_UpdateAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeUpdateAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "account.uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeAccount"
-            }
-          },
-          {
-            "name": "fieldMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{accountid}/owner/{ownerid}": {
-      "delete": {
-        "operationId": "Accounts_RemoveOwner",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeOwnershipResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "accountid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
+          "AccountsService"
         ]
       },
       "put": {
-        "operationId": "Accounts_AssignOwner",
+        "operationId": "AccountsService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeOwnershipResponse"
+              "$ref": "#/definitions/nodeaccountsCreateResponse"
             }
           },
           "default": {
@@ -261,31 +82,27 @@
         },
         "parameters": [
           {
-            "name": "accountid",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/nodeaccountsCreateRequest"
+            }
           }
         ],
         "tags": [
-          "Accounts"
+          "AccountsService"
         ]
       }
     },
-    "/accounts/{id}": {
+    "/accounts/{uuid}": {
       "get": {
-        "operationId": "Accounts_GetAccount",
+        "operationId": "AccountsService_Get",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeAccount"
+              "$ref": "#/definitions/accountsAccount"
             }
           },
           "default": {
@@ -297,61 +114,439 @@
         },
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Accounts"
-        ]
-      }
-    },
-    "/accounts/{uid}": {
-      "delete": {
-        "operationId": "Accounts_DeleteAccount",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteAccountResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "uid",
+            "name": "uuid",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "harddelete",
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
-          "Accounts"
+          "AccountsService"
+        ]
+      },
+      "delete": {
+        "operationId": "AccountsService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      },
+      "patch": {
+        "operationId": "AccountsService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountsAccount"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "defaultNamespace": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
+    "/accounts/{uuid}/credentials": {
+      "get": {
+        "operationId": "AccountsService_GetCredentials",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeGetCredentialsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      },
+      "post": {
+        "operationId": "AccountsService_SetCredentials",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeSetCredentialsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "credentials": {
+                  "$ref": "#/definitions/accountsCredentials"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
+    "/accounts/{uuid}/credentials/{type}": {
+      "delete": {
+        "operationId": "AccountsService_DelCredentials",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
+    "/accounts/{uuid}/deletables": {
+      "get": {
+        "operationId": "AccountsService_Deletables",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accessNodes"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "defaultNamespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountsService"
+        ]
+      }
+    },
+    "/accounts/{uuid}/toggle": {
+      "post": {
+        "operationId": "AccountsService_Toggle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountsAccount"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "defaultNamespace": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AccountsService"
         ]
       }
     },
     "/devices": {
       "get": {
-        "operationId": "Devices_List",
+        "operationId": "DevicesService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/deviceregistryListResponse"
+              "$ref": "#/definitions/devicesDevices"
             }
           },
           "default": {
@@ -361,165 +556,17 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "namespaceid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
         "tags": [
-          "Devices"
-        ]
-      },
-      "post": {
-        "operationId": "Devices_Create",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryCreateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/deviceregistryCreateRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/states/all": {
-      "get": {
-        "operationId": "States_GetForNS",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/shadowGetForNSResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      }
-    },
-    "/devices/{device.id}": {
-      "patch": {
-        "operationId": "Devices_Update",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryUpdateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "device.id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/deviceregistryDevice"
-            }
-          },
-          {
-            "name": "fieldMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/{deviceid}/owner/{ownerid}": {
-      "delete": {
-        "operationId": "Devices_RemoveOwnerDevices",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryOwnershipResponseDevices"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "deviceid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
+          "DevicesService"
         ]
       },
       "put": {
-        "operationId": "Devices_AssignOwnerDevices",
+        "operationId": "DevicesService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/deviceregistryOwnershipResponseDevices"
+              "$ref": "#/definitions/nodedevicesCreateResponse"
             }
           },
           "default": {
@@ -531,31 +578,28 @@
         },
         "parameters": [
           {
-            "name": "deviceid",
-            "in": "path",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "ownerid",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "schema": {
+              "$ref": "#/definitions/nodedevicesCreateRequest"
+            }
           }
         ],
         "tags": [
-          "Devices"
+          "DevicesService"
         ]
       }
     },
-    "/devices/{id}": {
-      "get": {
-        "operationId": "Devices_Get",
+    "/devices/move/{namespace}": {
+      "post": {
+        "summary": "Moves Device(s) between Namespaces and returns updated Devices",
+        "operationId": "DevicesService_Move",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/infinimeshdeviceregistryGetResponse"
+              "$ref": "#/definitions/devicesDevices"
             }
           },
           "default": {
@@ -567,93 +611,8 @@
         },
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      },
-      "delete": {
-        "operationId": "Devices_Delete",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/deviceregistryDeleteResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Devices"
-        ]
-      }
-    },
-    "/devices/{id}/state": {
-      "get": {
-        "operationId": "States_Get",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/infinimeshshadowGetResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "States"
-        ]
-      },
-      "patch": {
-        "operationId": "States_PatchDesiredState",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/shadowPatchDesiredStateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
+            "name": "namespace",
+            "description": "given devices and the given namespace",
             "in": "path",
             "required": true,
             "type": "string"
@@ -663,18 +622,122 @@
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "devices": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           }
         ],
         "tags": [
-          "States"
+          "DevicesService"
         ]
       }
     },
-    "/devices/{id}/state/stream": {
+    "/devices/states": {
       "get": {
-        "operationId": "States_StreamReportedStateChanges",
+        "operationId": "ShadowService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowGetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pool",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      },
+      "post": {
+        "operationId": "ShadowService_Patch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowShadow"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shadowShadow"
+            }
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/states/remove": {
+      "post": {
+        "operationId": "ShadowService_Remove",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/shadowShadow"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/shadowRemoveRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/states/stream": {
+      "get": {
+        "operationId": "ShadowService_StreamShadow",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -682,13 +745,13 @@
               "type": "object",
               "properties": {
                 "result": {
-                  "$ref": "#/definitions/shadowStreamReportedStateChangesResponse"
+                  "$ref": "#/definitions/shadowShadow"
                 },
                 "error": {
                   "$ref": "#/definitions/rpcStatus"
                 }
               },
-              "title": "Stream result of shadowStreamReportedStateChangesResponse"
+              "title": "Stream result of shadowShadow"
             }
           },
           "default": {
@@ -700,31 +763,637 @@
         },
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "name": "devices",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
           },
           {
             "name": "onlyDelta",
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "sync",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
-          "States"
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/states/stream/sync": {
+      "get": {
+        "operationId": "ShadowService_StreamShadowSync",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/shadowShadow"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of shadowShadow"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "devices",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "onlyDelta",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "sync",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "ShadowService"
+        ]
+      }
+    },
+    "/devices/token": {
+      "post": {
+        "operationId": "DevicesService_MakeDevicesToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/nodeDevicesTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/devices/{uuid}": {
+      "get": {
+        "operationId": "DevicesService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      },
+      "delete": {
+        "operationId": "DevicesService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "certificate.pemData",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.algorithm",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "certificate.fingerprint",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "basicEnabled",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      },
+      "patch": {
+        "operationId": "DevicesService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/devices/{uuid}/toggle": {
+      "post": {
+        "operationId": "DevicesService_Toggle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/devices/{uuid}/toggle/basic": {
+      "post": {
+        "operationId": "DevicesService_ToggleBasic",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/devicesDevice"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "certificate": {
+                  "$ref": "#/definitions/devicesCertificate"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "basicEnabled": {
+                  "type": "boolean"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DevicesService"
+        ]
+      }
+    },
+    "/handsfree": {
+      "post": {
+        "operationId": "HandsfreeService_Send",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/handsfreeControlPacket"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handsfreeControlPacket"
+            }
+          }
+        ],
+        "tags": [
+          "HandsfreeService"
+        ]
+      }
+    },
+    "/handsfree/connection": {
+      "get": {
+        "operationId": "HandsfreeService_Connect",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/handsfreeControlPacket"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of handsfreeControlPacket"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "HandsfreeService"
+        ]
+      }
+    },
+    "/i/ldapp": {
+      "get": {
+        "operationId": "InternalService_GetLDAPProviders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeLDAPProviders"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "InternalService"
         ]
       }
     },
     "/namespaces": {
       "get": {
-        "operationId": "Namespaces_ListNamespaces",
+        "operationId": "NamespacesService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeListNamespacesResponse"
+              "$ref": "#/definitions/namespacesNamespaces"
             }
           },
           "default": {
@@ -735,222 +1404,49 @@
           }
         },
         "tags": [
-          "Namespaces"
-        ]
-      },
-      "post": {
-        "operationId": "Namespaces_CreateNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeNamespace"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeCreateNamespaceRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace.id}": {
-      "patch": {
-        "operationId": "Namespaces_UpdateNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeUpdateNamespaceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace.id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/nodeNamespace"
-            }
-          },
-          {
-            "name": "namespaceMask",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespaceid}/{harddelete}": {
-      "delete": {
-        "operationId": "Namespaces_DeleteNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteNamespaceResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespaceid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "harddelete",
-            "in": "path",
-            "required": true,
-            "type": "boolean"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}": {
-      "get": {
-        "operationId": "Namespaces_GetNamespace",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeNamespace"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}/permissions": {
-      "get": {
-        "operationId": "Namespaces_ListPermissions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeListPermissionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
-        ]
-      }
-    },
-    "/namespaces/{namespace}/permissions/{accountId}": {
-      "delete": {
-        "operationId": "Namespaces_DeletePermission",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeletePermissionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "namespace",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Namespaces"
+          "NamespacesService"
         ]
       },
       "put": {
-        "operationId": "Namespaces_CreatePermission",
+        "operationId": "NamespacesService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/apiCreateNamespacePermissionResponse"
+              "$ref": "#/definitions/namespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/namespacesNamespace"
+            }
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
+    "/namespaces/{namespace}/join": {
+      "post": {
+        "summary": "Sets Access to this namespace for the given account(deletes if level is set\nto NONE(0))",
+        "operationId": "NamespacesService_Join",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountsAccounts"
             }
           },
           "default": {
@@ -968,7 +1464,189 @@
             "type": "string"
           },
           {
-            "name": "accountId",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessLevel"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
+    "/namespaces/{uuid}": {
+      "get": {
+        "operationId": "NamespacesService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/namespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plugin.uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      },
+      "delete": {
+        "operationId": "NamespacesService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plugin.uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      },
+      "patch": {
+        "operationId": "NamespacesService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/namespacesNamespace"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
             "in": "path",
             "required": true,
             "type": "string"
@@ -978,23 +1656,181 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshapiPermission"
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                },
+                "plugin": {
+                  "$ref": "#/definitions/nodenamespacesPlugin"
+                }
+              }
             }
           }
         ],
         "tags": [
-          "Namespaces"
+          "NamespacesService"
         ]
       }
     },
-    "/objects": {
+    "/namespaces/{uuid}/deletables": {
       "get": {
-        "operationId": "Objects_ListObjects",
+        "operationId": "NamespacesService_Deletables",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeListObjectsResponse"
+              "$ref": "#/definitions/accessNodes"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plugin.uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
+    "/namespaces/{uuid}/joins": {
+      "get": {
+        "summary": "Accounts having access to this namespace",
+        "operationId": "NamespacesService_Joins",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountsAccounts"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "plugin.uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NamespacesService"
+        ]
+      }
+    },
+    "/plugins": {
+      "get": {
+        "operationId": "PluginsService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pluginsPlugins"
             }
           },
           "default": {
@@ -1010,25 +1846,382 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "PluginsService"
+        ]
+      },
+      "put": {
+        "operationId": "PluginsService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshpluginsPlugin"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/infinimeshpluginsPlugin"
+            }
+          }
+        ],
+        "tags": [
+          "PluginsService"
+        ]
+      }
+    },
+    "/plugins/{uuid}": {
+      "get": {
+        "operationId": "PluginsService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshpluginsPlugin"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
           },
           {
-            "name": "recurse",
+            "name": "logo",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "public",
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "EMBEDDED",
+              "DEVICE"
+            ],
+            "default": "UNKNOWN"
+          },
+          {
+            "name": "vars",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "embeddedConf.frameUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deviceConf.viewUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deviceConf.desiredUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
-          "Objects"
+          "PluginsService"
         ]
       },
-      "post": {
-        "operationId": "Objects_CreateObject",
+      "delete": {
+        "operationId": "PluginsService_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/nodeObject"
+              "$ref": "#/definitions/infinimeshpluginsPlugin"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "logo",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "public",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "access.level",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "NONE",
+              "READ",
+              "MGMT",
+              "ADMIN",
+              "ROOT"
+            ],
+            "default": "NONE"
+          },
+          {
+            "name": "access.role",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "OWNER"
+            ],
+            "default": "UNSET"
+          },
+          {
+            "name": "access.namespace",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "EMBEDDED",
+              "DEVICE"
+            ],
+            "default": "UNKNOWN"
+          },
+          {
+            "name": "vars",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "embeddedConf.frameUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deviceConf.viewUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deviceConf.desiredUrl",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PluginsService"
+        ]
+      },
+      "post": {
+        "operationId": "PluginsService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/infinimeshpluginsPlugin"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "logo": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "public": {
+                  "type": "boolean"
+                },
+                "namespace": {
+                  "type": "string"
+                },
+                "access": {
+                  "$ref": "#/definitions/accessAccess"
+                },
+                "kind": {
+                  "$ref": "#/definitions/pluginsPluginKind"
+                },
+                "vars": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "embeddedConf": {
+                  "$ref": "#/definitions/pluginsEmbededPluginConf"
+                },
+                "deviceConf": {
+                  "$ref": "#/definitions/pluginsDevicePluginConf"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "PluginsService"
+        ]
+      }
+    },
+    "/token": {
+      "post": {
+        "operationId": "AccountsService_Token",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/nodeTokenResponse"
             }
           },
           "default": {
@@ -1044,57 +2237,113 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/infinimeshapiCreateObjectRequest"
+              "$ref": "#/definitions/nodeTokenRequest"
             }
           }
         ],
         "tags": [
-          "Objects"
-        ]
-      }
-    },
-    "/objects/{uid}": {
-      "delete": {
-        "operationId": "Objects_DeleteObject",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/nodeDeleteObjectResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "uid",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Objects"
+          "AccountsService"
         ]
       }
     }
   },
   "definitions": {
-    "apiCreateNamespacePermissionResponse": {
-      "type": "object"
+    "accessAccess": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "$ref": "#/definitions/accessLevel"
+        },
+        "role": {
+          "$ref": "#/definitions/accessRole"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      }
     },
-    "apiRestrictionRule": {
+    "accessLevel": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "READ",
+        "MGMT",
+        "ADMIN",
+        "ROOT"
+      ],
+      "default": "NONE"
+    },
+    "accessNode": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "edge": {
+          "type": "string"
+        }
+      }
+    },
+    "accessNodes": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/accessNode"
+          }
+        }
+      }
+    },
+    "accessRole": {
+      "type": "string",
+      "enum": [
+        "UNSET",
+        "OWNER"
+      ],
+      "default": "UNSET"
+    },
+    "accountsAccount": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "defaultNamespace": {
+          "type": "string"
+        },
+        "access": {
+          "$ref": "#/definitions/accessAccess"
+        }
+      }
+    },
+    "accountsAccounts": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/accountsAccount"
+          }
+        }
+      }
+    },
+    "accountsCredentials": {
       "type": "object",
       "properties": {
         "type": {
           "type": "string"
         },
-        "ids": {
+        "data": {
           "type": "array",
           "items": {
             "type": "string"
@@ -1102,35 +2351,7 @@
         }
       }
     },
-    "apiTokenRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
-        },
-        "expireTime": {
-          "type": "string"
-        },
-        "ruleset": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiRestrictionRule"
-          }
-        }
-      }
-    },
-    "apiTokenResponse": {
-      "type": "object",
-      "properties": {
-        "token": {
-          "type": "string"
-        }
-      }
-    },
-    "deviceregistryCertificate": {
+    "devicesCertificate": {
       "type": "object",
       "properties": {
         "pemData": {
@@ -1142,45 +2363,23 @@
         "fingerprint": {
           "type": "string",
           "format": "byte"
-        },
-        "fingerprintAlgorithm": {
-          "type": "string"
         }
       }
     },
-    "deviceregistryCreateRequest": {
+    "devicesDevice": {
       "type": "object",
       "properties": {
-        "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
-        }
-      }
-    },
-    "deviceregistryCreateResponse": {
-      "type": "object",
-      "properties": {
-        "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
-        }
-      }
-    },
-    "deviceregistryDeleteResponse": {
-      "type": "object"
-    },
-    "deviceregistryDevice": {
-      "type": "object",
-      "properties": {
-        "id": {
+        "uuid": {
           "type": "string"
         },
-        "name": {
+        "title": {
           "type": "string"
         },
         "enabled": {
           "type": "boolean"
         },
         "certificate": {
-          "$ref": "#/definitions/deviceregistryCertificate"
+          "$ref": "#/definitions/devicesCertificate"
         },
         "tags": {
           "type": "array",
@@ -1188,348 +2387,300 @@
             "type": "string"
           }
         },
-        "namespace": {
-          "type": "string"
-        },
         "basicEnabled": {
           "type": "boolean"
+        },
+        "token": {
+          "type": "string"
+        },
+        "access": {
+          "$ref": "#/definitions/accessAccess"
         }
       }
     },
-    "deviceregistryGetByFingerprintResponse": {
+    "devicesDevices": {
       "type": "object",
       "properties": {
         "devices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/deviceregistryDevice"
+            "$ref": "#/definitions/devicesDevice"
           }
         }
       }
     },
-    "deviceregistryGetDeviceStatusResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "deviceregistryListResponse": {
-      "type": "object",
-      "properties": {
-        "devices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/deviceregistryDevice"
-          }
-        }
-      }
-    },
-    "deviceregistryOwnershipResponseDevices": {
-      "type": "object"
-    },
-    "deviceregistryUpdateResponse": {
-      "type": "object"
-    },
-    "infinimeshapiCreateObjectRequest": {
-      "type": "object",
-      "properties": {
-        "parent": {
-          "type": "string"
-        },
-        "namespace": {
-          "type": "string"
-        },
-        "object": {
-          "$ref": "#/definitions/nodeObject"
-        }
-      }
-    },
-    "infinimeshapiPermission": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "$ref": "#/definitions/nodeAction"
-        }
-      },
-      "description": "Permission.Action may either be NONE, READ or WRITE."
-    },
-    "infinimeshdeviceregistryGetResponse": {
-      "type": "object",
-      "properties": {
-        "device": {
-          "$ref": "#/definitions/deviceregistryDevice"
-        }
-      }
-    },
-    "infinimeshnodePermission": {
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "string"
-        },
-        "accountId": {
-          "type": "string"
-        },
-        "accountName": {
-          "type": "string"
-        },
-        "action": {
-          "$ref": "#/definitions/nodeAction"
-        }
-      }
-    },
-    "infinimeshshadowGetResponse": {
-      "type": "object",
-      "properties": {
-        "shadow": {
-          "$ref": "#/definitions/shadowShadow"
-        }
-      }
-    },
-    "nodeAccount": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "isRoot": {
-          "type": "boolean"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "defaultNamespace": {
-          "$ref": "#/definitions/nodeNamespace"
-        },
-        "password": {
-          "type": "string"
-        },
-        "isAdmin": {
-          "type": "boolean"
-        },
-        "owner": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeAction": {
+    "handsfreeCode": {
       "type": "string",
       "enum": [
-        "NONE",
-        "READ",
-        "WRITE"
+        "UNKNOWN",
+        "AUTH",
+        "DATA",
+        "SUCCESS",
+        "ERROR"
       ],
-      "default": "NONE"
+      "default": "UNKNOWN"
     },
-    "nodeAuthenticateResponse": {
+    "handsfreeControlPacket": {
       "type": "object",
       "properties": {
-        "success": {
-          "type": "boolean"
+        "code": {
+          "$ref": "#/definitions/handsfreeCode"
         },
-        "account": {
-          "$ref": "#/definitions/nodeAccount"
-        },
-        "defaultNamespace": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeAuthorizeNamespaceResponse": {
-      "type": "object"
-    },
-    "nodeAuthorizeResponse": {
-      "type": "object"
-    },
-    "nodeCreateNamespaceRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeCreateUserAccountRequest": {
-      "type": "object",
-      "properties": {
-        "account": {
-          "$ref": "#/definitions/nodeAccount"
-        },
-        "password": {
-          "type": "string"
-        },
-        "createGfUser": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeCreateUserAccountResponse": {
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string"
-        }
-      }
-    },
-    "nodeDeleteAccountResponse": {
-      "type": "object"
-    },
-    "nodeDeleteNamespaceResponse": {
-      "type": "object"
-    },
-    "nodeDeleteObjectResponse": {
-      "type": "object"
-    },
-    "nodeDeletePermissionResponse": {
-      "type": "object"
-    },
-    "nodeIsAdminResponse": {
-      "type": "object",
-      "properties": {
-        "isAdmin": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsAuthorizedNamespaceResponse": {
-      "type": "object",
-      "properties": {
-        "decision": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsAuthorizedResponse": {
-      "type": "object",
-      "properties": {
-        "decision": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeIsRootResponse": {
-      "type": "object",
-      "properties": {
-        "isRoot": {
-          "type": "boolean"
-        }
-      }
-    },
-    "nodeListAccountsResponse": {
-      "type": "object",
-      "properties": {
-        "accounts": {
+        "payload": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/nodeAccount"
+            "type": "string"
           }
         }
       }
     },
-    "nodeListNamespacesResponse": {
+    "infinimeshpluginsPlugin": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "public": {
+          "type": "boolean"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "access": {
+          "$ref": "#/definitions/accessAccess"
+        },
+        "kind": {
+          "$ref": "#/definitions/pluginsPluginKind"
+        },
+        "vars": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "embeddedConf": {
+          "$ref": "#/definitions/pluginsEmbededPluginConf"
+        },
+        "deviceConf": {
+          "$ref": "#/definitions/pluginsDevicePluginConf"
+        }
+      }
+    },
+    "namespacesNamespace": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "access": {
+          "$ref": "#/definitions/accessAccess"
+        },
+        "plugin": {
+          "$ref": "#/definitions/nodenamespacesPlugin"
+        }
+      }
+    },
+    "namespacesNamespaces": {
       "type": "object",
       "properties": {
         "namespaces": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/nodeNamespace"
+            "$ref": "#/definitions/namespacesNamespace"
           }
         }
       }
     },
-    "nodeListObjectsResponse": {
+    "nodeDeleteResponse": {
+      "type": "object"
+    },
+    "nodeDevicesTokenRequest": {
       "type": "object",
       "properties": {
-        "objects": {
+        "devices": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/nodeObject"
+            "type": "string"
           }
-        }
-      }
-    },
-    "nodeListPermissionsResponse": {
-      "type": "object",
-      "properties": {
-        "permissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/infinimeshnodePermission"
-          }
-        }
-      }
-    },
-    "nodeNamespace": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
         },
-        "name": {
-          "type": "string"
+        "exp": {
+          "type": "string",
+          "format": "int64"
         },
-        "markfordeletion": {
+        "post": {
           "type": "boolean"
+        }
+      }
+    },
+    "nodeGetCredentialsResponse": {
+      "type": "object",
+      "properties": {
+        "credentials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/accountsCredentials"
+          }
+        }
+      }
+    },
+    "nodeLDAPProviders": {
+      "type": "object",
+      "properties": {
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "nodeSetCredentialsResponse": {
+      "type": "object"
+    },
+    "nodeTokenRequest": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "$ref": "#/definitions/accountsCredentials"
         },
-        "deleteinitiationtime": {
+        "exp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "uuid": {
           "type": "string"
         },
-        "RetentionPeriod": {
+        "inf": {
+          "type": "boolean"
+        }
+      }
+    },
+    "nodeTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "nodeaccountsCreateRequest": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "$ref": "#/definitions/accountsAccount"
+        },
+        "credentials": {
+          "$ref": "#/definitions/accountsCredentials"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "access": {
           "type": "integer",
           "format": "int32"
         }
       }
     },
-    "nodeObject": {
+    "nodeaccountsCreateResponse": {
       "type": "object",
       "properties": {
-        "uid": {
+        "account": {
+          "$ref": "#/definitions/accountsAccount"
+        }
+      }
+    },
+    "nodedevicesCreateRequest": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/devicesDevice"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      }
+    },
+    "nodedevicesCreateResponse": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/devicesDevice"
+        }
+      }
+    },
+    "nodenamespacesPlugin": {
+      "type": "object",
+      "properties": {
+        "uuid": {
           "type": "string"
         },
-        "name": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string"
-        },
-        "objects": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/nodeObject"
+        "vars": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
           }
         }
       }
     },
-    "nodeOwnershipResponse": {
-      "type": "object"
+    "pluginsDevicePluginConf": {
+      "type": "object",
+      "properties": {
+        "viewUrl": {
+          "type": "string"
+        },
+        "desiredUrl": {
+          "type": "string"
+        }
+      }
     },
-    "nodeSetPasswordResponse": {
-      "type": "object"
+    "pluginsEmbededPluginConf": {
+      "type": "object",
+      "properties": {
+        "frameUrl": {
+          "type": "string"
+        }
+      }
     },
-    "nodeUpdateAccountResponse": {
-      "type": "object"
+    "pluginsPluginKind": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "EMBEDDED",
+        "DEVICE"
+      ],
+      "default": "UNKNOWN"
     },
-    "nodeUpdateNamespaceResponse": {
-      "type": "object"
+    "pluginsPlugins": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/infinimeshpluginsPlugin"
+          }
+        }
+      }
     },
     "protobufAny": {
       "type": "object",
       "properties": {
         "@type": {
-          "type": "string",
-          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+          "type": "string"
         }
       },
-      "additionalProperties": {},
-      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+      "additionalProperties": {}
     },
     "protobufNullValue": {
       "type": "string",
@@ -1538,48 +2689,6 @@
       ],
       "default": "NULL_VALUE",
       "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\n The JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
-    },
-    "repopbDeleteDeviceStateResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "repopbRepo": {
-      "type": "object",
-      "properties": {
-        "Enabled": {
-          "type": "boolean"
-        },
-        "FingerPrint": {
-          "type": "string",
-          "format": "byte"
-        },
-        "NamespaceID": {
-          "type": "string"
-        },
-        "BasicEnabled": {
-          "type": "boolean"
-        }
-      }
-    },
-    "repopbSetDeviceStateResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "type": "boolean"
-        }
-      }
-    },
-    "reporepopbGetResponse": {
-      "type": "object",
-      "properties": {
-        "repo": {
-          "$ref": "#/definitions/repopbRepo"
-        }
-      }
     },
     "rpcStatus": {
       "type": "object",
@@ -1599,60 +2708,80 @@
         }
       }
     },
-    "shadowGetForNSResponse": {
+    "shadowConnectionState": {
       "type": "object",
       "properties": {
-        "pool": {
-          "type": "object",
-          "additionalProperties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "connected": {
+          "type": "boolean"
+        }
+      }
+    },
+    "shadowGetResponse": {
+      "type": "object",
+      "properties": {
+        "shadows": {
+          "type": "array",
+          "items": {
             "$ref": "#/definitions/shadowShadow"
           }
         }
       }
     },
-    "shadowPatchDesiredStateResponse": {
-      "type": "object"
+    "shadowRemoveRequest": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "stateKey": {
+          "$ref": "#/definitions/shadowStateKey"
+        },
+        "key": {
+          "type": "string"
+        }
+      }
     },
     "shadowShadow": {
       "type": "object",
       "properties": {
-        "config": {
-          "$ref": "#/definitions/shadowVersionedValue"
+        "device": {
+          "type": "string"
         },
         "reported": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/shadowState"
         },
         "desired": {
-          "$ref": "#/definitions/shadowVersionedValue"
+          "$ref": "#/definitions/shadowState"
+        },
+        "connection": {
+          "$ref": "#/definitions/shadowConnectionState"
         }
       }
     },
-    "shadowStreamReportedStateChangesResponse": {
+    "shadowState": {
       "type": "object",
       "properties": {
-        "reportedState": {
-          "$ref": "#/definitions/shadowVersionedValue"
-        },
-        "desiredState": {
-          "$ref": "#/definitions/shadowVersionedValue"
-        }
-      }
-    },
-    "shadowVersionedValue": {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "data": {
-          "type": "object"
-        },
         "timestamp": {
           "type": "string",
           "format": "date-time"
+        },
+        "data": {
+          "type": "object"
         }
       }
+    },
+    "shadowStateKey": {
+      "type": "string",
+      "enum": [
+        "REPORTED",
+        "DESIRED",
+        "CONNECTION"
+      ],
+      "default": "REPORTED"
     }
   }
 }
