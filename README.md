@@ -14,7 +14,10 @@ Our API's (REST / gRPC) are considered als beta and may change in future. infini
 
 ## Documentation  
 
-Check out our [Wiki here](https://github.com/infinimesh/infinimesh/wiki).
+Check out our:
+
+- [Wiki here](https://github.com/infinimesh/infinimesh/wiki).
+- [Swagger UI](https://infinimesh.github.io/infinimesh/)
 
 ## Build status
 
