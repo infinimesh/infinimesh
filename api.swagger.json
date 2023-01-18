@@ -12,12 +12,6 @@
   },
   "tags": [
     {
-      "name": "HandsfreeService"
-    },
-    {
-      "name": "ShadowService"
-    },
-    {
       "name": "AccountsService"
     },
     {
@@ -28,6 +22,9 @@
     },
     {
       "name": "ShadowService"
+    },
+    {
+      "name": "HandsfreeService"
     },
     {
       "name": "InternalService"
