@@ -148,8 +148,11 @@ We have built an automated local development setup based on Docker.
   127.0.0.1 mqtt.infinimesh.local
   ```
 
-2. Close this repo
-3. Run `docker compose up`
+2. Clone this repo via `git clone https://github.com/infinimesh/infinimesh.git` 
+3. cd into the fresh cloned repo
+4. Run `docker compose up`
+
+Swagger API: https://infinimesh.github.io/infinimesh/
 
 ### Generating proto files
 
