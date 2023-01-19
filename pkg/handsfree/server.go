@@ -110,7 +110,9 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 	for {
 		select {
 		case <-refresh.C:
-			code := GenerateCode(s.db)
+			delete(s.db, code)
+
+			code = GenerateCode(s.db)
 			s.db[code] = &Connection{
 				Channel: make(chan []string),
 				Payload: req.GetPayload(),
