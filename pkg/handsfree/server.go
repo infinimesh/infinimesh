@@ -80,13 +80,13 @@ func (s *HandsfreeServer) Send(ctx context.Context, req *pb.ControlPacket) (*pb.
 	conn.Channel <- req.GetPayload()[1:]
 
 	return &pb.ControlPacket{
-		Code: pb.Code_SUCCESS,
+		Code: pb.Code_SUCCESS, Payload: conn.Payload,
 	}, nil
 }
 
 func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeService_ConnectServer) error {
 	log := s.log.Named("Connect")
-	log.Debug("Request received", zap.String("app", req.GetAppId()))
+	log.Debug("Request received", zap.String("app", req.GetAppId()), zap.Strings("payload", req.GetPayload()))
 
 	if req.GetAppId() == "" {
 		return status.Error(codes.InvalidArgument, "Application ID must be present upon connection")
