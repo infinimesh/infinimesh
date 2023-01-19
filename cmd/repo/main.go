@@ -27,6 +27,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
+	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/plugins"
 	shadowpb "github.com/infinimesh/proto/shadow"
 	"github.com/spf13/viper"
@@ -47,8 +48,9 @@ var (
 	arangodbHost string
 	arangodbCred string
 	rootPass     string
-	SIGNING_KEY  []byte
-	services     map[string]bool
+
+	SIGNING_KEY []byte
+	services    map[string]bool
 )
 
 func init() {
@@ -131,8 +133,16 @@ func main() {
 
 	if _, ok := services["devices"]; ok {
 		log.Info("Registering devices service")
-		dev_ctrl := graph.NewDevicesController(log, db)
+		viper.SetDefault("HANDSFREE_HOST", "shadow-api:8000")
+		host := viper.GetString("HANDSFREE_HOST")
+		conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatal("Failed to connect to handsfree", zap.String("address", host), zap.Error(err))
+		}
+
+		dev_ctrl := graph.NewDevicesController(log, db, handsfree.NewHandsfreeServiceClient(conn))
 		dev_ctrl.SIGNING_KEY = SIGNING_KEY
+
 		pb.RegisterDevicesServiceServer(s, dev_ctrl)
 	}
 	if _, ok := services["shadow"]; ok {

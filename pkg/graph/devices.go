@@ -26,6 +26,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	"github.com/infinimesh/proto/handsfree"
 	pb "github.com/infinimesh/proto/node"
 	access "github.com/infinimesh/proto/node/access"
 	devpb "github.com/infinimesh/proto/node/devices"
@@ -75,18 +76,19 @@ type DevicesController struct {
 
 	col driver.Collection // Devices Collection
 	db  driver.Database
+	hfc handsfree.HandsfreeServiceClient
 
 	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
 
 	SIGNING_KEY []byte
 }
 
-func NewDevicesController(log *zap.Logger, db driver.Database) *DevicesController {
+func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.HandsfreeServiceClient) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
 	return &DevicesController{
-		log: log.Named("DevicesController"), col: col, db: db,
+		log: log.Named("DevicesController"), col: col, db: db, hfc: hfc,
 		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}

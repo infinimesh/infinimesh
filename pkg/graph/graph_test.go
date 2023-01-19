@@ -73,7 +73,7 @@ func init() {
 	}
 
 	ns_ctrl = NewNamespacesController(log, db)
-	dev_ctrl = NewDevicesController(log, db)
+	dev_ctrl = NewDevicesController(log, db, nil)
 
 	plug_ctrl = NewPluginsController(log, db)
 
