@@ -89,6 +89,7 @@ services:
       SHADOW_HOST: shadow:8000
       INF_DEFAULT_ROOT_PASS: infinimesh
       SIGNING_KEY: "${SIGNING_KEY}"
+      HANDSFREE_HOST: handsfree:8000
 
   shadow:
     image: ghcr.io/infinimesh/infinimesh/shadow:latest
