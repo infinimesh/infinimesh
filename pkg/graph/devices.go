@@ -95,6 +95,9 @@ func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.Han
 }
 
 func sha256Fingerprint(cert *devpb.Certificate) (err error) {
+	if cert == nil {
+		return errors.New("certificate is nil")
+	}
 	block, _ := pem.Decode([]byte(cert.PemData))
 	if block == nil {
 		return errors.New("coudn't decode PEM data")
