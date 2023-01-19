@@ -44,7 +44,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.9-management
     labels:
-      - traefik.http.routers.rabbitmq.rule=Host(`rbmq.infinimesh.local`)
+      - traefik.http.routers.rabbitmq.rule=Host(`rbmq.${BASE_DOMAIN}`)
       - traefik.http.routers.rabbitmq.entrypoints=http
       - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
     environment:
