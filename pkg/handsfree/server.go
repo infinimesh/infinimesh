@@ -32,16 +32,21 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+type Connection struct {
+	Channel chan []string
+	Payload []string
+}
+
 type HandsfreeServer struct {
 	pb.UnimplementedHandsfreeServiceServer
 
 	log *zap.Logger
-	db  map[string](chan []string)
+	db  map[string](*Connection)
 }
 
 func NewHandsfreeServer(log *zap.Logger) *HandsfreeServer {
 	return &HandsfreeServer{
-		log: log.Named("HandsfreeServer"), db: make(map[string]chan []string),
+		log: log.Named("HandsfreeServer"), db: make(map[string]*Connection),
 	}
 }
 
@@ -67,12 +72,12 @@ func (s *HandsfreeServer) Send(ctx context.Context, req *pb.ControlPacket) (*pb.
 
 	code := strings.ToLower(req.GetPayload()[0])
 
-	ch, ok := s.db[code]
+	conn, ok := s.db[code]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "No App's awaiting with this code")
 	}
 
-	ch <- req.GetPayload()[1:]
+	conn.Channel <- req.GetPayload()[1:]
 
 	return &pb.ControlPacket{
 		Code: pb.Code_SUCCESS,
@@ -88,7 +93,10 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 	}
 
 	code := GenerateCode(s.db)
-	s.db[code] = make(chan []string)
+	s.db[code] = &Connection{
+		Channel: make(chan []string),
+		Payload: req.GetPayload(),
+	}
 
 	err := srv.Send(&pb.ControlPacket{
 		Code: pb.Code_AUTH, Payload: []string{code},
@@ -103,7 +111,10 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 		select {
 		case <-refresh.C:
 			code := GenerateCode(s.db)
-			s.db[code] = make(chan []string)
+			s.db[code] = &Connection{
+				Channel: make(chan []string),
+				Payload: req.GetPayload(),
+			}
 
 			err = srv.Send(&pb.ControlPacket{
 				Code: pb.Code_AUTH, Payload: []string{code},
@@ -111,7 +122,7 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 			if err != nil {
 				return nil
 			}
-		case payload := <-s.db[code]:
+		case payload := <-s.db[code].Channel:
 			srv.Send(&pb.ControlPacket{
 				Code: pb.Code_DATA, Payload: payload,
 			})
