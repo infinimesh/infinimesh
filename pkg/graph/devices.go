@@ -232,11 +232,10 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 		return cleanup(fmt.Errorf("issue with Handsfree Payload: is empty"))
 	}
 
-	log.Debug("prereq", zap.Any("device", dev), zap.Strings("payload", cp.GetPayload()))
 	dev.Certificate = &devpb.Certificate{
 		PemData: cp.GetPayload()[0],
 	}
-	log.Debug("result", zap.Any("device", dev))
+	dev.Tags = append(dev.Tags, cp.GetAppId())
 
 	err = sha256Fingerprint(dev.Certificate)
 	if err != nil {
