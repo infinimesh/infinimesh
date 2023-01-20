@@ -25,13 +25,24 @@
         <n-form-item label="Namespace" path="namespace">
           <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
         </n-form-item>
-        <n-form-item label="Enabled" path="device.enabled">
+        <n-form-item label="Enabled" path="device.enabled" label-placement="left">
           <n-switch v-model:value="model.device.enabled" />
         </n-form-item>
         <n-form-item label="Tags" path="device.tags">
           <n-dynamic-tags v-model:value="model.device.tags" />
         </n-form-item>
-        <n-form-item label="Certificate" path="device.certificate.pem_data">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-form-item label="Handsfree" label-placement="left">
+              <n-switch v-model:value="handsfree" />
+            </n-form-item>
+          </template>
+          Use Authorization code from device to obtain it's pre-installed certificate
+        </n-tooltip>
+        <n-form-item label="Code" path="handsfree.code" v-if="handsfree">
+          <Code @update:value="(v) => model.handsfree.code = v.code" />
+        </n-form-item>
+        <n-form-item label="Certificate" path="device.certificate.pem_data" v-else>
           <n-upload v-if="pem_not_uploaded" @before-upload="handleUploadCertificate" accept=".crt,.pem"
             :show-file-list="false">
             <n-upload-dragger>
@@ -61,22 +72,10 @@
 <script setup>
 import { ref, watch, computed, defineAsyncComponent } from "vue";
 import {
-  NButton,
-  NDrawer,
-  NDrawerContent,
-  NIcon,
-  NSwitch,
-  NSpace,
-  NForm,
-  NFormItem,
-  NInput,
-  NDynamicTags,
-  NSelect,
-  NUpload,
-  NUploadDragger,
-  NText,
-  NAlert,
-  useLoadingBar,
+  NButton, NDrawer, NDrawerContent, NIcon,
+  NSwitch, NSpace, NForm, NFormItem, NTooltip,
+  NInput, NDynamicTags, NSelect, NUpload,
+  NUploadDragger, NText, NAlert, useLoadingBar,
 } from "naive-ui";
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
@@ -84,8 +83,10 @@ import { access_lvl_conv } from "@/utils/access";
 
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
 const CloudUploadOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloudUploadOutline"))
+const Code = defineAsyncComponent(() => import("@/components/devices/register_modal/code.vue"))
 
 const show = ref(false);
+const handsfree = ref(false);
 
 watch(
   () => show.value,
@@ -127,6 +128,9 @@ const rules = ref({
     },
   },
   namespace: [{ required: true, message: "Please select namespace" }],
+  handsfree: {
+    code: [{ required: false, message: "Please enter the auth code" }]
+  }
 });
 const store = useDevicesStore();
 
@@ -143,6 +147,23 @@ function reset() {
     namespace: nss.selected == "all" ? null : nss.selected,
   };
 }
+
+watch(handsfree, (v) => {
+  if (v) {
+    rules.value.device.certificate.pem_data[0].required = false
+    rules.value.handsfree.code[0].required = true
+
+    model.value.device.certificate.pem_data = ""
+    model.value.handsfree = { code: "" }
+
+    return
+  }
+
+  rules.value.device.certificate.pem_data[0].required = true
+  rules.value.handsfree.code[0].required = false
+
+  delete model.value.handsfree
+})
 
 const pem_not_uploaded = computed(
   () => model.value.device.certificate.pem_data == ""
