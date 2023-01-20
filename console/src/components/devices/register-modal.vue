@@ -34,6 +34,10 @@
 
                 <component :is="content" @update:nextEnabled="v => next_enabled = v" @update:value="value" />
 
+                <n-alert title="Warning" type="warning" closable>
+                    This would generate token and send it to the device, if you desire to <b>create</b> a device with
+                    the included Certificate - you should use Create Device modal.
+                </n-alert>
                 <n-alert title="Error" type="error" v-if="error">
                     {{ error }}
                 </n-alert>

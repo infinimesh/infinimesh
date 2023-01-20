@@ -21,11 +21,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	"github.com/infinimesh/proto/handsfree"
 	pb "github.com/infinimesh/proto/node"
 	access "github.com/infinimesh/proto/node/access"
 	devpb "github.com/infinimesh/proto/node/devices"
@@ -75,24 +77,28 @@ type DevicesController struct {
 
 	col driver.Collection // Devices Collection
 	db  driver.Database
+	hfc handsfree.HandsfreeServiceClient
 
 	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
 
 	SIGNING_KEY []byte
 }
 
-func NewDevicesController(log *zap.Logger, db driver.Database) *DevicesController {
+func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.HandsfreeServiceClient) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
 	return &DevicesController{
-		log: log.Named("DevicesController"), col: col, db: db,
+		log: log.Named("DevicesController"), col: col, db: db, hfc: hfc,
 		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
 
 func sha256Fingerprint(cert *devpb.Certificate) (err error) {
+	if cert == nil {
+		return errors.New("certificate is nil")
+	}
 	block, _ := pem.Decode([]byte(cert.PemData))
 	if block == nil {
 		return errors.New("coudn't decode PEM data")
@@ -118,6 +124,10 @@ func sha256Fingerprint(cert *devpb.Certificate) (err error) {
 func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
 	log := c.log.Named("Create")
 	log.Debug("Create request received", zap.Any("request", req), zap.Any("context", ctx))
+
+	if req.Handsfree != nil {
+		return c._HandsfreeCreate(ctx, req)
+	}
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -158,6 +168,89 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 
 	return &devpb.CreateResponse{
 		Device: device.Device,
+	}, nil
+}
+
+func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
+	log := c.log.Named("HandsfreeCreate")
+	log.Debug("Request received")
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	ns_id := req.GetNamespace()
+	if ns_id == "" {
+		return nil, status.Error(codes.InvalidArgument, "Namespace ID is required")
+	}
+
+	ns := NewBlankNamespaceDocument(ns_id)
+
+	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	if !ok || level < access.Level_ADMIN {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
+	}
+
+	dev := req.GetDevice()
+	device := Device{Device: dev}
+	device.Token = ""
+
+	meta, err := c.col.CreateDocument(ctx, device)
+	if err != nil {
+		log.Warn("Error creating Device", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while creating Device")
+	}
+	device.Uuid = meta.ID.Key()
+	device.DocumentMeta = meta
+
+	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	if err != nil {
+		log.Warn("Error creating edge", zap.Error(err))
+		c.col.RemoveDocument(ctx, device.Uuid)
+		return nil, status.Error(codes.Internal, "error creating Permission")
+	}
+
+	cleanup := func(err error) (*devpb.CreateResponse, error) {
+		if _, d_err := c.Delete(ctx, device.Device); d_err != nil {
+			log.Warn("Couldn't delete Device", zap.Error(d_err))
+			return &devpb.CreateResponse{
+				Device: device.Device,
+			}, status.Error(codes.OK, "Couldn't delete freshly created device as well as set the certificate")
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	cp, err := c.hfc.Send(ctx, &handsfree.ControlPacket{
+		Payload: append([]string{req.GetHandsfree().GetCode(), device.Uuid}, req.GetHandsfree().GetPayload()...),
+	})
+	if err != nil {
+		log.Warn("Couldn't obtain certificate from Handsfree", zap.Error(err))
+		return cleanup(err)
+	}
+
+	if len(cp.GetPayload()) == 0 {
+		log.Warn("Handsfree connection Payload is empty")
+		return cleanup(fmt.Errorf("issue with Handsfree Payload: is empty"))
+	}
+
+	dev.Certificate = &devpb.Certificate{
+		PemData: cp.GetPayload()[0],
+	}
+	dev.Tags = append(dev.Tags, cp.GetAppId())
+
+	err = sha256Fingerprint(dev.Certificate)
+	if err != nil {
+		log.Warn("Couldn't generate certificate Hash", zap.Error(err))
+		return cleanup(err)
+	}
+
+	_, err = c.col.ReplaceDocument(ctx, device.Uuid, dev)
+	if err != nil {
+		log.Warn("Couldn't set Device Certificate", zap.Error(err))
+		return cleanup(err)
+	}
+
+	return &devpb.CreateResponse{
+		Device: dev,
 	}, nil
 }
 
