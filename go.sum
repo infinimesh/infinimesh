@@ -178,6 +178,8 @@ github.com/infinimesh/proto v0.0.0-20230110140957-00ee8a70ad22 h1:LJDgSXb/FcyU9J
 github.com/infinimesh/proto v0.0.0-20230110140957-00ee8a70ad22/go.mod h1:f6FITUScmUq/O1GaxnJ9NnRQ1t2l7VkpF6+O7vKyyA8=
 github.com/infinimesh/proto v0.0.0-20230119160209-7e22b8e5d637 h1:sP8qLSPvtfkQnATdYrD8GWi3N9yPQiz27xe5O7a2Eqw=
 github.com/infinimesh/proto v0.0.0-20230119160209-7e22b8e5d637/go.mod h1:9ouLrM/uGBG4XieQwD6Fzj6hkBytF9IFequJ5rtPKrY=
+github.com/infinimesh/proto v0.0.0-20230120150610-a7d07ecbe569 h1:YCjNY1ShKeoYpATGmyYW91CmqvCXWKFZGQ+7Ptnlp7w=
+github.com/infinimesh/proto v0.0.0-20230120150610-a7d07ecbe569/go.mod h1:9ouLrM/uGBG4XieQwD6Fzj6hkBytF9IFequJ5rtPKrY=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=

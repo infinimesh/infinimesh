@@ -35,6 +35,7 @@ func init() {
 type Connection struct {
 	Channel chan []string
 	Payload []string
+	App     string
 }
 
 type HandsfreeServer struct {
@@ -80,7 +81,7 @@ func (s *HandsfreeServer) Send(ctx context.Context, req *pb.ControlPacket) (*pb.
 	conn.Channel <- req.GetPayload()[1:]
 
 	return &pb.ControlPacket{
-		Code: pb.Code_SUCCESS, Payload: conn.Payload,
+		Code: pb.Code_SUCCESS, Payload: conn.Payload, AppId: &conn.App,
 	}, nil
 }
 
@@ -96,6 +97,7 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 	s.db[code] = &Connection{
 		Channel: make(chan []string),
 		Payload: req.GetPayload(),
+		App:     req.GetAppId(),
 	}
 
 	err := srv.Send(&pb.ControlPacket{
