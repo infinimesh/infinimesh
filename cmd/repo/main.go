@@ -133,7 +133,7 @@ func main() {
 
 	if _, ok := services["devices"]; ok {
 		log.Info("Registering devices service")
-		viper.SetDefault("HANDSFREE_HOST", "shadow-api:8000")
+		viper.SetDefault("HANDSFREE_HOST", "handsfree:8000")
 		host := viper.GetString("HANDSFREE_HOST")
 		conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
