@@ -146,6 +146,7 @@ function reset() {
     },
     namespace: nss.selected == "all" ? null : nss.selected,
   };
+  handsfree.value = false
 }
 
 watch(handsfree, (v) => {
