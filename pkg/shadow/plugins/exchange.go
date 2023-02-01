@@ -82,23 +82,27 @@ func Publish(dev *devpb.Device, state *pb.Shadow) {
 	}
 }
 
+func SetupQueue(log *zap.Logger, channel *amqp.Channel, plugin string) (amqp.Queue, error) {
+	queue, err := channel.QueueDeclare(
+		"plugin."+plugin, false, false, false, false, nil,
+	)
+	if err != nil {
+		log.Warn("Error declaring queue", zap.Error(err))
+		return queue, err
+	}
+
+	return queue, channel.QueueBind(queue.Name, plugin, "plugins", false, nil)
+}
+
 func PublishSingle(plugin string, state *pb.Shadow) {
 	log := logger.Named("Publisher")
 	log.Debug("Publish request received", zap.String("plugin", plugin))
 
 	_, ok := qs[plugin]
 	if !ok {
-		queue, err := channel.QueueDeclare(
-			"plugin."+plugin, false, false, false, false, nil,
-		)
+		queue, err := SetupQueue(log, channel, plugin)
 		if err != nil {
 			log.Warn("Error declaring queue", zap.Error(err))
-			return
-		}
-
-		err = channel.QueueBind(queue.Name, plugin, "plugins", false, nil)
-		if err != nil {
-			log.Warn("Error binding queue", zap.Error(err))
 			return
 		}
 
