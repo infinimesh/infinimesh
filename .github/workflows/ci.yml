@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          depth: 0
 
       - name: Set target tags
         id: set-tags-matrix
