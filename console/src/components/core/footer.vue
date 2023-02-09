@@ -27,7 +27,7 @@ import { useAppStore } from "@/store/app";
 
 const store = useAppStore();
 
-const tag = "development";
+const tag = "INFINIMESH_VERSION_TAG";
 
 const clicked = ref(0)
 const min_clicked = ref(false)

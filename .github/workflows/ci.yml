@@ -36,6 +36,13 @@ jobs:
           echo '```json' >> $GITHUB_STEP_SUMMARY
           echo "$TAGS_JSON" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+      
+      - name: Get latest Version Tag
+        id: latest-version-tag
+        run: |
+          $VERSION=$(git describe --tags --abbrev=0)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "### Sewing `$VERSION` as build Version" >> $GITHUB_STEP_SUMMARY
 
     outputs:
       matrix: ${{steps.set-tags-matrix.outputs.matrix}}
@@ -77,7 +84,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: IMAGE_TAG=${{env.IMAGE_TAG}}
+          build-args: IMAGE_TAG=${{env.IMAGE_TAG}},INFINIMESH_VERSION_TAG=${{needs.prepare.outputs.version}}
       - name: Summary
         run: |
           echo "### :whale: Published new image" >> $GITHUB_STEP_SUMMARY
