@@ -23,7 +23,7 @@
           <n-input v-model:value="model.device.title" placeholder="Make it bright" />
         </n-form-item>
         <n-form-item label="Namespace" path="namespace">
-          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" filterable />
         </n-form-item>
         <n-form-item label="Enabled" path="device.enabled" label-placement="left">
           <n-switch v-model:value="model.device.enabled" />
@@ -102,10 +102,11 @@ function shortUUID(uuid) {
 }
 
 const namespaces = computed(() => {
-  return nss.namespaces_list.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
+  return nss.namespaces_list.map((ns) => ({
     label: `${ns.title} (${shortUUID(ns.uuid)})`,
     value: ns.uuid,
-  }));
+    disabled: access_lvl_conv(ns) < 3
+  })).sort((a, b) => a.disabled - b.disabled );
 });
 
 const form = ref();

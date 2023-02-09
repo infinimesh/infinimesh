@@ -1,5 +1,8 @@
 FROM node:latest AS console-builder
 
+ARG INFINIMESH_VERSION_TAG
+ENV INFINIMESH_VERSION_TAG=$INFINIMESH_VERSION_TAG
+
 ADD console /console
 WORKDIR /console
 

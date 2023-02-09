@@ -55,6 +55,15 @@ func (o *Device) SetAccessLevel(level access.Level) {
 	o.Access.Level = level
 }
 
+func (o *Device) GetAccess() *access.Access {
+	if o.Access == nil {
+		return &access.Access{
+			Level: access.Level_NONE,
+		}
+	}
+	return o.Access
+}
+
 func NewBlankDeviceDocument(key string) *Device {
 	return &Device{
 		Device: &devpb.Device{
@@ -544,4 +553,12 @@ func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(c.SIGNING_KEY)
+}
+
+func (c *DevicesController) _DB() driver.Database {
+	return c.db
+}
+
+func (c *DevicesController) _log() *zap.Logger {
+	return c.log
 }
