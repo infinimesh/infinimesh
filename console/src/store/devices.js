@@ -143,6 +143,15 @@ export const useDevicesStore = defineStore("devices", {
         throw `Error Updating Device: ${err.response.data.message}`;
       }
     },
+    async moveDevice(device, namespace) {
+      try {
+        await as.http.post(`/devices/${device}/namespace`, { namespace });
+        this.devices[device].access.namespace = namespace;
+      } catch (e) {
+        console.error(e);
+        throw `Error Moving Device: ${err.response.data.message}`;
+      }
+    },
     async patchDesiredState(device, state, bar) {
       if (bar) bar.start();
       try {

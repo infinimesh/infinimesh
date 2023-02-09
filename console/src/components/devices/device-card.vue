@@ -81,6 +81,8 @@
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
+          <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
+
           <n-popconfirm @positive-click="handleDelete" v-if="access_lvl_conv(device) > 2">
             <template #trigger>
               <n-button type="error" round secondary>Delete</n-button>
@@ -147,6 +149,8 @@ const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue")
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
 
 const StatusCorner = defineAsyncComponent(() => import("./status-corner.vue"))
+
+const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
 
 const props = defineProps({
   device: {
@@ -312,6 +316,15 @@ async function handleUpdateTitle(title, resolve, reject) {
     await store.updateDevice(device.value.uuid, { title: title, tags: device.value.tags })
     resolve()
   } catch (e) {
+    reject(e)
+  }
+}
+
+async function handleMove(ns, resolve, reject) {
+  try {
+    await store.moveDevice(device.value.uuid, ns)
+    resolve()
+  } catch(e) {
     reject(e)
   }
 }
