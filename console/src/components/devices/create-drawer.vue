@@ -102,10 +102,11 @@ function shortUUID(uuid) {
 }
 
 const namespaces = computed(() => {
-  return nss.namespaces_list.filter(ns => access_lvl_conv(ns) > 2).map((ns) => ({
+  return nss.namespaces_list.map((ns) => ({
     label: `${ns.title} (${shortUUID(ns.uuid)})`,
     value: ns.uuid,
-  }));
+    disabled: access_lvl_conv(ns) < 3
+  })).sort((a, b) => a.disabled - b.disabled );
 });
 
 const form = ref();
