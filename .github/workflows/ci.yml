@@ -44,7 +44,7 @@ jobs:
         run: |
           VERSION=$(git describe --tags --abbrev=0)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "### Sewing `$VERSION` as build Version" >> $GITHUB_STEP_SUMMARY
+          echo "### Sewing *$VERSION* as build Version" >> $GITHUB_STEP_SUMMARY
 
     outputs:
       matrix: ${{steps.set-tags-matrix.outputs.matrix}}
