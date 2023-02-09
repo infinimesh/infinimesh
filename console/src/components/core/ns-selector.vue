@@ -1,7 +1,7 @@
 <template>
   <n-space justify="space-between" align="center">
     <n-spin size="small" v-show="loading" />
-    <n-select v-model:value="selected" :options="options" :style="{ minWidth: '15vw' }" />
+    <n-select v-model:value="selected" :options="options" :style="{ minWidth: '15vw' }" filterable />
     <n-button type="primary" size="small" ghost circle @click="() => store.fetchNamespaces()">
       <template #icon>
         <n-icon>

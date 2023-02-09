@@ -23,7 +23,7 @@
           <n-input v-model:value="model.device.title" placeholder="Make it bright" />
         </n-form-item>
         <n-form-item label="Namespace" path="namespace">
-          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" filterable />
         </n-form-item>
         <n-form-item label="Enabled" path="device.enabled" label-placement="left">
           <n-switch v-model:value="model.device.enabled" />
