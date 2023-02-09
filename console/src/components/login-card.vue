@@ -13,7 +13,7 @@
           <n-input v-model:value="username" placeholder="Username" @focus="() => handleDBlock(true)"
             @blur="() => handleDBlock(false)"></n-input>
           <n-input v-model:value="password" type="password" placeholder="Password" @focus="() => handleDBlock(true)"
-            @blur="() => handleDBlock(false)"></n-input>
+            @blur="() => handleDBlock(false)" show-password-on="mousedown"></n-input>
           <n-alert :title="error.title" type="error" v-if="error" />
 
           <n-space justify="center">
