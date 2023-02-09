@@ -81,9 +81,9 @@
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
-          <n-popconfirm @positive-click="handleDelete">
+          <n-popconfirm @positive-click="handleDelete" v-if="access_lvl_conv(device) > 2">
             <template #trigger>
-              <n-button v-if="access_lvl_conv(device) > 2" type="error" round secondary>Delete</n-button>
+              <n-button type="error" round secondary>Delete</n-button>
             </template>
             Are you sure about deleting this device?
           </n-popconfirm>
