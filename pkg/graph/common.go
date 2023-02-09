@@ -41,6 +41,10 @@ type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
 	SetAccessLevel(level access.Level)
+
+type InfinimeshController interface {
+	_DB() driver.Database
+	_log() *zap.Logger
 }
 
 func NewBlankDocument(col string, key string) driver.DocumentMeta {

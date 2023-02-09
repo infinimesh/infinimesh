@@ -545,3 +545,11 @@ func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(c.SIGNING_KEY)
 }
+
+func (c *DevicesController) _DB() driver.Database {
+	return c.db
+}
+
+func (c *DevicesController) _log() *zap.Logger {
+	return c.log
+}
