@@ -55,6 +55,15 @@ func (o *Device) SetAccessLevel(level access.Level) {
 	o.Access.Level = level
 }
 
+func (o *Device) GetAccess() *access.Access {
+	if o.Access == nil {
+		return &access.Access{
+			Level: access.Level_NONE,
+		}
+	}
+	return o.Access
+}
+
 func NewBlankDeviceDocument(key string) *Device {
 	return &Device{
 		Device: &devpb.Device{

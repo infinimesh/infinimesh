@@ -40,7 +40,10 @@ type Access struct {
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
+
 	SetAccessLevel(level access.Level)
+	GetAccess() *access.Access
+}
 
 type InfinimeshController interface {
 	_DB() driver.Database

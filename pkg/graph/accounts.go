@@ -51,6 +51,15 @@ func (o *Account) SetAccessLevel(level access.Level) {
 	o.Access.Level = level
 }
 
+func (o *Account) GetAccess() *access.Access {
+	if o.Access == nil {
+		return &access.Access{
+			Level: access.Level_NONE,
+		}
+	}
+	return o.Access
+}
+
 func NewBlankAccountDocument(key string) *Account {
 	return &Account{
 		Account: &accpb.Account{
