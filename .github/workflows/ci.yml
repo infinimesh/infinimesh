@@ -40,7 +40,7 @@ jobs:
       - name: Get latest Version Tag
         id: latest-version-tag
         run: |
-          $VERSION=$(git describe --tags --abbrev=0)
+          VERSION=$(git describe --tags --abbrev=0)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "### Sewing `$VERSION` as build Version" >> $GITHUB_STEP_SUMMARY
 
