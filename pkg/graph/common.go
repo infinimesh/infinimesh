@@ -50,6 +50,19 @@ type InfinimeshController interface {
 	_log() *zap.Logger
 }
 
+type InfinimeshBaseController struct {
+	log *zap.Logger
+	db  driver.Database
+}
+
+func (c *InfinimeshBaseController) _DB() driver.Database {
+	return c.db
+}
+
+func (c *InfinimeshBaseController) _log() *zap.Logger {
+	return c.log
+}
+
 func NewBlankDocument(col string, key string) driver.DocumentMeta {
 	return driver.DocumentMeta{
 		Key: key,

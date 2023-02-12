@@ -72,3 +72,11 @@ func (ctrl *DevicesController) Move(ctx context.Context, req *node.MoveRequest) 
 	return &node.EmptyMessage{}, _Move(ctx, ctrl, obj, ctrl.ns2dev, req.GetNamespace())
 
 }
+
+func (ctrl *AccountsController) Move(ctx context.Context, req *node.MoveRequest) (*node.EmptyMessage, error) {
+
+	obj := NewBlankDeviceDocument(req.GetUuid())
+
+	return &node.EmptyMessage{}, _Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
+
+}

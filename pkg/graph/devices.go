@@ -82,10 +82,9 @@ func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
 
 type DevicesController struct {
 	pb.UnimplementedDevicesServiceServer
-	log *zap.Logger
+	InfinimeshBaseController
 
 	col driver.Collection // Devices Collection
-	db  driver.Database
 	hfc handsfree.HandsfreeServiceClient
 
 	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
@@ -98,7 +97,10 @@ func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.Han
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
 	return &DevicesController{
-		log: log.Named("DevicesController"), col: col, db: db, hfc: hfc,
+		InfinimeshBaseController: InfinimeshBaseController{
+			log: log.Named("DevicesController"), db: db,
+		},
+		col: col, hfc: hfc,
 		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
