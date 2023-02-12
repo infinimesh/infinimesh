@@ -72,11 +72,11 @@
 
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
-            {{ subscribed ? "Subscribed" : "Subscribe" }}
+            {{ subscribed? "Subscribed": "Subscribe" }}
           </n-button>
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
-            {{ patch ? "Cancel Patch" : "Patch Desired" }}
+            {{ patch? "Cancel Patch": "Patch Desired" }}
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
@@ -324,7 +324,7 @@ async function handleMove(ns, resolve, reject) {
   try {
     await store.moveDevice(device.value.uuid, ns)
     resolve()
-  } catch(e) {
+  } catch (e) {
     reject(e)
   }
 }
