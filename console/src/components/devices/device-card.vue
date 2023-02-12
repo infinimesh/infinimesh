@@ -40,9 +40,10 @@
             {{ tag }}
           </n-tag>
         </template>
-        <div :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
+        <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
           <edit-tags-modal :device="device" @save="handleUpdateTags" />
-        </div>
+          <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
+        </n-space >
       </template>
 
       <template #action>
@@ -80,8 +81,6 @@
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
-
-          <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
 
           <n-popconfirm @positive-click="handleDelete" v-if="access_lvl_conv(device) > 2">
             <template #trigger>
