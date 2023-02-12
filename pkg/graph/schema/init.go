@@ -50,7 +50,7 @@ func CheckAndRegisterGraph(log *zap.Logger, db driver.Database, graph Infinimesh
 	if err != nil {
 		log.Fatal("Failed to check graph", zap.Any(graph.Name, err))
 	}
-	log.Debug("Graph Permissions", zap.Bool("Exists", graphExists))
+	log.Debug("Graph", zap.String("name", graph.Name), zap.Bool("Exists", graphExists))
 
 	if graphExists {
 		return
