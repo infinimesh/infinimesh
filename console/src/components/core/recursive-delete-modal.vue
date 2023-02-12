@@ -112,13 +112,14 @@ function makeTree(data, parent = '') {
         return true
     })
 
-    return nodes.map(node => {
+    nodes = nodes.map(node => {
         return {
             key: node.node,
             label: () => resolve(node.node),
             children: makeTree(data, node.node)
         }
     })
+    return nodes.length ? nodes : null
 }
 
 function resolve(node) {
