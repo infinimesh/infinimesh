@@ -243,6 +243,14 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 	return nil
 }
 
+func SplitDocID(id string) (col, key string) {
+	data := strings.SplitN(id, "/", 2)
+	if len(data) != 2 {
+		return "", ""
+	}
+	return data[0], data[1]
+}
+
 func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver.Database, node string, cols map[string]driver.Collection) (err error) {
 	log.Debug("Handling deletion", zap.String("node", node))
 
