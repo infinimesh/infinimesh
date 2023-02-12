@@ -100,6 +100,15 @@ export const useAccountsStore = defineStore("accounts", {
         bar.error();
       }
     },
+    async moveAccount(account, namespace) {
+      try {
+        await as.http.post(`/accounts/${account}/namespace`, { namespace });
+        this.account[account].access.namespace = namespace;
+      } catch (err) {
+        console.error(err);
+        throw `Error Moving Device: ${err.response.data.message}`;
+      }
+    },
     async getCredentials(uuid) {
       try {
         const { data } = await as.http.get(`/accounts/${uuid}/credentials`);

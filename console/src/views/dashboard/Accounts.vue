@@ -82,6 +82,10 @@
                 <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
               </n-tooltip>
 
+              <move
+                v-if="access_lvl_conv(account) >= 3" type="account"
+                :obj="account" @move="(...args) => handleMove(account.uuid, args)" />
+
               <n-button round secondary type="success" @click="e => handleLoginAs(account)">
                 Login as
               </n-button>
@@ -130,6 +134,7 @@ const AccessBadge = defineAsyncComponent(() => import("@/components/core/access-
 const AccountCreate = defineAsyncComponent(() => import("@/components/accounts/create-drawer.vue"))
 const setCredentialsModal = defineAsyncComponent(() => import("@/components/accounts/set-credentials-modal.vue"))
 const AccDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
+const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
@@ -171,6 +176,16 @@ async function handleLoginAs(account) {
     window.open(window.location.origin + '/#login?a=' + btoa(JSON.stringify(params)), '_blank', { incognito: true })
   } catch (e) {
     message.error("Failed to get token: " + e.response.statusText)
+  }
+}
+
+async function handleMove(account, [ns, resolve, reject]) {
+  console.log(account, ns, resolve, reject)
+  try {
+    await store.moveAccount(account, ns)
+    resolve()
+  } catch(e) {
+    reject(e)
   }
 }
 </script>
