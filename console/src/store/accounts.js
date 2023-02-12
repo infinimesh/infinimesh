@@ -103,7 +103,7 @@ export const useAccountsStore = defineStore("accounts", {
     async moveAccount(account, namespace) {
       try {
         await as.http.post(`/accounts/${account}/namespace`, { namespace });
-        this.account[account].access.namespace = namespace;
+        this.accounts[account].access.namespace = namespace;
       } catch (err) {
         console.error(err);
         throw `Error Moving Device: ${err.response.data.message}`;
