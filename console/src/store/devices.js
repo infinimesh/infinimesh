@@ -147,8 +147,8 @@ export const useDevicesStore = defineStore("devices", {
       try {
         await as.http.post(`/devices/${device}/namespace`, { namespace });
         this.devices[device].access.namespace = namespace;
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         throw `Error Moving Device: ${err.response.data.message}`;
       }
     },
