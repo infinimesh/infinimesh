@@ -33,7 +33,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="account in accounts" :key="account.uuid">
+        <tr v-for="account in accounts" :key="account.uuid" @mouseenter="hovered.set(account.uuid, true)"
+          @mouseleave="hovered.set(account.uuid, false)">
           <td>
             <uuid-badge :uuid="account.uuid" :type="account.enabled ? 'success' : 'error'" />
           </td>
@@ -50,7 +51,14 @@
             {{ nss.namespaces[account.access.namespace]?.title || account.access.namespace }}
           </td>
           <td>
-            {{ nss.namespaces[account.defaultNamespace]?.title || "-" }}
+            <n-space align="center">
+              {{ nss.namespaces[account.defaultNamespace]?.title || "-" }}
+              <div :style="{ visibility: hovered.get(account.uuid) ? '' : 'hidden' }"
+                v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'">
+                <edit-acc-default-ns-modal :default="account.defaultNamespace"
+                  @save="(...args) => handleUpdateDefaultNamespace(account.uuid, args)" />
+              </div>
+            </n-space>
           </td>
           <td>
             <n-space>
@@ -82,9 +90,8 @@
                 <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
               </n-tooltip>
 
-              <move
-                v-if="access_lvl_conv(account) >= 3" type="account"
-                :obj="account" @move="(...args) => handleMove(account.uuid, args)" />
+              <move v-if="access_lvl_conv(account) >= 3" type="account" :obj="account"
+                @move="(...args) => handleMove(account.uuid, args)" />
 
               <n-button round secondary type="success" @click="e => handleLoginAs(account)">
                 Login as
@@ -104,16 +111,9 @@
 <script setup>
 import { ref, defineAsyncComponent } from "vue";
 import {
-  NSpin,
-  NTable,
-  NButton,
-  NIcon,
-  NSpace,
-  NTooltip,
-  NGrid,
-  NGridItem,
-  NH1,
-  NText,
+  NSpin, NTable, NButton,
+  NIcon, NSpace, NTooltip,
+  NGrid, NGridItem, NH1, NText,
   useLoadingBar, useMessage
 } from "naive-ui";
 
@@ -135,6 +135,7 @@ const AccountCreate = defineAsyncComponent(() => import("@/components/accounts/c
 const setCredentialsModal = defineAsyncComponent(() => import("@/components/accounts/set-credentials-modal.vue"))
 const AccDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
 const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
+const EditAccDefaultNsModal = defineAsyncComponent(() => import("@/components/accounts/edit-default-ns-modal.vue"))
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
@@ -143,6 +144,7 @@ store.fetchAccounts(true);
 
 const show_mc = ref(false);
 const active_account = ref({})
+const hovered = ref(new Map())
 
 const nss = useNSStore()
 
@@ -179,12 +181,21 @@ async function handleLoginAs(account) {
   }
 }
 
+async function handleUpdateDefaultNamespace(account, [ns, resolve, reject]) {
+  try {
+    let err = await store.updateDefaultNamespace(account, ns)
+    if (err) throw err.response.data.message
+    resolve()
+  } catch (e) {
+    reject(e)
+  }
+}
+
 async function handleMove(account, [ns, resolve, reject]) {
-  console.log(account, ns, resolve, reject)
   try {
     await store.moveAccount(account, ns)
     resolve()
-  } catch(e) {
+  } catch (e) {
     reject(e)
   }
 }

@@ -290,9 +290,9 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
-		ok, level := AccessLevel(ctx, c.db, requestorAccount, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
+		ok, level := AccessLevel(ctx, c.db, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
 		if !ok || level < access.Level_READ {
-			return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", acc.GetDefaultNamespace())
+			return nil, status.Errorf(codes.PermissionDenied, "Account has no Access to Namespace %s", acc.GetDefaultNamespace())
 		}
 	}
 
