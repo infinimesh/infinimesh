@@ -48,7 +48,13 @@
             <access-badge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
           </td>
           <td>
-            {{ nss.namespaces[account.access.namespace]?.title || account.access.namespace }}
+            <n-space align="center">
+              {{ nss.namespaces[account.access.namespace]?.title || account.access.namespace }}
+              <div :style="{ visibility: hovered.get(account.uuid) ? '' : 'hidden' }"
+                v-if="access_lvl_conv(account) >= 3 || account.access.role == 'OWNER'">
+                <move type="account" :obj="account" @move="(...args) => handleMove(account.uuid, args)" />
+              </div>
+            </n-space>
           </td>
           <td>
             <n-space align="center">
@@ -90,8 +96,7 @@
                 <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
               </n-tooltip>
 
-              <move v-if="access_lvl_conv(account) >= 3" type="account" :obj="account"
-                @move="(...args) => handleMove(account.uuid, args)" />
+
 
               <n-button round secondary type="success" @click="e => handleLoginAs(account)">
                 Login as
