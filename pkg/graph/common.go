@@ -180,6 +180,7 @@ const listOwnedQuery = `
 FOR node, edge IN 0..100
 OUTBOUND @from
 GRAPH Permissions
+OPTIONS { uniqueVertices: "path" }
 FILTER !edge || edge.role == 1
     RETURN MERGE({ node: node._id }, edge ? { edge: edge._id, parent: edge._from } : { edge: null, parent: null })
 `
