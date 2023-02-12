@@ -75,7 +75,7 @@ func (ctrl *DevicesController) Move(ctx context.Context, req *node.MoveRequest) 
 
 func (ctrl *AccountsController) Move(ctx context.Context, req *node.MoveRequest) (*node.EmptyMessage, error) {
 
-	obj := NewBlankDeviceDocument(req.GetUuid())
+	obj := NewBlankAccountDocument(req.GetUuid())
 
 	return &node.EmptyMessage{}, _Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
 
