@@ -36,7 +36,9 @@
 
                 <n-space justify="end" align="center" style="margin-top: 2vh">
                     <n-button type="error" round secondary @click="handleCancel">{{ cancelText }}</n-button>
-                    <n-button type="success" round @click="handleSubmit" :disabled="submitDisabled">{{ submitText }}</n-button>
+                    <n-button type="success" round @click="handleSubmit" :disabled="submitDisabled">{{
+                        submitText
+                    }}</n-button>
                 </n-space>
             </n-card>
         </n-spin>

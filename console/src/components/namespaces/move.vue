@@ -36,9 +36,7 @@
 <script setup>
 import { ref, computed, defineAsyncComponent } from "vue"
 import {
-    NButton, NModal, NCard,
-    NSpace, NSpin, NIcon,
-    NSelect, NAlert
+    NSpace, NSelect, NAlert
 } from "naive-ui"
 import { useNSStore } from "@/store/namespaces";
 import { access_lvl_conv } from "@/utils/access";
