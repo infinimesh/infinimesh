@@ -36,11 +36,7 @@ const { fetch } = defineProps({
     }
 })
 
-const emit = defineEmits({
-    loading: {
-
-    }
-})
+const emit = defineEmits(['loading'])
 
 const message = useMessage()
 async function load() {
