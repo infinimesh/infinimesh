@@ -568,6 +568,7 @@ RETURN MERGE(node, { uuid: node._key, access: KEEP(edge, ["level", "role"]) })
 
 func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*access.Nodes, error) {
 	log := c.log.Named("Joins")
+	log.Debug("Fetch Joins request received", zap.String("device", req.GetUuid()))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -581,7 +582,7 @@ func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*acce
 	}
 
 	cr, err := c.db.Query(ctx, listDeviceJoinsQuery, map[string]interface{}{
-		"device": NewBlankDeviceDocument(dev.Uuid),
+		"device": NewBlankDeviceDocument(dev.Uuid).ID(),
 	})
 	if err != nil {
 		log.Warn("Error querying for joins", zap.Error(err))
@@ -658,5 +659,10 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	return nil, nil
+	return &access.Node{
+		Node: req.Join,
+		Access: &access.Access{
+			Level: lvl,
+		},
+	}, nil
 }
