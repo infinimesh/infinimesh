@@ -58,9 +58,9 @@
                         <td style="width: 40%"><n-select v-model:value="add.uuid" :options="accounts" /></td>
                         <td style="width: 40%">
                             <access-badge :disabled="add.access == 'READ'" access="READ" join
-                                :cb="(v) => add.access = v" />
+                                :cb="(v) => add.access = v" device />
                             <access-badge :disabled="add.access == 'MGMT'" access="MGMT" join left="5px"
-                                :cb="(v) => add.access = v" />
+                                :cb="(v) => add.access = v" device />
                         </td>
                         <td>
                             <n-button strong quaternary round type="warning" @click="handleAdd">
@@ -216,7 +216,7 @@ function RenderRow({ node }) {
                 }
             )
         ])),
-        h('td', h(AccessBadge, { access: node.access.level })),
+        h('td', h(AccessBadge, { access: node.access.level, device: true })),
         h('td', h(NButton, {
             type: 'warning', strong: true,
             secondary: true, round: true,
