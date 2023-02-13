@@ -1,5 +1,5 @@
 <template>
-    <modal-button type="warning" @submit="handleSubmit">
+    <modal-button type="warning" @submit="handleSubmit" :loading="loading">
         <template #button-text>
             Move
         </template>
@@ -41,7 +41,6 @@ import {
 import { useNSStore } from "@/store/namespaces";
 import { access_lvl_conv } from "@/utils/access";
 
-const CloseOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloseOutline"))
 const ModalButton = defineAsyncComponent(() => import("@/components/core/modal-button.vue"))
 
 const props = defineProps({
