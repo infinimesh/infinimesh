@@ -116,7 +116,16 @@ const getWithAccessLevelRoleAndNS = `
 FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
 GRAPH @permissions SORT path.edges[0].level DESC
     LET perm = path.edges[0]
-	RETURN MERGE(path.vertices[-1], { access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key }})
+    LET last = path.edges[-1]
+	RETURN MERGE(
+	    path.vertices[-1], {
+	        access: {
+	            level: last.role == 2 ? last.level : perm.level,
+	            role: last.role == 2 ? last.role : perm.role,
+	            namespace: path.vertices[-2]._key
+	        }
+	    }
+    )
 `
 
 func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error {
@@ -155,7 +164,16 @@ OPTIONS {order: "bfs", uniqueVertices: "global"}
 FILTER IS_SAME_COLLECTION(@@kind, node)
 FILTER edge.level > 0
     LET perm = path.edges[0]
-	RETURN MERGE(node, { uuid: node._key, access: { level: perm.level, role: perm.role, namespace: path.vertices[-2]._key } })
+    LET last = path.edges[-1]
+	RETURN MERGE(node, {
+	    uuid: node._key,
+	    access: {
+	        level: last.role == 2 ? last.level : perm.level,
+	        role:  last.role == 2 ? last.role : perm.role,
+	        namespace: last.role == 2 ? null : path.vertices[-2]._key
+	     }
+	    }
+    )
 `
 
 // List children nodes
@@ -293,12 +311,18 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 	return err
 }
 
+const getWithAccessLevelQuery = `
+FOR path IN OUTBOUND
+K_SHORTEST_PATHS @requestor TO @node
+GRAPH @permissions
+    RETURN path.edges[-1].role == 2 ? path.edges[-1].level : path.edges[0].level
+`
+
 func AccessLevel(ctx context.Context, db driver.Database, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level) {
 	if requestor.ID() == node.ID() {
 		return true, access.Level_ROOT
 	}
-	query := `FOR path IN OUTBOUND K_SHORTEST_PATHS @requestor TO @node GRAPH @permissions RETURN path.edges[0].level`
-	c, err := db.Query(ctx, query, map[string]interface{}{
+	c, err := db.Query(ctx, getWithAccessLevelQuery, map[string]interface{}{
 		"requestor":   requestor.ID(),
 		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,

@@ -656,7 +656,7 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
 	}
 
-	err = Link(ctx, log, edge, obj, dev, req.Access, access.Role_UNSET)
+	err = Link(ctx, log, edge, obj, dev, req.Access, access.Role_SHARED)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")
