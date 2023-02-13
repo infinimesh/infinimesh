@@ -647,6 +647,11 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")
 	}
 
+	lvl := req.Access
+	if lvl >= access.Level_ADMIN {
+		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
+	}
+
 	err = Link(ctx, log, edge, obj, dev, req.Access, access.Role_UNSET)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
