@@ -4,7 +4,7 @@
       <template #header>
         <n-space aligh="center">
           {{ device.title }}
-          <div :style="{ visibility: hover ? '' : 'hidden' }">
+          <div :style="{ visibility: hover ? '' : 'hidden' }" v-if="access_lvl_conv(device) > 1">
             <edit-dev-title-modal :device="device" @save="handleUpdateTitle" />
           </div>
         </n-space>
@@ -41,9 +41,9 @@
           </n-tag>
         </template>
         <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
-          <edit-tags-modal :device="device" @save="handleUpdateTags" />
+          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1"/>
           <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
-          <device-joins-mgmt-modal :device="device" />
+          <device-joins-mgmt-modal :device="device" v-if="access_lvl_conv(device) >= 3" />
         </n-space>
       </template>
 
