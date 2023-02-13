@@ -637,6 +637,10 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 		edge = c.ns2dev
 	}
 
+	if obj == nil {
+		return nil, status.Error(codes.InvalidArgument, "Unable to determine Object type")
+	}
+
 	err = AccessLevelAndGet(ctx, log, c.db, requestor, obj)
 	if err != nil {
 		log.Warn("Error getting Object and access level", zap.String("id", req.Join), zap.Error(err))
