@@ -40,7 +40,7 @@
         <n-tr v-if="add">
             <n-td></n-td>
             <n-td colspan="2">
-                <n-select v-model:value="add.uuid" :options="accounts" />
+                <n-select v-model:value="add.uuid" :options="accounts" filterable/>
             </n-td>
             <n-td>
                 <access-badge :disabled="add.access == 'READ'" access="READ" join :cb="(v) => add.access = v" />

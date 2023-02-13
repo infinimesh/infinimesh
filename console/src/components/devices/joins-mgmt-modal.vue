@@ -55,7 +55,7 @@
                 </thead>
                 <tbody>
                     <tr v-if="add">
-                        <td style="width: 40%"><n-select v-model:value="add.uuid" :options="accounts" /></td>
+                        <td style="width: 40%"><n-select v-model:value="add.uuid" :options="accounts" filterable /></td>
                         <td style="width: 40%">
                             <access-badge :disabled="add.access == 'READ'" access="READ" join
                                 :cb="(v) => add.access = v" device />

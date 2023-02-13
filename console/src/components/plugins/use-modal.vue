@@ -14,7 +14,7 @@
                 </n-button>
             </template>
 
-            <n-select v-model:value="namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
+            <n-select v-model:value="namespace" :options="namespaces" :style="{ minWidth: '15vw' }" filterable />
 
             <n-alert :title="validator_state.title" :type="validator_state.type" v-if="validator_state"
                 style="margin-top: 2vh">

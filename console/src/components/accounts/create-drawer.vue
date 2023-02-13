@@ -25,7 +25,7 @@
           <n-switch v-model:value="model.account.enabled" />
         </n-form-item>
         <n-form-item label="Namespace" path="namespace">
-          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" filterable />
         </n-form-item>
         Credentials:
         <n-tabs v-model:value="model.credentials.type">
