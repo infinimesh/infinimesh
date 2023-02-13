@@ -233,5 +233,12 @@ export const useDevicesStore = defineStore("devices", {
         return;
       }
     },
+    async fetchJoins(device) {
+      const { data } = await as.http.get(`/devices/${device}/joins`);
+      return data
+    },
+    async join(params) {
+      return as.http.post(`/devices/join`, params)
+    }
   },
 });
