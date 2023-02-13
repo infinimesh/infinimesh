@@ -15,7 +15,7 @@
                     Loading...
                 </template>
             </template>
-            <n-card style="min-width: 30vw; max-width: 90vw;" :bordered="false" size="huge" role="dialog"
+            <n-card :style="{ minWidth, maxWidth, width }" :bordered="false" size="huge" role="dialog"
                 aria-modal="true">
 
                 <template #header>
@@ -35,7 +35,7 @@
                 <slot name="default"></slot>
 
                 <n-space justify="end" align="center" style="margin-top: 2vh">
-                    <n-button type="error" round secondary @click="handleCancel">{{ cancelText }}</n-button>
+                    <n-button type="error" round secondary @click="handleCancel" v-if="cancelText != ''">{{ cancelText }}</n-button>
                     <n-button type="success" round @click="handleSubmit" :disabled="submitDisabled">{{
                         submitText
                     }}</n-button>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, defineAsyncComponent } from "vue";
+import { ref, defineAsyncComponent, watch } from "vue";
 import {
     NButton, NModal, NCard, NSpin,
     NIcon, NSpace
@@ -79,12 +79,30 @@ const props = defineProps({
         type: Boolean,
         required: false,
         default: false
+    },
+    width: {
+        type: String,
+        required: false,
+        default: null
+    },
+    minWidth: {
+        type: String,
+        required: false,
+        default: "30vw"
+    },
+    maxWidth: {
+        type: String,
+        required: false,
+        default: "90vw"
     }
 })
 
-const show = ref(false)
+const emit = defineEmits(['submit', 'cancel', 'show'])
 
-const emit = defineEmits(['submit', 'cancel'])
+const show = ref(false)
+watch(show, (v) => {
+    emit('show', v)
+})
 
 function handleCancel() {
     show.value = false
