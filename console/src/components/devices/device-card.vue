@@ -43,7 +43,8 @@
         <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
           <edit-tags-modal :device="device" @save="handleUpdateTags" />
           <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
-        </n-space >
+          <device-joins-mgmt-modal :device="device" />
+        </n-space>
       </template>
 
       <template #action>
@@ -146,6 +147,7 @@ const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutli
 const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
+const DeviceJoinsMgmtModal = defineAsyncComponent(() => import("./joins-mgmt-modal.vue"))
 
 const StatusCorner = defineAsyncComponent(() => import("./status-corner.vue"))
 
