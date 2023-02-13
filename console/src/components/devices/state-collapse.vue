@@ -121,7 +121,6 @@ const expanded = computed({
   get() {
     if (props.debug) {
       return ["reported", "reported_patch", "desired", "patch"];
-
     }
     if (props.patch) {
       return ["reported", "desired", "patch"];
