@@ -138,8 +138,8 @@ export const useDevicesStore = defineStore("devices", {
       try {
         const { data } = await as.http.patch(`/devices/${device}`, patch);
         this.devices[device] = data;
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         throw `Error Updating Device: ${err.response.data.message}`;
       }
     },
