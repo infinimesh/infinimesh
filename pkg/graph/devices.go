@@ -563,7 +563,10 @@ const listDeviceJoinsQuery = `
 FOR node, edge, path IN 1 INBOUND @device
 GRAPH Permissions
 FILTER edge.level > 0 && edge.role != 1
-RETURN MERGE(node, { uuid: node._key, access: KEEP(edge, ["level", "role"]) })
+RETURN {
+    node: node._id,
+    access: KEEP(edge, ["level", "role"])
+}
 `
 
 func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*access.Nodes, error) {
