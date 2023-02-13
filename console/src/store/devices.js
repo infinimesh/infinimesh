@@ -138,8 +138,8 @@ export const useDevicesStore = defineStore("devices", {
       try {
         const { data } = await as.http.patch(`/devices/${device}`, patch);
         this.devices[device] = data;
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         throw `Error Updating Device: ${err.response.data.message}`;
       }
     },
@@ -147,8 +147,8 @@ export const useDevicesStore = defineStore("devices", {
       try {
         await as.http.post(`/devices/${device}/namespace`, { namespace });
         this.devices[device].access.namespace = namespace;
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         throw `Error Moving Device: ${err.response.data.message}`;
       }
     },
@@ -233,5 +233,12 @@ export const useDevicesStore = defineStore("devices", {
         return;
       }
     },
+    async fetchJoins(device) {
+      const { data } = await as.http.get(`/devices/${device}/joins`);
+      return data
+    },
+    async join(params) {
+      return as.http.post(`/devices/join`, params)
+    }
   },
 });

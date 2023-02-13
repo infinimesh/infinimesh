@@ -4,7 +4,7 @@
       <template #header>
         <n-space aligh="center">
           {{ device.title }}
-          <div :style="{ visibility: hover ? '' : 'hidden' }">
+          <div :style="{ visibility: hover ? '' : 'hidden' }" v-if="access_lvl_conv(device) > 1">
             <edit-dev-title-modal :device="device" @save="handleUpdateTitle" />
           </div>
         </n-space>
@@ -40,9 +40,11 @@
             {{ tag }}
           </n-tag>
         </template>
-        <div :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
-          <edit-tags-modal :device="device" @save="handleUpdateTags" />
-        </div>
+        <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
+          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1"/>
+          <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
+          <device-joins-mgmt-modal :device="device" v-if="access_lvl_conv(device) >= 3" />
+        </n-space>
       </template>
 
       <template #action>
@@ -72,16 +74,14 @@
 
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
-            {{ subscribed ? "Subscribed" : "Subscribe" }}
+            {{ subscribed? "Subscribed": "Subscribe" }}
           </n-button>
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
-            {{ patch ? "Cancel Patch" : "Patch Desired" }}
+            {{ patch? "Cancel Patch": "Patch Desired" }}
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
-
-          <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
 
           <n-popconfirm @positive-click="handleDelete" v-if="access_lvl_conv(device) > 2">
             <template #trigger>
@@ -147,6 +147,7 @@ const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutli
 const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
+const DeviceJoinsMgmtModal = defineAsyncComponent(() => import("./joins-mgmt-modal.vue"))
 
 const StatusCorner = defineAsyncComponent(() => import("./status-corner.vue"))
 
@@ -324,7 +325,7 @@ async function handleMove(ns, resolve, reject) {
   try {
     await store.moveDevice(device.value.uuid, ns)
     resolve()
-  } catch(e) {
+  } catch (e) {
     reject(e)
   }
 }

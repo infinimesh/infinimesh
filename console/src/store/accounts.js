@@ -58,18 +58,24 @@ export const useAccountsStore = defineStore("accounts", {
       }
     },
     async updateAccount(account, bar) {
-      bar.start();
+      if(bar) bar.start();
       try {
         await as.http.patch(`/accounts/${account.uuid}`, account);
 
         this.fetchAccounts();
-        bar.finish();
+        if(bar) bar.finish();
         return false;
       } catch (e) {
         console.error(e);
-        bar.error();
+        if(bar) bar.error();
         return e;
       }
+    },
+    updateDefaultNamespace(account, ns) {
+      let acc = this.accounts[account];
+      return this.updateAccount({
+        ...acc, defaultNamespace: ns,
+      })
     },
     async toggle(uuid, bar) {
       bar.start();
@@ -98,6 +104,15 @@ export const useAccountsStore = defineStore("accounts", {
       } catch (e) {
         console.error(e);
         bar.error();
+      }
+    },
+    async moveAccount(account, namespace) {
+      try {
+        await as.http.post(`/accounts/${account}/namespace`, { namespace });
+        this.accounts[account].access.namespace = namespace;
+      } catch (err) {
+        console.error(err);
+        throw `Error Moving Device: ${err.response.data.message}`;
       }
     },
     async getCredentials(uuid) {

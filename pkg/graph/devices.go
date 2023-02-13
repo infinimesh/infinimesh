@@ -82,13 +82,13 @@ func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
 
 type DevicesController struct {
 	pb.UnimplementedDevicesServiceServer
-	log *zap.Logger
+	InfinimeshBaseController
 
 	col driver.Collection // Devices Collection
-	db  driver.Database
 	hfc handsfree.HandsfreeServiceClient
 
-	ns2dev driver.Collection // Namespaces to Devices permissions edge collection
+	ns2dev  driver.Collection // Namespaces to Devices permissions edge collection
+	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
 	SIGNING_KEY []byte
 }
@@ -98,8 +98,12 @@ func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.Han
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
 	return &DevicesController{
-		log: log.Named("DevicesController"), col: col, db: db, hfc: hfc,
+		InfinimeshBaseController: InfinimeshBaseController{
+			log: log.Named("DevicesController"), db: db,
+		},
+		col: col, hfc: hfc,
 		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
+		acc2dev:     GetEdgeCol(ctx, db, schema.ACC2DEV),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -555,10 +559,113 @@ func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (
 	return token.SignedString(c.SIGNING_KEY)
 }
 
-func (c *DevicesController) _DB() driver.Database {
-	return c.db
+const listDeviceJoinsQuery = `
+FOR node, edge, path IN 1 INBOUND @device
+GRAPH Permissions
+FILTER edge.level > 0 && edge.role != 1
+RETURN {
+    node: node._id,
+    access: KEEP(edge, ["level", "role"])
+}
+`
+
+func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*access.Nodes, error) {
+	log := c.log.Named("Joins")
+	log.Debug("Fetch Joins request received", zap.String("device", req.GetUuid()))
+
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	dev, err := c.Get(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if dev.Access == nil || dev.Access.Level < access.Level_ADMIN {
+		return nil, status.Error(codes.PermissionDenied, "Must be device Admin to fetch Joins")
+	}
+
+	cr, err := c.db.Query(ctx, listDeviceJoinsQuery, map[string]interface{}{
+		"device": NewBlankDeviceDocument(dev.Uuid).ID(),
+	})
+	if err != nil {
+		log.Warn("Error querying for joins", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error querying for joins")
+	}
+	defer cr.Close()
+
+	var r []*access.Node
+	for {
+		var node access.Node
+		_, err := cr.ReadDocument(ctx, &node)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			log.Warn("Error unmarshalling Document", zap.Error(err))
+			return nil, status.Error(codes.Internal, "Couldn't execute query")
+		}
+		log.Debug("Got document", zap.Any("node", &node))
+		r = append(r, &node)
+	}
+
+	return &access.Nodes{Nodes: r}, nil
 }
 
-func (c *DevicesController) _log() *zap.Logger {
-	return c.log
+func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest) (*access.Node, error) {
+	log := c.log.Named("Join")
+
+	requestor_id := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor_id))
+
+	requestor := NewBlankAccountDocument(requestor_id)
+	dev := NewBlankDeviceDocument(req.Node)
+
+	err := AccessLevelAndGet(ctx, log, c.db, requestor, dev)
+	if err != nil {
+		log.Warn("Error getting Device and access level", zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Device not found or not enough Access Rights")
+	}
+	if dev.Access.Role != access.Role_OWNER && dev.Access.Level < access.Level_ADMIN {
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+	}
+
+	var obj InfinimeshGraphNode
+	var edge driver.Collection
+
+	col, key := SplitDocID(req.Join)
+	switch col {
+	case "Accounts":
+		obj = NewBlankAccountDocument(key)
+		edge = c.acc2dev
+	case "Namespaces":
+		obj = NewBlankNamespaceDocument(key)
+		edge = c.ns2dev
+	}
+
+	if obj == nil {
+		return nil, status.Error(codes.InvalidArgument, "Unable to determine Object type")
+	}
+
+	err = AccessLevelAndGet(ctx, log, c.db, requestor, obj)
+	if err != nil {
+		log.Warn("Error getting Object and access level", zap.String("id", req.Join), zap.Error(err))
+		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")
+	}
+
+	lvl := req.Access
+	if lvl >= access.Level_ADMIN {
+		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
+	}
+
+	err = Link(ctx, log, edge, obj, dev, req.Access, access.Role_SHARED)
+	if err != nil {
+		log.Warn("Error creating edge", zap.Error(err))
+		return nil, status.Error(codes.Internal, "error creating Permission")
+	}
+
+	return &access.Node{
+		Node: req.Join,
+		Access: &access.Access{
+			Level: lvl,
+		},
+	}, nil
 }

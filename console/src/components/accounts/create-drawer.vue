@@ -25,7 +25,7 @@
           <n-switch v-model:value="model.account.enabled" />
         </n-form-item>
         <n-form-item label="Namespace" path="namespace">
-          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" />
+          <n-select v-model:value="model.namespace" :options="namespaces" :style="{ minWidth: '15vw' }" filterable />
         </n-form-item>
         Credentials:
         <n-tabs v-model:value="model.credentials.type">
@@ -61,18 +61,9 @@
 <script setup>
 import { ref, watch, computed, onMounted, defineAsyncComponent } from "vue";
 import {
-  NButton,
-  NDrawer,
-  NDrawerContent,
-  NIcon,
-  NSwitch,
-  NSpace,
-  NForm,
-  NFormItem,
-  NInput,
-  NSelect,
-  NTabs,
-  NTabPane,
+  NButton, NDrawer, NDrawerContent, NIcon,
+  NSwitch, NSpace, NForm, NFormItem,
+  NInput, NSelect, NTabs, NTabPane,
   useLoadingBar,
 } from "naive-ui";
 

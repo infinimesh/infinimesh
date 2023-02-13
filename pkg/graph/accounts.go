@@ -78,11 +78,10 @@ func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 
 type AccountsController struct {
 	pb.UnimplementedAccountsServiceServer
-	log *zap.Logger
+	InfinimeshBaseController
 
 	col  driver.Collection // Accounts Collection
 	cred driver.Collection
-	db   driver.Database
 
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
@@ -98,8 +97,10 @@ func NewAccountsController(log *zap.Logger, db driver.Database) *AccountsControl
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
 	return &AccountsController{
-		log: log.Named("AccountsController"), col: col, db: db, cred: cred,
-		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
+		InfinimeshBaseController: InfinimeshBaseController{
+			log: log.Named("AccountsController"), db: db,
+		}, col: col, cred: cred, acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS),
+		ns2acc:      GetEdgeCol(ctx, db, schema.NS2ACC),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -289,9 +290,9 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
-		ok, level := AccessLevel(ctx, c.db, requestorAccount, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
+		ok, level := AccessLevel(ctx, c.db, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
 		if !ok || level < access.Level_READ {
-			return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", acc.GetDefaultNamespace())
+			return nil, status.Errorf(codes.PermissionDenied, "Account has no Access to Namespace %s", acc.GetDefaultNamespace())
 		}
 	}
 

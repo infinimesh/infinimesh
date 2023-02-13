@@ -18,6 +18,14 @@ const accessLevels = {
     ROOT: ["Super-Admin", "success", "#8a2be2", "You have the highest possible access to this Namespace"],
     OWNER: ["Owned", "success", "#8a2be2", "You are the owner of this Namespace, which gives you full access to it and right to delete it"]
   },
+  device: {
+    NONE: ["None", "error", undefined, "How did you get here??? Please, report this immideately"],
+    READ: ["Read", "error", undefined, "You can only see this Device and it's State"],
+    MGMT: ["Manage", "warning", undefined, "You can Manage this Device, for example enable/disable, change Title and Tags and set Desired state"],
+    ADMIN: ["Admin", "success", undefined, "You have the highest possible access to this Device"],
+    ROOT: ["Super-Admin", "success", "#8a2be2", "You have the highest possible access to this Device"],
+    OWNER: ["Owned", "success", "#8a2be2", "This Account is the owner of this Device, which gives them full access to it and right to delete it"]
+  },
   join: {
     NONE: ["None", "error", undefined, "How did you get here??? Please, report this immideately"],
     READ: ["Read", "error", undefined, "This Account can only see this Namespace"],
@@ -32,6 +40,7 @@ export default function AccessBadge(props) {
   let key = "account";
   if (props.account != undefined) key = "account";
   if (props.namespace != undefined) key = "namespace";
+  if (props.device != undefined) key = "device";
   if (props.join != undefined) key = "join";
 
   if (props.cb == undefined) props.cb = () => { };

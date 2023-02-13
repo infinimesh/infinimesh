@@ -107,18 +107,9 @@
 import { ref, computed, defineAsyncComponent } from "vue"
 import { useRouter } from "vue-router"
 import {
-  NSpin,
-  NTable,
-  NThead,
-  NTr,
-  NButton,
-  NIcon,
-  NSpace,
-  NGrid,
-  NGridItem,
-  NH1,
-  NText,
-  useMessage
+  NSpin, NTable, NThead, NTr,
+  NButton, NIcon, NSpace, NGrid,
+  NGridItem, NH1, NText, useMessage
 } from "naive-ui";
 
 import { useNSStore } from "@/store/namespaces";

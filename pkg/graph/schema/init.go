@@ -45,19 +45,46 @@ func CheckAndRegisterCollections(log *zap.Logger, db driver.Database, collection
 	}
 }
 
-func CheckAndRegisterGraph(log *zap.Logger, db driver.Database, graph InfinimeshGraphSchema) {
-	graphExists, err := db.GraphExists(context.TODO(), graph.Name)
+func CheckAndRegisterGraph(log *zap.Logger, db driver.Database, graph_def InfinimeshGraphSchema) {
+	ctx := context.TODO()
+	graphExists, err := db.GraphExists(ctx, graph_def.Name)
 	if err != nil {
-		log.Fatal("Failed to check graph", zap.Any(graph.Name, err))
+		log.Fatal("Failed to check graph", zap.Any(graph_def.Name, err))
 	}
-	log.Debug("Graph Permissions", zap.Bool("Exists", graphExists))
+	log.Debug("Graph", zap.String("name", graph_def.Name), zap.Bool("Exists", graphExists))
 
 	if graphExists {
+		log.Debug("Checking Edge collections")
+		graph, _ := db.Graph(ctx, graph_def.Name)
+		for _, edge := range graph_def.Edges {
+			name := strings.Join(edge, "2")
+			if ok, err := graph.EdgeCollectionExists(ctx, name); !ok || err != nil {
+				log.Debug("Collection doesn't exist, creating", zap.String("name", name))
+				_, err = graph.CreateEdgeCollection(
+					ctx, name, driver.VertexConstraints{
+						From: []string{edge[0]},
+						To:   []string{edge[1]},
+					},
+				)
+
+				if err != nil {
+					log.Fatal(
+						"Failed to create Graph Edge collection",
+						zap.String("graph", graph_def.Name),
+						zap.String("edge", name), zap.Error(err),
+					)
+				}
+
+				continue
+			}
+			log.Debug("Collection exists, skipping", zap.String("name", name))
+		}
 		return
 	}
-	log.Debug("Creating", zap.String("graph", graph.Name))
+
+	log.Debug("Creating", zap.String("graph", graph_def.Name))
 	edges := make([]driver.EdgeDefinition, 0)
-	for _, edge := range graph.Edges {
+	for _, edge := range graph_def.Edges {
 		edges = append(edges, driver.EdgeDefinition{
 			Collection: strings.Join(edge, "2"),
 			From:       []string{edge[0]}, To: []string{edge[1]},
@@ -67,9 +94,9 @@ func CheckAndRegisterGraph(log *zap.Logger, db driver.Database, graph Infinimesh
 	var options driver.CreateGraphOptions
 	options.EdgeDefinitions = edges
 
-	_, err = db.CreateGraph(context.TODO(), graph.Name, &options)
+	_, err = db.CreateGraph(ctx, graph_def.Name, &options)
 	if err != nil {
-		log.Fatal("Failed to create Graph", zap.Any(graph.Name, err))
+		log.Fatal("Failed to create Graph", zap.Any(graph_def.Name, err))
 	}
 }
 
