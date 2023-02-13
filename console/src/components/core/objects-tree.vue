@@ -13,10 +13,6 @@ import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { useDevicesStore } from "@/store/devices";
 
-import { access_lvl_conv } from "@/utils/access";
-
-import { ChevronForward } from '@vicons/ionicons5'
-
 const ObjectIcons = {
     Devices: defineAsyncComponent(() => import("@vicons/ionicons5/HardwareChipOutline")),
     Accounts: defineAsyncComponent(() => import("@vicons/ionicons5/PeopleOutline")),
