@@ -12,6 +12,17 @@
           </template>
         </n-button>
       </template>
+
+      <n-grid responsive="screen" :collapsed-rows="2" v-if="reported">
+        <n-grid-item :span="8">
+          <span>Timestamp</span>
+        </n-grid-item>
+        <n-grid-item :span="16">
+          <n-date-picker input-readonly :value="new Date(reported.timestamp).getTime()" type="datetime" disabled
+            class="pseudo-disabled" />
+        </n-grid-item>
+      </n-grid>
+
       <n-code language="json" :word-wrap="true" :code="
         reported
           ? JSON.stringify(reported.data, null, 2)
@@ -19,16 +30,6 @@
       ">
       </n-code>
     </n-collapse-item>
-
-    <n-grid responsive="screen" :collapsed-rows="2" v-if="reported && expanded.includes('reported')">
-      <n-grid-item :span="8">
-        <span>Timestamp</span>
-      </n-grid-item>
-      <n-grid-item :span="16">
-        <n-date-picker input-readonly :value="new Date(reported.timestamp).getTime()" type="datetime" disabled
-          class="pseudo-disabled" />
-      </n-grid-item>
-    </n-grid>
 
     <n-collapse-item title="Patch Reported" name="reported_patch" v-if="debug">
       <template #header-extra>
@@ -53,22 +54,23 @@
           </template>
         </n-button>
       </template>
+
+      <n-grid responsive="screen" :collapsed-rows="2" v-if="desired">
+        <n-grid-item :span="8">
+          <span>Timestamp</span>
+        </n-grid-item>
+        <n-grid-item :span="16">
+          <n-date-picker input-readonly :value="new Date(desired.timestamp).getTime()" type="datetime" disabled
+            class="pseudo-disabled" />
+        </n-grid-item>
+      </n-grid>
+
       <n-code language="json" :word-wrap="true" :code="
         desired
           ? JSON.stringify(desired.data, null, 2)
           : '// No Desired state have been set yet'
       " />
     </n-collapse-item>
-
-    <n-grid responsive="screen" :collapsed-rows="2" v-if="desired && expanded.includes('desired')">
-      <n-grid-item :span="8">
-        <span>Timestamp</span>
-      </n-grid-item>
-      <n-grid-item :span="16">
-        <n-date-picker input-readonly :value="new Date(desired.timestamp).getTime()" type="datetime" disabled
-          class="pseudo-disabled" />
-      </n-grid-item>
-    </n-grid>
 
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
       <template #header-extra>
