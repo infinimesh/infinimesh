@@ -61,18 +61,9 @@
 <script setup>
 import { ref, watch, computed, onMounted, defineAsyncComponent } from "vue";
 import {
-  NButton,
-  NDrawer,
-  NDrawerContent,
-  NIcon,
-  NSwitch,
-  NSpace,
-  NForm,
-  NFormItem,
-  NInput,
-  NSelect,
-  NTabs,
-  NTabPane,
+  NButton, NDrawer, NDrawerContent, NIcon,
+  NSwitch, NSpace, NForm, NFormItem,
+  NInput, NSelect, NTabs, NTabPane,
   useLoadingBar,
 } from "naive-ui";
 
