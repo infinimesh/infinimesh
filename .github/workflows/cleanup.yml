@@ -32,7 +32,7 @@ jobs:
         tag: ${{fromJson(needs.prepare.outputs.matrix)}}
     steps:
       - name: Untagged Images (> 1 day)
-        uses: snok/container-retention-policy@v1
+        uses: snok/container-retention-policy@v2
         with:
           image-names: infinimesh/${{matrix.tag}}
           cut-off: A day ago UTC
@@ -54,7 +54,7 @@ jobs:
           done
 
       - name: Dev Images (> 2 weeks)
-        uses: snok/container-retention-policy@v1
+        uses: snok/container-retention-policy@v2
         with:
           image-names: infinimesh/${{matrix.tag}}
           cut-off: 2 weeks ago UTC
