@@ -1,5 +1,15 @@
 <template>
-  <n-space align="center" justify="space-between" style="min-height: 4vh">
+  <n-space align="center" justify="space-between" style="min-height: 4vh; padding: 0 10px 0 10px">
+    <span @click="e => e.preventDefault()">
+      <span style="font-family: 'Exo 2'">{{ platform }}</span> - <n-tooltip :show="min_clicked" placement="top">
+        <template #trigger>
+          <span @click="handler">{{ tag }}</span>
+        </template>
+        <span v-if="store.dev"> You are now in the developer mode</span>
+        <span v-else> You are {{ 10 - clicked }} d's away from Developer mode</span>
+      </n-tooltip>
+    </span>
+    <links />
     <span>
       Source code at
       <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
@@ -7,20 +17,11 @@
       </a>
       ©2020-2023
     </span>
-    <span @click="e => e.preventDefault()">
-      <span style="font-family: 'Exo 2">{{ platform }}</span> - <n-tooltip :show="min_clicked" placement="top">
-        <template #trigger>
-          <span @click="handler">{{ tag }}</span>
-        </template>
-        <span v-if="store.dev"> You are now in the developer mode</span>
-        <span v-else> You are {{ 10 - clicked }} d's away from Developer mode</span>
-      </n-tooltip></span>
-    <span></span>
   </n-space>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { h, ref } from "vue"
 import { NSpace, NTooltip } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
@@ -52,4 +53,25 @@ function handler() {
     store.dev = true
   }
 }
+
+function links() {
+  let children = FooterLinks.map(el => {
+    return h('span', { class: 'a', onClick: () => window.open(el.href, '_blank')}, el.title)
+  })
+
+  return h(NSpace, {}, children)
+}
 </script>
+
+<style>
+
+span.a {
+  cursor:pointer;
+  font-family: 'Exo 2'
+}
+
+span.a:hover {
+  text-decoration:underline;
+}
+
+</style>
