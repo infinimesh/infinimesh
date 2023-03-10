@@ -1,4 +1,4 @@
-{
+const DarkThemeOverrides = {
   "common": {
     "primaryColor": "#70C0E8FF",
     "primaryColorSuppl": "#3889C5FF",

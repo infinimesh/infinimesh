@@ -29,9 +29,6 @@ import {
 import { storeToRefs } from 'pinia';
 import { useAppStore } from "@/store/app"
 
-import lightThemeOverrides from "@/assets/light-theme-overrides.json"
-import darkThemeOverrides from "@/assets/dark-theme-overrides.json"
-
 import hljs from "@/utils/hljs";
 
 const store = useAppStore()
@@ -39,7 +36,7 @@ const { theme: pick, dev } = storeToRefs(store)
 const theme = computed(() => {
   return {
     it: pick.value === "dark" ? darkTheme : lightTheme,
-    overrides: pick.value === "dark" ? darkThemeOverrides : lightThemeOverrides,
+    overrides: pick.value === "dark" ? DarkThemeOverrides : LightThemeOverrides,
   }
 })
 
