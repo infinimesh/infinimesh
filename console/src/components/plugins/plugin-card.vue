@@ -138,7 +138,7 @@ const props = defineProps({
 const plugin = computed(() => {
     let r = props.plugin;
     if (props.preview) {
-        r.uuid = "infinimesh will give some unique ID to this plugin and it will be shown here"
+        r.uuid = PLATFORM_NAME + " will give some unique ID to this plugin and it will be shown here"
         r.uuid_short = "s0m3uu1d"
         return r
     }

@@ -1,7 +1,7 @@
 <template>
   <n-tooltip :show="min_dpressed" placement="bottom">
     <template #trigger>
-      <n-card embedded :bordered="false" hoverable size="huge" title="infinimesh"
+      <n-card embedded :bordered="false" hoverable size="huge" :title="platform"
         header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
         <template #header-extra>
           <n-space>
@@ -46,6 +46,8 @@ import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
 
 const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-picker.vue"))
+
+const platform = PLATFORM_NAME
 
 const store = useAppStore();
 const router = useRouter();

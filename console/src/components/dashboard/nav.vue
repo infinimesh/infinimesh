@@ -36,17 +36,17 @@ function RouterAction() {
   return null
 }
 
-function infinimesh() {
-  return h('span', { class: "infinimesh" }, [
-    "infinimesh", h('span', { class: "copyright" }, "©")
+function platform() {
+  return h('span', { class: "platform" }, [
+    PLATFORM_NAME, PLATFORM_NAME == 'infinimesh' ? h('span', { class: "copyright" }, "©") : null
   ])
 }
 
 const jollymesh = defineAsyncComponent(() => import("@/assets/icons/jollymesh.svg"))
 
 function current_thing() {
-  if (!store.current_thing)
-    return infinimesh()
+  if (!store.current_thing || PLATFORM_NAME != 'infinimesh')
+    return platform()
 
   switch (store.current_thing.k) {
     case 'jolly':
@@ -55,13 +55,13 @@ function current_thing() {
       })
   }
 
-  return infinimesh()
+  return platform()
 
 }
 </script>
 
 <style>
-span.infinimesh {
+span.platform {
   font-size: 3vh;
   font-family: "Exo 2", sans-serif;
 }

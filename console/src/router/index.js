@@ -2,7 +2,6 @@ import { nextTick } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { useAppStore } from "@/store/app";
 
-const BASE_TITLE = "infinimesh";
 const routes = [
   {
     path: "/login",
@@ -97,7 +96,7 @@ const router = createRouter({
 
 router.afterEach((to, from) => {
   nextTick(() => {
-    document.title = [BASE_TITLE, to.meta.title].join(" | ");
+    document.title = [PLATFORM_NAME, to.meta.title].join(" | ");
   });
 });
 

@@ -8,7 +8,7 @@
       ©2020-2023
     </span>
     <span @click="e => e.preventDefault()">
-      <span style="font-family: 'Exo 2'">infinimesh</span> - <n-tooltip :show="min_clicked" placement="top">
+      <span style="font-family: 'Exo 2">{{ platform }}</span> - <n-tooltip :show="min_clicked" placement="top">
         <template #trigger>
           <span @click="handler">{{ tag }}</span>
         </template>
@@ -28,6 +28,7 @@ import { useAppStore } from "@/store/app";
 const store = useAppStore();
 
 const tag = "INFINIMESH_VERSION_TAG";
+const platform = PLATFORM_NAME
 
 const clicked = ref(0)
 const min_clicked = ref(false)

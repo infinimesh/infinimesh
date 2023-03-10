@@ -1,3 +1,5 @@
+const PLATFORM_NAME = "infinimesh"
+
 const LightThemeOverrides = {
     "common": {
         "primaryColor": "#70C0E8FF",
