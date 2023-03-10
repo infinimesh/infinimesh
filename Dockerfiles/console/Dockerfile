@@ -9,48 +9,29 @@ WORKDIR /console
 RUN npm install -g pnpm
 RUN pnpm i && pnpm build
 
-# Many thanks to @lipanski for his work on the original script
+# Build server
+FROM golang:1.19-alpine AS builder
 
-FROM alpine:3.13.2 AS builder
+RUN apk add upx
 
-ARG THTTPD_VERSION=2.29
+WORKDIR /go/src/github.com/infinimesh/infinimesh
 
-# Install all dependencies required for compiling thttpd
-RUN apk add gcc musl-dev make
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Download thttpd sources
-RUN wget http://www.acme.com/software/thttpd/thttpd-${THTTPD_VERSION}.tar.gz \
-  && tar xzf thttpd-${THTTPD_VERSION}.tar.gz \
-  && mv /thttpd-${THTTPD_VERSION} /thttpd
-
-# Compile thttpd to a static binary which we can copy around
-RUN cd /thttpd \
-  && ./configure \
-  && make CCOPT='-O2 -s -static' thttpd
-
-# Create a non-root user to own the files and run our server
-RUN adduser -D static
+COPY ./cmd/console ./cmd/console
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -buildvcs=false ./cmd/console
+RUN upx ./console
 
 # Switch to the scratch image
 FROM scratch
 
-# Copy over the user
-COPY --from=builder /etc/passwd /etc/passwd
-
-# Copy the thttpd static binary
-COPY --from=builder /thttpd/thttpd /
-
-# Use our non-root user
-USER static
-WORKDIR /home/static
-
-# Copy the static website
-# Use the .dockerignore file to control what ends up inside the image!
-COPY --from=console-builder /console/dist/ ./
+COPY --from=console-builder /console/dist/ /app
+COPY --from=builder /go/src/github.com/infinimesh/infinimesh/console /console
 
 EXPOSE 80
 
 LABEL org.opencontainers.image.source https://github.com/infinimesh/infinimesh
 
 # Run thttpd
-ENTRYPOINT ["/thttpd", "-D", "-h", "0.0.0.0", "-p", "80", "-d", "/home/static", "-u", "static", "-l", "-", "-M", "60"]
+ENTRYPOINT ["/console"]
