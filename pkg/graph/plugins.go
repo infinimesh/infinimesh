@@ -175,7 +175,7 @@ func (c *PluginsController) List(ctx context.Context, r *pb.ListRequest) (*pb.Pl
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		cr, err = ListQuery(ctx, log, c.db, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL, 1)
+		cr, err = ListQuery(WithDepth(ctx, 1), log, c.db, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
 	} else {
 		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
 			"@plugins": schema.PLUGINS_COL,

@@ -163,6 +163,7 @@ GRAPH @permissions_graph
 OPTIONS {order: "bfs", uniqueVertices: "global"}
 FILTER IS_SAME_COLLECTION(@@kind, node)
 FILTER edge.level > 0
+%s
     LET perm = path.edges[0]
     LET last = path.edges[-1]
 	RETURN MERGE(node, {
@@ -183,15 +184,21 @@ FILTER edge.level > 0
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string, depth int) (driver.Cursor, error) {
+func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
 	bindVars := map[string]interface{}{
-		"depth":             depth,
+		"depth":             DepthValue(ctx),
 		"from":              from.ID(),
 		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
 		"@kind":             children,
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
-	return db.Query(ctx, listObjectsOfKind, bindVars)
+
+	filters := ""
+	if ns := NSFilterValue(ctx); ns != "" {
+		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
+	}
+
+	return db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
 }
 
 const listOwnedQuery = `

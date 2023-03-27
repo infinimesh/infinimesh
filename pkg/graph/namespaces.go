@@ -189,7 +189,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL, 10)
+	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
 	if err != nil {
 		return nil, err
 	}
