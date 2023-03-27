@@ -413,6 +413,10 @@ func (c *DevicesController) List(ctx context.Context, q *pb.QueryRequest) (*devp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
+	if q.GetNamespace() != "" {
+		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
+	}
+
 	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
