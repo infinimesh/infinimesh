@@ -41,7 +41,7 @@
           </n-tag>
         </template>
         <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
-          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1"/>
+          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1" />
           <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
           <device-joins-mgmt-modal :device="device" v-if="access_lvl_conv(device) >= 3" />
         </n-space>
@@ -74,21 +74,25 @@
 
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
-            {{ subscribed? "Subscribed": "Subscribe" }}
+            {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
-            {{ patch? "Cancel Patch": "Patch Desired" }}
+            {{ patch ? "Cancel Patch" : "Patch Desired" }}
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
-          <n-popconfirm @positive-click="handleDelete" v-if="access_lvl_conv(device) > 2">
-            <template #trigger>
-              <n-button type="error" round secondary>Delete</n-button>
-            </template>
-            Are you sure about deleting this device?
-          </n-popconfirm>
+          <template v-if="access_lvl_conv(device) > 2">
+            <basic-auth-modal :device="device" @toggle="handleBasicToggle"/>
+
+            <n-popconfirm @positive-click="handleDelete">
+              <template #trigger>
+                <n-button type="error" round secondary>Delete</n-button>
+              </template>
+              Are you sure about deleting this device?
+            </n-popconfirm>
+          </template>
 
           <template v-if="dev">
 
@@ -144,6 +148,7 @@ import { storeToRefs } from "pinia";
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
 
+const BasicAuthModal = defineAsyncComponent(() => import("./device_card/basic-auth-modal.vue"))
 const EditDevTitleModal = defineAsyncComponent(() => import('./device_card/edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./device_card/edit-tags-modal.vue"))
 const DeviceStateCollapse = defineAsyncComponent(() => import("./device_card/state-collapse.vue"))
@@ -288,6 +293,9 @@ async function handleToggle() {
   toggle_animation.value = false
   await store.toggle(device.value.uuid, bar);
   toggle_animation.value = true
+}
+async function handleBasicToggle() {
+  await store.toggle_basic(device.value.uuid, bar);
 }
 
 async function handleMakeToken() {

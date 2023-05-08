@@ -233,6 +233,24 @@ export const useDevicesStore = defineStore("devices", {
         return;
       }
     },
+    async toggle_basic(uuid, bar) {
+      let device = this.devices[uuid];
+      if (!device) {
+        return;
+      }
+
+      bar.start();
+
+      try {
+        const { data } = await as.http.post(`/devices/${uuid}/toggle/basic`);
+        this.devices[uuid] = { ...device, ...data };
+        bar.finish();
+      } catch (e) {
+        console.error(e);
+        bar.error();
+        return;
+      }
+    },
     async fetchJoins(device) {
       const { data } = await as.http.get(`/devices/${device}/joins`);
       return data
