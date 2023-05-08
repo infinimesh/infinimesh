@@ -144,12 +144,12 @@ import { storeToRefs } from "pinia";
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
 
-const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
-const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
-const DeviceStateCollapse = defineAsyncComponent(() => import("./state-collapse.vue"))
-const DeviceJoinsMgmtModal = defineAsyncComponent(() => import("./joins-mgmt-modal.vue"))
+const EditDevTitleModal = defineAsyncComponent(() => import('./device_card/edit-dev-title-modal.vue'))
+const EditTagsModal = defineAsyncComponent(() => import("./device_card/edit-tags-modal.vue"))
+const DeviceStateCollapse = defineAsyncComponent(() => import("./device_card/state-collapse.vue"))
+const DeviceJoinsMgmtModal = defineAsyncComponent(() => import("./device_card/joins-mgmt-modal.vue"))
 
-const StatusCorner = defineAsyncComponent(() => import("./status-corner.vue"))
+const StatusCorner = defineAsyncComponent(() => import("./device_card/status-corner.vue"))
 
 const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
 
