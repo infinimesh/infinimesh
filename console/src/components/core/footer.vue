@@ -59,7 +59,7 @@ function links() {
     return h('span', { class: 'a', onClick: () => window.open(el.href, '_blank')}, el.title)
   })
 
-  return h(NSpace, {}, children)
+  return h(NSpace, {}, () => children)
 }
 </script>
 
