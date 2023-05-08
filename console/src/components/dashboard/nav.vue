@@ -1,8 +1,8 @@
 <template>
   <n-space justify="space-between" :style="{ padding: '15px' }" align="center">
-    <current_thing />
+    <current_thing @click="router.push({ name: 'Devices' })" />
 
-    <ns-selector />
+    <ns-selector v-show="nsSelector" />
     <div style="margin-left: 5px">
       <n-space justify="space-between">
         <theme-picker />
@@ -15,7 +15,7 @@
 
 <script setup>
 import { h, defineAsyncComponent } from "vue"
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { NSpace } from "naive-ui";
 
 import { useAppStore } from "@/store/app"
@@ -28,6 +28,14 @@ const PluginVars = defineAsyncComponent(() => import("@/components/plugins/plugi
 
 const store = useAppStore()
 const route = useRoute()
+const router = useRouter()
+
+const { nsSelector } = defineProps({
+  nsSelector: {
+    type: Boolean,
+    default: true
+  }
+})
 
 function RouterAction() {
   if (route.name == "DashboardMain" && store.dev)
