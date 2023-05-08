@@ -33,6 +33,16 @@ const { me, dev } = storeToRefs(store);
 
 const options = ref([
   {
+    key: 'profile',
+    label: 'Profile',
+    icon: renderIcon(Person),
+    props: {
+      onClick: () => {
+        router.push({ name: "Profile" });
+      }
+    }
+  },
+  {
     key: "credentials",
     label: "Manage Credentials",
     icon: renderIcon(LockClosedOutline),
