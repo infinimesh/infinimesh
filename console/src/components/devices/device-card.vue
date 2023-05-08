@@ -10,10 +10,18 @@
         </n-space>
       </template>
       <template #header-extra>
+        <n-tooltip trigger="hover" v-if="!device.certificate">
+          <template #trigger>
+            <n-icon size="2vh" color="#f2c97d">
+              <phone-portrait-outline />
+            </n-icon>
+          </template>
+          Software Device - data is sent from the device using Device Token
+        </n-tooltip>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
             <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
-              @click="handleUUIDClicked">
+              @click="handleUUIDClicked" style="margin-left: 1vw;">
               {{ device.uuid_short }}
             </n-tag>
           </template>
@@ -41,7 +49,7 @@
           </n-tag>
         </template>
         <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
-          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1"/>
+          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1" />
           <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
           <device-joins-mgmt-modal :device="device" v-if="access_lvl_conv(device) >= 3" />
         </n-space>
@@ -74,11 +82,11 @@
 
         <n-space justify="start" align="center" style="margin-top: 1vh">
           <n-button type="success" round tertiary :disabled="subscribed" @click="handleSubscribe">
-            {{ subscribed? "Subscribed": "Subscribe" }}
+            {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
-            {{ patch? "Cancel Patch": "Patch Desired" }}
+            {{ patch ? "Cancel Patch" : "Patch Desired" }}
           </n-button>
 
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
@@ -143,6 +151,7 @@ import { storeToRefs } from "pinia";
 
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
+const PhonePortraitOutline = defineAsyncComponent(() => import("@vicons/ionicons5/PhonePortraitOutline"))
 
 const EditDevTitleModal = defineAsyncComponent(() => import('./edit-dev-title-modal.vue'))
 const EditTagsModal = defineAsyncComponent(() => import("./edit-tags-modal.vue"))
