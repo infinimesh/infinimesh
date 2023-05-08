@@ -60,8 +60,8 @@ func HandleTCPConnections(tcp net.Listener) {
 			log.Debug("Fingerprint", zap.ByteString("fingerprint", fingerprint))
 
 			device, err := GetByFingerprintAndVerify(fingerprint, func(device *devpb.Device) bool {
-				if device.Title != connectPacket.ConnectPayload.Username {
-					log.Warn("Failed to verify client as the device name doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
+				if device.GetUuid() != connectPacket.ConnectPayload.Username {
+					log.Warn("Failed to verify client as the device UUID doesn't match Basic Auth Username", zap.String("uuid", device.Uuid), zap.String("device", device.Title), zap.String("username", connectPacket.ConnectPayload.Username))
 					return false
 				} else if !device.BasicEnabled {
 					log.Warn("Failed to verify client as the device is not enabled for Basic Auth", zap.String("uuid", device.Uuid))

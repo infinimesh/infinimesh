@@ -45,6 +45,9 @@ import (
 )
 
 func verifyBasicAuth(p *packet.ConnectControlPacket) (fingerprint []byte, err error) {
+	if p.ConnectPayload.Username == "" {
+		return nil, errors.New("payload Username is Empty")
+	}
 	if p.ConnectPayload.Password == "" {
 		return nil, errors.New("payload Password is Empty")
 	}

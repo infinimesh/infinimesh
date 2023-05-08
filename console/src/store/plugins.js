@@ -53,6 +53,7 @@ export const usePluginsStore = defineStore("plugins", {
 
 window.addEventListener('message', ({ origin, data }) => {
   if (!data || !data.type) {
+    if (data.source && data.source.includes('vue-devtools-')) return
     console.warn("Malformed cross-frame message, skipping. Data:", data, origin);
     return;
   }

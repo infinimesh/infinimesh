@@ -328,8 +328,8 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) 
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.Level_MGMT {
-		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	if curr.GetAccess().GetLevel() < access.Level_ADMIN {
+		return nil, status.Errorf(codes.PermissionDenied, "Not enough Access to Device %s", dev.Uuid)
 	}
 
 	res := NewDeviceFromPB(curr)
