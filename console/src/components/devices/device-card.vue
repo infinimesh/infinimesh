@@ -10,10 +10,18 @@
         </n-space>
       </template>
       <template #header-extra>
+        <n-tooltip trigger="hover" v-if="!device.certificate">
+          <template #trigger>
+            <n-icon size="2vh" color="#f2c97d">
+              <phone-portrait-outline />
+            </n-icon>
+          </template>
+          Software Device - data is sent from the device using Device Token
+        </n-tooltip>
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
             <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
-              @click="handleUUIDClicked">
+              @click="handleUUIDClicked" style="margin-left: 1vw;">
               {{ device.uuid_short }}
             </n-tag>
           </template>
@@ -147,6 +155,7 @@ import { storeToRefs } from "pinia";
 
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
+const PhonePortraitOutline = defineAsyncComponent(() => import("@vicons/ionicons5/PhonePortraitOutline"))
 
 const BasicAuthModal = defineAsyncComponent(() => import("./device_card/basic-auth-modal.vue"))
 const EditDevTitleModal = defineAsyncComponent(() => import('./device_card/edit-dev-title-modal.vue'))
