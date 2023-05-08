@@ -17,6 +17,7 @@
           <n-button type="warning" round @click="handleSubmit">Submit</n-button>
         </n-space>
       </template>
+
       <n-form ref="form" :model="model" label-placement="top">
         <n-form-item label="Title" path="account.title">
           <n-input v-model:value="model.account.title" placeholder="How should we call you?" />
