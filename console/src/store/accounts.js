@@ -140,9 +140,10 @@ export const useAccountsStore = defineStore("accounts", {
         bar.error();
       }
     },
-    tokenFor(account) {
+    tokenFor(account, exp = 0) {
       return as.http.post(`/token`, {
-        uuid: account
+        uuid: account,
+        exp,
       });
     }
   },
