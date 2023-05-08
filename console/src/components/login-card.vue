@@ -159,6 +159,7 @@ onMounted(() => {
 
 <style>
 .login-card {
-  min-width: 40vw;
+  min-width: 20vw;
+  max-width: 480px;
 }
 </style>
