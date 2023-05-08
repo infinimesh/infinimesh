@@ -328,7 +328,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) 
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.Level_MGMT {
+	if curr.GetAccess().GetLevel() < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
