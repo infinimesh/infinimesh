@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent } from "vue";
+import { ref, defineAsyncComponent } from "vue";
 import {
     NLayout,
     NLayoutHeader,
@@ -47,5 +47,5 @@ import { useRouter } from "vue-router";
 const ChevronBackOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ChevronBackOutline"));
 
 const router = useRouter()
-
+const collapsed = ref(true);
 </script>
