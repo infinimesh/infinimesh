@@ -90,14 +90,6 @@ const routes = [
     children: [
       {
         path: "",
-        name: "SettingsMain",
-        component: () => import("@/views/settings/index.vue"),
-        meta: {
-          title: "Settings",
-        },
-      },
-      {
-        path: "profile",
         name: "Profile",
         component: () => import("@/views/settings/Profile.vue"),
         meta: {

@@ -29,6 +29,10 @@ export const useAccountsStore = defineStore("accounts", {
     },
   },
   actions: {
+    async sync_me() {
+      const { data } = await as.http.get("/accounts/me")
+      as.me = { ...as.me, ...data };
+    },
     async fetchAccounts(no_cache = false) {
       this.loading = true;
 
@@ -58,16 +62,16 @@ export const useAccountsStore = defineStore("accounts", {
       }
     },
     async updateAccount(account, bar) {
-      if(bar) bar.start();
+      if (bar) bar.start();
       try {
         await as.http.patch(`/accounts/${account.uuid}`, account);
 
         this.fetchAccounts();
-        if(bar) bar.finish();
+        if (bar) bar.finish();
         return false;
       } catch (e) {
         console.error(e);
-        if(bar) bar.error();
+        if (bar) bar.error();
         return e;
       }
     },

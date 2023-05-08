@@ -54,7 +54,7 @@ const options = ref([
     icon: renderIcon(KeyOutline),
     props: {
       onClick: () => {
-        router.push({ name: "Settings" });
+        router.push({ name: "Tokens" });
       }
     }
   },
@@ -68,7 +68,7 @@ const options = ref([
     icon: renderIcon(CogOutline),
     props: {
       onClick: () => {
-        router.push({ name: "Settings" });
+        router.push({ name: "Profile" });
       },
     },
   },
