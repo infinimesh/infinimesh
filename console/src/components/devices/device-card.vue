@@ -92,7 +92,7 @@
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
           <template v-if="access_lvl_conv(device) > 2">
-            <basic-auth-modal :device="device" @toggle="handleBasicToggle"/>
+            <basic-auth-modal :device="device" @toggle="handleBasicToggle" v-if="device.certificate"/>
 
             <n-popconfirm @positive-click="handleDelete">
               <template #trigger>
