@@ -9,27 +9,27 @@
       {{ me.title }}
     </n-button>
   </n-dropdown>
-
-  <set-credentials-modal :show="show" @close="show = false" :account="me" />
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { defineAsyncComponent, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { NButton, NDropdown, NIcon } from "naive-ui";
 import { renderIcon } from "@/utils";
-import { Person, LogOutOutline, LockClosedOutline, CodeSlashOutline } from "@vicons/ionicons5";
 import { useAppStore } from "@/store/app";
 import { useRouter } from "vue-router";
 
-import setCredentialsModal from "@/components/accounts/set-credentials-modal.vue";
+const Person = defineAsyncComponent(() => import("@vicons/ionicons5/Person"));
+const LogOutOutline = defineAsyncComponent(() => import("@vicons/ionicons5/LogOutOutline"));
+const LockClosedOutline = defineAsyncComponent(() => import("@vicons/ionicons5/LockClosedOutline"));
+const CodeSlashOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CodeSlashOutline"));
+const KeyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/KeyOutline"));
+const CogOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CogOutline"));
 
 const router = useRouter();
 const store = useAppStore();
 
 const { me, dev } = storeToRefs(store);
-
-const show = ref(false)
 
 const options = ref([
   {
@@ -38,13 +38,33 @@ const options = ref([
     icon: renderIcon(LockClosedOutline),
     props: {
       onClick: () => {
-        show.value = true;
-      },
+        router.push({ name: "Credentials" });
+      }
     },
+  },
+  {
+    key: 'token',
+    label: 'Personal Access Token',
+    icon: renderIcon(KeyOutline),
+    props: {
+      onClick: () => {
+        router.push({ name: "Tokens" });
+      }
+    }
   },
   {
     type: 'divider',
     key: 'd1'
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: renderIcon(CogOutline),
+    props: {
+      onClick: () => {
+        router.push({ name: "Profile" });
+      },
+    },
   },
   {
     key: "logout",

@@ -80,6 +80,41 @@ const routes = [
     ],
   },
   {
+    path: "/settings",
+    name: "Settings",
+    component: () => import("@/views/Settings.vue"),
+    meta: {
+      title: "Settings",
+      requiresAuth: true,
+    },
+    children: [
+      {
+        path: "",
+        name: "Profile",
+        component: () => import("@/views/settings/Profile.vue"),
+        meta: {
+          title: "Profile",
+        },
+      },
+      {
+        path: "tokens",
+        name: "Tokens",
+        component: () => import("@/views/settings/Tokens.vue"),
+        meta: {
+          title: "Tokens",
+        },
+      },
+      {
+        path: "credentials",
+        name: "Credentials",
+        component: () => import("@/views/settings/Credentials.vue"),
+        meta: {
+          title: "Credentials",
+        },
+      },
+    ]
+  },
+  {
     path: "/offline",
     name: "Offline",
     component: () => import("@/views/Offline.vue"),
