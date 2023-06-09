@@ -38,22 +38,22 @@
 
         <!-- Device Credentials -->
         <n-form-item label="Credentials Mode" label-placement="top">
-          <n-radio-group v-model:value="mode">
+          <n-radio-group v-model:value="mode" name="device_credentials_mode">
             <n-tooltip trigger="hover">
               <template #trigger>
-                <n-radio-button value="handsfree" label="Handsfree" />
+                <n-radio-button value="handsfree" key="handsfree" label="Handsfree" />
               </template>
               Use Authorization code from device to obtain it's pre-installed certificate
             </n-tooltip>
             <n-tooltip trigger="hover">
               <template #trigger>
-                <n-radio-button value="certificate" label="Certificate" />
+                <n-radio-button value="certificate" key="certificate" :label="'Certificate'" />
               </template>
               Upload your own certificate
             </n-tooltip>
             <n-tooltip trigger="hover">
               <template #trigger>
-                <n-radio-button value="soft" label="Soft(Token)" />
+                <n-radio-button value="soft" key="soft" label="Soft(Token)" />
               </template>
               No credentials required, but device will only be able to send data using Device Token.
             </n-tooltip>
