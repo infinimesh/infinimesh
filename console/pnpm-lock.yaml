@@ -33,8 +33,8 @@ dependencies:
     specifier: ^3.5.2
     version: 3.5.2(axios@1.4.0)(vue@3.3.4)
   vue-router:
-    specifier: '4'
-    version: 4.0.0(vue@3.3.4)
+    specifier: ^4.2.2
+    version: 4.2.2(vue@3.3.4)
   vue3-markdown-it:
     specifier: ^1.0.10
     version: 1.0.10(@types/markdown-it@12.2.3)
@@ -991,11 +991,12 @@ packages:
       vue: 3.3.4
     dev: false
 
-  /vue-router@4.0.0(vue@3.3.4):
-    resolution: {integrity: sha512-RiAsDsSV73TBqppgpAKghb5exHHKsFuTii7hbhj9QHjWJNDE4lBDTr7bVALG9DH9vVcFI+7PUTBGYbytBFsWsQ==}
+  /vue-router@4.2.2(vue@3.3.4):
+    resolution: {integrity: sha512-cChBPPmAflgBGmy3tBsjeoe3f3VOSG6naKyY5pjtrqLGbNEXdzCigFUHgBvp9e3ysAtFtEx7OLqcSDh/1Cq2TQ==}
     peerDependencies:
-      vue: ^3.0.0
+      vue: ^3.2.0
     dependencies:
+      '@vue/devtools-api': 6.5.0
       vue: 3.3.4
     dev: false
 
