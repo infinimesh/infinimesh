@@ -2,7 +2,7 @@ import { createApp, markRaw } from "vue";
 import './main.css';
 import App from "./App.vue";
 
-import router from "@/router";
+import {router} from "./router/index.mjs";
 
 import axios from "axios";
 import VueAxios from "vue-axios";

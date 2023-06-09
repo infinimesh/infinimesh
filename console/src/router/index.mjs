@@ -124,7 +124,7 @@ const routes = [
   },
 ];
 
-const router = createRouter({
+export const router = createRouter({
   history: createWebHashHistory(),
   routes,
 });
@@ -142,4 +142,3 @@ router.beforeEach(async (to, from) => {
   }
 });
 
-export default router;
