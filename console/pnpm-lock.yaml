@@ -47,8 +47,8 @@ devDependencies:
     specifier: ^4.1.0
     version: 4.1.0(vite@4.3.9)(vue@3.3.4)
   naive-ui:
-    specifier: ^2.27.0
-    version: 2.27.0(vue@3.3.4)
+    specifier: ^2.34.4
+    version: 2.34.4(vue@3.3.4)
   vfonts:
     specifier: ^0.0.3
     version: 0.0.3
@@ -317,6 +317,10 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
     dev: false
+
+  /@types/katex@0.14.0:
+    resolution: {integrity: sha512-+2FW2CcT0K3P+JMR8YG846bmDwplKUTsWgT2ENwdQ1UdVfRk3GQrh6Mi4sTopy30gI8Uau5CEqHTDZ6YvWIUPA==}
+    dev: true
 
   /@types/linkify-it@3.0.2:
     resolution: {integrity: sha512-HZQYqbiFVWufzCwexrvh694SOim8z2d+xJl5UNamcvQFejLY/2YUtzXHYi3cHdI7PMlS8ejH2slRAOJQ32aNbA==}
@@ -761,13 +765,14 @@ packages:
       mime-db: 1.52.0
     dev: false
 
-  /naive-ui@2.27.0(vue@3.3.4):
-    resolution: {integrity: sha512-g9A2uulbQKMuJpUjAyiAqBHQ4xrcbwRPdv+OS2FeNC5u/SrRWFiO64X10YDyMwQNudrwc3VVqKUrw3ZArxtFCg==}
+  /naive-ui@2.34.4(vue@3.3.4):
+    resolution: {integrity: sha512-aPG8PDfhSzIzn/jSC9y3Jb3Pe2wHJ7F0cFV1EWlbImSrZECeUmoc+fIcOSWbizoztkKfaUAeKwYdMl09MKkj1g==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
       '@css-render/plugin-bem': 0.15.12(css-render@0.15.12)
       '@css-render/vue3-ssr': 0.15.12(vue@3.3.4)
+      '@types/katex': 0.14.0
       '@types/lodash': 4.14.195
       '@types/lodash-es': 4.17.7
       async-validator: 4.2.5
@@ -781,7 +786,6 @@ packages:
       seemly: 0.3.6
       treemate: 0.3.11
       vdirs: 0.1.8(vue@3.3.4)
-      vfonts: 0.0.3
       vooks: 0.2.12(vue@3.3.4)
       vue: 3.3.4
       vueuc: 0.4.51(vue@3.3.4)
