@@ -21,7 +21,7 @@
       <tbody>
         <tr v-for="device in devices">
           <td align="center">
-            <n-checkbox size="large" class="table-checkbox" style="--n-size: 3vh; --n-border-radius: var(--n-size);"
+            <n-checkbox size="large" class="table-checkbox" style="--n-size: max(32px, min(48px, 2vh)); --n-border-radius: var(--n-size);"
               :value="device.uuid" />
           </td>
           <td>
