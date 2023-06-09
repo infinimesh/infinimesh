@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
-	github.com/arangodb/go-driver v1.5.2
+	github.com/arangodb/go-driver v1.6.0
 	github.com/cskr/pubsub v1.0.2
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/go-ldap/ldap/v3 v3.4.4
