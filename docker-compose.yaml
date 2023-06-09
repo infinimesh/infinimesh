@@ -47,6 +47,8 @@ services:
       - traefik.http.routers.rabbitmq.rule=Host(`rbmq.${BASE_DOMAIN}`)
       - traefik.http.routers.rabbitmq.entrypoints=http
       - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
+    ports:
+     - 5672:5672
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
@@ -96,6 +98,7 @@ services:
     restart: unless-stopped
     depends_on:
       - redis
+      - rabbitmq
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
@@ -105,6 +108,8 @@ services:
 
   redis:
     image: redis:latest
+    ports:
+      - 6379:6379
     command: [ "redis-server", "--appendonly", "yes" ]
 
   db:
