@@ -16,7 +16,7 @@
     "pinia-plugin-persist": "^1.0.0",
     "vite-svg-loader": "^4.0.0",
     "vue": "^3.3.4",
-    "vue-axios": "^3.4.1",
+    "vue-axios": "^3.5.2",
     "vue-router": "4",
     "vue3-markdown-it": "^1.0.10"
   },
