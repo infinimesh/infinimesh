@@ -66,7 +66,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4.4.0
+        uses: docker/metadata-action@v4.5.0
         with:
           tags: type=raw,value=${{env.IMAGE_TAG}}
           images: ${{ env.REGISTRY }}/infinimesh/infinimesh/${{matrix.tag}}
