@@ -99,6 +99,7 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 		Payload: req.GetPayload(),
 		App:     req.GetAppId(),
 	}
+	defer delete(s.db, code)
 
 	err := srv.Send(&pb.ControlPacket{
 		Code: pb.Code_AUTH, Payload: []string{code},
