@@ -42,3 +42,7 @@ func Store(rdb *redis.Client, account string, session *sessions.Session) error {
 
 	return rdb.Set(context.Background(), key, data, ret).Err()
 }
+
+func LogActivity(rdb *redis.Client, account, sid string, exp int64) error {
+	return rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
+}

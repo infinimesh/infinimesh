@@ -32,12 +32,16 @@ import (
 )
 
 var (
-	log         *zap.Logger
+	log *zap.Logger
+	rdb *redis.Client
+
 	SIGNING_KEY []byte
 )
 
-func SetContext(logger *zap.Logger, key []byte) {
+func SetContext(logger *zap.Logger, _rdb *redis.Client, key []byte) {
 	log = logger.Named("JWT")
+	rdb = _rdb
+
 	SIGNING_KEY = key
 	log.Debug("Context set", zap.ByteString("signing_key", key))
 }
@@ -46,6 +50,8 @@ func MakeToken(account string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims[infinimesh.INFINIMESH_ACCOUNT_CLAIM] = account
 	claims[infinimesh.INFINIMESH_ROOT_CLAIM] = 4
+	claims[infinimesh.INFINIMESH_NOSESSION_CLAIM] = true
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(SIGNING_KEY)
 }
@@ -74,6 +80,8 @@ func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.Unary
 		return nil, err
 	}
 
+	go handleLogActivity(ctx)
+
 	return handler(ctx, req)
 }
 
@@ -100,7 +108,24 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
 	}
 
+	session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
+	if session == nil {
+		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+	}
+	sid, ok := session.(string)
+	if !ok {
+		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+	}
+
+	var exp int64
+	if token["exp"] != nil {
+		exp = int64(token["exp"].(float64))
+	}
+
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
+	ctx = context.WithValue(ctx, infinimesh.InfinimeshSessionCtxKey, sid)
+	ctx = context.WithValue(ctx, infinimesh.ContextKey("exp"), exp)
+
 	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, uuid)
 	ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+tokenString)
 
@@ -181,4 +206,19 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	}
 
 	return nil, status.Error(codes.Unauthenticated, "Cannot Validate Token")
+}
+
+func handleLogActivity(ctx context.Context) {
+	sid_ctx := ctx.Value(infinimesh.InfinimeshSessionCtxKey)
+	if sid_ctx == nil {
+		return
+	}
+
+	sid := sid_ctx.(string)
+	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
+	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
+
+	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+		log.Warn("Error logging activity", zap.Any("error", err))
+	}
 }

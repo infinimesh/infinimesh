@@ -148,7 +148,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 	}
 
 	session := sessions.New(req.Exp, req.GetClient())
-	if err := sessions.Store(log, c.rdb, account.Key, session); err != nil {
+	if err := sessions.Store(c.rdb, account.Key, session); err != nil {
 		log.Error("Failed to store session", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to issue token: session")
 	}
