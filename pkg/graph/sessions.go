@@ -30,7 +30,7 @@ func (c *SessionsController) Get(ctx context.Context, req *node.EmptyMessage) (*
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	sid := ctx.Value(inf.InfinimeshSessionCtxKey).(string)
 
-	log.Debug("Invoked", zap.String("requestor", requestor))
+	log.Debug("Invoked", zap.String("requestor", requestor), zap.String("sid", sid))
 
 	result, err := sessions.Get(c.rdb, requestor)
 	if err != nil {
@@ -47,5 +47,21 @@ func (c *SessionsController) Get(ctx context.Context, req *node.EmptyMessage) (*
 
 	return &pb.Sessions{
 		Sessions: result,
+	}, nil
+}
+
+func (c *SessionsController) GetActivity(ctx context.Context, req *node.EmptyMessage) (*pb.Activity, error) {
+	log := c.log.Named("GetActivity")
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+
+	log.Debug("Invoked", zap.String("requestor", requestor))
+
+	result, err := sessions.GetActivity(c.rdb, requestor)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Activity{
+		LastSeen: result,
 	}, nil
 }

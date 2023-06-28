@@ -3,6 +3,8 @@ package sessions
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -72,6 +74,29 @@ func Check(rdb *redis.Client, account, sid string) error {
 
 func LogActivity(rdb *redis.Client, account, sid string, exp int64) error {
 	return rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
+}
+func GetActivity(rdb *redis.Client, account string) (map[string]*timestamppb.Timestamp, error) {
+	keys, err := rdb.Keys(context.Background(), fmt.Sprintf("sessions:activity:%s:*", account)).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := rdb.MGet(context.Background(), keys...).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]*timestamppb.Timestamp)
+	for i, d := range data {
+		ts, err := strconv.Atoi(d.(string))
+		if err != nil {
+			return nil, fmt.Errorf("invalid data type: %s | %v", keys[i], err)
+		}
+
+		result[strings.Split(keys[i], ":")[3]] = timestamppb.New(time.Unix(int64(ts), 0))
+	}
+
+	return result, nil
 }
 
 func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
