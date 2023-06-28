@@ -24,6 +24,10 @@
           </n-space>
 
           <n-alert title="Success! Redirecting..." type="success" v-if="success" />
+
+          <n-alert v-if="alert" :title="alert.title" :type="alert.type" closable>
+          {{  alert.description }}  
+          </n-alert>
         </n-space>
       </n-card>
     </template>
@@ -35,9 +39,7 @@
 <script setup>
 import { ref, inject, onMounted, defineAsyncComponent } from "vue";
 import {
-  NCard,
-  NSpace,
-  NInput,
+  NCard, NSpace, NInput,
   NButton, NRadioButton,
   NAlert, NRadioGroup,
   useLoadingBar, NTooltip
@@ -58,6 +60,7 @@ const type = ref("standard")
 
 const error = ref(false);
 const success = ref(false);
+const alert = ref(false);
 
 const bar = useLoadingBar();
 
@@ -65,6 +68,7 @@ const axios = inject("axios");
 async function login() {
   success.value = false;
   error.value = false;
+  alert.value = false;
   bar.start();
 
   const data = {
@@ -154,6 +158,10 @@ onMounted(() => {
       store.dev = true
     }
   });
+
+  if (route.query.msg) {
+    alert.value = JSON.parse(atob(route.query.msg))
+  }
 })
 </script>
 

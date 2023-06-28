@@ -1,4 +1,4 @@
-import { inject } from "vue";
+import { inject, nextTick } from "vue";
 import { defineStore } from "pinia";
 
 import { check_token_expired, check_offline } from "@/utils/access";
@@ -18,7 +18,8 @@ export const useAppStore = defineStore("app", {
     console_services: {},
     dev: false,
 
-    current_thing: false
+    current_thing: false,
+    notify: null
   }),
   getters: {
     base_url: () => baseURL,
@@ -43,8 +44,15 @@ export const useAppStore = defineStore("app", {
     },
   },
   actions: {
-    logout() {
+    logout(msg = false) {
       this.$reset();
+
+      let query = {};
+      if (msg) {
+        query.msg = btoa(JSON.stringify(msg));
+      }
+
+      this.$router.push({ name: 'Login', query });
     },
     offline() {
       this.$router.push({ name: 'Offline' });

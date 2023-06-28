@@ -2,9 +2,14 @@
 </template>
 
 <script setup>
-import { useNSStore } from '@/store/namespaces';
 import { useRouter } from "vue-router";
 
+import { useAppStore } from '@/store/app';
+import { useNSStore } from '@/store/namespaces';
+
+import { useNotification } from "naive-ui"
+
+const store = useAppStore()
 const nss = useNSStore()
 const router = useRouter();
 
@@ -16,4 +21,6 @@ if (!ns || !ns.plugin || ns.plugin.kind != "EMBEDDED") {
     console.log("Navigating to Main Dashboard")
     router.push({ name: "DashboardMain" })
 }
+
+store.notify = useNotification()
 </script>
