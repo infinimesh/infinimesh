@@ -88,7 +88,6 @@ func init() {
 
 	viper.SetDefault("DEVICES_HOST", "api.infinimesh.local")
 	viper.SetDefault("SHADOW_HOST", "shadow:8080")
-	viper.SetDefault("DB_ADDR2", ":6379")
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
 	viper.SetDefault("ACME", "")
 	viper.SetDefault("TLS_CERT_FILE", "/cert/tls.crt")
