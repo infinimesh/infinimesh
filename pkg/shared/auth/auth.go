@@ -20,10 +20,12 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	"github.com/infinimesh/infinimesh/pkg/sessions"
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -115,6 +117,12 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 	sid, ok := session.(string)
 	if !ok {
 		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+	}
+
+	// Check if session is valid
+	if err := sessions.Check(rdb, uuid, sid); err != nil {
+		log.Debug("Session check failed", zap.Any("error", err))
+		return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 	}
 
 	var exp int64

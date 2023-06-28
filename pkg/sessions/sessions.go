@@ -43,6 +43,33 @@ func Store(rdb *redis.Client, account string, session *sessions.Session) error {
 	return rdb.Set(context.Background(), key, data, ret).Err()
 }
 
+func Check(rdb *redis.Client, account, sid string) error {
+	key := fmt.Sprintf("sessions:%s:%s", account, sid)
+
+	cmd := rdb.Get(context.Background(), key)
+	if cmd.Err() != nil {
+		return cmd.Err()
+	}
+
+	data, err := cmd.Bytes()
+	if err != nil {
+		return err
+	}
+
+	session := &sessions.Session{}
+	err = proto.Unmarshal(data, session)
+
+	if err != nil {
+		return err
+	}
+
+	if session.Expires != nil && session.Expires.AsTime().Before(time.Now()) {
+		return fmt.Errorf("session expired")
+	}
+
+	return nil
+}
+
 func LogActivity(rdb *redis.Client, account, sid string, exp int64) error {
 	return rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
 }
