@@ -8,8 +8,8 @@
                 @mouseover="collapsed = false" @mouseleave="collapsed = true">
                 <settings-menu :collapsed="collapsed" />
             </n-layout-sider>
-            <n-layout-content :content-style="{ padding: noContentPadding ? 0 : '24px' }" :native-scrollbar="false">
-                <n-button text type="info" @click="router.push({name: 'DashboardMain'})">
+            <n-layout-content :content-style="{ padding: '24px' }" :native-scrollbar="false">
+                <n-button text type="info" @click="router.push({ name: 'DashboardMain' })">
                     <template #icon>
                         <n-icon>
                             <chevron-back-outline />
@@ -17,7 +17,7 @@
                     </template>
                     Back to infinimesh
                 </n-button>
-                
+
                 <router-view />
             </n-layout-content>
         </n-layout>
