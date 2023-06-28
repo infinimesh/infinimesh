@@ -103,6 +103,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		Connection: &pb.ConnectionState{
 			Connected: true,
 			Timestamp: timestamppb.Now(),
+			ClientId:  connectPacket.ConnectPayload.ClientID,
 		},
 	}, "mqtt.incoming")
 
@@ -112,6 +113,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			Connection: &pb.ConnectionState{
 				Connected: false,
 				Timestamp: timestamppb.Now(),
+				ClientId:  connectPacket.ConnectPayload.ClientID,
 			},
 		}, "mqtt.incoming")
 	}()
