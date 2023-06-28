@@ -20,9 +20,11 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
+	"github.com/infinimesh/infinimesh/pkg/sessions"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	pb "github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/access"
@@ -83,13 +85,15 @@ type AccountsController struct {
 	col  driver.Collection // Accounts Collection
 	cred driver.Collection
 
+	rdb *redis.Client
+
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database) *AccountsController {
+func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Client) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
@@ -99,7 +103,9 @@ func NewAccountsController(log *zap.Logger, db driver.Database) *AccountsControl
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
-		}, col: col, cred: cred, acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS),
+		}, col: col, cred: cred, rdb: rdb,
+
+		acc2ns:      GetEdgeCol(ctx, db, schema.ACC2NS),
 		ns2acc:      GetEdgeCol(ctx, db, schema.NS2ACC),
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -141,8 +147,15 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
 	}
 
+	session := sessions.New(req.Exp, req.GetClient())
+	if err := sessions.Store(log, c.rdb, account.Key, session); err != nil {
+		log.Error("Failed to store session", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Failed to issue token: session")
+	}
+
 	claims := jwt.MapClaims{}
 	claims[inf.INFINIMESH_ACCOUNT_CLAIM] = account.Key
+	claims[inf.INFINIMESH_SESSION_CLAIM] = session.Id
 	claims["exp"] = req.Exp
 
 	if req.Inf != nil && *req.Inf {
