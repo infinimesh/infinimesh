@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -18,11 +18,11 @@ dependencies:
     specifier: ^4.17.21
     version: 4.17.21
   pinia:
-    specifier: ^2.0.13
-    version: 2.0.13(vue@3.3.4)
+    specifier: ^2.1.4
+    version: 2.1.4(vue@3.3.4)
   pinia-plugin-persist:
     specifier: ^1.0.0
-    version: 1.0.0(pinia@2.0.13)(vue@3.3.4)
+    version: 1.0.0(pinia@2.1.4)(vue@3.3.4)
   vite-svg-loader:
     specifier: ^4.0.0
     version: 4.0.0
@@ -44,8 +44,8 @@ devDependencies:
     specifier: ^12.2.3
     version: 12.2.3
   '@vitejs/plugin-vue':
-    specifier: ^4.1.0
-    version: 4.1.0(vite@4.3.9)(vue@3.3.4)
+    specifier: ^4.2.3
+    version: 4.2.3(vite@4.3.9)(vue@3.3.4)
   naive-ui:
     specifier: ^2.34.4
     version: 2.34.4(vue@3.3.4)
@@ -348,8 +348,8 @@ packages:
     resolution: {integrity: sha512-Iy1EUVRpX0WWxeu1VIReR1zsZLMc4fqpt223czR+Rpnrwu7pt46nbnC2ycO7ItI/uqDLJxnbcMC7FujKs9IfFA==}
     dev: false
 
-  /@vitejs/plugin-vue@4.1.0(vite@4.3.9)(vue@3.3.4):
-    resolution: {integrity: sha512-++9JOAFdcXI3lyer9UKUV4rfoQ3T1RN8yDqoCLar86s0xQct5yblxAE+yWgRnU5/0FOlVCpTZpYSBV/bGWrSrQ==}
+  /@vitejs/plugin-vue@4.2.3(vite@4.3.9)(vue@3.3.4):
+    resolution: {integrity: sha512-R6JDUfiZbJA9cMiguQ7jxALsgiprjBeHL5ikpXfJCH62pPHtI+JdJ5xWj6Ev73yXSlYl86+blXn1kZHQ7uElxw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       vite: ^4.0.0
@@ -805,7 +805,7 @@ packages:
   /picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
 
-  /pinia-plugin-persist@1.0.0(pinia@2.0.13)(vue@3.3.4):
+  /pinia-plugin-persist@1.0.0(pinia@2.1.4)(vue@3.3.4):
     resolution: {integrity: sha512-M4hBBd8fz/GgNmUPaaUsC29y1M09lqbXrMAHcusVoU8xlQi1TqgkWnnhvMikZwr7Le/hVyMx8KUcumGGrR6GVw==}
     peerDependencies:
       '@vue/composition-api': ^1.0.0
@@ -815,17 +815,17 @@ packages:
       '@vue/composition-api':
         optional: true
     dependencies:
-      pinia: 2.0.13(vue@3.3.4)
+      pinia: 2.1.4(vue@3.3.4)
       vue: 3.3.4
       vue-demi: 0.12.5(vue@3.3.4)
     dev: false
 
-  /pinia@2.0.13(vue@3.3.4):
-    resolution: {integrity: sha512-B7rSqm1xNpwcPMnqns8/gVBfbbi7lWTByzS6aPZ4JOXSJD4Y531rZHDCoYWBwLyHY/8hWnXljgiXp6rRyrofcw==}
+  /pinia@2.1.4(vue@3.3.4):
+    resolution: {integrity: sha512-vYlnDu+Y/FXxv1ABo1vhjC+IbqvzUdiUC3sfDRrRyY2CQSrqqaa+iiHmqtARFxJVqWQMCJfXx1PBvFs9aJVLXQ==}
     peerDependencies:
       '@vue/composition-api': ^1.4.0
       typescript: '>=4.4.4'
-      vue: ^2.6.14 || ^3.2.0
+      vue: ^2.6.14 || ^3.3.0
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
@@ -853,8 +853,8 @@ packages:
     resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
     dev: true
 
-  /rollup@3.24.0:
-    resolution: {integrity: sha512-OgraHOIg2YpHQTjl0/ymWfFNBEyPucB7lmhXrQUh38qNOegxLapSPFs9sNr0qKR75awW41D93XafoR2QfhBdUQ==}
+  /rollup@3.25.3:
+    resolution: {integrity: sha512-ZT279hx8gszBj9uy5FfhoG4bZx8c+0A1sbqtr7Q3KNWIizpTdDEPZbV2xcbvHsnFp4MavCQYZyzApJ+virB8Yw==}
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
     hasBin: true
     optionalDependencies:
@@ -941,7 +941,7 @@ packages:
     dependencies:
       esbuild: 0.17.19
       postcss: 8.4.24
-      rollup: 3.24.0
+      rollup: 3.25.3
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
