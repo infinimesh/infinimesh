@@ -65,3 +65,17 @@ func (c *SessionsController) GetActivity(ctx context.Context, req *node.EmptyMes
 		LastSeen: result,
 	}, nil
 }
+
+func (c *SessionsController) Revoke(ctx context.Context, req *pb.Session) (*node.DeleteResponse, error) {
+	log := c.log.Named("Revoke")
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+
+	log.Debug("Invoked", zap.String("requestor", requestor), zap.String("sid", req.Id))
+
+	err := sessions.Revoke(c.rdb, requestor, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &node.DeleteResponse{}, nil
+}

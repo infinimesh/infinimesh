@@ -130,3 +130,8 @@ func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
 
 	return result, nil
 }
+
+func Revoke(rdb *redis.Client, account, sid string) error {
+	key := fmt.Sprintf("sessions:%s:%s", account, sid)
+	return rdb.Del(context.Background(), key).Err()
+}
