@@ -69,7 +69,7 @@ func init() {
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow,plugins,internal")
+	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal")
 
 	port = viper.GetString("PORT")
 
@@ -144,6 +144,12 @@ func main() {
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}
+	}
+
+	if _, ok := services["sessions"]; ok {
+		log.Info("Registering sessions service")
+		sess_ctrl := graph.NewSessionsController(log, rdb)
+		pb.RegisterSessionsServiceServer(s, sess_ctrl)
 	}
 
 	if _, ok := services["devices"]; ok {

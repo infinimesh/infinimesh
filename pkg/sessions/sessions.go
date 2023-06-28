@@ -73,3 +73,35 @@ func Check(rdb *redis.Client, account, sid string) error {
 func LogActivity(rdb *redis.Client, account, sid string, exp int64) error {
 	return rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
 }
+
+func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
+
+	keys, err := rdb.Keys(context.Background(), fmt.Sprintf("sessions:%s:*", account)).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := rdb.MGet(context.Background(), keys...).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*sessions.Session, len(data))
+	for i, d := range data {
+		session := &sessions.Session{}
+
+		bytes, ok := d.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid data type: %s", keys[i])
+		}
+
+		err = proto.Unmarshal([]byte(bytes), session)
+		if err != nil {
+			return nil, err
+		}
+
+		result[i] = session
+	}
+
+	return result, nil
+}
