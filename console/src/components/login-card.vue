@@ -47,6 +47,8 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
 
+import { UAParser } from "ua-parser-js"
+
 const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-picker.vue"))
 
 const platform = PLATFORM_NAME
@@ -81,6 +83,15 @@ async function login() {
   if (store.dev) {
     data.inf = true
   }
+
+  let res = {};
+  try {
+    res = new UAParser(navigator.userAgent).getResult()
+  } catch (e) {
+    console.warn("Failed to get user agent", e)
+  }
+
+  data.client = `Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`
 
   axios
     .post(store.base_url + "/token", data)
