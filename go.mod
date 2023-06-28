@@ -16,7 +16,7 @@ require (
 	github.com/infinimesh/proto v0.0.0-20230327134700-39a110305f77
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.16.0
-	github.com/streadway/amqp v1.0.0
+	github.com/streadway/amqp v1.1.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.10.0
