@@ -24,6 +24,10 @@
           </n-space>
 
           <n-alert title="Success! Redirecting..." type="success" v-if="success" />
+
+          <n-alert v-if="alert" :title="alert.title" :type="alert.type" closable>
+          {{  alert.description }}  
+          </n-alert>
         </n-space>
       </n-card>
     </template>
@@ -35,15 +39,15 @@
 <script setup>
 import { ref, inject, onMounted, defineAsyncComponent } from "vue";
 import {
-  NCard,
-  NSpace,
-  NInput,
+  NCard, NSpace, NInput,
   NButton, NRadioButton,
   NAlert, NRadioGroup,
   useLoadingBar, NTooltip
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
+
+import { UAParser } from "ua-parser-js"
 
 const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-picker.vue"))
 
@@ -58,6 +62,7 @@ const type = ref("standard")
 
 const error = ref(false);
 const success = ref(false);
+const alert = ref(false);
 
 const bar = useLoadingBar();
 
@@ -65,6 +70,7 @@ const axios = inject("axios");
 async function login() {
   success.value = false;
   error.value = false;
+  alert.value = false;
   bar.start();
 
   const data = {
@@ -77,6 +83,15 @@ async function login() {
   if (store.dev) {
     data.inf = true
   }
+
+  let res = {};
+  try {
+    res = new UAParser(navigator.userAgent).getResult()
+  } catch (e) {
+    console.warn("Failed to get user agent", e)
+  }
+
+  data.client = `Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`
 
   axios
     .post(store.base_url + "/token", data)
@@ -154,6 +169,10 @@ onMounted(() => {
       store.dev = true
     }
   });
+
+  if (route.query.msg) {
+    alert.value = JSON.parse(atob(route.query.msg))
+  }
 })
 </script>
 

@@ -55,7 +55,7 @@ const menuOptions = ref([
         icon: renderIcon(LockClosedOutline),
     },
     {
-        label: renderLabelLink("Tokens"),
+        label: renderLabelLink("Tokens", "Tokens and Sessions"),
         key: "Tokens",
         icon: renderIcon(KeyOutline),
     }

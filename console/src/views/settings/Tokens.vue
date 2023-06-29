@@ -1,51 +1,73 @@
 <template>
-    <n-space>
+    <n-space vertical justify="start" align="start">
         <n-h2 prefix="bar">
             <n-text>
                 Tokens
             </n-text>
         </n-h2>
-    </n-space>
 
-    <n-space style="padding: 10px; border: 1px solid #333; border-radius: 10px;" vertical>
-        <n-h3>
-            <n-text>
-                Create Personal Access Token
-            </n-text>
-        </n-h3>
+        <n-space style="padding: 10px; border: 1px solid #333; border-radius: 10px;" vertical>
+            <n-h3>
+                <n-text>
+                    Create Personal Access Token
+                </n-text>
+            </n-h3>
 
-        <n-space align="center">
+            <n-space align="center">
+                <n-text>
+                    Expire At:
+                </n-text>
+                <n-date-picker v-model:value="expire_at" type="datetime"
+                    :is-date-disabled="ts => ts <= new Date().getTime()" :is-time-disabled="timeDisabled" />
+                <n-dropdown trigger="hover" :options="options" @select="handleSelectPreset">
+                    <n-button>Presets</n-button>
+                </n-dropdown>
+            </n-space>
+
+            <n-form label-placement="left">
+                <n-form-item>
+                    <template #label>
+                        Client
+                        <n-tooltip trigger="hover">
+                            <template #trigger>
+                                <n-icon :component="HelpCircleOutline" />
+                            </template>
+
+                            Who or What will be using this token? Recommended template is {app} | {device} | {os}
+                        </n-tooltip>
+                    </template>
+                    <n-input v-model:value="client" />
+                </n-form-item>
+            </n-form>
+
+            <n-divider dashed />
             <n-text>
-                Expire At:
+                Confirm your password to continue.
             </n-text>
-            <n-date-picker v-model:value="expire_at" type="datetime" :is-date-disabled="ts => ts <= new Date().getTime()"
-                :is-time-disabled="timeDisabled" />
-            <n-dropdown trigger="hover" :options="options" @select="handleSelectPreset">
-                <n-button>Presets</n-button>
-            </n-dropdown>
+            <n-form inline v-if="!pat">
+                <n-form-item label="Username">
+                    <n-input v-model:value="credentials[0]" />
+                </n-form-item>
+                <n-form-item label="Password">
+                    <n-input v-model:value="credentials[1]" type="password" />
+                </n-form-item>
+            </n-form>
+
+            <n-button type="info" ghost :loading="pat_loading" @click="handleGeneratePAT" :disabled="!credentials[1]">
+                Generate
+            </n-button>
+
+            <n-input-group style="margin-top: 10px; max-width: 512px;" v-if="pat">
+                <n-input :value="pat" @update:value="" />
+                <n-button type="info" @click="handleCopy">
+                    <template #icon>
+                        <n-icon :component="CopyOutline" />
+                    </template>
+                </n-button>
+            </n-input-group>
         </n-space>
 
-        <n-form inline v-if="!pat">
-            <n-form-item label="Username">
-                <n-input v-model:value="credentials[0]" />
-            </n-form-item>
-            <n-form-item label="Password">
-                <n-input v-model:value="credentials[1]" type="password" />
-            </n-form-item>
-        </n-form>
-
-        <n-button type="info" ghost :loading="pat_loading" @click="handleGeneratePAT" :disabled="!credentials[1]">
-            Generate
-        </n-button>
-
-        <n-input-group style="margin-top: 10px; max-width: 512px;" v-if="pat">
-            <n-input :value="pat" @update:value="" />
-            <n-button type="info" @click="handleCopy">
-                <template #icon>
-                    <n-icon :component="CopyOutline" />
-                </template>
-            </n-button>
-        </n-input-group>
+        <sessions />
     </n-space>
 </template>
 
@@ -57,13 +79,18 @@ import {
     NDatePicker, NDropdown,
     NButton, NInput, NInputGroup,
     NIcon, useMessage, NForm,
-    NFormItem
+    NFormItem, NDivider, NTooltip
 } from 'naive-ui';
 
 import { useAppStore } from "../../store/app"
 import { useAccountsStore } from "../../store/accounts";
 
+import { UAParser } from "ua-parser-js"
+
+import sessions from "@/components/settings/sessions.vue";
+
 const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
+const HelpCircleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/HelpCircleOutline"))
 
 const expire_at = ref(new Date().getTime() + 86400000)
 const pat = ref("")
@@ -73,6 +100,15 @@ const as = useAppStore()
 const store = useAccountsStore()
 
 const credentials = ref([as.me.username, ""])
+
+let res = {};
+  try {
+    res = new UAParser(navigator.userAgent).getResult()
+  } catch (e) {
+    console.warn("Failed to get user agent", e)
+  }
+
+const client = ref(`Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`)
 
 function timeDisabled(ts) {
     return {
@@ -118,7 +154,8 @@ async function handleGeneratePAT() {
             type: 'standard',
             data: credentials.value
         },
-        exp: Math.round(expire_at.value / 1000)
+        exp: Math.round(expire_at.value / 1000),
+        client: client.value
     })
         .then((res) => {
             pat.value = res.data.token;

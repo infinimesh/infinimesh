@@ -89,6 +89,12 @@ func main() {
 		log.Fatal("Failed to register AccountsService gateway", zap.Error(err))
 	}
 
+	log.Info("Registering Sessions Service")
+	err = pb.RegisterSessionsServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register SessionsService gateway", zap.Error(err))
+	}
+
 	log.Info("Registering Namespaces Service")
 	err = pb.RegisterNamespacesServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
 	if err != nil {

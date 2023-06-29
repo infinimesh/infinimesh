@@ -20,6 +20,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/go-redis/redis/v8"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
@@ -47,7 +48,10 @@ var (
 
 	arangodbHost string
 	arangodbCred string
-	rootPass     string
+
+	rootPass string
+
+	redisHost string
 
 	SIGNING_KEY []byte
 	services    map[string]bool
@@ -63,15 +67,19 @@ func init() {
 	viper.SetDefault("DB_CRED", "root:openSesame")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
+	viper.SetDefault("REDIS_HOST", "redis:6379")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,devices,shadow,plugins,internal")
+	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal")
 
 	port = viper.GetString("PORT")
 
 	arangodbHost = viper.GetString("DB_HOST")
 	arangodbCred = viper.GetString("DB_CRED")
+
 	SIGNING_KEY = []byte(viper.GetString("SIGNING_KEY"))
 	rootPass = viper.GetString("INF_DEFAULT_ROOT_PASS")
+
+	redisHost = viper.GetString("REDIS_HOST")
 
 	services = make(map[string]bool)
 	for _, s := range strings.Split(viper.GetString("SERVICES"), ",") {
@@ -88,12 +96,19 @@ func main() {
 	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
 	log.Info("DB connection established")
 
+	log.Info("Connecting to Redis", zap.String("URL", redisHost))
+	rdb := redis.NewClient(&redis.Options{
+		Addr: redisHost,
+		DB:   0, // use default DB
+	})
+	log.Info("Redis connection established")
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
 		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
 	}
 
-	auth.SetContext(log, SIGNING_KEY)
+	auth.SetContext(log, rdb, SIGNING_KEY)
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_zap.UnaryServerInterceptor(log),
@@ -110,7 +125,7 @@ func main() {
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
 		log.Info("Registering accounts service")
-		acc_ctrl := graph.NewAccountsController(log, db)
+		acc_ctrl := graph.NewAccountsController(log, db, rdb)
 		acc_ctrl.SIGNING_KEY = SIGNING_KEY
 		pb.RegisterAccountsServiceServer(s, acc_ctrl)
 
@@ -125,10 +140,16 @@ func main() {
 	}
 
 	if ensure_root {
-		err := graph.EnsureRootExists(log, db, rootPass)
+		err := graph.EnsureRootExists(log, db, rdb, rootPass)
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}
+	}
+
+	if _, ok := services["sessions"]; ok {
+		log.Info("Registering sessions service")
+		sess_ctrl := graph.NewSessionsController(log, rdb)
+		pb.RegisterSessionsServiceServer(s, sess_ctrl)
 	}
 
 	if _, ok := services["devices"]; ok {

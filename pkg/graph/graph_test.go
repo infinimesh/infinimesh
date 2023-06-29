@@ -22,6 +22,7 @@ import (
 
 	randomdata "github.com/Pallinder/go-randomdata"
 	"github.com/arangodb/go-driver"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
@@ -59,6 +60,7 @@ func init() {
 
 	viper.SetDefault("DB_HOST", "db.infinimesh.local")
 	viper.SetDefault("DB_CRED", "root:openSesame")
+	viper.SetDefault("REDIS_HOST", "localhost:6759")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
 	arangodbHost = viper.GetString("DB_HOST")
@@ -66,11 +68,17 @@ func init() {
 	rootPass := viper.GetString("INF_DEFAULT_ROOT_PASS")
 	db = schema.InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
 
-	ctrl = NewAccountsController(log, db)
-	err := EnsureRootExists(log, db, rootPass)
+	redisHost := viper.GetString("REDIS_HOST")
+	rdb := redis.NewClient(&redis.Options{
+		Addr: redisHost,
+	})
+
+	err := EnsureRootExists(log, db, rdb, rootPass)
 	if err != nil {
 		panic(err)
 	}
+
+	ctrl = NewAccountsController(log, db, rdb)
 
 	ns_ctrl = NewNamespacesController(log, db)
 	dev_ctrl = NewDevicesController(log, db, nil)

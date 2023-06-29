@@ -1,15 +1,17 @@
 <template>
   <n-config-provider :theme="theme.it" :theme-overrides="theme.overrides" :hljs="hljs">
     <n-loading-bar-provider>
-      <n-message-provider>
-        <n-global-style />
-        <router-view />
-        <n-watermark v-if="dev" content="dev mode" cross fullscreen :font-size="16" :line-height="16" :width="250"
-          :height="150" :x-offset="12" :y-offset="80" :rotate="-15" />
+      <n-notification-provider>
+        <n-message-provider>
+          <n-global-style />
+          <router-view />
+          <n-watermark v-if="dev" content="dev mode" cross fullscreen :font-size="16" :line-height="16" :width="250"
+            :height="150" :x-offset="12" :y-offset="80" :rotate="-15" />
 
-        <current_thing />
+          <current_thing />
 
-      </n-message-provider>
+        </n-message-provider>
+      </n-notification-provider>
     </n-loading-bar-provider>
   </n-config-provider>
 </template>
@@ -22,6 +24,7 @@ import {
   NWatermark,
   NLoadingBarProvider,
   NMessageProvider,
+  NNotificationProvider,
   darkTheme,
   lightTheme,
 } from "naive-ui";
