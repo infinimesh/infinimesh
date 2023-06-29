@@ -10,7 +10,6 @@ const IdCardOutline = defineAsyncComponent(() => import('@vicons/ionicons5/IdCar
 const TelescopeOutline = defineAsyncComponent(() => import('@vicons/ionicons5/TelescopeOutline'))
 
 const theme = useThemeVars()
-console.dir(theme.value)
 
 const props = defineProps({
     connection: {

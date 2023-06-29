@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/arangodb/go-driver"
+	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/proto/node/access"
@@ -29,7 +30,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err error) {
+func EnsureRootExists(_log *zap.Logger, db driver.Database, rdb *redis.Client, passwd string) (err error) {
 
 	ctx := context.TODO()
 	log := _log.Named("EnsureRootExists")
@@ -117,7 +118,7 @@ func EnsureRootExists(_log *zap.Logger, db driver.Database, passwd string) (err 
 		return err
 	}
 
-	ctrl := NewAccountsController(log, db)
+	ctrl := NewAccountsController(log, db, rdb)
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
 		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)
