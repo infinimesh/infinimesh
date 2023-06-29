@@ -1,51 +1,53 @@
 <template>
-    <n-space>
+    <n-space vertical justify="start" align="start">
         <n-h2 prefix="bar">
             <n-text>
                 Tokens
             </n-text>
         </n-h2>
-    </n-space>
 
-    <n-space style="padding: 10px; border: 1px solid #333; border-radius: 10px;" vertical>
-        <n-h3>
-            <n-text>
-                Create Personal Access Token
-            </n-text>
-        </n-h3>
+        <n-space style="padding: 10px; border: 1px solid #333; border-radius: 10px;" vertical>
+            <n-h3>
+                <n-text>
+                    Create Personal Access Token
+                </n-text>
+            </n-h3>
 
-        <n-space align="center">
-            <n-text>
-                Expire At:
-            </n-text>
-            <n-date-picker v-model:value="expire_at" type="datetime" :is-date-disabled="ts => ts <= new Date().getTime()"
-                :is-time-disabled="timeDisabled" />
-            <n-dropdown trigger="hover" :options="options" @select="handleSelectPreset">
-                <n-button>Presets</n-button>
-            </n-dropdown>
+            <n-space align="center">
+                <n-text>
+                    Expire At:
+                </n-text>
+                <n-date-picker v-model:value="expire_at" type="datetime"
+                    :is-date-disabled="ts => ts <= new Date().getTime()" :is-time-disabled="timeDisabled" />
+                <n-dropdown trigger="hover" :options="options" @select="handleSelectPreset">
+                    <n-button>Presets</n-button>
+                </n-dropdown>
+            </n-space>
+
+            <n-form inline v-if="!pat">
+                <n-form-item label="Username">
+                    <n-input v-model:value="credentials[0]" />
+                </n-form-item>
+                <n-form-item label="Password">
+                    <n-input v-model:value="credentials[1]" type="password" />
+                </n-form-item>
+            </n-form>
+
+            <n-button type="info" ghost :loading="pat_loading" @click="handleGeneratePAT" :disabled="!credentials[1]">
+                Generate
+            </n-button>
+
+            <n-input-group style="margin-top: 10px; max-width: 512px;" v-if="pat">
+                <n-input :value="pat" @update:value="" />
+                <n-button type="info" @click="handleCopy">
+                    <template #icon>
+                        <n-icon :component="CopyOutline" />
+                    </template>
+                </n-button>
+            </n-input-group>
         </n-space>
 
-        <n-form inline v-if="!pat">
-            <n-form-item label="Username">
-                <n-input v-model:value="credentials[0]" />
-            </n-form-item>
-            <n-form-item label="Password">
-                <n-input v-model:value="credentials[1]" type="password" />
-            </n-form-item>
-        </n-form>
-
-        <n-button type="info" ghost :loading="pat_loading" @click="handleGeneratePAT" :disabled="!credentials[1]">
-            Generate
-        </n-button>
-
-        <n-input-group style="margin-top: 10px; max-width: 512px;" v-if="pat">
-            <n-input :value="pat" @update:value="" />
-            <n-button type="info" @click="handleCopy">
-                <template #icon>
-                    <n-icon :component="CopyOutline" />
-                </template>
-            </n-button>
-        </n-input-group>
+        <sessions />
     </n-space>
 </template>
 
@@ -62,6 +64,8 @@ import {
 
 import { useAppStore } from "../../store/app"
 import { useAccountsStore } from "../../store/accounts";
+
+import sessions from "@/components/settings/sessions.vue";
 
 const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
 
