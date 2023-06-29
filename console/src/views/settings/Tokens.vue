@@ -24,6 +24,26 @@
                 </n-dropdown>
             </n-space>
 
+            <n-form label-placement="left">
+                <n-form-item>
+                    <template #label>
+                        Client
+                        <n-tooltip trigger="hover">
+                            <template #trigger>
+                                <n-icon :component="HelpCircleOutline" />
+                            </template>
+
+                            Who or What will be using this token? Recommended template is {app} | {device} | {os}
+                        </n-tooltip>
+                    </template>
+                    <n-input v-model:value="client" />
+                </n-form-item>
+            </n-form>
+
+            <n-divider dashed />
+            <n-text>
+                Confirm your password to continue.
+            </n-text>
             <n-form inline v-if="!pat">
                 <n-form-item label="Username">
                     <n-input v-model:value="credentials[0]" />
@@ -59,15 +79,18 @@ import {
     NDatePicker, NDropdown,
     NButton, NInput, NInputGroup,
     NIcon, useMessage, NForm,
-    NFormItem
+    NFormItem, NDivider, NTooltip
 } from 'naive-ui';
 
 import { useAppStore } from "../../store/app"
 import { useAccountsStore } from "../../store/accounts";
 
+import { UAParser } from "ua-parser-js"
+
 import sessions from "@/components/settings/sessions.vue";
 
 const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
+const HelpCircleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/HelpCircleOutline"))
 
 const expire_at = ref(new Date().getTime() + 86400000)
 const pat = ref("")
@@ -77,6 +100,15 @@ const as = useAppStore()
 const store = useAccountsStore()
 
 const credentials = ref([as.me.username, ""])
+
+let res = {};
+  try {
+    res = new UAParser(navigator.userAgent).getResult()
+  } catch (e) {
+    console.warn("Failed to get user agent", e)
+  }
+
+const client = ref(`Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`)
 
 function timeDisabled(ts) {
     return {
@@ -122,7 +154,8 @@ async function handleGeneratePAT() {
             type: 'standard',
             data: credentials.value
         },
-        exp: Math.round(expire_at.value / 1000)
+        exp: Math.round(expire_at.value / 1000),
+        client: client.value
     })
         .then((res) => {
             pat.value = res.data.token;
