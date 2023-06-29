@@ -110,19 +110,23 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
 	}
 
-	session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
-	if session == nil {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
-	}
-	sid, ok := session.(string)
-	if !ok {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
-	}
+	if token[infinimesh.INFINIMESH_NOSESSION_CLAIM] == nil {
+		session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
+		if session == nil {
+			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+		}
+		sid, ok := session.(string)
+		if !ok {
+			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+		}
 
-	// Check if session is valid
-	if err := sessions.Check(rdb, uuid, sid); err != nil {
-		log.Debug("Session check failed", zap.Any("error", err))
-		return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+		// Check if session is valid
+		if err := sessions.Check(rdb, uuid, sid); err != nil {
+			log.Debug("Session check failed", zap.Any("error", err))
+			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+		}
+
+		ctx = context.WithValue(ctx, infinimesh.InfinimeshSessionCtxKey, sid)
 	}
 
 	var exp int64
@@ -131,7 +135,6 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 	}
 
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshAccountCtxKey, uuid)
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshSessionCtxKey, sid)
 	ctx = context.WithValue(ctx, infinimesh.ContextKey("exp"), exp)
 
 	ctx = metadata.AppendToOutgoingContext(ctx, infinimesh.INFINIMESH_ACCOUNT_CLAIM, uuid)
