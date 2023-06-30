@@ -156,7 +156,7 @@ function relative_time({ timestamp }) {
     let label = timestamp < now.value.getTime() ? relative_time_past(timestamp) : relative_time_future(timestamp)
 
     return h(NTooltip, { trigger: 'hover' }, {
-        default: () => timestamp.toLocaleDateString(),
+        default: () => timestamp.toString(),
         trigger: () => label
     })
 }
@@ -166,7 +166,7 @@ function relative_time_past(timestamp) {
     const minutesDifference = Math.floor(timeDifference / 60);
 
     if (minutesDifference >= 4320) {
-        return timestamp.toLocaleDateString();
+        return timestamp.toString();
     } else if (minutesDifference >= 1440) {
         const daysDifference = Math.floor(minutesDifference / 1440);
         return `${daysDifference} days ago`;
@@ -185,7 +185,7 @@ function relative_time_future(timestamp) {
     const minutesDifference = Math.floor(timeDifference / 60);
 
     if (minutesDifference >= 4320) {
-        return timestamp.toLocaleDateString();
+        return timestamp.toString();
     } else if (minutesDifference >= 1440) {
         const daysDifference = Math.floor(minutesDifference / 1440);
         return `in ${daysDifference} days`;
