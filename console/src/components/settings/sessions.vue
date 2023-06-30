@@ -203,12 +203,17 @@ const icons = {
     'chrome': defineAsyncComponent(() => import('@vicons/ionicons5/LogoChrome')),
     'firefox': defineAsyncComponent(() => import('@vicons/ionicons5/LogoFirefox')),
     'linux': defineAsyncComponent(() => import('@vicons/ionicons5/LogoTux')),
-    'mac': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
     'windows': defineAsyncComponent(() => import('@vicons/ionicons5/LogoWindows')),
     'android': defineAsyncComponent(() => import('@vicons/ionicons5/LogoAndroid')),
     'cli': defineAsyncComponent(() => import('@vicons/ionicons5/TerminalOutline')),
     'unknown': defineAsyncComponent(() => import('@vicons/ionicons5/HelpOutline')),
-    'console': defineAsyncComponent(() => import('@vicons/ionicons5/DesktopOutline'))
+    'console': defineAsyncComponent(() => import('@vicons/ionicons5/DesktopOutline')),
+    
+    'mac': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
+    'macos': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
+    'mac os': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
+    'ios': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
+    'ipados': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
 }
 const interleave = (arr, thing) => [].concat(...arr.map(n => [n, thing])).slice(0, -1)
 
