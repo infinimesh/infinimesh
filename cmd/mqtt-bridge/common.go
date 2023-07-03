@@ -98,7 +98,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		return
 	}
 
-	ps.Pub(&pb.Shadow{
+	ps.TryPub(&pb.Shadow{
 		Device: device.Uuid,
 		Connection: &pb.ConnectionState{
 			Connected: true,
@@ -108,7 +108,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}, "mqtt.incoming")
 
 	defer func() {
-		ps.Pub(&pb.Shadow{
+		ps.TryPub(&pb.Shadow{
 			Device: device.Uuid,
 			Connection: &pb.ConnectionState{
 				Connected: false,
@@ -170,7 +170,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 					Timestamp: timestamppb.Now(),
 				},
 			}
-			ps.Pub(payload, "mqtt.incoming")
+			ps.TryPub(payload, "mqtt.incoming")
 
 			// _, err := packet.NewPubAckControlPacket(uint16(p.VariableHeader.PacketID)).WriteTo(c)
 			// if err != nil {
@@ -187,7 +187,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			for _, sub := range p.Payload.Subscriptions {
 				ps.AddSub(backChannel, "mqtt.outgoing/"+device.Uuid)
 				go handleBackChannel(log, backChannel, c, sub.Topic, connectPacket.VariableHeader.ProtocolLevel, func() {
-					ps.Pub(&pb.Shadow{
+					ps.TryPub(&pb.Shadow{
 						Device: device.Uuid,
 						Connection: &pb.ConnectionState{
 							Connected: true,
@@ -206,7 +206,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 					}
 					state := r.GetShadows()[0]
 					if state.Desired != nil {
-						ps.Pub(state, "mqtt.outgoing/"+device.Uuid)
+						ps.TryPub(state, "mqtt.outgoing/"+device.Uuid)
 					}
 				}
 			}()

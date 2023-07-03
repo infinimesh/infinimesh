@@ -113,7 +113,7 @@ func (s *ShadowServiceServer) Patch(ctx context.Context, req *pb.Shadow) (*pb.Sh
 		topics = append(topics, "mqtt.outgoing")
 	}
 
-	s.ps.Pub(req, topics...)
+	s.ps.TryPub(req, topics...)
 
 	return req, nil
 }

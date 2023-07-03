@@ -115,7 +115,7 @@ consume:
 			continue
 		}
 		log.Debug("Received message from RabbitMQ", zap.Any("shadow", &shadow))
-		ps.Pub(shadow, topic, topic+"/"+shadow.Device)
+		ps.TryPub(shadow, topic, topic+"/"+shadow.Device)
 		msg.Ack(false)
 	}
 }
