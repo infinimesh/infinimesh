@@ -29,11 +29,14 @@ import (
 var (
 	ps     *pubsub.PubSub
 	logger *zap.Logger
+
+	cap int
 )
 
 func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capacity int) (*pubsub.PubSub, error) {
 	logger = Log
-	ps = pubsub.New(buffer_capacity)
+	cap = buffer_capacity
+	ps = pubsub.New(cap)
 
 	ch, err := conn.Channel()
 	if err != nil {
@@ -61,7 +64,7 @@ init:
 	}
 	log.Info("Queue declared", zap.String("name", q.Name))
 
-	incoming := make(chan interface{}, 10)
+	incoming := make(chan interface{}, cap)
 	ps.AddSub(incoming, topic)
 
 	for msg := range incoming {
