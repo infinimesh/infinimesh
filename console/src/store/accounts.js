@@ -141,8 +141,16 @@ export const useAccountsStore = defineStore("accounts", {
       }
     },
     tokenFor(account, exp = 0) {
+      let res = {};
+      try {
+        res = new UAParser(navigator.userAgent).getResult()
+      } catch (e) {
+        console.warn("Failed to get user agent", e)
+      }
+
       return as.http.post(`/token`, {
         uuid: account,
+        client: `Console Admin | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`,
         exp,
       });
     }
