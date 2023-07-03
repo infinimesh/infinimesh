@@ -52,6 +52,7 @@ func init() {
 
 	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
+	viper.SetDefault("REDIS_HOST", "redis:6379")
 
 	port = viper.GetString("PORT")
 	SIGNING_KEY = []byte(viper.GetString("SIGNING_KEY"))
