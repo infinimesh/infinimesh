@@ -16,11 +16,12 @@ limitations under the License.
 package pubsub
 
 import (
+	"context"
 	"time"
 
 	"github.com/cskr/pubsub"
 	pb "github.com/infinimesh/proto/shadow"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -71,9 +72,14 @@ init:
 			log.Warn("Error while publishing message:", zap.Error(err))
 			continue
 		}
-		ch.Publish("", q.Name, false, false, amqp.Publishing{
+
+		err = ch.PublishWithContext(context.Background(), "", q.Name, false, false, amqp.Publishing{
 			ContentType: "text/plain", Body: payload,
 		})
+		if err != nil {
+			log.Warn("Error while publishing message:", zap.Error(err))
+			continue
+		}
 	}
 }
 

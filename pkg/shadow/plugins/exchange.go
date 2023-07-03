@@ -16,12 +16,13 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"strings"
 
 	"github.com/cskr/pubsub"
 	devpb "github.com/infinimesh/proto/node/devices"
 	pb "github.com/infinimesh/proto/shadow"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
@@ -115,7 +116,8 @@ func PublishSingle(plugin string, state *pb.Shadow) {
 		log.Warn("Error Marshaling state", zap.Error(err))
 		return
 	}
-	err = channel.Publish("plugins", plugin, false, false, amqp.Publishing{
+
+	err = channel.PublishWithContext(context.Background(), "plugins", plugin, false, false, amqp.Publishing{
 		ContentType: "text/plain", Body: body,
 	})
 	if err != nil {

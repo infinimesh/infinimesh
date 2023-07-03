@@ -16,7 +16,6 @@ require (
 	github.com/infinimesh/proto v0.0.0-20230628170155-20434da4c5bd
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.16.0
-	github.com/streadway/amqp v1.1.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.10.0
@@ -60,6 +59,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0
+	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/cors v1.9.0
 )
 

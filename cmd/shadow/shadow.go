@@ -21,8 +21,8 @@ import (
 	"net"
 
 	"github.com/go-redis/redis/v8"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
