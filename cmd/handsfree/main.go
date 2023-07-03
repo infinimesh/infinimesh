@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/go-redis/redis/v8"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/infinimesh/infinimesh/pkg/handsfree"
@@ -39,6 +40,8 @@ var (
 
 	port string
 
+	redisHost string
+
 	SIGNING_KEY []byte
 )
 
@@ -52,6 +55,8 @@ func init() {
 
 	port = viper.GetString("PORT")
 	SIGNING_KEY = []byte(viper.GetString("SIGNING_KEY"))
+
+	redisHost = viper.GetString("REDIS_HOST")
 }
 
 func main() {
@@ -59,12 +64,19 @@ func main() {
 		_ = log.Sync()
 	}()
 
+	log.Info("Connecting to Redis", zap.String("URL", redisHost))
+	rdb := redis.NewClient(&redis.Options{
+		Addr: redisHost,
+		DB:   0, // use default DB
+	})
+	log.Info("Redis connection established")
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
 		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
 	}
 
-	auth.SetContext(log, nil, SIGNING_KEY)
+	auth.SetContext(log, rdb, SIGNING_KEY)
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_zap.UnaryServerInterceptor(log),
