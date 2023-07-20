@@ -13,7 +13,7 @@
         <n-spin :show="loading">
             <n-card style="width: 600px" title="To be deleted" :bordered="false" size="huge" role="dialog"
                 aria-modal="true">
-                <objects-tree :fetch="deletables" @loading="change_loading"/>
+                <objects-tree :fetch="deletables" @loading="change_loading" @confirm="() => { emit('confirm'); show = false }"/>
                 <template #footer>
                     <n-space justify="end">
                         <n-button type="info" round secondary @click="close">

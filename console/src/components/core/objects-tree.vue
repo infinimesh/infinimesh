@@ -32,7 +32,7 @@ const { fetch } = defineProps({
     }
 })
 
-const emit = defineEmits(['loading'])
+const emit = defineEmits(['loading', 'confirm'])
 
 const message = useMessage()
 async function load() {
@@ -41,7 +41,6 @@ async function load() {
         const { data } = await fetch()
 
         if (data.nodes.length == 1) {
-            close()
             emit('confirm')
             return
         }
