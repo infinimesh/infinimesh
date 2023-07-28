@@ -12,7 +12,7 @@
     "axios": "^1.4.0",
     "highlight.js": "^11.8.0",
     "lodash": "^4.17.21",
-    "pinia": "^2.1.4",
+    "pinia": "^2.1.6",
     "pinia-plugin-persist": "^1.0.0",
     "ua-parser-js": "^1.0.35",
     "vite-svg-loader": "^4.0.0",
