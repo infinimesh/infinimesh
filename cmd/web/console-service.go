@@ -48,6 +48,15 @@ func init_cs(log *zap.Logger) {
 		SERVICES_ENABLED_MAP["handsfree"] = handsfree
 	}
 
+	viper.SetDefault("CHATTING", "")
+	chatting := viper.GetString("CHATTING")
+	log.Debug("CHATTING", zap.String("value", chatting))
+	if chatting != "" {
+		log.Info("Chatting service is enabled")
+		enabled["chatting"] = chatting
+		SERVICES_ENABLED_MAP["chatting"] = chatting
+	}
+
 	var err error
 	SERVICES_ENABLED, err = json.Marshal(enabled)
 	if err != nil {

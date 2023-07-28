@@ -70,6 +70,14 @@ const routes = [
         },
       },
       {
+        path: "cc",
+        name: "Chats",
+        component: () => import("@/views/dashboard/Chats.vue"),
+        meta: {
+          title: "Chats",
+        }
+      },
+      {
         path: "plugins",
         name: "Plugins",
         component: () => import("@/views/dashboard/Plugins.vue"),
