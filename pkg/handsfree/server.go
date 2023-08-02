@@ -17,12 +17,12 @@ package handsfree
 
 import (
 	"context"
-	"github.com/bufbuild/connect-go"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/bufbuild/connect-go"
 	pb "github.com/infinimesh/proto/handsfree"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

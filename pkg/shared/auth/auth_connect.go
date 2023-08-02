@@ -18,16 +18,18 @@ package auth
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/infinimesh/infinimesh/pkg/sessions"
-	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"strings"
+
+	"github.com/infinimesh/infinimesh/pkg/sessions"
+	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 )
 
 type interceptor struct {
