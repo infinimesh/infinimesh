@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -buildvcs=false ./cmd/handsfree
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn" -buildvcs=false ./cmd/handsfree
 RUN upx ./handsfree
 
 # Download Healthcheck
