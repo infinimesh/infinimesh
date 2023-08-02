@@ -13,7 +13,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/handlers v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
-	github.com/infinimesh/proto v0.0.0-20230628170155-20434da4c5bd
+	github.com/infinimesh/proto v0.0.0-20230731093608-a63b776675a2
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.16.0
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
@@ -58,12 +58,13 @@ require (
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/cors v1.9.0
 )
 
 require (
-	google.golang.org/genproto/googleapis/api v0.0.0-20230724170836-66ad5b6ff146 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230724170836-66ad5b6ff146 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e // indirect
 )
