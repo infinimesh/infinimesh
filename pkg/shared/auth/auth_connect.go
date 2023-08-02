@@ -63,11 +63,11 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 
 		switch {
 		case path == "/infinimesh.node.DevicesService/GetByToken":
-			middleware = ConnectDeviceAuthMiddleware
+			middleware = i.ConnectDeviceAuthMiddleware
 		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
-			middleware = ConnectDeviceAuthMiddleware
+			middleware = i.ConnectDeviceAuthMiddleware
 		default:
-			middleware = ConnectStandardAuthMiddleware
+			middleware = i.ConnectStandardAuthMiddleware
 		}
 		i.log.Debug("Authorization Header", zap.String("header", header))
 
@@ -76,7 +76,7 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 			return nil, err
 		}
 
-		go handleLogActivity(ctx)
+		go i.connectHandleLogActivity(ctx)
 
 		return next(ctx, req)
 	})
@@ -101,11 +101,11 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 
 		switch {
 		case path == "/infinimesh.node.DevicesService/GetByToken":
-			middleware = ConnectDeviceAuthMiddleware
+			middleware = i.ConnectDeviceAuthMiddleware
 		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
-			middleware = ConnectDeviceAuthMiddleware
+			middleware = i.ConnectDeviceAuthMiddleware
 		default:
-			middleware = ConnectStandardAuthMiddleware
+			middleware = i.ConnectStandardAuthMiddleware
 		}
 		i.log.Debug("Authorization Header", zap.String("header", header))
 
@@ -114,18 +114,18 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 			return err
 		}
 
-		go handleLogActivity(ctx)
+		go i.connectHandleLogActivity(ctx)
 
 		return next(ctx, shc)
 	}
 }
 
-func ConnectStandardAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
+func (i *interceptor) ConnectStandardAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
 	token, err := connectValidateToken(signingKey, tokenString)
 	if err != nil {
 		return ctx, err
 	}
-	log.Debug("Validated token", zap.Any("claims", token))
+	i.log.Debug("Validated token", zap.Any("claims", token))
 
 	account := token[infinimesh.INFINIMESH_ACCOUNT_CLAIM]
 	if account == nil {
@@ -148,7 +148,7 @@ func ConnectStandardAuthMiddleware(ctx context.Context, signingKey []byte, token
 
 		// Check if session is valid
 		if err := sessions.Check(rdb, uuid, sid); err != nil {
-			log.Debug("Session check failed", zap.Any("error", err))
+			i.log.Debug("Session check failed", zap.Any("error", err))
 			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 		}
 
@@ -176,12 +176,12 @@ func ConnectStandardAuthMiddleware(ctx context.Context, signingKey []byte, token
 	return ctx, nil
 }
 
-func ConnectDeviceAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
+func (i *interceptor) ConnectDeviceAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
 	token, err := connectValidateToken(signingKey, tokenString)
 	if err != nil {
 		return nil, err
 	}
-	log.Debug("Validated token", zap.Any("claims", token))
+	i.log.Debug("Validated token", zap.Any("claims", token))
 
 	devices := token[infinimesh.INFINIMESH_DEVICES_CLAIM]
 	if devices == nil {
@@ -236,4 +236,19 @@ func connectValidateToken(signing_key []byte, tokenString string) (jwt.MapClaims
 	}
 
 	return nil, status.Error(codes.Unauthenticated, "Cannot Validate Token")
+}
+
+func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
+	sid_ctx := ctx.Value(infinimesh.InfinimeshSessionCtxKey)
+	if sid_ctx == nil {
+		return
+	}
+
+	sid := sid_ctx.(string)
+	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
+	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
+
+	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+		i.log.Warn("Error logging activity", zap.Any("error", err))
+	}
 }
