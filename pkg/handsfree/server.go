@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bufbuild/connect-go"
 	pb "github.com/infinimesh/proto/handsfree"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -39,8 +40,6 @@ type Connection struct {
 }
 
 type HandsfreeServer struct {
-	pb.UnimplementedHandsfreeServiceServer
-
 	log *zap.Logger
 	db  map[string](*Connection)
 }
@@ -64,40 +63,48 @@ begin:
 	return r
 }
 
-func (s *HandsfreeServer) Send(ctx context.Context, req *pb.ControlPacket) (*pb.ControlPacket, error) {
+func (s *HandsfreeServer) Send(ctx context.Context, req *connect.Request[pb.ControlPacket]) (*connect.Response[pb.ControlPacket], error) {
 	log := s.log.Named("Send")
-	if len(req.GetPayload()) < 2 {
+
+	packet := req.Msg
+
+	if len(packet.GetPayload()) < 2 {
 		return nil, status.Error(codes.InvalidArgument, "Payload must consist of code and actual payload")
 	}
-	log.Debug("Request received", zap.Strings("payload", req.GetPayload()))
+	log.Debug("Request received", zap.Strings("payload", packet.GetPayload()))
 
-	code := strings.ToLower(req.GetPayload()[0])
+	code := strings.ToLower(packet.GetPayload()[0])
 
 	conn, ok := s.db[code]
 	if !ok {
 		return nil, status.Error(codes.NotFound, "No App's awaiting with this code")
 	}
 
-	conn.Channel <- req.GetPayload()[1:]
+	conn.Channel <- packet.GetPayload()[1:]
 
-	return &pb.ControlPacket{
+	res := connect.NewResponse[pb.ControlPacket](&pb.ControlPacket{
 		Code: pb.Code_SUCCESS, Payload: conn.Payload, AppId: &conn.App,
-	}, nil
+	})
+
+	return res, nil
 }
 
-func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeService_ConnectServer) error {
+func (s *HandsfreeServer) Connect(ctx context.Context, req *connect.Request[pb.ConnectionRequest], srv *connect.ServerStream[pb.ControlPacket]) error {
 	log := s.log.Named("Connect")
-	log.Debug("Request received", zap.String("app", req.GetAppId()), zap.Strings("payload", req.GetPayload()))
 
-	if req.GetAppId() == "" {
+	connReq := req.Msg
+
+	log.Debug("Request received", zap.String("app", connReq.GetAppId()), zap.Strings("payload", connReq.GetPayload()))
+
+	if connReq.GetAppId() == "" {
 		return status.Error(codes.InvalidArgument, "Application ID must be present upon connection")
 	}
 
 	code := GenerateCode(s.db)
 	s.db[code] = &Connection{
 		Channel: make(chan []string),
-		Payload: req.GetPayload(),
-		App:     req.GetAppId(),
+		Payload: connReq.GetPayload(),
+		App:     connReq.GetAppId(),
 	}
 	defer delete(s.db, code)
 
@@ -118,7 +125,7 @@ func (s *HandsfreeServer) Connect(req *pb.ConnectionRequest, srv pb.HandsfreeSer
 			code = GenerateCode(s.db)
 			s.db[code] = &Connection{
 				Channel: make(chan []string),
-				Payload: req.GetPayload(),
+				Payload: connReq.GetPayload(),
 			}
 
 			err = srv.Send(&pb.ControlPacket{
