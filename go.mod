@@ -56,15 +56,16 @@ require (
 )
 
 require (
+	github.com/bufbuild/connect-go v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/cors v1.9.0
 )
 
 require (
-	github.com/gorilla/mux v1.8.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230726155614-23370e0ffb3e // indirect
 )
