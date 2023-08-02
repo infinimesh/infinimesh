@@ -17,21 +17,22 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"net/http"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	"connectrpc.com/grpchealth"
 	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
-
 	"github.com/infinimesh/infinimesh/pkg/handsfree"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	cc "github.com/infinimesh/proto/handsfree/handsfreeconnect"
+	"github.com/rs/cors"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 var (
@@ -87,6 +88,10 @@ func main() {
 	path, handler := cc.NewHandsfreeServiceHandler(handsfreeServer, interceptors)
 	router.PathPrefix(path).Handler(handler)
 
+	checker := grpchealth.NewStaticChecker()
+	path, handler = grpchealth.NewHandler(checker)
+	router.PathPrefix(path).Handler(handler)
+
 	host := fmt.Sprintf("0.0.0.0:%s", port)
 
 	handler = cors.New(cors.Options{
@@ -97,7 +102,7 @@ func main() {
 		AllowPrivateNetwork: true,
 	}).Handler(h2c.NewHandler(router, &http2.Server{}))
 
-	log.Debug("Start server", zap.String("host", host))
+	log.Info("Serving", zap.String("host", host))
 	err := http.ListenAndServe(host, handler)
 	if err != nil {
 		log.Fatal("Failed to start server", zap.Error(err))
