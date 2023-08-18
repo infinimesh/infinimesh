@@ -19,6 +19,7 @@ import (
 	"context"
 
 	"github.com/arangodb/go-driver"
+	"github.com/bufbuild/connect-go"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -151,12 +152,12 @@ func (c *PluginsController) Get(ctx context.Context, plug *pb.Plugin) (*pb.Plugi
 		return nil, status.Error(codes.InvalidArgument, "Namespace is not given")
 	}
 
-	ns, err := c.ns_ctrl.Get(ctx, &namespaces.Namespace{Uuid: *plug.Namespace})
+	ns, err := c.ns_ctrl.Get(ctx, connect.NewRequest(&namespaces.Namespace{Uuid: *plug.Namespace}))
 	if err != nil {
 		return nil, err
 	}
 
-	if ns.Access.Level < access.Level_READ {
+	if ns.Msg.Access.Level < access.Level_READ {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access")
 	}
 
