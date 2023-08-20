@@ -1143,7 +1143,7 @@ func TestPluginsRepo(t *testing.T) {
 		Kind:        plugins.PluginKind_UNKNOWN,
 	}
 
-	_, err := plug_ctrl.Create(rootCtx, this)
+	_, err := plug_ctrl.Create(rootCtx, connect.NewRequest(this))
 	if err == nil {
 		t.Fatal("Creation must have failed, because kind is unknown, but error is nil")
 	}
@@ -1153,18 +1153,19 @@ func TestPluginsRepo(t *testing.T) {
 		FrameUrl: randomdata.Letters(16),
 	}
 
-	this, err = plug_ctrl.Create(rootCtx, this)
+	res, err := plug_ctrl.Create(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error creating Plugin: %v", err)
 	}
+	this = res.Msg
 
-	plugs, err := plug_ctrl.List(rootCtx, &plugins.ListRequest{})
+	plugs, err := plug_ctrl.List(rootCtx, connect.NewRequest(&plugins.ListRequest{}))
 	if err != nil {
 		t.Fatalf("Error listing plugins: %v", err)
 	}
 
 	found := false
-	for _, plug := range plugs.Pool {
+	for _, plug := range plugs.Msg.Pool {
 		if plug.Uuid == this.Uuid {
 			found = true
 			break
@@ -1184,10 +1185,11 @@ func TestPluginsRepo(t *testing.T) {
 	}
 	that.Title = randomdata.SillyName()
 	that.Public = true
-	that, err = plug_ctrl.Update(rootCtx, that)
+	res, err = plug_ctrl.Update(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Error updating plugin: %v", err)
 	}
+	that = res.Msg
 
 	if this.Title == that.Title {
 		t.Fatal("Plugin Title didn't update")
@@ -1196,12 +1198,13 @@ func TestPluginsRepo(t *testing.T) {
 		t.Fatal("Plugin <public> property didn't update")
 	}
 
-	that, err = plug_ctrl.Get(rootCtx, that)
+	res, err = plug_ctrl.Get(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Couldn't get Plugin: %v", err)
 	}
+	that = res.Msg
 
-	_, err = plug_ctrl.Delete(rootCtx, that)
+	_, err = plug_ctrl.Delete(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Couldn't delete Plugin: %v", err)
 	}
