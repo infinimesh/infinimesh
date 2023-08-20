@@ -2,7 +2,7 @@ package graph
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/arangodb/go-driver"
 	"github.com/bufbuild/connect-go"
@@ -81,6 +81,6 @@ func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[
 	return connect.NewResponse(&node.EmptyMessage{}), _Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
 }
 
-func StatusFromString(code connect.Code, msg string) *connect.Error {
-	return connect.NewError(code, errors.New(msg))
+func StatusFromString(code connect.Code, format string, args ...any) *connect.Error {
+	return connect.NewError(code, fmt.Errorf(format, args...))
 }
