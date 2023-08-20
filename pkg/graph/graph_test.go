@@ -998,11 +998,11 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
 	}
-	this := thisR.Msg.Device
+	this := thisR.Msg.GetDevice()
 
 	t.Logf("Device created: %s", this.GetUuid())
 
-	pool, err := dev_ctrl.List(rootCtx, nil)
+	pool, err := dev_ctrl.List(rootCtx, connect.NewRequest(&pb.QueryRequest{}))
 	if err != nil {
 		t.Fatalf("Error listing devices: %v", err)
 	}
