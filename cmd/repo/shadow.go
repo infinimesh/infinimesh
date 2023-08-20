@@ -19,10 +19,11 @@ package main
 
 import (
 	"context"
+	"errors"
+
+	"github.com/bufbuild/connect-go"
 
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	pb "github.com/infinimesh/proto/node"
@@ -43,93 +44,111 @@ func NewShadowAPI(log *zap.Logger, client shadow.ShadowServiceClient) *ShadowAPI
 	}
 }
 
-func (s *ShadowAPI) Get(ctx context.Context, _ *shadow.GetRequest) (response *shadow.GetResponse, err error) {
+func (s *ShadowAPI) Get(ctx context.Context, _ *connect.Request[shadow.GetRequest]) (response *connect.Response[shadow.GetResponse], err error) {
 	log := s.log.Named("Get")
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-	return s.client.Get(ctx, &shadow.GetRequest{Pool: devices_scope})
+	res, err := s.client.Get(ctx, &shadow.GetRequest{Pool: devices_scope})
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(res), nil
 }
 
 // PatchDesiredState is a method to update the current state of the device
-func (s *ShadowAPI) Patch(ctx context.Context, request *shadow.Shadow) (response *shadow.Shadow, err error) {
+func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.Shadow]) (response *connect.Response[shadow.Shadow], err error) {
 	log := s.log.Named("PatchDesiredState")
+	shadow := request.Msg
 
 	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
 	if !ok || !post_allowed {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
 	found := false
 	for _, device := range devices_scope {
-		if device == request.Device {
+		if device == shadow.Device {
 			found = true
 			break
 		}
 	}
 	if !found {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope"))
 	}
 
-	return s.client.Patch(ctx, request)
+	res, err := s.client.Patch(ctx, shadow)
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(res), nil
 }
 
-func (s *ShadowAPI) Remove(ctx context.Context, request *shadow.RemoveRequest) (response *shadow.Shadow, err error) {
+func (s *ShadowAPI) Remove(ctx context.Context, request *connect.Request[shadow.RemoveRequest]) (response *connect.Response[shadow.Shadow], err error) {
 	log := s.log.Named("RemoveStateKey")
+	req := request.Msg
 
 	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
 	if !ok || !post_allowed {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
 	found := false
 	for _, device := range devices_scope {
-		if device == request.Device {
+		if device == req.Device {
 			found = true
 			break
 		}
 	}
 	if !found {
-		return nil, status.Error(codes.Unauthenticated, "Requested device is outside of token scope")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope"))
 	}
 
-	return s.client.Remove(ctx, request)
+	res, err := s.client.Remove(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(res), nil
 }
 
 // StreamShadow is a method to get the stream for a device
-func (s *ShadowAPI) StreamShadow(request *shadow.StreamShadowRequest, srv pb.ShadowService_StreamShadowServer) (err error) {
+func (s *ShadowAPI) StreamShadow(ctx context.Context, request *connect.Request[shadow.StreamShadowRequest], srv *connect.ServerStream[shadow.Shadow]) (err error) {
 	log := s.log.Named("StreamReportedStateChanges")
+	req := request.Msg
 
-	devices_scope, ok := srv.Context().Value(inf.InfinimeshDevicesCtxKey).([]string)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
-		return status.Error(codes.Unauthenticated, "Requested device is outside of token scope or not allowed to post")
+		return connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
 	log.Debug("Scope", zap.Strings("devices", devices_scope))
 
-	request.Devices = devices_scope
+	req.Devices = devices_scope
 
 	log.Debug("Stream API Method: Streaming started", zap.Strings("devices", devices_scope))
 
-	c, err := s.client.StreamShadow(srv.Context(), request)
+	c, err := s.client.StreamShadow(ctx, req)
 	if err != nil {
 		log.Warn("Stream API Method: Failed to start the Stream", zap.Error(err))
-		return status.Error(codes.Unauthenticated, "Failed to start the Stream")
+		return connect.NewError(connect.CodeAborted, errors.New("failed to start the Stream"))
 	}
 
 	for {
@@ -147,7 +166,7 @@ func (s *ShadowAPI) StreamShadow(request *shadow.StreamShadowRequest, srv pb.Sha
 	}
 }
 
-func (s *ShadowAPI) StreamShadowSync(request *shadow.StreamShadowRequest, srv pb.ShadowService_StreamShadowSyncServer) (err error) {
-	request.Sync = true
-	return s.StreamShadow(request, srv)
+func (s *ShadowAPI) StreamShadowSync(ctx context.Context, request *connect.Request[shadow.StreamShadowRequest], srv *connect.ServerStream[shadow.Shadow]) (err error) {
+	request.Msg.Sync = true
+	return s.StreamShadow(ctx, request, srv)
 }
