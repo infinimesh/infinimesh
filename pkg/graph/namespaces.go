@@ -18,8 +18,8 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
-	"github.com/bufbuild/connect-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

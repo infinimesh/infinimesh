@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
-	"github.com/bufbuild/connect-go"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/access"

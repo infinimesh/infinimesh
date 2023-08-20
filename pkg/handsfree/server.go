@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	pb "github.com/infinimesh/proto/handsfree"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
-	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/credentials"

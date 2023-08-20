@@ -20,8 +20,8 @@ import (
 	"net/http"
 	"strings"
 
+	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
-	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"github.com/infinimesh/infinimesh/pkg/graph"

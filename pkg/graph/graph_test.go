@@ -20,9 +20,9 @@ import (
 	"errors"
 	"testing"
 
+	"connectrpc.com/connect"
 	randomdata "github.com/Pallinder/go-randomdata"
 	"github.com/arangodb/go-driver"
-	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"

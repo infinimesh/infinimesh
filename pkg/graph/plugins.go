@@ -18,8 +18,8 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
-	"github.com/bufbuild/connect-go"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

@@ -22,8 +22,8 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
+	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
-	"github.com/bufbuild/connect-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"github.com/infinimesh/infinimesh/pkg/handsfree"

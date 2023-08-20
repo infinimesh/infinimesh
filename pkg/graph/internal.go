@@ -18,7 +18,7 @@ package graph
 import (
 	"context"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	pb "github.com/infinimesh/proto/node"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

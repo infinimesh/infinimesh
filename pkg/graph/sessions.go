@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
