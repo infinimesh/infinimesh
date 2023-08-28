@@ -40,12 +40,12 @@ dependencies:
     version: 4.2.4(vue@3.3.4)
   vue3-markdown-it:
     specifier: ^1.0.10
-    version: 1.0.10(@types/markdown-it@13.0.0)
+    version: 1.0.10(@types/markdown-it@13.0.1)
 
 devDependencies:
   '@types/markdown-it':
-    specifier: ^13.0.0
-    version: 13.0.0
+    specifier: ^13.0.1
+    version: 13.0.1
   '@vitejs/plugin-vue':
     specifier: ^4.3.1
     version: 4.3.1(vite@4.4.9)(vue@3.3.4)
@@ -338,8 +338,8 @@ packages:
     resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
     dev: true
 
-  /@types/markdown-it@13.0.0:
-    resolution: {integrity: sha512-mPTaUl5glYfzdJFeCsvhXQwZKdyszNAZcMm5ZTP5SfpTu+vIbog7J3z8Fa4x/Fzv5TB4R6OA/pHBYIYmkYOWGQ==}
+  /@types/markdown-it@13.0.1:
+    resolution: {integrity: sha512-SUEb8Frsxs3D5Gg9xek6i6EG6XQ5s+O+ZdQzIPESZVZw3Pv3CPQfjCJBI+RgqZd1IBeu18S0Rn600qpPnEK37w==}
     dependencies:
       '@types/linkify-it': 3.0.2
       '@types/mdurl': 1.0.2
@@ -680,13 +680,13 @@ packages:
     resolution: {integrity: sha512-ZeA4Z4SaBbYysZap5iZcxKmlPL6bYA8grqhzJIHB1ikn7njnzaP8uwbtuXc4YXD5LicI4/2Xmc0VwmSiFV04gg==}
     dev: false
 
-  /markdown-it-anchor@8.6.7(@types/markdown-it@13.0.0)(markdown-it@12.3.2):
+  /markdown-it-anchor@8.6.7(@types/markdown-it@13.0.1)(markdown-it@12.3.2):
     resolution: {integrity: sha512-FlCHFwNnutLgVTflOYHPW2pPcl2AACqVzExlkGQNsi4CJgqOHN7YTgDd4LuhgN1BFO3TS0vLAruV1Td6dwWPJA==}
     peerDependencies:
       '@types/markdown-it': '*'
       markdown-it: '*'
     dependencies:
-      '@types/markdown-it': 13.0.0
+      '@types/markdown-it': 13.0.1
       markdown-it: 12.3.2
     dev: false
 
@@ -1014,12 +1014,12 @@ packages:
       vue: 3.3.4
     dev: false
 
-  /vue3-markdown-it@1.0.10(@types/markdown-it@13.0.0):
+  /vue3-markdown-it@1.0.10(@types/markdown-it@13.0.1):
     resolution: {integrity: sha512-mTvHu0zl7jrh7ojgaZ+tTpCLiS4CVg4bTgTu4KGhw/cRRY5YgIG8QgFAPu6kCzSW6Znc9a52Beb6hFvF4hSMkQ==}
     dependencies:
       markdown-it: 12.3.2
       markdown-it-abbr: 1.0.4
-      markdown-it-anchor: 8.6.7(@types/markdown-it@13.0.0)(markdown-it@12.3.2)
+      markdown-it-anchor: 8.6.7(@types/markdown-it@13.0.1)(markdown-it@12.3.2)
       markdown-it-deflist: 2.1.0
       markdown-it-emoji: 2.0.2
       markdown-it-footnote: 3.0.3
