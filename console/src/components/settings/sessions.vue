@@ -201,13 +201,17 @@ function relative_time_future(timestamp) {
 
 const icons = {
     'chrome': defineAsyncComponent(() => import('@vicons/ionicons5/LogoChrome')),
+    'chrome os': defineAsyncComponent(() => import('@vicons/ionicons5/LogoChrome')),
+    'mobile chrome': defineAsyncComponent(() => import('@vicons/ionicons5/LogoChrome')),
     'firefox': defineAsyncComponent(() => import('@vicons/ionicons5/LogoFirefox')),
+    'mobile firefox': defineAsyncComponent(() => import('@vicons/ionicons5/LogoFirefox')),
     'linux': defineAsyncComponent(() => import('@vicons/ionicons5/LogoTux')),
     'windows': defineAsyncComponent(() => import('@vicons/ionicons5/LogoWindows')),
     'android': defineAsyncComponent(() => import('@vicons/ionicons5/LogoAndroid')),
     'cli': defineAsyncComponent(() => import('@vicons/ionicons5/TerminalOutline')),
     'unknown': defineAsyncComponent(() => import('@vicons/ionicons5/HelpOutline')),
     'console': defineAsyncComponent(() => import('@vicons/ionicons5/DesktopOutline')),
+    'docker': defineAsyncComponent(() => import('@vicons/ionicons5/LogoDocker')),
     
     'mac': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
     'macos': defineAsyncComponent(() => import('@vicons/ionicons5/LogoApple')),
