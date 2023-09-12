@@ -73,12 +73,14 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 		}
 		i.log.Debug("Authorization Header", zap.String("header", header))
 
-		ctx, err := middleware(ctx, i.signing_key, segments[1])
+		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
 		if path != "/infinimesh.node.AccountsService/Token" && err != nil {
 			return nil, err
 		}
 
-		go i.connectHandleLogActivity(ctx)
+		if log_activity {
+			go i.connectHandleLogActivity(ctx)
+		}
 
 		return next(ctx, req)
 	})
@@ -102,8 +104,6 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 		var middleware middleware
 
 		switch {
-		case path == "/infinimesh.node.DevicesService/GetByToken":
-			middleware = i.ConnectDeviceAuthMiddleware
 		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
 			middleware = i.ConnectDeviceAuthMiddleware
 		default:
@@ -111,47 +111,59 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 		}
 		i.log.Debug("Authorization Header", zap.String("header", header))
 
-		ctx, err := middleware(ctx, i.signing_key, segments[1])
-		if path != "/infinimesh.node.AccountsService/Token" && err != nil {
+		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
+		if err != nil {
 			return err
 		}
 
-		go i.connectHandleLogActivity(ctx)
+		if log_activity {
+			go i.connectHandleLogActivity(ctx)
+		}
 
 		return next(ctx, shc)
 	}
 }
 
-func (i *interceptor) ConnectStandardAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
+func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	ctx = _ctx
+
+	log := i.log.Named("StandardAuthMiddleware")
+
 	token, err := connectValidateToken(signingKey, tokenString)
 	if err != nil {
-		return ctx, err
+		return
 	}
-	i.log.Debug("Validated token", zap.Any("claims", token))
+	log.Debug("Validated token", zap.Any("claims", token))
 
 	account := token[infinimesh.INFINIMESH_ACCOUNT_CLAIM]
 	if account == nil {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		return
 	}
 	uuid, ok := account.(string)
 	if !ok {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		return
 	}
 
 	if token[infinimesh.INFINIMESH_NOSESSION_CLAIM] == nil {
+		log_activity = true
 		session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
 		if session == nil {
-			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+			err = status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+			return
 		}
 		sid, ok := session.(string)
 		if !ok {
-			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+			err = status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+			return
 		}
 
 		// Check if session is valid
-		if err := sessions.Check(rdb, uuid, sid); err != nil {
+		if err = sessions.Check(rdb, uuid, sid); err != nil {
 			i.log.Debug("Session check failed", zap.Any("error", err))
-			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+			err = status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+			return
 		}
 
 		ctx = context.WithValue(ctx, infinimesh.InfinimeshSessionCtxKey, sid)
@@ -175,34 +187,39 @@ func (i *interceptor) ConnectStandardAuthMiddleware(ctx context.Context, signing
 		}
 	}
 
-	return ctx, nil
+	return
 }
 
-func (i *interceptor) ConnectDeviceAuthMiddleware(ctx context.Context, signingKey []byte, tokenString string) (context.Context, error) {
+func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	log_activity = false
 	token, err := connectValidateToken(signingKey, tokenString)
 	if err != nil {
-		return nil, err
+		return
 	}
-	i.log.Debug("Validated token", zap.Any("claims", token))
+	log := i.log.Named("DeviceAuthMiddleware")
+	log.Debug("Validated token", zap.Any("claims", token))
 
 	devices := token[infinimesh.INFINIMESH_DEVICES_CLAIM]
 	if devices == nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+		return
 	}
 
 	ipool, ok := devices.([]interface{})
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
+		return
 	}
 
 	pool := make([]string, len(ipool))
 	for i, el := range ipool {
 		pool[i], ok = el.(string)
 		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			return
 		}
 	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
+	ctx = context.WithValue(_ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
 
 	post := false
 	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
@@ -214,7 +231,7 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(ctx context.Context, signingKe
 	}
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
 
-	return ctx, nil
+	return
 }
 
 func connectValidateToken(signing_key []byte, tokenString string) (jwt.MapClaims, error) {
