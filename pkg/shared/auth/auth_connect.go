@@ -51,7 +51,7 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 		ctx context.Context,
 		req connect.AnyRequest,
 	) (connect.AnyResponse, error) {
-		path := req.Header().Get(":path")
+		path := req.Spec().Procedure
 		header := req.Header().Get("Authorization")
 
 		segments := strings.Split(header, " ")
@@ -89,7 +89,7 @@ func (i *interceptor) WrapStreamingClient(next connect.StreamingClientFunc) conn
 func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
 	i.log.Debug("Setup Wrap Streaming Handler")
 	return func(ctx context.Context, shc connect.StreamingHandlerConn) error {
-		path := shc.RequestHeader().Get(":path")
+		path := shc.Spec().Procedure
 		header := shc.RequestHeader().Get("Authorization")
 
 		segments := strings.Split(header, " ")
