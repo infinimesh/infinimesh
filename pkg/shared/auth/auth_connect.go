@@ -38,6 +38,8 @@ type interceptor struct {
 	signing_key []byte
 }
 
+type middleware func(context.Context, []byte, string) (context.Context, bool, error)
+
 func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, signing_key []byte) *interceptor {
 	return &interceptor{
 		log:         log.Named("AuthInterceptor"),
@@ -59,7 +61,7 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 			return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid token"))
 		}
 
-		var middleware func(context.Context, []byte, string) (context.Context, error)
+		var middleware middleware
 
 		switch {
 		case path == "/infinimesh.node.DevicesService/GetByToken":
@@ -97,7 +99,7 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 			return connect.NewError(connect.CodeUnauthenticated, errors.New("invalid token"))
 		}
 
-		var middleware func(context.Context, []byte, string) (context.Context, error)
+		var middleware middleware
 
 		switch {
 		case path == "/infinimesh.node.DevicesService/GetByToken":
