@@ -19,7 +19,7 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.13.0
-	google.golang.org/grpc v1.58.0
+	google.golang.org/grpc v1.58.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 )
