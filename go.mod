@@ -59,7 +59,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/rabbitmq/amqp091-go v1.8.1
-	github.com/rs/cors v1.10.0
+	github.com/rs/cors v1.10.1
 )
 
 require (
