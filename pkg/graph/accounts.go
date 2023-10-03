@@ -380,7 +380,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 		log.Warn("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
-	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
+	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ADMIN {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
