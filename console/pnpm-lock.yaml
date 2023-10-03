@@ -50,8 +50,8 @@ devDependencies:
     specifier: ^4.3.4
     version: 4.3.4(vite@4.4.9)(vue@3.3.4)
   naive-ui:
-    specifier: ^2.34.4
-    version: 2.34.4(vue@3.3.4)
+    specifier: ^2.35.0
+    version: 2.35.0(vue@3.3.4)
   vfonts:
     specifier: ^0.0.3
     version: 0.0.3
@@ -321,21 +321,21 @@ packages:
     engines: {node: '>=10.13.0'}
     dev: false
 
-  /@types/katex@0.14.0:
-    resolution: {integrity: sha512-+2FW2CcT0K3P+JMR8YG846bmDwplKUTsWgT2ENwdQ1UdVfRk3GQrh6Mi4sTopy30gI8Uau5CEqHTDZ6YvWIUPA==}
+  /@types/katex@0.16.3:
+    resolution: {integrity: sha512-CeVMX9EhVUW8MWnei05eIRks4D5Wscw/W9Byz1s3PA+yJvcdvq9SaDjiUKvRvEgjpdTyJMjQA43ae4KTwsvOPg==}
     dev: true
 
   /@types/linkify-it@3.0.2:
     resolution: {integrity: sha512-HZQYqbiFVWufzCwexrvh694SOim8z2d+xJl5UNamcvQFejLY/2YUtzXHYi3cHdI7PMlS8ejH2slRAOJQ32aNbA==}
 
-  /@types/lodash-es@4.17.7:
-    resolution: {integrity: sha512-z0ptr6UI10VlU6l5MYhGwS4mC8DZyYer2mCoyysZtSF7p26zOX8UpbrV0YpNYLGS8K4PUFIyEr62IMFFjveSiQ==}
+  /@types/lodash-es@4.17.9:
+    resolution: {integrity: sha512-ZTcmhiI3NNU7dEvWLZJkzG6ao49zOIjEgIE0RgV7wbPxU0f2xT3VSAHw2gmst8swH6V0YkLRGp4qPlX/6I90MQ==}
     dependencies:
-      '@types/lodash': 4.14.195
+      '@types/lodash': 4.14.199
     dev: true
 
-  /@types/lodash@4.14.195:
-    resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
+  /@types/lodash@4.14.199:
+    resolution: {integrity: sha512-Vrjz5N5Ia4SEzWWgIVwnHNEnb1UE1XMkvY5DGXrAeOGE9imk0hgTHh5GyDjLDJi9OTCn9oo9dXH1uToK1VRfrg==}
     dev: true
 
   /@types/markdown-it@13.0.2:
@@ -529,8 +529,8 @@ packages:
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
 
-  /date-fns-tz@1.3.8(date-fns@2.30.0):
-    resolution: {integrity: sha512-qwNXUFtMHTTU6CFSFjoJ80W8Fzzp24LntbjFFBgL/faqds4e5mo9mftoRLgr3Vi1trISsg4awSpYVsOQCRnapQ==}
+  /date-fns-tz@2.0.0(date-fns@2.30.0):
+    resolution: {integrity: sha512-OAtcLdB9vxSXTWHdT8b398ARImVwQMyjfYGkKD2zaGpHseG2UPHbHjXELReErZFxWdSLph3c2zOaaTyHfOhERQ==}
     peerDependencies:
       date-fns: '>=2.0.0'
     dependencies:
@@ -768,20 +768,20 @@ packages:
       mime-db: 1.52.0
     dev: false
 
-  /naive-ui@2.34.4(vue@3.3.4):
-    resolution: {integrity: sha512-aPG8PDfhSzIzn/jSC9y3Jb3Pe2wHJ7F0cFV1EWlbImSrZECeUmoc+fIcOSWbizoztkKfaUAeKwYdMl09MKkj1g==}
+  /naive-ui@2.35.0(vue@3.3.4):
+    resolution: {integrity: sha512-PdnLpOip1LQaKs5+rXLZoPDPQkTq26TnHWeABvUA2eOQjtHxE4+TQvj0Jq/W8clM2On/7jptoGmenLt48G3Bhg==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
       '@css-render/plugin-bem': 0.15.12(css-render@0.15.12)
       '@css-render/vue3-ssr': 0.15.12(vue@3.3.4)
-      '@types/katex': 0.14.0
-      '@types/lodash': 4.14.195
-      '@types/lodash-es': 4.17.7
+      '@types/katex': 0.16.3
+      '@types/lodash': 4.14.199
+      '@types/lodash-es': 4.17.9
       async-validator: 4.2.5
       css-render: 0.15.12
       date-fns: 2.30.0
-      date-fns-tz: 1.3.8(date-fns@2.30.0)
+      date-fns-tz: 2.0.0(date-fns@2.30.0)
       evtd: 0.2.4
       highlight.js: 11.8.0
       lodash: 4.17.21
