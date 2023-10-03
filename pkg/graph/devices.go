@@ -289,6 +289,7 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 
 	curr.Tags = dev.Tags
 	curr.Title = dev.Title
+	curr.Config = dev.Config
 
 	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
 	if err != nil {

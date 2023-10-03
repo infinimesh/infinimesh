@@ -85,6 +85,9 @@
             {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
+          <config-edit-modal :o="device" @submit="handleUpdate"
+            v-if="access_lvl_conv(device) > 3 || device.access.role == 'OWNER'" />
+
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
             {{ patch ? "Cancel Patch" : "Patch Desired" }}
           </n-button>
@@ -92,7 +95,7 @@
           <n-button type="info" round tertiary @click="handleMakeToken">Make Device Token</n-button>
 
           <template v-if="access_lvl_conv(device) > 2">
-            <basic-auth-modal :device="device" @toggle="handleBasicToggle" v-if="device.certificate"/>
+            <basic-auth-modal :device="device" @toggle="handleBasicToggle" v-if="device.certificate" />
 
             <n-popconfirm @positive-click="handleDelete">
               <template #trigger>
@@ -164,6 +167,8 @@ const DeviceStateCollapse = defineAsyncComponent(() => import("./device_card/sta
 const DeviceJoinsMgmtModal = defineAsyncComponent(() => import("./device_card/joins-mgmt-modal.vue"))
 
 const StatusCorner = defineAsyncComponent(() => import("./device_card/status-corner.vue"))
+
+const ConfigEditModal = defineAsyncComponent(() => import("@/components/core/config-edit-modal.vue"))
 
 const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
 
@@ -335,6 +340,15 @@ async function handleUpdateTitle(title, resolve, reject) {
     resolve()
   } catch (e) {
     reject(e)
+  }
+}
+
+async function handleUpdate(device) {
+  try {
+    await store.updateDevice(device.uuid, device)
+  } catch (e) {
+    message.error("Failed to save device's configuration");
+    console.error(e)
   }
 }
 
