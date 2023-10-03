@@ -129,7 +129,7 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 			log.Warn("Failed to get Account and access level", zap.Error(err))
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
-		if account.Access.Level < access.Level_ROOT {
+		if account.Access.Level < access.Level_ROOT && account.Access.Role != access.Role_OWNER {
 			log.Warn("Super-Admin Token Request attempted", zap.String("requestor", requestor), zap.String("account", account.Uuid))
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
