@@ -54,6 +54,9 @@
             </td>
             <td>
               <n-space>
+                <config-edit-modal :o="ns" @submit="handleConfigUpdate"
+                  v-if="access_lvl_conv(ns) > 3 || ns.access.role == 'OWNER'" />
+
                 <n-button type="success" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Devices')">
                   Devices
                 </n-button>
@@ -129,6 +132,8 @@ const NsCreate = defineAsyncComponent(() => import("@/components/namespaces/crea
 const NsJoins = defineAsyncComponent(() => import("@/components/namespaces/joins.vue"))
 const NsDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
 
+const ConfigEditModal = defineAsyncComponent(() => import("@/components/core/config-edit-modal.vue"))
+
 const store = useNSStore();
 const { loading, namespaces_list: namespaces } = storeToRefs(store);
 
@@ -169,4 +174,15 @@ async function handleDelete(uuid) {
   }
   refresh()
 }
+
+async function handleConfigUpdate(ns) {
+  try {
+    await store.update(ns)
+    message.success("Namespace config updated")
+  } catch (e) {
+    message.error("Failed to update namespace config: " + e.response.statusText)
+  }
+  refresh()
+}
+
 </script>
