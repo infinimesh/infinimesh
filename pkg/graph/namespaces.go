@@ -173,6 +173,11 @@ func (c *NamespacesController) Update(ctx context.Context, ns *nspb.Namespace) (
 		changed = true
 	}
 
+	if ns.Config != nil {
+		curr.Config = ns.Config
+		changed = true
+	}
+
 	if changed {
 		_, err := c.col.ReplaceDocument(ctx, curr.Uuid, curr)
 		if err != nil {
