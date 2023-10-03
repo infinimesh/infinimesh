@@ -1,5 +1,6 @@
 <template>
-    <n-button :type="type" :round="!!$slots['button-text']" :circle="!$slots['button-text']" tertiary @click="show = true">
+    <n-button :type="type" :round="!!$slots['button-text']" :circle="!$slots['button-text']" tertiary
+        @click="e => { e.preventDefault(); show = true }">
         <template #icon v-if="$slots.icon">
             <n-icon>
                 <slot name="icon"></slot>
@@ -16,8 +17,7 @@
                     Loading...
                 </template>
             </template>
-            <n-card :style="{ minWidth, maxWidth, width }" :bordered="false" size="huge" role="dialog"
-                aria-modal="true">
+            <n-card :style="{ minWidth, maxWidth, width }" :bordered="false" size="huge" role="dialog" aria-modal="true">
 
                 <template #header>
                     <slot name="header"></slot>
@@ -36,7 +36,8 @@
                 <slot name="default"></slot>
 
                 <n-space justify="end" align="center" style="margin-top: 2vh">
-                    <n-button type="error" round secondary @click="handleCancel" v-if="cancelText != ''">{{ cancelText }}</n-button>
+                    <n-button type="error" round secondary @click="handleCancel" v-if="cancelText != ''">{{ cancelText
+                    }}</n-button>
                     <n-button type="success" round @click="handleSubmit" :disabled="submitDisabled">{{
                         submitText
                     }}</n-button>
