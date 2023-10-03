@@ -1,5 +1,5 @@
 <template>
-    <n-button :type="type" round tertiary @click="show = true">
+    <n-button :type="type" :round="!!$slots['button-text']" :circle="!$slots['button-text']" tertiary @click="show = true">
         <template #icon v-if="$slots.icon">
             <n-icon>
                 <slot name="icon"></slot>
@@ -7,6 +7,7 @@
         </template>
         <slot name="button-text"></slot>
     </n-button>
+
     <n-modal :show="show" @update:show="e => show = e">
         <n-spin :show="loading">
             <template #description>

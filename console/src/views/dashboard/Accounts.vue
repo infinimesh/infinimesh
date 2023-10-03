@@ -96,7 +96,8 @@
                 <span>Click to manage <b>{{ account.title }}'s</b> credentials</span>
               </n-tooltip>
 
-
+              <config-edit-modal :o="account" @submit="handleConfigUpdate"
+                v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'" />
 
               <n-button round secondary type="success" @click="e => handleLoginAs(account)">
                 Login as
@@ -141,6 +142,7 @@ const setCredentialsModal = defineAsyncComponent(() => import("@/components/acco
 const AccDelete = defineAsyncComponent(() => import("@/components/core/recursive-delete-modal.vue"))
 const Move = defineAsyncComponent(() => import("@/components/namespaces/move.vue"))
 const EditAccDefaultNsModal = defineAsyncComponent(() => import("@/components/accounts/edit-default-ns-modal.vue"))
+const ConfigEditModal = defineAsyncComponent(() => import("@/components/core/config-edit-modal.vue"))
 
 const store = useAccountsStore();
 const { accounts_ns_filtered: accounts, loading } = storeToRefs(store);
@@ -193,6 +195,14 @@ async function handleUpdateDefaultNamespace(account, [ns, resolve, reject]) {
     resolve()
   } catch (e) {
     reject(e)
+  }
+}
+
+async function handleConfigUpdate(account) {
+  try {
+    await store.updateAccount(account, bar)
+  } catch (e) {
+    message.error("Failed to update account configuration: " + e.response.statusText)
   }
 }
 
