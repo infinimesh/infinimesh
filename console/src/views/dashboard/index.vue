@@ -1,5 +1,5 @@
 <template>
-    <iframe v-if="plugin && src != ''" style="width: calc(100% - 5px); height: 90vh; border: none" :src="src"></iframe>
+    <iframe v-if="plugin && src != ''" style="width: calc(100% - 5px); height: 90vh; border: none" :src="src" allow="clipboard-write"></iframe>
     <n-space align="center" justify="center" class="fullscreen padded" style="min-height: 60vh;">
 
         <n-alert title="No Namespace Selected" type="info" v-if="!ns">
