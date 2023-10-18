@@ -18,11 +18,11 @@ dependencies:
     specifier: ^4.17.21
     version: 4.17.21
   pinia:
-    specifier: ^2.1.6
-    version: 2.1.6(vue@3.3.4)
+    specifier: ^2.1.7
+    version: 2.1.7(vue@3.3.4)
   pinia-plugin-persist:
     specifier: ^1.0.0
-    version: 1.0.0(pinia@2.1.6)(vue@3.3.4)
+    version: 1.0.0(pinia@2.1.7)(vue@3.3.4)
   ua-parser-js:
     specifier: ^1.0.36
     version: 1.0.36
@@ -808,7 +808,7 @@ packages:
   /picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
 
-  /pinia-plugin-persist@1.0.0(pinia@2.1.6)(vue@3.3.4):
+  /pinia-plugin-persist@1.0.0(pinia@2.1.7)(vue@3.3.4):
     resolution: {integrity: sha512-M4hBBd8fz/GgNmUPaaUsC29y1M09lqbXrMAHcusVoU8xlQi1TqgkWnnhvMikZwr7Le/hVyMx8KUcumGGrR6GVw==}
     peerDependencies:
       '@vue/composition-api': ^1.0.0
@@ -818,13 +818,13 @@ packages:
       '@vue/composition-api':
         optional: true
     dependencies:
-      pinia: 2.1.6(vue@3.3.4)
+      pinia: 2.1.7(vue@3.3.4)
       vue: 3.3.4
       vue-demi: 0.12.5(vue@3.3.4)
     dev: false
 
-  /pinia@2.1.6(vue@3.3.4):
-    resolution: {integrity: sha512-bIU6QuE5qZviMmct5XwCesXelb5VavdOWKWaB17ggk++NUwQWWbP5YnsONTk3b752QkW9sACiR81rorpeOMSvQ==}
+  /pinia@2.1.7(vue@3.3.4):
+    resolution: {integrity: sha512-+C2AHFtcFqjPih0zpYuvof37SFxMQ7OEG2zV9jRI12i9BOy3YQVAHwdKtyyc8pDcDyIc33WCIsZaCFWU7WWxGQ==}
     peerDependencies:
       '@vue/composition-api': ^1.4.0
       typescript: '>=4.4.4'
