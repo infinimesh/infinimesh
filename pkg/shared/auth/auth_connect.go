@@ -58,7 +58,7 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 
 		segments := strings.Split(header, " ")
 		if len(segments) != 2 {
-			return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid token"))
+			segments = []string{"", ""}
 		}
 
 		var middleware middleware
