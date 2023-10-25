@@ -2,7 +2,7 @@
 
 infinimesh is a opinionated multi-tenant hyperscale Internet of Things platform to connect IoT devices fast and securely with minimal TCO. It features a unique Graph-based authorization system, allowing users & engineers to create arbitrary hierarchical ontologies, with the possibility to scope permissions down to single sub-devices to specific users (e.g. suppliers). It exposes simple to consume RESTful & gRPC APIs with both high-level (e.g. device shadow) and low-level (sending messages) concepts. The infinimesh IoT platform is open source and fully kubernetes compliant. No vendor lock-in - **run it yourself on Kubernetes in your own datacenter, under your control with maximum data privacy.**
 
-Our API's (REST / gRPC) are considered als beta and may change in future. infinimesh has already available:  
+Our API's (REST / gRPC / ConnectRPC) are considered as beta and may change in future. infinimesh has already available:  
   
 - **MQTT support for version 3 and 5**
 - **State management (digital twin)**  
