@@ -17,22 +17,22 @@ package main
 
 import (
 	"fmt"
-	"net"
+	"net/http"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	"connectrpc.com/connect"
+	"connectrpc.com/grpchealth"
 	"github.com/go-redis/redis/v8"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/gorilla/mux"
 	"github.com/infinimesh/infinimesh/pkg/handsfree"
+	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
+	cc "github.com/infinimesh/proto/handsfree/handsfreeconnect"
+	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/health"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-
-	logger "github.com/infinimesh/infinimesh/pkg/log"
-
-	pb "github.com/infinimesh/proto/handsfree"
 )
 
 var (
@@ -72,24 +72,40 @@ func main() {
 	})
 	log.Info("Redis connection established")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
-	if err != nil {
-		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
-	}
+	router := mux.NewRouter()
+	router.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Debug("Request", zap.String("method", r.Method), zap.String("path", r.URL.Path))
+			h.ServeHTTP(w, r)
+		})
+	})
 
 	auth.SetContext(log, rdb, SIGNING_KEY)
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpc_zap.UnaryServerInterceptor(log),
-			grpc.UnaryServerInterceptor(auth.JWT_AUTH_INTERCEPTOR),
-		)),
-	)
+	authInterceptor := auth.NewAuthInterceptor(log, rdb, SIGNING_KEY)
 
-	srv := handsfree.NewHandsfreeServer(log)
-	pb.RegisterHandsfreeServiceServer(s, srv)
-	healthpb.RegisterHealthServer(s, health.NewServer())
+	interceptors := connect.WithInterceptors(authInterceptor)
 
-	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
-	log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))
+	handsfreeServer := handsfree.NewHandsfreeServer(log)
+	path, handler := cc.NewHandsfreeServiceHandler(handsfreeServer, interceptors)
+	router.PathPrefix(path).Handler(handler)
 
+	checker := grpchealth.NewStaticChecker()
+	path, handler = grpchealth.NewHandler(checker)
+	router.PathPrefix(path).Handler(handler)
+
+	host := fmt.Sprintf("0.0.0.0:%s", port)
+
+	handler = cors.New(cors.Options{
+		AllowedOrigins:      []string{"*"},
+		AllowedMethods:      []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
+		AllowedHeaders:      []string{"*", "Connect-Protocol-Version"},
+		AllowCredentials:    true,
+		AllowPrivateNetwork: true,
+	}).Handler(h2c.NewHandler(router, &http2.Server{}))
+
+	log.Info("Serving", zap.String("host", host))
+	err := http.ListenAndServe(host, handler)
+	if err != nil {
+		log.Fatal("Failed to start server", zap.Error(err))
+	}
 }

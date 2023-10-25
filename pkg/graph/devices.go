@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -134,8 +135,9 @@ func sha256Fingerprint(cert *devpb.Certificate) (err error) {
 	return nil
 }
 
-func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
+func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[devpb.CreateRequest]) (*connect.Response[devpb.CreateResponse], error) {
 	log := c.log.Named("Create")
+	req := _req.Msg
 	log.Debug("Create request received", zap.Any("request", req), zap.Any("context", ctx))
 
 	if req.Handsfree != nil {
@@ -182,12 +184,12 @@ func (c *DevicesController) Create(ctx context.Context, req *devpb.CreateRequest
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	return &devpb.CreateResponse{
+	return connect.NewResponse(&devpb.CreateResponse{
 		Device: device.Device,
-	}, nil
+	}), nil
 }
 
-func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.CreateRequest) (*devpb.CreateResponse, error) {
+func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.CreateRequest) (*connect.Response[devpb.CreateResponse], error) {
 	log := c.log.Named("HandsfreeCreate")
 	log.Debug("Request received")
 
@@ -225,14 +227,14 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	cleanup := func(err error) (*devpb.CreateResponse, error) {
-		if _, d_err := c.Delete(ctx, device.Device); d_err != nil {
+	cleanup := func(err error) (*connect.Response[devpb.CreateResponse], error) {
+		if _, d_err := c.Delete(ctx, connect.NewRequest(device.Device)); d_err != nil {
 			log.Warn("Couldn't delete Device", zap.Error(d_err))
-			return &devpb.CreateResponse{
+			return connect.NewResponse(&devpb.CreateResponse{
 				Device: device.Device,
-			}, status.Error(codes.OK, "Couldn't delete freshly created device as well as set the certificate")
+			}), status.Error(codes.OK, "Couldn't delete freshly created device as well as set the certificate")
 		}
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	cp, err := c.hfc.Send(ctx, &handsfree.ControlPacket{
@@ -265,21 +267,22 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 		return cleanup(err)
 	}
 
-	return &devpb.CreateResponse{
+	return connect.NewResponse(&devpb.CreateResponse{
 		Device: dev,
-	}, nil
+	}), nil
 }
 
-func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+func (c *DevicesController) Update(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Update")
+	dev := req.Msg
 	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
 
-	curr, err := c.Get(ctx, dev)
+	curr, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.Level_MGMT {
+	if curr.Msg.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
@@ -287,9 +290,9 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 		return nil, status.Error(codes.InvalidArgument, "Device Title cannot be empty")
 	}
 
-	curr.Tags = dev.Tags
-	curr.Title = dev.Title
-	curr.Config = dev.Config
+	curr.Msg.Tags = dev.Tags
+	curr.Msg.Title = dev.Title
+	curr.Msg.Config = dev.Config
 
 	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
 	if err != nil {
@@ -300,20 +303,21 @@ func (c *DevicesController) Update(ctx context.Context, dev *devpb.Device) (*dev
 	return curr, nil
 }
 
-func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Update")
+	dev := req.Msg
 	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
 
-	curr, err := c.Get(ctx, dev)
+	curr, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.Level_MGMT {
+	if curr.Msg.GetAccess().GetLevel() < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
-	res := NewDeviceFromPB(curr)
+	res := NewDeviceFromPB(curr.Msg)
 	err = Toggle(ctx, c.db, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
@@ -323,20 +327,21 @@ func (c *DevicesController) Toggle(ctx context.Context, dev *devpb.Device) (*dev
 	return curr, nil
 }
 
-func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Update")
+	dev := req.Msg
 	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
 
-	curr, err := c.Get(ctx, dev)
+	curr, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	if curr.GetAccess().GetLevel() < access.Level_ADMIN {
+	if curr.Msg.GetAccess().GetLevel() < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "Not enough Access to Device %s", dev.Uuid)
 	}
 
-	res := NewDeviceFromPB(curr)
+	res := NewDeviceFromPB(curr.Msg)
 	err = Toggle(ctx, c.db, res, "basic_enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
@@ -346,8 +351,9 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, dev *devpb.Device) 
 	return curr, nil
 }
 
-func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Get")
+	dev := req.Msg
 	log.Debug("Get request received", zap.Any("request", dev), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -376,11 +382,12 @@ func (c *DevicesController) Get(ctx context.Context, dev *devpb.Device) (*devpb.
 	}
 	device.Token = token
 
-	return device.Device, nil
+	return connect.NewResponse(device.Device), nil
 }
 
-func (c *DevicesController) GetByToken(ctx context.Context, dev *devpb.Device) (*devpb.Device, error) {
+func (c *DevicesController) GetByToken(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("GetByToken")
+	dev := req.Msg
 	log.Debug("Get by Token request received", zap.String("device", dev.Uuid), zap.Any("context", ctx))
 
 	devices_scope := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
@@ -408,11 +415,12 @@ func (c *DevicesController) GetByToken(ctx context.Context, dev *devpb.Device) (
 		device.Certificate = nil
 	}
 
-	return &device, nil
+	return connect.NewResponse(&device), nil
 }
 
-func (c *DevicesController) List(ctx context.Context, q *pb.QueryRequest) (*devpb.Devices, error) {
+func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.QueryRequest]) (*connect.Response[devpb.Devices], error) {
 	log := c.log.Named("List")
+	q := req.Msg
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -447,13 +455,14 @@ func (c *DevicesController) List(ctx context.Context, q *pb.QueryRequest) (*devp
 		r = append(r, &dev)
 	}
 
-	return &devpb.Devices{
+	return connect.NewResponse(&devpb.Devices{
 		Devices: r,
-	}, nil
+	}), nil
 }
 
-func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.DeleteResponse, error) {
+func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[devpb.Device]) (*connect.Response[pb.DeleteResponse], error) {
 	log := c.log.Named("Delete")
+	req := _req.Msg
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -483,14 +492,14 @@ func (c *DevicesController) Delete(ctx context.Context, req *devpb.Device) (*pb.
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
-	return &pb.DeleteResponse{}, nil
+	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 
 const findByFingerprintQuery = `FOR device IN @@devices
 FILTER device.certificate.fingerprint == @fingerprint
 RETURN device`
 
-func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.GetByFingerprintRequest) (*devpb.Device, error) {
+func (c *DevicesController) GetByFingerprint(ctx context.Context, req *connect.Request[devpb.GetByFingerprintRequest]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("GetByFingerprint")
 	log.Debug("GetByFingerprint request received", zap.Any("request", req), zap.Any("context", ctx))
 
@@ -499,7 +508,7 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 
 	cr, err := c.db.Query(ctx, findByFingerprintQuery, map[string]interface{}{
 		"@devices":    schema.DEVICES_COL,
-		"fingerprint": req.GetFingerprint(),
+		"fingerprint": req.Msg.GetFingerprint(),
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Error executing query")
@@ -523,11 +532,13 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *devpb.Get
 	}
 	r.Token = token
 
-	return &r, nil
+	return connect.NewResponse(&r), nil
 }
 
-func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.DevicesTokenRequest) (*pb.TokenResponse, error) {
+func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.Request[pb.DevicesTokenRequest]) (*connect.Response[pb.TokenResponse], error) {
 	log := c.log.Named("MakeDevicesToken")
+	req := _req.Msg
+
 	log.Debug("MakeDevicesToken request received", zap.Any("request", req), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -554,7 +565,7 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, req *pb.Device
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
 
-	return &pb.TokenResponse{Token: token_string}, nil
+	return connect.NewResponse(&pb.TokenResponse{Token: token_string}), nil
 }
 
 func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (string, error) {
@@ -577,17 +588,20 @@ RETURN {
 }
 `
 
-func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*access.Nodes, error) {
+func (c *DevicesController) Joins(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[access.Nodes], error) {
 	log := c.log.Named("Joins")
-	log.Debug("Fetch Joins request received", zap.String("device", req.GetUuid()))
+	dev := req.Msg
+	log.Debug("Fetch Joins request received", zap.String("device", dev.GetUuid()))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	dev, err := c.Get(ctx, req)
+	_dev, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
+	dev = _dev.Msg
+
 	if dev.Access == nil || dev.Access.Level < access.Level_ADMIN {
 		return nil, status.Error(codes.PermissionDenied, "Must be device Admin to fetch Joins")
 	}
@@ -615,17 +629,17 @@ func (c *DevicesController) Joins(ctx context.Context, req *devpb.Device) (*acce
 		r = append(r, &node)
 	}
 
-	return &access.Nodes{Nodes: r}, nil
+	return connect.NewResponse(&access.Nodes{Nodes: r}), nil
 }
 
-func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest) (*access.Node, error) {
+func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.JoinGeneralRequest]) (*connect.Response[access.Node], error) {
 	log := c.log.Named("Join")
 
 	requestor_id := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor_id))
 
 	requestor := NewBlankAccountDocument(requestor_id)
-	dev := NewBlankDeviceDocument(req.Node)
+	dev := NewBlankDeviceDocument(req.Msg.Node)
 
 	err := AccessLevelAndGet(ctx, log, c.db, requestor, dev)
 	if err != nil {
@@ -639,7 +653,7 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 	var obj InfinimeshGraphNode
 	var edge driver.Collection
 
-	col, key := SplitDocID(req.Join)
+	col, key := SplitDocID(req.Msg.Join)
 	switch col {
 	case "Accounts":
 		obj = NewBlankAccountDocument(key)
@@ -655,25 +669,25 @@ func (c *DevicesController) Join(ctx context.Context, req *pb.JoinGeneralRequest
 
 	err = AccessLevelAndGet(ctx, log, c.db, requestor, obj)
 	if err != nil {
-		log.Warn("Error getting Object and access level", zap.String("id", req.Join), zap.Error(err))
+		log.Warn("Error getting Object and access level", zap.String("id", req.Msg.Join), zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")
 	}
 
-	lvl := req.Access
+	lvl := req.Msg.Access
 	if lvl >= access.Level_ADMIN {
 		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
 	}
 
-	err = Link(ctx, log, edge, obj, dev, req.Access, access.Role_SHARED)
+	err = Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	return &access.Node{
-		Node: req.Join,
+	return connect.NewResponse(&access.Node{
+		Node: req.Msg.Join,
 		Access: &access.Access{
 			Level: lvl,
 		},
-	}, nil
+	}), nil
 }

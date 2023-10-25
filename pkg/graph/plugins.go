@@ -18,6 +18,7 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
@@ -101,8 +102,9 @@ func ValidatePluginDocument(p *pb.Plugin) string {
 	return ""
 }
 
-func (c *PluginsController) Create(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+func (c *PluginsController) Create(ctx context.Context, req *connect.Request[pb.Plugin]) (*connect.Response[pb.Plugin], error) {
 	log := c.log.Named("Create")
+	plug := req.Msg
 
 	if !ValidateRoot(ctx) {
 		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to create Plugin")
@@ -123,7 +125,7 @@ func (c *PluginsController) Create(ctx context.Context, plug *pb.Plugin) (*pb.Pl
 	plugin.DocumentMeta = meta
 
 	log.Debug("Created", zap.String("plugin", plugin.Uuid))
-	return plugin.Plugin, nil
+	return connect.NewResponse(plugin.Plugin), nil
 }
 
 const listAllPluginsQuery = `FOR plug IN @@plugins RETURN plug`
@@ -133,8 +135,9 @@ FILTER plug.public
     RETURN plug
 `
 
-func (c *PluginsController) Get(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+func (c *PluginsController) Get(ctx context.Context, req *connect.Request[pb.Plugin]) (*connect.Response[pb.Plugin], error) {
 	log := c.log.Named("Get")
+	plug := req.Msg
 
 	meta, err := c.col.ReadDocument(ctx, plug.Uuid, plug)
 	if err != nil {
@@ -144,27 +147,28 @@ func (c *PluginsController) Get(ctx context.Context, plug *pb.Plugin) (*pb.Plugi
 	plug.Uuid = meta.ID.Key()
 
 	if plug.Public || ValidateRoot(ctx) {
-		return plug, nil
+		return connect.NewResponse(plug), nil
 	}
 
 	if plug.Namespace == nil || *plug.Namespace == "" {
 		return nil, status.Error(codes.InvalidArgument, "Namespace is not given")
 	}
 
-	ns, err := c.ns_ctrl.Get(ctx, &namespaces.Namespace{Uuid: *plug.Namespace})
+	ns, err := c.ns_ctrl.Get(ctx, connect.NewRequest(&namespaces.Namespace{Uuid: *plug.Namespace}))
 	if err != nil {
 		return nil, err
 	}
 
-	if ns.Access.Level < access.Level_READ {
+	if ns.Msg.Access.Level < access.Level_READ {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access")
 	}
 
-	return plug, nil
+	return connect.NewResponse(plug), nil
 }
 
-func (c *PluginsController) List(ctx context.Context, r *pb.ListRequest) (*pb.Plugins, error) {
+func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.ListRequest]) (*connect.Response[pb.Plugins], error) {
 	log := c.log.Named("List")
+	r := req.Msg
 
 	var cr driver.Cursor
 	var err error
@@ -202,13 +206,14 @@ func (c *PluginsController) List(ctx context.Context, r *pb.ListRequest) (*pb.Pl
 		res = append(res, &plug)
 	}
 
-	return &pb.Plugins{
+	return connect.NewResponse(&pb.Plugins{
 		Pool: res,
-	}, nil
+	}), nil
 }
 
-func (c *PluginsController) Update(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+func (c *PluginsController) Update(ctx context.Context, req *connect.Request[pb.Plugin]) (*connect.Response[pb.Plugin], error) {
 	log := c.log.Named("Update")
+	plug := req.Msg
 
 	if !ValidateRoot(ctx) {
 		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to update Plugin")
@@ -230,18 +235,19 @@ func (c *PluginsController) Update(ctx context.Context, plug *pb.Plugin) (*pb.Pl
 	}
 
 	log.Debug("Updated", zap.Any("plugin", plugin))
-	return plugin.Plugin, nil
+	return connect.NewResponse(plugin.Plugin), nil
 }
 
-func (c *PluginsController) Delete(ctx context.Context, plug *pb.Plugin) (*pb.Plugin, error) {
+func (c *PluginsController) Delete(ctx context.Context, req *connect.Request[pb.Plugin]) (*connect.Response[pb.Plugin], error) {
+	plug := req.Msg
 	if !ValidateRoot(ctx) {
-		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to delete Plugin")
+		return nil, StatusFromString(connect.CodePermissionDenied, "Not enough access rights to delete this Plugin")
 	}
 
 	_, err := c.col.RemoveDocument(ctx, plug.Uuid)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error while deleting Plugin: %v", err)
+		return nil, StatusFromString(connect.CodeInternal, "Error while deleting Plugin: %v", err)
 	}
 
-	return plug, nil
+	return connect.NewResponse(plug), nil
 }

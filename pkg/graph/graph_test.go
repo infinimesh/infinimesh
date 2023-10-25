@@ -20,6 +20,7 @@ import (
 	"errors"
 	"testing"
 
+	"connectrpc.com/connect"
 	randomdata "github.com/Pallinder/go-randomdata"
 	"github.com/arangodb/go-driver"
 	"github.com/go-redis/redis/v8"
@@ -104,18 +105,18 @@ func CompareAccounts(a, b *accounts.Account) bool {
 
 func TestAuthorizeAsRoot(t *testing.T) {
 	i := true
-	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
+	res, err := ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{"infinimesh", viper.GetString("INF_DEFAULT_ROOT_PASS")},
 		},
 		Inf: &i,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error authorizing with root credentials: %v", err)
 	}
 
-	token, _ := jwt.Parse(res.Token, func(t *jwt.Token) (interface{}, error) { return []byte("placeholder"), nil })
+	token, _ := jwt.Parse(res.Msg.Token, func(t *jwt.Token) (interface{}, error) { return []byte("placeholder"), nil })
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		t.Fatal("Error parsing token claims")
@@ -148,14 +149,14 @@ func TestNewBlankAccountDocument(t *testing.T) {
 func TestAccountCreate_FalseCredentialsType(t *testing.T) {
 	t.Log("Creating Sample Account with unsupported Credentials")
 	username := randomdata.SillyName()
-	_, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	_, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: false,
 		},
 		Credentials: &accounts.Credentials{
 			Type: "unsupported",
 		},
-	})
+	}))
 	if err == nil && err.Error() != "auth type is wrong" {
 		t.Error("Create isn't returning error, despite Credentials type must be unsupported")
 	}
@@ -170,19 +171,19 @@ func TestAuthorizeDisabledAccount(t *testing.T) {
 		Data: []string{username, password},
 	}
 
-	_, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	_, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: false,
 		},
 		Credentials: credentials,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
+	_, err = ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: credentials,
-	})
+	}))
 	if err == nil {
 		t.Error("Error is nil despite Account is disabled")
 	} else if s, ok := status.FromError(err); !ok || (s.Code() != codes.PermissionDenied && s.Message() != "Account is disabled") {
@@ -199,24 +200,24 @@ func TestAuthorizeStandard(t *testing.T) {
 		Data: []string{username, password},
 	}
 
-	crtRes, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	crtRes, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: true,
 		},
 		Credentials: credentials,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
+	res, err := ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: credentials,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Unexpected error while getting Token: %v", err)
 	}
 
-	token, err := jwt.Parse(res.GetToken(), func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(res.Msg.GetToken(), func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Unexpected signing alg")
 		}
@@ -240,8 +241,8 @@ func TestAuthorizeStandard(t *testing.T) {
 		t.Fatal("Error casting claim value to string")
 	}
 
-	if id != crtRes.Account.Uuid {
-		t.Fatalf("Expected account in Claim to be %s, got: %s", crtRes.Account.Uuid, id)
+	if id != crtRes.Msg.Account.Uuid {
+		t.Fatalf("Expected account in Claim to be %s, got: %s", crtRes.Msg.Account.Uuid, id)
 	}
 }
 
@@ -250,7 +251,7 @@ func TestAuthorizeStandardFail(t *testing.T) {
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
 
-	_, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	_, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: true,
 		},
@@ -258,17 +259,17 @@ func TestAuthorizeStandardFail(t *testing.T) {
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	_, err = ctrl.Token(context.TODO(), &pb.TokenRequest{
+	_, err = ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password + "blah"},
 		},
-	})
+	}))
 	if err == nil {
 		t.Fatal("Token request supposed to fail, but it didn't")
 	}
@@ -292,27 +293,27 @@ func TestUpdateAccount(t *testing.T) {
 		Title: username, Enabled: false,
 	}
 
-	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	res, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	uuid := res.GetAccount().GetUuid()
+	uuid := res.Msg.GetAccount().GetUuid()
 	this.Uuid = uuid
 	this.Title = username + "-new"
 	this.Enabled = true
 
-	that, err := ctrl.Update(rootCtx, this)
+	that, err := ctrl.Update(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error udpating Account: %v", err)
 	}
-	if !CompareAccounts(this, that) {
+	if !CompareAccounts(this, that.Msg) {
 		t.Fatal("Requested updates and updated accounts(from Response) aren't matching, this:", this, "that:", that)
 	}
 
@@ -320,7 +321,7 @@ func TestUpdateAccount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error reading Account in DB: %v", err)
 	}
-	if !CompareAccounts(this, that) {
+	if !CompareAccounts(this, that.Msg) {
 		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
 	}
 }
@@ -334,26 +335,26 @@ func TestUpdateAccountDefaultNS(t *testing.T) {
 		Title: username, Enabled: false,
 	}
 
-	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	res, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	uuid := res.GetAccount().GetUuid()
+	uuid := res.Msg.GetAccount().GetUuid()
 	this.Uuid = uuid
 	this.DefaultNamespace = schema.ROOT_NAMESPACE_KEY
 
-	that, err := ctrl.Update(rootCtx, this)
+	that, err := ctrl.Update(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error udpating Account: %v", err)
 	}
-	if !CompareAccounts(this, that) {
+	if !CompareAccounts(this, that.Msg) {
 		t.Fatal("Requested updates and updated accounts(from Response) aren't matching, this:", this, "that:", that)
 	}
 
@@ -361,12 +362,12 @@ func TestUpdateAccountDefaultNS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error reading Account in DB: %v", err)
 	}
-	if !CompareAccounts(this, that) {
+	if !CompareAccounts(this, that.Msg) {
 		t.Fatal("Requested updates and updated accounts(from DB) aren't matching, this:", this, "that:", that)
 	}
 
 	this.DefaultNamespace = "notexistent"
-	_, err = ctrl.Update(rootCtx, this)
+	_, err = ctrl.Update(rootCtx, connect.NewRequest(this))
 	if err == nil {
 		t.Fatalf("Error supposed to be raised, but it didn't")
 	}
@@ -389,30 +390,30 @@ func TestGetAccount(t *testing.T) {
 		Title: username, Enabled: false,
 	}
 
-	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	res, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	uuid := res.GetAccount().GetUuid()
+	uuid := res.Msg.GetAccount().GetUuid()
 	this.Uuid = uuid
-	that, err := ctrl.Get(rootCtx, &accounts.Account{Uuid: uuid})
+	that, err := ctrl.Get(rootCtx, connect.NewRequest(&accounts.Account{Uuid: uuid}))
 	if err != nil {
 		t.Fatalf("Error getting Account from API: %v", err)
 	}
-	if !CompareAccounts(this, that) {
+	if !CompareAccounts(this, that.Msg) {
 		t.Fatal("Requested and created accounts(from API) aren't matching, this:", this, "that:", that)
 	}
 }
 
 func TestGetAccountNotFound(t *testing.T) {
-	r, err := ctrl.Get(rootCtx, &accounts.Account{Uuid: randomdata.Alphanumeric(12)})
+	r, err := ctrl.Get(rootCtx, connect.NewRequest(&accounts.Account{Uuid: randomdata.Alphanumeric(12)}))
 	if err == nil {
 		t.Fatal("Get account received no error despite it should, response:", r)
 	}
@@ -436,31 +437,31 @@ func TestList(t *testing.T) {
 		Title: username, Enabled: false,
 	}
 
-	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	res, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	t.Logf("Created account: %s", res.GetAccount().GetUuid())
+	t.Logf("Created account: %s", res.Msg.GetAccount().GetUuid())
 
 	pool, err := ctrl.List(rootCtx, nil)
 	if err != nil {
 		t.Fatalf("Error listing Account: %v", err)
 	}
 
-	if len(pool.Accounts) < 1 {
-		t.Fatalf("Pool is empty, length: %d", len(pool.Accounts))
+	if len(pool.Msg.Accounts) < 1 {
+		t.Fatalf("Pool is empty, length: %d", len(pool.Msg.Accounts))
 	}
 
 	r := false
-	for _, acc := range pool.Accounts {
-		if acc.Uuid == res.GetAccount().GetUuid() {
+	for _, acc := range pool.Msg.Accounts {
+		if acc.Uuid == res.Msg.GetAccount().GetUuid() {
 			r = true
 			break
 		}
@@ -480,24 +481,24 @@ func TestDeleteAccount(t *testing.T) {
 		Title: username, Enabled: false,
 	}
 
-	res, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	res, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
 
-	this.Uuid = res.Account.GetUuid()
-	_, err = ctrl.Delete(rootCtx, this)
+	this.Uuid = res.Msg.Account.GetUuid()
+	_, err = ctrl.Delete(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Unexpected error while deleting Account: %v", err)
 	}
 
-	r, err := ctrl.Get(rootCtx, this)
+	r, err := ctrl.Get(rootCtx, connect.NewRequest(this))
 	if err == nil {
 		t.Fatal("Get account received no error despite it should, response:", r)
 	}
@@ -521,39 +522,39 @@ func TestSetCredentialsStandard(t *testing.T) {
 		Title: username, Enabled: true,
 	}
 
-	crtRes, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	crtRes, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: this,
 		Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating Account: %v", err)
 	}
-	this.Uuid = crtRes.GetAccount().GetUuid()
+	this.Uuid = crtRes.Msg.GetAccount().GetUuid()
 
-	_, err = ctrl.SetCredentials(rootCtx, &pb.SetCredentialsRequest{
+	_, err = ctrl.SetCredentials(rootCtx, connect.NewRequest(&pb.SetCredentialsRequest{
 		Uuid: this.GetUuid(), Credentials: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password + "-addon"},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error Setting New Credentials: %v", err)
 	}
 
-	res, err := ctrl.Token(context.TODO(), &pb.TokenRequest{
+	res, err := ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: &accounts.Credentials{
 			Type: "standard",
 			Data: []string{username, password + "-addon"},
 		},
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Unexpected error while getting Token: %v", err)
 	}
 
-	token, err := jwt.Parse(res.GetToken(), func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(res.Msg.GetToken(), func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("Unexpected signing alg")
 		}
@@ -586,14 +587,14 @@ func TestSetCredentialsStandard(t *testing.T) {
 
 func TestCreateUpdateNamespace(t *testing.T) {
 	title := randomdata.SillyName()
-	nspb, err := ns_ctrl.Create(rootCtx, &namespaces.Namespace{
+	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Couldn't create Namespace: %v", err)
 	}
 
-	ok, err := ns_ctrl.col.DocumentExists(rootCtx, nspb.Uuid)
+	ok, err := ns_ctrl.col.DocumentExists(rootCtx, nspb.Msg.Uuid)
 	if err != nil {
 		t.Fatalf("Error testing Namespace existance: %v", err)
 	} else if !ok {
@@ -602,7 +603,7 @@ func TestCreateUpdateNamespace(t *testing.T) {
 
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
 	var _access Access
-	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY+"-"+nspb.Uuid, &_access)
+	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY+"-"+nspb.Msg.Uuid, &_access)
 	if err != nil {
 		t.Fatalf("Can't read edge document or it doesn't exist: %v", err)
 	}
@@ -611,41 +612,41 @@ func TestCreateUpdateNamespace(t *testing.T) {
 		t.Fatalf("Access level incorrect(%d), must be: %d", _access.Level, access.Level_ADMIN)
 	}
 
-	new, err := ns_ctrl.Update(rootCtx, &namespaces.Namespace{
-		Uuid:  nspb.Uuid,
+	new, err := ns_ctrl.Update(rootCtx, connect.NewRequest(&namespaces.Namespace{
+		Uuid:  nspb.Msg.Uuid,
 		Title: randomdata.SillyName(),
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Failed to update Namespace: %v", err)
 	}
 
-	if new.Title == title {
-		t.Fatalf("Namespace didn't update: old(%s) == new(%s)", title, new.Title)
+	if new.Msg.Title == title {
+		t.Fatalf("Namespace didn't update: old(%s) == new(%s)", title, new.Msg.Title)
 	}
 }
 
 func TestListNamespaces(t *testing.T) {
 	title := randomdata.SillyName()
-	nspb, err := ns_ctrl.Create(rootCtx, &namespaces.Namespace{
+	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Couldn't create Namespace: %v", err)
 	}
 
-	pool, err := ns_ctrl.List(rootCtx, &pb.EmptyMessage{})
+	pool, err := ns_ctrl.List(rootCtx, connect.NewRequest(&pb.EmptyMessage{}))
 	if err != nil {
 		t.Fatalf("Couldn't list Namespace: %v", err)
 	}
 
 	rootFound, createdFound := false, false
-	for _, ns := range pool.GetNamespaces() {
+	for _, ns := range pool.Msg.GetNamespaces() {
 		if ns.GetUuid() == schema.ROOT_NAMESPACE_KEY {
 			rootFound = true
-		} else if ns.GetUuid() == nspb.GetUuid() {
+		} else if ns.GetUuid() == nspb.Msg.GetUuid() {
 			createdFound = true
-			if ns.GetTitle() != nspb.GetTitle() {
-				t.Logf("[WARNING]: namespaces titles don't match. Listed: %s; Created: %s", ns.GetTitle(), nspb.GetTitle())
+			if ns.GetTitle() != nspb.Msg.GetTitle() {
+				t.Logf("[WARNING]: namespaces titles don't match. Listed: %s; Created: %s", ns.GetTitle(), nspb.Msg.GetTitle())
 			}
 		}
 	}
@@ -668,16 +669,16 @@ func TestNewAccountNoNamespaceGiven(t *testing.T) {
 		Data: []string{username, password},
 	}
 
-	accpb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	accpb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: true,
 		},
 		Credentials: credentials,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Failed to create Account: %v", err)
 	}
-	acc := NewAccountFromPB(accpb.Account)
+	acc := NewAccountFromPB(accpb.Msg.Account)
 
 	edge := GetEdgeCol(rootCtx, db, schema.NS2ACC)
 	ok := CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
@@ -695,17 +696,17 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 		Data: []string{username, password},
 	}
 
-	accPb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	accPb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username, Enabled: true,
 		},
 		Credentials: credentials,
 		Namespace:   schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatal("Error creating Account")
 	}
-	acc := NewAccountFromPB(accPb.Account)
+	acc := NewAccountFromPB(accPb.Msg.Account)
 
 	// Checking Account access to Root Account
 	ok, level := AccessLevel(rootCtx, db, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
@@ -739,17 +740,17 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	}
 
 	// Create Account 1 under platform Namespace
-	acc1pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	acc1pb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username1, Enabled: true,
 		},
 		Credentials: credentials1,
 		Namespace:   schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatal("Error creating Account 1")
 	}
-	acc1 := NewAccountFromPB(acc1pb.Account)
+	acc1 := NewAccountFromPB(acc1pb.Msg.Account)
 
 	username2 := randomdata.SillyName()
 	credentials2 := &accounts.Credentials{
@@ -758,17 +759,17 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	}
 
 	// Create Account 2 under platform Namespace
-	acc2pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	acc2pb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username2, Enabled: true,
 		},
 		Credentials: credentials2,
 		Namespace:   schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatal("Error creating Account 2")
 	}
-	acc2 := NewAccountFromPB(acc2pb.Account)
+	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
@@ -806,17 +807,17 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	}
 
 	// Create Account 1 under platform Namespace
-	acc1pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	acc1pb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username1, Enabled: true,
 		},
 		Credentials: credentials1,
 		Namespace:   schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatal("Error creating Account 1")
 	}
-	acc1 := NewAccountFromPB(acc1pb.Account)
+	acc1 := NewAccountFromPB(acc1pb.Msg.Account)
 
 	username2 := randomdata.SillyName()
 	credentials2 := &accounts.Credentials{
@@ -825,17 +826,17 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	}
 
 	// Create Account 2 under platform Namespace
-	acc2pb, err := ctrl.Create(rootCtx, &accounts.CreateRequest{
+	acc2pb, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
 		Account: &accounts.Account{
 			Title: username2, Enabled: true,
 		},
 		Credentials: credentials2,
 		Namespace:   schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatal("Error creating Account 2")
 	}
-	acc2 := NewAccountFromPB(acc2pb.Account)
+	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
@@ -912,7 +913,7 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 -----END CERTIFICATE-----
 `
 
-	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
+	thisR, err := dev_ctrl.Create(rootCtx, connect.NewRequest(&devices.CreateRequest{
 		Device: &devices.Device{
 			Title:   randomdata.SillyName(),
 			Enabled: true,
@@ -921,35 +922,35 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 			},
 		},
 		Namespace: schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
 	}
-	this := thisR.Device
+	this := thisR.Msg.GetDevice()
 
 	t.Logf("Device created: %s", this.GetUuid())
 
-	that, err := dev_ctrl.Get(rootCtx, this)
+	that, err := dev_ctrl.Get(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error getting device: %v", err)
 	}
 
-	if this.Uuid != that.Uuid {
-		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	if this.Uuid != that.Msg.Uuid {
+		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Msg.Uuid)
 	}
-	if this.Title != that.Title {
-		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+	if this.Title != that.Msg.Title {
+		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Msg.Title)
 	}
-	if this.Enabled != that.Enabled {
-		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+	if this.Enabled != that.Msg.Enabled {
+		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Msg.Enabled)
 	}
 	thisc := string(this.Certificate.Fingerprint)
-	thatc := string(that.Certificate.Fingerprint)
+	thatc := string(that.Msg.Certificate.Fingerprint)
 	if thisc != thatc {
 		t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
 	}
 
-	_, err = dev_ctrl.Delete(rootCtx, this)
+	_, err = dev_ctrl.Delete(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error deleting device: %v", err)
 	}
@@ -984,7 +985,7 @@ r+vyP3YimFBE9AbM5GgfUHGRBJBpC40aVaE7HtHapE4JJNit4NfBvfDotNUs6shJ
 cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 -----END CERTIFICATE-----`
 
-	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
+	thisR, err := dev_ctrl.Create(rootCtx, connect.NewRequest(&devices.CreateRequest{
 		Device: &devices.Device{
 			Title:   randomdata.SillyName(),
 			Enabled: true,
@@ -993,21 +994,21 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 			},
 		},
 		Namespace: schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
 	}
-	this := thisR.Device
+	this := thisR.Msg.GetDevice()
 
 	t.Logf("Device created: %s", this.GetUuid())
 
-	pool, err := dev_ctrl.List(rootCtx, nil)
+	pool, err := dev_ctrl.List(rootCtx, connect.NewRequest(&pb.QueryRequest{}))
 	if err != nil {
 		t.Fatalf("Error listing devices: %v", err)
 	}
 
 	this_found := false
-	for _, dev := range pool.GetDevices() {
+	for _, dev := range pool.Msg.GetDevices() {
 		if dev.Uuid == this.Uuid {
 			this_found = true
 			break
@@ -1048,7 +1049,7 @@ a+5z88Oa1aswXQBRt+4JTHJsc5KE2/pWuZY6+CL738hzWmDYpr3JHV1HdAN3dHU1
 UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 -----END CERTIFICATE-----`
 
-	thisR, err := dev_ctrl.Create(rootCtx, &devices.CreateRequest{
+	thisR, err := dev_ctrl.Create(rootCtx, connect.NewRequest(&devices.CreateRequest{
 		Device: &devices.Device{
 			Title:   randomdata.SillyName(),
 			Enabled: true,
@@ -1057,46 +1058,46 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 			},
 		},
 		Namespace: schema.ROOT_NAMESPACE_KEY,
-	})
+	}))
 	if err != nil {
 		t.Fatalf("Error creating device: %v", err)
 	}
-	this := thisR.Device
+	this := thisR.Msg.Device
 	t.Logf("Device created: %s", this.GetUuid())
 
-	that, err := dev_ctrl.GetByFingerprint(rootCtx, &devices.GetByFingerprintRequest{
+	that, err := dev_ctrl.GetByFingerprint(rootCtx, connect.NewRequest(&devices.GetByFingerprintRequest{
 		Fingerprint: this.Certificate.Fingerprint,
-	})
+	}))
 
 	if err != nil {
 		t.Fatalf("Error getting device: %v", err)
 	}
 
-	if this.Uuid != that.Uuid {
-		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Uuid)
+	if this.Uuid != that.Msg.Uuid {
+		t.Fatalf("Devices aren't same. %s != %s", this.Uuid, that.Msg.Uuid)
 	}
-	if this.Title != that.Title {
-		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Title)
+	if this.Title != that.Msg.Title {
+		t.Fatalf("Devices aren't same. %s != %s", this.Title, that.Msg.Title)
 	}
-	if this.Enabled != that.Enabled {
-		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Enabled)
+	if this.Enabled != that.Msg.Enabled {
+		t.Fatalf("Devices aren't same. %t != %t", this.Enabled, that.Msg.Enabled)
 	}
 	thisc := string(this.Certificate.Fingerprint)
-	thatc := string(that.Certificate.Fingerprint)
+	thatc := string(that.Msg.Certificate.Fingerprint)
 	if thisc != thatc {
 		t.Fatalf("Devices aren't same. %s != %s", thisc, thatc)
 	}
 
-	_, err = dev_ctrl.Delete(rootCtx, this)
+	_, err = dev_ctrl.Delete(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error deleting device: %v", err)
 	}
 }
 
 func TestFingByFingerprintNotFound(t *testing.T) {
-	_, err := dev_ctrl.GetByFingerprint(rootCtx, &devices.GetByFingerprintRequest{
+	_, err := dev_ctrl.GetByFingerprint(rootCtx, connect.NewRequest(&devices.GetByFingerprintRequest{
 		Fingerprint: []byte("notfound"),
-	})
+	}))
 
 	if err == nil {
 		t.Fatalf("Expected error")
@@ -1142,7 +1143,7 @@ func TestPluginsRepo(t *testing.T) {
 		Kind:        plugins.PluginKind_UNKNOWN,
 	}
 
-	_, err := plug_ctrl.Create(rootCtx, this)
+	_, err := plug_ctrl.Create(rootCtx, connect.NewRequest(this))
 	if err == nil {
 		t.Fatal("Creation must have failed, because kind is unknown, but error is nil")
 	}
@@ -1152,18 +1153,19 @@ func TestPluginsRepo(t *testing.T) {
 		FrameUrl: randomdata.Letters(16),
 	}
 
-	this, err = plug_ctrl.Create(rootCtx, this)
+	res, err := plug_ctrl.Create(rootCtx, connect.NewRequest(this))
 	if err != nil {
 		t.Fatalf("Error creating Plugin: %v", err)
 	}
+	this = res.Msg
 
-	plugs, err := plug_ctrl.List(rootCtx, &plugins.ListRequest{})
+	plugs, err := plug_ctrl.List(rootCtx, connect.NewRequest(&plugins.ListRequest{}))
 	if err != nil {
 		t.Fatalf("Error listing plugins: %v", err)
 	}
 
 	found := false
-	for _, plug := range plugs.Pool {
+	for _, plug := range plugs.Msg.Pool {
 		if plug.Uuid == this.Uuid {
 			found = true
 			break
@@ -1183,10 +1185,11 @@ func TestPluginsRepo(t *testing.T) {
 	}
 	that.Title = randomdata.SillyName()
 	that.Public = true
-	that, err = plug_ctrl.Update(rootCtx, that)
+	res, err = plug_ctrl.Update(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Error updating plugin: %v", err)
 	}
+	that = res.Msg
 
 	if this.Title == that.Title {
 		t.Fatal("Plugin Title didn't update")
@@ -1195,12 +1198,13 @@ func TestPluginsRepo(t *testing.T) {
 		t.Fatal("Plugin <public> property didn't update")
 	}
 
-	that, err = plug_ctrl.Get(rootCtx, that)
+	res, err = plug_ctrl.Get(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Couldn't get Plugin: %v", err)
 	}
+	that = res.Msg
 
-	_, err = plug_ctrl.Delete(rootCtx, that)
+	_, err = plug_ctrl.Delete(rootCtx, connect.NewRequest(that))
 	if err != nil {
 		t.Fatalf("Couldn't delete Plugin: %v", err)
 	}

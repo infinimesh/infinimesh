@@ -10,7 +10,7 @@ RUN npm install -g pnpm
 RUN pnpm i && pnpm build
 
 # Build server
-FROM golang:1.19-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 RUN apk add upx
 

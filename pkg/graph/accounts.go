@@ -17,8 +17,11 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt"
@@ -29,6 +32,7 @@ import (
 	pb "github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/access"
 	accpb "github.com/infinimesh/proto/node/accounts"
+	"github.com/infinimesh/proto/node/namespaces"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -79,7 +83,6 @@ func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 }
 
 type AccountsController struct {
-	pb.UnimplementedAccountsServiceServer
 	InfinimeshBaseController
 
 	col  driver.Collection // Accounts Collection
@@ -111,8 +114,9 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 	}
 }
 
-func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*pb.TokenResponse, error) {
+func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb.TokenRequest]) (*connect.Response[pb.TokenResponse], error) {
 	log := c.log.Named("Token")
+	req := _req.Msg
 	log.Debug("Token request received", zap.Any("request", req))
 
 	var account Account
@@ -169,11 +173,16 @@ func (c *AccountsController) Token(ctx context.Context, req *pb.TokenRequest) (*
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
 
-	return &pb.TokenResponse{Token: token_string}, nil
+	return connect.NewResponse(&pb.TokenResponse{Token: token_string}), nil
 }
 
-func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *accpb.Account, err error) {
+func (c *AccountsController) Accessibles(ctx context.Context, req *connect.Request[namespaces.Namespace]) (*connect.Response[access.Nodes], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("not implemented"))
+}
+
+func (c *AccountsController) Get(ctx context.Context, req *connect.Request[accpb.Account]) (res *connect.Response[accpb.Account], err error) {
 	log := c.log.Named("Get")
+	acc := req.Msg
 	log.Debug("Get request received", zap.Any("request", acc))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -195,10 +204,10 @@ func (c *AccountsController) Get(ctx context.Context, acc *accpb.Account) (res *
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	return result.Account, nil
+	return connect.NewResponse(result.Account), nil
 }
 
-func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*accpb.Accounts, error) {
+func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.EmptyMessage]) (*connect.Response[accpb.Accounts], error) {
 	log := c.log.Named("List")
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -227,13 +236,14 @@ func (c *AccountsController) List(ctx context.Context, _ *pb.EmptyMessage) (*acc
 		r = append(r, &acc)
 	}
 
-	return &accpb.Accounts{
+	return connect.NewResponse(&accpb.Accounts{
 		Accounts: r,
-	}, nil
+	}), nil
 }
 
-func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRequest) (*accpb.CreateResponse, error) {
+func (c *AccountsController) Create(ctx context.Context, req *connect.Request[accpb.CreateRequest]) (*connect.Response[accpb.CreateResponse], error) {
 	log := c.log.Named("Create")
+	request := req.Msg
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -246,7 +256,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 
 	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
 	if !ok || level < access.Level_ADMIN {
-		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
+		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("no Access to Namespace %s", ns_id))
 	}
 
 	if request.Account.GetDefaultNamespace() == "" {
@@ -257,7 +267,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	meta, err := c.col.CreateDocument(ctx, account)
 	if err != nil {
 		log.Warn("Error creating Account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error while creating Account")
+		return nil, StatusFromString(connect.CodeInternal, "Error while creating Account")
 	}
 	account.Uuid = meta.ID.Key()
 	account.DocumentMeta = meta
@@ -267,7 +277,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error Linking Namespace to Account", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
@@ -275,7 +285,7 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error making Credentials for Account", zap.Error(err))
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	err = c._SetCredentials(ctx, account, col, cred)
@@ -284,12 +294,14 @@ func (c *AccountsController) Create(ctx context.Context, request *accpb.CreateRe
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
 		return nil, err
 	}
-
-	return &accpb.CreateResponse{Account: account.Account}, nil
+	return connect.NewResponse(
+		&accpb.CreateResponse{Account: account.Account},
+	), nil
 }
 
-func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+func (c *AccountsController) Update(ctx context.Context, req *connect.Request[accpb.Account]) (*connect.Response[accpb.Account], error) {
 	log := c.log.Named("Update")
+	acc := req.Msg
 	log.Debug("Update request received", zap.Any("request", acc), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -315,17 +327,19 @@ func (c *AccountsController) Update(ctx context.Context, acc *accpb.Account) (*a
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	return acc, nil
+	return connect.NewResponse(acc), nil
 }
 
-func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*accpb.Account, error) {
+func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[accpb.Account]) (*connect.Response[accpb.Account], error) {
 	log := c.log.Named("Update")
+	acc := req.Msg
 	log.Debug("Update request received", zap.Any("account", acc), zap.Any("context", ctx))
 
-	curr, err := c.Get(ctx, acc)
+	resp, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
+	curr := resp.Msg
 
 	if curr.Access.Level < access.Level_MGMT {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.Uuid)
@@ -338,11 +352,12 @@ func (c *AccountsController) Toggle(ctx context.Context, acc *accpb.Account) (*a
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	return res.Account, nil
+	return connect.NewResponse(res.Account), nil
 }
 
-func (c *AccountsController) Deletables(ctx context.Context, request *accpb.Account) (*access.Nodes, error) {
+func (c *AccountsController) Deletables(ctx context.Context, req *connect.Request[accpb.Account]) (*connect.Response[access.Nodes], error) {
 	log := c.log.Named("Deletables")
+	request := req.Msg
 	log.Debug("Deletables request received", zap.Any("request", request))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -364,11 +379,12 @@ func (c *AccountsController) Deletables(ctx context.Context, request *accpb.Acco
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
 	}
 
-	return nodes, nil
+	return connect.NewResponse(nodes), nil
 }
 
-func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*pb.DeleteResponse, error) {
+func (c *AccountsController) Delete(ctx context.Context, request *connect.Request[accpb.Account]) (*connect.Response[pb.DeleteResponse], error) {
 	log := c.log.Named("Delete")
+	req := request.Msg
 	log.Debug("Delete request received", zap.Any("request", req), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -390,7 +406,7 @@ func (c *AccountsController) Delete(ctx context.Context, req *accpb.Account) (*p
 		return nil, status.Error(codes.Internal, "Error deleting account")
 	}
 
-	return &pb.DeleteResponse{}, nil
+	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 
 // Helper Functions
@@ -427,8 +443,9 @@ func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.
 	return r, err == nil
 }
 
-func (c *AccountsController) GetCredentials(ctx context.Context, req *pb.GetCredentialsRequest) (*pb.GetCredentialsResponse, error) {
+func (c *AccountsController) GetCredentials(ctx context.Context, request *connect.Request[pb.GetCredentialsRequest]) (*connect.Response[pb.GetCredentialsResponse], error) {
 	log := c.log.Named("GetCredentials")
+	req := request.Msg
 	log.Debug("Get Credentials request received", zap.String("account", req.GetUuid()))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -463,7 +480,7 @@ func (c *AccountsController) GetCredentials(ctx context.Context, req *pb.GetCred
 		})
 	}
 
-	return &pb.GetCredentialsResponse{Credentials: creds}, nil
+	return connect.NewResponse(&pb.GetCredentialsResponse{Credentials: creds}), nil
 }
 
 // Set Account Credentials, ensure account has only one credentials document linked per credentials type
@@ -507,8 +524,9 @@ func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account
 	return nil
 }
 
-func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCredentialsRequest) (*pb.SetCredentialsResponse, error) {
+func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.Request[pb.SetCredentialsRequest]) (*connect.Response[pb.SetCredentialsResponse], error) {
 	log := c.log.Named("SetCredentials")
+	req := _req.Msg
 	log.Debug("Set Credentials request received", zap.String("account", req.GetUuid()), zap.String("type", req.GetCredentials().GetType()), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -536,5 +554,9 @@ func (c *AccountsController) SetCredentials(ctx context.Context, req *pb.SetCred
 	if err != nil {
 		return nil, err
 	}
-	return &pb.SetCredentialsResponse{}, nil
+	return connect.NewResponse(&pb.SetCredentialsResponse{}), nil
+}
+
+func (c *AccountsController) DelCredentials(context.Context, *connect.Request[pb.DeleteCredentialsRequest]) (*connect.Response[pb.DeleteResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("not implemented"))
 }

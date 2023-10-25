@@ -18,6 +18,7 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	pb "github.com/infinimesh/proto/node"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,7 +30,7 @@ type InternalService struct {
 	pb.UnimplementedInternalServiceServer
 }
 
-func (*InternalService) GetLDAPProviders(ctx context.Context, _ *pb.EmptyMessage) (*pb.LDAPProviders, error) {
+func (*InternalService) GetLDAPProviders(ctx context.Context, _ *connect.Request[pb.EmptyMessage]) (*connect.Response[pb.LDAPProviders], error) {
 	if !cred.LDAP_CONFIGURED {
 		return nil, status.Error(codes.OK, "LDAP Auth is not configured")
 	}
@@ -39,7 +40,7 @@ func (*InternalService) GetLDAPProviders(ctx context.Context, _ *pb.EmptyMessage
 		res[key] = "" // TODO: add title
 	}
 
-	return &pb.LDAPProviders{
+	return connect.NewResponse(&pb.LDAPProviders{
 		Providers: res,
-	}, nil
+	}), nil
 }

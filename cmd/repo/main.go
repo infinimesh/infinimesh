@@ -17,28 +17,28 @@ package main
 
 import (
 	"fmt"
-	"net"
+	"net/http"
 	"strings"
 
+	"connectrpc.com/connect"
+	"connectrpc.com/grpchealth"
 	"github.com/go-redis/redis/v8"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/gorilla/mux"
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/infinimesh/proto/handsfree"
-	"github.com/infinimesh/proto/plugins"
+	"github.com/infinimesh/proto/node/nodeconnect"
+	"github.com/infinimesh/proto/plugins/pluginsconnect"
 	shadowpb "github.com/infinimesh/proto/shadow"
+	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/health"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
-
-	pb "github.com/infinimesh/proto/node"
 )
 
 var (
@@ -103,22 +103,18 @@ func main() {
 	})
 	log.Info("Redis connection established")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
-	if err != nil {
-		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
-	}
+	router := mux.NewRouter()
+	router.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Debug("Request", zap.String("method", r.Method), zap.String("path", r.URL.Path))
+			h.ServeHTTP(w, r)
+		})
+	})
 
 	auth.SetContext(log, rdb, SIGNING_KEY)
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpc_zap.UnaryServerInterceptor(log),
-			grpc.UnaryServerInterceptor(auth.JWT_AUTH_INTERCEPTOR),
-		)),
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-			grpc_zap.StreamServerInterceptor(log),
-			grpc_auth.StreamServerInterceptor(auth.JwtDeviceAuthMiddleware),
-		)),
-	)
+	authInterceptor := auth.NewAuthInterceptor(log, rdb, SIGNING_KEY)
+
+	interceptors := connect.WithInterceptors(authInterceptor)
 
 	log.Debug("Registering services", zap.Any("services", services))
 
@@ -127,14 +123,16 @@ func main() {
 		log.Info("Registering accounts service")
 		acc_ctrl := graph.NewAccountsController(log, db, rdb)
 		acc_ctrl.SIGNING_KEY = SIGNING_KEY
-		pb.RegisterAccountsServiceServer(s, acc_ctrl)
+		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl, interceptors)
+		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
 	}
 	if _, ok := services["namespaces"]; ok {
 		log.Info("Registering namespaces service")
 		ns_ctrl := graph.NewNamespacesController(log, db)
-		pb.RegisterNamespacesServiceServer(s, ns_ctrl)
+		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl, interceptors)
+		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
 	}
@@ -149,7 +147,8 @@ func main() {
 	if _, ok := services["sessions"]; ok {
 		log.Info("Registering sessions service")
 		sess_ctrl := graph.NewSessionsController(log, rdb)
-		pb.RegisterSessionsServiceServer(s, sess_ctrl)
+		path, handler := nodeconnect.NewSessionsServiceHandler(sess_ctrl, interceptors)
+		router.PathPrefix(path).Handler(handler)
 	}
 
 	if _, ok := services["devices"]; ok {
@@ -164,7 +163,8 @@ func main() {
 		dev_ctrl := graph.NewDevicesController(log, db, handsfree.NewHandsfreeServiceClient(conn))
 		dev_ctrl.SIGNING_KEY = SIGNING_KEY
 
-		pb.RegisterDevicesServiceServer(s, dev_ctrl)
+		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl, interceptors)
+		router.PathPrefix(path).Handler(handler)
 	}
 	if _, ok := services["shadow"]; ok {
 		log.Info("Registering shadow service")
@@ -175,23 +175,43 @@ func main() {
 			log.Fatal("Failed to connect to shadow", zap.String("address", host), zap.Error(err))
 		}
 		client := shadowpb.NewShadowServiceClient(conn)
-		pb.RegisterShadowServiceServer(s, NewShadowAPI(log, client))
+
+		path, handler := nodeconnect.NewShadowServiceHandler(NewShadowAPI(log, client), interceptors)
+		router.PathPrefix(path).Handler(handler)
 	}
 
 	if _, ok := services["plugins"]; ok {
 		log.Info("Registering plugins service")
 		plug_ctrl := graph.NewPluginsController(log, db)
-		plugins.RegisterPluginsServiceServer(s, plug_ctrl)
+
+		path, handler := pluginsconnect.NewPluginsServiceHandler(plug_ctrl, interceptors)
+		router.PathPrefix(path).Handler(handler)
 	}
 
 	if _, ok := services["internal"]; ok {
 		log.Info("Registering Internal service")
 		is := graph.InternalService{}
-		pb.RegisterInternalServiceServer(s, &is)
+		path, handler := nodeconnect.NewInternalServiceHandler(&is, interceptors)
+		router.PathPrefix(path).Handler(handler)
 	}
 
-	healthpb.RegisterHealthServer(s, health.NewServer())
+	checker := grpchealth.NewStaticChecker()
+	path, handler := grpchealth.NewHandler(checker)
+	router.PathPrefix(path).Handler(handler)
 
-	log.Info(fmt.Sprintf("Serving gRPC on 0.0.0.0:%v", port))
-	log.Fatal("Failed to serve gRPC", zap.Error(s.Serve(lis)))
+	host := fmt.Sprintf("0.0.0.0:%s", port)
+
+	handler = cors.New(cors.Options{
+		AllowedOrigins:      []string{"*"},
+		AllowedMethods:      []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
+		AllowedHeaders:      []string{"*", "Connect-Protocol-Version"},
+		AllowCredentials:    true,
+		AllowPrivateNetwork: true,
+	}).Handler(h2c.NewHandler(router, &http2.Server{}))
+
+	log.Info("Serving", zap.String("host", host))
+	err := http.ListenAndServe(host, handler)
+	if err != nil {
+		log.Fatal("Failed to start server", zap.Error(err))
+	}
 }

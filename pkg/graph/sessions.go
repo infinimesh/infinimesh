@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
@@ -25,7 +26,7 @@ func NewSessionsController(log *zap.Logger, rdb *redis.Client) *SessionsControll
 	}
 }
 
-func (c *SessionsController) Get(ctx context.Context, req *node.EmptyMessage) (*pb.Sessions, error) {
+func (c *SessionsController) Get(ctx context.Context, req *connect.Request[node.EmptyMessage]) (*connect.Response[pb.Sessions], error) {
 	log := c.log.Named("Get")
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	sid := ctx.Value(inf.InfinimeshSessionCtxKey).(string)
@@ -45,12 +46,12 @@ func (c *SessionsController) Get(ctx context.Context, req *node.EmptyMessage) (*
 		}
 	}
 
-	return &pb.Sessions{
+	return connect.NewResponse(&pb.Sessions{
 		Sessions: result,
-	}, nil
+	}), nil
 }
 
-func (c *SessionsController) GetActivity(ctx context.Context, req *node.EmptyMessage) (*pb.Activity, error) {
+func (c *SessionsController) GetActivity(ctx context.Context, req *connect.Request[node.EmptyMessage]) (*connect.Response[pb.Activity], error) {
 	log := c.log.Named("GetActivity")
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 
@@ -61,13 +62,14 @@ func (c *SessionsController) GetActivity(ctx context.Context, req *node.EmptyMes
 		return nil, err
 	}
 
-	return &pb.Activity{
+	return connect.NewResponse(&pb.Activity{
 		LastSeen: result,
-	}, nil
+	}), nil
 }
 
-func (c *SessionsController) Revoke(ctx context.Context, req *pb.Session) (*node.DeleteResponse, error) {
+func (c *SessionsController) Revoke(ctx context.Context, _req *connect.Request[pb.Session]) (*connect.Response[node.DeleteResponse], error) {
 	log := c.log.Named("Revoke")
+	req := _req.Msg
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 
 	log.Debug("Invoked", zap.String("requestor", requestor), zap.String("sid", req.Id))
@@ -77,5 +79,5 @@ func (c *SessionsController) Revoke(ctx context.Context, req *pb.Session) (*node
 		return nil, err
 	}
 
-	return &node.DeleteResponse{}, nil
+	return connect.NewResponse(&node.DeleteResponse{}), nil
 }

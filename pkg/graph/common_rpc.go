@@ -2,7 +2,9 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"github.com/infinimesh/proto/node"
@@ -65,18 +67,20 @@ func _Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode,
 	return nil
 }
 
-func (ctrl *DevicesController) Move(ctx context.Context, req *node.MoveRequest) (*node.EmptyMessage, error) {
-
+func (ctrl *DevicesController) Move(ctx context.Context, msg *connect.Request[node.MoveRequest]) (*connect.Response[node.EmptyMessage], error) {
+	req := msg.Msg
 	obj := NewBlankDeviceDocument(req.GetUuid())
 
-	return &node.EmptyMessage{}, _Move(ctx, ctrl, obj, ctrl.ns2dev, req.GetNamespace())
-
+	return connect.NewResponse(&node.EmptyMessage{}), _Move(ctx, ctrl, obj, ctrl.ns2dev, req.GetNamespace())
 }
 
-func (ctrl *AccountsController) Move(ctx context.Context, req *node.MoveRequest) (*node.EmptyMessage, error) {
-
+func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[node.MoveRequest]) (*connect.Response[node.EmptyMessage], error) {
+	req := _req.Msg
 	obj := NewBlankAccountDocument(req.GetUuid())
 
-	return &node.EmptyMessage{}, _Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
+	return connect.NewResponse(&node.EmptyMessage{}), _Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
+}
 
+func StatusFromString(code connect.Code, format string, args ...any) *connect.Error {
+	return connect.NewError(code, fmt.Errorf(format, args...))
 }

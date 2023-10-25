@@ -18,6 +18,7 @@ package graph
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -82,8 +83,9 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	}
 }
 
-func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespace) (*nspb.Namespace, error) {
+func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[nspb.Namespace]) (*connect.Response[nspb.Namespace], error) {
 	log := c.log.Named("Create")
+	request := req.Msg
 	log.Debug("Create request received", zap.Any("request", request), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -117,17 +119,17 @@ func (c *NamespacesController) Create(ctx context.Context, request *nspb.Namespa
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	return namespace.Namespace, nil
+	return connect.NewResponse(namespace.Namespace), nil
 }
 
-func (c *NamespacesController) Get(ctx context.Context, ns *nspb.Namespace) (res *nspb.Namespace, err error) {
+func (c *NamespacesController) Get(ctx context.Context, ns *connect.Request[nspb.Namespace]) (res *connect.Response[nspb.Namespace], err error) {
 	log := c.log.Named("Get")
 	log.Debug("Get request received", zap.Any("request", ns))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	uuid := ns.GetUuid()
+	uuid := ns.Msg.GetUuid()
 	// Getting Namespace from DB
 	// and Check requestor access
 	result := *NewBlankNamespaceDocument(uuid)
@@ -140,11 +142,12 @@ func (c *NamespacesController) Get(ctx context.Context, ns *nspb.Namespace) (res
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	return result.Namespace, nil
+	return connect.NewResponse(result.Namespace), nil
 }
 
-func (c *NamespacesController) Update(ctx context.Context, ns *nspb.Namespace) (res *nspb.Namespace, err error) {
+func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[nspb.Namespace]) (res *connect.Response[nspb.Namespace], err error) {
 	log := c.log.Named("Update")
+	ns := req.Msg
 	log.Debug("Request received", zap.Any("namespace", ns))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -185,10 +188,10 @@ func (c *NamespacesController) Update(ctx context.Context, ns *nspb.Namespace) (
 		}
 	}
 
-	return curr.Namespace, nil
+	return connect.NewResponse(curr.Namespace), nil
 }
 
-func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*nspb.Namespaces, error) {
+func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.EmptyMessage]) (*connect.Response[nspb.Namespaces], error) {
 	log := c.log.Named("List")
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
@@ -215,9 +218,9 @@ func (c *NamespacesController) List(ctx context.Context, _ *pb.EmptyMessage) (*n
 		r = append(r, &ns)
 	}
 
-	return &nspb.Namespaces{
+	return connect.NewResponse(&nspb.Namespaces{
 		Namespaces: r,
-	}, nil
+	}), nil
 }
 
 const listJoinsQuery = `
@@ -227,8 +230,9 @@ FILTER edge.role != 1 && edge.level > 0
 RETURN MERGE(node, { uuid: node._key, access: { level: edge.level } })
 `
 
-func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespace) (*accpb.Accounts, error) {
+func (c *NamespacesController) Joins(ctx context.Context, req *connect.Request[nspb.Namespace]) (*connect.Response[accpb.Accounts], error) {
 	log := c.log.Named("Joins")
+	request := req.Msg
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -267,11 +271,12 @@ func (c *NamespacesController) Joins(ctx context.Context, request *nspb.Namespac
 		r = append(r, &acc)
 	}
 
-	return &accpb.Accounts{Accounts: r}, nil
+	return connect.NewResponse(&accpb.Accounts{Accounts: r}), nil
 }
 
-func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest) (*accpb.Accounts, error) {
+func (c *NamespacesController) Join(ctx context.Context, req *connect.Request[pb.JoinRequest]) (*connect.Response[accpb.Accounts], error) {
 	log := c.log.Named("Join")
+	request := req.Msg
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
@@ -303,17 +308,17 @@ func (c *NamespacesController) Join(ctx context.Context, request *pb.JoinRequest
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	return c.Joins(ctx, ns.Namespace)
+	return c.Joins(ctx, connect.NewRequest(ns.Namespace))
 }
 
-func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Namespace) (*access.Nodes, error) {
+func (c *NamespacesController) Deletables(ctx context.Context, request *connect.Request[nspb.Namespace]) (*connect.Response[access.Nodes], error) {
 	log := c.log.Named("Deletables")
 	log.Debug("Deletables request received", zap.Any("request", request))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	ns := *NewBlankNamespaceDocument(request.GetUuid())
+	ns := *NewBlankNamespaceDocument(request.Msg.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
@@ -329,17 +334,17 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *nspb.Nam
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
 	}
 
-	return nodes, nil
+	return connect.NewResponse(nodes), nil
 }
 
-func (c *NamespacesController) Delete(ctx context.Context, request *nspb.Namespace) (*pb.DeleteResponse, error) {
+func (c *NamespacesController) Delete(ctx context.Context, request *connect.Request[nspb.Namespace]) (*connect.Response[pb.DeleteResponse], error) {
 	log := c.log.Named("Delete")
 	log.Debug("Delete request received", zap.Any("request", request), zap.Any("context", ctx))
 
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	ns := *NewBlankNamespaceDocument(request.GetUuid())
+	ns := *NewBlankNamespaceDocument(request.Msg.GetUuid())
 	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
@@ -355,5 +360,9 @@ func (c *NamespacesController) Delete(ctx context.Context, request *nspb.Namespa
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
 	}
 
-	return &pb.DeleteResponse{}, nil
+	return connect.NewResponse(&pb.DeleteResponse{}), nil
+}
+
+func (c *NamespacesController) Accessibles(context.Context, *connect.Request[nspb.Namespace]) (*connect.Response[access.Nodes], error) {
+	return nil, StatusFromString(connect.CodeUnimplemented, "Not implemented")
 }
