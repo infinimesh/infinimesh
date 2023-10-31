@@ -24,8 +24,8 @@ dependencies:
     specifier: ^1.0.0
     version: 1.0.0(pinia@2.1.7)(vue@3.3.7)
   ua-parser-js:
-    specifier: ^1.0.36
-    version: 1.0.36
+    specifier: ^1.0.37
+    version: 1.0.37
   vite-svg-loader:
     specifier: ^4.0.0
     version: 4.0.0
@@ -945,8 +945,8 @@ packages:
     resolution: {integrity: sha512-M8RGFoKtZ8dF+iwJfAJTOH/SM4KluKOKRJpjCMhI8bG3qB74zrFoArKZ62ll0Fr3mqkMJiQOmWYkdYgDeITYQg==}
     dev: true
 
-  /ua-parser-js@1.0.36:
-    resolution: {integrity: sha512-znuyCIXzl8ciS3+y3fHJI/2OhQIXbXw9MWC/o3qwyR+RGppjZHrM27CGFSKCJXi2Kctiz537iOu2KnXs1lMQhw==}
+  /ua-parser-js@1.0.37:
+    resolution: {integrity: sha512-bhTyI94tZofjo+Dn8SN6Zv8nBDvyXTymAdM3LDI/0IboIUwTu1rEhW7v2TfiVsoYWgkQ4kOVqnI8APUFbIQIFQ==}
     dev: false
 
   /uc.micro@1.0.6:
