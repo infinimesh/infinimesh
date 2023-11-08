@@ -22,13 +22,13 @@
     "vue3-markdown-it": "^1.0.10"
   },
   "devDependencies": {
-    "@types/markdown-it": "^13.0.5",
+    "@types/markdown-it": "^13.0.6",
     "naive-ui": "^2.35.0",
     "@vitejs/plugin-vue": "^4.4.0",
     "vfonts": "^0.0.3",
     "vite": "^4.5.0"
   },
   "peerDependencies": {
-    "@types/markdown-it": "^13.0.5"
+    "@types/markdown-it": "^13.0.6"
   }
 }
