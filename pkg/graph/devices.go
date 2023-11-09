@@ -294,7 +294,7 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 	curr.Msg.Title = dev.Title
 	curr.Msg.Config = dev.Config
 
-	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr)
+	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr.Msg)
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
