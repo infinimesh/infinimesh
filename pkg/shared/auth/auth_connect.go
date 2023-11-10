@@ -106,6 +106,8 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 		switch {
 		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
 			middleware = i.ConnectDeviceAuthMiddleware
+		case path == "/infinimesh.handsfree.HandsfreeService/Connect":
+			middleware = i.ConnectBlankMiddleware
 		default:
 			middleware = i.ConnectStandardAuthMiddleware
 		}
