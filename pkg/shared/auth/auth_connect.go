@@ -98,7 +98,7 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 
 		segments := strings.Split(header, " ")
 		if len(segments) != 2 {
-			return connect.NewError(connect.CodeUnauthenticated, errors.New("invalid token"))
+			segments = []string{"", ""}
 		}
 
 		var middleware middleware
