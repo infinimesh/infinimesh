@@ -190,6 +190,10 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 	return
 }
 
+func (i *interceptor) ConnectBlankMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	return _ctx, false, nil
+}
+
 func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
 	log_activity = false
 	token, err := connectValidateToken(signingKey, tokenString)
