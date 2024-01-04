@@ -20,7 +20,7 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.17.0
 	google.golang.org/grpc v1.60.1
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -54,7 +54,7 @@ require (
 )
 
 require (
-	connectrpc.com/connect v1.13.0
+	connectrpc.com/connect v1.14.0
 	connectrpc.com/grpchealth v1.3.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.5.0
