@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.12.0
     version: 0.12.0
   axios:
-    specifier: ^1.6.2
-    version: 1.6.2
+    specifier: ^1.6.4
+    version: 1.6.4
   highlight.js:
     specifier: ^11.9.0
     version: 11.9.0
@@ -34,7 +34,7 @@ dependencies:
     version: 3.3.12
   vue-axios:
     specifier: ^3.5.2
-    version: 3.5.2(axios@1.6.2)(vue@3.3.12)
+    version: 3.5.2(axios@1.6.4)(vue@3.3.12)
   vue-router:
     specifier: ^4.2.5
     version: 4.2.5(vue@3.3.12)
@@ -511,10 +511,10 @@ packages:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: false
 
-  /axios@1.6.2:
-    resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
+  /axios@1.6.4:
+    resolution: {integrity: sha512-heJnIs6N4aa1eSthhN9M5ioILu8Wi8vmQW9iHQ9NUvfkJb0lEEDUiIdQNAuBtfUt3FxReaKdpQA5DbmMOqzF/A==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.4
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -682,8 +682,8 @@ packages:
     resolution: {integrity: sha512-qaeGN5bx63s/AXgQo8gj6fBkxge+OoLddLniox5qtLAEY5HSnuSlISXVPxnSae1dWblvTh4/HoMIB+mbMsvZzw==}
     dev: true
 
-  /follow-redirects@1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+  /follow-redirects@1.15.4:
+    resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -1038,13 +1038,13 @@ packages:
       vue: 3.3.12
     dev: true
 
-  /vue-axios@3.5.2(axios@1.6.2)(vue@3.3.12):
+  /vue-axios@3.5.2(axios@1.6.4)(vue@3.3.12):
     resolution: {integrity: sha512-GP+dct7UlAWkl1qoP3ppw0z6jcSua5/IrMpjB5O8bh089iIiJ+hdxPYH2NPEpajlYgkW5EVMP95ttXWdas1O0g==}
     peerDependencies:
       axios: '*'
       vue: ^3.0.0 || ^2.0.0
     dependencies:
-      axios: 1.6.2
+      axios: 1.6.4
       vue: 3.3.12
     dev: false
 
