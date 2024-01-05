@@ -187,7 +187,7 @@ Access the Console at <http://console.infinimesh.local>
 
 ## License
 
-Copyright 2018 - 2023, The Infinite Devices team
+Copyright 2018 - 2024 the infinimesh committers, 2pk03, birdayz and The Infinite Devices team
 
 Licensed under the Apache License, Version 2.0 (the "Licenses"); you may not use
 this file except in compliance with the License. You may obtain a copy of the License at
