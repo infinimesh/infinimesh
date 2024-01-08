@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@types/markdown-it": "^13.0.7",
-    "naive-ui": "^2.36.0",
+    "naive-ui": "^2.37.0",
     "@vitejs/plugin-vue": "^4.6.2",
     "vfonts": "^0.0.3",
     "vite": "^5.0.10"

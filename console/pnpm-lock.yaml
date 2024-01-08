@@ -50,8 +50,8 @@ devDependencies:
     specifier: ^4.6.2
     version: 4.6.2(vite@5.0.10)(vue@3.4.5)
   naive-ui:
-    specifier: ^2.36.0
-    version: 2.36.0(vue@3.4.5)
+    specifier: ^2.37.0
+    version: 2.37.0(vue@3.4.5)
   vfonts:
     specifier: ^0.0.3
     version: 0.0.3
@@ -924,8 +924,8 @@ packages:
       mime-db: 1.52.0
     dev: false
 
-  /naive-ui@2.36.0(vue@3.4.5):
-    resolution: {integrity: sha512-r1ydtEm1Ryf/aWpbLCf32mQAGK99jd1eXgpkCtIomcBRZeAtusfy6zCtIpCppoCuIKM3BW5DMafhVxilubk/lQ==}
+  /naive-ui@2.37.0(vue@3.4.5):
+    resolution: {integrity: sha512-TcuXM1zysnK6i/7o2ZqNjcLp3QMmcdSLWWiXcpEk+xdGpkJzs53/OXNpF4CoDM/npjha7qqtB8Pl17YPN5egFw==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
@@ -936,6 +936,7 @@ packages:
       '@types/lodash-es': 4.17.11
       async-validator: 4.2.5
       css-render: 0.15.12
+      csstype: 3.1.3
       date-fns: 2.30.0
       date-fns-tz: 2.0.0(date-fns@2.30.0)
       evtd: 0.2.4
@@ -947,7 +948,7 @@ packages:
       vdirs: 0.1.8(vue@3.4.5)
       vooks: 0.2.12(vue@3.4.5)
       vue: 3.4.5
-      vueuc: 0.4.54(vue@3.4.5)
+      vueuc: 0.4.58(vue@3.4.5)
     dev: true
 
   /nanoid@3.3.7:
@@ -1217,8 +1218,8 @@ packages:
       '@vue/server-renderer': 3.4.5(vue@3.4.5)
       '@vue/shared': 3.4.5
 
-  /vueuc@0.4.54(vue@3.4.5):
-    resolution: {integrity: sha512-2LED7h1BSnCRPBI6AlSIf+1Yte1shN+Vb2gpspO5wHI7zWzbcq4bAu2f9nFh5yXIUKdzqmLvzRsOXDl4TrDyCw==}
+  /vueuc@0.4.58(vue@3.4.5):
+    resolution: {integrity: sha512-Wnj/N8WbPRSxSt+9ji1jtDHPzda5h2OH/0sFBhvdxDRuyCZbjGg3/cKMaKqEoe+dErTexG2R+i6Q8S/Toq1MYg==}
     peerDependencies:
       vue: ^3.0.11
     dependencies:
