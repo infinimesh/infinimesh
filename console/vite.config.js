@@ -16,8 +16,10 @@ export default defineConfig(({ command }) => {
 
   if (command == 'build') {
     conf.define = {
-      INFINIMESH_VERSION_TAG: process.env.INFINIMESH_VERSION_TAG ?? "development"
+      INFINIMESH_VERSION_TAG: process.env.INFINIMESH_VERSION_TAG
     }
+    if (!process.env.INFINIMESH_VERSION_TAG) conf.define.INFINIMESH_VERSION_TAG = "development"
+    
     console.log(`Using version tag: ${conf.define.INFINIMESH_VERSION_TAG}`)
   }
 
