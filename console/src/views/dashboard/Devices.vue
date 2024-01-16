@@ -6,9 +6,26 @@
           <n-h1 prefix="bar" align-text type="info">
             <n-text type="info"> Devices </n-text>
             (
-            <n-number-animation :from="0" :to="devices.length" />
+            <n-number-animation :from="0" :to="filteredDevices.length || 0" />
             )
           </n-h1>
+          <n-space>
+            <n-dropdown 
+              trigger="click"
+              width="200px"
+              placement="bottom-start"
+              :options="filterDeviceOptions"
+              @select="handleFilterSelect"
+            >
+              <n-input
+                ref="filterRef"
+                placeholder="Filter devices eg. :uuid:abc"
+                v-model:value="filterTerm"
+                clearable
+                @clear="clearFilter"
+              />
+            </n-dropdown>
+          </n-space>
           <n-button strong secondary round type="info" @click="handleRefresh">
             <template #icon>
               <n-icon>
@@ -26,13 +43,13 @@
         </n-space>
       </n-grid-item>
     </n-grid>
-    <devices-pool :devices="devices" :show_ns="show_ns" @refresh="() => store.fetchDevices(true, true)" />
+    <devices-pool :devices="filteredDevices()" :show_ns="show_ns" @refresh="() => store.fetchDevices(true, true)" />
   </n-spin>
 </template>
 
 <script setup>
-import { defineAsyncComponent, watch } from "vue"
-import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation } from "naive-ui";
+import { defineAsyncComponent, watch, ref } from "vue"
+import { NSpin, NH1, NText, NInput, NIcon, NButton, NGrid, NGridItem, NSpace, NDropdown, NNumberAnimation } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
@@ -49,6 +66,100 @@ const DeviceRegister = defineAsyncComponent(() => import("@/components/devices/r
 
 const store = useDevicesStore();
 const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
+
+const filterRef = ref(null);
+const filterTerm = ref("");
+const filterDeviceOptions = [
+  {
+    label: ":uuid:",
+    key: ":uuid:"
+  },
+  {
+    label: ":enabled:",
+    key: ":enabled:"
+  },
+  {
+    label: ":tag:",
+    key: ":tag:"
+  },
+  {
+    label: ":title:",
+    key: ":title:"
+  },
+  {
+    label: ":namespace:",
+    key: ":namespace:"
+  }
+]
+
+function handleFilterSelect(option) {
+  filterTerm.value = filterTerm.value + " " + option;
+  filterRef.value.focus();
+}
+
+function clearFilter() { filterTerm.value = "" }
+
+function parseFilterText() {
+  const filters = {};
+  const parts = filterTerm.value.split(' ');
+  parts.forEach(part => {
+    const [key, value] = part.split(':').filter(String);
+    if (key && value) {
+      filters[key] = value;
+    }
+  });
+
+  return filters;
+}
+
+function matchFilterDevice(device, filters) {
+  for(let key in filters) {
+    const filterValue = filters[key];
+
+    if(key === "uuid" && !device.uuid.toLowerCase().includes(filterValue)) {
+      return false;
+    }
+    
+    if(key === "enabled") {
+      const expectedValue = filterValue === "true";
+      if (device.enabled !== expectedValue) {
+        return false;
+      }
+    }
+
+    if(key === "title" && !device.title.toLowerCase().includes(filterValue)) {
+      return false;
+    }
+
+    if(key === "tag") {
+      const filterTags = filterValue.split(",");
+
+      if(!device.tags.some(tag => 
+        filterTags.some(filterTag => 
+          tag.toLowerCase().includes(filterTag))
+        )
+      ) {
+        return false;
+      }
+    }
+
+    if(
+      key === "namespace" && 
+      !device.access.namespace.toLowerCase().includes(filterValue)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function filteredDevices() {
+  const filters = parseFilterText()
+  return devices.value.filter((device) => {
+    return matchFilterDevice(device, filters)
+  })
+}
 
 store.fetchDevices(true, true);
 
