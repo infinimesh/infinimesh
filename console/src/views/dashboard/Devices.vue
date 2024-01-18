@@ -2,7 +2,7 @@
   <n-spin :show="loading">
     <n-grid item-responsive y-gap="10" x-gap="10">
       <n-grid-item span="24 500:14 600:12 1000:12">
-        <n-space justify="space-between">
+        <n-space justify="space-between" align="center">
           <n-h1 prefix="bar" align-text type="info">
             <n-text type="info"> Devices </n-text>
             (
@@ -10,34 +10,32 @@
             )
           </n-h1>
           <n-space>
-            <n-dropdown 
-              trigger="click"
-              width="200px"
-              placement="bottom-start"
-              :options="filterDeviceOptions"
-              @select="handleFilterSelect"
-            >
-              <n-input
-                ref="filterRef"
-                placeholder="Filter devices eg. :uuid:abc"
+            <n-space>
+              <n-select
+                style="width: 220px"
                 v-model:value="filterTerm"
-                clearable
-                @clear="clearFilter"
+                tag
+                filterable
+                multiple
+                placeholder="Filter devices eg. :uuid:abc"
+                :options="filterDeviceOptions"
+                :show-arrow="false"
+                class="filter-input"
               />
-            </n-dropdown>
+            </n-space>
+            <n-button strong secondary round type="info" @click="handleRefresh">
+              <template #icon>
+                <n-icon>
+                  <refresh-outline />
+                </n-icon>
+              </template>
+              Refresh State
+            </n-button>
           </n-space>
-          <n-button strong secondary round type="info" @click="handleRefresh">
-            <template #icon>
-              <n-icon>
-                <refresh-outline />
-              </n-icon>
-            </template>
-            Refresh State
-          </n-button>
         </n-space>
       </n-grid-item>
       <n-grid-item span="24 300:24 500:10 600:12 1000:12">
-        <n-space justify="space-evenly" align="center">
+        <n-space justify="space-evenly" style="margin-top: 20px;">
           <device-create />
           <device-register v-if="console_services.handsfree != undefined" />
         </n-space>
@@ -49,7 +47,7 @@
 
 <script setup>
 import { defineAsyncComponent, watch, ref } from "vue"
-import { NSpin, NH1, NText, NInput, NIcon, NButton, NGrid, NGridItem, NSpace, NDropdown, NNumberAnimation } from "naive-ui";
+import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation, NSelect } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
@@ -67,48 +65,44 @@ const DeviceRegister = defineAsyncComponent(() => import("@/components/devices/r
 const store = useDevicesStore();
 const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
 
-const filterRef = ref(null);
-const filterTerm = ref("");
+const filterTerm = ref([]);
 const filterDeviceOptions = [
   {
     label: ":uuid:",
-    key: ":uuid:"
+    value: ":uuid:",
+    disabled: true
   },
   {
     label: ":enabled:",
-    key: ":enabled:"
+    value: ":enabled:",
+    disabled: true
   },
   {
     label: ":tag:",
-    key: ":tag:"
+    value: ":tag:",
+    disabled: true
   },
   {
     label: ":title:",
-    key: ":title:"
+    value: ":title:",
+    disabled: true
   },
   {
     label: ":namespace:",
-    key: ":namespace:"
+    value: ":namespace:",
+    disabled: true
   }
 ]
 
-function handleFilterSelect(option) {
-  filterTerm.value = filterTerm.value + " " + option;
-  filterRef.value.focus();
-}
-
-function clearFilter() { filterTerm.value = "" }
-
 function parseFilterText() {
   const filters = {};
-  const parts = filterTerm.value.split(' ');
+  const parts = filterTerm.value;
   parts.forEach(part => {
     const [key, value] = part.split(':').filter(String);
     if (key && value) {
       filters[key] = value;
     }
   });
-
   return filters;
 }
 
