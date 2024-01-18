@@ -9,29 +9,27 @@
             <n-number-animation :from="0" :to="filteredDevices.length || 0" />
             )
           </n-h1>
-          <n-space>
-            <n-space>
-              <n-select
-                style="width: 220px"
-                v-model:value="filterTerm"
-                tag
-                filterable
-                multiple
-                placeholder="Filter devices eg. :uuid:abc"
-                :options="filterDeviceOptions"
-                :show-arrow="false"
-                class="filter-input"
-              />
-            </n-space>
-            <n-button strong secondary round type="info" @click="handleRefresh">
-              <template #icon>
-                <n-icon>
-                  <refresh-outline />
-                </n-icon>
-              </template>
-              Refresh State
-            </n-button>
-          </n-space>
+          <n-button strong secondary round type="info" @click="handleRefresh">
+            <template #icon>
+              <n-icon>
+                <refresh-outline />
+              </n-icon>
+            </template>
+            Refresh State
+          </n-button>
+        </n-space>
+        <n-space>
+          <n-select
+            style="width: 92.5vw; min-width: 640px"
+            v-model:value="filterTerm"
+            tag
+            filterable
+            multiple
+            placeholder="Filter devices eg. :uuid:abc"
+            :options="filterDeviceOptions"
+            :show-arrow="false"
+            class="filter-input"
+          />
         </n-space>
       </n-grid-item>
       <n-grid-item span="24 300:24 500:10 600:12 1000:12">
