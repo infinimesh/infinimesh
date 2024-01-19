@@ -370,13 +370,9 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	post := false
-	if device.Access.Level > access.Level_READ {
-		post = true
-	} else {
-		device.Certificate = nil
-	}
-	token, err := c._MakeToken([]string{device.Uuid}, post, 0)
+	token, err := c._MakeToken(map[string]access.Level{
+		device.GetUuid(): access.Level_NONE,
+	}, 0)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -526,7 +522,9 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *connect.R
 	}
 	r.Uuid = meta.ID.Key()
 
-	token, err := c._MakeToken([]string{r.Uuid}, false, 0)
+	token, err := c._MakeToken(map[string]access.Level{
+		r.GetUuid(): access.Level_NONE,
+	}, 0)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -545,22 +543,24 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(requestor)
-	_access := access.Level_READ
-	if req.GetPost() {
-		_access = access.Level_MGMT
-	}
 
-	for _, uuid := range req.GetDevices() {
+	for uuid := range req.GetDevices() {
 		ok, level := AccessLevel(ctx, c.db, &acc, NewBlankDeviceDocument(uuid))
 		if !ok {
 			return nil, status.Errorf(codes.NotFound, "Account not found or not enough Access Rights to device: %s", uuid)
 		}
-		if level < _access {
+		if level < access.Level_READ {
 			return nil, status.Errorf(codes.PermissionDenied, "Not enough Access Rights to device: %s", uuid)
+		}
+		if req.GetDevices()[uuid] > level {
+			return nil, status.Errorf(codes.PermissionDenied, "Not enough Access Rights to device: %s", uuid)
+		}
+		if req.GetDevices()[uuid] == access.Level_NONE {
+			req.Devices[uuid] = level
 		}
 	}
 
-	token_string, err := c._MakeToken(req.GetDevices(), req.GetPost(), req.GetExp())
+	token_string, err := c._MakeToken(req.GetDevices(), req.GetExp())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -568,10 +568,9 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.
 	return connect.NewResponse(&pb.TokenResponse{Token: token_string}), nil
 }
 
-func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (string, error) {
+func (c *DevicesController) _MakeToken(devices map[string]access.Level, exp int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims[inf.INFINIMESH_DEVICES_CLAIM] = devices
-	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = post
 	claims["exp"] = exp
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
