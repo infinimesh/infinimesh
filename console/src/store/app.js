@@ -1,7 +1,9 @@
 import { inject, nextTick } from "vue";
 import { defineStore } from "pinia";
-
 import { check_token_expired, check_offline } from "@/utils/access";
+import { createPromiseClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
+import { AccountsService } from 'infinimesh-proto/build/es/node/node_connect'
 
 export const baseURL =
   import.meta.env.DEV ? "http://api.infinimesh.local" // jshint ignore:line
@@ -31,6 +33,19 @@ export const useAppStore = defineStore("app", {
           Authorization: `Bearer ${state.token}`,
         },
       });
+
+      //test configuration!!!
+      const transport = createConnectTransport({
+        baseUrl: baseURL,
+        interceptors: [
+          (next) => async (req) => {
+            req.header.set("Authorization", `Bearer ${state.token}`);
+            return next(req);
+          },
+        ],
+      })
+      const accountsClient = createPromiseClient(AccountsService, transport);
+      console.log(accountsClient.list())
 
       const store = this;
       function err_check(err) {
