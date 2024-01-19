@@ -108,7 +108,13 @@ function matchFilterDevice(device, filters) {
   for(let key in filters) {
     const filterValue = filters[key];
 
-    if(key === "uuid" && !device.uuid.toLowerCase().includes(filterValue)) {
+    const matchFilterValue = (val) => val.toLowerCase().includes(filterValue)
+
+    if(["uuid", "title"].includes(key) && !matchFilterValue(device[key])) {
+      return false;
+    }
+
+    if(key === "namespace" && !matchFilterValue(device.access.namespace)) {
       return false;
     }
     
@@ -117,10 +123,6 @@ function matchFilterDevice(device, filters) {
       if (device.enabled !== expectedValue) {
         return false;
       }
-    }
-
-    if(key === "title" && !device.title.toLowerCase().includes(filterValue)) {
-      return false;
     }
 
     if(key === "tag") {
@@ -133,13 +135,6 @@ function matchFilterDevice(device, filters) {
       ) {
         return false;
       }
-    }
-
-    if(
-      key === "namespace" && 
-      !device.access.namespace.toLowerCase().includes(filterValue)
-    ) {
-      return false;
     }
   }
 
