@@ -66,11 +66,6 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.S
 	log := s.log.Named("PatchDesiredState")
 	shadow := request.Msg
 
-	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
-	if !ok || !post_allowed {
-		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
-	}
-
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
@@ -99,11 +94,6 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.S
 func (s *ShadowAPI) Remove(ctx context.Context, request *connect.Request[shadow.RemoveRequest]) (response *connect.Response[shadow.Shadow], err error) {
 	log := s.log.Named("RemoveStateKey")
 	req := request.Msg
-
-	post_allowed, ok := ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool)
-	if !ok || !post_allowed {
-		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
-	}
 
 	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
 	if !ok {

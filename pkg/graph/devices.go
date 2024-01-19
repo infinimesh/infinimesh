@@ -407,10 +407,6 @@ func (c *DevicesController) GetByToken(ctx context.Context, req *connect.Request
 	}
 	device.Uuid = meta.ID.Key()
 
-	if !ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool) {
-		device.Certificate = nil
-	}
-
 	return connect.NewResponse(&device), nil
 }
 

@@ -227,16 +227,6 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 	}
 	ctx = context.WithValue(_ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
 
-	post := false
-	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
-	if ipost != nil {
-		post, ok = ipost.(bool)
-		if !ok {
-			post = false
-		}
-	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
-
 	return
 }
 
