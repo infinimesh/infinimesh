@@ -4,6 +4,7 @@ import { check_token_expired, check_offline } from "@/utils/access";
 import { createPromiseClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { AccountsService } from 'infinimesh-proto/build/es/node/node_connect'
+import { grpcCodeToHttp } from "../utils/access";
 
 export const baseURL =
   import.meta.env.DEV ? "http://api.infinimesh.local" // jshint ignore:line
@@ -34,19 +35,6 @@ export const useAppStore = defineStore("app", {
         },
       });
 
-      //test configuration!!!
-      const transport = createConnectTransport({
-        baseUrl: baseURL,
-        interceptors: [
-          (next) => async (req) => {
-            req.header.set("Authorization", `Bearer ${state.token}`);
-            return next(req);
-          },
-        ],
-      })
-      const accountsClient = createPromiseClient(AccountsService, transport);
-      console.log(accountsClient.list())
-
       const store = this;
       function err_check(err) {
         check_token_expired(err, store);
@@ -56,6 +44,30 @@ export const useAppStore = defineStore("app", {
 
       instance.interceptors.response.use((r) => r, err_check);
       return instance;
+    },
+    transport(state) {
+      const transport = createConnectTransport({
+        baseUrl: baseURL,
+        interceptors: [
+          (next) => async (req) => {
+            req.header.set("Authorization", `Bearer ${state.token.replace(1, 5)}`);
+            return next(req);
+          },
+          (next) => async (req) => {
+            try {
+              return await next(req);
+            } catch (err) {
+              const httpError = { response: { data: { ...err } }, status: grpcCodeToHttp(err.code) }
+              const store = this;
+              check_token_expired(httpError, store);
+              check_offline(httpError, store);
+              return Promise.reject(httpError);
+            }
+          }
+        ],
+      })
+
+      return transport;
     },
   },
   actions: {

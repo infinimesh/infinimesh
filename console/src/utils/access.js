@@ -33,6 +33,12 @@ export function check_token_expired(err, store) {
   }
 }
 
+export function grpcCodeToHttp(code) {
+  return {
+    '0': 200, '1': 499, '2': 500, '3': 400, '4': 504, '5': 400, '6': 409, '7': 403, '16': 401, '8': 429, '13': 500, '15': 500
+  }[code]
+}
+
 export function check_offline(err, store) {
   if (!err.isAxiosError) {
     return
