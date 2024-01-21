@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	og_redis "github.com/go-redis/redis/v8"
-	"github.com/infinimesh/infinimesh/mocks/github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v8"
+	redis_mocks "github.com/infinimesh/infinimesh/mocks/github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	sess_pb "github.com/infinimesh/proto/node/sessions"
 
@@ -21,7 +21,7 @@ type sessionsFixture struct {
 	sh sessions.SessionsHandler
 
 	mocks struct {
-		rdb *redis.MockCmdable
+		rdb *redis_mocks.MockCmdable
 	}
 
 	data struct {
@@ -36,7 +36,7 @@ func newSessionsFixture(
 ) (f *sessionsFixture) {
 
 	f = &sessionsFixture{}
-	f.mocks.rdb = redis.NewMockCmdable(t)
+	f.mocks.rdb = redis_mocks.NewMockCmdable(t)
 
 	f.sh = sessions.NewSessionsHandler(
 		f.mocks.rdb,
@@ -99,7 +99,7 @@ func TestStore_FailsOn_Set(t *testing.T) {
 		return []byte("data"), nil
 	}, nil)
 
-	res := og_redis.NewStatusCmd(context.Background())
+	res := redis.NewStatusCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -119,7 +119,7 @@ func TestStore_Success(t *testing.T) {
 		return []byte("data"), nil
 	}, nil)
 
-	res := og_redis.NewStatusCmd(context.Background())
+	res := redis.NewStatusCmd(context.Background())
 
 	f.mocks.rdb.On(
 		"Set", context.Background(),
@@ -139,7 +139,7 @@ func TestStore_Success(t *testing.T) {
 func TestCheck_FailsOn_Get(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewStringCmd(context.Background())
+	res := redis.NewStringCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -156,7 +156,7 @@ func TestCheck_FailsOn_Unmarshal(t *testing.T) {
 		return assert.AnError
 	})
 
-	res := og_redis.NewStringCmd(context.Background())
+	res := redis.NewStringCmd(context.Background())
 	res.SetVal("data")
 
 	f.mocks.rdb.On(
@@ -180,7 +180,7 @@ func TestCheck_FailsOn_SessionExpired(t *testing.T) {
 		return nil
 	})
 
-	res := og_redis.NewStringCmd(context.Background())
+	res := redis.NewStringCmd(context.Background())
 	res.SetVal("data")
 
 	f.mocks.rdb.On(
@@ -204,7 +204,7 @@ func TestCheck_Success(t *testing.T) {
 		return nil
 	})
 
-	res := og_redis.NewStringCmd(context.Background())
+	res := redis.NewStringCmd(context.Background())
 	res.SetVal("data")
 
 	f.mocks.rdb.On(
@@ -222,7 +222,7 @@ func TestCheck_Success(t *testing.T) {
 func TestLogActivity_FailsOn_Set(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewStatusCmd(context.Background())
+	res := redis.NewStatusCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -237,7 +237,7 @@ func TestLogActivity_FailsOn_Set(t *testing.T) {
 func TestLogActivity_Success(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewStatusCmd(context.Background())
+	res := redis.NewStatusCmd(context.Background())
 
 	f.mocks.rdb.On(
 		"Set", context.Background(),
@@ -254,7 +254,7 @@ func TestLogActivity_Success(t *testing.T) {
 func TestGetActivity_FailsOn_Keys(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewStringSliceCmd(context.Background())
+	res := redis.NewStringSliceCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -269,10 +269,10 @@ func TestGetActivity_FailsOn_Keys(t *testing.T) {
 func TestGetActivity_FailsOn_MGet(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -292,10 +292,10 @@ func TestGetActivity_FailsOn_MGet(t *testing.T) {
 func TestGetActivity_FailsOn_InvalidDataType(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{1})
 
 	f.mocks.rdb.On(
@@ -315,10 +315,10 @@ func TestGetActivity_FailsOn_InvalidDataType(t *testing.T) {
 func TestGetActivity_FailsOn_InvalidDataTypeOn_Atoi(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{"string"})
 
 	f.mocks.rdb.On(
@@ -338,10 +338,10 @@ func TestGetActivity_FailsOn_InvalidDataTypeOn_Atoi(t *testing.T) {
 func TestGetActivity_Success(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"sessions:account:session:key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{"1"})
 
 	f.mocks.rdb.On(
@@ -364,7 +364,7 @@ func TestGetActivity_Success(t *testing.T) {
 func TestGet_FailsOn_Keys(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewStringSliceCmd(context.Background())
+	res := redis.NewStringSliceCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -379,10 +379,10 @@ func TestGet_FailsOn_Keys(t *testing.T) {
 func TestGet_FailsOn_MGet(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -402,10 +402,10 @@ func TestGet_FailsOn_MGet(t *testing.T) {
 func TestGet_FailsOn_InvalidDataType(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{1})
 
 	f.mocks.rdb.On(
@@ -427,10 +427,10 @@ func TestGet_FailsOn_Unmarshal(t *testing.T) {
 		return assert.AnError
 	})
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{"string"})
 
 	f.mocks.rdb.On(
@@ -452,10 +452,10 @@ func TestGet_Success(t *testing.T) {
 		return nil
 	})
 
-	keysCmd := og_redis.NewStringSliceCmd(context.Background())
+	keysCmd := redis.NewStringSliceCmd(context.Background())
 	keysCmd.SetVal([]string{"key"})
 
-	res := og_redis.NewSliceCmd(context.Background())
+	res := redis.NewSliceCmd(context.Background())
 	res.SetVal([]interface{}{"string"})
 
 	f.mocks.rdb.On(
@@ -478,7 +478,7 @@ func TestGet_Success(t *testing.T) {
 func TestRevoke_FailsOn_Del(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewIntCmd(context.Background())
+	res := redis.NewIntCmd(context.Background())
 	res.SetErr(assert.AnError)
 
 	f.mocks.rdb.On(
@@ -493,7 +493,7 @@ func TestRevoke_FailsOn_Del(t *testing.T) {
 func TestRevoke_Success(t *testing.T) {
 	f := newSessionsFixture(t, nil, nil)
 
-	res := og_redis.NewIntCmd(context.Background())
+	res := redis.NewIntCmd(context.Background())
 
 	f.mocks.rdb.On(
 		"Del", context.Background(),
