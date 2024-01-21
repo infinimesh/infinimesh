@@ -161,7 +161,7 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 
 	ns := NewBlankNamespaceDocument(ns_id)
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), ns)
 	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
@@ -210,7 +210,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 
 	ns := NewBlankNamespaceDocument(ns_id)
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), ns)
 	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
@@ -558,7 +558,7 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.
 	}
 
 	for _, uuid := range req.GetDevices() {
-		ok, level := AccessLevel(ctx, c.db, &acc, NewBlankDeviceDocument(uuid))
+		ok, level := c.ica_repo.AccessLevel(ctx, &acc, NewBlankDeviceDocument(uuid))
 		if !ok {
 			return nil, status.Errorf(codes.NotFound, "Account not found or not enough Access Rights to device: %s", uuid)
 		}

@@ -333,7 +333,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *connect.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	nodes, err := ListOwnedDeep(ctx, log, c.db, &ns)
+	nodes, err := c.ica.ListOwnedDeep(ctx, log, &ns)
 	if err != nil {
 		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
@@ -359,7 +359,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	err = DeleteRecursive(ctx, log, c.db, &ns)
+	err = c.ica.DeleteRecursive(ctx, log, &ns)
 	if err != nil {
 		log.Warn("Error deleting namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting namespace")

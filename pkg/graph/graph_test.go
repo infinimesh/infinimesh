@@ -767,7 +767,7 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 	acc := NewAccountFromPB(accPb.Msg.Account)
 
 	// Checking Account access to Root Account
-	ok, level := AccessLevel(rootCtx, db, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
+	ok, level := ica.AccessLevel(rootCtx, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
 	if ok {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.Level_NONE)
 	}
@@ -840,7 +840,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	}
 
 	// Checking Account 1 access to Account 2
-	ok, level := AccessLevel(rootCtx, db, acc1, acc2)
+	ok, level := ica.AccessLevel(rootCtx, acc1, acc2)
 	if !ok {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
@@ -853,7 +853,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	}
 
 	// Checking Account 2 access to Account 1
-	ok, level = AccessLevel(rootCtx, db, acc2, acc1)
+	ok, level = ica.AccessLevel(rootCtx, acc2, acc1)
 	if ok {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.Level_NONE)
 	}

@@ -85,8 +85,11 @@ type InfinimeshCommonActionsRepo interface {
 		lvl access.Level, role access.Role,
 	) error
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
+	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
 	AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
+	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
+	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
 	//
 	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
 }
@@ -292,8 +295,8 @@ FILTER !edge || edge.role == 1
     RETURN MERGE({ node: node._id }, edge ? { edge: edge._id, parent: edge._from } : { edge: null, parent: null })
 `
 
-func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) (res *access.Nodes, err error) {
-	c, err := db.Query(ctx, listOwnedQuery, map[string]interface{}{
+func (r *infinimeshCommonActionsRepo) ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error) {
+	c, err := r.db.Query(ctx, listOwnedQuery, map[string]interface{}{
 		"from": from.ID(),
 	})
 	if err != nil {
@@ -318,8 +321,8 @@ func ListOwnedDeep(ctx context.Context, log *zap.Logger, db driver.Database, fro
 	return &access.Nodes{Nodes: nodes}, nil
 }
 
-func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode) error {
-	nodes, err := ListOwnedDeep(ctx, log, db, from)
+func (r *infinimeshCommonActionsRepo) DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error {
+	nodes, err := r.ListOwnedDeep(ctx, log, from)
 	if err != nil {
 		return err
 	}
@@ -330,7 +333,7 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 		log.Debug("Deleting", zap.String("node", node.Node), zap.String("edge", node.Edge))
 
 		if node.Node != "" {
-			err := handleDeleteNodeInRecursion(ctx, log, db, node.Node, cols)
+			err := handleDeleteNodeInRecursion(ctx, log, r.db, node.Node, cols)
 			if err != nil {
 				if err.Error() == "ERR_ROOT_OBJECT_CANNOT_BE_DELETED" {
 					continue
@@ -340,7 +343,7 @@ func DeleteRecursive(ctx context.Context, log *zap.Logger, db driver.Database, f
 		}
 
 		if node.Edge != "" {
-			err := handleDeleteNodeInRecursion(ctx, log, db, node.Edge, cols)
+			err := handleDeleteNodeInRecursion(ctx, log, r.db, node.Edge, cols)
 			if err != nil {
 				return err
 			}
@@ -407,11 +410,11 @@ GRAPH @permissions
     RETURN path.edges[-1].role == 2 ? path.edges[-1].level : path.edges[0].level
 `
 
-func AccessLevel(ctx context.Context, db driver.Database, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level) {
+func (r *infinimeshCommonActionsRepo) AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level) {
 	if requestor.ID() == node.ID() {
 		return true, access.Level_ROOT
 	}
-	c, err := db.Query(ctx, getWithAccessLevelQuery, map[string]interface{}{
+	c, err := r.db.Query(ctx, getWithAccessLevelQuery, map[string]interface{}{
 		"requestor":   requestor.ID(),
 		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,

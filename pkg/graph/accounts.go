@@ -175,7 +175,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 	claims["exp"] = req.Exp
 
 	if req.Inf != nil && *req.Inf {
-		ok, lvl := AccessLevel(ctx, c.db, &account, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY))
+		ok, lvl := c.ica_repo.AccessLevel(ctx, &account, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY))
 		claims[inf.INFINIMESH_ROOT_CLAIM] = ok && lvl > access.Level_ADMIN
 	}
 
@@ -266,7 +266,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		ns_id = schema.ROOT_NAMESPACE_KEY
 	}
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
 	if !ok || level < access.Level_ADMIN {
 		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("no Access to Namespace %s", ns_id))
 	}
@@ -327,7 +327,7 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
-		ok, level := AccessLevel(ctx, c.db, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
+		ok, level := c.ica_repo.AccessLevel(ctx, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
 		if !ok || level < access.Level_READ {
 			return nil, status.Errorf(codes.PermissionDenied, "Account has no Access to Namespace %s", acc.GetDefaultNamespace())
 		}
@@ -385,7 +385,7 @@ func (c *AccountsController) Deletables(ctx context.Context, req *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	nodes, err := ListOwnedDeep(ctx, log, c.db, &acc)
+	nodes, err := c.ica_repo.ListOwnedDeep(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
@@ -412,7 +412,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	err = DeleteRecursive(ctx, log, c.db, &acc)
+	err = c.ica_repo.DeleteRecursive(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting account")
