@@ -1,41 +1,37 @@
 with-expecter: true
 packages:
     github.com/infinimesh/infinimesh/pkg/shared/auth:
-        # place your package-specific config here
-        config:
         interfaces:
             JWTHandler:
-                # place your interface-specific config here
-                config:
-                methods:
     github.com/infinimesh/infinimesh/pkg/sessions:
-        # place your package-specific config here
-        config:
         interfaces:
             SessionsHandler:
-                # place your interface-specific config here
-                config:
-                methods:
     
     github.com/infinimesh/infinimesh/pkg/graph:
-        # place your package-specific config here
-        config:
         interfaces:
             InfinimeshCommonActionsRepo:
-                # place your interface-specific config here
-                config:
-                methods:
+
+    # ProtoBuf Packages
+    github.com/infinimesh/proto/node:
+        interfaces:
+            AccountsServiceClient:
+            DevicesServiceClient:
+            NamespacesServiceClient:
+            SessionsServiceClient:
+            ShadowServiceClient:
+            InternalServiceClient:
+    github.com/infinimesh/proto/shadow:
+        interfaces:
+            ShadowServiceClient:
+    github.com/infinimesh/proto/plugins:
+        interfaces:
+            PluginsServiceClient:
+    github.com/infinimesh/proto/handsfree:
+        interfaces:
+            HandsfreeServiceClient:
     
     # Foreign Packages
     github.com/go-redis/redis/v8:
-        # place your package-specific config here
-        config:
         interfaces:
             UniversalClient:
-                # place your interface-specific config here
-                config:
-                methods:
             Cmdable:
-                # place your interface-specific config here
-                config:
-                methods:
