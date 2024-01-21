@@ -1,0 +1,10 @@
+with-expecter: true
+packages:
+    github.com/infinimesh/infinimesh/pkg/shared/auth:
+        # place your package-specific config here
+        config:
+        interfaces:
+            JWTHandler:
+                # place your interface-specific config here
+                config:
+                methods:

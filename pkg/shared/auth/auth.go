@@ -34,15 +34,20 @@ import (
 )
 
 var (
-	log *zap.Logger
-	rdb *redis.Client
+	log  *zap.Logger
+	rdb  *redis.Client
+	jwth JWTHandler
 
 	SIGNING_KEY []byte
 )
 
-func SetContext(logger *zap.Logger, _rdb *redis.Client, key []byte) {
+func SetContext(logger *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, key []byte) {
 	log = logger.Named("JWT")
 	rdb = _rdb
+	jwth = _jwth
+	if jwth == nil {
+		jwth = &defaultJWTHandler{}
+	}
 
 	SIGNING_KEY = key
 	log.Debug("Context set", zap.ByteString("signing_key", key))
@@ -197,7 +202,7 @@ func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
 }
 
 func validateToken(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 		}

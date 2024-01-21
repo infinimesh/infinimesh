@@ -35,15 +35,22 @@ import (
 type interceptor struct {
 	log         *zap.Logger
 	rdb         *redis.Client
+	jwt         JWTHandler
 	signing_key []byte
 }
 
 type middleware func(context.Context, []byte, string) (context.Context, bool, error)
 
-func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, signing_key []byte) *interceptor {
+func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, signing_key []byte) *interceptor {
+	jwth := _jwth
+	if jwth == nil {
+		jwth = defaultJWTHandler{}
+	}
+
 	return &interceptor{
 		log:         log.Named("AuthInterceptor"),
 		rdb:         _rdb,
+		jwt:         jwth,
 		signing_key: signing_key,
 	}
 }
@@ -131,7 +138,7 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 
 	log := i.log.Named("StandardAuthMiddleware")
 
-	token, err := connectValidateToken(signingKey, tokenString)
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
 		return
 	}
@@ -198,7 +205,7 @@ func (i *interceptor) ConnectBlankMiddleware(_ctx context.Context, signingKey []
 
 func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
 	log_activity = false
-	token, err := connectValidateToken(signingKey, tokenString)
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
 		return
 	}
@@ -240,8 +247,8 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 	return
 }
 
-func connectValidateToken(signing_key []byte, tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+func connectValidateToken(jwth JWTHandler, signing_key []byte, tokenString string) (jwt.MapClaims, error) {
+	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 		}
