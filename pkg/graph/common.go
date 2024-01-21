@@ -86,6 +86,7 @@ type InfinimeshCommonActionsRepo interface {
 	) error
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
 	AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error
+	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
 	//
 	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
 }
@@ -265,7 +266,7 @@ FILTER edge.level > 0
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
+func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
 	bindVars := map[string]interface{}{
 		"depth":             DepthValue(ctx),
 		"from":              from.ID(),
@@ -279,7 +280,7 @@ func ListQuery(ctx context.Context, log *zap.Logger, db driver.Database, from In
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	return db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
+	return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
 }
 
 const listOwnedQuery = `

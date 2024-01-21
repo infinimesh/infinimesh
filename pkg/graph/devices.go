@@ -436,7 +436,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
 	}
 
-	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
+	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
