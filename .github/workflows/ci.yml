@@ -79,7 +79,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [prepare]
+    needs: [prepare, checks]
     strategy:
       matrix:
         tag: ${{fromJson(needs.prepare.outputs.matrix)}}
