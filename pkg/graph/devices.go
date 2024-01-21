@@ -369,7 +369,7 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 	// Getting Account from DB
 	// and Check requestor access
 	device := *NewBlankDeviceDocument(dev.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -476,7 +476,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 
 	acc := *NewBlankAccountDocument(requestor)
 	dev := *NewBlankDeviceDocument(req.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -648,7 +648,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 	requestor := NewBlankAccountDocument(requestor_id)
 	dev := NewBlankDeviceDocument(req.Msg.Node)
 
-	err := AccessLevelAndGet(ctx, log, c.db, requestor, dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, c.db, requestor, dev)
 	if err != nil {
 		log.Warn("Error getting Device and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Device not found or not enough Access Rights")
@@ -674,7 +674,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Unable to determine Object type")
 	}
 
-	err = AccessLevelAndGet(ctx, log, c.db, requestor, obj)
+	err = c.ica_repo.AccessLevelAndGet(ctx, log, c.db, requestor, obj)
 	if err != nil {
 		log.Warn("Error getting Object and access level", zap.String("id", req.Msg.Join), zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")

@@ -912,7 +912,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	nacc1 := *NewBlankAccountDocument(acc1.Key)
 	nacc2 := *NewBlankAccountDocument(acc2.Key)
 	// Checking Account 1 access to Account 2
-	err = AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
+	err = ica.AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
 	if err != nil {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
@@ -925,7 +925,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	}
 
 	// Checking Account 2 access to Account 1
-	err = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
+	err = ica.AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
 	if err == nil && nacc1.Access.Level > access.Level_NONE {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.Access.Level, access.Level_NONE)
 	}
@@ -938,7 +938,7 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
 	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
 
-	err := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
+	err := ica.AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
 	if err == nil {
 		t.Fatalf("Has to be error but it's not: %v", err)
 	}

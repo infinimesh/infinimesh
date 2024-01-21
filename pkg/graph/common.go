@@ -69,6 +69,13 @@ func (c *InfinimeshBaseController) _log() *zap.Logger {
 	return c.log
 }
 
+func NewBlankDocument(col string, key string) driver.DocumentMeta {
+	return driver.DocumentMeta{
+		Key: key,
+		ID:  driver.NewDocumentID(col, key),
+	}
+}
+
 type InfinimeshCommonActionsRepo interface {
 	GetEdgeCol(ctx context.Context, name string) driver.Collection
 	CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool
@@ -78,6 +85,7 @@ type InfinimeshCommonActionsRepo interface {
 		lvl access.Level, role access.Role,
 	) error
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
+	AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error
 	//
 	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
 }
@@ -141,7 +149,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	)
 	log.Debug("Requestor", zap.String("id", requestor.Key))
 
-	err := AccessLevelAndGet(ctx, log, c._DB(), requestor, obj)
+	err := r.AccessLevelAndGet(ctx, log, c._DB(), requestor, obj)
 	if err != nil {
 		return status.Error(codes.NotFound, "Object not found or not enough Access Rights")
 	}
@@ -156,7 +164,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	old_namespace := NewBlankNamespaceDocument(*obj.GetAccess().Namespace)
 
 	namespace := NewBlankNamespaceDocument(ns)
-	err = AccessLevelAndGet(ctx, log, c._DB(), requestor, namespace)
+	err = r.AccessLevelAndGet(ctx, log, c._DB(), requestor, namespace)
 	if err != nil {
 		return status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
@@ -185,13 +193,6 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	return nil
 }
 
-func NewBlankDocument(col string, key string) driver.DocumentMeta {
-	return driver.DocumentMeta{
-		Key: key,
-		ID:  driver.NewDocumentID(col, key),
-	}
-}
-
 const getWithAccessLevelRoleAndNS = `
 FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
 GRAPH @permissions SORT path.edges[0].level DESC
@@ -208,7 +209,7 @@ GRAPH @permissions SORT path.edges[0].level DESC
     )
 `
 
-func AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error {
+func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error {
 	vars := map[string]interface{}{
 		"account":     account.ID(),
 		"node":        node.ID(),
