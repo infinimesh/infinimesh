@@ -386,7 +386,7 @@ func (c *DevicesController) GetByToken(ctx context.Context, req *connect.Request
 	dev := req.Msg
 	log.Debug("Get by Token request received", zap.String("device", dev.Uuid), zap.Any("context", ctx))
 
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]any)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}

@@ -20,6 +20,7 @@ package main
 import (
 	"context"
 	"errors"
+	"github.com/infinimesh/proto/node/access"
 
 	"connectrpc.com/connect"
 
@@ -47,7 +48,7 @@ func NewShadowAPI(log *zap.Logger, client shadow.ShadowServiceClient) *ShadowAPI
 func (s *ShadowAPI) Get(ctx context.Context, _ *connect.Request[shadow.GetRequest]) (response *connect.Response[shadow.GetResponse], err error) {
 	log := s.log.Named("Get")
 
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]any)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
@@ -71,7 +72,7 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.S
 	log := s.log.Named("PatchDesiredState")
 	shadow := request.Msg
 
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]any)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
@@ -100,7 +101,7 @@ func (s *ShadowAPI) Remove(ctx context.Context, request *connect.Request[shadow.
 	log := s.log.Named("RemoveStateKey")
 	req := request.Msg
 
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]any)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
@@ -130,7 +131,7 @@ func (s *ShadowAPI) StreamShadow(ctx context.Context, request *connect.Request[s
 	log := s.log.Named("StreamReportedStateChanges")
 	req := request.Msg
 
-	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]any)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
 	if !ok {
 		return connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
 	}
