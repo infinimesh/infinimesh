@@ -71,6 +71,7 @@ func (c *InfinimeshBaseController) _log() *zap.Logger {
 
 type InfinimeshCommonActionsRepo interface {
 	GetEdgeCol(ctx context.Context, name string) driver.Collection
+	CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool
 	Link(
 		ctx context.Context, log *zap.Logger, edge driver.Collection,
 		from InfinimeshGraphNode, to InfinimeshGraphNode,
@@ -93,6 +94,11 @@ func (r *infinimeshCommonActionsRepo) GetEdgeCol(ctx context.Context, name strin
 	g, _ := r.db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _, _ := g.EdgeCollection(ctx, name)
 	return col
+}
+
+func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool {
+	res, err := edge.DocumentExists(ctx, from.ID().Key()+"-"+to.ID().Key())
+	return err == nil && res
 }
 
 func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
@@ -184,11 +190,6 @@ func NewBlankDocument(col string, key string) driver.DocumentMeta {
 		Key: key,
 		ID:  driver.NewDocumentID(col, key),
 	}
-}
-
-func CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool {
-	r, err := edge.DocumentExists(ctx, from.ID().Key()+"-"+to.ID().Key())
-	return err == nil && r
 }
 
 const getWithAccessLevelRoleAndNS = `
@@ -521,7 +522,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 	}
 
 	edge_col := r.GetEdgeCol(ctx, schema.ACC2NS)
-	exists = CheckLink(ctx, edge_col, root, rootNS)
+	exists = r.CheckLink(ctx, edge_col, root, rootNS)
 	if err != nil {
 		log.Warn("Error checking link Root Account to Root Namespace", zap.Error(err))
 		return err
