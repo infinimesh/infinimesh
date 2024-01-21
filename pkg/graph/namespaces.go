@@ -114,7 +114,7 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 	namespace.DocumentMeta = meta
 
 	requestorAcc := NewBlankAccountDocument(requestor)
-	err = Link(ctx, log, c.acc2ns,
+	err = c.ica.Link(ctx, log, c.acc2ns,
 		requestorAcc,
 		&namespace, access.Level_ADMIN, access.Role_OWNER,
 	)
@@ -307,7 +307,7 @@ func (c *NamespacesController) Join(ctx context.Context, req *connect.Request[pb
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights: can't grant higher access than current")
 	}
 
-	err = Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
+	err = c.ica.Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")

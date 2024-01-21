@@ -184,7 +184,7 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -227,7 +227,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -490,7 +490,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.Internal, "Error deleting Device")
 	}
 
-	err = Link(
+	err = c.ica_repo.Link(
 		ctx, log, c.ns2dev,
 		NewBlankNamespaceDocument(*dev.Access.Namespace),
 		&dev, access.Level_NONE, access.Role_UNSET,
@@ -685,7 +685,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
 	}
 
-	err = Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
+	err = c.ica_repo.Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")

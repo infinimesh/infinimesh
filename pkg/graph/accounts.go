@@ -285,7 +285,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	account.DocumentMeta = meta
 
 	ns := NewBlankNamespaceDocument(ns_id)
-	err = Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error Linking Namespace to Account", zap.Error(err))

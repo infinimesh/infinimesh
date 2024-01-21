@@ -834,7 +834,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -904,7 +904,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
