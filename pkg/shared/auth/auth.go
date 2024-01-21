@@ -49,7 +49,7 @@ func SetContext(logger *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, key []
 	if jwth == nil {
 		jwth = &defaultJWTHandler{}
 	}
-	sess = sessions.NewSessionsHandler(rdb)
+	sess = sessions.NewSessionsHandlerModule(rdb).Handler()
 
 	SIGNING_KEY = key
 	log.Debug("Context set", zap.ByteString("signing_key", key))

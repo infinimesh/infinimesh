@@ -113,7 +113,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS),
 		ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
 
-		sessions: sessions.NewSessionsHandler(rdb),
+		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}

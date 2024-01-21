@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/proto/node/sessions"
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -24,12 +24,21 @@ type SessionsHandler interface {
 }
 
 type sessionsHandler struct {
-	rdb *redis.Client
+	rdb redis.Cmdable
+
+	protoMarshal   func(m protoreflect.ProtoMessage) ([]byte, error)
+	protoUnmarshal func(b []byte, m protoreflect.ProtoMessage) error
 }
 
-func NewSessionsHandler(rdb *redis.Client) SessionsHandler {
+func NewSessionsHandler(
+	rdb redis.Cmdable,
+	protoMarshal func(m protoreflect.ProtoMessage) ([]byte, error),
+	protoUnmarshal func(b []byte, m protoreflect.ProtoMessage) error,
+) SessionsHandler {
 	return &sessionsHandler{
-		rdb: rdb,
+		rdb:            rdb,
+		protoMarshal:   protoMarshal,
+		protoUnmarshal: protoUnmarshal,
 	}
 }
 
@@ -51,7 +60,7 @@ func (s *sessionsHandler) New(_exp int64, client string) *sessions.Session {
 }
 
 func (s *sessionsHandler) Store(account string, session *sessions.Session) error {
-	data, err := proto.Marshal(session)
+	data, err := s.protoMarshal(session)
 	if err != nil {
 		return err
 	}
@@ -79,8 +88,7 @@ func (s *sessionsHandler) Check(account, sid string) error {
 	}
 
 	session := &sessions.Session{}
-	err = proto.Unmarshal(data, session)
-
+	err = s.protoUnmarshal(data, session)
 	if err != nil {
 		return err
 	}
@@ -108,7 +116,12 @@ func (s *sessionsHandler) GetActivity(account string) (map[string]*timestamppb.T
 
 	result := make(map[string]*timestamppb.Timestamp)
 	for i, d := range data {
-		ts, err := strconv.Atoi(d.(string))
+		d_s, ok := d.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid data type: %s", keys[i])
+		}
+
+		ts, err := strconv.Atoi(d_s)
 		if err != nil {
 			return nil, fmt.Errorf("invalid data type: %s | %v", keys[i], err)
 		}
@@ -135,12 +148,12 @@ func (s *sessionsHandler) Get(account string) ([]*sessions.Session, error) {
 	for i, d := range data {
 		session := &sessions.Session{}
 
-		bytes, ok := d.(string)
+		str, ok := d.(string)
 		if !ok {
 			return nil, fmt.Errorf("invalid data type: %s", keys[i])
 		}
 
-		err = proto.Unmarshal([]byte(bytes), session)
+		err = s.protoUnmarshal([]byte(str), session)
 		if err != nil {
 			return nil, err
 		}

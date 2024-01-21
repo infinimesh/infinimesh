@@ -52,7 +52,7 @@ func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, s
 		log:         log.Named("AuthInterceptor"),
 		rdb:         _rdb,
 		jwt:         jwth,
-		sessions:    sessions.NewSessionsHandler(_rdb),
+		sessions:    sessions.NewSessionsHandlerModule(_rdb).Handler(),
 		signing_key: signing_key,
 	}
 }

@@ -25,7 +25,7 @@ func NewSessionsController(log *zap.Logger, rdb *redis.Client) *SessionsControll
 	return &SessionsController{
 		log:      log.Named("Sessions"),
 		rdb:      rdb,
-		sessions: sessions.NewSessionsHandler(rdb),
+		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
 	}
 }
 
