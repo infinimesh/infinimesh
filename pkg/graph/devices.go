@@ -91,6 +91,8 @@ type DevicesController struct {
 	ns2dev  driver.Collection // Namespaces to Devices permissions edge collection
 	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
+	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+
 	SIGNING_KEY []byte
 }
 
@@ -98,13 +100,18 @@ func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.Han
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
+	ica := NewInfinimeshCommonActionsRepo(db)
+
 	return &DevicesController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("DevicesController"), db: db,
 		},
 		col: col, hfc: hfc,
-		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
-		acc2dev:     GetEdgeCol(ctx, db, schema.ACC2DEV),
+		ns2dev:  ica.GetEdgeCol(ctx, schema.NS2DEV),
+		acc2dev: ica.GetEdgeCol(ctx, schema.ACC2DEV),
+
+		ica_repo: ica,
+
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }

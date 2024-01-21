@@ -95,6 +95,8 @@ type AccountsController struct {
 
 	sessions sessions.SessionsHandler
 
+	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+
 	SIGNING_KEY []byte
 }
 
@@ -105,15 +107,20 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
+
+	ica := NewInfinimeshCommonActionsRepo(db)
+
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
 		}, col: col, cred: cred, rdb: rdb,
 
-		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS),
-		ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
+		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
+		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
 
 		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
+
+		ica_repo: ica,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}

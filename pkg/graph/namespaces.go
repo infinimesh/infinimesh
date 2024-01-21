@@ -70,6 +70,8 @@ type NamespacesController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
+	ica InfinimeshCommonActionsRepo
+
 	db driver.Database
 }
 
@@ -77,9 +79,12 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
+	ica := NewInfinimeshCommonActionsRepo(db)
+
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
-		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
+		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
+		ica: ica,
 	}
 }
 

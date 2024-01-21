@@ -22,9 +22,12 @@ import (
 	"strings"
 
 	"github.com/arangodb/go-driver"
+	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/proto/node/access"
+	accpb "github.com/infinimesh/proto/node/accounts"
+	nspb "github.com/infinimesh/proto/node/namespaces"
 	"go.uber.org/zap"
 )
 
@@ -63,17 +66,137 @@ func (c *InfinimeshBaseController) _log() *zap.Logger {
 	return c.log
 }
 
+type InfinimeshCommonActionsRepo interface {
+	GetEdgeCol(ctx context.Context, name string) driver.Collection
+
+	//
+	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
+}
+
+type infinimeshCommonActionsRepo struct {
+	db driver.Database
+}
+
+func NewInfinimeshCommonActionsRepo(db driver.Database) InfinimeshCommonActionsRepo {
+	return &infinimeshCommonActionsRepo{db: db}
+}
+
+func (r *infinimeshCommonActionsRepo) GetEdgeCol(ctx context.Context, name string) driver.Collection {
+	g, _ := r.db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
+	col, _, _ := g.EdgeCollection(ctx, name)
+	return col
+}
+
+func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error) {
+
+	ctx := context.TODO()
+	log := _log.Named("EnsureRootExists")
+
+	log.Debug("Checking Root Account exists")
+	col, _ := r.db.Collection(ctx, schema.ACCOUNTS_COL)
+	exists, err := col.DocumentExists(ctx, schema.ROOT_ACCOUNT_KEY)
+	if err != nil {
+		log.Warn("Error checking Root Account existance")
+		return err
+	}
+
+	var meta driver.DocumentMeta
+	if !exists {
+		log.Debug("Root Account doesn't exist, creating")
+		meta, err = col.CreateDocument(ctx, Account{
+			Account: &accpb.Account{
+				Title:   "infinimesh",
+				Enabled: true,
+			},
+			DocumentMeta: driver.DocumentMeta{Key: schema.ROOT_ACCOUNT_KEY},
+		})
+		if err != nil {
+			log.Warn("Error creating Root Account")
+			return err
+		}
+		log.Debug("Created root Account", zap.Any("result", meta))
+	}
+	var acc accpb.Account
+	meta, err = col.ReadDocument(ctx, schema.ROOT_ACCOUNT_KEY, &acc)
+	if err != nil {
+		log.Warn("Error reading Root Account")
+		return err
+	}
+	root := &Account{
+		Account:      &acc,
+		DocumentMeta: meta,
+	}
+
+	ns_col, _ := r.db.Collection(ctx, schema.NAMESPACES_COL)
+	exists, err = ns_col.DocumentExists(ctx, schema.ROOT_NAMESPACE_KEY)
+	if err != nil || !exists {
+		meta, err := ns_col.CreateDocument(ctx, Namespace{
+			Namespace: &nspb.Namespace{
+				Title: "infinimesh",
+			},
+			DocumentMeta: driver.DocumentMeta{Key: schema.ROOT_NAMESPACE_KEY},
+		})
+		if err != nil {
+			log.Warn("Error creating Root Namespace")
+			return err
+		}
+		log.Debug("Created root Namespace", zap.Any("result", meta))
+	}
+
+	var ns nspb.Namespace
+	meta, err = ns_col.ReadDocument(ctx, schema.ROOT_NAMESPACE_KEY, &ns)
+	if err != nil {
+		log.Warn("Error reading Root Namespace")
+		return err
+	}
+	rootNS := &Namespace{
+		Namespace:    &ns,
+		DocumentMeta: meta,
+	}
+
+	edge_col := r.GetEdgeCol(ctx, schema.ACC2NS)
+	exists = CheckLink(ctx, edge_col, root, rootNS)
+	if err != nil {
+		log.Warn("Error checking link Root Account to Root Namespace", zap.Error(err))
+		return err
+	} else if !exists {
+		err = Link(ctx, log, edge_col, root, rootNS, access.Level_ROOT, access.Role_OWNER)
+		if err != nil {
+			log.Warn("Error linking Root Account to Root Namespace")
+			return err
+		}
+	}
+
+	ctx = context.WithValue(ctx, schema.InfinimeshAccount, schema.ROOT_ACCOUNT_KEY)
+	cred_edge_col, _ := r.db.Collection(ctx, schema.ACC2CRED)
+	cred, err := credentials.NewStandardCredentials("infinimesh", passwd)
+	if err != nil {
+		log.Warn("Error creating Root Account Credentials")
+		return err
+	}
+
+	ctrl := NewAccountsController(log, r.db, rdb)
+	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
+	if err != nil || !exists {
+		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)
+		if err != nil {
+			log.Warn("Error setting Root Account Credentials")
+			return err
+		}
+	}
+	_, res := ctrl.Authorize(ctx, "standard", "infinimesh", passwd)
+	if !res {
+		log.Warn("Error authorizing Root Account")
+		return errors.New("cannot authorize infinimesh")
+	}
+	return nil
+}
+
 func NewBlankDocument(col string, key string) driver.DocumentMeta {
 	return driver.DocumentMeta{
 		Key: key,
 		ID:  driver.NewDocumentID(col, key),
 	}
-}
-
-func GetEdgeCol(ctx context.Context, db driver.Database, name string) driver.Collection {
-	g, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
-	col, _, _ := g.EdgeCollection(ctx, name)
-	return col
 }
 
 func Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {

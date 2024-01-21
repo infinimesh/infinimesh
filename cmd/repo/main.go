@@ -138,7 +138,8 @@ func main() {
 	}
 
 	if ensure_root {
-		err := graph.EnsureRootExists(log, db, rdb, rootPass)
+		ica := graph.NewInfinimeshCommonActionsRepo(db)
+		err := ica.EnsureRootExists(log, rdb, rootPass)
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}

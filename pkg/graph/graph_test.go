@@ -52,6 +52,8 @@ var (
 
 	rootCtx context.Context
 
+	ica InfinimeshCommonActionsRepo
+
 	db driver.Database
 )
 
@@ -77,7 +79,9 @@ func init() {
 		Addr: redisHost,
 	})
 
-	err := EnsureRootExists(log, db, rdb, rootPass)
+	ica = NewInfinimeshCommonActionsRepo(db)
+
+	err := ica.EnsureRootExists(log, rdb, rootPass)
 	if err != nil {
 		panic(err)
 	}
@@ -646,7 +650,7 @@ func TestCreateUpdateNamespace(t *testing.T) {
 		t.Fatalf("Namespace doesn't exist in DB")
 	}
 
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
 	var _access Access
 	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY+"-"+nspb.Msg.Uuid, &_access)
 	if err != nil {
@@ -731,7 +735,7 @@ func TestNewAccountNoNamespaceGiven(t *testing.T) {
 	}
 	acc := NewAccountFromPB(accpb.Msg.Account)
 
-	edge := GetEdgeCol(rootCtx, db, schema.NS2ACC)
+	edge := ica.GetEdgeCol(rootCtx, schema.NS2ACC)
 	ok := CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
 	if !ok {
 		t.Fatal("Account has to be under platform Namespace by default")
@@ -829,7 +833,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
 	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
@@ -899,7 +903,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
 	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
