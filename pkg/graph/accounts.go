@@ -358,7 +358,7 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 	}
 
 	res := NewAccountFromPB(curr)
-	err = Toggle(ctx, c.db, res, "enabled")
+	err = c.ica_repo.Toggle(ctx, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")

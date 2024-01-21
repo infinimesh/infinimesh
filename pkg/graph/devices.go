@@ -325,7 +325,7 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 	}
 
 	res := NewDeviceFromPB(curr.Msg)
-	err = Toggle(ctx, c.db, res, "enabled")
+	err = c.ica_repo.Toggle(ctx, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
@@ -349,7 +349,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 	}
 
 	res := NewDeviceFromPB(curr.Msg)
-	err = Toggle(ctx, c.db, res, "basic_enabled")
+	err = c.ica_repo.Toggle(ctx, res, "basic_enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")

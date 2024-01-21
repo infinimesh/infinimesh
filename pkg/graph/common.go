@@ -90,6 +90,7 @@ type InfinimeshCommonActionsRepo interface {
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
 	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
 	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
+	Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error
 	//
 	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
 }
@@ -445,8 +446,8 @@ LET o = DOCUMENT(@node)
 UPDATE o WITH {%[1]s: !o.%[1]s} IN @@col RETURN NEW 
 `
 
-func Toggle(ctx context.Context, db driver.Database, node InfinimeshGraphNode, field string) error {
-	c, err := db.Query(ctx, fmt.Sprintf(toggleQuery, field), map[string]interface{}{
+func (r *infinimeshCommonActionsRepo) Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error {
+	c, err := r.db.Query(ctx, fmt.Sprintf(toggleQuery, field), map[string]interface{}{
 		"node": node.ID(),
 		"@col": node.ID().Collection(),
 	})
