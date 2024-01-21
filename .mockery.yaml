@@ -8,3 +8,11 @@ packages:
                 # place your interface-specific config here
                 config:
                 methods:
+    github.com/infinimesh/infinimesh/pkg/sessions:
+        # place your package-specific config here
+        config:
+        interfaces:
+            SessionsHandler:
+                # place your interface-specific config here
+                config:
+                methods:

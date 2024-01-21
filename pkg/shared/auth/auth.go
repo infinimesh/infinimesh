@@ -37,6 +37,7 @@ var (
 	log  *zap.Logger
 	rdb  *redis.Client
 	jwth JWTHandler
+	sess sessions.SessionsHandler
 
 	SIGNING_KEY []byte
 )
@@ -48,6 +49,7 @@ func SetContext(logger *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, key []
 	if jwth == nil {
 		jwth = &defaultJWTHandler{}
 	}
+	sess = sessions.NewSessionsHandler(rdb)
 
 	SIGNING_KEY = key
 	log.Debug("Context set", zap.ByteString("signing_key", key))
@@ -126,7 +128,7 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 		}
 
 		// Check if session is valid
-		if err := sessions.Check(rdb, uuid, sid); err != nil {
+		if err := sess.Check(uuid, sid); err != nil {
 			log.Debug("Session check failed", zap.Any("error", err))
 			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 		}
@@ -234,7 +236,7 @@ func handleLogActivity(ctx context.Context) {
 	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
 	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
 
-	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+	if err := sess.LogActivity(req, sid, exp); err != nil {
 		log.Warn("Error logging activity", zap.Any("error", err))
 	}
 }

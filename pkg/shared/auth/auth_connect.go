@@ -36,6 +36,7 @@ type interceptor struct {
 	log         *zap.Logger
 	rdb         *redis.Client
 	jwt         JWTHandler
+	sessions    sessions.SessionsHandler
 	signing_key []byte
 }
 
@@ -51,6 +52,7 @@ func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, s
 		log:         log.Named("AuthInterceptor"),
 		rdb:         _rdb,
 		jwt:         jwth,
+		sessions:    sessions.NewSessionsHandler(_rdb),
 		signing_key: signing_key,
 	}
 }
@@ -169,7 +171,7 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 		}
 
 		// Check if session is valid
-		if err = sessions.Check(rdb, uuid, sid); err != nil {
+		if err = i.sessions.Check(uuid, sid); err != nil {
 			i.log.Debug("Session check failed", zap.Any("error", err))
 			err = status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 			return
@@ -280,7 +282,7 @@ func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
 	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
 	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
 
-	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+	if err := i.sessions.LogActivity(req, sid, exp); err != nil {
 		i.log.Warn("Error logging activity", zap.Any("error", err))
 	}
 }

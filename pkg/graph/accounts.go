@@ -93,6 +93,8 @@ type AccountsController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
+	sessions sessions.SessionsHandler
+
 	SIGNING_KEY []byte
 }
 
@@ -108,8 +110,11 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 			log: log.Named("AccountsController"), db: db,
 		}, col: col, cred: cred, rdb: rdb,
 
-		acc2ns:      GetEdgeCol(ctx, db, schema.ACC2NS),
-		ns2acc:      GetEdgeCol(ctx, db, schema.NS2ACC),
+		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS),
+		ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
+
+		sessions: sessions.NewSessionsHandler(rdb),
+
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -151,8 +156,8 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
 	}
 
-	session := sessions.New(req.Exp, req.GetClient())
-	if err := sessions.Store(c.rdb, account.Key, session); err != nil {
+	session := c.sessions.New(req.Exp, req.GetClient())
+	if err := c.sessions.Store(account.Key, session); err != nil {
 		log.Error("Failed to store session", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to issue token: session")
 	}
