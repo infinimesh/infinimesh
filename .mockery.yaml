@@ -17,6 +17,15 @@ packages:
                 config:
                 methods:
     
+    github.com/infinimesh/infinimesh/pkg/graph:
+        # place your package-specific config here
+        config:
+        interfaces:
+            InfinimeshCommonActionsRepo:
+                # place your interface-specific config here
+                config:
+                methods:
+    
     # Foreign Packages
     github.com/go-redis/redis/v8:
         # place your package-specific config here
