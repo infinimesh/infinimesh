@@ -161,10 +161,10 @@ func main() {
 			log.Fatal("Failed to connect to handsfree", zap.String("address", host), zap.Error(err))
 		}
 
-		dev_ctrl := graph.NewDevicesController(log, db, handsfree.NewHandsfreeServiceClient(conn))
-		dev_ctrl.SIGNING_KEY = SIGNING_KEY
+		dev_ctrl := graph.NewDevicesControllerModule(log, db, handsfree.NewHandsfreeServiceClient(conn))
+		dev_ctrl.SetSigningKey(SIGNING_KEY)
 
-		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl, interceptors)
+		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl.Handler(), interceptors)
 		router.PathPrefix(path).Handler(handler)
 	}
 	if _, ok := services["shadow"]; ok {

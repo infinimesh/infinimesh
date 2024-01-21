@@ -82,7 +82,6 @@ func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
 }
 
 type DevicesController struct {
-	pb.UnimplementedDevicesServiceServer
 	InfinimeshBaseController
 
 	col driver.Collection // Devices Collection
@@ -96,11 +95,13 @@ type DevicesController struct {
 	SIGNING_KEY []byte
 }
 
-func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.HandsfreeServiceClient) *DevicesController {
+func NewDevicesController(
+	log *zap.Logger, db driver.Database,
+	hfc handsfree.HandsfreeServiceClient,
+	ica InfinimeshCommonActionsRepo,
+) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
-
-	ica := NewInfinimeshCommonActionsRepo(db)
 
 	return &DevicesController{
 		InfinimeshBaseController: InfinimeshBaseController{

@@ -89,7 +89,7 @@ func init() {
 	ctrl = NewAccountsController(log, db, rdb)
 
 	ns_ctrl = NewNamespacesController(log, db)
-	dev_ctrl = NewDevicesController(log, db, nil)
+	dev_ctrl = NewDevicesController(log, db, nil, ica)
 
 	plug_ctrl = NewPluginsController(log, db)
 
