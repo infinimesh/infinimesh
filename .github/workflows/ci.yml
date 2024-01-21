@@ -1,4 +1,4 @@
-name: Build Docker Images
+name: Run Checks and Build Docker Images
 
 on:
   push:
