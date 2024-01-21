@@ -35,3 +35,9 @@ packages:
         interfaces:
             UniversalClient:
             Cmdable:
+    
+    github.com/arangodb/go-driver:
+        interfaces:
+            Database:
+            Collection:
+            Cursor:
