@@ -123,7 +123,7 @@ func TestCreate_FailsOn_NoNamespace(t *testing.T) {
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.Nil(t, res)
 	assert.Error(t, err)
-	assert.Contains(t, "Namespace ID is required", err.Error())
+	assert.Contains(t, err.Error(), "Namespace ID is required")
 }
 
 func TestCreate_FailsOn_NoAccessToNamespace(t *testing.T) {
