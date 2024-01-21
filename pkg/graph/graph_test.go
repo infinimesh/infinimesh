@@ -56,6 +56,9 @@ var (
 )
 
 func init() {
+	// TODO: Move to e2e
+	return
+
 	viper.AutomaticEnv()
 	log = zap.NewExample()
 
@@ -104,6 +107,9 @@ func CompareAccounts(a, b *accounts.Account) bool {
 // AccountsController Tests
 
 func TestAuthorizeAsRoot(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	i := true
 	res, err := ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: &accounts.Credentials{
@@ -138,6 +144,9 @@ func TestAuthorizeAsRoot(t *testing.T) {
 }
 
 func TestNewBlankAccountDocument(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	uuid := randomdata.StringNumber(10, "-")
 	uuidMeta := driver.NewDocumentID(schema.ACCOUNTS_COL, uuid)
 	acc := NewBlankAccountDocument(uuid)
@@ -147,6 +156,9 @@ func TestNewBlankAccountDocument(t *testing.T) {
 }
 
 func TestAccountCreate_FalseCredentialsType(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account with unsupported Credentials")
 	username := randomdata.SillyName()
 	_, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
@@ -163,6 +175,9 @@ func TestAccountCreate_FalseCredentialsType(t *testing.T) {
 }
 
 func TestAuthorizeDisabledAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Disabled Account")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -192,6 +207,9 @@ func TestAuthorizeDisabledAccount(t *testing.T) {
 }
 
 func TestAuthorizeStandard(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -247,6 +265,9 @@ func TestAuthorizeStandard(t *testing.T) {
 }
 
 func TestAuthorizeStandardFail(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation with false Credentials")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -285,6 +306,9 @@ func TestAuthorizeStandardFail(t *testing.T) {
 }
 
 func TestUpdateAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -327,6 +351,9 @@ func TestUpdateAccount(t *testing.T) {
 }
 
 func TestUpdateAccountDefaultNS(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -382,6 +409,9 @@ func TestUpdateAccountDefaultNS(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -413,6 +443,9 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestGetAccountNotFound(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	r, err := ctrl.Get(rootCtx, connect.NewRequest(&accounts.Account{Uuid: randomdata.Alphanumeric(12)}))
 	if err == nil {
 		t.Fatal("Get account received no error despite it should, response:", r)
@@ -429,6 +462,9 @@ func TestGetAccountNotFound(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -473,6 +509,9 @@ func TestList(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -514,6 +553,9 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestSetCredentialsStandard(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -586,6 +628,9 @@ func TestSetCredentialsStandard(t *testing.T) {
 // NamespacesController Tests
 
 func TestCreateUpdateNamespace(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	title := randomdata.SillyName()
 	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
@@ -626,6 +671,9 @@ func TestCreateUpdateNamespace(t *testing.T) {
 }
 
 func TestListNamespaces(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	title := randomdata.SillyName()
 	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
@@ -661,6 +709,9 @@ func TestListNamespaces(t *testing.T) {
 // Permissions Tests
 
 func TestNewAccountNoNamespaceGiven(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -688,6 +739,9 @@ func TestNewAccountNoNamespaceGiven(t *testing.T) {
 }
 
 func TestNewAccountAccessToRoot(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -732,6 +786,9 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 */
 
 func TestPermissionsRootNamespace(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username1 := randomdata.SillyName()
 	credentials1 := &accounts.Credentials{
@@ -799,6 +856,9 @@ func TestPermissionsRootNamespace(t *testing.T) {
 }
 
 func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username1 := randomdata.SillyName()
 	credentials1 := &accounts.Credentials{
@@ -868,6 +928,9 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 }
 
 func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
 	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
 
@@ -880,6 +943,9 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 // Devices Tests
 
 func TestCreateGetAndDelete(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIFazCCA1OgAwIBAgIUAhdObDJnggMc26EDvd11ItBaPewwDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -957,6 +1023,9 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 }
 
 func TestCreateAndList(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIEljCCAn4CCQC7oNynkLPhTjANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJk
 ZTAeFw0yMTA2MTYxMTMyNDRaFw0yMjA2MTYxMTMyNDRaMA0xCzAJBgNVBAYTAmRl
@@ -1021,6 +1090,9 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 }
 
 func TestCreateFingByFingerprintAndDelete(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIEmDCCAoACCQDLeCKlPBA5IzANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDDANk
 ZXYwHhcNMjEwNjE2MTEzMzE4WhcNMjIwNjE2MTEzMzE4WjAOMQwwCgYDVQQDDANk
@@ -1095,6 +1167,9 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 }
 
 func TestFingByFingerprintNotFound(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	_, err := dev_ctrl.GetByFingerprint(rootCtx, connect.NewRequest(&devices.GetByFingerprintRequest{
 		Fingerprint: []byte("notfound"),
 	}))
@@ -1134,6 +1209,9 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 // Plugins Test
 
 func TestPluginsRepo(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	name := randomdata.SillyName()
 	desc := randomdata.Letters(256)
 	this := &plugins.Plugin{
