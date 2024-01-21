@@ -12,6 +12,7 @@ on:
   pull_request:
     branches:
       - master
+      - dev
       - dev-*
   workflow_dispatch:
 
@@ -20,6 +21,26 @@ env:
   IMAGE_TAG: ${{github.ref_name == 'master' && 'latest' || github.ref_name}}
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Go
+        uses: WillAbides/setup-go-faster@v1.7.0
+        with:
+          go-version: 1.20
+
+      - name: Run Go tests
+        run: |
+          go test -v ./...
+      
+      - name: Run staticcheck
+        uses: dominikh/staticcheck-action@v1.2.0
+          
   prepare:
     runs-on: ubuntu-latest
     steps:
