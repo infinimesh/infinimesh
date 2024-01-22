@@ -67,7 +67,7 @@ func (s *ShadowAPI) Get(ctx context.Context, _ *connect.Request[shadow.GetReques
 	return connect.NewResponse(res), nil
 }
 
-// PatchDesiredState is a method to update the current state of the device
+// Patch - is a method to update the current state of the device
 func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.Shadow]) (response *connect.Response[shadow.Shadow], err error) {
 	log := s.log.Named("PatchDesiredState")
 	shadow := request.Msg

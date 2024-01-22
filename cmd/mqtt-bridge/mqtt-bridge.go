@@ -141,7 +141,7 @@ func main() {
 	}
 
 	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
-	auth.SetContext(log, nil, SIGNING_KEY)
+	auth.SetContext(log, nil, nil, SIGNING_KEY)
 	token, err := auth.MakeToken(schema.ROOT_ACCOUNT_KEY)
 	if err != nil {
 		log.Fatal("Error making token", zap.Error(err))
@@ -272,12 +272,10 @@ func printConnState(con net.Conn) {
 	)
 }
 
-/*
-TopicChecker: to validate the subscribed topic name
-
-	input : topic, deviceId string
-	output : topicAltered
-*/
+// TopicChecker - validates the subscribed topic name
+//
+//	input : topic, deviceId string
+//	output : topicAltered
 func TopicChecker(topic, deviceId string) string {
 	state := strings.Split(topic, "/")
 	state[1] = deviceId

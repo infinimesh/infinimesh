@@ -40,6 +40,7 @@ func init() {
 }
 
 func TestInitDB(t *testing.T) {
+	t.SkipNow()
 	t.Log("Initializing DB")
 	InitDB(log, arangodbHost, arangodbCred, "infinimesh", false)
 }

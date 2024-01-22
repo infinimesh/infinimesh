@@ -111,8 +111,8 @@ func main() {
 		})
 	})
 
-	auth.SetContext(log, rdb, SIGNING_KEY)
-	authInterceptor := auth.NewAuthInterceptor(log, rdb, SIGNING_KEY)
+	auth.SetContext(log, rdb, nil, SIGNING_KEY)
+	authInterceptor := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 
 	interceptors := connect.WithInterceptors(authInterceptor)
 
@@ -138,7 +138,8 @@ func main() {
 	}
 
 	if ensure_root {
-		err := graph.EnsureRootExists(log, db, rdb, rootPass)
+		ica := graph.NewInfinimeshCommonActionsRepo(db)
+		err := ica.EnsureRootExists(log, rdb, rootPass)
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}
@@ -160,10 +161,10 @@ func main() {
 			log.Fatal("Failed to connect to handsfree", zap.String("address", host), zap.Error(err))
 		}
 
-		dev_ctrl := graph.NewDevicesController(log, db, handsfree.NewHandsfreeServiceClient(conn))
-		dev_ctrl.SIGNING_KEY = SIGNING_KEY
+		dev_ctrl := graph.NewDevicesControllerModule(log, db, handsfree.NewHandsfreeServiceClient(conn))
+		dev_ctrl.SetSigningKey(SIGNING_KEY)
 
-		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl, interceptors)
+		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl.Handler(), interceptors)
 		router.PathPrefix(path).Handler(handler)
 	}
 	if _, ok := services["shadow"]; ok {

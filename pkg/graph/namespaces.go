@@ -70,6 +70,8 @@ type NamespacesController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
+	ica InfinimeshCommonActionsRepo
+
 	db driver.Database
 }
 
@@ -77,9 +79,12 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
+	ica := NewInfinimeshCommonActionsRepo(db)
+
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
-		acc2ns: GetEdgeCol(ctx, db, schema.ACC2NS), ns2acc: GetEdgeCol(ctx, db, schema.NS2ACC),
+		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
+		ica: ica,
 	}
 }
 
@@ -109,7 +114,7 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 	namespace.DocumentMeta = meta
 
 	requestorAcc := NewBlankAccountDocument(requestor)
-	err = Link(ctx, log, c.acc2ns,
+	err = c.ica.Link(ctx, log, c.acc2ns,
 		requestorAcc,
 		&namespace, access.Level_ADMIN, access.Role_OWNER,
 	)
@@ -133,7 +138,7 @@ func (c *NamespacesController) Get(ctx context.Context, ns *connect.Request[nspb
 	// Getting Namespace from DB
 	// and Check requestor access
 	result := *NewBlankNamespaceDocument(uuid)
-	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
+	err = c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &result)
 	if err != nil {
 		log.Warn("Failed to get Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
@@ -154,7 +159,7 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	curr := *NewBlankNamespaceDocument(ns.Uuid)
-	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &curr)
+	err = c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &curr)
 
 	if err != nil {
 		log.Warn("Can't get Namespaces from DB", zap.String("namespace", ns.Uuid), zap.Error(err))
@@ -197,7 +202,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
+	cr, err := c.ica.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +243,7 @@ func (c *NamespacesController) Joins(ctx context.Context, req *connect.Request[n
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns := *NewBlankNamespaceDocument(request.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	err := c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
@@ -282,7 +287,7 @@ func (c *NamespacesController) Join(ctx context.Context, req *connect.Request[pb
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns := *NewBlankNamespaceDocument(request.GetNamespace())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	err := c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
@@ -302,7 +307,7 @@ func (c *NamespacesController) Join(ctx context.Context, req *connect.Request[pb
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights: can't grant higher access than current")
 	}
 
-	err = Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
+	err = c.ica.Link(ctx, log, c.acc2ns, &acc, &ns, request.Access, access.Role_UNSET)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")
@@ -319,7 +324,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *connect.
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns := *NewBlankNamespaceDocument(request.Msg.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	err := c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
@@ -328,7 +333,7 @@ func (c *NamespacesController) Deletables(ctx context.Context, request *connect.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	nodes, err := ListOwnedDeep(ctx, log, c.db, &ns)
+	nodes, err := c.ica.ListOwnedDeep(ctx, log, &ns)
 	if err != nil {
 		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
@@ -345,7 +350,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	ns := *NewBlankNamespaceDocument(request.Msg.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &ns)
+	err := c.ica.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &ns)
 	if err != nil {
 		log.Warn("Error getting Namespace and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
@@ -354,7 +359,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	err = DeleteRecursive(ctx, log, c.db, &ns)
+	err = c.ica.DeleteRecursive(ctx, log, &ns)
 	if err != nil {
 		log.Warn("Error deleting namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
