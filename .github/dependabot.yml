@@ -12,7 +12,7 @@ updates:
       interval: daily
       time: "06:00"
     reviewers:
-      - infinimesh/external/backend
+      - infinimesh/backend
 
   - package-ecosystem: "npm"
     directory: "/console"
@@ -21,7 +21,7 @@ updates:
       interval: daily
       time: "06:00"
     reviewers:
-      - infinimesh/external/frontend
+      - infinimesh/frontend
 
   - package-ecosystem: github-actions
     directory: "/"
