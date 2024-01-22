@@ -438,7 +438,7 @@ func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string,
 	return account, ok
 }
 
-// Return Account authorisable by this Credentials
+// Authorisable - Returns Account authorisable by this Credentials
 func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.Database) (Account, bool) {
 	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
 	c, err := db.Query(ctx, query, map[string]interface{}{
