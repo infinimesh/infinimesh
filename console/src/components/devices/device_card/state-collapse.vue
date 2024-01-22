@@ -203,7 +203,7 @@ function handleSubmitReported() {
 
 <style scoped>
 .reported-state {
-  max-height: 80px;
+  max-height: 220px;
   overflow-y: auto;
 }
 </style>
