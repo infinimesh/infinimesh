@@ -261,7 +261,9 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 	dev.Certificate = &devpb.Certificate{
 		PemData: cp.GetPayload()[0],
 	}
-	dev.Tags = append(dev.Tags, cp.GetAppId())
+	if cp.GetAppId() != "" {
+		dev.Tags = append(dev.Tags, cp.GetAppId())
+	}
 
 	err = sha256Fingerprint(dev.Certificate)
 	if err != nil {
