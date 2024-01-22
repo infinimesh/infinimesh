@@ -1,13 +1,18 @@
 export const access_levels = {
-  "NONE": 0,
-  "READ": 1,
-  "MGMT": 2,
-  "ADMIN": 3,
-  "ROOT": 4,
-}
+  NONE: 0,
+  READ: 1,
+  MGMT: 2,
+  ADMIN: 3,
+  ROOT: 4,
+};
 
 export function access_lvl_conv(o) {
-  return access_levels[o.access.level || "READ"];
+  const level = o.access.level;
+
+  if (level >= 0 && level <= 4) {
+    return level;
+  }
+  return access_levels[level] || "READ";
 }
 
 // must be axios error and App Store
