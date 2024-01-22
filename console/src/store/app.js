@@ -1,7 +1,7 @@
 import { inject, nextTick } from "vue";
 import { defineStore } from "pinia";
-
-import { check_token_expired, check_offline } from "@/utils/access";
+import { check_token_expired, check_offline, check_offline_http, check_token_expired_http } from "@/utils/access";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 export const baseURL =
   import.meta.env.DEV ? "http://api.infinimesh.local" // jshint ignore:line
@@ -34,13 +34,36 @@ export const useAppStore = defineStore("app", {
 
       const store = this;
       function err_check(err) {
-        check_token_expired(err, store);
-        check_offline(err, store);
+        check_token_expired_http(err, store);
+        check_offline_http(err, store);
         return Promise.reject(err);
       }
 
       instance.interceptors.response.use((r) => r, err_check);
       return instance;
+    },
+    transport(state) {
+      const transport = createConnectTransport({
+        baseUrl: baseURL,
+        interceptors: [
+          (next) => async (req) => {
+            req.header.set("Authorization", `Bearer ${state.token}`);
+            return next(req);
+          },
+          (next) => async (req) => {
+            try {
+              return await next(req);
+            } catch (err) {
+              const store = this;
+              check_token_expired(err, store);
+              check_offline(err, store);
+              return Promise.reject(err);
+            }
+          }
+        ],
+      })
+
+      return transport;
     },
   },
   actions: {

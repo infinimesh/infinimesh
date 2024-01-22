@@ -79,8 +79,15 @@ services:
     labels:
       - traefik.http.routers.repo.rule=Host(`api.${BASE_DOMAIN}`)
       - traefik.http.routers.repo.entrypoints=grpc
+      - traefik.http.routers.repo.service=repo@docker
       - traefik.http.services.repo.loadbalancer.server.port=8000
       - traefik.http.services.repo.loadbalancer.server.scheme=h2c
+
+      - traefik.http.routers.repo_connect.rule=Host(`api.${BASE_DOMAIN}`)&&PathPrefix("/infinimesh.node.", "/infinimesh.shadow", "/infinimesh.plugins")
+      - traefik.http.routers.repo_connect.entrypoints=http
+      - traefik.http.routers.repo_connect.service=repo_connect@docker
+      - traefik.http.services.repo_connect.loadbalancer.server.port=8000
+
     depends_on:
       - db
       - proxy
@@ -96,6 +103,8 @@ services:
   shadow:
     image: "ghcr.io/infinimesh/infinimesh/shadow:${INFINIMESH_VERSION}"
     restart: unless-stopped
+    labels:
+      - traefik.enable=false
     depends_on:
       - redis
       - rabbitmq
@@ -108,6 +117,8 @@ services:
 
   redis:
     image: redis:latest
+    labels:
+      - traefik.enable=false
     ports:
       - 6379:6379
     command: [ "redis-server", "--appendonly", "yes" ]
