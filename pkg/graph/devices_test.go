@@ -575,7 +575,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 		true, access.Level_READ,
 	)
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
-		Devices: map[string]access.Level{f.data.dev_uuid: access.Level_NONE},
+		Devices: map[string]access.Level{f.data.dev_uuid: access.Level_ADMIN},
 	}))
 
 	assert.Nil(t, res)
