@@ -1,0 +1,24 @@
+---
+".github/*":
+  - slntopp
+
+"console/*":
+  - team: external/frontend
+
+"cmd/console/*":
+  - team: external/frontend
+
+"Dockerfiles/console/*":
+  - team: external/frontend
+
+".nvmrc":
+  - team: external/frontend
+
+"vetur.config.js":
+  - team: external/frontend
+
+"*.go":
+  - team: external/backend
+
+"Dockerfiles/*":
+  - team: external/backend
