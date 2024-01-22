@@ -1,18 +1,16 @@
-export const access_levels = {
-  NONE: 0,
-  READ: 1,
-  MGMT: 2,
-  ADMIN: 3,
-  ROOT: 4,
-};
+import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
-export function access_lvl_conv(o) {
-  const level = o.access.level;
+export function access_lvl_conv(item) {
+  const { level = "READ" } = item.access;
 
-  if (level >= 0 && level <= 4) {
-    return level;
-  }
-  return access_levels[level] || "READ";
+  if (level >= 0 && level <= 4) return level
+  return Level[level] ?? 1;
+}
+
+export function access_role_conv(item) {
+  const { role = "UNSET" } = item.access;
+
+  return Role[role] ?? Role.UNSET;
 }
 
 // must be axios error and App Store
