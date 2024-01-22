@@ -86,7 +86,7 @@ type InfinimeshCommonActionsRepo interface {
 	) error
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
 	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
-	AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error
+	AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
 	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
 	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
@@ -154,7 +154,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	)
 	log.Debug("Requestor", zap.String("id", requestor.Key))
 
-	err := r.AccessLevelAndGet(ctx, log, c._DB(), requestor, obj)
+	err := r.AccessLevelAndGet(ctx, log, requestor, obj)
 	if err != nil {
 		return status.Error(codes.NotFound, "Object not found or not enough Access Rights")
 	}
@@ -169,7 +169,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	old_namespace := NewBlankNamespaceDocument(*obj.GetAccess().Namespace)
 
 	namespace := NewBlankNamespaceDocument(ns)
-	err = r.AccessLevelAndGet(ctx, log, c._DB(), requestor, namespace)
+	err = r.AccessLevelAndGet(ctx, log, requestor, namespace)
 	if err != nil {
 		return status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
@@ -214,13 +214,13 @@ GRAPH @permissions SORT path.edges[0].level DESC
     )
 `
 
-func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *Account, node InfinimeshGraphNode) error {
+func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error {
 	vars := map[string]interface{}{
 		"account":     account.ID(),
 		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	}
-	c, err := db.Query(ctx, getWithAccessLevelRoleAndNS, vars)
+	c, err := r.db.Query(ctx, getWithAccessLevelRoleAndNS, vars)
 	if err != nil {
 		log.Debug("Error while executing query", zap.Any("vars", vars), zap.Error(err))
 		return err

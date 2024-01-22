@@ -89,17 +89,17 @@ func (_c *MockInfinimeshCommonActionsRepo_AccessLevel_Call) RunAndReturn(run fun
 	return _c
 }
 
-// AccessLevelAndGet provides a mock function with given fields: ctx, log, db, account, node
-func (_m *MockInfinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, db driver.Database, account *graph.Account, node graph.InfinimeshGraphNode) error {
-	ret := _m.Called(ctx, log, db, account, node)
+// AccessLevelAndGet provides a mock function with given fields: ctx, log, account, node
+func (_m *MockInfinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *graph.Account, node graph.InfinimeshGraphNode) error {
+	ret := _m.Called(ctx, log, account, node)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AccessLevelAndGet")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, driver.Database, *graph.Account, graph.InfinimeshGraphNode) error); ok {
-		r0 = rf(ctx, log, db, account, node)
+	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, *graph.Account, graph.InfinimeshGraphNode) error); ok {
+		r0 = rf(ctx, log, account, node)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -115,16 +115,15 @@ type MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call struct {
 // AccessLevelAndGet is a helper method to define mock.On call
 //   - ctx context.Context
 //   - log *zap.Logger
-//   - db driver.Database
 //   - account *graph.Account
 //   - node graph.InfinimeshGraphNode
-func (_e *MockInfinimeshCommonActionsRepo_Expecter) AccessLevelAndGet(ctx interface{}, log interface{}, db interface{}, account interface{}, node interface{}) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
-	return &MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call{Call: _e.mock.On("AccessLevelAndGet", ctx, log, db, account, node)}
+func (_e *MockInfinimeshCommonActionsRepo_Expecter) AccessLevelAndGet(ctx interface{}, log interface{}, account interface{}, node interface{}) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
+	return &MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call{Call: _e.mock.On("AccessLevelAndGet", ctx, log, account, node)}
 }
 
-func (_c *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call) Run(run func(ctx context.Context, log *zap.Logger, db driver.Database, account *graph.Account, node graph.InfinimeshGraphNode)) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
+func (_c *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call) Run(run func(ctx context.Context, log *zap.Logger, account *graph.Account, node graph.InfinimeshGraphNode)) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(driver.Database), args[3].(*graph.Account), args[4].(graph.InfinimeshGraphNode))
+		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(*graph.Account), args[3].(graph.InfinimeshGraphNode))
 	})
 	return _c
 }
@@ -134,7 +133,7 @@ func (_c *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call) Return(_a0 err
 	return _c
 }
 
-func (_c *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call) RunAndReturn(run func(context.Context, *zap.Logger, driver.Database, *graph.Account, graph.InfinimeshGraphNode) error) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
+func (_c *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call) RunAndReturn(run func(context.Context, *zap.Logger, *graph.Account, graph.InfinimeshGraphNode) error) *MockInfinimeshCommonActionsRepo_AccessLevelAndGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
