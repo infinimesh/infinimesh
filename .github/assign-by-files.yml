@@ -3,22 +3,22 @@
   - slntopp
 
 "console/*":
-  - team: external/frontend
+  - team: frontend
 
 "cmd/console/*":
-  - team: external/frontend
+  - team: frontend
 
 "Dockerfiles/console/*":
-  - team: external/frontend
+  - team: frontend
 
 ".nvmrc":
-  - team: external/frontend
+  - team: frontend
 
 "vetur.config.js":
-  - team: external/frontend
+  - team: frontend
 
 "*.go":
-  - team: external/backend
+  - team: backend
 
 "Dockerfiles/*":
-  - team: external/backend
+  - team: backend
