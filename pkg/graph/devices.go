@@ -239,8 +239,10 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 		if _, d_err := c.Delete(ctx, connect.NewRequest(device.Device)); d_err != nil {
 			log.Warn("Couldn't delete Device", zap.Error(d_err))
 			return connect.NewResponse(&devpb.CreateResponse{
-				Device: device.Device,
-			}), status.Error(codes.OK, "Couldn't delete freshly created device as well as set the certificate")
+					Device: device.Device,
+				}), connect.NewError(connect.CodeDataLoss, fmt.Errorf(
+					"Couldn't delete freshly created device as well as set the certificate: %v", err,
+				))
 		}
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -490,7 +492,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Warn("Error removing document", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error deleting Device")
+		return nil, status.Error(codes.Internal, "Error while deleting Device")
 	}
 
 	err = c.ica_repo.Link(
