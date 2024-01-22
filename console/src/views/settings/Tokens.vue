@@ -147,25 +147,24 @@ function handleSelectPreset(key) {
 
 const msg = useMessage()
 async function handleGeneratePAT() {
-    pat_loading.value = true
-
-    as.http.post(as.base_url + "/token", {
-        auth: {
-            type: 'standard',
-            data: credentials.value
-        },
-        exp: Math.round(expire_at.value / 1000),
-        client: client.value
+  pat_loading.value = true
+  try {
+    const { token } = store.token({
+      auth: {
+        type: 'standard',
+        data: credentials.value
+      },
+      exp: Math.round(expire_at.value / 1000),
+      client: client.value
     })
-        .then((res) => {
-            pat.value = res.data.token;
-            msg.success('Token generated successfully!')
-        })
-        .catch((e) => {
-            msg.error(e.response.data.message)
-        }).finally(() => {
-            pat_loading.value = false
-        });
+
+    pat.value = token;
+    msg.success('Token generated successfully!')
+  } catch (e) {
+    msg.error(e.response?.data.message ?? e.message ?? e)
+  } finally {
+    pat_loading.value = false
+  };
 }
 
 onMounted(async () => {
