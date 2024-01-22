@@ -23,12 +23,14 @@
         </n-grid-item>
       </n-grid>
 
-      <n-code language="json" :word-wrap="true" :code="
-        reported
-          ? JSON.stringify(reported.data, null, 2)
-          : '// No State have been reported yet'
-      ">
-      </n-code>
+      <div class="reported-state">
+        <n-code language="json" :word-wrap="true" :code="
+          reported
+            ? JSON.stringify(reported.data, null, 2)
+            : '// No State have been reported yet'
+        ">
+        </n-code>
+      </div>
     </n-collapse-item>
 
     <n-collapse-item title="Patch Reported" name="reported_patch" v-if="debug">
@@ -65,11 +67,13 @@
         </n-grid-item>
       </n-grid>
 
-      <n-code language="json" :word-wrap="true" :code="
-        desired
-          ? JSON.stringify(desired.data, null, 2)
-          : '// No Desired state have been set yet'
-      " />
+      <div class="reported-state">
+        <n-code language="json" :word-wrap="true" :code="
+          desired
+            ? JSON.stringify(desired.data, null, 2)
+            : '// No Desired state have been set yet'
+        " />
+      </div>
     </n-collapse-item>
 
     <n-collapse-item title="Patch Desired" name="patch" v-if="patch">
@@ -196,3 +200,10 @@ function handleSubmitReported() {
   emit("submit-debug", JSON.parse(reported_state.value));
 }
 </script>
+
+<style scoped>
+.reported-state {
+  max-height: 80px;
+  overflow-y: auto;
+}
+</style>
