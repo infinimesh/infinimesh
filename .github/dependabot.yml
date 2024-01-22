@@ -12,9 +12,8 @@ updates:
       interval: daily
       time: "06:00"
     reviewers:
-      - slntopp
-    assignees:
-      - slntopp
+      - infinimesh/external/backend
+
   - package-ecosystem: "npm"
     directory: "/console"
     target-branch: dev
@@ -22,9 +21,8 @@ updates:
       interval: daily
       time: "06:00"
     reviewers:
-      - slntopp
-    assignees:
-      - slntopp
+      - infinimesh/external/frontend
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
