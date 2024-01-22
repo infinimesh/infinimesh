@@ -28,6 +28,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/proto/node/access"
+
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 )
@@ -220,31 +222,22 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 		return
 	}
 
-	ipool, ok := devices.([]interface{})
+	ipool, ok := devices.(map[string]any)
 	if !ok {
 		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
 		return
 	}
 
-	pool := make([]string, len(ipool))
-	for i, el := range ipool {
-		pool[i], ok = el.(string)
+	pool := make(map[string]access.Level, len(ipool))
+	for key, value := range ipool {
+		val, ok := value.(float64)
 		if !ok {
-			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %f is not a string", value)
 			return
 		}
+		pool[key] = access.Level(val)
 	}
 	ctx = context.WithValue(_ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
-
-	post := false
-	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
-	if ipost != nil {
-		post, ok = ipost.(bool)
-		if !ok {
-			post = false
-		}
-	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
 
 	return
 }

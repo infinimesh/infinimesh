@@ -560,7 +560,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotFound(t *testing.T) {
 		false, access.Level_NONE,
 	)
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
-		Devices: []string{f.data.dev_uuid},
+		Devices: map[string]access.Level{f.data.dev_uuid: access.Level_NONE},
 	}))
 
 	assert.Nil(t, res)
@@ -575,8 +575,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 		true, access.Level_READ,
 	)
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
-		Devices: []string{f.data.dev_uuid},
-		Post:    true,
+		Devices: map[string]access.Level{f.data.dev_uuid: access.Level_ADMIN},
 	}))
 
 	assert.Nil(t, res)
@@ -613,8 +612,7 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 	)
 
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
-		Devices: []string{f.data.dev_uuid},
-		Post:    true,
+		Devices: map[string]access.Level{f.data.dev_uuid: access.Level_NONE},
 	}))
 
 	assert.NoError(t, err)

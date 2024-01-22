@@ -85,8 +85,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0 h1:Wqo399gCIufwto+VfwCSvsnfGpF
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0/go.mod h1:qmOFXW2epJhM0qSnUUYpldc7gVz2KMQwJ/QYCDIa7XU=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
-github.com/infinimesh/proto v0.0.0-20231107111249-d89e5d022a22 h1:3sUMBbUyElwg8F1O2Jzuxte+MSl/VeMeoMTOpZ+KHX4=
-github.com/infinimesh/proto v0.0.0-20231107111249-d89e5d022a22/go.mod h1:hcPyXBK3z3zNSkFgKZ36o6MjvwnF1diEk5Z4QWJF1S0=
+github.com/infinimesh/proto v0.0.0-20240119100706-460df37df77c h1:9kcZyt7+SdZgzuU3BMkGpnbJglIOsd8nLerwwvqkqHc=
+github.com/infinimesh/proto v0.0.0-20240119100706-460df37df77c/go.mod h1:XJskBY4uo56jb9AzMqq5VGDs6aYEUYF+d+HkCxWIttk=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=

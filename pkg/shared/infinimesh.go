@@ -24,10 +24,8 @@ const INFINIMESH_SESSION_CLAIM = "session"
 const INFINIMESH_NOSESSION_CLAIM = "nosession"
 
 const INFINIMESH_DEVICES_CLAIM = "devices"
-const INFINIMESH_POST_STATE_ALLOWED_CLAIM = "post"
 
 const InfinimeshRootCtxKey = ContextKey(INFINIMESH_ROOT_CLAIM)
 const InfinimeshAccountCtxKey = ContextKey(INFINIMESH_ACCOUNT_CLAIM)
 const InfinimeshSessionCtxKey = ContextKey(INFINIMESH_SESSION_CLAIM)
 const InfinimeshDevicesCtxKey = ContextKey(INFINIMESH_DEVICES_CLAIM)
-const InfinimeshPostAllowedCtxKey = ContextKey(INFINIMESH_POST_STATE_ALLOWED_CLAIM)
