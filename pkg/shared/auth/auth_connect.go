@@ -232,7 +232,7 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 	for key, value := range ipool {
 		val, ok := value.(float64)
 		if !ok {
-			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %f is not a string", value)
 			return
 		}
 		pool[key] = access.Level(val)
