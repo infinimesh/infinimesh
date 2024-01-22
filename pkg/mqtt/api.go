@@ -24,7 +24,8 @@ type IncomingMessage struct {
 	Data         []byte
 }
 
-// TBD: MQTT Subsystem will never be aware of the type/content of the message.
+// OutgoingMessage - represents a message that is to be sent to a device.
+// TODO: MQTT Subsystem will never be aware of the type/content of the message.
 // Currently this is a deliberate design choice. Is it optimaL?
 type OutgoingMessage struct {
 	DeviceID string // "Target" device; does not necessarily have to be the connected device (e.g. sub-device)

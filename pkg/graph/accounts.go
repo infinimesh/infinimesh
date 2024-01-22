@@ -93,6 +93,10 @@ type AccountsController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
+	sessions sessions.SessionsHandler
+
+	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+
 	SIGNING_KEY []byte
 }
 
@@ -103,13 +107,21 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
+
+	ica := NewInfinimeshCommonActionsRepo(db)
+
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
 		}, col: col, cred: cred, rdb: rdb,
 
-		acc2ns:      GetEdgeCol(ctx, db, schema.ACC2NS),
-		ns2acc:      GetEdgeCol(ctx, db, schema.NS2ACC),
+		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
+		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
+
+		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
+
+		ica_repo: ica,
+
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -128,7 +140,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		if *req.Uuid == requestor {
 			return nil, status.Error(codes.PermissionDenied, "You can't create such token for yourself")
 		}
-		err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &account)
+		err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &account)
 		if err != nil {
 			log.Warn("Failed to get Account and access level", zap.Error(err))
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
@@ -151,8 +163,8 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
 	}
 
-	session := sessions.New(req.Exp, req.GetClient())
-	if err := sessions.Store(c.rdb, account.Key, session); err != nil {
+	session := c.sessions.New(req.Exp, req.GetClient())
+	if err := c.sessions.Store(account.Key, session); err != nil {
 		log.Error("Failed to store session", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to issue token: session")
 	}
@@ -163,7 +175,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 	claims["exp"] = req.Exp
 
 	if req.Inf != nil && *req.Inf {
-		ok, lvl := AccessLevel(ctx, c.db, &account, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY))
+		ok, lvl := c.ica_repo.AccessLevel(ctx, &account, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY))
 		claims[inf.INFINIMESH_ROOT_CLAIM] = ok && lvl > access.Level_ADMIN
 	}
 
@@ -195,7 +207,7 @@ func (c *AccountsController) Get(ctx context.Context, req *connect.Request[accpb
 	// Getting Account from DB
 	// and Check requestor access
 	result := *NewBlankAccountDocument(uuid)
-	err = AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &result)
+	err = c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &result)
 	if err != nil {
 		log.Warn("Failed to get Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
@@ -213,7 +225,7 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
+	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
@@ -254,7 +266,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		ns_id = schema.ROOT_NAMESPACE_KEY
 	}
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), NewBlankNamespaceDocument(ns_id))
 	if !ok || level < access.Level_ADMIN {
 		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("no Access to Namespace %s", ns_id))
 	}
@@ -273,7 +285,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	account.DocumentMeta = meta
 
 	ns := NewBlankNamespaceDocument(ns_id)
-	err = Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2acc, ns, &account, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error Linking Namespace to Account", zap.Error(err))
@@ -309,13 +321,13 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 	requestorAccount := NewBlankAccountDocument(requestor)
 
 	old := *NewBlankAccountDocument(acc.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, requestorAccount, &old)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, requestorAccount, &old)
 	if err != nil || old.Access.Level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
-		ok, level := AccessLevel(ctx, c.db, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
+		ok, level := c.ica_repo.AccessLevel(ctx, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
 		if !ok || level < access.Level_READ {
 			return nil, status.Errorf(codes.PermissionDenied, "Account has no Access to Namespace %s", acc.GetDefaultNamespace())
 		}
@@ -346,7 +358,7 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 	}
 
 	res := NewAccountFromPB(curr)
-	err = Toggle(ctx, c.db, res, "enabled")
+	err = c.ica_repo.Toggle(ctx, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
@@ -364,7 +376,7 @@ func (c *AccountsController) Deletables(ctx context.Context, req *connect.Reques
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(request.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
@@ -373,7 +385,7 @@ func (c *AccountsController) Deletables(ctx context.Context, req *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	nodes, err := ListOwnedDeep(ctx, log, c.db, &acc)
+	nodes, err := c.ica_repo.ListOwnedDeep(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error getting owned nodes", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error getting owned nodes")
@@ -391,7 +403,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
@@ -400,7 +412,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	err = DeleteRecursive(ctx, log, c.db, &acc)
+	err = c.ica_repo.DeleteRecursive(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting account")
@@ -426,7 +438,7 @@ func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string,
 	return account, ok
 }
 
-// Return Account authorisable by this Credentials
+// Authorisable - Returns Account authorisable by this Credentials
 func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.Database) (Account, bool) {
 	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
 	c, err := db.Query(ctx, query, map[string]interface{}{
@@ -452,7 +464,7 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
 
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
@@ -533,7 +545,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &acc)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
 
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))

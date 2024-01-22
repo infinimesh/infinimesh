@@ -16,9 +16,9 @@ on:
     branches: [ master, master-protection ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ master ]
+    branches: [ master, dev ]
   schedule:
-    - cron: '26 11 * * 3'
+    - cron: '00 09 * * 1'
 
 jobs:
   analyze:

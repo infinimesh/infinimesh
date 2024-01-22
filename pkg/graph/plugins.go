@@ -66,6 +66,8 @@ type PluginsController struct {
 	col     driver.Collection // Plugins Collection
 	ns_ctrl *NamespacesController
 
+	ica_repo InfinimeshCommonActionsRepo
+
 	db driver.Database
 }
 
@@ -74,7 +76,8 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
 	return &PluginsController{
 		log: log.Named("PluginsController"), col: col, db: db,
-		ns_ctrl: NewNamespacesController(log, db),
+		ns_ctrl:  NewNamespacesController(log, db),
+		ica_repo: NewInfinimeshCommonActionsRepo(db),
 	}
 }
 
@@ -179,7 +182,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		cr, err = ListQuery(WithDepth(ctx, 1), log, c.db, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
+		cr, err = c.ica_repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
 	} else {
 		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
 			"@plugins": schema.PLUGINS_COL,

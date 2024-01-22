@@ -48,7 +48,7 @@ func GetByFingerprintAndVerify(fingerprint []byte, cb VerifyDeviceFunc) (device 
 	return nil, errors.New("not found")
 }
 
-// Log Error, Send Acknowlegement(ACK) packet and Close the connection
+// LogErrorAndClose - Logs Error, Sends Acknowlegement(ACK) packet and Closes the connection
 // ACK Packet needs to be sent to prevent MQTT Client sending CONN packets further
 func LogErrorAndClose(c net.Conn, err error) {
 	log.Warn("Closing connection on error", zap.Error(err))
@@ -62,7 +62,7 @@ func LogErrorAndClose(c net.Conn, err error) {
 	c.Close()
 }
 
-// Connection is expected to be valid & legitimate at this point
+// HandleConn - note: Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
 	log := log.Named(device.GetUuid()).Named(connectPacket.ConnectPayload.ClientID)
 	defer log.Debug("Client disconnected")

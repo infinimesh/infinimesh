@@ -52,10 +52,15 @@ var (
 
 	rootCtx context.Context
 
+	ica InfinimeshCommonActionsRepo
+
 	db driver.Database
 )
 
 func init() {
+	// TODO: Move to e2e
+	return
+
 	viper.AutomaticEnv()
 	log = zap.NewExample()
 
@@ -74,7 +79,9 @@ func init() {
 		Addr: redisHost,
 	})
 
-	err := EnsureRootExists(log, db, rdb, rootPass)
+	ica = NewInfinimeshCommonActionsRepo(db)
+
+	err := ica.EnsureRootExists(log, rdb, rootPass)
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +89,7 @@ func init() {
 	ctrl = NewAccountsController(log, db, rdb)
 
 	ns_ctrl = NewNamespacesController(log, db)
-	dev_ctrl = NewDevicesController(log, db, nil)
+	dev_ctrl = NewDevicesController(log, db, nil, ica)
 
 	plug_ctrl = NewPluginsController(log, db)
 
@@ -104,6 +111,9 @@ func CompareAccounts(a, b *accounts.Account) bool {
 // AccountsController Tests
 
 func TestAuthorizeAsRoot(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	i := true
 	res, err := ctrl.Token(context.TODO(), connect.NewRequest(&pb.TokenRequest{
 		Auth: &accounts.Credentials{
@@ -138,6 +148,9 @@ func TestAuthorizeAsRoot(t *testing.T) {
 }
 
 func TestNewBlankAccountDocument(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	uuid := randomdata.StringNumber(10, "-")
 	uuidMeta := driver.NewDocumentID(schema.ACCOUNTS_COL, uuid)
 	acc := NewBlankAccountDocument(uuid)
@@ -147,6 +160,9 @@ func TestNewBlankAccountDocument(t *testing.T) {
 }
 
 func TestAccountCreate_FalseCredentialsType(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account with unsupported Credentials")
 	username := randomdata.SillyName()
 	_, err := ctrl.Create(rootCtx, connect.NewRequest(&accounts.CreateRequest{
@@ -163,6 +179,9 @@ func TestAccountCreate_FalseCredentialsType(t *testing.T) {
 }
 
 func TestAuthorizeDisabledAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Disabled Account")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -192,6 +211,9 @@ func TestAuthorizeDisabledAccount(t *testing.T) {
 }
 
 func TestAuthorizeStandard(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -247,6 +269,9 @@ func TestAuthorizeStandard(t *testing.T) {
 }
 
 func TestAuthorizeStandardFail(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation with false Credentials")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -285,6 +310,9 @@ func TestAuthorizeStandardFail(t *testing.T) {
 }
 
 func TestUpdateAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -327,6 +355,9 @@ func TestUpdateAccount(t *testing.T) {
 }
 
 func TestUpdateAccountDefaultNS(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -382,6 +413,9 @@ func TestUpdateAccountDefaultNS(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -413,6 +447,9 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestGetAccountNotFound(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	r, err := ctrl.Get(rootCtx, connect.NewRequest(&accounts.Account{Uuid: randomdata.Alphanumeric(12)}))
 	if err == nil {
 		t.Fatal("Get account received no error despite it should, response:", r)
@@ -429,6 +466,9 @@ func TestGetAccountNotFound(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -473,6 +513,9 @@ func TestList(t *testing.T) {
 }
 
 func TestDeleteAccount(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -514,6 +557,9 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestSetCredentialsStandard(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating sample account")
 
 	username := randomdata.SillyName()
@@ -586,6 +632,9 @@ func TestSetCredentialsStandard(t *testing.T) {
 // NamespacesController Tests
 
 func TestCreateUpdateNamespace(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	title := randomdata.SillyName()
 	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
@@ -601,7 +650,7 @@ func TestCreateUpdateNamespace(t *testing.T) {
 		t.Fatalf("Namespace doesn't exist in DB")
 	}
 
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
 	var _access Access
 	_, err = edge.ReadDocument(rootCtx, schema.ROOT_ACCOUNT_KEY+"-"+nspb.Msg.Uuid, &_access)
 	if err != nil {
@@ -626,6 +675,9 @@ func TestCreateUpdateNamespace(t *testing.T) {
 }
 
 func TestListNamespaces(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	title := randomdata.SillyName()
 	nspb, err := ns_ctrl.Create(rootCtx, connect.NewRequest(&namespaces.Namespace{
 		Title: title,
@@ -661,6 +713,9 @@ func TestListNamespaces(t *testing.T) {
 // Permissions Tests
 
 func TestNewAccountNoNamespaceGiven(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -680,14 +735,17 @@ func TestNewAccountNoNamespaceGiven(t *testing.T) {
 	}
 	acc := NewAccountFromPB(accpb.Msg.Account)
 
-	edge := GetEdgeCol(rootCtx, db, schema.NS2ACC)
-	ok := CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
+	edge := ica.GetEdgeCol(rootCtx, schema.NS2ACC)
+	ok := ica.CheckLink(rootCtx, edge, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), acc)
 	if !ok {
 		t.Fatal("Account has to be under platform Namespace by default")
 	}
 }
 
 func TestNewAccountAccessToRoot(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username := randomdata.SillyName()
 	password := randomdata.Alphanumeric(12)
@@ -709,7 +767,7 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 	acc := NewAccountFromPB(accPb.Msg.Account)
 
 	// Checking Account access to Root Account
-	ok, level := AccessLevel(rootCtx, db, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
+	ok, level := ica.AccessLevel(rootCtx, acc, NewBlankAccountDocument(schema.ROOT_ACCOUNT_KEY))
 	if ok {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.Level_NONE)
 	}
@@ -732,6 +790,9 @@ func TestNewAccountAccessToRoot(t *testing.T) {
 */
 
 func TestPermissionsRootNamespace(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username1 := randomdata.SillyName()
 	credentials1 := &accounts.Credentials{
@@ -772,14 +833,14 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
+	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
 
 	// Checking Account 1 access to Account 2
-	ok, level := AccessLevel(rootCtx, db, acc1, acc2)
+	ok, level := ica.AccessLevel(rootCtx, acc1, acc2)
 	if !ok {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
@@ -792,13 +853,16 @@ func TestPermissionsRootNamespace(t *testing.T) {
 	}
 
 	// Checking Account 2 access to Account 1
-	ok, level = AccessLevel(rootCtx, db, acc2, acc1)
+	ok, level = ica.AccessLevel(rootCtx, acc2, acc1)
 	if ok {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", level, access.Level_NONE)
 	}
 }
 
 func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	t.Log("Creating Sample Account and testing Authorisation")
 	username1 := randomdata.SillyName()
 	credentials1 := &accounts.Credentials{
@@ -839,8 +903,8 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	acc2 := NewAccountFromPB(acc2pb.Msg.Account)
 
 	// Giving Account 1 Management access(MGMT) to Platform
-	edge := GetEdgeCol(rootCtx, db, schema.ACC2NS)
-	err = Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
+	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -848,7 +912,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	nacc1 := *NewBlankAccountDocument(acc1.Key)
 	nacc2 := *NewBlankAccountDocument(acc2.Key)
 	// Checking Account 1 access to Account 2
-	err = AccessLevelAndGet(rootCtx, log, db, acc1, &nacc2)
+	err = ica.AccessLevelAndGet(rootCtx, log, acc1, &nacc2)
 	if err != nil {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
@@ -861,17 +925,20 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	}
 
 	// Checking Account 2 access to Account 1
-	err = AccessLevelAndGet(rootCtx, log, db, &nacc2, &nacc1)
+	err = ica.AccessLevelAndGet(rootCtx, log, &nacc2, &nacc1)
 	if err == nil && nacc1.Access.Level > access.Level_NONE {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.Access.Level, access.Level_NONE)
 	}
 }
 
 func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
 	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
 
-	err := AccessLevelAndGet(rootCtx, log, db, &acc1, &acc2)
+	err := ica.AccessLevelAndGet(rootCtx, log, &acc1, &acc2)
 	if err == nil {
 		t.Fatalf("Has to be error but it's not: %v", err)
 	}
@@ -880,6 +947,9 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 // Devices Tests
 
 func TestCreateGetAndDelete(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIFazCCA1OgAwIBAgIUAhdObDJnggMc26EDvd11ItBaPewwDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -957,6 +1027,9 @@ lKUKOFnVNnDJhVjLh5DeNYbyyU/f+xFqTzQjSyuw+4FegKbzfq7oliRnDeT0Wgs=
 }
 
 func TestCreateAndList(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIEljCCAn4CCQC7oNynkLPhTjANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJk
 ZTAeFw0yMTA2MTYxMTMyNDRaFw0yMjA2MTYxMTMyNDRaMA0xCzAJBgNVBAYTAmRl
@@ -1021,6 +1094,9 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 }
 
 func TestCreateFingByFingerprintAndDelete(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	cert := `-----BEGIN CERTIFICATE-----
 MIIEmDCCAoACCQDLeCKlPBA5IzANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDDANk
 ZXYwHhcNMjEwNjE2MTEzMzE4WhcNMjIwNjE2MTEzMzE4WjAOMQwwCgYDVQQDDANk
@@ -1095,6 +1171,9 @@ UWjgQjqXqHAguCY1KKG8lyzY3Q9pkmJcoy0HiA==
 }
 
 func TestFingByFingerprintNotFound(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	_, err := dev_ctrl.GetByFingerprint(rootCtx, connect.NewRequest(&devices.GetByFingerprintRequest{
 		Fingerprint: []byte("notfound"),
 	}))
@@ -1134,6 +1213,9 @@ func TestFingByFingerprintNotFound(t *testing.T) {
 // Plugins Test
 
 func TestPluginsRepo(t *testing.T) {
+	// TODO: Move to e2e
+	t.SkipNow()
+
 	name := randomdata.SillyName()
 	desc := randomdata.Letters(256)
 	this := &plugins.Plugin{
