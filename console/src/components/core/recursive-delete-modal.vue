@@ -1,7 +1,7 @@
 <template>
     <n-popconfirm @positive-click="() => show = true">
         <template #trigger>
-            <n-button v-if="o.access.role == 'OWNER' || access_lvl_conv(o) > 3" type="error" round secondary
+            <n-button v-if="access_role_conv(o) == Role.OWNER || access_lvl_conv(o) > 3" type="error" round secondary
                 @click.stop.prevent>Delete
             </n-button>
         </template>
@@ -30,16 +30,12 @@
 </template>
 
 <script setup>
-import { h, ref, watch } from "vue"
-
-import {
-    NPopconfirm, NModal, NCard,
-    NButton, NSpin, NTree,
-    NSpace
-} from "naive-ui";
+import { ref } from "vue"
+import { NPopconfirm, NModal, NCard, NButton, NSpin, NSpace } from "naive-ui";
+import { Role } from "infinimesh-proto/build/es/node/access/access_pb"
 
 import ObjectsTree from "./objects-tree.vue";
-import { access_lvl_conv } from "@/utils/access";
+import { access_lvl_conv, access_role_conv } from "@/utils/access";
 
 
 const show = ref(false)

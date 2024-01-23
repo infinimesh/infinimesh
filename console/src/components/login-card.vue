@@ -46,6 +46,7 @@ import {
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/store/app";
+import { useAccountsStore } from "@/store/accounts";
 
 import { UAParser } from "ua-parser-js"
 
@@ -54,6 +55,7 @@ const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-p
 const platform = PLATFORM_NAME
 
 const store = useAppStore();
+const accStore = useAccountsStore()
 const router = useRouter();
 
 const username = ref("");
@@ -78,11 +80,9 @@ async function login() {
       type: type.value,
       data: [username.value, password.value],
     },
-  }
+  };
 
-  if (store.dev) {
-    data.inf = true
-  }
+  if (store.dev) data.inf = true;
 
   let res = {};
   try {
@@ -90,26 +90,23 @@ async function login() {
   } catch (e) {
     console.warn("Failed to get user agent", e)
   }
+  data.client = `Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`;
 
-  data.client = `Console | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`
+  try {
+    const { token } = await accStore.token(data)
 
-  axios
-    .post(store.base_url + "/token", data)
-    .then((res) => {
-      success.value = true;
-      store.token = res.data.token;
-      router.push({ name: "Root" });
-      bar.finish();
-    })
-    .catch((err) => {
-      console.error(err);
-      bar.error();
-      if (err.response.status == 401) {
-        error.value = {
-          title: "Wrong credentials given",
-        };
-      }
-    });
+    success.value = true;
+    store.token = token;
+    router.push({ name: "Root" });
+    bar.finish();
+  } catch (e) {
+    console.error(e);
+    bar.error();
+
+    if (e.message.includes("Wrong credentials given")) {
+      error.value = { title: "Wrong credentials given" };
+    }
+  }
 }
 
 const route = useRoute();

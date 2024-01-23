@@ -10,6 +10,7 @@ export function access_lvl_conv(item) {
 export function access_role_conv(item) {
   const { role = "UNSET" } = item.access;
 
+  if (role >= 0 && role <= 2) return role
   return Role[role] ?? Role.UNSET;
 }
 
