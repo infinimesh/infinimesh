@@ -23,7 +23,7 @@
         </n-grid-item>
       </n-grid>
 
-      <div class="reported-state">
+      <div class="reported-state" :style="{ maxHeight: calculatedHeight }">
         <n-code language="json" :word-wrap="true" :code="
           reported
             ? JSON.stringify(reported.data, null, 2)
@@ -67,7 +67,7 @@
         </n-grid-item>
       </n-grid>
 
-      <div class="reported-state">
+      <div class="reported-state" :style="{ maxHeight: calculatedHeight }">
         <n-code language="json" :word-wrap="true" :code="
           desired
             ? JSON.stringify(desired.data, null, 2)
@@ -196,6 +196,12 @@ const reported_validation = computed(() => {
   }
 });
 
+const calculatedHeight = computed(() => {
+  const maxRows = STATE_MAX_ROWS || 10;
+  const lineHeight = parseFloat(window.getComputedStyle(document.body).lineHeight);
+  return (parseInt(maxRows) * lineHeight) + 'px';
+});
+
 function handleSubmitReported() {
   emit("submit-debug", JSON.parse(reported_state.value));
 }
@@ -203,7 +209,7 @@ function handleSubmitReported() {
 
 <style scoped>
 .reported-state {
-  max-height: 220px;
+  max-height: 224px;
   overflow-y: auto;
 }
 </style>
