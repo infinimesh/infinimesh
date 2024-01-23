@@ -533,3 +533,74 @@ func TestMergeAndStore_SuccessWithMergeOldEmpty(t *testing.T) {
 	f.mocks.rdb.AssertNumberOfCalls(t, "Get", 1)
 	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
 }
+
+// MergeJSON
+
+type mergeJsonCase struct {
+	msg         string
+	old         string
+	new         string
+	expected    string
+	expectedErr bool
+
+	intransitive bool
+}
+
+func TestMergeJSON_Cases(t *testing.T) {
+	cases := []mergeJsonCase{
+		{
+			msg:      "Message is empty",
+			old:      "",
+			new:      `{ "foo": "bar" }`,
+			expected: `{ "foo": "bar" }`,
+		},
+		{
+			msg:         "Message is invalid",
+			old:         "invalid",
+			new:         `{ "foo": "bar" }`,
+			expected:    `{ "foo": "bar" }`,
+			expectedErr: true,
+		},
+		{
+			msg:      "Message is empty object",
+			old:      `{}`,
+			new:      `{ "foo": "bar" }`,
+			expected: `{ "foo": "bar" }`,
+		},
+		{
+			msg:          "Message (old) is empty array",
+			old:          `[]`,
+			new:          `{ "foo": "bar" }`,
+			expected:     `{ "foo": "bar" }`,
+			intransitive: true,
+		},
+		{
+			msg:          "Message is valid",
+			old:          `{ "foo": "bar" }`,
+			new:          `{ "foo": "baz" }`,
+			expected:     `{ "foo": "baz" }`,
+			intransitive: true,
+		},
+	}
+
+	test_func := func(c mergeJsonCase) func(t *testing.T) {
+		return func(t *testing.T) {
+			merged, err := shadow.MergeJSON([]byte(c.old), []byte(c.new))
+			if c.expectedErr {
+				assert.Errorf(t, err, "expected error, got nil and `%s`", string(merged))
+				return
+			}
+			assert.NoError(t, err)
+			assert.JSONEq(t, c.expected, string(merged))
+		}
+	}
+
+	for _, c := range cases {
+		t.Run(c.msg+"(testing old message)", test_func(c))
+		if c.intransitive {
+			continue
+		}
+		c.old, c.new = c.new, c.old
+		t.Run(c.msg+"(testing new message)", test_func(c))
+	}
+}
