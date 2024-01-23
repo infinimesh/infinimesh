@@ -34,11 +34,11 @@ type ShadowServiceServer struct {
 	pb.UnimplementedShadowServiceServer
 
 	log *zap.Logger
-	rdb *redis.Client
+	rdb redis.Cmdable
 	ps  *pubsub.PubSub
 }
 
-func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSub) *ShadowServiceServer {
+func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps *pubsub.PubSub) *ShadowServiceServer {
 	return &ShadowServiceServer{
 		log: log.Named("shadow"),
 		rdb: rdb,
