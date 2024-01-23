@@ -461,6 +461,19 @@ func TestMergeAndStore_FailsOn_RedisGetAndSet(t *testing.T) {
 	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
 }
 
+func TestMergeAndStore_FailsOn_MergeOldIsInvalid(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Get(
+		f.data.ctx, key,
+	).Return(redis.NewStringResult("invalid", nil))
+
+	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Get", 1)
+}
+
 func TestMergeAndStore_SuccessWithMerge(t *testing.T) {
 	f := newShadowServiceServerFixture(t)
 
