@@ -64,7 +64,7 @@
           <Code @update:value="(v) => model.handsfree.code = v.code" />
         </n-form-item>
         <!-- Certificate upload -->
-        <n-form-item label="Certificate" path="device.certificate.pem_data" v-if="mode == 'certificate'">
+        <n-form-item label="Certificate" path="device.certificate.pemData" v-if="mode == 'certificate'">
           <n-upload v-if="pem_not_uploaded" @before-upload="handleUploadCertificate" accept=".crt,.pem"
             :show-file-list="false">
             <n-upload-dragger>
@@ -79,7 +79,7 @@
             </n-upload-dragger>
           </n-upload>
           <n-alert v-else title="Certificate Upload Done" type="success" closable
-            @close="model.device.certificate.pem_data = ''">
+            @close="model.device.certificate.pemData = ''">
             Close this alert to upload another certificate
           </n-alert>
         </n-form-item>
@@ -145,7 +145,7 @@ const model = ref({
     title: "",
     enabled: false,
     certificate: {
-      pem_data: "",
+      pemData: "",
     },
     tags: [],
   },
@@ -155,7 +155,7 @@ const rules = ref({
   device: {
     title: [{ required: true, message: "Please input title" }],
     certificate: {
-      pem_data: [{ required: true, message: "Please upload certificate" }],
+      pemData: [{ required: true, message: "Please upload certificate" }],
     },
   },
   namespace: [{ required: true, message: "Please select namespace" }],
@@ -171,7 +171,7 @@ function reset() {
       title: "",
       enabled: false,
       certificate: {
-        pem_data: "",
+        pemData: "",
       },
       tags: [],
     },
@@ -181,22 +181,22 @@ function reset() {
 }
 
 watch(mode, (mode) => {
-  model.value.device.certificate = {pem_data: ""}
+  model.value.device.certificate = {pemData: ""}
 
   if (mode == 'handsfree') {
-    rules.value.device.certificate.pem_data[0].required = false
+    rules.value.device.certificate.pemData[0].required = false
     rules.value.handsfree.code[0].required = true
 
     model.value.handsfree = { code: "" }
 
     return
   } else if (mode == 'certificate') {
-    rules.value.device.certificate.pem_data[0].required = true
+    rules.value.device.certificate.pemData[0].required = true
     rules.value.handsfree.code[0].required = false
 
     delete model.value.handsfree
   } else if (mode == 'soft') {
-    rules.value.device.certificate.pem_data[0].required = false
+    rules.value.device.certificate.pemData[0].required = false
     rules.value.handsfree.code[0].required = false
 
     delete model.value.handsfree
@@ -207,14 +207,14 @@ watch(mode, (mode) => {
 })
 
 const pem_not_uploaded = computed(
-  () => model.value.device.certificate.pem_data == ""
+  () => model.value.device.certificate.pemData == ""
 );
 
 function handleUploadCertificate({ file }) {
   const reader = new FileReader();
 
   reader.onload = (e) => {
-    model.value.device.certificate.pem_data = e.target.result;
+    model.value.device.certificate.pemData = e.target.result;
   };
   reader.readAsText(file.file);
 
