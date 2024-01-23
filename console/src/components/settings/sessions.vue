@@ -79,7 +79,7 @@
                         <n-tooltip trigger="hover" v-if="!session.current">
                             <template #trigger>
                                 <n-button ghost type="warning"
-                                    @click="async () => { await store.revoke(session.id); load() }">
+                                    @click="async () => { await store.revoke(session); load() }">
                                     <template #icon>
                                         <n-icon :component="ExitOutline" />
                                     </template>
