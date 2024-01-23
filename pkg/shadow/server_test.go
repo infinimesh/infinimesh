@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	redis_mocks "github.com/infinimesh/infinimesh/mocks/github.com/go-redis/redis/v8"
 	pubsub_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/pubsub"
+	shadow_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/proto/shadow"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 	pb "github.com/infinimesh/proto/shadow"
 	"github.com/stretchr/testify/assert"
@@ -23,23 +24,47 @@ type shadowServiceServerFixture struct {
 	mocks   struct {
 		ps  *pubsub_mocks.MockPubSub
 		rdb *redis_mocks.MockCmdable
+
+		srv *shadow_mocks.MockShadowService_StreamShadowServer
 	}
 	data struct {
-		ctx context.Context
+		ctx               context.Context
+		uuid              string
+		sample_state      string
+		sample_connection string
 	}
 }
 
-func newShadowServiceServerFixture(t *testing.T) *shadowServiceServerFixture {
+func newShadowServiceServerFixture(t *testing.T, args ...bool) *shadowServiceServerFixture {
 	f := &shadowServiceServerFixture{}
 
 	f.mocks.ps = pubsub_mocks.NewMockPubSub(t)
 	f.mocks.rdb = redis_mocks.NewMockCmdable(t)
+	f.mocks.srv = shadow_mocks.NewMockShadowService_StreamShadowServer(t)
 
 	f.service = shadow.NewShadowServiceServer(
 		zap.NewExample(), f.mocks.rdb, f.mocks.ps,
 	)
 
 	f.data.ctx = context.Background()
+	f.data.uuid = uuid.New().String()
+	f.data.sample_state = `{
+		"data": {
+		  "diff": 2
+		},
+		"timestamp": {
+		  "nanos": 369620756,
+		  "seconds": 1687185838
+		}
+	  }`
+	f.data.sample_connection = `{
+		"timestamp": {
+			"nanos": 369620756,
+			"seconds": 1687185838
+		},
+		"connected": true,
+		"client_id": "device1"
+	  }`
 
 	return f
 }
@@ -78,30 +103,9 @@ func TestGet_Success(t *testing.T) {
 
 	mget_cmd := redis.NewSliceCmd(f.data.ctx)
 	mget_cmd.SetVal([]interface{}{
-		`{
-			"data": {
-			  "diff": 2
-			},
-			"timestamp": {
-			  "nanos": 369620756,
-			  "seconds": 1687185838
-			}
-		  }`, `{
-			"data": {
-			  "diff": 2
-			},
-			"timestamp": {
-			  "nanos": 369620756,
-			  "seconds": 1687185838
-			}
-		  }`, `{
-			"timestamp": {
-				"nanos": 369620756,
-				"seconds": 1687185838
-			},
-			"connected": true,
-			"client_id": "device1"
-		  }`,
+		f.data.sample_state,
+		f.data.sample_state,
+		f.data.sample_connection,
 	})
 
 	f.mocks.rdb.
@@ -237,15 +241,7 @@ func TestRemove_FailsOn_Unmarshal(t *testing.T) {
 func TestRemove_Reported_Success(t *testing.T) {
 	f := newShadowServiceServerFixture(t)
 
-	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:reported").Return(redis.NewStringResult(`{
-		"data": {
-		  "diff": 2
-		},
-		"timestamp": {
-		  "nanos": 369620756,
-		  "seconds": 1687185838
-		}
-	  }`, nil))
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:reported").Return(redis.NewStringResult(f.data.sample_state, nil))
 	f.mocks.rdb.EXPECT().Set(f.data.ctx, "device1:reported", mock.MatchedBy(func(s string) bool {
 		state := pb.State{}
 		err := json.Unmarshal([]byte(s), &state)
@@ -277,15 +273,7 @@ func TestRemove_Reported_Success(t *testing.T) {
 func TestRemove_Desired_Success(t *testing.T) {
 	f := newShadowServiceServerFixture(t)
 
-	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:desired").Return(redis.NewStringResult(`{
-		"data": {
-		  "diff": 2
-		},
-		"timestamp": {
-		  "nanos": 369620756,
-		  "seconds": 1687185838
-		}
-	  }`, nil))
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:desired").Return(redis.NewStringResult(f.data.sample_state, nil))
 	f.mocks.rdb.EXPECT().Set(f.data.ctx, "device1:desired", mock.MatchedBy(func(s string) bool {
 		state := pb.State{}
 		err := json.Unmarshal([]byte(s), &state)
@@ -313,4 +301,68 @@ func TestRemove_Desired_Success(t *testing.T) {
 	assert.NotNil(t, res.Desired)
 	assert.NotNil(t, res.Desired.Data)
 	assert.Len(t, res.Desired.Data.Fields, 0)
+}
+
+// StreamShadow
+
+func TestStreamShadow_FailsOn_NoDevices(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	err := f.service.StreamShadow(&pb.StreamShadowRequest{}, f.mocks.srv)
+
+	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no devices specified")
+}
+
+func TestStreamShadow_Success_ServerClosed(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.srv.EXPECT().Context().Return(f.data.ctx)
+	f.mocks.srv.EXPECT().Send(mock.Anything).Return(assert.AnError)
+
+	mget_result := redis.NewSliceCmd(f.data.ctx)
+	mget_result.SetVal([]interface{}{f.data.sample_state, f.data.sample_state, f.data.sample_connection})
+	f.mocks.rdb.EXPECT().MGet(
+		f.data.ctx, shadow.Key(f.data.uuid, pb.StateKey_REPORTED),
+		shadow.Key(f.data.uuid, pb.StateKey_DESIRED),
+		shadow.Key(f.data.uuid, pb.StateKey_CONNECTION),
+	).Return(mget_result)
+
+	f.mocks.ps.EXPECT().AddSub(mock.MatchedBy(func(ch chan interface{}) bool {
+		ch <- &pb.Shadow{
+			Device: f.data.uuid,
+		}
+		return true
+	}), "mqtt.incoming", "mqtt.outgoing").Return()
+	f.mocks.ps.EXPECT().Unsub(mock.MatchedBy(func(ch chan interface{}) bool {
+		close(ch)
+		return true
+	})).Return()
+
+	done := make(chan bool, 1)
+	go func(done chan bool) {
+		err := f.service.StreamShadow(&pb.StreamShadowRequest{
+			Devices: []string{f.data.uuid},
+			Sync:    true,
+		}, f.mocks.srv)
+		assert.NoError(t, err)
+		done <- true
+	}(done)
+
+	timer := time.After(time.Second * 5)
+	ticker := time.Tick(10 * time.Millisecond)
+
+timer_loop:
+	for {
+		select {
+		case <-timer:
+			t.Fatal("Server did not close")
+			break timer_loop
+		case <-done:
+			break timer_loop
+		case <-ticker:
+			time.Sleep(time.Millisecond * 10)
+		}
+	}
+
+	f.mocks.srv.AssertNumberOfCalls(t, "Send", 2)
 }

@@ -195,6 +195,8 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
 	defer unsub(s.ps, messages)
 
+	log.Debug("Listening for messages")
+
 	for msg := range messages {
 		shadow := msg.(*pb.Shadow)
 		if _, ok := devices[shadow.GetDevice()]; !ok {
