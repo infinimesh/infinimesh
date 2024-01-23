@@ -2,7 +2,9 @@ package shadow_test
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
@@ -11,6 +13,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 	pb "github.com/infinimesh/proto/shadow"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -183,4 +186,131 @@ func TestPatch_Success(t *testing.T) {
 
 	assert.Equal(t, request.Desired.Data, resp.Desired.Data)
 	assert.NotNil(t, resp.Desired.Timestamp)
+}
+
+// Remove
+
+func TestRemove_FailsOn_NoDevice(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	_, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{})
+
+	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no device specified")
+}
+
+func TestRemove_FailsOn_NoKey(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	_, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
+		Device: uuid.New().String(),
+	})
+
+	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = key not specified")
+}
+
+func TestRemove_FailsOn_RedisGet(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:reported").Return(redis.NewStringResult("", assert.AnError))
+
+	_, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
+		Device: "device1",
+		Key:    "diff",
+	})
+
+	assert.EqualError(t, err, "rpc error: code = Internal desc = failed to get Shadow")
+}
+
+func TestRemove_FailsOn_Unmarshal(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:reported").Return(redis.NewStringResult("invalid", nil))
+
+	_, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
+		Device: "device1",
+		Key:    "diff",
+	})
+
+	assert.EqualError(t, err, "rpc error: code = Internal desc = cannot Unmarshal state")
+}
+
+func TestRemove_Reported_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:reported").Return(redis.NewStringResult(`{
+		"data": {
+		  "diff": 2
+		},
+		"timestamp": {
+		  "nanos": 369620756,
+		  "seconds": 1687185838
+		}
+	  }`, nil))
+	f.mocks.rdb.EXPECT().Set(f.data.ctx, "device1:reported", mock.MatchedBy(func(s string) bool {
+		state := pb.State{}
+		err := json.Unmarshal([]byte(s), &state)
+		if err != nil {
+			t.Logf("Error unmarshalling state: %s", err)
+			return false
+		}
+
+		if len(state.Data.Fields) != 0 {
+			t.Logf("Expected state to be empty, got: %s", s)
+			return false
+		}
+
+		return true
+	}), time.Duration(0)).Return(redis.NewStatusResult("", nil))
+
+	res, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
+		Device: "device1",
+		Key:    "diff",
+	})
+
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+	assert.NotNil(t, res.Reported)
+	assert.NotNil(t, res.Reported.Data)
+	assert.Len(t, res.Reported.Data.Fields, 0)
+}
+
+func TestRemove_Desired_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.rdb.EXPECT().Get(f.data.ctx, "device1:desired").Return(redis.NewStringResult(`{
+		"data": {
+		  "diff": 2
+		},
+		"timestamp": {
+		  "nanos": 369620756,
+		  "seconds": 1687185838
+		}
+	  }`, nil))
+	f.mocks.rdb.EXPECT().Set(f.data.ctx, "device1:desired", mock.MatchedBy(func(s string) bool {
+		state := pb.State{}
+		err := json.Unmarshal([]byte(s), &state)
+		if err != nil {
+			t.Logf("Error unmarshalling state: %s", err)
+			return false
+		}
+
+		if len(state.Data.Fields) != 0 {
+			t.Logf("Expected state to be empty, got: %s", s)
+			return false
+		}
+
+		return true
+	}), time.Duration(0)).Return(redis.NewStatusResult("", nil))
+
+	res, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
+		Device:   "device1",
+		Key:      "diff",
+		StateKey: pb.StateKey_DESIRED,
+	})
+
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+	assert.NotNil(t, res.Desired)
+	assert.NotNil(t, res.Desired.Data)
+	assert.Len(t, res.Desired.Data.Fields, 0)
 }
