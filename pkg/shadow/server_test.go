@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -26,6 +27,9 @@ type shadowServiceServerFixture struct {
 		rdb *redis_mocks.MockCmdable
 
 		srv *shadow_mocks.MockShadowService_StreamShadowServer
+
+		log      *zap.Logger
+		observer *observer.ObservedLogs
 	}
 	data struct {
 		ctx               context.Context
@@ -38,12 +42,16 @@ type shadowServiceServerFixture struct {
 func newShadowServiceServerFixture(t *testing.T, args ...bool) *shadowServiceServerFixture {
 	f := &shadowServiceServerFixture{}
 
+	core, observer := observer.New(zap.DebugLevel)
+	f.mocks.log = zap.New(core)
+	f.mocks.observer = observer
+
 	f.mocks.ps = pubsub_mocks.NewMockPubSub(t)
 	f.mocks.rdb = redis_mocks.NewMockCmdable(t)
 	f.mocks.srv = shadow_mocks.NewMockShadowService_StreamShadowServer(t)
 
 	f.service = shadow.NewShadowServiceServer(
-		zap.NewExample(), f.mocks.rdb, f.mocks.ps,
+		f.mocks.log, f.mocks.rdb, f.mocks.ps,
 	)
 
 	f.data.ctx = context.Background()
@@ -616,4 +624,51 @@ func TestMergeJSON_Cases(t *testing.T) {
 		c.old, c.new = c.new, c.old
 		t.Run(c.msg+"(testing new message)", test_func(c))
 	}
+}
+
+// Persister
+
+func TestPersister_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	f.mocks.ps.EXPECT().AddSub(mock.MatchedBy(func(ch chan interface{}) bool {
+		ch <- &pb.Shadow{
+			Device: f.data.uuid,
+		}
+		go func() {
+			time.Sleep(time.Millisecond * 200)
+			close(ch)
+		}()
+		return true
+	}), "mqtt.incoming", "mqtt.outgoing").Return()
+	f.mocks.ps.EXPECT().Unsub(mock.Anything).Return()
+
+	done := make(chan bool, 1)
+	go func(done chan bool) {
+		f.service.Persister()
+		done <- true
+	}(done)
+
+	timer := time.After(time.Second * 5)
+	ticker := time.Tick(10 * time.Millisecond)
+
+timer_loop:
+	for {
+		select {
+		case <-timer:
+			t.Fatal("Server did not close")
+			break timer_loop
+		case <-done:
+			break timer_loop
+		case <-ticker:
+			time.Sleep(time.Millisecond * 10)
+		}
+	}
+
+	alleged_exited_logs := f.mocks.observer.FilterMessage("Exited").All()
+	assert.Len(t, alleged_exited_logs, 1)
+	assert.Equal(t, zap.WarnLevel, alleged_exited_logs[0].Level)
+
+	f.mocks.ps.AssertNumberOfCalls(t, "AddSub", 1)
+	f.mocks.ps.AssertNumberOfCalls(t, "Unsub", 1)
 }
