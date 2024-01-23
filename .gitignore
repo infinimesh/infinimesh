@@ -5,3 +5,7 @@ coverage
 .DS_Store
 CronJobs/bkp.yaml
 .idea
+
+# Ignore auto-generated coverage files
+cover.out
+cover.html

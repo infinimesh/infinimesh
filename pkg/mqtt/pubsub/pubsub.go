@@ -49,7 +49,7 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capac
 	return ps, nil
 }
 
-// Reading messages from PubSub and publishing them to RabbitMQ Queue
+// HandlePublish - Reads messages from PubSub and publishing them to RabbitMQ Queue
 func HandlePublish(ch *amqp.Channel, topic string) {
 	log := logger.Named("publish")
 init:
@@ -86,7 +86,7 @@ init:
 	}
 }
 
-// Reading messages from RabbitMQ Queue and publishing them to PubSub
+// HandleSubscribe - Reads messages from RabbitMQ Queue and publishing them to PubSub
 func HandleSubscribe(ch *amqp.Channel, topic string) {
 	log := logger.Named("subscribe")
 init:

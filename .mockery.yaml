@@ -1,0 +1,44 @@
+with-expecter: true
+outpkg: "{{.PackageName}}_mocks"
+packages:
+    github.com/infinimesh/infinimesh/pkg/shared/auth:
+        interfaces:
+            JWTHandler:
+    github.com/infinimesh/infinimesh/pkg/sessions:
+        interfaces:
+            SessionsHandler:
+    
+    github.com/infinimesh/infinimesh/pkg/graph:
+        interfaces:
+            InfinimeshCommonActionsRepo:
+
+    # ProtoBuf Packages
+    github.com/infinimesh/proto/node:
+        interfaces:
+            AccountsServiceClient:
+            DevicesServiceClient:
+            NamespacesServiceClient:
+            SessionsServiceClient:
+            ShadowServiceClient:
+            InternalServiceClient:
+    github.com/infinimesh/proto/shadow:
+        interfaces:
+            ShadowServiceClient:
+    github.com/infinimesh/proto/plugins:
+        interfaces:
+            PluginsServiceClient:
+    github.com/infinimesh/proto/handsfree:
+        interfaces:
+            HandsfreeServiceClient:
+    
+    # Foreign Packages
+    github.com/go-redis/redis/v8:
+        interfaces:
+            UniversalClient:
+            Cmdable:
+    
+    github.com/arangodb/go-driver:
+        interfaces:
+            Database:
+            Collection:
+            Cursor:

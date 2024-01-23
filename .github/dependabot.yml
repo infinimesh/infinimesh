@@ -7,22 +7,22 @@ version: 2
 updates:
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
+    target-branch: dev
     schedule:
       interval: daily
       time: "06:00"
     reviewers:
-      - slntopp
-    assignees:
-      - slntopp
+      - infinimesh/backend
+
   - package-ecosystem: "npm"
     directory: "/console"
+    target-branch: dev
     schedule:
       interval: daily
       time: "06:00"
     reviewers:
-      - slntopp
-    assignees:
-      - slntopp
+      - infinimesh/frontend
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

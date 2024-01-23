@@ -146,7 +146,7 @@ GRAPH @credentials_graph
 RETURN { type: edge.type, credentials }
 `
 
-// Return Credentials linked to Account
+// ListCredentials - Returns Credentials linked to Account
 func ListCredentials(ctx context.Context, log *zap.Logger, db driver.Database, acc driver.DocumentID) (r []ListCredentialsResponse, err error) {
 	c, err := db.Query(ctx, listCredentialsQuery, map[string]interface{}{
 		"account":           acc.String(),
@@ -182,7 +182,7 @@ var _Listables = map[string]ListableFabric{
 	"standard": StandardFromMap,
 }
 
-// Accepts Credentials type as string t and Credentials data as map[string]interface{} d
+// MakeListable - Accepts Credentials type as string t and Credentials data as map[string]interface{} d
 func MakeListable(r ListCredentialsResponse) (ListableCredentials, error) {
 	f, ok := _Listables[r.Type]
 	if !ok {

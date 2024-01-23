@@ -82,7 +82,6 @@ func NewDeviceFromPB(dev *devpb.Device) (res *Device) {
 }
 
 type DevicesController struct {
-	pb.UnimplementedDevicesServiceServer
 	InfinimeshBaseController
 
 	col driver.Collection // Devices Collection
@@ -91,10 +90,16 @@ type DevicesController struct {
 	ns2dev  driver.Collection // Namespaces to Devices permissions edge collection
 	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
+	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+
 	SIGNING_KEY []byte
 }
 
-func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.HandsfreeServiceClient) *DevicesController {
+func NewDevicesController(
+	log *zap.Logger, db driver.Database,
+	hfc handsfree.HandsfreeServiceClient,
+	ica InfinimeshCommonActionsRepo,
+) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
 
@@ -103,8 +108,11 @@ func NewDevicesController(log *zap.Logger, db driver.Database, hfc handsfree.Han
 			log: log.Named("DevicesController"), db: db,
 		},
 		col: col, hfc: hfc,
-		ns2dev:      GetEdgeCol(ctx, db, schema.NS2DEV),
-		acc2dev:     GetEdgeCol(ctx, db, schema.ACC2DEV),
+		ns2dev:  ica.GetEdgeCol(ctx, schema.NS2DEV),
+		acc2dev: ica.GetEdgeCol(ctx, schema.ACC2DEV),
+
+		ica_repo: ica,
+
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
 }
@@ -154,7 +162,7 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 
 	ns := NewBlankNamespaceDocument(ns_id)
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), ns)
 	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
@@ -177,7 +185,7 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -203,7 +211,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 
 	ns := NewBlankNamespaceDocument(ns_id)
 
-	ok, level := AccessLevel(ctx, c.db, NewBlankAccountDocument(requestor), ns)
+	ok, level := c.ica_repo.AccessLevel(ctx, NewBlankAccountDocument(requestor), ns)
 	if !ok || level < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Namespace %s", ns_id)
 	}
@@ -220,7 +228,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -231,8 +239,10 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 		if _, d_err := c.Delete(ctx, connect.NewRequest(device.Device)); d_err != nil {
 			log.Warn("Couldn't delete Device", zap.Error(d_err))
 			return connect.NewResponse(&devpb.CreateResponse{
-				Device: device.Device,
-			}), status.Error(codes.OK, "Couldn't delete freshly created device as well as set the certificate")
+					Device: device.Device,
+				}), connect.NewError(connect.CodeDataLoss, fmt.Errorf(
+					"Couldn't delete freshly created device as well as set the certificate: %v", err,
+				))
 		}
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -253,7 +263,9 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 	dev.Certificate = &devpb.Certificate{
 		PemData: cp.GetPayload()[0],
 	}
-	dev.Tags = append(dev.Tags, cp.GetAppId())
+	if cp.GetAppId() != "" {
+		dev.Tags = append(dev.Tags, cp.GetAppId())
+	}
 
 	err = sha256Fingerprint(dev.Certificate)
 	if err != nil {
@@ -318,7 +330,7 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 	}
 
 	res := NewDeviceFromPB(curr.Msg)
-	err = Toggle(ctx, c.db, res, "enabled")
+	err = c.ica_repo.Toggle(ctx, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
@@ -342,7 +354,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 	}
 
 	res := NewDeviceFromPB(curr.Msg)
-	err = Toggle(ctx, c.db, res, "basic_enabled")
+	err = c.ica_repo.Toggle(ctx, res, "basic_enabled")
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
@@ -362,7 +374,7 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 	// Getting Account from DB
 	// and Check requestor access
 	device := *NewBlankDeviceDocument(dev.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, NewBlankAccountDocument(requestor), &device)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &device)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -370,13 +382,9 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	post := false
-	if device.Access.Level > access.Level_READ {
-		post = true
-	} else {
-		device.Certificate = nil
-	}
-	token, err := c._MakeToken([]string{device.Uuid}, post, 0)
+	token, err := c._MakeToken(map[string]access.Level{
+		device.GetUuid(): access.Level_NONE,
+	}, 0)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -390,11 +398,14 @@ func (c *DevicesController) GetByToken(ctx context.Context, req *connect.Request
 	dev := req.Msg
 	log.Debug("Get by Token request received", zap.String("device", dev.Uuid), zap.Any("context", ctx))
 
-	devices_scope := ctx.Value(inf.InfinimeshDevicesCtxKey).([]string)
+	devices_scope, ok := ctx.Value(inf.InfinimeshDevicesCtxKey).(map[string]access.Level)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope or not allowed to post"))
+	}
 	log.Debug("Devices Scope", zap.Any("devices", devices_scope))
 
 	found := false
-	for _, device := range devices_scope {
+	for device := range devices_scope {
 		if device == dev.GetUuid() {
 			found = true
 			break
@@ -411,10 +422,6 @@ func (c *DevicesController) GetByToken(ctx context.Context, req *connect.Request
 	}
 	device.Uuid = meta.ID.Key()
 
-	if !ctx.Value(inf.InfinimeshPostAllowedCtxKey).(bool) {
-		device.Certificate = nil
-	}
-
 	return connect.NewResponse(&device), nil
 }
 
@@ -429,7 +436,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
 	}
 
-	cr, err := ListQuery(ctx, log, c.db, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
+	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
@@ -469,7 +476,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 
 	acc := *NewBlankAccountDocument(requestor)
 	dev := *NewBlankDeviceDocument(req.GetUuid())
-	err := AccessLevelAndGet(ctx, log, c.db, &acc, &dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, &acc, &dev)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -480,10 +487,10 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Warn("Error removing document", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error deleting Device")
+		return nil, status.Error(codes.Internal, "Error while deleting Device")
 	}
 
-	err = Link(
+	err = c.ica_repo.Link(
 		ctx, log, c.ns2dev,
 		NewBlankNamespaceDocument(*dev.Access.Namespace),
 		&dev, access.Level_NONE, access.Role_UNSET,
@@ -526,7 +533,9 @@ func (c *DevicesController) GetByFingerprint(ctx context.Context, req *connect.R
 	}
 	r.Uuid = meta.ID.Key()
 
-	token, err := c._MakeToken([]string{r.Uuid}, false, 0)
+	token, err := c._MakeToken(map[string]access.Level{
+		r.GetUuid(): access.Level_NONE,
+	}, 0)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -545,22 +554,24 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.
 	log.Debug("Requestor", zap.String("id", requestor))
 
 	acc := *NewBlankAccountDocument(requestor)
-	_access := access.Level_READ
-	if req.GetPost() {
-		_access = access.Level_MGMT
-	}
 
-	for _, uuid := range req.GetDevices() {
-		ok, level := AccessLevel(ctx, c.db, &acc, NewBlankDeviceDocument(uuid))
+	for uuid := range req.GetDevices() {
+		ok, level := c.ica_repo.AccessLevel(ctx, &acc, NewBlankDeviceDocument(uuid))
 		if !ok {
 			return nil, status.Errorf(codes.NotFound, "Account not found or not enough Access Rights to device: %s", uuid)
 		}
-		if level < _access {
+		if level < access.Level_READ {
 			return nil, status.Errorf(codes.PermissionDenied, "Not enough Access Rights to device: %s", uuid)
+		}
+		if req.GetDevices()[uuid] > level {
+			return nil, status.Errorf(codes.PermissionDenied, "Not enough Access Rights to device: %s", uuid)
+		}
+		if req.GetDevices()[uuid] == access.Level_NONE {
+			req.Devices[uuid] = level
 		}
 	}
 
-	token_string, err := c._MakeToken(req.GetDevices(), req.GetPost(), req.GetExp())
+	token_string, err := c._MakeToken(req.GetDevices(), req.GetExp())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Failed to issue token")
 	}
@@ -568,10 +579,9 @@ func (c *DevicesController) MakeDevicesToken(ctx context.Context, _req *connect.
 	return connect.NewResponse(&pb.TokenResponse{Token: token_string}), nil
 }
 
-func (c *DevicesController) _MakeToken(devices []string, post bool, exp int64) (string, error) {
+func (c *DevicesController) _MakeToken(devices map[string]access.Level, exp int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims[inf.INFINIMESH_DEVICES_CLAIM] = devices
-	claims[inf.INFINIMESH_POST_STATE_ALLOWED_CLAIM] = post
 	claims["exp"] = exp
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -641,7 +651,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 	requestor := NewBlankAccountDocument(requestor_id)
 	dev := NewBlankDeviceDocument(req.Msg.Node)
 
-	err := AccessLevelAndGet(ctx, log, c.db, requestor, dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, log, requestor, dev)
 	if err != nil {
 		log.Warn("Error getting Device and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Device not found or not enough Access Rights")
@@ -667,7 +677,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Unable to determine Object type")
 	}
 
-	err = AccessLevelAndGet(ctx, log, c.db, requestor, obj)
+	err = c.ica_repo.AccessLevelAndGet(ctx, log, requestor, obj)
 	if err != nil {
 		log.Warn("Error getting Object and access level", zap.String("id", req.Msg.Join), zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")
@@ -678,7 +688,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
 	}
 
-	err = Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
+	err = c.ica_repo.Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")

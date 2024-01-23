@@ -28,6 +28,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/proto/node/access"
+
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 )
@@ -35,15 +37,24 @@ import (
 type interceptor struct {
 	log         *zap.Logger
 	rdb         *redis.Client
+	jwt         JWTHandler
+	sessions    sessions.SessionsHandler
 	signing_key []byte
 }
 
 type middleware func(context.Context, []byte, string) (context.Context, bool, error)
 
-func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, signing_key []byte) *interceptor {
+func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, signing_key []byte) *interceptor {
+	jwth := _jwth
+	if jwth == nil {
+		jwth = defaultJWTHandler{}
+	}
+
 	return &interceptor{
 		log:         log.Named("AuthInterceptor"),
 		rdb:         _rdb,
+		jwt:         jwth,
+		sessions:    sessions.NewSessionsHandlerModule(_rdb).Handler(),
 		signing_key: signing_key,
 	}
 }
@@ -131,7 +142,7 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 
 	log := i.log.Named("StandardAuthMiddleware")
 
-	token, err := connectValidateToken(signingKey, tokenString)
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
 		return
 	}
@@ -162,7 +173,7 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 		}
 
 		// Check if session is valid
-		if err = sessions.Check(rdb, uuid, sid); err != nil {
+		if err = i.sessions.Check(uuid, sid); err != nil {
 			i.log.Debug("Session check failed", zap.Any("error", err))
 			err = status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 			return
@@ -198,7 +209,7 @@ func (i *interceptor) ConnectBlankMiddleware(_ctx context.Context, signingKey []
 
 func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
 	log_activity = false
-	token, err := connectValidateToken(signingKey, tokenString)
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
 		return
 	}
@@ -211,37 +222,28 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 		return
 	}
 
-	ipool, ok := devices.([]interface{})
+	ipool, ok := devices.(map[string]any)
 	if !ok {
 		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
 		return
 	}
 
-	pool := make([]string, len(ipool))
-	for i, el := range ipool {
-		pool[i], ok = el.(string)
+	pool := make(map[string]access.Level, len(ipool))
+	for key, value := range ipool {
+		val, ok := value.(float64)
 		if !ok {
-			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %f is not a string", value)
 			return
 		}
+		pool[key] = access.Level(val)
 	}
 	ctx = context.WithValue(_ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
-
-	post := false
-	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
-	if ipost != nil {
-		post, ok = ipost.(bool)
-		if !ok {
-			post = false
-		}
-	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
 
 	return
 }
 
-func connectValidateToken(signing_key []byte, tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+func connectValidateToken(jwth JWTHandler, signing_key []byte, tokenString string) (jwt.MapClaims, error) {
+	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 		}
@@ -273,7 +275,7 @@ func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
 	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
 	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
 
-	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+	if err := i.sessions.LogActivity(req, sid, exp); err != nil {
 		i.log.Warn("Error logging activity", zap.Any("error", err))
 	}
 }

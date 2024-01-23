@@ -34,15 +34,22 @@ import (
 )
 
 var (
-	log *zap.Logger
-	rdb *redis.Client
+	log  *zap.Logger
+	rdb  *redis.Client
+	jwth JWTHandler
+	sess sessions.SessionsHandler
 
 	SIGNING_KEY []byte
 )
 
-func SetContext(logger *zap.Logger, _rdb *redis.Client, key []byte) {
+func SetContext(logger *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, key []byte) {
 	log = logger.Named("JWT")
 	rdb = _rdb
+	jwth = _jwth
+	if jwth == nil {
+		jwth = &defaultJWTHandler{}
+	}
+	sess = sessions.NewSessionsHandlerModule(rdb).Handler()
 
 	SIGNING_KEY = key
 	log.Debug("Context set", zap.ByteString("signing_key", key))
@@ -121,7 +128,7 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 		}
 
 		// Check if session is valid
-		if err := sessions.Check(rdb, uuid, sid); err != nil {
+		if err := sess.Check(uuid, sid); err != nil {
 			log.Debug("Session check failed", zap.Any("error", err))
 			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
 		}
@@ -183,21 +190,11 @@ func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
 	}
 	ctx = context.WithValue(ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
 
-	post := false
-	ipost := token[infinimesh.INFINIMESH_POST_STATE_ALLOWED_CLAIM]
-	if ipost != nil {
-		post, ok = ipost.(bool)
-		if !ok {
-			post = false
-		}
-	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshPostAllowedCtxKey, post)
-
 	return ctx, nil
 }
 
 func validateToken(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 		}
@@ -229,7 +226,7 @@ func handleLogActivity(ctx context.Context) {
 	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
 	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
 
-	if err := sessions.LogActivity(rdb, req, sid, exp); err != nil {
+	if err := sess.LogActivity(req, sid, exp); err != nil {
 		log.Warn("Error logging activity", zap.Any("error", err))
 	}
 }

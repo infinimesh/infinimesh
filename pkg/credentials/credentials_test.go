@@ -37,6 +37,8 @@ var (
 )
 
 func init() {
+	// TODO: Move this to e2e
+	return
 	viper.AutomaticEnv()
 	log = zap.NewExample()
 
