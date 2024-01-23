@@ -10,6 +10,9 @@ import {
 
 import { access_lvl_conv } from "@/utils/access";
 import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
+import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
+import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
+import { Struct } from "@bufbuild/protobuf";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -173,10 +176,13 @@ export const useDevicesStore = defineStore("devices", {
       if (!patch.title || !patch.tags)
         throw "Both device Title and Tags must be specified while update";
       try {
-        const data = await this.devices_client.update({
-          ...patch,
-          uuid: device,
-        });
+        const data = await this.devices_client.update(
+          new Device({
+            ...patch,
+            config: new Struct().fromJson(patch.config),
+            uuid: device,
+          })
+        );
         this.devices[device] = data;
       } catch (err) {
         console.error(err);
