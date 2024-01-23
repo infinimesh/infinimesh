@@ -145,16 +145,18 @@ const joins = ref([])
 
 async function load() {
     loading.value = true
-    const { data } = await store.loadJoins(props.namespace)
-    joins.value = data.accounts
+    const { accounts } = await store.loadJoins(props.namespace)
+
+    joins.value = accounts
     loading.value = false
 }
 
 async function handleJoin(account, access) {
     loading.value = true
     try {
-        const { data } = await store.join(props.namespace, account, Level[access])
-        joins.value = data.accounts
+        const { accounts } = await store.join(props.namespace, account, Level[access])
+
+        joins.value = accounts
     } catch (e) {
         console.error(e)
     }

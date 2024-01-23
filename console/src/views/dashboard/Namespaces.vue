@@ -50,12 +50,12 @@
             </td>
             <td>
               <access-badge :access="ns.access.level" namespace />
-              <access-badge access="OWNER" v-if="ns.access.role == 'OWNER'" left="5px" namespace />
+              <access-badge access="OWNER" v-if="access_role_conv(ns) == Role.OWNER" left="5px" namespace />
             </td>
             <td>
               <n-space>
                 <config-edit-modal :o="ns" @submit="handleConfigUpdate"
-                  v-if="access_lvl_conv(ns) > 3 || ns.access.role == 'OWNER'" />
+                  v-if="access_lvl_conv(ns) > 3 || access_role_conv(ns) == Role.OWNER" />
 
                 <n-button type="success" round secondary @click.stop.prevent="setNSAndGo(ns.uuid, 'Devices')">
                   Devices
@@ -68,7 +68,7 @@
             </td>
           </n-tr>
           <ns-joins v-if="expand.has(ns.uuid)" :namespace="ns.uuid"
-            :admin="ns.access.role == 'OWNER' || ns.access.level == 'ROOT'" />
+            :admin="access_role_conv(ns) == Role.OWNER || access_lvl_conv(ns) == Role.ROOT" />
         </template>
         <n-tr v-if="pool.user && pool.user.length">
           <td colspan="5" align="center">
@@ -115,11 +115,12 @@ import {
   NGridItem, NH1, NText, useMessage
 } from "naive-ui";
 
-import { useNSStore } from "@/store/namespaces";
-
 import { storeToRefs } from "pinia";
-import { access_lvl_conv } from "@/utils/access";
 import { groupBy } from "lodash";
+import { Role } from "infinimesh-proto/build/es/node/access/access_pb"
+
+import { useNSStore } from "@/store/namespaces";
+import { access_lvl_conv, access_role_conv } from "@/utils/access";
 
 const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
 const ChevronForwardOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ChevronForwardOutline"))
@@ -138,7 +139,9 @@ const store = useNSStore();
 const { loading, namespaces_list: namespaces } = storeToRefs(store);
 
 const pool = computed(() => groupBy(namespaces.value, (e) => {
-  if ((e.access ?? { role: "" }).role == "OWNER" || access_lvl_conv(e) >= 3) {
+  const role = access_role_conv((e))
+
+  if (role == Role.OWNER || access_lvl_conv(e) >= 3) {
     return "admin"
   }
   return "user"
@@ -170,7 +173,7 @@ async function handleDelete(uuid) {
     await store.delete(uuid)
     message.success("Namespace successfuly deleted")
   } catch (e) {
-    message.error("Failed to delete namespace: " + e.response.statusText)
+    message.error("Failed to delete namespace: " + e.message)
   }
   refresh()
 }
@@ -180,7 +183,7 @@ async function handleConfigUpdate(ns) {
     await store.update(ns)
     message.success("Namespace config updated")
   } catch (e) {
-    message.error("Failed to update namespace config: " + e.response.statusText)
+    message.error("Failed to update namespace config: " + e.message)
   }
   refresh()
 }
