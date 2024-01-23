@@ -24,6 +24,7 @@ packages:
     github.com/infinimesh/proto/shadow:
         interfaces:
             ShadowServiceClient:
+            ShadowService_StreamShadowServer:
     github.com/infinimesh/proto/plugins:
         interfaces:
             PluginsServiceClient:
