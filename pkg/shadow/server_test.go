@@ -440,3 +440,96 @@ func TestStoreConnectionState_Success(t *testing.T) {
 	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
 	f.mocks.rdb.AssertNumberOfCalls(t, "Expire", 1)
 }
+
+// MergeAndStore
+
+func TestMergeAndStore_FailsOn_RedisGetAndSet(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Get(
+		f.data.ctx, key,
+	).Return(redis.NewStringResult("", assert.AnError))
+
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, "{}", time.Duration(0),
+	).Return(redis.NewStatusResult("", assert.AnError))
+
+	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Get", 1)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+}
+
+func TestMergeAndStore_SuccessWithMerge(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Get(
+		f.data.ctx, key,
+	).Return(redis.NewStringResult(f.data.sample_state, nil))
+
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, mock.MatchedBy(func(s string) bool {
+			state := pb.State{}
+			err := json.Unmarshal([]byte(s), &state)
+			if err != nil {
+				t.Errorf("Error unmarshalling state: %s", err)
+				return false
+			}
+
+			assert.Len(t, state.Data.Fields, 2)
+			assert.Equal(t, float64(2), state.Data.Fields["diff"].GetNumberValue())
+			assert.Equal(t, "bar", state.Data.Fields["foo"].GetStringValue())
+
+			return true
+		}), time.Duration(0),
+	).Return(redis.NewStatusResult("", nil))
+
+	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{
+		Data: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"foo": structpb.NewStringValue("bar"),
+			},
+		},
+	})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Get", 1)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+}
+
+func TestMergeAndStore_SuccessWithMergeOldEmpty(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Get(
+		f.data.ctx, key,
+	).Return(redis.NewStringResult("", nil))
+
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, mock.MatchedBy(func(s string) bool {
+			state := pb.State{}
+			err := json.Unmarshal([]byte(s), &state)
+			if err != nil {
+				t.Errorf("Error unmarshalling state: %s", err)
+				return false
+			}
+
+			assert.Len(t, state.Data.Fields, 1)
+			assert.Equal(t, "bar", state.Data.Fields["foo"].GetStringValue())
+
+			return true
+		}), time.Duration(0),
+	).Return(redis.NewStatusResult("", nil))
+
+	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{
+		Data: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"foo": structpb.NewStringValue("bar"),
+			},
+		},
+	})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Get", 1)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+}
