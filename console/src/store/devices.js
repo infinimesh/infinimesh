@@ -9,6 +9,7 @@ import {
 } from "infinimesh-proto/build/es/node/node_connect";
 
 import { access_lvl_conv } from "@/utils/access";
+import { access_levels } from "../utils/access";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -141,7 +142,7 @@ export const useDevicesStore = defineStore("devices", {
     async makeDevicesToken(pool, post = false) {
       const data = await this.devices_client.makeDevicesToken({
         devices: pool,
-        post,
+        post: { uuid: post ? access_levels.MGMT : access_levels.READ },
       });
 
       return data.token;
