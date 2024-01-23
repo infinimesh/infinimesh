@@ -366,3 +366,43 @@ timer_loop:
 
 	f.mocks.srv.AssertNumberOfCalls(t, "Send", 2)
 }
+
+// Store
+
+func TestStore_FailsOn_Marshal(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	res, ok := f.service.Store(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, make(chan int)) // ensure Marshal fails
+
+	assert.Equal(t, false, ok)
+	assert.Equal(t, key, res)
+}
+
+func TestStore_FailsOn_RedisSet(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, "{}", time.Duration(0),
+	).Return(redis.NewStatusResult("", assert.AnError))
+
+	res, ok := f.service.Store(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{}) // ensure Marshal fails
+
+	assert.Equal(t, false, ok)
+	assert.Equal(t, key, res)
+}
+
+func TestStore_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":reported"
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, "{}", time.Duration(0),
+	).Return(redis.NewStatusResult("", nil))
+
+	res, ok := f.service.Store(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{}) // ensure Marshal fails
+
+	assert.Equal(t, true, ok)
+	assert.Equal(t, key, res)
+}
