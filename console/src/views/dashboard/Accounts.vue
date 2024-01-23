@@ -193,7 +193,7 @@ async function handleLoginAs(account) {
 async function handleUpdateDefaultNamespace(account, [ns, resolve, reject]) {
   try {
     let err = await store.updateDefaultNamespace(account, ns)
-    if (err) throw err.response.data.message
+    if (err) throw err.message
     resolve()
   } catch (e) {
     reject(e)

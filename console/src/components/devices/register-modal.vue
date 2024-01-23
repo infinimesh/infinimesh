@@ -126,7 +126,7 @@ async function next() {
         }
         error.value = false
     } catch (e) {
-        error.value = e.response.data.message
+        error.value = e.message
     }
     loading.value = false
 }

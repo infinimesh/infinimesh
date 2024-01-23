@@ -68,7 +68,6 @@ const alert = ref(false);
 
 const bar = useLoadingBar();
 
-const axios = inject("axios");
 async function login() {
   success.value = false;
   error.value = false;

@@ -80,7 +80,10 @@ export const useAccountsStore = defineStore("accounts", {
     async updateAccount(account, bar) {
       if (bar) bar.start();
       try {
-        await this.accountsApi.update(new Account(account));
+        const result = new Account(account);
+
+        result.config = result.config.fromJson(account.config)
+        await this.accountsApi.update(result);
 
         this.fetchAccounts();
         if (bar) bar.finish();
@@ -126,16 +129,14 @@ export const useAccountsStore = defineStore("accounts", {
         bar.error();
       }
     },
-    async moveAccount(account, namespace) {
+    async moveAccount(uuid, namespace) {
       try {
-        await this.accountsApi.move(new MoveRequest(
-          { uuid: account.uuid, namespace }
-        ));
+        await this.accountsApi.move(new MoveRequest({ uuid, namespace }));
 
-        this.accounts[account].access.namespace = namespace;
+        this.accounts[uuid].access.namespace = namespace;
       } catch (err) {
         console.error(err);
-        throw `Error Moving Device: ${err.response.data.message}`;
+        throw `Error Moving Device: ${err.message}`;
       }
     },
     async getCredentials(uuid) {
