@@ -391,6 +391,7 @@ func TestStore_FailsOn_RedisSet(t *testing.T) {
 
 	assert.Equal(t, false, ok)
 	assert.Equal(t, key, res)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
 }
 
 func TestStore_Success(t *testing.T) {
@@ -405,4 +406,37 @@ func TestStore_Success(t *testing.T) {
 
 	assert.Equal(t, true, ok)
 	assert.Equal(t, key, res)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+}
+
+// StoreConnectionState
+
+func TestStoreConnectionState_FailsOn_Store(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":connection"
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, "{}", time.Duration(0),
+	).Return(redis.NewStatusResult("", assert.AnError))
+
+	f.service.StoreConnectionState(zap.NewExample(), f.data.uuid, &pb.ConnectionState{})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+}
+
+func TestStoreConnectionState_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	key := f.data.uuid + ":connection"
+	f.mocks.rdb.EXPECT().Set(
+		f.data.ctx, key, "{}", time.Duration(0),
+	).Return(redis.NewStatusResult("", nil))
+	f.mocks.rdb.EXPECT().Expire(
+		f.data.ctx, key, time.Hour*24,
+	).Return(redis.NewBoolResult(false, assert.AnError))
+
+	f.service.StoreConnectionState(zap.NewExample(), f.data.uuid, &pb.ConnectionState{})
+
+	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
+	f.mocks.rdb.AssertNumberOfCalls(t, "Expire", 1)
 }
