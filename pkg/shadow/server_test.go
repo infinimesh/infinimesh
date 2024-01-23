@@ -5,12 +5,14 @@ import (
 	"testing"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 	redis_mocks "github.com/infinimesh/infinimesh/mocks/github.com/go-redis/redis/v8"
 	pubsub_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
 	pb "github.com/infinimesh/proto/shadow"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type shadowServiceServerFixture struct {
@@ -133,4 +135,52 @@ func TestGet_Success(t *testing.T) {
 	assert.NotNil(t, connection)
 	assert.Equal(t, true, connection.Connected)
 	assert.Equal(t, "device1", connection.ClientId)
+}
+
+// Patch
+
+func TestPatch_FailsOn_NoDevice(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	_, err := f.service.Patch(f.data.ctx, &pb.Shadow{})
+
+	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no device specified")
+}
+
+func TestPatch_Success(t *testing.T) {
+	f := newShadowServiceServerFixture(t)
+
+	request := &pb.Shadow{
+		Device: uuid.New().String(),
+		Reported: &pb.State{
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"diff": structpb.NewNumberValue(2),
+				},
+			},
+		},
+		Desired: &pb.State{
+			Data: &structpb.Struct{
+				Fields: map[string]*structpb.Value{
+					"diff": structpb.NewNumberValue(2),
+				},
+			},
+		},
+	}
+
+	f.mocks.ps.EXPECT().TryPub(request, "mqtt.incoming", "mqtt.outgoing").
+		Return()
+
+	resp, err := f.service.Patch(f.data.ctx, request)
+
+	assert.NoError(t, err)
+	f.mocks.ps.AssertNumberOfCalls(t, "TryPub", 1)
+
+	assert.Equal(t, request.Device, resp.Device)
+
+	assert.Equal(t, request.Reported.Data, resp.Reported.Data)
+	assert.NotNil(t, resp.Reported.Timestamp)
+
+	assert.Equal(t, request.Desired.Data, resp.Desired.Data)
+	assert.NotNil(t, resp.Desired.Timestamp)
 }
