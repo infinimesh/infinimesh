@@ -113,7 +113,7 @@ import { NTr, NTd, NProgress, NText, NButton, NIcon, NSpace, NSelect } from "nai
 
 import { useNSStore } from "@/store/namespaces"
 import { useAccountsStore } from "@/store/accounts"
-import { access_levels } from "@/utils/access";
+import { Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
 const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
@@ -152,7 +152,7 @@ async function load() {
 async function handleJoin(account, access) {
     loading.value = true
     try {
-        const { data } = await store.join(props.namespace, account, access_levels[access])
+        const { data } = await store.join(props.namespace, account, Level[access])
         joins.value = data.accounts
     } catch (e) {
         console.error(e)
