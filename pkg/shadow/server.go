@@ -86,7 +86,6 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 		if states[i*3+2] != nil {
 			state := states[i*3+2].(string)
 			json.Unmarshal([]byte(state), s.Connection)
-
 		}
 		shadows[i] = s
 	}
