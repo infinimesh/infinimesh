@@ -169,7 +169,7 @@ async function load_plugin() {
     return
   }
 
-  const { data } = await plugins.get(ns.plugin.uuid)
+  const data = await plugins.get(ns.plugin.uuid)
   if (ns.vars) data.vars = ns.vars
   plugins.current = data
 }

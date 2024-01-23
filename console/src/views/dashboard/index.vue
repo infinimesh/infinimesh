@@ -112,7 +112,7 @@ async function loadPlugin() {
     let { uuid, vars } = ns.value.plugin
 
     try {
-        const { data } = await plugs.get(uuid)
+        const data = await plugs.get(uuid)
         if (vars) data.vars = vars
         plugs.current = data
         plugin.value = data
