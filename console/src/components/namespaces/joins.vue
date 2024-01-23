@@ -114,7 +114,6 @@ import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
 import { useNSStore } from "@/store/namespaces"
 import { useAccountsStore } from "@/store/accounts"
-import { Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
 const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
