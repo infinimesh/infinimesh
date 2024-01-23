@@ -20,8 +20,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/cskr/pubsub"
 	redis "github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -35,10 +35,10 @@ type ShadowServiceServer struct {
 
 	log *zap.Logger
 	rdb redis.Cmdable
-	ps  *pubsub.PubSub
+	ps  pubsub.PubSub
 }
 
-func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps *pubsub.PubSub) *ShadowServiceServer {
+func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps pubsub.PubSub) *ShadowServiceServer {
 	return &ShadowServiceServer{
 		log: log.Named("shadow"),
 		rdb: rdb,
@@ -211,7 +211,7 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	return nil
 }
 
-func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+func unsub[T chan any](ps pubsub.PubSub, ch chan any) {
 	go ps.Unsub(ch)
 
 	for range ch {

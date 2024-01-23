@@ -42,3 +42,7 @@ packages:
             Database:
             Collection:
             Cursor:
+
+    github.com/infinimesh/infinimesh/pkg/pubsub:
+        interfaces:
+            PubSub:
