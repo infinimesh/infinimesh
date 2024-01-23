@@ -32,7 +32,7 @@ export const useDevicesStore = defineStore("devices", {
     shadow_client() {
       return createPromiseClient(
         ShadowService,
-        createConnectTransport({ baseUrl: as.base_url })
+        createConnectTransport({ baseUrl: as.base_url, useBinaryFormat: true })
       );
     },
     show_ns: (state) => nss.selected == "all",
