@@ -80,6 +80,7 @@ export const useAccountsStore = defineStore("accounts", {
     async updateAccount(account, bar) {
       if (bar) bar.start();
       try {
+        if (!account.config) account.config = {}
         const result = new Account(account);
 
         result.config = result.config.fromJson(account.config)

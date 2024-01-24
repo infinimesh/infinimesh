@@ -56,6 +56,7 @@ export const useNSStore = defineStore("namespaces", {
       return this.namespacesApi.create(new Namespace(namespace));
     },
     update(namespace) {
+      if (!namespace.config) namespace.config = {}
       const result = new Namespace(namespace);
 
       result.config = result.config.fromJson(namespace.config)
