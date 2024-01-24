@@ -58,7 +58,7 @@ require (
 	connectrpc.com/grpchealth v1.3.0
 	github.com/go-faker/faker/v4 v4.2.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0
 	github.com/rabbitmq/amqp091-go v1.9.0
