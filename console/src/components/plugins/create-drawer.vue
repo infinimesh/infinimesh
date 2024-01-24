@@ -226,8 +226,7 @@ function handleSubmit() {
         } catch (err) {
             bar.error()
             console.error(err)
-            error.value = `${err.response.status}: ${(err.response.data ?? { message: "Unexpected Error" }).message
-                }`;
+            error.value = `${err.code}: ${err.message ?? "Unexpected Error"}`;
         }
     });
 }

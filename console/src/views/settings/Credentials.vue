@@ -78,7 +78,7 @@ async function handleSubmit() {
     if (!err) {
         message.success('Credentials set');
     } else {
-        message.error(`${err.response.status}: ${(err.response.data ?? { message: "Unexpected Error" }).message}`);
+        message.error(`${err.code}: ${err.message ?? "Unexpected Error"}`);
     }
 }
 

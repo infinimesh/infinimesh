@@ -56,7 +56,11 @@ export const useNSStore = defineStore("namespaces", {
       return this.namespacesApi.create(new Namespace(namespace));
     },
     update(namespace) {
-      return this.namespacesApi.update(new Namespace(namespace));
+      if (!namespace.config) namespace.config = {}
+      const result = new Namespace(namespace);
+
+      result.config = result.config.fromJson(namespace.config)
+      return this.namespacesApi.update(result);
     },
     deletables(uuid) {
       return this.namespacesApi.deletables(new Namespace(this.namespaces[uuid]));

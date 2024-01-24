@@ -233,9 +233,8 @@ function handleSubmit() {
     if (!err) {
       show.value = false;
     } else {
-      console.log(err.response);
-      error.value = `${err.response.status}: ${(err.response.data ?? { message: "Unexpected Error" }).message
-        }`;
+      console.log(err);
+      error.value = `${err.code}: ${err.message ?? "Unexpected Error"}`;
     }
   });
 }
