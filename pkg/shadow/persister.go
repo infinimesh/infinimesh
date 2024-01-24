@@ -73,7 +73,7 @@ func (s *ShadowServiceServer) Persister() {
 func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device string, skey pb.StateKey, state *pb.State) {
 	key := Key(device, skey)
 
-	var new, merged []byte
+	var new []byte
 	var err error
 
 	new, err = json.Marshal(state)
@@ -88,18 +88,12 @@ func (s *ShadowServiceServer) MergeAndStore(log *zap.Logger, device string, skey
 		goto set
 	}
 
-merge:
 	log.Debug("Merging", zap.ByteString("old", []byte(m)), zap.ByteString("new", new))
-	merged, err = jsonpatch.MergePatch([]byte(m), new)
+	new, err = MergeJSON([]byte(m), new)
 	if err != nil {
-		if m == "" {
-			m = "{}"
-			goto merge
-		}
 		log.Warn("Error Merging State", zap.String("key", key), zap.Error(err))
 		return
 	}
-	new = merged
 
 set:
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
@@ -107,6 +101,20 @@ set:
 		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))
 		return
 	}
+}
+
+func MergeJSON(old, new []byte) ([]byte, error) {
+	merged, err := jsonpatch.MergePatch(old, new)
+	if err != nil {
+		if string(old) == "" {
+			return new, nil
+		}
+		if string(new) == "" {
+			return old, nil
+		}
+		return nil, err
+	}
+	return merged, nil
 }
 
 func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.StateKey, state interface{}) (string, bool) {

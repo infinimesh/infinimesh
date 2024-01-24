@@ -26,11 +26,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/acme"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	pb "github.com/infinimesh/proto/node"
 	devpb "github.com/infinimesh/proto/node/devices"
@@ -74,7 +74,7 @@ var (
 	tlsCertFile  string
 	tlsKeyFile   string
 
-	ps *pubsub.PubSub
+	ps pubsub.PubSub
 
 	log             *zap.Logger
 	internal_ctx    context.Context

@@ -19,7 +19,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/cskr/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	devpb "github.com/infinimesh/proto/node/devices"
 	pb "github.com/infinimesh/proto/shadow"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -35,7 +35,7 @@ var (
 
 type FetchDeviceFunc func(string) *devpb.Device
 
-func Setup(Log *zap.Logger, conn *amqp.Connection, ps *pubsub.PubSub, fetcher FetchDeviceFunc) error {
+func Setup(Log *zap.Logger, conn *amqp.Connection, ps pubsub.PubSub, fetcher FetchDeviceFunc) error {
 	logger = Log.Named("PluginsExchange")
 
 	ch, err := conn.Channel()

@@ -21,8 +21,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/cskr/pubsub"
 	structpb "github.com/golang/protobuf/ptypes/struct"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	devpb "github.com/infinimesh/proto/node/devices"
 	pb "github.com/infinimesh/proto/shadow"
 	"github.com/slntopp/mqtt-go/packet"
@@ -254,7 +254,7 @@ func handleBackChannel(log *zap.Logger, ch chan interface{}, c net.Conn, topic s
 	}
 }
 
-func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+func unsub[T chan any](ps pubsub.PubSub, ch chan any) {
 	go ps.Unsub(ch)
 
 	for range ch {
