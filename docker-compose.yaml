@@ -1,6 +1,8 @@
 version: "3.8"
-services:
 
+name: infinimesh
+
+services:
   proxy:
     image: traefik:latest
     labels:

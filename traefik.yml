@@ -1,7 +1,8 @@
 api:
   insecure: true
   dashboard: true
-accessLog: {}
+accessLog:
+  format: json
 providers:
   docker: {}
 entryPoints:
