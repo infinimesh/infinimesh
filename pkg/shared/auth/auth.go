@@ -20,117 +20,173 @@ import (
 	"errors"
 	"strings"
 
+	"connectrpc.com/connect"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	"github.com/infinimesh/infinimesh/pkg/sessions"
-	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	"github.com/infinimesh/proto/node/access"
+
+	"github.com/infinimesh/infinimesh/pkg/sessions"
+	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 )
 
-var (
-	log  *zap.Logger
-	rdb  *redis.Client
-	jwth JWTHandler
-	sess sessions.SessionsHandler
-
-	SIGNING_KEY []byte
-)
-
-func SetContext(logger *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, key []byte) {
-	log = logger.Named("JWT")
-	rdb = _rdb
-	jwth = _jwth
-	if jwth == nil {
-		jwth = &defaultJWTHandler{}
-	}
-	sess = sessions.NewSessionsHandlerModule(rdb).Handler()
-
-	SIGNING_KEY = key
-	log.Debug("Context set", zap.ByteString("signing_key", key))
+type interceptor struct {
+	log         *zap.Logger
+	rdb         *redis.Client
+	jwt         JWTHandler
+	sessions    sessions.SessionsHandler
+	signing_key []byte
 }
 
-func MakeToken(account string) (string, error) {
+type middleware func(context.Context, []byte, string) (context.Context, bool, error)
+
+func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, signing_key []byte) *interceptor {
+	jwth := _jwth
+	if jwth == nil {
+		jwth = defaultJWTHandler{}
+	}
+
+	return &interceptor{
+		log:         log.Named("AuthInterceptor"),
+		rdb:         _rdb,
+		jwt:         jwth,
+		sessions:    sessions.NewSessionsHandlerModule(_rdb).Handler(),
+		signing_key: signing_key,
+	}
+}
+
+func (i *interceptor) MakeToken(account string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims[infinimesh.INFINIMESH_ACCOUNT_CLAIM] = account
 	claims[infinimesh.INFINIMESH_ROOT_CLAIM] = 4
 	claims[infinimesh.INFINIMESH_NOSESSION_CLAIM] = true
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(SIGNING_KEY)
+	return token.SignedString(i.signing_key)
 }
 
-func JWT_AUTH_INTERCEPTOR(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	l := log.Named("Interceptor")
-	l.Debug("Invoked", zap.String("method", info.FullMethod))
+func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
+	return connect.UnaryFunc(func(
+		ctx context.Context,
+		req connect.AnyRequest,
+	) (connect.AnyResponse, error) {
+		path := req.Spec().Procedure
+		header := req.Header().Get("Authorization")
 
-	if strings.HasPrefix(info.FullMethod, "/grpc.health.v1.Health/") {
-		return handler(ctx, req)
-	}
+		segments := strings.Split(header, " ")
+		if len(segments) != 2 {
+			segments = []string{"", ""}
+		}
 
-	// Middleware selector
-	var middleware func(context.Context) (context.Context, error)
-	switch {
-	case info.FullMethod == "/infinimesh.node.DevicesService/GetByToken":
-		middleware = JwtDeviceAuthMiddleware
-	case strings.HasPrefix(info.FullMethod, "/infinimesh.node.ShadowService/"):
-		middleware = JwtDeviceAuthMiddleware
-	default:
-		middleware = JwtStandardAuthMiddleware
-	}
+		var middleware middleware
 
-	ctx, err := middleware(ctx)
-	if info.FullMethod != "/infinimesh.node.AccountsService/Token" && err != nil {
-		return nil, err
-	}
+		switch {
+		case path == "/infinimesh.node.DevicesService/GetByToken":
+			middleware = i.ConnectDeviceAuthMiddleware
+		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
+			middleware = i.ConnectDeviceAuthMiddleware
+		default:
+			middleware = i.ConnectStandardAuthMiddleware
+		}
+		i.log.Debug("Authorization Header", zap.String("header", header))
 
-	go handleLogActivity(ctx)
+		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
+		if path != "/infinimesh.node.AccountsService/Token" && err != nil {
+			return nil, err
+		}
 
-	return handler(ctx, req)
+		if log_activity {
+			go i.connectHandleLogActivity(ctx)
+		}
+
+		return next(ctx, req)
+	})
 }
 
-func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
-	l := log.Named("StandardAuthMiddleware")
-	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
-	if err != nil {
-		l.Debug("Error extracting token", zap.Any("error", err))
-		return ctx, err
-	}
+func (i *interceptor) WrapStreamingClient(next connect.StreamingClientFunc) connect.StreamingClientFunc {
+	i.log.Debug("WrapStreamingClient")
+	return next
+}
+func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
+	i.log.Debug("Setup Wrap Streaming Handler")
+	return func(ctx context.Context, shc connect.StreamingHandlerConn) error {
+		path := shc.Spec().Procedure
+		header := shc.RequestHeader().Get("Authorization")
 
-	token, err := validateToken(tokenString)
+		segments := strings.Split(header, " ")
+		if len(segments) != 2 {
+			segments = []string{"", ""}
+		}
+
+		var middleware middleware
+
+		switch {
+		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
+			middleware = i.ConnectDeviceAuthMiddleware
+		case path == "/infinimesh.handsfree.HandsfreeService/Connect":
+			middleware = i.ConnectBlankMiddleware
+		default:
+			middleware = i.ConnectStandardAuthMiddleware
+		}
+		i.log.Debug("Authorization Header", zap.String("header", header))
+
+		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
+		if err != nil {
+			return err
+		}
+
+		if log_activity {
+			go i.connectHandleLogActivity(ctx)
+		}
+
+		return next(ctx, shc)
+	}
+}
+
+func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	ctx = _ctx
+
+	log := i.log.Named("StandardAuthMiddleware")
+
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
-		return ctx, err
+		return
 	}
 	log.Debug("Validated token", zap.Any("claims", token))
 
 	account := token[infinimesh.INFINIMESH_ACCOUNT_CLAIM]
 	if account == nil {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		return
 	}
 	uuid, ok := account.(string)
 	if !ok {
-		return ctx, status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		return
 	}
 
 	if token[infinimesh.INFINIMESH_NOSESSION_CLAIM] == nil {
+		log_activity = true
 		session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
 		if session == nil {
-			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+			err = status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+			return
 		}
 		sid, ok := session.(string)
 		if !ok {
-			return ctx, status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+			err = status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+			return
 		}
 
 		// Check if session is valid
-		if err := sess.Check(uuid, sid); err != nil {
-			log.Debug("Session check failed", zap.Any("error", err))
-			return ctx, status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+		if err = i.sessions.Check(uuid, sid); err != nil {
+			i.log.Debug("Session check failed", zap.Any("error", err))
+			err = status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+			return
 		}
 
 		ctx = context.WithValue(ctx, infinimesh.InfinimeshSessionCtxKey, sid)
@@ -154,51 +210,54 @@ func JwtStandardAuthMiddleware(ctx context.Context) (context.Context, error) {
 		}
 	}
 
-	return ctx, nil
+	return
 }
 
-func JwtDeviceAuthMiddleware(ctx context.Context) (context.Context, error) {
-	l := log.Named("DeviceAuthMiddleware")
-	tokenString, err := grpc_auth.AuthFromMD(ctx, "bearer")
-	if err != nil {
-		l.Error("Error extracting token", zap.Any("error", err))
-		return nil, err
-	}
+func (i *interceptor) ConnectBlankMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	return _ctx, false, nil
+}
 
-	token, err := validateToken(tokenString)
+func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingKey []byte, tokenString string) (ctx context.Context, log_activity bool, err error) {
+	log_activity = false
+	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
-		return nil, err
+		return
 	}
+	log := i.log.Named("DeviceAuthMiddleware")
 	log.Debug("Validated token", zap.Any("claims", token))
 
 	devices := token[infinimesh.INFINIMESH_DEVICES_CLAIM]
 	if devices == nil {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+		return
 	}
 
-	ipool, ok := devices.([]interface{})
+	ipool, ok := devices.(map[string]any)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
+		return
 	}
 
-	pool := make([]string, len(ipool))
-	for i, el := range ipool {
-		pool[i], ok = el.(string)
+	pool := make(map[string]access.Level, len(ipool))
+	for key, value := range ipool {
+		val, ok := value.(float64)
 		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "Invalid token format: element %d is not a string", i)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %f is not a string", value)
+			return
 		}
+		pool[key] = access.Level(val)
 	}
-	ctx = context.WithValue(ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
+	ctx = context.WithValue(_ctx, infinimesh.InfinimeshDevicesCtxKey, pool)
 
-	return ctx, nil
+	return
 }
 
-func validateToken(tokenString string) (jwt.MapClaims, error) {
+func connectValidateToken(jwth JWTHandler, signing_key []byte, tokenString string) (jwt.MapClaims, error) {
 	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 		}
-		return SIGNING_KEY, nil
+		return signing_key, nil
 	})
 
 	if err != nil {
@@ -216,7 +275,7 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	return nil, status.Error(codes.Unauthenticated, "Cannot Validate Token")
 }
 
-func handleLogActivity(ctx context.Context) {
+func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
 	sid_ctx := ctx.Value(infinimesh.InfinimeshSessionCtxKey)
 	if sid_ctx == nil {
 		return
@@ -226,7 +285,7 @@ func handleLogActivity(ctx context.Context) {
 	req := ctx.Value(infinimesh.InfinimeshAccountCtxKey).(string)
 	exp := ctx.Value(infinimesh.ContextKey("exp")).(int64)
 
-	if err := sess.LogActivity(req, sid, exp); err != nil {
-		log.Warn("Error logging activity", zap.Any("error", err))
+	if err := i.sessions.LogActivity(req, sid, exp); err != nil {
+		i.log.Warn("Error logging activity", zap.Any("error", err))
 	}
 }

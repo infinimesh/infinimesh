@@ -80,7 +80,6 @@ func main() {
 		})
 	})
 
-	auth.SetContext(log, rdb, nil, SIGNING_KEY)
 	authInterceptor := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 
 	interceptors := connect.WithInterceptors(authInterceptor)
