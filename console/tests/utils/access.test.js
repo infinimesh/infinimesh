@@ -6,7 +6,7 @@ import {
   access_lvl_conv,
 } from "@/utils/access";
 import { Level, Role } from "infinimesh-proto/build/es/node/access/access_pb";
-import { ConnectError } from "@connectrpc/connect";
+import { ConnectError, Code } from "@connectrpc/connect";
 
 const check_offline_store = { offline: vi.fn() };
 const check_token_expired_store = { logout: vi.fn() };
@@ -59,6 +59,14 @@ describe("check_token_expired", () => {
 
     expect(expiredSpy).toHaveBeenCalledOnce();
   });
+
+  test("code unknown", () => {
+    const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
+    check_token_expired(
+      new ConnectError("rpc error: code = Unauthenticated desc = Session is expired, revoked or invalid", Code.Unknown),
+      check_token_expired_store
+    );
+  })
 
   test("check another error", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
