@@ -1,13 +1,13 @@
 import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
-export function access_lvl_conv(item) {
+export function access_lvl_conv(item={access:{}}) {
   const { level = "READ" } = item.access;
 
   if (level >= 0 && level <= 4) return level
   return Level[level] ?? 1;
 }
 
-export function access_role_conv(item) {
+export function access_role_conv(item={access:{}}) {
   const { role = "UNSET" } = item.access;
 
   if (role >= 0 && role <= 2) return role
@@ -38,8 +38,8 @@ export function check_token_expired_http(err, store) {
   }
 }
 
-export function check_token_expired(err) {
-  if (err.code == 2 && err.message.toLowerCase().includes('Invalid token format')) {
+export function check_token_expired(err,store) {
+  if (err?.code == 2 && err.message.toLowerCase().includes('invalid token format')) {
     store.logout({
       title: "Signed Out",
       type: "warning",
@@ -47,7 +47,7 @@ export function check_token_expired(err) {
     });
   }
 
-  if (err.code == 16 && err.message === 'Session is expired, revoked or invalid') {
+  if (err?.code == 16 && err.message.toLowerCase().includes('session is expired')) {
     store.logout({
       title: "Signed Out",
       type: "warning",
@@ -68,7 +68,7 @@ export function check_offline_http(err, store) {
 }
 
 export function check_offline(err, store) {
-  if (err.message == "Failed to fetch") {
+  if (err?.message == "Failed to fetch") {
     store.offline()
   }
 }
