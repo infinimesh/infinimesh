@@ -143,10 +143,14 @@ export const useDevicesStore = defineStore("devices", {
       };
     },
     async makeDevicesToken(pool, post = false) {
-      const data = await this.devices_client.makeDevicesToken({
-        devices: pool,
-        post: { uuid: post ? Level.MGMT : Level.READ },
+      const level = post ? Level.MGMT : Level.READ;
+
+      const devices = {};
+      pool.forEach((uuid) => {
+        devices[uuid] = level;
       });
+
+      const data = await this.devices_client.makeDevicesToken({ devices });
 
       return data.token;
     },
