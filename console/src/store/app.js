@@ -1,11 +1,15 @@
 import { inject, nextTick } from "vue";
 import { defineStore } from "pinia";
-import { check_token_expired, check_offline, check_offline_http, check_token_expired_http } from "@/utils/access";
-import { createConnectTransport } from "@connectrpc/connect-web";
+import {
+  check_token_expired,
+  check_offline,
+  check_offline_http,
+  check_token_expired_http,
+} from "@/utils/access";
 
-export const baseURL =
-  import.meta.env.DEV ? "http://api.infinimesh.local" // jshint ignore:line
-    : window.location.origin.replace("console.", "api.");
+export const baseURL = import.meta.env.DEV
+  ? "http://api.infinimesh.local" // jshint ignore:line
+  : window.location.origin.replace("console.", "api.");
 
 export const useAppStore = defineStore("app", {
   state: () => ({
@@ -19,7 +23,7 @@ export const useAppStore = defineStore("app", {
     dev: false,
 
     current_thing: false,
-    notify: null
+    notify: null,
   }),
   getters: {
     base_url: () => baseURL,
@@ -42,9 +46,10 @@ export const useAppStore = defineStore("app", {
       instance.interceptors.response.use((r) => r, err_check);
       return instance;
     },
-    transport(state) {
-      const transport = createConnectTransport({
+    transport_options(state) {
+      const options = {
         baseUrl: baseURL,
+        useBinaryFormat: !import.meta.env.DEV,
         interceptors: [
           (next) => async (req) => {
             req.header.set("Authorization", `Bearer ${state.token}`);
@@ -59,11 +64,11 @@ export const useAppStore = defineStore("app", {
               check_offline(err, store);
               return Promise.reject(err);
             }
-          }
+          },
         ],
-      })
+      };
 
-      return transport;
+      return options;
     },
   },
   actions: {
@@ -75,11 +80,11 @@ export const useAppStore = defineStore("app", {
         query.msg = btoa(JSON.stringify(msg));
       }
 
-      this.$router.push({ name: 'Login', query });
+      this.$router.push({ name: "Login", query });
     },
     offline() {
-      this.$router.push({ name: 'Offline' });
-    }
+      this.$router.push({ name: "Offline" });
+    },
   },
 
   persist: {

@@ -1,9 +1,13 @@
 import { defineStore } from "pinia";
-import { createPromiseClient } from "@connectrpc/connect"
-import { NamespacesService } from "infinimesh-proto/build/es/node/node_connect"
-import { EmptyMessage, JoinRequest } from "infinimesh-proto/build/es/node/node_pb"
-import { Namespace } from "infinimesh-proto/build/es/node/namespaces/namespaces_pb"
+import { createPromiseClient } from "@connectrpc/connect";
+import { NamespacesService } from "infinimesh-proto/build/es/node/node_connect";
+import {
+  EmptyMessage,
+  JoinRequest,
+} from "infinimesh-proto/build/es/node/node_pb";
+import { Namespace } from "infinimesh-proto/build/es/node/namespaces/namespaces_pb";
 import { useAppStore } from "@/store/app";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 const appStore = useAppStore();
 
@@ -12,7 +16,10 @@ export const useNSStore = defineStore("namespaces", {
     loading: false,
     selected: "",
     namespaces: {},
-    namespacesApi: createPromiseClient(NamespacesService, appStore.transport)
+    namespacesApi: createPromiseClient(
+      NamespacesService,
+      createConnectTransport(appStore.transport_options)
+    ),
   }),
 
   getters: {
@@ -50,7 +57,9 @@ export const useNSStore = defineStore("namespaces", {
       return this.namespacesApi.joins(new Namespace(this.namespaces[uuid]));
     },
     join(namespace, account, access) {
-      return this.namespacesApi.join(new JoinRequest({ namespace, account, access }));
+      return this.namespacesApi.join(
+        new JoinRequest({ namespace, account, access })
+      );
     },
     create(namespace) {
       return this.namespacesApi.create(new Namespace(namespace));
@@ -63,7 +72,9 @@ export const useNSStore = defineStore("namespaces", {
       return this.namespacesApi.update(result);
     },
     deletables(uuid) {
-      return this.namespacesApi.deletables(new Namespace(this.namespaces[uuid]));
+      return this.namespacesApi.deletables(
+        new Namespace(this.namespaces[uuid])
+      );
     },
     delete(uuid) {
       const namespace = this.namespaces[uuid];

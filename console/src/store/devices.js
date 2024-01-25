@@ -3,6 +3,7 @@ import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 import { createPromiseClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
+
 import {
   DevicesService,
   ShadowService,
@@ -30,12 +31,15 @@ export const useDevicesStore = defineStore("devices", {
 
   getters: {
     devices_client() {
-      return createPromiseClient(DevicesService, as.transport);
+      return createPromiseClient(
+        DevicesService,
+        createConnectTransport(as.transport_options)
+      );
     },
     shadow_client() {
       return createPromiseClient(
         ShadowService,
-        createConnectTransport({ baseUrl: as.base_url })
+        createConnectTransport({ ...as.transport_options, interceptors: [] })
       );
     },
     show_ns: (state) => nss.selected == "all",
