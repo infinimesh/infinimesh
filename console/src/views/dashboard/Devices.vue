@@ -1,51 +1,49 @@
 <template>
   <n-spin :show="loading">
-    <n-grid item-responsive y-gap="10" x-gap="10">
-      <n-grid-item span="24 500:14 600:12 1000:12">
-        <n-space justify="space-between" align="center">
-          <n-h1 prefix="bar" align-text type="info">
-            <n-text type="info"> Devices </n-text>
-            (
-            <n-number-animation :from="0" :to="filteredDevices.length || 0" />
-            )
-          </n-h1>
-          <n-button strong secondary round type="info" @click="handleRefresh">
-            <template #icon>
-              <n-icon>
-                <refresh-outline />
-              </n-icon>
-            </template>
-            Refresh State
-          </n-button>
-        </n-space>
-        <n-space>
-          <n-select
-            style="width: 92.5vw; min-width: 640px"
-            v-model:value="filterTerm"
-            tag
-            filterable
-            multiple
-            placeholder="Filter devices eg. :uuid:abc"
-            :options="filterDeviceOptions"
-            :show-arrow="false"
-            class="filter-input"
-          />
-        </n-space>
-      </n-grid-item>
-      <n-grid-item span="24 300:24 500:10 600:12 1000:12">
-        <n-space justify="space-evenly" style="margin-top: 20px;">
-          <device-create />
-          <device-register v-if="console_services.handsfree != undefined" />
-        </n-space>
-      </n-grid-item>
-    </n-grid>
+    <n-flex>
+      <n-grid item-responsive y-gap="10" x-gap="10" style="width: 100%;">
+        <n-grid-item span="24 500:14 600:12 1000:12">
+          <n-space justify="space-between" align="flex-end">
+            <n-h1 prefix="bar" align-text type="info" style="margin: 0;">
+              <n-text type="info"> Devices </n-text>
+              ( <n-number-animation :from="0" :to="filteredDevices.length || 0" /> )
+            </n-h1>
+            <n-button strong secondary round type="info" @click="handleRefresh">
+              <template #icon>
+                <n-icon>
+                  <refresh-outline />
+                </n-icon>
+              </template>
+              Refresh State
+            </n-button>
+          </n-space>
+        </n-grid-item>
+        <n-grid-item span="24 300:24 500:10 600:12 1000:12">
+          <n-space justify="end" align="flex-end" style="height: 100%;">
+            <device-create />
+            <device-register v-if="console_services.handsfree != undefined" />
+          </n-space>
+        </n-grid-item>
+      </n-grid>
+      <n-select
+        style="width: 92.5vw; min-width: 640px"
+        v-model:value="filterTerm"
+        tag
+        filterable
+        multiple
+        placeholder="Filter devices eg. :uuid:abc"
+        :options="filterDeviceOptions"
+        :show-arrow="false"
+        class="filter-input"
+      />
+    </n-flex>
     <devices-pool :devices="filteredDevices()" :show_ns="show_ns" @refresh="() => store.fetchDevices(true, true)" />
   </n-spin>
 </template>
 
 <script setup>
 import { defineAsyncComponent, watch, ref } from "vue"
-import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation, NSelect } from "naive-ui";
+import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation, NSelect, NFlex } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
