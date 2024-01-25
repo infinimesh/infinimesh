@@ -175,7 +175,7 @@ async function handleAdd() {
         loading.value = false
         loading_text.value = ""
 
-        message.error("Couldn't add Share Record: " + e.response.data.message)
+        message.error("Couldn't add Share Record: " + e.message)
     }
     fetch()
 }
@@ -193,7 +193,7 @@ async function handleDelete(uuid) {
         loading.value = false
         loading_text.value = ""
 
-        message.error("Couldn't remove Share Record: " + e.response.data.message)
+        message.error("Couldn't remove Share Record: " + e.message)
     }
     fetch()
 }

@@ -186,7 +186,7 @@ export const useDevicesStore = defineStore("devices", {
         this.devices[device] = data;
       } catch (err) {
         console.error(err);
-        throw `Error Updating Device: ${err.response.data.message}`;
+        throw `Error Updating Device: ${err.message}`;
       }
     },
     async moveDevice(device, namespace) {
@@ -195,7 +195,7 @@ export const useDevicesStore = defineStore("devices", {
         this.devices[device].access.namespace = namespace;
       } catch (err) {
         console.error(err);
-        throw `Error Moving Device: ${err.response.data.message}`;
+        throw `Error Moving Device: ${err.message}`;
       }
     },
     async patchDesiredState(device, state, bar) {

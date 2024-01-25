@@ -111,6 +111,7 @@
 import { ref, computed, onMounted, defineAsyncComponent } from "vue"
 import { NTr, NTd, NProgress, NText, NButton, NIcon, NSpace, NSelect } from "naive-ui"
 import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb"
+import { access_role_conv } from "@/utils/access"
 
 import { useNSStore } from "@/store/namespaces"
 import { useAccountsStore } from "@/store/accounts"
