@@ -18,7 +18,7 @@
           <span>Timestamp</span>
         </n-grid-item>
         <n-grid-item :span="16">
-          <n-date-picker input-readonly :value="new Date(reported.timestamp).getTime()" type="datetime" disabled
+          <n-date-picker input-readonly :value="timestamppb_to_time(reported.timestamp)" type="datetime" disabled
             class="pseudo-disabled" />
         </n-grid-item>
       </n-grid>
@@ -62,7 +62,7 @@
           <span>Timestamp</span>
         </n-grid-item>
         <n-grid-item :span="16">
-          <n-date-picker input-readonly :value="new Date(desired.timestamp).getTime()" type="datetime" disabled
+          <n-date-picker input-readonly :value="timestamppb_to_time(desired.timestamp)" type="datetime" disabled
             class="pseudo-disabled" />
         </n-grid-item>
       </n-grid>
@@ -101,6 +101,9 @@ import {
   NGrid,
   NGridItem,
 } from "naive-ui";
+
+import { Shadow } from "infinimesh-proto/build/es/shadow/shadow_pb";
+import { Timestamp } from "@bufbuild/protobuf";
 
 const CopyOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CopyOutline"))
 
@@ -204,6 +207,15 @@ const calculatedHeight = computed(() => {
 
 function handleSubmitReported() {
   emit("submit-debug", JSON.parse(reported_state.value));
+}
+
+/*
+  * Convert a timestamppb to a Date object
+  * @param {Timestamp} timestamp
+  * @returns {number}
+  */
+function timestamppb_to_time(timestamp) {
+  return new Date(Number(timestamp.seconds) * 1000 + timestamp.nanos / 1000000).getTime();
 }
 </script>
 
