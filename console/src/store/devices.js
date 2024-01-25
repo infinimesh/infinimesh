@@ -1,8 +1,19 @@
 import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
+import { createPromiseClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
+
+import {
+  DevicesService,
+  ShadowService,
+} from "infinimesh-proto/build/es/node/node_connect";
 
 import { access_lvl_conv } from "@/utils/access";
+import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
+import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
+import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
+import { Struct } from "@bufbuild/protobuf";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -19,6 +30,18 @@ export const useDevicesStore = defineStore("devices", {
   }),
 
   getters: {
+    devices_client() {
+      return createPromiseClient(
+        DevicesService,
+        createConnectTransport(as.transport_options)
+      );
+    },
+    shadow_client() {
+      return createPromiseClient(
+        ShadowService,
+        createConnectTransport({ ...as.transport_options, interceptors: [] })
+      );
+    },
     show_ns: (state) => nss.selected == "all",
     devices_ns_filtered: (state) => {
       let ns = nss.selected;
@@ -26,7 +49,10 @@ export const useDevicesStore = defineStore("devices", {
       let pool = Object.values(state.devices)
         .map((d) => {
           d.sorter =
-            d.enabled + access_lvl_conv(d) + d.basicEnabled + subscribed.has(d.uuid);
+            d.enabled +
+            access_lvl_conv(d) +
+            d.basicEnabled +
+            subscribed.has(d.uuid);
           return d;
         })
         .sort((a, b) => b.sorter - a.sorter);
@@ -53,26 +79,34 @@ export const useDevicesStore = defineStore("devices", {
     async fetchDevices(state = true, no_cache = false) {
       this.loading = true;
 
-      const { data } = await as.http.get("/devices");
+      const data = await this.devices_client.list();
 
       if (no_cache) {
-        this.devices = data.devices.reduce((r, d) => { r[d.uuid] = d; return r; }, {});
+        this.devices = data.devices.reduce((r, d) => {
+          r[d.uuid] = d;
+          return r;
+        }, {});
       } else {
-        this.devices = { ...this.devices, ...data.devices.reduce((r, d) => { r[d.uuid] = d; return r; }, {}) };
+        this.devices = {
+          ...this.devices,
+          ...data.devices.reduce((r, d) => {
+            r[d.uuid] = d;
+            return r;
+          }, {}),
+        };
       }
 
-      if (state)
-        this.getDevicesState(data.devices.map((d) => d.uuid));
+      if (state) this.getDevicesState(data.devices.map((d) => d.uuid));
       this.loading = false;
     },
     async subscribe(devices) {
       let pool = this.subscribed.concat(devices);
 
       let token = await this.makeDevicesToken(pool);
-      let socket = new WebSocket(`${as.base_url.replace("http", "ws")}/devices/states/stream`, [
-        "Bearer",
-        token,
-      ]);
+      let socket = new WebSocket(
+        `${as.base_url.replace("http", "ws")}/devices/states/stream`,
+        ["Bearer", token]
+      );
       socket.onmessage = (msg) => {
         let response = JSON.parse(msg.data).result;
         if (!response) {
@@ -82,13 +116,19 @@ export const useDevicesStore = defineStore("devices", {
 
         if (response.reported) {
           if (this.reported.get(response.device)) {
-            response.reported.data = { ...this.reported.get(response.device).data, ...response.reported.data };
+            response.reported.data = {
+              ...this.reported.get(response.device).data,
+              ...response.reported.data,
+            };
           }
           this.reported.set(response.device, response.reported);
         }
         if (response.desired) {
           if (this.desired.get(response.device)) {
-            response.desired.data = { ...this.desired.get(response.device).data, ...response.desired.data };
+            response.desired.data = {
+              ...this.desired.get(response.device).data,
+              ...response.desired.data,
+            };
           }
           this.desired.set(response.device, response.desired);
         }
@@ -107,10 +147,14 @@ export const useDevicesStore = defineStore("devices", {
       };
     },
     async makeDevicesToken(pool, post = false) {
-      const { data } = await as.http.post("/devices/token", {
-        devices: pool,
-        post,
+      const level = post ? Level.MGMT : Level.READ;
+
+      const devices = {};
+      pool.forEach((uuid) => {
+        devices[uuid] = level;
       });
+
+      const data = await this.devices_client.makeDevicesToken({ devices });
 
       return data.token;
     },
@@ -121,11 +165,14 @@ export const useDevicesStore = defineStore("devices", {
         token = await this.makeDevicesToken(pool);
       }
 
-      const { data } = await as.http.get("/devices/states", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const data = await this.shadow_client.get(
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       for (let shadow of data.shadows) {
         this.reported.set(shadow.device, shadow.reported);
@@ -134,35 +181,46 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async updateDevice(device, patch) {
-      if (!patch.title || !patch.tags) throw "Both device Title and Tags must be specified while update";
+      if (!patch.title || !patch.tags)
+        throw "Both device Title and Tags must be specified while update";
       try {
-        const { data } = await as.http.patch(`/devices/${device}`, patch);
+        const data = await this.devices_client.update(
+          new Device({
+            ...patch,
+            config: new Struct().fromJson(patch.config),
+            uuid: device,
+          })
+        );
         this.devices[device] = data;
       } catch (err) {
         console.error(err);
-        throw `Error Updating Device: ${err.response.data.message}`;
+        throw `Error Updating Device: ${err.message}`;
       }
     },
     async moveDevice(device, namespace) {
       try {
-        await as.http.post(`/devices/${device}/namespace`, { namespace });
+        await this.devices_client.move({ uuid: device, namespace });
         this.devices[device].access.namespace = namespace;
       } catch (err) {
         console.error(err);
-        throw `Error Moving Device: ${err.response.data.message}`;
+        throw `Error Moving Device: ${err.message}`;
       }
     },
     async patchDesiredState(device, state, bar) {
       if (bar) bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
-        await as.http.post(`/devices/states`, {
-          device, desired: { data: state },
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await this.shadow_client.patch(
+          {
+            device,
+            desired: { data: state },
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         this.getDevicesState([device], token);
         if (bar) bar.finish();
       } catch (e) {
@@ -174,13 +232,17 @@ export const useDevicesStore = defineStore("devices", {
       bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
-        await as.http.post(`/devices/states`, {
-          device, reported: { data: state },
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await this.shadow_client.patch(
+          {
+            device,
+            reported: { data: state },
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         this.getDevicesState([device], token);
         bar.finish();
       } catch (e) {
@@ -191,7 +253,7 @@ export const useDevicesStore = defineStore("devices", {
     async deleteDevice(device, bar) {
       bar.start();
       try {
-        await as.http.delete(`/devices/${device}`);
+        await this.devices_client.delete({ uuid: device });
         bar.finish();
 
         this.fetchDevices(false, true);
@@ -203,7 +265,7 @@ export const useDevicesStore = defineStore("devices", {
     async createDevice(request, bar) {
       bar.start();
       try {
-        await as.http.put(`/devices`, request);
+        await this.devices_client.create(request);
 
         this.fetchDevices();
         bar.finish();
@@ -224,7 +286,7 @@ export const useDevicesStore = defineStore("devices", {
       device.enabled = null;
 
       try {
-        const { data } = await as.http.post(`/devices/${uuid}/toggle`);
+        const data = await this.devices_client.toggle({ uuid });
         this.devices[uuid] = { ...device, ...data };
         bar.finish();
       } catch (e) {
@@ -242,7 +304,7 @@ export const useDevicesStore = defineStore("devices", {
       bar.start();
 
       try {
-        const { data } = await as.http.post(`/devices/${uuid}/toggle/basic`);
+        const data = await this.devices_client.toggleBasic({ uuid });
         this.devices[uuid] = { ...device, ...data };
         bar.finish();
       } catch (e) {
@@ -252,11 +314,11 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async fetchJoins(device) {
-      const { data } = await as.http.get(`/devices/${device}/joins`);
-      return data
+      const data = await this.devices_client.joins({ uuid: device });
+      return data;
     },
     async join(params) {
-      return as.http.post(`/devices/join`, params)
-    }
+      return this.devices_client.join(params);
+    },
   },
 });

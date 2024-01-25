@@ -20,8 +20,8 @@ import (
 
 	"encoding/json"
 
-	"github.com/cskr/pubsub"
 	redis "github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,11 +34,11 @@ type ShadowServiceServer struct {
 	pb.UnimplementedShadowServiceServer
 
 	log *zap.Logger
-	rdb *redis.Client
-	ps  *pubsub.PubSub
+	rdb redis.Cmdable
+	ps  pubsub.PubSub
 }
 
-func NewShadowServiceServer(log *zap.Logger, rdb *redis.Client, ps *pubsub.PubSub) *ShadowServiceServer {
+func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps pubsub.PubSub) *ShadowServiceServer {
 	return &ShadowServiceServer{
 		log: log.Named("shadow"),
 		rdb: rdb,
@@ -86,7 +86,6 @@ func (s *ShadowServiceServer) Get(ctx context.Context, req *pb.GetRequest) (*pb.
 		if states[i*3+2] != nil {
 			state := states[i*3+2].(string)
 			json.Unmarshal([]byte(state), s.Connection)
-
 		}
 		shadows[i] = s
 	}
@@ -196,6 +195,8 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	s.ps.AddSub(messages, "mqtt.incoming", "mqtt.outgoing")
 	defer unsub(s.ps, messages)
 
+	log.Debug("Listening for messages")
+
 	for msg := range messages {
 		shadow := msg.(*pb.Shadow)
 		if _, ok := devices[shadow.GetDevice()]; !ok {
@@ -211,7 +212,7 @@ func (s *ShadowServiceServer) StreamShadow(req *pb.StreamShadowRequest, srv pb.S
 	return nil
 }
 
-func unsub[T chan any](ps *pubsub.PubSub, ch chan any) {
+func unsub[T chan any](ps pubsub.PubSub, ch chan any) {
 	go ps.Unsub(ch)
 
 	for range ch {

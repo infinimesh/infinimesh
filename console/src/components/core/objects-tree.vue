@@ -38,8 +38,9 @@ const message = useMessage()
 async function load() {
     emit('loading', true);
     try {
-        const { data } = await fetch()
+        let { data, nodes } = await fetch()
 
+        if (!data) data = { nodes }
         if (data.nodes.length == 1) {
             emit('confirm')
             return

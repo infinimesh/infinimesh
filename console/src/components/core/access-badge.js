@@ -36,6 +36,14 @@ const accessLevels = {
   }
 };
 
+const levels = {
+  0: "NONE",
+  1: "READ",
+  2: "MGMT",
+  3: "ADMIN",
+  4: "ROOT",
+};
+
 export default function AccessBadge(props) {
   let key = "account";
   if (props.account != undefined) key = "account";
@@ -44,8 +52,11 @@ export default function AccessBadge(props) {
   if (props.join != undefined) key = "join";
 
   if (props.cb == undefined) props.cb = () => { };
+  const level = (typeof props.access === 'number')
+    ? levels[props.access]
+    : props.access
 
-  let conf = accessLevels[key][props.access];
+  let conf = accessLevels[key][level];
   return h(
     NTooltip,
     {

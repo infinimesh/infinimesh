@@ -157,17 +157,17 @@ async function handleUUIDClicked() {
 }
 
 const kinds = {
-    UNKNOWN: {
+    0: {
         label: "UNKNOWN",
         desc: "This App or Plugin will not work, please contact to Platform administrators",
         color: "#fc1703"
     },
-    EMBEDDED: {
+    1: {
         label: "Embedded",
         desc: "This Plugin will embed into this Console as the main Dashboard",
         color: "#8a2be2"
     },
-    DEVICE: {
+    2: {
         label: "Device",
         desc: "This Plugin will be embedded into Devices state",
         color: "#52c41a"

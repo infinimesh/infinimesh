@@ -88,7 +88,7 @@
                 </template>
                 <template v-else>
                     <access-badge :access="acc.access.level" join />
-                    <access-badge access="OWNER" v-if="acc.access.role == 'OWNER'" left="5px" join />
+                    <access-badge access="OWNER" v-if="access_role_conv(acc) == Role.OWNER" left="5px" join />
                 </template>
             </n-td>
             <n-td>
@@ -110,10 +110,11 @@
 <script setup>
 import { ref, computed, onMounted, defineAsyncComponent } from "vue"
 import { NTr, NTd, NProgress, NText, NButton, NIcon, NSpace, NSelect } from "naive-ui"
+import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb"
+import { access_role_conv } from "@/utils/access"
 
 import { useNSStore } from "@/store/namespaces"
 import { useAccountsStore } from "@/store/accounts"
-import { access_levels } from "@/utils/access";
 
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
 const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
@@ -144,16 +145,18 @@ const joins = ref([])
 
 async function load() {
     loading.value = true
-    const { data } = await store.loadJoins(props.namespace)
-    joins.value = data.accounts
+    const { accounts } = await store.loadJoins(props.namespace)
+
+    joins.value = accounts
     loading.value = false
 }
 
 async function handleJoin(account, access) {
     loading.value = true
     try {
-        const { data } = await store.join(props.namespace, account, access_levels[access])
-        joins.value = data.accounts
+        const { accounts } = await store.join(props.namespace, account, Level[access])
+
+        joins.value = accounts
     } catch (e) {
         console.error(e)
     }

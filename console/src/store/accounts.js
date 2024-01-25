@@ -3,6 +3,19 @@ import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
 
 import { access_lvl_conv } from "@/utils/access";
+import { createPromiseClient } from "@connectrpc/connect";
+import { AccountsService } from "infinimesh-proto/build/es/node/node_connect";
+import {
+  Account,
+  CreateRequest,
+} from "infinimesh-proto/build/es/node/accounts/accounts_pb";
+import {
+  EmptyMessage,
+  MoveRequest,
+  SetCredentialsRequest,
+  TokenRequest,
+} from "infinimesh-proto/build/es/node/node_pb";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -11,6 +24,10 @@ export const useAccountsStore = defineStore("accounts", {
   state: () => ({
     loading: false,
     accounts: {},
+    accountsApi: createPromiseClient(
+      AccountsService,
+      createConnectTransport(as.transport_options)
+    ),
   }),
 
   getters: {
@@ -30,27 +47,38 @@ export const useAccountsStore = defineStore("accounts", {
   },
   actions: {
     async sync_me() {
-      const { data } = await as.http.get("/accounts/me")
+      const data = await this.accountsApi.get({ uuid: "me" });
+
       as.me = { ...as.me, ...data };
     },
     async fetchAccounts(no_cache = false) {
       this.loading = true;
 
-      const { data } = await as.http.get("/accounts");
+      const { accounts } = await this.accountsApi.list(new EmptyMessage());
 
       if (no_cache) {
-        this.accounts = data.accounts.reduce((r, a) => { r[a.uuid] = a; return r; }, {});
-      } else {
-        this.accounts = { ...this.accounts, ...data.accounts.reduce((r, a) => { r[a.uuid] = a; return r; }, {}) };
-      }
+        this.accounts = accounts.reduce((result, account) => {
+          result[account.uuid] = account;
 
+          return result;
+        }, {});
+      } else {
+        this.accounts = {
+          ...this.accounts,
+          ...accounts.reduce((result, account) => {
+            result[account.uuid] = account;
+
+            return result;
+          }, {}),
+        };
+      }
 
       this.loading = false;
     },
     async createAccount(request, bar) {
       bar.start();
       try {
-        await as.http.put(`/accounts`, request);
+        await this.accountsApi.create(new CreateRequest(request));
 
         this.fetchAccounts();
         bar.finish();
@@ -64,7 +92,11 @@ export const useAccountsStore = defineStore("accounts", {
     async updateAccount(account, bar) {
       if (bar) bar.start();
       try {
-        await as.http.patch(`/accounts/${account.uuid}`, account);
+        if (!account.config) account.config = {}
+        const result = new Account(account);
+
+        result.config = result.config.fromJson(account.config)
+        await this.accountsApi.update(result);
 
         this.fetchAccounts();
         if (bar) bar.finish();
@@ -78,17 +110,18 @@ export const useAccountsStore = defineStore("accounts", {
     updateDefaultNamespace(account, ns) {
       let acc = this.accounts[account];
       return this.updateAccount({
-        ...acc, defaultNamespace: ns,
-      })
+        ...acc,
+        defaultNamespace: ns,
+      });
     },
     async toggle(uuid, bar) {
       bar.start();
 
       try {
-        await as.http.post(`/accounts/${uuid}/toggle`);
-        bar.finish();
+        await this.accountsApi.toggle(new Account(this.accounts[uuid]));
 
         this.fetchAccounts();
+        bar.finish();
       } catch (e) {
         console.error(e);
         bar.error();
@@ -96,34 +129,33 @@ export const useAccountsStore = defineStore("accounts", {
       }
     },
     deletables(uuid) {
-      return as.http.get(`/accounts/${uuid}/deletables`);
+      return this.accountsApi.deletables(new Account(this.accounts[uuid]));
     },
     async deleteAccount(uuid, bar) {
       bar.start();
       try {
-        await as.http.delete(`/accounts/${uuid}`);
-        bar.finish();
+        await this.accountsApi.delete(new Account(this.accounts[uuid]));
 
         this.fetchAccounts();
+        bar.finish();
       } catch (e) {
         console.error(e);
         bar.error();
       }
     },
-    async moveAccount(account, namespace) {
+    async moveAccount(uuid, namespace) {
       try {
-        await as.http.post(`/accounts/${account}/namespace`, { namespace });
-        this.accounts[account].access.namespace = namespace;
+        await this.accountsApi.move(new MoveRequest({ uuid, namespace }));
+
+        this.accounts[uuid].access.namespace = namespace;
       } catch (err) {
         console.error(err);
-        throw `Error Moving Device: ${err.response.data.message}`;
+        throw `Error Moving Device: ${err.message}`;
       }
     },
     async getCredentials(uuid) {
       try {
-        const { data } = await as.http.get(`/accounts/${uuid}/credentials`);
-
-        return data;
+        return await this.accountsApi.getCredentials({ uuid });
       } catch (e) {
         console.error(e);
       }
@@ -131,28 +163,39 @@ export const useAccountsStore = defineStore("accounts", {
     async setCredentials(uuid, credentials, bar) {
       bar.start();
       try {
-        await as.http.post(`/accounts/${uuid}/credentials`, { credentials });
-        bar.finish();
+        await this.accountsApi.setCredentials(
+          new SetCredentialsRequest({ uuid, credentials })
+        );
 
         this.fetchAccounts();
+        bar.finish();
       } catch (e) {
         console.error(e);
         bar.error();
       }
     },
+    token(data) {
+      try {
+        return this.accountsApi.token(new TokenRequest(data));
+      } catch (e) {
+        console.error(e);
+      }
+    },
     tokenFor(account, exp = 0) {
       let res = {};
       try {
-        res = new UAParser(navigator.userAgent).getResult()
+        res = new UAParser(navigator.userAgent).getResult();
       } catch (e) {
-        console.warn("Failed to get user agent", e)
+        console.warn("Failed to get user agent", e);
       }
 
-      return as.http.post(`/token`, {
+      return this.token({
         uuid: account,
-        client: `Console Admin | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`,
+        client: `Console Admin | ${res.os?.name ?? "Unknown"} | ${
+          res.browser?.name ?? "Unknown"
+        }`,
         exp,
       });
-    }
+    },
   },
 });

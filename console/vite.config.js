@@ -11,13 +11,14 @@ export default defineConfig(({ command }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    define: {
+      STATE_MAX_ROWS: '10'
     }
   }
 
   if (command == 'build') {
-    conf.define = {
-      INFINIMESH_VERSION_TAG: `'${process.env.INFINIMESH_VERSION_TAG}'`
-    }
+    conf.define.INFINIMESH_VERSION_TAG = `'${process.env.INFINIMESH_VERSION_TAG}'`
     if (!process.env.INFINIMESH_VERSION_TAG) conf.define.INFINIMESH_VERSION_TAG = "development"
     
     console.log(`Using version tag: ${conf.define.INFINIMESH_VERSION_TAG}`)

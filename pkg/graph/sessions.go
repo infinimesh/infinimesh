@@ -17,12 +17,15 @@ type SessionsController struct {
 
 	log *zap.Logger
 	rdb *redis.Client
+
+	sessions sessions.SessionsHandler
 }
 
 func NewSessionsController(log *zap.Logger, rdb *redis.Client) *SessionsController {
 	return &SessionsController{
-		log: log.Named("Sessions"),
-		rdb: rdb,
+		log:      log.Named("Sessions"),
+		rdb:      rdb,
+		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
 	}
 }
 
@@ -33,7 +36,7 @@ func (c *SessionsController) Get(ctx context.Context, req *connect.Request[node.
 
 	log.Debug("Invoked", zap.String("requestor", requestor), zap.String("sid", sid))
 
-	result, err := sessions.Get(c.rdb, requestor)
+	result, err := c.sessions.Get(requestor)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +60,7 @@ func (c *SessionsController) GetActivity(ctx context.Context, req *connect.Reque
 
 	log.Debug("Invoked", zap.String("requestor", requestor))
 
-	result, err := sessions.GetActivity(c.rdb, requestor)
+	result, err := c.sessions.GetActivity(requestor)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +77,7 @@ func (c *SessionsController) Revoke(ctx context.Context, _req *connect.Request[p
 
 	log.Debug("Invoked", zap.String("requestor", requestor), zap.String("sid", req.Id))
 
-	err := sessions.Revoke(c.rdb, requestor, req.Id)
+	err := c.sessions.Revoke(requestor, req.Id)
 	if err != nil {
 		return nil, err
 	}

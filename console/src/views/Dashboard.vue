@@ -27,29 +27,17 @@ import {
   NLayoutSider,
   NLayoutFooter,
 } from "naive-ui";
+import { useRoute } from "vue-router";
+import { useAccountsStore } from "@/store/accounts";
+
 import DashboardNav from "@/components/dashboard/nav.vue";
 import DashboardMenu from "@/components/dashboard/menu.vue";
 import DashboardFooter from "@/components/core/footer.vue";
-import { useRoute, useRouter } from "vue-router";
 
-import { inject } from "vue";
-import { useAppStore } from "@/store/app";
-const store = useAppStore();
-
-const axios = inject("axios");
+const store = useAccountsStore();
 const route = useRoute();
 
-(async () => {
-  axios
-    .get(`${store.base_url}/accounts/me`, {
-      headers: {
-        Authorization: `Bearer ${store.token}`,
-      },
-    })
-    .then((res) => {
-      store.me = res.data;
-    });
-})();
+store.sync_me()
 
 const collapsed = ref(true);
 const noContentPadding = computed(() => {

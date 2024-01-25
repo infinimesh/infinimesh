@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cskr/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	pb "github.com/infinimesh/proto/shadow"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -27,13 +27,13 @@ import (
 )
 
 var (
-	ps     *pubsub.PubSub
+	ps     pubsub.PubSub
 	logger *zap.Logger
 
 	cap int
 )
 
-func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capacity int) (*pubsub.PubSub, error) {
+func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capacity int) (pubsub.PubSub, error) {
 	logger = Log
 	cap = buffer_capacity
 	ps = pubsub.New(cap)
@@ -49,7 +49,7 @@ func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capac
 	return ps, nil
 }
 
-// Reading messages from PubSub and publishing them to RabbitMQ Queue
+// HandlePublish - Reads messages from PubSub and publishing them to RabbitMQ Queue
 func HandlePublish(ch *amqp.Channel, topic string) {
 	log := logger.Named("publish")
 init:
@@ -86,7 +86,7 @@ init:
 	}
 }
 
-// Reading messages from RabbitMQ Queue and publishing them to PubSub
+// HandleSubscribe - Reads messages from RabbitMQ Queue and publishing them to PubSub
 func HandleSubscribe(ch *amqp.Channel, topic string) {
 	log := logger.Named("subscribe")
 init:

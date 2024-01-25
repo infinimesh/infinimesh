@@ -173,6 +173,17 @@ Right now we keep protos generated only for Go. If you need one of the other lan
 
 PRs are as always welcome.
 
+### Mocks
+
+infinimesh is using [mockery](https://vektra.github.io/mockery). To generate mocks it is recommended to use Docker image:
+
+```shell
+docker pull vektra/mockery
+docker run -v "$PWD":/src -w /src vektra/mockery --all
+```
+
+Otherwise just get the `mockery` binary and run it at the root of the project.
+
 ### Local Development
 
 Start the local dev environment via `docker compose up -d`.
@@ -187,7 +198,7 @@ Access the Console at <http://console.infinimesh.local>
 
 ## License
 
-Copyright 2018 - 2023, The Infinite Devices team
+Copyright 2018 - 2024 the infinimesh committers, 2pk03, birdayz, slntopp and The Infinite AI Audio GmbH team
 
 Licensed under the Apache License, Version 2.0 (the "Licenses"); you may not use
 this file except in compliance with the License. You may obtain a copy of the License at

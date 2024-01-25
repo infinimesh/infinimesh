@@ -91,7 +91,7 @@ import {
 } from "naive-ui";
 import { useDevicesStore } from "@/store/devices";
 import { useAccountsStore } from "@/store/accounts"
-import { access_levels } from "@/utils/access";
+import { Level } from "infinimesh-proto/build/es/node/access/access_pb"
 
 const ModalButton = defineAsyncComponent(() => import("@/components/core/modal-button.vue"))
 const AccessBadge = defineAsyncComponent(() => import("@/components/core/access-badge"))
@@ -168,14 +168,14 @@ async function handleAdd() {
         await store.join({
             node: props.device.uuid,
             join: `Accounts/${add.value.uuid}`,
-            access: access_levels[add.value.access]
+            access: Level[add.value.access]
         })
         add.value = false
     } catch (e) {
         loading.value = false
         loading_text.value = ""
 
-        message.error("Couldn't add Share Record: " + e.response.data.message)
+        message.error("Couldn't add Share Record: " + e.message)
     }
     fetch()
 }
@@ -193,7 +193,7 @@ async function handleDelete(uuid) {
         loading.value = false
         loading_text.value = ""
 
-        message.error("Couldn't remove Share Record: " + e.response.data.message)
+        message.error("Couldn't remove Share Record: " + e.message)
     }
     fetch()
 }

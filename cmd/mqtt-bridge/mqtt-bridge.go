@@ -26,11 +26,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cskr/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/acme"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
+	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	pb "github.com/infinimesh/proto/node"
 	devpb "github.com/infinimesh/proto/node/devices"
@@ -74,7 +74,7 @@ var (
 	tlsCertFile  string
 	tlsKeyFile   string
 
-	ps *pubsub.PubSub
+	ps pubsub.PubSub
 
 	log             *zap.Logger
 	internal_ctx    context.Context
@@ -141,7 +141,7 @@ func main() {
 	}
 
 	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
-	auth.SetContext(log, nil, SIGNING_KEY)
+	auth.SetContext(log, nil, nil, SIGNING_KEY)
 	token, err := auth.MakeToken(schema.ROOT_ACCOUNT_KEY)
 	if err != nil {
 		log.Fatal("Error making token", zap.Error(err))
@@ -272,12 +272,10 @@ func printConnState(con net.Conn) {
 	)
 }
 
-/*
-TopicChecker: to validate the subscribed topic name
-
-	input : topic, deviceId string
-	output : topicAltered
-*/
+// TopicChecker - validates the subscribed topic name
+//
+//	input : topic, deviceId string
+//	output : topicAltered
 func TopicChecker(topic, deviceId string) string {
 	state := strings.Split(topic, "/")
 	state[1] = deviceId

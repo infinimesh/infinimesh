@@ -9,11 +9,40 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/proto/node/sessions"
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func New(_exp int64, client string) *sessions.Session {
+type SessionsHandler interface {
+	New(exp int64, client string) *sessions.Session
+	Store(account string, session *sessions.Session) error
+	Check(account, sid string) error
+	LogActivity(account, sid string, exp int64) error
+	Get(account string) ([]*sessions.Session, error)
+	GetActivity(account string) (map[string]*timestamppb.Timestamp, error)
+	Revoke(account, sid string) error
+}
+
+type sessionsHandler struct {
+	rdb redis.Cmdable
+
+	protoMarshal   func(m protoreflect.ProtoMessage) ([]byte, error)
+	protoUnmarshal func(b []byte, m protoreflect.ProtoMessage) error
+}
+
+func NewSessionsHandler(
+	rdb redis.Cmdable,
+	protoMarshal func(m protoreflect.ProtoMessage) ([]byte, error),
+	protoUnmarshal func(b []byte, m protoreflect.ProtoMessage) error,
+) SessionsHandler {
+	return &sessionsHandler{
+		rdb:            rdb,
+		protoMarshal:   protoMarshal,
+		protoUnmarshal: protoUnmarshal,
+	}
+}
+
+func (s *sessionsHandler) New(_exp int64, client string) *sessions.Session {
 	now := time.Now()
 	id := fmt.Sprintf("%x", now.UnixNano())
 
@@ -30,8 +59,8 @@ func New(_exp int64, client string) *sessions.Session {
 	}
 }
 
-func Store(rdb *redis.Client, account string, session *sessions.Session) error {
-	data, err := proto.Marshal(session)
+func (s *sessionsHandler) Store(account string, session *sessions.Session) error {
+	data, err := s.protoMarshal(session)
 	if err != nil {
 		return err
 	}
@@ -42,13 +71,13 @@ func Store(rdb *redis.Client, account string, session *sessions.Session) error {
 		ret = time.Until(session.Expires.AsTime())
 	}
 
-	return rdb.Set(context.Background(), key, data, ret).Err()
+	return s.rdb.Set(context.Background(), key, data, ret).Err()
 }
 
-func Check(rdb *redis.Client, account, sid string) error {
+func (s *sessionsHandler) Check(account, sid string) error {
 	key := fmt.Sprintf("sessions:%s:%s", account, sid)
 
-	cmd := rdb.Get(context.Background(), key)
+	cmd := s.rdb.Get(context.Background(), key)
 	if cmd.Err() != nil {
 		return cmd.Err()
 	}
@@ -59,8 +88,7 @@ func Check(rdb *redis.Client, account, sid string) error {
 	}
 
 	session := &sessions.Session{}
-	err = proto.Unmarshal(data, session)
-
+	err = s.protoUnmarshal(data, session)
 	if err != nil {
 		return err
 	}
@@ -72,23 +100,28 @@ func Check(rdb *redis.Client, account, sid string) error {
 	return nil
 }
 
-func LogActivity(rdb *redis.Client, account, sid string, exp int64) error {
-	return rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
+func (s *sessionsHandler) LogActivity(account, sid string, exp int64) error {
+	return s.rdb.Set(context.Background(), fmt.Sprintf("sessions:activity:%s:%s", account, sid), time.Now().Unix(), time.Until(time.Unix(exp, 0))).Err()
 }
-func GetActivity(rdb *redis.Client, account string) (map[string]*timestamppb.Timestamp, error) {
-	keys, err := rdb.Keys(context.Background(), fmt.Sprintf("sessions:activity:%s:*", account)).Result()
+func (s *sessionsHandler) GetActivity(account string) (map[string]*timestamppb.Timestamp, error) {
+	keys, err := s.rdb.Keys(context.Background(), fmt.Sprintf("sessions:activity:%s:*", account)).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := rdb.MGet(context.Background(), keys...).Result()
+	data, err := s.rdb.MGet(context.Background(), keys...).Result()
 	if err != nil {
 		return nil, err
 	}
 
 	result := make(map[string]*timestamppb.Timestamp)
 	for i, d := range data {
-		ts, err := strconv.Atoi(d.(string))
+		d_s, ok := d.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid data type: %s", keys[i])
+		}
+
+		ts, err := strconv.Atoi(d_s)
 		if err != nil {
 			return nil, fmt.Errorf("invalid data type: %s | %v", keys[i], err)
 		}
@@ -99,14 +132,14 @@ func GetActivity(rdb *redis.Client, account string) (map[string]*timestamppb.Tim
 	return result, nil
 }
 
-func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
+func (s *sessionsHandler) Get(account string) ([]*sessions.Session, error) {
 
-	keys, err := rdb.Keys(context.Background(), fmt.Sprintf("sessions:%s:*", account)).Result()
+	keys, err := s.rdb.Keys(context.Background(), fmt.Sprintf("sessions:%s:*", account)).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := rdb.MGet(context.Background(), keys...).Result()
+	data, err := s.rdb.MGet(context.Background(), keys...).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -115,12 +148,12 @@ func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
 	for i, d := range data {
 		session := &sessions.Session{}
 
-		bytes, ok := d.(string)
+		str, ok := d.(string)
 		if !ok {
 			return nil, fmt.Errorf("invalid data type: %s", keys[i])
 		}
 
-		err = proto.Unmarshal([]byte(bytes), session)
+		err = s.protoUnmarshal([]byte(str), session)
 		if err != nil {
 			return nil, err
 		}
@@ -131,7 +164,7 @@ func Get(rdb *redis.Client, account string) ([]*sessions.Session, error) {
 	return result, nil
 }
 
-func Revoke(rdb *redis.Client, account, sid string) error {
+func (s *sessionsHandler) Revoke(account, sid string) error {
 	key := fmt.Sprintf("sessions:%s:%s", account, sid)
-	return rdb.Del(context.Background(), key).Err()
+	return s.rdb.Del(context.Background(), key).Err()
 }

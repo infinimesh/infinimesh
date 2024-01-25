@@ -45,13 +45,13 @@
           </td>
           <td>
             <access-badge :access="account.access.level" />
-            <access-badge access="OWNER" v-if="account.access.role == 'OWNER'" left="5px" />
+            <access-badge access="OWNER" v-if="access_role_conv(account) == Role.OWNER" left="5px" />
           </td>
           <td>
             <n-space align="center">
               {{ nss.namespaces[account.access.namespace]?.title || account.access.namespace }}
               <div :style="{ visibility: hovered.get(account.uuid) ? '' : 'hidden' }"
-                v-if="access_lvl_conv(account) >= 3 || account.access.role == 'OWNER'">
+                v-if="access_lvl_conv(account) >= 3 || access_role_conv(account) == Role.OWNER">
                 <move type="account" :obj="account" @move="(...args) => handleMove(account.uuid, args)" />
               </div>
             </n-space>
@@ -60,7 +60,7 @@
             <n-space align="center">
               {{ nss.namespaces[account.defaultNamespace]?.title || "-" }}
               <div :style="{ visibility: hovered.get(account.uuid) ? '' : 'hidden' }"
-                v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'">
+                v-if="access_lvl_conv(account) > 3 || access_role_conv(account) == Role.OWNER">
                 <edit-acc-default-ns-modal :default="account.defaultNamespace"
                   @save="(...args) => handleUpdateDefaultNamespace(account.uuid, args)" />
               </div>
@@ -83,7 +83,7 @@
                 <span>Click to {{ account.enabled ? "disable" : "enable" }} <b>{{ account.title }}'s</b> Account</span>
               </n-tooltip>
 
-              <n-tooltip v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'" trigger="hover">
+              <n-tooltip v-if="access_lvl_conv(account) > 3 || access_role_conv(account) == Role.OWNER" trigger="hover">
                 <template #trigger>
                   <n-button type="warning" @click="() => { active_account = account; show_mc = true }" tertiary circle>
                     <template #icon>
@@ -97,7 +97,7 @@
               </n-tooltip>
 
               <config-edit-modal :o="account" @submit="handleConfigUpdate"
-                v-if="access_lvl_conv(account) > 3 || account.access.role == 'OWNER'" />
+                v-if="access_lvl_conv(account) > 3 || access_role_conv(account) == Role.OWNER" />
 
               <n-button round secondary type="success" @click="e => handleLoginAs(account)">
                 Login as
@@ -122,13 +122,14 @@ import {
   NGrid, NGridItem, NH1, NText,
   useLoadingBar, useMessage
 } from "naive-ui";
+import { Role } from "infinimesh-proto/build/es/node/access/access_pb"
 
 import { useAppStore } from "@/store/app";
 import { useAccountsStore } from "@/store/accounts";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
-import { access_lvl_conv } from "@/utils/access";
+import { access_lvl_conv, access_role_conv } from "@/utils/access";
 
 const CheckmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CheckmarkOutline"))
 const BanOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BanOutline"))
@@ -172,26 +173,27 @@ async function handleDelete(uuid) {
     delete store.accounts[uuid]
     message.success("Account successfuly deleted")
   } catch (e) {
-    message.error("Failed to delete account: " + e.response.statusText)
+    message.error("Failed to delete account: " + e.message)
   }
 }
 
 const as = useAppStore()
 async function handleLoginAs(account) {
   try {
-    const { data } = await store.tokenFor(account.uuid)
-    const params = { token: data.token, title: account.title, back_token: as.token }
+    const { token } = await store.tokenFor(account.uuid)
+    const params = { token, title: account.title, back_token: as.token }
+    const url = `${window.location.origin}/#login?a=${btoa(JSON.stringify(params))}`
 
-    window.open(window.location.origin + '/#login?a=' + btoa(JSON.stringify(params)), '_blank', { incognito: true })
+    window.open(url, '_blank', { incognito: true })
   } catch (e) {
-    message.error("Failed to get token: " + e.response.statusText)
+    message.error("Failed to get token: " + e.message)
   }
 }
 
 async function handleUpdateDefaultNamespace(account, [ns, resolve, reject]) {
   try {
     let err = await store.updateDefaultNamespace(account, ns)
-    if (err) throw err.response.data.message
+    if (err) throw err.message
     resolve()
   } catch (e) {
     reject(e)
@@ -202,7 +204,7 @@ async function handleConfigUpdate(account) {
   try {
     await store.updateAccount(account, bar)
   } catch (e) {
-    message.error("Failed to update account configuration: " + e.response.statusText)
+    message.error("Failed to update account configuration: " + e.message)
   }
 }
 
