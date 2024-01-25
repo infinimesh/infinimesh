@@ -34,6 +34,12 @@ import (
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 )
 
+type AuthInterceptor interface {
+	connect.Interceptor
+
+	MakeToken(account string) (string, error)
+}
+
 type interceptor struct {
 	log         *zap.Logger
 	rdb         *redis.Client

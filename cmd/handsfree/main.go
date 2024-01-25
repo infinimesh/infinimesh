@@ -81,7 +81,6 @@ func main() {
 	})
 
 	authInterceptor := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
-
 	interceptors := connect.WithInterceptors(authInterceptor)
 
 	handsfreeServer := handsfree.NewHandsfreeServer(log)
