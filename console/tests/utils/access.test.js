@@ -66,6 +66,8 @@ describe("check_token_expired", () => {
       new ConnectError("rpc error: code = Unauthenticated desc = Session is expired, revoked or invalid", Code.Unknown),
       check_token_expired_store
     );
+
+    expect(expiredSpy).toHaveBeenCalledOnce();
   })
 
   test("check another error", () => {
