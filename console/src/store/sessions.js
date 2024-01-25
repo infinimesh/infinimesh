@@ -1,15 +1,19 @@
 import { defineStore } from "pinia";
 import { createPromiseClient } from "@connectrpc/connect";
 
-import { SessionsService } from "infinimesh-proto/build/es/node/node_connect"
+import { SessionsService } from "infinimesh-proto/build/es/node/node_connect";
 import { Session } from "infinimesh-proto/build/es/node/sessions/sessions_pb";
 import { EmptyMessage } from "infinimesh-proto/build/es/node/node_pb";
 
 import { useAppStore } from "@/store/app";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 export const useSessionsStore = defineStore("sessions", () => {
   const appStore = useAppStore();
-  const sessionsApi = createPromiseClient(SessionsService, appStore.transport);
+  const sessionsApi = createPromiseClient(
+    SessionsService,
+    createConnectTransport(appStore.transport_options)
+  );
 
   async function get() {
     return await sessionsApi.get(new EmptyMessage());
@@ -24,4 +28,4 @@ export const useSessionsStore = defineStore("sessions", () => {
   }
 
   return { get, activity, revoke };
-})
+});

@@ -4,9 +4,18 @@ import { defineStore } from "pinia";
 
 import { access_lvl_conv } from "@/utils/access";
 import { createPromiseClient } from "@connectrpc/connect";
-import { AccountsService } from "infinimesh-proto/build/es/node/node_connect"
-import { Account, CreateRequest } from "infinimesh-proto/build/es/node/accounts/accounts_pb";
-import { EmptyMessage, MoveRequest, SetCredentialsRequest, TokenRequest } from "infinimesh-proto/build/es/node/node_pb";
+import { AccountsService } from "infinimesh-proto/build/es/node/node_connect";
+import {
+  Account,
+  CreateRequest,
+} from "infinimesh-proto/build/es/node/accounts/accounts_pb";
+import {
+  EmptyMessage,
+  MoveRequest,
+  SetCredentialsRequest,
+  TokenRequest,
+} from "infinimesh-proto/build/es/node/node_pb";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -15,7 +24,10 @@ export const useAccountsStore = defineStore("accounts", {
   state: () => ({
     loading: false,
     accounts: {},
-    accountsApi: createPromiseClient(AccountsService, as.transport)
+    accountsApi: createPromiseClient(
+      AccountsService,
+      createConnectTransport(as.transport_options)
+    ),
   }),
 
   getters: {
@@ -35,7 +47,7 @@ export const useAccountsStore = defineStore("accounts", {
   },
   actions: {
     async sync_me() {
-      const data = await this.accountsApi.get({ uuid: "me" })
+      const data = await this.accountsApi.get({ uuid: "me" });
 
       as.me = { ...as.me, ...data };
     },
@@ -57,7 +69,7 @@ export const useAccountsStore = defineStore("accounts", {
             result[account.uuid] = account;
 
             return result;
-          }, {})
+          }, {}),
         };
       }
 
@@ -94,8 +106,9 @@ export const useAccountsStore = defineStore("accounts", {
     updateDefaultNamespace(account, ns) {
       let acc = this.accounts[account];
       return this.updateAccount({
-        ...acc, defaultNamespace: ns,
-      })
+        ...acc,
+        defaultNamespace: ns,
+      });
     },
     async toggle(uuid, bar) {
       bar.start();
@@ -128,9 +141,9 @@ export const useAccountsStore = defineStore("accounts", {
     },
     async moveAccount(account, namespace) {
       try {
-        await this.accountsApi.move(new MoveRequest(
-          { uuid: account.uuid, namespace }
-        ));
+        await this.accountsApi.move(
+          new MoveRequest({ uuid: account.uuid, namespace })
+        );
 
         this.accounts[account].access.namespace = namespace;
       } catch (err) {
@@ -159,26 +172,28 @@ export const useAccountsStore = defineStore("accounts", {
         bar.error();
       }
     },
-    token (data) {
+    token(data) {
       try {
-        return this.accountsApi.token(new TokenRequest(data))
+        return this.accountsApi.token(new TokenRequest(data));
       } catch (e) {
-        console.error(e); 
+        console.error(e);
       }
     },
     tokenFor(account, exp = 0) {
       let res = {};
       try {
-        res = new UAParser(navigator.userAgent).getResult()
+        res = new UAParser(navigator.userAgent).getResult();
       } catch (e) {
-        console.warn("Failed to get user agent", e)
+        console.warn("Failed to get user agent", e);
       }
 
       return this.token({
         uuid: account,
-        client: `Console Admin | ${res.os?.name ?? 'Unknown'} | ${res.browser?.name ?? 'Unknown'}`,
+        client: `Console Admin | ${res.os?.name ?? "Unknown"} | ${
+          res.browser?.name ?? "Unknown"
+        }`,
         exp,
       });
-    }
+    },
   },
 });

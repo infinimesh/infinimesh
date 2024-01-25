@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { useDevicesStore } from "@/store/devices";
 import { createPromiseClient } from "@connectrpc/connect";
 import { PluginsService } from "infinimesh-proto/build/es/plugins/plugins_connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -20,7 +21,10 @@ export const usePluginsStore = defineStore("plugins", {
   }),
   getters: {
     plugins_client() {
-      return createPromiseClient(PluginsService, as.transport);
+      return createPromiseClient(
+        PluginsService,
+        createConnectTransport(as.transport_options)
+      );
     },
   },
   actions: {

@@ -6,7 +6,6 @@ import {
   check_offline_http,
   check_token_expired_http,
 } from "@/utils/access";
-import { createConnectTransport } from "@connectrpc/connect-web";
 
 export const baseURL = import.meta.env.DEV
   ? "http://api.infinimesh.local" // jshint ignore:line
@@ -47,10 +46,10 @@ export const useAppStore = defineStore("app", {
       instance.interceptors.response.use((r) => r, err_check);
       return instance;
     },
-    transport(state) {
-      const transport = createConnectTransport({
+    transport_options(state) {
+      const options = {
         baseUrl: baseURL,
-        useBinaryFormat: true,
+        useBinaryFormat: !import.meta.env.DEV,
         interceptors: [
           (next) => async (req) => {
             req.header.set("Authorization", `Bearer ${state.token}`);
@@ -67,9 +66,9 @@ export const useAppStore = defineStore("app", {
             }
           },
         ],
-      });
+      };
 
-      return transport;
+      return options;
     },
   },
   actions: {
