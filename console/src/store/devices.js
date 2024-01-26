@@ -13,6 +13,9 @@ import { access_lvl_conv } from "@/utils/access";
 import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
 import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
 
+import { Shadow } from "infinimesh-proto/build/es/shadow/shadow_pb";
+import { Struct } from "@bufbuild/protobuf";
+
 const as = useAppStore();
 const nss = useNSStore();
 
@@ -208,11 +211,13 @@ export const useDevicesStore = defineStore("devices", {
       if (bar) bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
+        const data = Struct.fromJson(state);
+        const request = new Shadow({
+          device,
+          desired: { data }
+        })
         await this.shadow_client.patch(
-          {
-            device,
-            desired: { data: state },
-          },
+          request,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -230,11 +235,13 @@ export const useDevicesStore = defineStore("devices", {
       bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
+        const data = Struct.fromJson(state);
+        const request = new Shadow({
+          device,
+          reported: { data }
+        })
         await this.shadow_client.patch(
-          {
-            device,
-            reported: { data: state },
-          },
+          request,
           {
             headers: {
               Authorization: `Bearer ${token}`,
