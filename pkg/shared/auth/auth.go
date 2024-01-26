@@ -37,7 +37,11 @@ import (
 type AuthInterceptor interface {
 	connect.Interceptor
 
-	MakeToken(account string) (string, error)
+	MakeToken(string) (string, error)
+	ConnectStandardAuthMiddleware(context.Context, []byte, string) (context.Context, bool, error)
+	ConnectDeviceAuthMiddleware(context.Context, []byte, string) (context.Context, bool, error)
+
+	SetSessionsHandler(sessions.SessionsHandler)
 }
 
 type interceptor struct {
@@ -56,11 +60,13 @@ func NewAuthInterceptor(log *zap.Logger, _rdb *redis.Client, _jwth JWTHandler, s
 		jwth = defaultJWTHandler{}
 	}
 
+	sessions := sessions.NewSessionsHandlerModule(_rdb).Handler()
+
 	return &interceptor{
 		log:         log.Named("AuthInterceptor"),
 		rdb:         _rdb,
 		jwt:         jwth,
-		sessions:    sessions.NewSessionsHandlerModule(_rdb).Handler(),
+		sessions:    sessions,
 		signing_key: signing_key,
 	}
 }
@@ -73,6 +79,21 @@ func (i *interceptor) MakeToken(account string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(i.signing_key)
+}
+
+func SelectMiddleware(i *interceptor, path string) middleware {
+	var middleware middleware
+
+	switch {
+	case path == "/infinimesh.node.DevicesService/GetByToken":
+		middleware = i.ConnectDeviceAuthMiddleware
+	case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
+		middleware = i.ConnectDeviceAuthMiddleware
+	default:
+		middleware = i.ConnectStandardAuthMiddleware
+	}
+
+	return middleware
 }
 
 func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
@@ -88,17 +109,9 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 			segments = []string{"", ""}
 		}
 
-		var middleware middleware
-
-		switch {
-		case path == "/infinimesh.node.DevicesService/GetByToken":
-			middleware = i.ConnectDeviceAuthMiddleware
-		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
-			middleware = i.ConnectDeviceAuthMiddleware
-		default:
-			middleware = i.ConnectStandardAuthMiddleware
-		}
 		i.log.Debug("Authorization Header", zap.String("header", header))
+
+		middleware := SelectMiddleware(i, path)
 
 		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
 		if path != "/infinimesh.node.AccountsService/Token" && err != nil {
@@ -160,6 +173,7 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 
 	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
+		err = status.Error(codes.Unauthenticated, "Invalid token format")
 		return
 	}
 	log.Debug("Validated token", zap.Any("claims", token))
@@ -294,4 +308,8 @@ func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
 	if err := i.sessions.LogActivity(req, sid, exp); err != nil {
 		i.log.Warn("Error logging activity", zap.Any("error", err))
 	}
+}
+
+func (i *interceptor) SetSessionsHandler(sessions sessions.SessionsHandler) {
+	i.sessions = sessions
 }
