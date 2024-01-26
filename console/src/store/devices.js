@@ -11,9 +11,7 @@ import {
 
 import { access_lvl_conv } from "@/utils/access";
 import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
-import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
 import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
-import { Struct } from "@bufbuild/protobuf";
 
 const as = useAppStore();
 const nss = useNSStore();
@@ -187,8 +185,8 @@ export const useDevicesStore = defineStore("devices", {
         const data = await this.devices_client.update(
           new Device({
             ...patch,
-            config: new Struct().fromJson(patch.config),
             uuid: device,
+            config: undefined,
           })
         );
         this.devices[device] = data;
