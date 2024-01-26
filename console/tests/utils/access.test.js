@@ -42,7 +42,7 @@ describe("check_token_expired", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
 
     check_token_expired(
-      new ConnectError("Session is expired", 16),
+      new ConnectError("Session is expired", Code.Unauthenticated),
       check_token_expired_store
     );
 
@@ -53,7 +53,7 @@ describe("check_token_expired", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
 
     check_token_expired(
-      new ConnectError("Invalid token format", 2),
+      new ConnectError("Invalid token format", Code.Unknown),
       check_token_expired_store
     );
 
@@ -63,17 +63,23 @@ describe("check_token_expired", () => {
   test("code unknown", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
     check_token_expired(
-      new ConnectError("rpc error: code = Unauthenticated desc = Session is expired, revoked or invalid", Code.Unknown),
+      new ConnectError(
+        "rpc error: code = Unauthenticated desc = Session is expired, revoked or invalid",
+        Code.Unknown
+      ),
       check_token_expired_store
     );
 
     expect(expiredSpy).toHaveBeenCalledOnce();
-  })
+  });
 
   test("check another error", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
 
-    check_token_expired(new ConnectError("Test error", 2), check_token_expired_store);
+    check_token_expired(
+      new ConnectError("Test error", Code.Unknown),
+      check_token_expired_store
+    );
 
     expect(expiredSpy).not.toHaveBeenCalled();
   });
