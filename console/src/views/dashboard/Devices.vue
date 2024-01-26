@@ -6,7 +6,7 @@
           <n-space justify="space-between" align="flex-end">
             <n-h1 prefix="bar" align-text type="info" style="margin: 0;">
               <n-text type="info"> Devices </n-text>
-              ( <n-number-animation :from="0" :to="filteredDevices.length || 0" /> )
+              ( <n-number-animation :from="0" :to="filteredDevices().length || 0" /> )
             </n-h1>
             <n-button strong secondary round type="info" @click="handleRefresh">
               <template #icon>
