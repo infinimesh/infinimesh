@@ -40,7 +40,6 @@ export function check_token_expired_http(err, store) {
 }
 
 export function check_token_expired(err, store) {
-  console.log(err);
   if (
     err?.code == 2 &&
     err.message.toLowerCase().includes("invalid token format")
