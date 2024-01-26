@@ -215,7 +215,7 @@ function handleSubmitReported() {
   * @returns {number}
   */
 function timestamppb_to_time(timestamp) {
-  return new Date(Number(timestamp.seconds) * 1000 + timestamp.nanos / 1000000).getTime();
+  return Number(timestamp.seconds) * 1000
 }
 </script>
 
