@@ -187,7 +187,7 @@ export const useDevicesStore = defineStore("devices", {
         const data = await this.devices_client.update(
           new Device({
             ...patch,
-            config: new Struct().fromJson(patch.config),
+            config: new Struct().fromJsonString(JSON.stringify(patch.config)),
             uuid: device,
           })
         );

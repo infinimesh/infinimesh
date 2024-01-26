@@ -327,7 +327,7 @@ async function handleMakeToken() {
 
 async function handleUpdateTags(tags, resolve, reject) {
   try {
-    await store.updateDevice(device.value.uuid, { title: device.value.title, tags: tags })
+    await store.updateDevice(device.value.uuid, { ...device.value, title, tags: tags })
     resolve()
   } catch (e) {
     reject(e)
@@ -336,7 +336,7 @@ async function handleUpdateTags(tags, resolve, reject) {
 
 async function handleUpdateTitle(title, resolve, reject) {
   try {
-    await store.updateDevice(device.value.uuid, { title: title, tags: device.value.tags })
+    await store.updateDevice(device.value.uuid, { ...device.value, title: title })
     resolve()
   } catch (e) {
     reject(e)
