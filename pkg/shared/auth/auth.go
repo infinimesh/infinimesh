@@ -254,7 +254,7 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 
 	ipool, ok := devices.(map[string]any)
 	if !ok {
-		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a slice")
+		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a map")
 		return
 	}
 
@@ -262,7 +262,7 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 	for key, value := range ipool {
 		val, ok := value.(float64)
 		if !ok {
-			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %f is not a string", value)
+			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %v is not a number", value)
 			return
 		}
 		pool[key] = access.Level(val)

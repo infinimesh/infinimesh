@@ -14,6 +14,7 @@ import (
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/node/access"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
@@ -266,4 +267,88 @@ func TestConnectStandardAuthMiddleware_Success(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, []string{"test"}, md.Get(infinimesh.INFINIMESH_ACCOUNT_CLAIM))
 	assert.Equal(t, []string{"Bearer "}, md.Get("authorization"))
+}
+
+// ConnectDeviceAuthMiddleware
+
+func TestConnectDeviceAuthMiddleware_FailsOn_NoToken(t *testing.T) {
+	f := newInterceptorFixture(t)
+
+	f.mocks.jwth.EXPECT().Parse("test", mock.Anything).Return(nil, errors.New("token contains an invalid number of segments"))
+
+	_, _, err := f.interceptor.ConnectDeviceAuthMiddleware(context.Background(), []byte{}, ("test"))
+
+	assert.EqualError(t, err, "token contains an invalid number of segments")
+}
+
+func TestConnectDeviceAuthMiddleware_FailsOn_NoDevicesScope(t *testing.T) {
+	f := newInterceptorFixture(t)
+
+	f.mocks.jwth.EXPECT().Parse("test", mock.Anything).Return(
+		&jwt.Token{
+			Claims: jwt.MapClaims{},
+			Valid:  true,
+		}, nil,
+	)
+
+	_, _, err := f.interceptor.ConnectDeviceAuthMiddleware(context.Background(), []byte{}, ("test"))
+
+	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Invalid token format: no devices scope")
+}
+
+func TestConnectDeviceAuthMiddleware_FailsOn_WrongType(t *testing.T) {
+	f := newInterceptorFixture(t)
+
+	f.mocks.jwth.EXPECT().Parse("test", mock.Anything).Return(
+		&jwt.Token{
+			Claims: jwt.MapClaims{
+				infinimesh.INFINIMESH_DEVICES_CLAIM: 666,
+			},
+			Valid: true,
+		}, nil,
+	)
+
+	_, _, err := f.interceptor.ConnectDeviceAuthMiddleware(context.Background(), []byte{}, ("test"))
+
+	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Invalid token format: devices scope isn't a map")
+}
+
+func TestConnectDeviceAuthMiddleware_FailsOn_WrongValueType(t *testing.T) {
+	f := newInterceptorFixture(t)
+
+	f.mocks.jwth.EXPECT().Parse("test", mock.Anything).Return(
+		&jwt.Token{
+			Claims: jwt.MapClaims{
+				infinimesh.INFINIMESH_DEVICES_CLAIM: map[string]any{
+					"uuid": "invalid",
+				},
+			},
+			Valid: true,
+		}, nil,
+	)
+
+	_, _, err := f.interceptor.ConnectDeviceAuthMiddleware(context.Background(), []byte{}, ("test"))
+
+	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Invalid token format: element invalid is not a number")
+}
+
+func TestConnectDeviceAuthMiddleware_Success(t *testing.T) {
+	f := newInterceptorFixture(t)
+
+	f.mocks.jwth.EXPECT().Parse("test", mock.Anything).Return(
+		&jwt.Token{
+			Claims: jwt.MapClaims{
+				infinimesh.INFINIMESH_DEVICES_CLAIM: map[string]any{
+					"uuid": float64(1),
+				},
+			},
+			Valid: true,
+		}, nil,
+	)
+
+	ctx, log, err := f.interceptor.ConnectDeviceAuthMiddleware(context.Background(), []byte{}, ("test"))
+
+	assert.NoError(t, err)
+	assert.Equal(t, map[string]access.Level{"uuid": 1}, ctx.Value(infinimesh.InfinimeshDevicesCtxKey))
+	assert.Equal(t, false, log)
 }
