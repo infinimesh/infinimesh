@@ -43,13 +43,14 @@
                 <n-select v-model:value="add.uuid" :options="accounts" filterable/>
             </n-td>
             <n-td>
-                <access-badge :disabled="add.access == 'READ'" access="READ" join :cb="(v) => add.access = v" />
-                <access-badge :disabled="add.access == 'MGMT'" access="MGMT" join left="5px"
-                    :cb="(v) => add.access = v" />
-                <access-badge :disabled="add.access == 'ADMIN'" access="ADMIN" join left="5px"
-                    :cb="(v) => add.access = v" />
-                <access-badge :disabled="add.access == 'ROOT'" access="ROOT" join left="5px"
-                    :cb="(v) => add.access = v" />
+                <access-badge
+                  join
+                  left="5px"
+                  v-for="level of levels"
+                  :disabled="add.access == level"
+                  :access="level"
+                  :cb="(value) => add.access = value"
+                />
             </n-td>
             <n-td>
                 <n-button strong quaternary round type="error"
@@ -81,10 +82,14 @@
             </n-td>
             <n-td>
                 <template v-if="editing == acc.uuid">
-                    <access-badge access="READ" join :cb="(v) => handleJoin(acc.uuid, v)" />
-                    <access-badge access="MGMT" join left="5px" :cb="(v) => handleJoin(acc.uuid, v)" />
-                    <access-badge access="ADMIN" join left="5px" :cb="(v) => handleJoin(acc.uuid, v)" />
-                    <access-badge access="ROOT" join left="5px" :cb="(v) => handleJoin(acc.uuid, v)" />
+                    <access-badge
+                      join
+                      left="5px"
+                      v-for="level of levels"
+                      :disabled="acc.access.level == level"
+                      :access="level"
+                      :cb="(value) => handleJoin(acc.uuid, value)"
+                    />
                 </template>
                 <template v-else>
                     <access-badge :access="acc.access.level" join />
@@ -143,6 +148,10 @@ const editing = ref(null)
 const add = ref(null)
 const joins = ref([])
 
+const levels = computed(() =>
+  Object.values(Level).filter((key) => key !== Level.NONE && !isNaN(key))
+)
+
 async function load() {
     loading.value = true
     const { accounts } = await store.loadJoins(props.namespace)
@@ -154,7 +163,7 @@ async function load() {
 async function handleJoin(account, access) {
     loading.value = true
     try {
-        const { accounts } = await store.join(props.namespace, account, Level[access])
+        const { accounts } = await store.join(props.namespace, account, access)
 
         joins.value = accounts
     } catch (e) {

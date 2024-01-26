@@ -90,6 +90,8 @@ import { useNSStore } from '@/store/namespaces';
 import { usePluginsStore } from "@/store/plugins";
 import { baseURL, useAppStore } from "@/store/app";
 
+import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
+
 const as = useAppStore()
 const nss = useNSStore()
 const plugs = usePluginsStore()
@@ -117,7 +119,7 @@ async function loadPlugin() {
         plugs.current = data
         plugin.value = data
 
-        if (data.kind != "EMBEDDED") {
+        if (data.kind != PluginKind.EMBEDDED) {
             state.value = "wrongkind"
             return
         }
@@ -135,8 +137,8 @@ onMounted(async () => {
 })
 
 const src = computed(() => {
-    console.log(state.value, !plugin.value, plugin.value.kind != "EMBEDDED", state.value || !plugin.value || plugin.kind != "EMBEDDED")
-    if (state.value || !plugin.value || plugin.value.kind != "EMBEDDED") return ""
+    console.log(state.value, !plugin.value, plugin.value.kind != PluginKind.EMBEDDED, state.value || !plugin.value || plugin.kind != PluginKind.EMBEDDED)
+    if (state.value || !plugin.value || plugin.value.kind != PluginKind.EMBEDDED) return ""
 
     const params = { token: as.token, title: as.me.title, namespace: nss.selected, theme: as.theme, api: baseURL, vars: plugin.value.vars }
     const src = `${plugin.value.embeddedConf.frameUrl}?a=${btoa(JSON.stringify(params))}`

@@ -10,7 +10,9 @@ import {
 } from "infinimesh-proto/build/es/node/node_connect";
 
 import { access_lvl_conv } from "@/utils/access";
+
 import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
+import { Shadow } from "infinimesh-proto/build/es/shadow/shadow_pb";
 import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
 import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
 import { Struct } from "@bufbuild/protobuf";
@@ -187,8 +189,8 @@ export const useDevicesStore = defineStore("devices", {
         const data = await this.devices_client.update(
           new Device({
             ...patch,
-            config: new Struct().fromJson(patch.config),
             uuid: device,
+            config: undefined,
           })
         );
         this.devices[device] = data;
@@ -210,11 +212,13 @@ export const useDevicesStore = defineStore("devices", {
       if (bar) bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
+        const data = Struct.fromJson(state);
+        const request = new Shadow({
+          device,
+          desired: { data }
+        })
         await this.shadow_client.patch(
-          {
-            device,
-            desired: { data: state },
-          },
+          request,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -232,11 +236,13 @@ export const useDevicesStore = defineStore("devices", {
       bar.start();
       try {
         let token = await this.makeDevicesToken([device], true);
+        const data = Struct.fromJson(state);
+        const request = new Shadow({
+          device,
+          reported: { data }
+        })
         await this.shadow_client.patch(
-          {
-            device,
-            reported: { data: state },
-          },
+          request,
           {
             headers: {
               Authorization: `Bearer ${token}`,
