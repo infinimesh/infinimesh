@@ -3,8 +3,8 @@ import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb";
 export function access_lvl_conv(item = { access: {} }) {
   const { level = "READ" } = item.access;
 
-  if (level >= 0 && level <= 4) return level;
-  return Level[level] ?? 1;
+  if (level >= 0 && level <= 4) return level
+  return Level[level] ?? Level.READ;
 }
 
 export function access_role_conv(item = { access: {} }) {
