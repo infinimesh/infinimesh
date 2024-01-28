@@ -67,8 +67,8 @@ func LogErrorAndClose(c net.Conn, err error) {
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
 	log := log.Named(device.GetUuid()).Named(connectPacket.ConnectPayload.ClientID)
 
-	metrics.ConnOpenTotal.Inc()
-	defer metrics.ConnClosedTotal.Inc()
+	metrics.ActiveConnectionsTotal.Inc()
+	defer metrics.ActiveConnectionsTotal.Dec()
 
 	defer log.Debug("Client disconnected")
 

@@ -35,13 +35,9 @@ var (
 	})
 
 	// Metrics for HandleConn (both BasicAuth and TLS)
-	ConnOpenTotal = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "mqtt_bridge_connected_total",
+	ActiveConnectionsTotal = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "mqtt_bridge_active_connections_total",
 		Help: "The total number of active connections",
-	})
-	ConnClosedTotal = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "mqtt_bridge_connections_closed_total",
-		Help: "The total number of connections closed",
 	})
 
 	// Other common metrics
