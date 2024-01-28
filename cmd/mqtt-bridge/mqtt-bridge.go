@@ -23,18 +23,21 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inflog "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/acme"
+	"github.com/infinimesh/infinimesh/pkg/mqtt/metrics"
 	mqttps "github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	pb "github.com/infinimesh/proto/node"
 	devpb "github.com/infinimesh/proto/node/devices"
 	stpb "github.com/infinimesh/proto/shadow"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/slntopp/mqtt-go/packet"
 	"github.com/spf13/viper"
@@ -113,6 +116,9 @@ func main() {
 
 	log.Info("Starting MQTT Bridge")
 
+	http.Handle("/metrics", promhttp.Handler())
+	go http.ListenAndServe(":2112", nil)
+
 	var serverCert tls.Certificate
 	var err error
 	if acme_path != "" {
@@ -178,8 +184,10 @@ func main() {
 		log := log.Named("TLS")
 		for {
 			c, err := tlsl.Accept() // nolint: gosec
+			metrics.TlsAcceptedTotal.Inc()
 			if err != nil {
 				log.Warn("Couldn't accept TLS Connection", zap.Error(err))
+				metrics.TlsFailedToAcceptTotal.Inc()
 				continue
 			}
 			if debug {
@@ -195,6 +203,7 @@ func main() {
 					if err := conn.Close(); err != nil {
 						log.Warn("Couldn't close connection", zap.Error(err))
 					}
+					metrics.TlsFailedToAcceptTotal.Inc()
 					return
 				}
 
@@ -207,16 +216,19 @@ func main() {
 				case err := <-errChannel:
 					if err != nil {
 						log.Info("Handshake failed", zap.Error(err))
+						metrics.TlsFailedToAcceptTotal.Inc()
 						return
 					}
 				case <-time.After(timeout):
 					LogErrorAndClose(c, errors.New("handshake failed due to timeout"))
+					metrics.TlsFailedToAcceptTotal.Inc()
 					return
 				}
 
 				p, err := packet.ReadPacket(conn, 0)
 				if err != nil {
 					LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
+					metrics.ConnNotAnMqttPacketTotal.Inc()
 					return
 				}
 
@@ -225,12 +237,14 @@ func main() {
 				connectPacket, ok := p.(*packet.ConnectControlPacket)
 				if !ok {
 					LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
+					metrics.ConnNotAnMqttPacketTotal.Inc()
 					return
 				}
 				log.Debug("ConnectPacket", zap.Any("packet", p))
 
 				if len(conn.ConnectionState().PeerCertificates) == 0 {
 					LogErrorAndClose(conn, errors.New("no certificate given"))
+					metrics.TlsDeviceAuthFailedTotal.Inc()
 					return
 				}
 
@@ -249,6 +263,7 @@ func main() {
 				})
 				if err != nil {
 					LogErrorAndClose(conn, err)
+					metrics.TlsDeviceAuthFailedTotal.Inc()
 					return
 				}
 
