@@ -67,9 +67,6 @@ func LogErrorAndClose(c net.Conn, err error) {
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
 	log := log.Named(device.GetUuid()).Named(connectPacket.ConnectPayload.ClientID)
 
-	metrics.ActiveConnectionsTotal.Inc()
-	defer metrics.ActiveConnectionsTotal.Dec()
-
 	defer log.Debug("Client disconnected")
 
 	log.Debug(
@@ -103,6 +100,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		return
 	}
 
+	metrics.ActiveConnectionsTotal.Inc()
 	ps.TryPub(&pb.Shadow{
 		Device: device.Uuid,
 		Connection: &pb.ConnectionState{
@@ -113,6 +111,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}, "mqtt.incoming")
 
 	defer func() {
+		metrics.ActiveConnectionsTotal.Dec()
 		ps.TryPub(&pb.Shadow{
 			Device: device.Uuid,
 			Connection: &pb.ConnectionState{
@@ -147,7 +146,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			if err := c.Close(); err != nil {
 				log.Warn("Couldn't close connection", zap.Error(err))
 			}
-			break
+			return
 		}
 
 		switch p := p.(type) {
