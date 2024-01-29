@@ -28,7 +28,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/infinimesh/proto/handsfree/handsfreeconnect"
 	"github.com/infinimesh/proto/node/access"
+	"github.com/infinimesh/proto/node/nodeconnect"
 
 	"github.com/infinimesh/infinimesh/pkg/sessions"
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
@@ -81,13 +83,13 @@ func (i *interceptor) MakeToken(account string) (string, error) {
 	return token.SignedString(i.signing_key)
 }
 
-func SelectMiddleware(i *interceptor, path string) middleware {
+func SelectMiddleware(i *interceptor, procedure string) middleware {
 	var middleware middleware
 
 	switch {
-	case path == "/infinimesh.node.DevicesService/GetByToken":
+	case procedure == nodeconnect.DevicesServiceGetByTokenProcedure:
 		middleware = i.ConnectDeviceAuthMiddleware
-	case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
+	case strings.HasPrefix(procedure, "/"+nodeconnect.ShadowServiceName):
 		middleware = i.ConnectDeviceAuthMiddleware
 	default:
 		middleware = i.ConnectStandardAuthMiddleware
@@ -101,7 +103,7 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 		ctx context.Context,
 		req connect.AnyRequest,
 	) (connect.AnyResponse, error) {
-		path := req.Spec().Procedure
+		procedure := req.Spec().Procedure
 		header := req.Header().Get("Authorization")
 
 		segments := strings.Split(header, " ")
@@ -111,10 +113,10 @@ func (i *interceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 
 		i.log.Debug("Authorization Header", zap.String("header", header))
 
-		middleware := SelectMiddleware(i, path)
+		middleware := SelectMiddleware(i, procedure)
 
 		ctx, log_activity, err := middleware(ctx, i.signing_key, segments[1])
-		if path != "/infinimesh.node.AccountsService/Token" && err != nil {
+		if procedure != nodeconnect.AccountsServiceTokenProcedure && err != nil {
 			return nil, err
 		}
 
@@ -133,7 +135,7 @@ func (i *interceptor) WrapStreamingClient(next connect.StreamingClientFunc) conn
 func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
 	i.log.Debug("Setup Wrap Streaming Handler")
 	return func(ctx context.Context, shc connect.StreamingHandlerConn) error {
-		path := shc.Spec().Procedure
+		procedure := shc.Spec().Procedure
 		header := shc.RequestHeader().Get("Authorization")
 
 		segments := strings.Split(header, " ")
@@ -144,9 +146,9 @@ func (i *interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 		var middleware middleware
 
 		switch {
-		case strings.HasPrefix(path, "/infinimesh.node.ShadowService/"):
+		case strings.HasPrefix(procedure, "/"+nodeconnect.ShadowServiceName):
 			middleware = i.ConnectDeviceAuthMiddleware
-		case path == "/infinimesh.handsfree.HandsfreeService/Connect":
+		case procedure == handsfreeconnect.HandsfreeServiceConnectProcedure:
 			middleware = i.ConnectBlankMiddleware
 		default:
 			middleware = i.ConnectStandardAuthMiddleware
