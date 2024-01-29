@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run --dom --coverage"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.6.0",
@@ -28,9 +29,13 @@
   "devDependencies": {
     "@types/markdown-it": "^13.0.7",
     "@vitejs/plugin-vue": "^5.0.3",
+    "@vitest/coverage-v8": "^1.2.2",
+    "@vue/test-utils": "^2.4.3",
+    "happy-dom": "^13.3.1",
     "naive-ui": "^2.37.3",
     "vfonts": "^0.0.3",
-    "vite": "^5.0.12"
+    "vite": "^5.0.12",
+    "vitest": "^1.2.1"
   },
   "peerDependencies": {
     "@types/markdown-it": "^13.0.7"

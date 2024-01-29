@@ -63,6 +63,7 @@ services:
     ports:
       - 1883:1883 # BasicAuth(non-TLS)
       - 8883:8883 # Standard(TLS)
+      - 2112:2112 # Metrics
     volumes:
       - ./hack/server.crt:/cert/tls.crt
       - ./hack/server.key:/cert/tls.key

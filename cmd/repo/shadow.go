@@ -20,6 +20,7 @@ package main
 import (
 	"context"
 	"errors"
+
 	"github.com/infinimesh/proto/node/access"
 
 	"connectrpc.com/connect"
@@ -54,7 +55,7 @@ func (s *ShadowAPI) Get(ctx context.Context, _ *connect.Request[shadow.GetReques
 	}
 	log.Debug("Scope", zap.Any("devices", devices_scope))
 
-	var pool = make([]string, len(devices_scope))
+	var pool []string
 	for device := range devices_scope {
 		pool = append(pool, device)
 	}
@@ -78,13 +79,7 @@ func (s *ShadowAPI) Patch(ctx context.Context, request *connect.Request[shadow.S
 	}
 	log.Debug("Scope", zap.Any("devices", devices_scope))
 
-	found := false
-	for device := range devices_scope {
-		if device == shadow.Device {
-			found = true
-			break
-		}
-	}
+	_, found := devices_scope[shadow.Device]
 	if !found {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope"))
 	}
@@ -107,13 +102,7 @@ func (s *ShadowAPI) Remove(ctx context.Context, request *connect.Request[shadow.
 	}
 	log.Debug("Scope", zap.Any("devices", devices_scope))
 
-	found := false
-	for device := range devices_scope {
-		if device == req.Device {
-			found = true
-			break
-		}
-	}
+	_, found := devices_scope[req.Device]
 	if !found {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("requested device is outside of token scope"))
 	}
@@ -137,7 +126,7 @@ func (s *ShadowAPI) StreamShadow(ctx context.Context, request *connect.Request[s
 	}
 	log.Debug("Scope", zap.Any("devices", devices_scope))
 
-	var pool = make([]string, len(devices_scope))
+	var pool []string
 	for device := range devices_scope {
 		pool = append(pool, device)
 	}

@@ -60,7 +60,7 @@ jobs:
           cut-off: 2 weeks ago UTC
           account-type: org
           org-name: infinimesh
-          filter-tags: dev-*
+          filter-tags: dev-*, *-merge
           filter-include-untagged: true
           token: ${{ secrets.PACKAGES_PAT }}
       - name: Summary
