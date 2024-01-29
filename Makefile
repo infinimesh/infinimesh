@@ -10,6 +10,9 @@ build-console:
 build-repo:
 	docker build . -f "Dockerfiles/repo/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/repo:${VERSION}"
 
+build-mqtt:
+	docker build . -f "Dockerfiles/mqtt-bridge/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/mqtt-bridge:${VERSION}"
+
 mocks:
 	docker run -v "$PWD":/src -w /src vektra/mockery --all
 

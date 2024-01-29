@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/infinimesh/infinimesh/pkg/mqtt/metrics"
 	devpb "github.com/infinimesh/proto/node/devices"
 	"github.com/slntopp/mqtt-go/packet"
 	"go.uber.org/zap"
@@ -29,8 +30,10 @@ func HandleTCPConnections(tcp net.Listener) {
 	log := log.Named("TCP")
 	for {
 		conn, err := tcp.Accept()
+		metrics.BasicAuthAcceptedTotal.Inc()
 		if err != nil {
 			log.Warn("Couldn't accept connection", zap.Error(err))
+			metrics.BasicAuthFailedToAcceptTotal.Inc()
 			continue
 		}
 		log.Debug("Connection Accepted", zap.String("remote", conn.RemoteAddr().String()))
@@ -39,6 +42,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			p, err := packet.ReadPacket(conn, 0)
 			if err != nil {
 				LogErrorAndClose(conn, fmt.Errorf("error while reading connect packet: %v", err))
+				metrics.ConnNotAnMqttPacketTotal.Inc()
 				return
 			}
 			log.Debug("ControlPacket", zap.Any("packet", p))
@@ -46,6 +50,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			connectPacket, ok := p.(*packet.ConnectControlPacket)
 			if !ok {
 				LogErrorAndClose(conn, errors.New("first packet isn't ConnectControlPacket"))
+				metrics.ConnNotAnMqttPacketTotal.Inc()
 				return
 			}
 			log.Debug("ConnectPacket", zap.Any("packet", p))
@@ -54,6 +59,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			fingerprint, err = verifyBasicAuth(connectPacket)
 			if err != nil {
 				LogErrorAndClose(conn, fmt.Errorf("error verifying Basic Auth: %v", err))
+				metrics.BasicAuthDeviceAuthFailedTotal.Inc()
 				return
 			}
 
@@ -76,6 +82,7 @@ func HandleTCPConnections(tcp net.Listener) {
 			})
 			if err != nil {
 				LogErrorAndClose(conn, err)
+				metrics.BasicAuthDeviceAuthFailedTotal.Inc()
 				return
 			}
 
