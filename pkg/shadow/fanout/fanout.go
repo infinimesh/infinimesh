@@ -77,7 +77,7 @@ func (f *fanout) Publish(ctx context.Context, message proto.Message, args ...str
 		return err
 	}
 
-	return f.channel.PublishWithContext(ctx, routing_key, f.exchange, false, false, amqp.Publishing{
+	return f.channel.PublishWithContext(ctx, f.exchange, routing_key, false, false, amqp.Publishing{
 		ContentType: "text/plain", Body: payload,
 	})
 }
