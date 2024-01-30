@@ -10,7 +10,10 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type IFanout interface{}
+type IFanout interface {
+	Publish(ctx context.Context, message proto.Message, args ...string) error
+	Subscribe(ctx context.Context, client string, args ...string) (<-chan amqp.Delivery, error)
+}
 
 type fanout struct {
 	log *zap.Logger
