@@ -436,6 +436,14 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
 	}
 
+	limit := q.GetLimit()
+	page := q.GetPage()
+
+	if limit != 0 && page != 0 {
+		ctx = WithLimit(ctx, int(limit))
+		ctx = WithSkip(ctx, (int(page)-1)*int(limit))
+	}
+
 	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
