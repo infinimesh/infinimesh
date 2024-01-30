@@ -100,7 +100,7 @@ func main() {
 	log.Info("Pub/Sub setup complete")
 
 	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
-	auth.SetContext(log, rdb, nil, SIGNING_KEY)
+	auth := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 	token, err := auth.MakeToken(schema.ROOT_ACCOUNT_KEY)
 	if err != nil {
 		log.Fatal("Error making token", zap.Error(err))
