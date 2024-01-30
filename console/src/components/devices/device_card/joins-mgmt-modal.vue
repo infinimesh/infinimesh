@@ -57,10 +57,14 @@
                     <tr v-if="add">
                         <td style="width: 40%"><n-select v-model:value="add.uuid" :options="accounts" filterable /></td>
                         <td style="width: 40%">
-                            <access-badge :disabled="add.access == 'READ'" access="READ" join
-                                :cb="(v) => add.access = v" device />
-                            <access-badge :disabled="add.access == 'MGMT'" access="MGMT" join left="5px"
-                                :cb="(v) => add.access = v" device />
+                            <access-badge
+                              join
+                              v-for="(level, i) of [Level.READ, Level.MGMT]"
+                              :access="level"
+                              :disabled="add.access === level"
+                              :left="(i === 0) ? 0 : '5px'"
+                              :cb="(v) => add.access = v"
+                            />
                         </td>
                         <td>
                             <n-button strong quaternary round type="warning" @click="handleAdd">
@@ -168,7 +172,7 @@ async function handleAdd() {
         await store.join({
             node: props.device.uuid,
             join: `Accounts/${add.value.uuid}`,
-            access: Level[add.value.access]
+            access: add.value.access
         })
         add.value = false
     } catch (e) {
