@@ -9,7 +9,7 @@
     "test": "vitest run --dom --coverage"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.6.0",
+    "@bufbuild/protobuf": "^1.7.1",
     "@connectrpc/connect": "^1.3.0",
     "@connectrpc/connect-web": "^1.3.0",
     "@vicons/ionicons5": "^0.12.0",
