@@ -17,7 +17,7 @@ Our API's (REST / gRPC / ConnectRPC) are considered as beta and may change in fu
 Check out our:
 
 - [Wiki here](https://github.com/infinimesh/infinimesh/wiki).
-- [Swagger UI](https://infinimesh.github.io/infinimesh/)
+- [Swagger UI](https://infinimesh.github.io/infinimesh/) **soon to be deprecated**
 
 ## Build status
 
@@ -29,6 +29,32 @@ Check out our:
 You can reach out to the community via Discord.
 
 ![](http://invidget.switchblade.xyz/801798988163448832)
+
+## Client libraries
+
+The recommended way to interact with infinimesh API is gRPC and ConnectRPC. Thus, we provide protobuf files at [`infinimesh/proto`](https://github.com/infinimesh/proto), using which you can generate a client library for your programming language of choice.
+
+Additionally, we have pregenerated libraries:
+
+### Golang
+
+Can be added to your project via:
+
+```shell
+go get github.com/infinimesh/proto@latest
+```
+
+### JS
+
+Can be obtained from npm via:
+
+```shell
+npm install infinimesh-proto
+```
+
+### Dart / FLutter
+
+Has to be downloaded from [`infinimesh/proto`](https://github.com/infinimesh/proto), you can copy the whole [`build/dart`](https://github.com/infinimesh/proto/tree/master/build/dart) dir into your Flutter project
 
 ## CLI
 
