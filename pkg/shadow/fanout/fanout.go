@@ -32,7 +32,7 @@ func Get() IFanout {
 	return _fanout
 }
 
-func Setup(log *zap.Logger, conn *amqp.Connection, name, pub, sub string, buffer_capacity int) (IFanout, error) {
+func Setup(log *zap.Logger, conn *amqp.Connection, name string, buffer_capacity int) (IFanout, error) {
 	if _fanout != nil {
 		return _fanout, nil
 	}
