@@ -7,7 +7,9 @@
                         <copy-outline />
                     </n-icon>
                 </template>
-                {{ shortUUID(uuid) }}
+                <span id="short_uuid">
+                    {{ shortUUID(uuid) }}
+                </span>
             </n-button>
         </template>
         {{ uuid }}
