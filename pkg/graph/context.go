@@ -12,8 +12,8 @@ var DepthKey = GraphContextKey[int]{
 	Default: 10,
 }
 
-var SkipKey = GraphContextKey[int]{
-	Key:     "skip",
+var OffsetKey = GraphContextKey[int]{
+	Key:     "offset",
 	Default: 10,
 }
 
@@ -26,8 +26,8 @@ func WithDepth(ctx context.Context, depth int) context.Context {
 	return context.WithValue(ctx, DepthKey, depth)
 }
 
-func WithSkip(ctx context.Context, limit int) context.Context {
-	return context.WithValue(ctx, SkipKey, limit)
+func WithOffset(ctx context.Context, limit int) context.Context {
+	return context.WithValue(ctx, OffsetKey, limit)
 }
 
 func WithLimit(ctx context.Context, limit int) context.Context {
@@ -41,8 +41,8 @@ func DepthValue(ctx context.Context) int {
 	return DepthKey.Default
 }
 
-func SkipValue(ctx context.Context) int {
-	if d := ctx.Value(SkipKey); d != nil {
+func OffsetValue(ctx context.Context) int {
+	if d := ctx.Value(OffsetKey); d != nil {
 		return d.(int)
 	}
 	return 0

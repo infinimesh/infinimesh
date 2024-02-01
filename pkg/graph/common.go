@@ -88,6 +88,7 @@ type InfinimeshCommonActionsRepo interface {
 	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
 	AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
+	CountQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (int, error)
 	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
 	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
 	Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error
@@ -243,7 +244,7 @@ func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log
 	return nil
 }
 
-const listObjectsOfKindWithPagination = `
+const listObjectsOfKind = `
 FOR node, edge, path IN 0..@depth OUTBOUND @from
 GRAPH @permissions_graph
 OPTIONS {order: "bfs", uniqueVertices: "global"}
@@ -252,7 +253,7 @@ FILTER edge.level > 0
 %s
     LET perm = path.edges[0]
     LET last = path.edges[-1]
-    LIMIT @skip, @limit
+    %s
 	RETURN MERGE(node, {
 	    uuid: node._key,
 	    access: {
@@ -264,24 +265,27 @@ FILTER edge.level > 0
     )
 `
 
-const listObjectsOfKind = `
-FOR node, edge, path IN 0..@depth OUTBOUND @from
-GRAPH @permissions_graph
-OPTIONS {order: "bfs", uniqueVertices: "global"}
-FILTER IS_SAME_COLLECTION(@@kind, node)
-FILTER edge.level > 0
-%s
+const countObjectsOfKind = `
+LET nodes = (
+    FOR node, edge, path IN 0..@depth OUTBOUND @from
+    GRAPH @permissions_graph
+    OPTIONS {order: "bfs", uniqueVertices: "global"}
+    FILTER IS_SAME_COLLECTION(@@kind, node)
+    FILTER edge.level > 0
+    %s
     LET perm = path.edges[0]
     LET last = path.edges[-1]
-	RETURN MERGE(node, {
-	    uuid: node._key,
-	    access: {
-	        level: last.role == 2 ? last.level : perm.level,
-	        role:  last.role == 2 ? last.role : perm.role,
-	        namespace: last.role == 2 ? null : path.vertices[-2]._key
-	     }
-	    }
+    RETURN MERGE(node, {
+        uuid: node._key,
+        access: {
+            level: last.role == 2 ? last.level : perm.level,
+            role:  last.role == 2 ? last.role : perm.role,
+            namespace: last.role == 2 ? null : path.vertices[-2]._key
+         }
+        }
     )
+)
+RETURN LENGTH(nodes)
 `
 
 // List children nodes
@@ -293,12 +297,10 @@ FILTER edge.level > 0
 // depth
 func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
 	limit := LimitValue(ctx)
-	skip := SkipValue(ctx)
+	offset := OffsetValue(ctx)
 
 	bindVars := map[string]interface{}{
 		"depth":             DepthValue(ctx),
-		"skip":              skip,
-		"limit":             limit,
 		"from":              from.ID(),
 		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
 		"@kind":             children,
@@ -310,11 +312,53 @@ func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Lo
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	if limit != 0 && skip != 0 {
-		return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKindWithPagination, filters), bindVars)
+	if limit != 0 && offset != 0 {
+		bindVars["limit"] = limit
+		bindVars["offset"] = offset
+
+		return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters, "LIMIT @offset, @limit"), bindVars)
 	} else {
-		return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
+		return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters, ""), bindVars)
 	}
+}
+
+// Count children nodes
+// ctx - context
+// log - logger
+// db - Database connection
+// from - Graph node to start traversal from
+// children - children type(collection name)
+// depth
+func (r *infinimeshCommonActionsRepo) CountQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (int, error) {
+	bindVars := map[string]interface{}{
+		"depth":             DepthValue(ctx),
+		"from":              from.ID(),
+		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
+		"@kind":             children,
+	}
+	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
+
+	filters := ""
+	if ns := NSFilterValue(ctx); ns != "" {
+		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
+	}
+
+	cursor, err := r.db.Query(ctx, fmt.Sprintf(countObjectsOfKind, filters), bindVars)
+	if err != nil {
+		log.Fatal(err.Error())
+		return 0, err
+	}
+	defer cursor.Close()
+
+	var count int
+	if cursor.HasMore() {
+		_, err := cursor.ReadDocument(nil, &count)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}
+
+	return count, nil
 }
 
 const listOwnedQuery = `
