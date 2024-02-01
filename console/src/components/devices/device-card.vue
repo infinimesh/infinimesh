@@ -12,7 +12,7 @@
       <template #header-extra>
         <n-tooltip trigger="hover" v-if="!device.certificate">
           <template #trigger>
-            <n-icon size="2vh" color="#f2c97d">
+            <n-icon size="1.25rem" color="#f2c97d">
               <phone-portrait-outline />
             </n-icon>
           </template>
@@ -29,7 +29,7 @@
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
+            <n-icon size="1.25rem" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
               :class="toggle_animation ? 'jump-shaking-animation' : ''" @click="handleToggle">
               <bulb />
             </n-icon>
