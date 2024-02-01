@@ -70,13 +70,13 @@ function current_thing() {
 
 <style>
 span.platform {
-  font-size: 3vh;
+  font-size: 1.8rem;
   font-family: "Exo 2", sans-serif;
 }
 
 span.copyright {
   vertical-align: super;
-  font-size: 1.2vh;
+  font-size: 0.8rem;
 }
 
 #svgmesh text {
