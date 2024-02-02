@@ -352,7 +352,7 @@ func (r *infinimeshCommonActionsRepo) CountQuery(ctx context.Context, log *zap.L
 
 	var count int
 	if cursor.HasMore() {
-		_, err := cursor.ReadDocument(nil, &count)
+		_, err := cursor.ReadDocument(context.TODO(), &count)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
