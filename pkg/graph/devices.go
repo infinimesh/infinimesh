@@ -471,7 +471,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 			return nil, status.Error(codes.Internal, "Couldn't execute query")
 		}
 		dev.Uuid = meta.ID.Key()
-		if dev.Access.Level < access.Level_MGMT {
+		if dev.Access != nil && dev.Access.Level < access.Level_MGMT {
 			dev.Certificate = nil
 		}
 

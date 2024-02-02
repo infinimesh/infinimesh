@@ -618,3 +618,25 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
 }
+
+func TestList_Success(t *testing.T) {
+	mockCursor := new(driver_mocks.MockCursor)
+	f := newDevicesControllerFixture(t)
+
+	devices := []devpb.Device{{Uuid: "1", Access: &access.Access{Level: 1}}, {Uuid: "2", Access: &access.Access{Level: 1}}, {Uuid: "3", Access: &access.Access{Level: 1}}}
+
+	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(mockCursor, nil)
+
+	mockCursor.On("Close", mock.Anything).Return(nil).Once()
+
+	for _, device := range devices {
+		meta := driver.DocumentMeta{ID: driver.NewDocumentID("Devices", device.GetUuid())}
+		mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(meta, nil).Once()
+	}
+	mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, driver.NoMoreDocumentsError{}).Once()
+
+	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
+
+	assert.NoError(t, err)
+	assert.Equal(t, len(devices), len(resp.Msg.Devices))
+}
