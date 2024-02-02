@@ -21,7 +21,7 @@ function tooltip_row({ icon, label, value }) {
     return h('tr', [
         h('th', label),
         h('th',
-            h(NIcon, { component: icon, size: 20, style: { paddingTop: '10px'  }})
+            h(NIcon, { component: icon, size: 20, style: { paddingTop: '10px' } })
         ),
         h('td', value)
     ])
@@ -34,8 +34,9 @@ function render() {
 
     if (props.connection) {
         status = props.connection.connected ? 'online' : 'offline'
-        if (props.connection.timestamp) {
-            let d = new Date(props.connection.timestamp)
+        const timestamp = props.connection.timestamp?.toDate() || props.connection.timestamp
+        if (timestamp) {
+            let d = new Date(timestamp)
             seen = d.toString().split(' (')[0]
 
             if (((new Date) - d) / 1000 >= 3600) {
