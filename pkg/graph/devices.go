@@ -304,7 +304,6 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 
 	curr.Msg.Tags = dev.Tags
 	curr.Msg.Title = dev.Title
-	curr.Msg.Config = dev.Config
 
 	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr.Msg)
 	if err != nil {
@@ -316,20 +315,26 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 }
 
 func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
-	log := c.log.Named("Patch")
+	log := c.log.Named("Patch config")
 	dev := req.Msg
-	log.Debug("Patch request received", zap.Any("device", dev), zap.Any("context", ctx))
+	log.Debug("Patch config update request received", zap.Any("device", dev), zap.Any("context", ctx))
 
 	curr, err := c.Get(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	log.Debug("curr", zap.Any("device curr", curr))
 
-	if curr.Msg.GetAccess().GetLevel() < access.Level_MGMT {
+	if curr.Msg.GetAccess().GetLevel() >= access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
-	log.Debug("curr", zap.Any("getacccess", curr.Msg.GetAccess().GetLevel()), zap.Any("getacccess", access.Level_MGMT))
+
+	curr.Msg.Config = dev.Config
+
+	_, err = c.col.ReplaceDocument(ctx, dev.Uuid, curr.Msg)
+	if err != nil {
+		log.Warn("Error updating Device config", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating Device config")
+	}
 
 	return curr, nil
 }
