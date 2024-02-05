@@ -439,11 +439,6 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	limit := q.GetLimit()
 	page := q.GetPage()
 
-	if limit != 0 && page != 0 {
-		ctx = WithLimit(ctx, int(limit))
-		ctx = WithOffset(ctx, (int(page)-1)*int(limit))
-	}
-
 	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 
 	if err != nil {
@@ -451,13 +446,6 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
 
-	// Uncomment this to get total count of devices
-	// count, err := c.ica_repo.CountQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
-
-	if err != nil {
-		log.Warn("Error executing query", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Couldn't execute query")
-	}
 	defer cr.Close()
 
 	var r []*devpb.Device
@@ -479,9 +467,23 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		r = append(r, &dev)
 	}
 
+	filteredDevices := r
+
+	if limit > 0 && page > 0 {
+		start := int((page - 1) * limit)
+		end := start + int(limit)
+		if start > len(r) {
+			filteredDevices = []*devpb.Device{}
+		} else if end > len(r) {
+			filteredDevices = r[start:]
+		} else {
+			filteredDevices = r[start:end]
+		}
+	}
+
 	return connect.NewResponse(&devpb.Devices{
-		Devices: r,
-		// Count:   count,
+		Devices: filteredDevices,
+		// Total:   len(r),
 	}), nil
 }
 

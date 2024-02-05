@@ -12,26 +12,8 @@ var DepthKey = GraphContextKey[int]{
 	Default: 10,
 }
 
-var OffsetKey = GraphContextKey[int]{
-	Key:     "offset",
-	Default: 10,
-}
-
-var LimitKey = GraphContextKey[int]{
-	Key:     "limit",
-	Default: 10,
-}
-
 func WithDepth(ctx context.Context, depth int) context.Context {
 	return context.WithValue(ctx, DepthKey, depth)
-}
-
-func WithOffset(ctx context.Context, limit int) context.Context {
-	return context.WithValue(ctx, OffsetKey, limit)
-}
-
-func WithLimit(ctx context.Context, limit int) context.Context {
-	return context.WithValue(ctx, LimitKey, limit)
 }
 
 func DepthValue(ctx context.Context) int {
@@ -39,20 +21,6 @@ func DepthValue(ctx context.Context) int {
 		return d.(int)
 	}
 	return DepthKey.Default
-}
-
-func OffsetValue(ctx context.Context) int {
-	if d := ctx.Value(OffsetKey); d != nil {
-		return d.(int)
-	}
-	return 0
-}
-
-func LimitValue(ctx context.Context) int {
-	if d := ctx.Value(LimitKey); d != nil {
-		return d.(int)
-	}
-	return 0
 }
 
 var NamespaceFilterKey = GraphContextKey[string]{
