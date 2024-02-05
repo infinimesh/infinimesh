@@ -287,7 +287,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 func (c *DevicesController) Update(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Update")
 	dev := req.Msg
-	log.Debug("Update request received", zap.Any("device", dev), zap.Any("context", ctx))
+	log.Debug("Update request received", zap.Any("device - ", dev), zap.Any("context", ctx))
 
 	curr, err := c.Get(ctx, req)
 	if err != nil {
