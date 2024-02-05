@@ -315,6 +315,19 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 	return curr, nil
 }
 
+func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
+	log := c.log.Named("Patch")
+	dev := req.Msg
+	log.Debug("Patch request received", zap.Any("device", dev), zap.Any("context", ctx))
+
+	curr, err := c.Get(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return curr, nil
+}
+
 func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[devpb.Device]) (*connect.Response[devpb.Device], error) {
 	log := c.log.Named("Update")
 	dev := req.Msg
