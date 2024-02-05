@@ -4,11 +4,12 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"encoding/json"
-	"github.com/infinimesh/proto/node"
+	"github.com/infinimesh/proto/node/access"
 	"io"
 	"net/http"
 	"time"
 
+	"github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/nodeconnect"
 
@@ -89,7 +90,7 @@ func GithubLoginHandler(log *zap.Logger, githubConfig *oauth2.Config, config *Co
 	}
 }
 
-func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config *Config, client nodeconnect.AccountsServiceClient, infinimeshToken string) func(http.ResponseWriter, *http.Request) {
+func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config *Config, accClient nodeconnect.AccountsServiceClient, nsClient nodeconnect.NamespacesServiceClient, infinimeshToken string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Info("Get checkout request")
 		if r.FormValue("state") != config.State {
@@ -118,14 +119,14 @@ func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config 
 			return
 		}
 
-		var access *OrgAccess
+		var orgAccess *OrgAccess
 
 		for _, team := range teams {
 			var ok = false
 			for key, org := range config.OrganizationMapping {
 				if team.Org.Name == key {
 					ok = true
-					access = &org
+					orgAccess = &org
 					break
 				}
 			}
@@ -133,7 +134,7 @@ func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config 
 				break
 			}
 		}
-		if access == nil {
+		if orgAccess == nil {
 			log.Error("Wrong access check")
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 			return
@@ -146,7 +147,7 @@ func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config 
 			},
 			Exp: time.Now().Unix() + 24*60*60*30,
 		})
-		tokenResponse, err := client.Token(context.Background(), tokenReq)
+		tokenResponse, err := accClient.Token(context.Background(), tokenReq)
 		if err != nil {
 			createAccRequest := connect.NewRequest(&accounts.CreateRequest{
 				Account: &accounts.Account{
@@ -156,18 +157,32 @@ func GithubCheckoutHandler(log *zap.Logger, githubConfig *oauth2.Config, config 
 					Type: "oauth2-github",
 					Data: []string{token.AccessToken},
 				},
-				Namespace: access.Namespace,
-				Access:    &access.Level,
 			})
 			createAccRequest.Header().Set("Authorization", "bearer "+infinimeshToken)
-			_, err := client.Create(context.Background(), createAccRequest)
+			createAccResponse, err := accClient.Create(context.Background(), createAccRequest)
 			if err != nil {
 				log.Error("Failed to create account", zap.Error(err))
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 				return
 			}
-			tokenResponse, err = client.Token(context.Background(), tokenReq)
+
+			joinRequest := connect.NewRequest(&node.JoinRequest{
+				Namespace: orgAccess.Namespace,
+				Account:   createAccResponse.Msg.GetAccount().GetUuid(),
+				Access:    access.Level(orgAccess.Level),
+			})
+			joinRequest.Header().Set("Authorization", "bearer "+infinimeshToken)
+			_, err = nsClient.Join(context.Background(), joinRequest)
+			if err != nil {
+				log.Error("Failed to join account", zap.Error(err))
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			tokenResponse, err = accClient.Token(context.Background(), tokenReq)
 			if err != nil {
 				log.Error("Failed to get token of created account", zap.Error(err))
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 				return
 			}
 		}

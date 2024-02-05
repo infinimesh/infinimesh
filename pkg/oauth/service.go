@@ -39,14 +39,14 @@ func NewOauthService(log *zap.Logger, router *mux.Router) *OauthService {
 	}
 }
 
-func (s *OauthService) Register(configs map[string]Config, client nodeconnect.AccountsServiceClient, token string) {
+func (s *OauthService) Register(configs map[string]Config, accClient nodeconnect.AccountsServiceClient, nsClient nodeconnect.NamespacesServiceClient, token string) {
 	log := s.log.Named("Register")
 	for key, val := range configs {
 		registrar, ok := Registrars[key]
 		if !ok {
 			log.Warn("No such auth type in config", zap.String("type", key))
 		}
-		registrar(s.log, s.router, &val, client, token)
+		registrar(s.log, s.router, &val, accClient, nsClient, token)
 	}
 }
 

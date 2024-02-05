@@ -6,31 +6,12 @@ import (
 	"errors"
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/oauth"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 )
-
-var cfg map[string]oauth.Config
-
-func init() {
-	log := logger.NewLogger().Named("Oauth credentials init")
-	cfg = map[string]oauth.Config{}
-	file, err := os.ReadFile("oauth2_config.yaml")
-	if err == nil {
-		err := yaml.Unmarshal(file, &cfg)
-		if err != nil {
-			log.Error("Failed to parse oauth_config", zap.Error(err))
-		}
-	} else {
-		log.Error("Failed to read oauth_config", zap.Error(err))
-	}
-}
 
 type OauthVerifier func(string) (string, error)
 

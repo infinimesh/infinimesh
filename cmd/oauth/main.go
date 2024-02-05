@@ -18,11 +18,12 @@ import (
 var (
 	log *zap.Logger
 
-	port               string
-	accountsConnection string
-	signingKey         []byte
-	corsAllowedIn      string
-	configs            map[string]oauth.Config
+	port                 string
+	accountsConnection   string
+	namespacesConnection string
+	signingKey           []byte
+	corsAllowedIn        string
+	configs              map[string]oauth.Config
 )
 
 func init() {
@@ -31,11 +32,13 @@ func init() {
 	log = logger.NewLogger()
 	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("REGISTRY", "repo:8000")
+	viper.SetDefault("NAMESPACES", "repo:8000")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("CORS_ALLOWED", []string{"*"})
 
 	port = viper.GetString("PORT")
 	accountsConnection = viper.GetString("REGISTRY")
+	namespacesConnection = viper.GetString("NAMESPACES")
 	signingKey = []byte(viper.GetString("SIGNING_KEY"))
 	corsAllowedIn = viper.GetString("CORS_ALLOWED")
 
@@ -55,7 +58,8 @@ func main() {
 	}()
 
 	router := mux.NewRouter()
-	client := nodeconnect.NewAccountsServiceClient(http.DefaultClient, accountsConnection)
+	accClient := nodeconnect.NewAccountsServiceClient(http.DefaultClient, accountsConnection)
+	nsClient := nodeconnect.NewNamespacesServiceClient(http.DefaultClient, namespacesConnection)
 
 	interceptor := auth.NewAuthInterceptor(log, nil, nil, signingKey)
 	token, err := interceptor.MakeToken(schema.ROOT_ACCOUNT_KEY)
@@ -66,6 +70,6 @@ func main() {
 	cors := strings.Split(corsAllowedIn, ",")
 
 	service := oauth.NewOauthService(log, router)
-	service.Register(configs, client, token)
+	service.Register(configs, accClient, nsClient, token)
 	service.Run(port, cors)
 }
