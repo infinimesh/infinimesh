@@ -45,6 +45,7 @@ func (s *OauthService) Register(configs map[string]Config, accClient nodeconnect
 		registrar, ok := Registrars[key]
 		if !ok {
 			log.Warn("No such auth type in config", zap.String("type", key))
+			continue
 		}
 		registrar(s.log, s.router, &val, accClient, nsClient, token)
 	}
