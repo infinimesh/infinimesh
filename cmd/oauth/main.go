@@ -30,7 +30,7 @@ func init() {
 	viper.AutomaticEnv()
 
 	log = logger.NewLogger()
-	viper.SetDefault("PORT", "8000")
+	viper.SetDefault("PORT", "80")
 	viper.SetDefault("REGISTRY", "repo:8000")
 	viper.SetDefault("NAMESPACES", "repo:8000")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
