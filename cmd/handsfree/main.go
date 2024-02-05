@@ -97,7 +97,7 @@ func main() {
 
 	handler = cors.New(cors.Options{
 		AllowedOrigins:      []string{"*"},
-		AllowedMethods:      []string{"GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"},
+		AllowedMethods:      []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 		AllowedHeaders:      []string{"*", "Connect-Protocol-Version"},
 		AllowCredentials:    true,
 		AllowPrivateNetwork: true,

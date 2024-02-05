@@ -324,6 +324,12 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 	if err != nil {
 		return nil, err
 	}
+	log.Debug("curr", zap.Any("device curr", curr))
+
+	if curr.Msg.GetAccess().GetLevel() < access.Level_MGMT {
+		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
+	}
+	log.Debug("curr", zap.Any("getacccess", curr.Msg.GetAccess().GetLevel()), zap.Any("getacccess", access.Level_MGMT))
 
 	return curr, nil
 }
