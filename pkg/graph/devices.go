@@ -324,7 +324,7 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 		return nil, err
 	}
 
-	if curr.Msg.GetAccess().GetLevel() >= access.Level_ADMIN {
+	if curr.Msg.GetAccess().GetLevel() < access.Level_ADMIN {
 		return nil, status.Errorf(codes.PermissionDenied, "No Access to Device %s", dev.Uuid)
 	}
 
