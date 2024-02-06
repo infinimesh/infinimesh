@@ -81,6 +81,6 @@ func (s *oauthService) Run(port string, corsAllowed []string) {
 	s.log.Debug("listen", zap.String("port", port))
 	err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%s", port), handler)
 	if err != nil {
-		s.log.Fatal("Failed to start server", zap.Error(err))
+		s.log.Error("Failed to start oauth server", zap.Error(err))
 	}
 }

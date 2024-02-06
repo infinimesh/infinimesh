@@ -17,7 +17,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/infinimesh/infinimesh/pkg/oauth"
+	"gopkg.in/yaml.v2"
 	"net/http"
+	"os"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -49,6 +52,12 @@ var (
 	arangodbHost string
 	arangodbCred string
 
+	accountsConnection   string
+	namespacesConnection string
+	corsAllowedIn        string
+	configs              map[string]oauth.Config
+	oauth_port           string
+
 	rootPass string
 
 	redisHost string
@@ -69,7 +78,7 @@ func init() {
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal")
+	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal,oauth")
 
 	port = viper.GetString("PORT")
 
@@ -84,6 +93,27 @@ func init() {
 	services = make(map[string]bool)
 	for _, s := range strings.Split(viper.GetString("SERVICES"), ",") {
 		services[s] = true
+	}
+
+	viper.SetDefault("OAUTH_PORT", "80")
+	viper.SetDefault("REGISTRY", "repo:8000")
+	viper.SetDefault("NAMESPACES", "repo:8000")
+	viper.SetDefault("CORS_ALLOWED", []string{"*"})
+
+	oauth_port = viper.GetString("OAUTH_PORT")
+	accountsConnection = viper.GetString("REGISTRY")
+	namespacesConnection = viper.GetString("NAMESPACES")
+	corsAllowedIn = viper.GetString("CORS_ALLOWED")
+
+	configs = map[string]oauth.Config{}
+	file, err := os.ReadFile("oauth2_config.yaml")
+	if err == nil {
+		err = yaml.Unmarshal(file, &configs)
+		if err != nil {
+			log.Error("Failed to parse oauth config", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to open file", zap.Error(err))
 	}
 }
 
@@ -116,6 +146,23 @@ func main() {
 	interceptors := connect.WithInterceptors(authInterceptor)
 
 	log.Debug("Registering services", zap.Any("services", services))
+
+	if _, ok := services["oauth"]; ok {
+		router := mux.NewRouter()
+		accClient := nodeconnect.NewAccountsServiceClient(http.DefaultClient, accountsConnection)
+		nsClient := nodeconnect.NewNamespacesServiceClient(http.DefaultClient, namespacesConnection)
+
+		token, err := authInterceptor.MakeToken(schema.ROOT_ACCOUNT_KEY)
+		if err != nil {
+			log.Fatal("Failed to create token", zap.Error(err))
+		}
+
+		cors := strings.Split(corsAllowedIn, ",")
+
+		service := oauth.NewOauthService(log, router)
+		service.Register(configs, accClient, nsClient, token)
+		go service.Run(port, cors)
+	}
 
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
