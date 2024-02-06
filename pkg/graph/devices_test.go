@@ -17,7 +17,6 @@ import (
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/access"
-	"github.com/infinimesh/proto/node/devices"
 	devpb "github.com/infinimesh/proto/node/devices"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -640,7 +639,7 @@ func TestPatchConfig_Success(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devices.Device) bool {
+	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devpb.Device) bool {
 		return true
 	})).Return(driver.DocumentMeta{}, nil)
 
