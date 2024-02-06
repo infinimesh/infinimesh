@@ -34,12 +34,10 @@ function render() {
 
     if (props.connection) {
         status = props.connection.connected ? 'online' : 'offline'
-        const timestamp = props.connection.timestamp?.toDate() || props.connection.timestamp
-        if (timestamp) {
-            let d = new Date(timestamp)
-            seen = d.toString().split(' (')[0]
-
-            if (((new Date) - d) / 1000 >= 3600) {
+        if (props.connection.timestamp) {
+            const date = typeof props.connection.timestamp === 'number' ? new Date(props.connection.timestamp) : props.connection.timestamp.toDate()
+            seen = date.toString().split(' (')[0]
+            if (((new Date) - date) / 1000 >= 3600) {
                 status = 'onlineish'
             }
         }
