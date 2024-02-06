@@ -649,7 +649,7 @@ func TestPatchConfig_Success(t *testing.T) {
 	assert.NotNil(t, res)
 }
 
-func TestPatchConfig_NoAccess(t *testing.T) {
+func TestPatchConfig_FailsOn_NoAccess(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
 	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
