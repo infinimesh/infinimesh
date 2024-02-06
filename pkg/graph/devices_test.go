@@ -17,6 +17,7 @@ import (
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/node/access"
+	"github.com/infinimesh/proto/node/devices"
 	devpb "github.com/infinimesh/proto/node/devices"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -48,6 +49,7 @@ type devicesControllerFixture struct {
 		cert          string
 		create_req    devpb.CreateRequest
 		create_hf_req devpb.CreateRequest
+		patch_req     devpb.Device
 	}
 }
 
@@ -124,6 +126,14 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 		Handsfree: &devpb.HandsfreeCreate{
 			Code:    "123456",
 			Payload: []string{f.data.cert},
+		},
+	}
+
+	f.data.patch_req = devpb.Device{
+		Config: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"Message": structpb.NewStringValue("Hello !!!"),
+			},
 		},
 	}
 
@@ -617,4 +627,42 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
+}
+
+func TestPatchConfig_Success(t *testing.T) {
+	f := newDevicesControllerFixture(t)
+
+	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+		d.Access = &access.Access{
+			Level:     access.Level_ROOT,
+			Namespace: &f.data.ns_uuid,
+		}
+		return true
+	})).Return(nil)
+
+	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devices.Device) bool {
+		return true
+	})).Return(driver.DocumentMeta{}, nil)
+
+	res, err := f.ctrl.PatchConfig(f.data.ctx, connect.NewRequest(&f.data.patch_req))
+
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
+func TestPatchConfig_NoAccess(t *testing.T) {
+	f := newDevicesControllerFixture(t)
+
+	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+		d.Access = &access.Access{
+			Level:     access.Level_MGMT,
+			Namespace: &f.data.ns_uuid,
+		}
+		return true
+	})).Return(nil)
+
+	res, err := f.ctrl.PatchConfig(f.data.ctx, connect.NewRequest(&f.data.patch_req))
+
+	assert.Error(t, err)
+	assert.Nil(t, res)
 }
