@@ -439,6 +439,9 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	limit := q.GetLimit()
 	page := q.GetPage()
 
+	ctx = WithLimit(ctx, limit)
+	ctx = WithOffset(ctx, (page-1)*limit)
+
 	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 
 	if err != nil {
@@ -448,42 +451,29 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 
 	defer cr.Close()
 
-	var r []*devpb.Device
-	for {
-		var dev devpb.Device
-		meta, err := cr.ReadDocument(ctx, &dev)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			log.Warn("Error unmarshalling Document", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Couldn't execute query")
-		}
-		dev.Uuid = meta.ID.Key()
-		if dev.Access != nil && dev.Access.Level < access.Level_MGMT {
-			dev.Certificate = nil
-		}
-
-		log.Debug("Got document", zap.Any("device", &dev))
-		r = append(r, &dev)
+	type QueryResponse struct {
+		Result []*devpb.Device
+		Count  int `json:"count"`
 	}
 
-	filteredDevices := r
+	var resp QueryResponse
 
-	if limit > 0 && page > 0 {
-		start := int((page - 1) * limit)
-		end := start + int(limit)
-		if start > len(r) {
-			filteredDevices = []*devpb.Device{}
-		} else if end > len(r) {
-			filteredDevices = r[start:]
-		} else {
-			filteredDevices = r[start:end]
+	_, err = cr.ReadDocument(ctx, &resp)
+
+	if err != nil {
+		log.Warn("Error unmarshalling Document", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Couldn't execute query")
+	}
+
+	for _, dev := range resp.Result {
+		if dev.Access != nil && dev.Access.Level < access.Level_MGMT {
+			dev.Certificate = nil
 		}
 	}
 
 	return connect.NewResponse(&devpb.Devices{
-		Devices: filteredDevices,
-		// Total:   len(r),
+		Devices: resp.Result,
+		// Total:   int64(resp.Count),
 	}), nil
 }
 

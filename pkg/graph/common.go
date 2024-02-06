@@ -244,23 +244,31 @@ func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log
 }
 
 const listObjectsOfKind = `
-FOR node, edge, path IN 0..@depth OUTBOUND @from
-GRAPH @permissions_graph
-OPTIONS {order: "bfs", uniqueVertices: "global"}
-FILTER IS_SAME_COLLECTION(@@kind, node)
-FILTER edge.level > 0
-%s
-    LET perm = path.edges[0]
-    LET last = path.edges[-1]
+LET result = (
+	FOR node, edge, path IN 0..@depth OUTBOUND @from
+	GRAPH @permissions_graph
+	OPTIONS {order: "bfs", uniqueVertices: "global"}
+	FILTER IS_SAME_COLLECTION(@@kind, node)
+	FILTER edge.level > 0
+	%s
+	LET perm = path.edges[0]
+	LET last = path.edges[-1]
 	RETURN MERGE(node, {
-	    uuid: node._key,
-	    access: {
-	        level: last.role == 2 ? last.level : perm.level,
-	        role:  last.role == 2 ? last.role : perm.role,
-	        namespace: last.role == 2 ? null : path.vertices[-2]._key
-	     }
-	    }
-    )
+		uuid: node._key,
+		access: {
+		level: last.role == 2 ? last.level : perm.level,
+		role:  last.role == 2 ? last.role : perm.role,
+		namespace: last.role == 2 ? null : path.vertices[-2]._key
+		}
+	})
+)
+LET count = LENGTH(result)
+LET page_length = @limit
+LET offset = @offset
+RETURN { 
+	result: offset > 0 && page_length > 0 ? SLICE(result, offset, offset + page_length) : result,
+	count: count
+}
 `
 
 // List children nodes
@@ -272,11 +280,16 @@ FILTER edge.level > 0
 // depth
 func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
 
+	offset := OffsetValue(ctx)
+	limit := LimitValue(ctx)
+
 	bindVars := map[string]interface{}{
 		"depth":             DepthValue(ctx),
 		"from":              from.ID(),
 		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
 		"@kind":             children,
+		"offset":            offset,
+		"limit":             limit,
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
 
