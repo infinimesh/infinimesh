@@ -4,30 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/infinimesh/infinimesh/pkg/oauth/config"
+	"github.com/infinimesh/infinimesh/pkg/oauth/handlers"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"go.uber.org/zap"
 	"net/http"
 )
 
-type OrgAccess struct {
-	Namespace string `yaml:"ns"`
-	Level     int32  `yaml:"level"`
+type Registrar interface {
+	Register(*zap.Logger, *mux.Router, *config.Config, nodeconnect.AccountsServiceClient, nodeconnect.NamespacesServiceClient, string)
 }
 
-type Config struct {
-	ClientId            string               `yaml:"client_id"`
-	ClientSecret        string               `yaml:"client_secret"`
-	RedirectUrl         string               `yaml:"redirect_url"`
-	Scopes              []string             `yaml:"scopes"`
-	State               string               `yaml:"state"`
-	ApiUrl              string               `yaml:"api_url"`
-	AuthUrl             string               `yaml:"auth_url"`
-	TokenUrl            string               `yaml:"token_url"`
-	OrganizationMapping map[string]OrgAccess `yaml:"organization_mapping"`
+var Registrars = map[string]Registrar{
+	"github": &handlers.GithubRegistrar{},
 }
 
 type OAuthService interface {
-	Register(map[string]Config, nodeconnect.AccountsServiceClient, nodeconnect.NamespacesServiceClient, string)
+	Register(map[string]config.Config, nodeconnect.AccountsServiceClient, nodeconnect.NamespacesServiceClient, string)
 	Run(string, []string)
 }
 
@@ -43,7 +36,7 @@ func NewOauthService(log *zap.Logger) *oauthService {
 	}
 }
 
-func (s *oauthService) Register(router *mux.Router, configs map[string]Config, accClient nodeconnect.AccountsServiceClient, nsClient nodeconnect.NamespacesServiceClient, token string) {
+func (s *oauthService) Register(router *mux.Router, configs map[string]config.Config, accClient nodeconnect.AccountsServiceClient, nsClient nodeconnect.NamespacesServiceClient, token string) {
 	log := s.log.Named("Register")
 	for key, val := range configs {
 		registrar, ok := Registrars[key]
@@ -51,7 +44,7 @@ func (s *oauthService) Register(router *mux.Router, configs map[string]Config, a
 			log.Warn("No such auth type in config", zap.String("type", key))
 			continue
 		}
-		registrar(s.log, router, &val, accClient, nsClient, token)
+		registrar.Register(s.log, router, &val, accClient, nsClient, token)
 		s.registeredProviders = append(s.registeredProviders, key)
 	}
 

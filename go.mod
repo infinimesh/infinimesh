@@ -12,7 +12,6 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/handlers v1.5.2
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/infinimesh/proto v0.0.0-20240205055014-d9e32ce9f744
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.18.2

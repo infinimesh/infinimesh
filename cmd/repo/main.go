@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/infinimesh/infinimesh/pkg/oauth"
 	"gopkg.in/yaml.v2"
 	"net/http"
 	"os"
@@ -30,6 +29,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
+	"github.com/infinimesh/infinimesh/pkg/oauth"
+	"github.com/infinimesh/infinimesh/pkg/oauth/config"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node/nodeconnect"
@@ -54,7 +55,7 @@ var (
 
 	accountsConnection   string
 	namespacesConnection string
-	configs              map[string]oauth.Config
+	configs              map[string]config.Config
 
 	rootPass string
 
@@ -99,7 +100,7 @@ func init() {
 	accountsConnection = viper.GetString("REGISTRY")
 	namespacesConnection = viper.GetString("NAMESPACES")
 
-	configs = map[string]oauth.Config{}
+	configs = map[string]config.Config{}
 	file, err := os.ReadFile("oauth2_config.yaml")
 	if err == nil {
 		err = yaml.Unmarshal(file, &configs)
