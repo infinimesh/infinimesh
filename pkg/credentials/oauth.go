@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
-	"github.com/infinimesh/infinimesh/pkg/oauth"
+	"github.com/infinimesh/infinimesh/pkg/oauth/handlers"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -35,7 +35,7 @@ func GithubVerifier(token string) (string, error) {
 		return "", err
 	}
 
-	var user oauth.GithubUser
+	var user handlers.GithubUser
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		return "", err
