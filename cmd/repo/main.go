@@ -54,9 +54,7 @@ var (
 
 	accountsConnection   string
 	namespacesConnection string
-	corsAllowedIn        string
 	configs              map[string]oauth.Config
-	oauth_port           string
 
 	rootPass string
 
@@ -95,15 +93,11 @@ func init() {
 		services[s] = true
 	}
 
-	viper.SetDefault("OAUTH_PORT", "80")
 	viper.SetDefault("REGISTRY", "repo:8000")
 	viper.SetDefault("NAMESPACES", "repo:8000")
-	viper.SetDefault("CORS_ALLOWED", []string{"*"})
 
-	oauth_port = viper.GetString("OAUTH_PORT")
 	accountsConnection = viper.GetString("REGISTRY")
 	namespacesConnection = viper.GetString("NAMESPACES")
-	corsAllowedIn = viper.GetString("CORS_ALLOWED")
 
 	configs = map[string]oauth.Config{}
 	file, err := os.ReadFile("oauth2_config.yaml")
@@ -148,7 +142,6 @@ func main() {
 	log.Debug("Registering services", zap.Any("services", services))
 
 	if _, ok := services["oauth"]; ok {
-		router := mux.NewRouter()
 		accClient := nodeconnect.NewAccountsServiceClient(http.DefaultClient, accountsConnection)
 		nsClient := nodeconnect.NewNamespacesServiceClient(http.DefaultClient, namespacesConnection)
 
@@ -157,11 +150,8 @@ func main() {
 			log.Fatal("Failed to create token", zap.Error(err))
 		}
 
-		cors := strings.Split(corsAllowedIn, ",")
-
-		service := oauth.NewOauthService(log, router)
-		service.Register(configs, accClient, nsClient, token)
-		go service.Run(port, cors)
+		service := oauth.NewOauthService(log)
+		service.Register(router, configs, accClient, nsClient, token)
 	}
 
 	ensure_root := false
