@@ -1,0 +1,14 @@
+github:
+  client_id: "client_id"
+  client_secret: "client_secret"
+  redirect_url: "redirect_url"
+  scopes:
+    - "read:user"
+    - "read:org"
+  # api_url: "api_url"
+  # auth_url: "auth_url"
+  # token_url: "token_url"
+  organization_mapping:
+    infinimesh:
+      namespace: "namespace"
+      level: 2
