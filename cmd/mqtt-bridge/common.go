@@ -22,6 +22,7 @@ import (
 	"net"
 
 	structpb "github.com/golang/protobuf/ptypes/struct"
+	"github.com/infinimesh/infinimesh/pkg/mqtt/metrics"
 	"github.com/infinimesh/infinimesh/pkg/pubsub"
 	devpb "github.com/infinimesh/proto/node/devices"
 	pb "github.com/infinimesh/proto/shadow"
@@ -65,6 +66,7 @@ func LogErrorAndClose(c net.Conn, err error) {
 // HandleConn - note: Connection is expected to be valid & legitimate at this point
 func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *devpb.Device) {
 	log := log.Named(device.GetUuid()).Named(connectPacket.ConnectPayload.ClientID)
+
 	defer log.Debug("Client disconnected")
 
 	log.Debug(
@@ -98,6 +100,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 		return
 	}
 
+	metrics.ActiveConnectionsTotal.Inc()
 	ps.TryPub(&pb.Shadow{
 		Device: device.Uuid,
 		Connection: &pb.ConnectionState{
@@ -108,6 +111,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 	}, "mqtt.incoming")
 
 	defer func() {
+		metrics.ActiveConnectionsTotal.Dec()
 		ps.TryPub(&pb.Shadow{
 			Device: device.Uuid,
 			Connection: &pb.ConnectionState{
@@ -142,7 +146,7 @@ func HandleConn(c net.Conn, connectPacket *packet.ConnectControlPacket, device *
 			if err := c.Close(); err != nil {
 				log.Warn("Couldn't close connection", zap.Error(err))
 			}
-			break
+			return
 		}
 
 		switch p := p.(type) {

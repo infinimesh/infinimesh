@@ -166,6 +166,7 @@ const rules = ref({
 const store = useDevicesStore();
 
 function reset() {
+  mode.value = 'certificate';
   model.value = {
     device: {
       title: "",

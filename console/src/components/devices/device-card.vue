@@ -12,7 +12,7 @@
       <template #header-extra>
         <n-tooltip trigger="hover" v-if="!device.certificate">
           <template #trigger>
-            <n-icon size="2vh" color="#f2c97d">
+            <n-icon size="1.25rem" color="#f2c97d">
               <phone-portrait-outline />
             </n-icon>
           </template>
@@ -29,7 +29,7 @@
         </n-tooltip>
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon size="2vh" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
+            <n-icon size="1.25rem" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
               :class="toggle_animation ? 'jump-shaking-animation' : ''" @click="handleToggle">
               <bulb />
             </n-icon>
@@ -56,7 +56,7 @@
       </template>
 
       <template #action>
-        <template v-if="plugin && plugin.kind == 'DEVICE'">
+        <template v-if="isPluginValid">
           <n-tabs type="segment" @update:value="handleStateTabChanged" :value="state_tab">
             <n-tab-pane :name="plugin.uuid" :tab="plugin.title">
               <div v-if="frame_url" style="width: 100%; height: max-content; overflow: visible;">
@@ -155,6 +155,7 @@ import { usePluginsStore } from "@/store/plugins";
 
 import { access_lvl_conv } from "@/utils/access";
 import { storeToRefs } from "pinia";
+import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
 
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
@@ -220,13 +221,15 @@ function handleSubscribe() {
 const { dev, theme } = storeToRefs(useAppStore())
 
 const plugins = usePluginsStore()
-const { current: plugin } = storeToRefs(plugins)
 let token = false
 const frame = ref(null)
 const frame_url = ref(false)
 
+const plugin = computed(() => plugins.current)
+const isPluginValid = computed(() => plugin.value && plugin.value?.kind == PluginKind.DEVICE)
+
 async function frame_src(view = 'viewUrl') {
-  if (!plugin.value || plugin.value.kind != 'DEVICE') {
+  if (!isPluginValid.value) {
     return
   }
 
@@ -273,7 +276,7 @@ function handleStateTabChanged(v) {
 }
 
 watch(patch, async (n) => {
-  if (!plugin.value || plugin.value.kind != 'DEVICE') return
+  if (!isPluginValid.value) return
 
   if (!n) {
     plugin_edit_modal.value = false

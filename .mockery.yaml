@@ -4,6 +4,7 @@ packages:
     github.com/infinimesh/infinimesh/pkg/shared/auth:
         interfaces:
             JWTHandler:
+            AuthInterceptor:
     github.com/infinimesh/infinimesh/pkg/sessions:
         interfaces:
             SessionsHandler:
