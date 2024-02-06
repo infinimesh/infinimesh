@@ -5,6 +5,7 @@ coverage
 .DS_Store
 CronJobs/bkp.yaml
 .idea
+oauth2_config.yaml
 
 # Ignore auto-generated coverage files
 cover.out

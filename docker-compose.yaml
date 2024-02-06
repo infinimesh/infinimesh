@@ -14,19 +14,6 @@ services:
       - ./traefik.yml:/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock
 
-  oauth:
-    image: "ghcr.io/infinimesh/infinimesh/oauth:${INFINIMESH_VERSION}"
-    restart: always
-    environment:
-    labels:
-      - traefik.http.routers.oauth.rule=Host(`api.${BASE_DOMAIN}`)&&PathPrefix("/oauth")
-      - traefik.http.routers.oauth.entrypoints=http
-      - traefik.http.routers.oauth.service=oauth@docker
-      - traefik.http.services.oauth.loadbalancer.server.port=80
-    volumes:
-      - ./oauth2_config.yaml:/oauth2_config.yaml
-
-
   console:
     image: "ghcr.io/infinimesh/infinimesh/console:${INFINIMESH_VERSION}"
     restart: always

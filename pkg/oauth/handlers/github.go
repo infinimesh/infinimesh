@@ -113,9 +113,9 @@ func (g *GithubRegistrar) Register(logger *zap.Logger, router *mux.Router, confi
 		Scopes:       config.Scopes,
 	}
 
-	router.HandleFunc("oauth/github/login", g.GithubLoginHandler(log, githubConfig, config))
+	router.HandleFunc("/oauth/github/login", g.GithubLoginHandler(log, githubConfig, config))
 
-	router.HandleFunc("oauth/github/checkout", g.GithubCheckoutHandler(log, githubConfig, config, accClient, nsClient, infinimeshToken))
+	router.HandleFunc("/oauth/github/checkout", g.GithubCheckoutHandler(log, githubConfig, config, accClient, nsClient, infinimeshToken))
 }
 
 func (g *GithubRegistrar) GithubLoginHandler(log *zap.Logger, githubConfig *oauth2.Config, config *config.Config) func(http.ResponseWriter, *http.Request) {
