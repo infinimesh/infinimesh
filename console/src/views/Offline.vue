@@ -75,13 +75,23 @@ import {
 } from "naive-ui";
 import { CloudOfflineOutline } from "@vicons/ionicons5";
 import { useRouter } from "vue-router"
+import { onMounted } from "vue";
 
 import DashboardFooter from "@/components/core/footer.vue";
 
 const router = useRouter()
 
+onMounted(() => {
+    if (sessionStorage.getItem('is_offline')) {
+        attempt()
+    } else {
+        sessionStorage.setItem('is_offline', true)
+    }
+})
+
 function attempt() {
     router.push({ name: 'Root' })
+    sessionStorage.removeItem('is_offline')
 }
 </script>
 

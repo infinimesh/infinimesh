@@ -56,7 +56,7 @@
       </template>
 
       <template #action>
-        <template v-if="plugin && plugin.kind == 'DEVICE'">
+        <template v-if="isPluginValid">
           <n-tabs type="segment" @update:value="handleStateTabChanged" :value="state_tab">
             <n-tab-pane :name="plugin.uuid" :tab="plugin.title">
               <div v-if="frame_url" style="width: 100%; height: max-content; overflow: visible;">
@@ -85,7 +85,7 @@
             {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
-          <config-edit-modal :o="device" @submit="handleUpdate"
+          <config-edit-modal :o="device" @submit="handleUpdateConfig"
             v-if="access_lvl_conv(device) > 3 || device.access.role == 'OWNER'" />
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
@@ -155,6 +155,7 @@ import { usePluginsStore } from "@/store/plugins";
 
 import { access_lvl_conv } from "@/utils/access";
 import { storeToRefs } from "pinia";
+import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
 
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
@@ -220,13 +221,15 @@ function handleSubscribe() {
 const { dev, theme } = storeToRefs(useAppStore())
 
 const plugins = usePluginsStore()
-const { current: plugin } = storeToRefs(plugins)
 let token = false
 const frame = ref(null)
 const frame_url = ref(false)
 
+const plugin = computed(() => plugins.current)
+const isPluginValid = computed(() => plugin.value && plugin.value?.kind == PluginKind.DEVICE)
+
 async function frame_src(view = 'viewUrl') {
-  if (!plugin.value || plugin.value.kind != 'DEVICE') {
+  if (!isPluginValid.value) {
     return
   }
 
@@ -273,7 +276,7 @@ function handleStateTabChanged(v) {
 }
 
 watch(patch, async (n) => {
-  if (!plugin.value || plugin.value.kind != 'DEVICE') return
+  if (!isPluginValid.value) return
 
   if (!n) {
     plugin_edit_modal.value = false
@@ -343,9 +346,9 @@ async function handleUpdateTitle(title, resolve, reject) {
   }
 }
 
-async function handleUpdate(device) {
+async function handleUpdateConfig(device) {
   try {
-    await store.updateDevice(device.uuid, device)
+    await store.updateDeviceConfig(device.uuid, device.config)
   } catch (e) {
     message.error("Failed to save device's configuration");
     console.error(e)

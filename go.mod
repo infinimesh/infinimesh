@@ -12,7 +12,8 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/handlers v1.5.2
-	github.com/infinimesh/proto v0.0.0-20240130094938-8791f7ca48fd
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/infinimesh/proto v0.0.0-20240206143316-baaaf1972c54
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.18.2
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
@@ -47,7 +48,7 @@ require (
 	golang.org/x/net v0.20.0
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto v0.0.0-20240125205218-1f4bbc51befe // indirect
+	google.golang.org/genproto v0.0.0-20240116215550-a9fa1716bcac // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
