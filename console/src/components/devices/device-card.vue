@@ -85,7 +85,7 @@
             {{ subscribed ? "Subscribed" : "Subscribe" }}
           </n-button>
 
-          <config-edit-modal :o="device" @submit="handleUpdate"
+          <config-edit-modal :o="device" @submit="handleUpdateConfig"
             v-if="access_lvl_conv(device) > 3 || device.access.role == 'OWNER'" />
 
           <n-button v-if="access_lvl_conv(device) > 1" type="warning" round tertiary @click="patch = !patch">
@@ -346,9 +346,9 @@ async function handleUpdateTitle(title, resolve, reject) {
   }
 }
 
-async function handleUpdate(device) {
+async function handleUpdateConfig(device) {
   try {
-    await store.updateDevice(device.uuid, device)
+    await store.updateDeviceConfig(device.uuid, device.config)
   } catch (e) {
     message.error("Failed to save device's configuration");
     console.error(e)
