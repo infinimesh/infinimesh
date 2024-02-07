@@ -33,6 +33,7 @@ import (
 	"github.com/infinimesh/proto/node/access"
 	accpb "github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/namespaces"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -225,27 +226,23 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
+	result, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
-	defer cr.Close()
 
 	var r []*accpb.Account
-	for {
-		var acc accpb.Account
-		meta, err := cr.ReadDocument(ctx, &acc)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			log.Warn("Error unmarshalling Document", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Couldn't execute query")
-		}
-		acc.Uuid = meta.ID.Key()
 
-		log.Debug("Got document", zap.Any("account", &acc))
-		r = append(r, &acc)
+	for _, item := range result.Result {
+		var v accpb.Account
+
+		if err := mapstructure.Decode(item, &v); err == nil {
+			r = append(r, &v)
+		} else {
+			log.Error("Failed to type assert to accpb.Account")
+			return nil, status.Error(codes.Internal, "Type assertion failed")
+		}
 	}
 
 	return connect.NewResponse(&accpb.Accounts{

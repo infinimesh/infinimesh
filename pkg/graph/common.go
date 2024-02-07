@@ -43,6 +43,11 @@ type Access struct {
 	driver.DocumentMeta
 }
 
+type ListQueryResult[T any] struct {
+	Result []T
+	Count  int
+}
+
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
@@ -87,7 +92,7 @@ type InfinimeshCommonActionsRepo interface {
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
 	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
 	AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error
-	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error)
+	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (ListQueryResult[any], error)
 	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
 	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
 	Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error
@@ -262,12 +267,9 @@ LET result = (
 		}
 	})
 )
-LET count = LENGTH(result)
-LET page_length = @limit
-LET offset = @offset
 RETURN { 
-	result: offset > 0 && page_length > 0 ? SLICE(result, offset, offset + page_length) : result,
-	count: count
+	result: (@offset > 0 && @limit > 0) ? SLICE(result, @offset, @offset + @limit) : result,
+	count: LENGTH(result)
 }
 `
 
@@ -278,8 +280,7 @@ RETURN {
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (driver.Cursor, error) {
-
+func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (ListQueryResult[any], error) {
 	offset := OffsetValue(ctx)
 	limit := LimitValue(ctx)
 
@@ -298,8 +299,25 @@ func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Lo
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	return r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
+	cr, err := r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
 
+	if err != nil {
+		log.Debug("Error while executing query", zap.Error(err))
+		return ListQueryResult[any]{}, err
+	}
+
+	defer cr.Close()
+
+	var resp ListQueryResult[any]
+
+	_, err = cr.ReadDocument(ctx, &resp)
+
+	if err != nil {
+		log.Warn("Error unmarshalling Document", zap.Error(err))
+		return resp, status.Error(codes.Internal, "Couldn't execute query")
+	}
+
+	return resp, nil
 }
 
 const listOwnedQuery = `

@@ -187,65 +187,6 @@ func (_c *MockInfinimeshCommonActionsRepo_CheckLink_Call) RunAndReturn(run func(
 	return _c
 }
 
-// CountQuery provides a mock function with given fields: ctx, log, from, children
-func (_m *MockInfinimeshCommonActionsRepo) CountQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string) (int, error) {
-	ret := _m.Called(ctx, log, from, children)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CountQuery")
-	}
-
-	var r0 int
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (int, error)); ok {
-		return rf(ctx, log, from, children)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) int); ok {
-		r0 = rf(ctx, log, from, children)
-	} else {
-		r0 = ret.Get(0).(int)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) error); ok {
-		r1 = rf(ctx, log, from, children)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockInfinimeshCommonActionsRepo_CountQuery_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CountQuery'
-type MockInfinimeshCommonActionsRepo_CountQuery_Call struct {
-	*mock.Call
-}
-
-// CountQuery is a helper method to define mock.On call
-//   - ctx context.Context
-//   - log *zap.Logger
-//   - from graph.InfinimeshGraphNode
-//   - children string
-func (_e *MockInfinimeshCommonActionsRepo_Expecter) CountQuery(ctx interface{}, log interface{}, from interface{}, children interface{}) *MockInfinimeshCommonActionsRepo_CountQuery_Call {
-	return &MockInfinimeshCommonActionsRepo_CountQuery_Call{Call: _e.mock.On("CountQuery", ctx, log, from, children)}
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_CountQuery_Call) Run(run func(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string)) *MockInfinimeshCommonActionsRepo_CountQuery_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(graph.InfinimeshGraphNode), args[3].(string))
-	})
-	return _c
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_CountQuery_Call) Return(_a0 int, _a1 error) *MockInfinimeshCommonActionsRepo_CountQuery_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_CountQuery_Call) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (int, error)) *MockInfinimeshCommonActionsRepo_CountQuery_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // DeleteRecursive provides a mock function with given fields: ctx, log, from
 func (_m *MockInfinimeshCommonActionsRepo) DeleteRecursive(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode) error {
 	ret := _m.Called(ctx, log, from)
@@ -504,24 +445,22 @@ func (_c *MockInfinimeshCommonActionsRepo_ListOwnedDeep_Call) RunAndReturn(run f
 }
 
 // ListQuery provides a mock function with given fields: ctx, log, from, children
-func (_m *MockInfinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string) (driver.Cursor, error) {
+func (_m *MockInfinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string) (graph.ListQueryResult[interface{}], error) {
 	ret := _m.Called(ctx, log, from, children)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListQuery")
 	}
 
-	var r0 driver.Cursor
+	var r0 graph.ListQueryResult[interface{}]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (driver.Cursor, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (graph.ListQueryResult[interface{}], error)); ok {
 		return rf(ctx, log, from, children)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) driver.Cursor); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) graph.ListQueryResult[interface{}]); ok {
 		r0 = rf(ctx, log, from, children)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(driver.Cursor)
-		}
+		r0 = ret.Get(0).(graph.ListQueryResult[interface{}])
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) error); ok {
@@ -554,12 +493,12 @@ func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) Run(run func(ctx conte
 	return _c
 }
 
-func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) Return(_a0 driver.Cursor, _a1 error) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
+func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) Return(_a0 graph.ListQueryResult[interface{}], _a1 error) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (driver.Cursor, error)) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
+func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (graph.ListQueryResult[interface{}], error)) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
 	_c.Call.Return(run)
 	return _c
 }

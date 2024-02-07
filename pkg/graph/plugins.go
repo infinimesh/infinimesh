@@ -21,6 +21,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -174,6 +175,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 	r := req.Msg
 
 	var cr driver.Cursor
+
 	var err error
 
 	if ValidateRoot(ctx) {
@@ -182,7 +184,28 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		cr, err = c.ica_repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
+		result, err := c.ica_repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+		}
+
+		var r []*pb.Plugin
+
+		for _, item := range result.Result {
+			var v pb.Plugin
+
+			if err := mapstructure.Decode(item, &v); err == nil {
+				r = append(r, &v)
+			} else {
+				log.Error("Failed to type assert to pb.Plugin")
+				return nil, status.Error(codes.Internal, "Type assertion failed")
+			}
+		}
+
+		return connect.NewResponse(&pb.Plugins{
+			Pool: r,
+		}), nil
+
 	} else {
 		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
 			"@plugins": schema.PLUGINS_COL,

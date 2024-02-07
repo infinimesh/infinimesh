@@ -629,79 +629,39 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 	assert.NotNil(t, res)
 }
 
-func TestList_Error_1(t *testing.T) {
+func TestList__Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("error"))
+	Count := 0
 
-	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
-
-	assert.Error(t, err)
-}
-
-func TestList_Error_2(t *testing.T) {
-	mockCursor := new(driver_mocks.MockCursor)
-	f := newDevicesControllerFixture(t)
-
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(mockCursor, nil)
-
-	mockCursor.On("Close", mock.Anything).Return(nil).Once()
-
-	mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, errors.New("Error")).Once()
-
-	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
-
-	assert.Error(t, err)
-}
-
-func TestList_WithLimitAndPage_Success(t *testing.T) {
-	mockCursor := new(driver_mocks.MockCursor)
-	f := newDevicesControllerFixture(t)
-
-	devices := []devpb.Device{{Uuid: "1", Access: &access.Access{Level: 1}}, {Uuid: "2", Access: &access.Access{Level: 1}}, {Uuid: "3", Access: &access.Access{Level: 1}}, {Uuid: "4", Access: &access.Access{Level: 1}}, {Uuid: "5", Access: &access.Access{Level: 1}}, {Uuid: "6", Access: &access.Access{Level: 1}}}
-
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(mockCursor, nil)
-
-	mockCursor.On("Close", mock.Anything).Return(nil).Once()
-
-	for _, device := range devices {
-		meta := driver.DocumentMeta{ID: driver.NewDocumentID("Devices", device.GetUuid())}
-		mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(meta, nil).Once()
+	result := graph.ListQueryResult[any]{
+		Result: []any{},
+		Count:  Count,
 	}
-	mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, driver.NoMoreDocumentsError{}).Once()
 
-	limit := int64(3)
-	page := int64(1)
-
-	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{
-		Limit: &limit,
-		Page:  &page,
-	}))
-
-	assert.NoError(t, err)
-	assert.Equal(t, int(limit), len(resp.Msg.Devices))
-}
-
-func TestList_WithoutLimitAndPage_Success(t *testing.T) {
-	mockCursor := new(driver_mocks.MockCursor)
-	f := newDevicesControllerFixture(t)
-
-	devices := []devpb.Device{{Uuid: "1", Access: &access.Access{Level: 1}}, {Uuid: "2", Access: &access.Access{Level: 1}}, {Uuid: "3", Access: &access.Access{Level: 1}}, {Uuid: "4", Access: &access.Access{Level: 1}}, {Uuid: "5", Access: &access.Access{Level: 1}}, {Uuid: "6", Access: &access.Access{Level: 1}}}
-
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(mockCursor, nil)
-
-	mockCursor.On("Close", mock.Anything).Return(nil).Once()
-
-	for _, device := range devices {
-		meta := driver.DocumentMeta{ID: driver.NewDocumentID("Devices", device.GetUuid())}
-		mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(meta, nil).Once()
-	}
-	mockCursor.EXPECT().ReadDocument(mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, driver.NoMoreDocumentsError{}).Once()
+	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(result, nil)
 
 	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 
 	assert.NoError(t, err)
-	assert.Equal(t, len(devices), len(resp.Msg.Devices))
+	assert.Equal(t, Count, len(resp.Msg.Devices))
+}
+
+func TestList__FailsOn_ListQuery(t *testing.T) {
+	f := newDevicesControllerFixture(t)
+
+	Count := 0
+
+	result := graph.ListQueryResult[any]{
+		Result: []any{},
+		Count:  Count,
+	}
+
+	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(result, errors.New("Error"))
+
+	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
+
+	assert.Error(t, err)
 }
 
 func TestPatchConfig_Success(t *testing.T) {

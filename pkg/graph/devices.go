@@ -32,6 +32,7 @@ import (
 	pb "github.com/infinimesh/proto/node"
 	access "github.com/infinimesh/proto/node/access"
 	devpb "github.com/infinimesh/proto/node/devices"
+	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -466,38 +467,34 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, (page-1)*limit)
 
-	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
+	result, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
 
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
 
-	defer cr.Close()
+	var devices []*devpb.Device
+	for _, item := range result.Result {
+		var v devpb.Device
+		if err := mapstructure.Decode(item, &v); err == nil {
+			devices = append(devices, &v)
+		} else {
+			log.Error("Failed to decode map to devpb.Device")
+			return nil, status.Error(codes.Internal, "Failed to decode map to devpb.Device")
+		}
 
-	type QueryResponse struct {
-		Result []*devpb.Device
-		Count  int `json:"count"`
 	}
 
-	var resp QueryResponse
-
-	_, err = cr.ReadDocument(ctx, &resp)
-
-	if err != nil {
-		log.Warn("Error unmarshalling Document", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Couldn't execute query")
-	}
-
-	for _, dev := range resp.Result {
+	for _, dev := range devices {
 		if dev.Access != nil && dev.Access.Level < access.Level_MGMT {
 			dev.Certificate = nil
 		}
 	}
 
 	return connect.NewResponse(&devpb.Devices{
-		Devices: resp.Result,
-		// Total:   int64(resp.Count),
+		Devices: devices,
+		Total:   int64(result.Count),
 	}), nil
 }
 

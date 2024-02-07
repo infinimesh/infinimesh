@@ -20,6 +20,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
+	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -202,25 +203,22 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := c.ica.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
+	result, err := c.ica.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
 	if err != nil {
 		return nil, err
 	}
-	defer cr.Close()
 
 	var r []*nspb.Namespace
-	for {
-		var ns nspb.Namespace
-		meta, err := cr.ReadDocument(ctx, &ns)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			return nil, err
-		}
-		ns.Uuid = meta.ID.Key()
 
-		log.Debug("Got document", zap.Any("namespace", &ns))
-		r = append(r, &ns)
+	for _, item := range result.Result {
+		var v nspb.Namespace
+
+		if err := mapstructure.Decode(item, &v); err == nil {
+			r = append(r, &v)
+		} else {
+			log.Error("Failed to type assert to nspb.Namespace")
+			return nil, status.Error(codes.Internal, "Type assertion failed")
+		}
 	}
 
 	return connect.NewResponse(&nspb.Namespaces{
