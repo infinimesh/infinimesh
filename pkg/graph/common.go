@@ -115,11 +115,16 @@ func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver
 }
 
 func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
+
+	access := map[string]any{
+		"level": lvl,
+		"role":  role,
+	}
+
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
-		zap.Any("level", lvl),
-		zap.Any("role", role),
+		zap.Any("access", access),
 	)
 
 	a := Access{
