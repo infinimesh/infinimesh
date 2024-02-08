@@ -34,6 +34,7 @@ import (
 	logger "github.com/infinimesh/infinimesh/pkg/log"
 	"github.com/infinimesh/infinimesh/pkg/mqtt/pubsub"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
+	fanoutpublisher "github.com/infinimesh/infinimesh/pkg/shadow/fanout_publisher"
 	"github.com/infinimesh/infinimesh/pkg/shadow/plugins"
 	"github.com/infinimesh/infinimesh/pkg/shared/auth"
 	nodepb "github.com/infinimesh/proto/node"
@@ -100,7 +101,7 @@ func main() {
 	log.Info("Pub/Sub setup complete")
 
 	SIGNING_KEY := []byte(viper.GetString("SIGNING_KEY"))
-	auth.SetContext(log, rdb, nil, SIGNING_KEY)
+	auth := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 	token, err := auth.MakeToken(schema.ROOT_ACCOUNT_KEY)
 	if err != nil {
 		log.Fatal("Error making token", zap.Error(err))
@@ -115,7 +116,7 @@ func main() {
 	client := nodepb.NewDevicesServiceClient(conn)
 
 	fetcher_log := log.Named("DevicesFetcher")
-	plugins.Setup(log, rbmq, ps, func(uuid string) *devpb.Device {
+	err = plugins.Setup(log, rbmq, ps, func(uuid string) *devpb.Device {
 		fetcher_log.Debug("Attempt getting device", zap.String("uuid", uuid))
 		dev, err := client.Get(internal_ctx, &devpb.Device{
 			Uuid: uuid,
@@ -126,6 +127,14 @@ func main() {
 		}
 		return dev
 	})
+	if err != nil {
+		log.Fatal("Error setting up plugins", zap.Error(err))
+	}
+
+	err = fanoutpublisher.Setup(log, rbmq, ps)
+	if err != nil {
+		log.Fatal("Error setting up fanout publisher", zap.Error(err))
+	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {

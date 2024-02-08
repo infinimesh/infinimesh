@@ -199,6 +199,18 @@ export const useDevicesStore = defineStore("devices", {
         throw `Error Updating Device: ${err.message}`;
       }
     },
+    async updateDeviceConfig(device, config) {
+      try {
+        const data = await this.devices_client.patchConfig({
+          uuid: device,
+          config: new Struct().fromJson(config),
+        });
+        this.devices[device] = data;
+      } catch (err) {
+        console.error(err);
+        throw `Error Updating Config: ${err.message}`;
+      }
+    },
     async moveDevice(device, namespace) {
       try {
         await this.devices_client.move({ uuid: device, namespace });
@@ -215,16 +227,13 @@ export const useDevicesStore = defineStore("devices", {
         const data = Struct.fromJson(state);
         const request = new Shadow({
           device,
-          desired: { data }
-        })
-        await this.shadow_client.patch(
-          request,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          desired: { data },
+        });
+        await this.shadow_client.patch(request, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         this.getDevicesState([device], token);
         if (bar) bar.finish();
       } catch (e) {
@@ -239,16 +248,13 @@ export const useDevicesStore = defineStore("devices", {
         const data = Struct.fromJson(state);
         const request = new Shadow({
           device,
-          reported: { data }
-        })
-        await this.shadow_client.patch(
-          request,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          reported: { data },
+        });
+        await this.shadow_client.patch(request, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         this.getDevicesState([device], token);
         bar.finish();
       } catch (e) {

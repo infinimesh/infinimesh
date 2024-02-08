@@ -3,10 +3,18 @@ VERSION ?= "latest"
 build-all:
 	sh hack/build_images.sh
 
-CONSOLE_TAG="ghcr.io/infinimesh/infinimesh/$(basename $image):${VERSION}"
 build-console:
 	export INFINIMESH_VERSION_TAG=$(git describe --tags --abbrev=0)
-	docker build . -f "Dockerfiles/console/Dockerfile" -t "$(CONSOLE_TAG)"
+	docker build . -f "Dockerfiles/console/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/console:${VERSION}"
+
+build-repo:
+	docker build . -f "Dockerfiles/repo/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/repo:${VERSION}"
+
+build-mqtt:
+	docker build . -f "Dockerfiles/mqtt-bridge/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/mqtt-bridge:${VERSION}"
+
+build-shadow:
+	docker build . -f "Dockerfiles/shadow/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/shadow:${VERSION}"
 
 mocks:
 	docker run -v "$PWD":/src -w /src vektra/mockery --all

@@ -17,7 +17,9 @@ package main
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"net/http"
+	"os"
 	"strings"
 
 	"connectrpc.com/connect"
@@ -27,6 +29,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	logger "github.com/infinimesh/infinimesh/pkg/log"
+	"github.com/infinimesh/infinimesh/pkg/oauth"
+	"github.com/infinimesh/infinimesh/pkg/oauth/config"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node/nodeconnect"
@@ -49,6 +53,10 @@ var (
 	arangodbHost string
 	arangodbCred string
 
+	accountsConnection   string
+	namespacesConnection string
+	configs              map[string]config.Config
+
 	rootPass string
 
 	redisHost string
@@ -69,7 +77,7 @@ func init() {
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal")
+	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal,oauth")
 
 	port = viper.GetString("PORT")
 
@@ -84,6 +92,23 @@ func init() {
 	services = make(map[string]bool)
 	for _, s := range strings.Split(viper.GetString("SERVICES"), ",") {
 		services[s] = true
+	}
+
+	viper.SetDefault("REGISTRY", "repo:8000")
+	viper.SetDefault("NAMESPACES", "repo:8000")
+
+	accountsConnection = viper.GetString("REGISTRY")
+	namespacesConnection = viper.GetString("NAMESPACES")
+
+	configs = map[string]config.Config{}
+	file, err := os.ReadFile("oauth2_config.yaml")
+	if err == nil {
+		err = yaml.Unmarshal(file, &configs)
+		if err != nil {
+			log.Error("Failed to parse oauth config", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to open file", zap.Error(err))
 	}
 }
 
@@ -111,12 +136,24 @@ func main() {
 		})
 	})
 
-	auth.SetContext(log, rdb, nil, SIGNING_KEY)
 	authInterceptor := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 
 	interceptors := connect.WithInterceptors(authInterceptor)
 
 	log.Debug("Registering services", zap.Any("services", services))
+
+	if _, ok := services["oauth"]; ok {
+		accClient := nodeconnect.NewAccountsServiceClient(http.DefaultClient, accountsConnection)
+		nsClient := nodeconnect.NewNamespacesServiceClient(http.DefaultClient, namespacesConnection)
+
+		token, err := authInterceptor.MakeToken(schema.ROOT_ACCOUNT_KEY)
+		if err != nil {
+			log.Fatal("Failed to create token", zap.Error(err))
+		}
+
+		service := oauth.NewOauthService(log)
+		service.Register(router, configs, accClient, nsClient, token)
+	}
 
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
