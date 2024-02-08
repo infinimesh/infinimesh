@@ -13,6 +13,9 @@ build-repo:
 build-mqtt:
 	docker build . -f "Dockerfiles/mqtt-bridge/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/mqtt-bridge:${VERSION}"
 
+build-shadow:
+	docker build . -f "Dockerfiles/shadow/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/shadow:${VERSION}"
+
 mocks:
 	docker run -v "$PWD":/src -w /src vektra/mockery --all
 
