@@ -18,23 +18,49 @@
           </template>
           Software Device - data is sent from the device using Device Token
         </n-tooltip>
+
         <n-tooltip trigger="hover" @click="handleUUIDClicked">
           <template #trigger>
-            <n-tag :color="{ textColor: bulb_color, borderColor: bulb_color }" size="large" round
-              @click="handleUUIDClicked" style="margin-left: 1vw;">
+            <n-tag
+              round
+              size="large"
+              style="margin-left: 1vw"
+              :color="{ textColor: bulb_color, borderColor: bulb_color }"
+              @click="handleUUIDClicked"
+            >
               {{ device.uuid_short }}
             </n-tag>
           </template>
           {{ device.uuid }}
         </n-tooltip>
+
         <n-tooltip trigger="hover" @click="handleToggle">
           <template #trigger>
-            <n-icon size="1.25rem" :color="bulb_color" style="margin-left: 1vw; cursor: pointer;"
-              :class="toggle_animation ? 'jump-shaking-animation' : ''" @click="handleToggle">
+            <n-icon
+              size="1.25rem"
+              style="margin-left: 1vw; cursor: pointer"
+              :color="bulb_color"
+              :class="toggle_animation ? 'jump-shaking-animation' : ''"
+              @click="handleToggle"
+            >
               <bulb />
             </n-icon>
           </template>
           Click to toggle device(enable/disable)
+        </n-tooltip>
+
+        <n-tooltip trigger="hover" @click="handleUpdateConfig">
+          <template #trigger>
+            <n-icon
+              size="1.25rem"
+              style="margin-left: 1vw; cursor: pointer"
+              :color="time_color"
+              @click="handleChangeTimeseries"
+            >
+              <time-icon />
+            </n-icon>
+          </template>
+          Click to enable/disable timeseries
         </n-tooltip>
       </template>
 
@@ -42,14 +68,39 @@
         <template v-if="show_ns">
           Namespace: <strong>{{ nss.namespaces[device.access.namespace]?.title || device.access.namespace }}</strong>
         </template><br />
+
         <template v-if="device.tags.length > 0">
           Tags:
-          <n-tag type="warning" round v-for="tag in device.tags" :key="tag" style="margin-right: 3px">
+          <n-tag round type="warning" v-for="tag of device.tags" :key="tag" style="margin-right: 3px">
+            {{ tag }}
+          </n-tag>
+        </template><br />
+
+        <template v-if="metrics.length > 0">
+          Metrics:
+          <n-tag round type="warning" v-for="tag of metrics" :key="tag" style="margin-right: 3px">
             {{ tag }}
           </n-tag>
         </template>
+
         <n-space align="center" :style="{ visibility: hover ? '' : 'hidden', marginTop: '1rem' }">
-          <edit-tags-modal :device="device" @save="handleUpdateTags" v-if="access_lvl_conv(device) > 1" />
+          <edit-tags-modal
+            v-if="access_lvl_conv(device) > 1"
+            :device="device"
+            :value="device.tags"
+            @save="handleUpdateTags"
+          />
+
+          <edit-tags-modal
+            v-if="access_lvl_conv(device) > 1"
+            is-select
+            entity="Metrics"
+            :device="device"
+            :value="metrics"
+            :options="[{ value: 'dev', label: 'dev' }, { value: 'prod', label: 'prod' }]"
+            @save="handleUpdateMetrics"
+          />
+
           <move v-if="access_lvl_conv(device) >= 3" type="device" :obj="device" @move="handleMove" />
           <device-joins-mgmt-modal :device="device" v-if="access_lvl_conv(device) >= 3" />
         </n-space>
@@ -156,8 +207,10 @@ import { usePluginsStore } from "@/store/plugins";
 import { access_lvl_conv } from "@/utils/access";
 import { storeToRefs } from "pinia";
 import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
+import { Struct } from "@bufbuild/protobuf";
 
 const Bulb = defineAsyncComponent(() => import("@vicons/ionicons5/Bulb"))
+const TimeIcon = defineAsyncComponent(() => import("@vicons/ionicons5/Time"))
 const BugOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BugOutline"))
 const PhonePortraitOutline = defineAsyncComponent(() => import("@vicons/ionicons5/PhonePortraitOutline"))
 
@@ -197,10 +250,23 @@ const subscribed = computed(() => {
 });
 
 const state = computed(() => store.device_state(device.value.uuid))
+const metrics = computed(() => {
+  const config = (device.value.config) ? device.value.config.toJson() : {}
+
+  return config['infinimesh.timeseries']?.include_metrics ?? []
+})
 
 const bulb_color = computed(() => {
   if (device.value.enabled === null) return "gray";
   return device.value.enabled ? "#52c41a" : "#eb2f96";
+});
+const time_color = computed(() => {
+  const config = (device.value.config) ? device.value.config.toJson() : {}
+  const { 'infinimesh.timeseries': infinimesh } = config
+  const isExist = infinimesh?.enabled ?? 'exist'
+
+  if (isExist === 'exist') return "gray";
+  return infinimesh.enabled ? "#52c41a" : "#eb2f96";
 });
 const toggle_animation = ref(false)
 
@@ -337,6 +403,37 @@ async function handleUpdateTags(tags, resolve, reject) {
   }
 }
 
+function handleChangeTimeseries () {
+  const config = JSON.parse(JSON.stringify(device.value.config ?? {}))
+
+  if (!config['infinimesh.timeseries']) {
+    config['infinimesh.timeseries'] = { enabled: true }
+  } else {
+    const { enabled } = config['infinimesh.timeseries']
+
+    config['infinimesh.timeseries'].enabled = !enabled
+  }
+
+  handleUpdateConfig({ ...device.value, config })
+}
+
+async function handleUpdateMetrics(include_metrics, resolve, reject) {
+  try {
+    const config = JSON.parse(JSON.stringify(device.value.config ?? {}))
+
+    if (!config['infinimesh.timeseries']) {
+      config['infinimesh.timeseries'] = { include_metrics }
+    } else {
+      config['infinimesh.timeseries'].include_metrics = include_metrics
+    }
+
+    await store.updateDeviceConfig(device.value, config)
+    resolve()
+  } catch (error) {
+    reject(error)
+  }
+}
+
 async function handleUpdateTitle(title, resolve, reject) {
   try {
     await store.updateDevice(device.value.uuid, { ...device.value, title: title })
@@ -348,7 +445,7 @@ async function handleUpdateTitle(title, resolve, reject) {
 
 async function handleUpdateConfig(device) {
   try {
-    await store.updateDeviceConfig(device.uuid, device.config)
+    await store.updateDeviceConfig(device, device.config)
   } catch (e) {
     message.error("Failed to save device's configuration");
     console.error(e)

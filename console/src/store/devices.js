@@ -201,11 +201,11 @@ export const useDevicesStore = defineStore("devices", {
     },
     async updateDeviceConfig(device, config) {
       try {
-        const data = await this.devices_client.patchConfig({
-          uuid: device,
-          config: new Struct().fromJson(config),
-        });
-        this.devices[device] = data;
+        const data = await this.devices_client.update(new Device({
+          ...device,
+          config: Struct.fromJson(config),
+        }));
+        this.devices[device.uuid] = data;
       } catch (err) {
         console.error(err);
         throw `Error Updating Config: ${err.message}`;
