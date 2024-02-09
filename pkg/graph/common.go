@@ -116,7 +116,7 @@ func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver
 
 func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
 
-	access_info := map[string]any{
+	access_info := map[string]interface{}{
 		"level": lvl,
 		"role":  role,
 	}
