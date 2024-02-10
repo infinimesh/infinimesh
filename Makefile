@@ -7,6 +7,9 @@ build-console:
 	export INFINIMESH_VERSION_TAG=$(git describe --tags --abbrev=0)
 	docker build . -f "Dockerfiles/console/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/console:${VERSION}"
 
+build-web:
+	docker build . -f "Dockerfiles/web/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/web:${VERSION}"
+
 build-repo:
 	docker build . -f "Dockerfiles/repo/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/repo:${VERSION}"
 
