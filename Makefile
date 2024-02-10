@@ -1,3 +1,5 @@
+include .env
+
 VERSION ?= "latest"
 
 build-all:
