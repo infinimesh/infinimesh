@@ -179,7 +179,8 @@ We have built an automated local development setup based on Docker.
 
 2. Clone this repo via `git clone https://github.com/infinimesh/infinimesh.git` 
 3. cd into the fresh cloned repo
-4. Run `docker compose up`
+4. Copy `.env.example` into `.env`, edit if needed
+5. Run `docker compose up`
 
 Swagger API: https://infinimesh.github.io/infinimesh/
 
