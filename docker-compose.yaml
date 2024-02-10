@@ -39,7 +39,8 @@ services:
     environment:
       APISERVER_HOST: repo:8000
       HTTP_FS: "http://media.${BASE_DOMAIN}"
-      HANDSFREE: handsfree:8000
+      HANDSFREE: "http://api.${BASE_DOMAIN}"
+      TIMESERIES: "http://api.${BASE_DOMAIN}/infinimesh.timeseries.ui/"
 
   rabbitmq:
     image: rabbitmq:3.9-management

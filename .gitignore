@@ -9,3 +9,5 @@ CronJobs/bkp.yaml
 # Ignore auto-generated coverage files
 cover.out
 cover.html
+
+.env
