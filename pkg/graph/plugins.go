@@ -79,6 +79,7 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 		log: log.Named("PluginsController"), col: col, db: db,
 		ns_ctrl:  NewNamespacesController(log, db),
 		ica_repo: NewInfinimeshCommonActionsRepo(db),
+		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }
 

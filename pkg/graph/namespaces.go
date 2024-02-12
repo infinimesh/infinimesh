@@ -81,11 +81,13 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
 	ica := NewInfinimeshCommonActionsRepo(db)
+	repo := NewGenericRepo[*nspb.Namespace](db)
 
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
-		ica: ica,
+		ica:  ica,
+		repo: repo,
 	}
 }
 

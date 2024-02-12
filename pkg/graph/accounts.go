@@ -96,7 +96,7 @@ type AccountsController struct {
 	sessions sessions.SessionsHandler
 
 	ica_repo InfinimeshCommonActionsRepo                  // Infinimesh Common Actions Repository
-	acc_repo InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
+	repo     InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
 
 	SIGNING_KEY []byte
 }
@@ -110,6 +110,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
 
 	ica := NewInfinimeshCommonActionsRepo(db)
+	repo := NewGenericRepo[*accpb.Account](db)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
@@ -122,6 +123,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
 
 		ica_repo: ica,
+		repo:     repo,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -226,7 +228,7 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.acc_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
