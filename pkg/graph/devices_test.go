@@ -629,13 +629,13 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 	assert.NotNil(t, res)
 }
 
-func TestList__Success(t *testing.T) {
+func TestList_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
 	Count := 0
 
-	result := graph.ListQueryResult[any]{
-		Result: []any{},
+	result := graph.ListQueryResult[*devpb.Device]{
+		Result: []*devpb.Device{},
 		Count:  Count,
 	}
 
@@ -647,13 +647,13 @@ func TestList__Success(t *testing.T) {
 	assert.Equal(t, Count, len(resp.Msg.Devices))
 }
 
-func TestList__FailsOn_ListQuery(t *testing.T) {
+func TestList_FailsOn_ListQuery(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
 	Count := 0
 
-	result := graph.ListQueryResult[any]{
-		Result: []any{},
+	result := graph.ListQueryResult[*devpb.Device]{
+		Result: []*devpb.Device{},
 		Count:  Count,
 	}
 

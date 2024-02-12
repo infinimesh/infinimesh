@@ -43,11 +43,6 @@ type Access struct {
 	driver.DocumentMeta
 }
 
-type ListQueryResult[T any] struct {
-	Result []T
-	Count  int
-}
-
 type InfinimeshGraphNode interface {
 	GetUuid() string
 	ID() driver.DocumentID
@@ -92,7 +87,6 @@ type InfinimeshCommonActionsRepo interface {
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
 	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
 	AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error
-	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (ListQueryResult[any], error)
 	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
 	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
 	Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error
@@ -246,78 +240,6 @@ func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log
 	}
 
 	return nil
-}
-
-const listObjectsOfKind = `
-LET result = (
-	FOR node, edge, path IN 0..@depth OUTBOUND @from
-	GRAPH @permissions_graph
-	OPTIONS {order: "bfs", uniqueVertices: "global"}
-	FILTER IS_SAME_COLLECTION(@@kind, node)
-	FILTER edge.level > 0
-	%s
-	LET perm = path.edges[0]
-	LET last = path.edges[-1]
-	RETURN MERGE(node, {
-		uuid: node._key,
-		access: {
-		level: last.role == 2 ? last.level : perm.level,
-		role:  last.role == 2 ? last.role : perm.role,
-		namespace: last.role == 2 ? null : path.vertices[-2]._key
-		}
-	})
-)
-RETURN { 
-	result: (@offset > 0 && @limit > 0) ? SLICE(result, @offset, @offset + @limit) : result,
-	count: LENGTH(result)
-}
-`
-
-// List children nodes
-// ctx - context
-// log - logger
-// db - Database connection
-// from - Graph node to start traversal from
-// children - children type(collection name)
-// depth
-func (r *infinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, children string) (ListQueryResult[any], error) {
-	offset := OffsetValue(ctx)
-	limit := LimitValue(ctx)
-
-	bindVars := map[string]interface{}{
-		"depth":             DepthValue(ctx),
-		"from":              from.ID(),
-		"permissions_graph": schema.PERMISSIONS_GRAPH.Name,
-		"@kind":             children,
-		"offset":            offset,
-		"limit":             limit,
-	}
-	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
-
-	filters := ""
-	if ns := NSFilterValue(ctx); ns != "" {
-		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
-	}
-
-	cr, err := r.db.Query(ctx, fmt.Sprintf(listObjectsOfKind, filters), bindVars)
-
-	if err != nil {
-		log.Debug("Error while executing query", zap.Error(err))
-		return ListQueryResult[any]{}, err
-	}
-
-	defer cr.Close()
-
-	var resp ListQueryResult[any]
-
-	_, err = cr.ReadDocument(ctx, &resp)
-
-	if err != nil {
-		log.Warn("Error unmarshalling Document", zap.Error(err))
-		return resp, status.Error(codes.Internal, "Couldn't execute query")
-	}
-
-	return resp, nil
 }
 
 const listOwnedQuery = `

@@ -20,7 +20,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
-	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -71,7 +70,8 @@ type NamespacesController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
-	ica InfinimeshCommonActionsRepo
+	ica  InfinimeshCommonActionsRepo
+	repo InfinimeshGenericActionsRepo[*nspb.Namespace]
 
 	db driver.Database
 }
@@ -203,26 +203,13 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.ica.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		return nil, err
 	}
 
-	var r []*nspb.Namespace
-
-	for _, item := range result.Result {
-		var v nspb.Namespace
-
-		if err := mapstructure.Decode(item, &v); err == nil {
-			r = append(r, &v)
-		} else {
-			log.Error("Failed to type assert to nspb.Namespace")
-			return nil, status.Error(codes.Internal, "Type assertion failed")
-		}
-	}
-
 	return connect.NewResponse(&nspb.Namespaces{
-		Namespaces: r,
+		Namespaces: result.Result,
 	}), nil
 }
 

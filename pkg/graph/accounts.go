@@ -33,7 +33,6 @@ import (
 	"github.com/infinimesh/proto/node/access"
 	accpb "github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/namespaces"
-	"github.com/mitchellh/mapstructure"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -96,7 +95,8 @@ type AccountsController struct {
 
 	sessions sessions.SessionsHandler
 
-	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+	ica_repo InfinimeshCommonActionsRepo                  // Infinimesh Common Actions Repository
+	acc_repo InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
 
 	SIGNING_KEY []byte
 }
@@ -226,27 +226,14 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
+	result, err := c.acc_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
 
-	var r []*accpb.Account
-
-	for _, item := range result.Result {
-		var v accpb.Account
-
-		if err := mapstructure.Decode(item, &v); err == nil {
-			r = append(r, &v)
-		} else {
-			log.Error("Failed to type assert to accpb.Account")
-			return nil, status.Error(codes.Internal, "Type assertion failed")
-		}
-	}
-
 	return connect.NewResponse(&accpb.Accounts{
-		Accounts: r,
+		Accounts: result.Result,
 	}), nil
 }
 
