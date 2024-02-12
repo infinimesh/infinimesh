@@ -114,19 +114,22 @@ func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver
 	return err == nil && res
 }
 
+type Access_info struct {
+	Level access.Level
+	Role  access.Role
+}
+
 func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
 
-	access_info := map[string]interface{}{
-		"level": lvl,
-		"role":  role,
-	}
+	// access_info := map[string]any{
+	// 	"level": lvl,
+	// 	"role":  role,
+	// }
 
-	log.Debug("Linking two nodes",
-		zap.Any("from", from.ID()),
-		zap.Any("to", to.ID()),
-		zap.Any("levelt", lvl),
-		zap.Any("access", access_info),
-	)
+	// access_info := Access_info{
+	// 	Level: lvl,
+	// 	Role:  role,
+	// }
 
 	a := Access{
 		From:  from.ID(),
@@ -137,6 +140,18 @@ func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger,
 			Key: from.ID().Key() + "-" + to.ID().Key(),
 		},
 	}
+
+	access_info := map[string]any{
+		"level": a.Level,
+		"role":  a.Role,
+	}
+
+	log.Debug("Linking two nodes",
+		zap.Any("from", from.ID()),
+		zap.Any("to", to.ID()),
+		zap.Any("levelt", lvl),
+		zap.Any("access", access_info),
+	)
 
 	if a.Level == access.Level_NONE {
 		_, err := edge.RemoveDocument(ctx, a.Key)
