@@ -3,7 +3,7 @@
     <span @click="e => e.preventDefault()">
       <span style="font-family: 'Exo 2'">{{ platform }}</span> - <n-tooltip :show="min_clicked" placement="top">
         <template #trigger>
-          <span @click="handler">{{ tag }}</span>
+          <span @click="handler">{{tag}}</span>
         </template>
         <span v-if="store.dev"> You are now in the developer mode</span>
         <span v-else> You are {{ 10 - clicked }} d's away from Developer mode</span>
@@ -28,7 +28,7 @@ import { useAppStore } from "@/store/app";
 
 const store = useAppStore();
 
-const tag = "INFINIMESH_VERSION_TAG";
+const tag = __INFINIMESH_VERSION_TAG__
 const platform = PLATFORM_NAME
 
 const clicked = ref(0)
