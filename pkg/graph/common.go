@@ -149,7 +149,7 @@ func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger,
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
-		zap.Any("levelt", lvl),
+		zap.Any("levelto", lvl),
 		zap.Any("access", access_info),
 	)
 
