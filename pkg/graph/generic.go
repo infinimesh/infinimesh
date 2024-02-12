@@ -58,7 +58,7 @@ LET result = (
 	})
 )
 RETURN { 
-	result: (@offset > 0 && @limit > 0) ? SLICE(result, @offset, @offset + @limit) : result,
+	result: (@limit > 0) ? SLICE(result, @offset, @offset + @limit) : result,
 	count: LENGTH(result)
 }
 `
