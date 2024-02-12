@@ -464,10 +464,10 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	}
 
 	limit := q.GetLimit()
-	page := q.GetPage()
+	offset := q.GetOffset()
 
 	ctx = WithLimit(ctx, limit)
-	ctx = WithOffset(ctx, (page-1)*limit)
+	ctx = WithOffset(ctx, (offset-1)*limit)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 
