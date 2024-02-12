@@ -15,6 +15,7 @@ export default defineConfig(({ command }) => {
     define: {
       STATE_MAX_ROWS: "10",
       __INFINIMESH_VERSION_TAG__: !process.env.INFINIMESH_VERSION_TAG ? "'development'" :`'${process.env.INFINIMESH_VERSION_TAG}'`,
+      __INFINIMESH_COMMIT_HASH__: !process.env.INFINIMESH_COMMIT_HASH ? "'unstaged'" :`'${process.env.INFINIMESH_COMMIT_HASH}'`,
     },
     build: {
       chunkSizeWarningLimit: 2000,
