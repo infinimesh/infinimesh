@@ -126,10 +126,10 @@ func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger,
 	// 	"role":  role,
 	// }
 
-	// access_info := Access_info{
-	// 	Level: lvl,
-	// 	Role:  role,
-	// }
+	access_info := Access_info{
+		Level: lvl,
+		Role:  role,
+	}
 
 	a := Access{
 		From:  from.ID(),
@@ -141,10 +141,10 @@ func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger,
 		},
 	}
 
-	access_info := map[string]any{
-		"level": a.Level,
-		"role":  a.Role,
-	}
+	// access_info := map[string]any{
+	// 	"level": a.Level,
+	// 	"role":  a.Role,
+	// }
 
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
