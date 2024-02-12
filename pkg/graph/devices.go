@@ -90,7 +90,8 @@ type DevicesController struct {
 	ns2dev  driver.Collection // Namespaces to Devices permissions edge collection
 	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
-	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+	ica_repo InfinimeshCommonActionsRepo                 // Infinimesh Common Actions Repository
+	repo     InfinimeshGenericActionsRepo[*devpb.Device] // Infinimesh Generic(Devices) Actions Repository
 
 	SIGNING_KEY []byte
 }
@@ -99,6 +100,7 @@ func NewDevicesController(
 	log *zap.Logger, db driver.Database,
 	hfc handsfree.HandsfreeServiceClient,
 	ica InfinimeshCommonActionsRepo,
+	repo InfinimeshGenericActionsRepo[*devpb.Device],
 ) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
@@ -112,6 +114,7 @@ func NewDevicesController(
 		acc2dev: ica.GetEdgeCol(ctx, schema.ACC2DEV),
 
 		ica_repo: ica,
+		repo:     repo,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -460,34 +463,28 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
 	}
 
-	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.DEVICES_COL)
+	limit := q.GetLimit()
+	offset := q.GetOffset()
+
+	ctx = WithLimit(ctx, limit)
+	ctx = WithOffset(ctx, (offset-1)*limit)
+
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
-	defer cr.Close()
 
-	var r []*devpb.Device
-	for {
-		var dev devpb.Device
-		meta, err := cr.ReadDocument(ctx, &dev)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			log.Warn("Error unmarshalling Document", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Couldn't execute query")
-		}
-		dev.Uuid = meta.ID.Key()
-		if dev.Access.Level < access.Level_MGMT {
+	for _, dev := range result.Result {
+		if dev.Access != nil && dev.Access.Level < access.Level_MGMT {
 			dev.Certificate = nil
 		}
-
-		log.Debug("Got document", zap.Any("device", &dev))
-		r = append(r, &dev)
 	}
 
 	return connect.NewResponse(&devpb.Devices{
-		Devices: r,
+		Devices: result.Result,
+		Total:   int64(result.Count),
 	}), nil
 }
 
