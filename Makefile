@@ -1,13 +1,17 @@
 include .env
 
 VERSION ?= "latest"
+GIT_VERSION ?= $(shell git describe --tags --abbrev=0)
 
 build-all:
 	sh hack/build_images.sh
 
+build-console-dry:
+	@echo "Building console image:"
+	@echo "docker build . -f \"Dockerfiles/console/Dockerfile\" --build-arg=\"INFINIMESH_VERSION_TAG=${GIT_VERSION}\" -t \"ghcr.io/infinimesh/infinimesh/console:${VERSION}\""
+
 build-console:
-	export INFINIMESH_VERSION_TAG=$(git describe --tags --abbrev=0)
-	docker build . -f "Dockerfiles/console/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/console:${VERSION}"
+	docker build . -f "Dockerfiles/console/Dockerfile" --build-arg="INFINIMESH_VERSION_TAG=${GIT_VERSION}" -t "ghcr.io/infinimesh/infinimesh/console:${VERSION}"
 
 build-web:
 	docker build . -f "Dockerfiles/web/Dockerfile" -t "ghcr.io/infinimesh/infinimesh/web:${VERSION}"
