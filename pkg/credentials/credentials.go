@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -93,14 +94,16 @@ func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Cred
 
 	var cred Credentials
 	var err error
-	switch credentials.Type {
-	case "standard":
+	switch {
+	case credentials.Type == "standard":
 		cred, err = NewStandardCredentials(credentials.Data[0], credentials.Data[1])
-	case "ldap":
+	case credentials.Type == "ldap":
 		if len(credentials.Data) != 2 {
 			return nil, errors.New("missing LDAP provider key")
 		}
 		cred, err = NewLDAPCredentials(credentials.Data[0], credentials.Data[1])
+	case strings.HasPrefix(credentials.Type, "oauth2"):
+		cred, err = NewOauthCredentials(credentials.GetType(), credentials.GetData()[0])
 	default:
 		return nil, errors.New("auth type is wrong")
 	}
