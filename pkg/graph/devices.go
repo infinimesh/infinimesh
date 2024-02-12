@@ -91,7 +91,7 @@ type DevicesController struct {
 	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
 	ica_repo InfinimeshCommonActionsRepo                 // Infinimesh Common Actions Repository
-	dev_repo InfinimeshGenericActionsRepo[*devpb.Device] // Infinimesh Generic(Devices) Actions Repository
+	repo     InfinimeshGenericActionsRepo[*devpb.Device] // Infinimesh Generic(Devices) Actions Repository
 
 	SIGNING_KEY []byte
 }
@@ -100,6 +100,7 @@ func NewDevicesController(
 	log *zap.Logger, db driver.Database,
 	hfc handsfree.HandsfreeServiceClient,
 	ica InfinimeshCommonActionsRepo,
+	repo InfinimeshGenericActionsRepo[*devpb.Device],
 ) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
@@ -113,6 +114,7 @@ func NewDevicesController(
 		acc2dev: ica.GetEdgeCol(ctx, schema.ACC2DEV),
 
 		ica_repo: ica,
+		repo:     repo,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -467,7 +469,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, (page-1)*limit)
 
-	result, err := c.dev_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))

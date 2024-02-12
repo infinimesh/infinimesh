@@ -31,8 +31,8 @@ type serviceFixture[T graph.InfinimeshProtobufEntity] struct {
 
 func newServiceFixture[T graph.InfinimeshProtobufEntity](t *testing.T) *serviceFixture[T] {
 	f := &serviceFixture[T]{}
-	f.mocks.db = &driver_mocks.MockDatabase{}
-	f.mocks.cursor = &driver_mocks.MockCursor{}
+	f.mocks.db = driver_mocks.NewMockDatabase(t)
+	f.mocks.cursor = driver_mocks.NewMockCursor(t)
 	f.mocks.log = zap.NewExample()
 	f.repo = graph.NewGenericRepo[T](f.mocks.db)
 

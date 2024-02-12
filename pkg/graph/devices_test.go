@@ -38,6 +38,7 @@ type devicesControllerFixture struct {
 
 		hfc      *handsfree_mocks.MockHandsfreeServiceClient
 		ica_repo *graph_mocks.MockInfinimeshCommonActionsRepo
+		repo     *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
 	}
 
 	data struct {
@@ -64,8 +65,10 @@ func newDevicesControllerFixture(t *testing.T) *devicesControllerFixture {
 
 	f.mocks.hfc = handsfree_mocks.NewMockHandsfreeServiceClient(t)
 	f.mocks.ica_repo = graph_mocks.NewMockInfinimeshCommonActionsRepo(t)
-	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.NS2DEV).Return(f.mocks.ns2dev, nil)
-	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.ACC2DEV).Return(f.mocks.acc2dev, nil)
+	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.NS2DEV).Return(f.mocks.ns2dev, nil).Maybe()
+	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.ACC2DEV).Return(f.mocks.acc2dev, nil).Maybe()
+
+	f.mocks.repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*devpb.Device](t)
 
 	f.data.acc_uuid = uuid.New().String()
 	f.data.dev_uuid = uuid.New().String()
@@ -140,6 +143,7 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 	f.ctrl = graph.NewDevicesController(
 		zap.NewExample(), f.mocks.db,
 		f.mocks.hfc, f.mocks.ica_repo,
+		f.mocks.repo,
 	)
 
 	return f
@@ -632,32 +636,23 @@ func TestMakeDevicesToken_Success(t *testing.T) {
 func TestList_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	Count := 0
-
-	result := graph.ListQueryResult[*devpb.Device]{
+	count := 0
+	result := &graph.ListQueryResult[*devpb.Device]{
 		Result: []*devpb.Device{},
-		Count:  Count,
+		Count:  count,
 	}
-
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(result, nil)
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(result, nil)
 
 	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 
 	assert.NoError(t, err)
-	assert.Equal(t, Count, len(resp.Msg.Devices))
+	assert.Equal(t, count, len(resp.Msg.Devices))
 }
 
 func TestList_FailsOn_ListQuery(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	Count := 0
-
-	result := graph.ListQueryResult[*devpb.Device]{
-		Result: []*devpb.Device{},
-		Count:  Count,
-	}
-
-	f.mocks.ica_repo.On("ListQuery", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(result, errors.New("Error"))
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("Error"))
 
 	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 

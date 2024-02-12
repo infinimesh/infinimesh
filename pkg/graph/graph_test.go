@@ -45,9 +45,12 @@ var (
 	arangodbHost string
 	arangodbCred string
 
-	ctrl      *AccountsController
-	ns_ctrl   *NamespacesController
-	dev_ctrl  *DevicesController
+	ctrl    *AccountsController
+	ns_ctrl *NamespacesController
+
+	dev_ctrl *DevicesController
+	dev_repo InfinimeshGenericActionsRepo[*devices.Device]
+
 	plug_ctrl *PluginsController
 
 	rootCtx context.Context
@@ -89,7 +92,9 @@ func init() {
 	ctrl = NewAccountsController(log, db, rdb)
 
 	ns_ctrl = NewNamespacesController(log, db)
-	dev_ctrl = NewDevicesController(log, db, nil, ica)
+
+	dev_repo = NewGenericRepo[*devices.Device](db)
+	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo)
 
 	plug_ctrl = NewPluginsController(log, db)
 
