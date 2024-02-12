@@ -24,8 +24,8 @@ dependencies:
     specifier: ^11.9.0
     version: 11.9.0
   infinimesh-proto:
-    specifier: ^3.1.4-0
-    version: 3.1.4-0
+    specifier: ^3.1.5
+    version: 3.1.5
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -146,21 +146,21 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@bufbuild/connect-web@0.8.6(@bufbuild/protobuf@1.7.2):
-    resolution: {integrity: sha512-+ZI7Ercc0X1vlQr1iHa35EymtFjq1x4rByE+ToNyw05mwB7yxk4nw4iUa/Z7PfHYba1dAcgnnrvRDI2K7TBPBQ==}
+  /@bufbuild/connect-web@0.13.0(@bufbuild/protobuf@1.7.2):
+    resolution: {integrity: sha512-Ys9VFDWYktD9yFQSLOlkpsD42LonDNMCysLCfjXFuxlupYuf4f7qg0zkT5bESyTfqk4xtRDSSGR3xygaj/ONIQ==}
     deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
-      '@bufbuild/connect': 0.8.6(@bufbuild/protobuf@1.7.2)
+      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.7.2)
       '@bufbuild/protobuf': 1.7.2
     dev: false
 
-  /@bufbuild/connect@0.8.6(@bufbuild/protobuf@1.7.2):
-    resolution: {integrity: sha512-z9gW4hcQxCz7w0kjt1JyMp7VEQQdm7CYiZHvNq4vZtMbKOje2DC8kSb62XStHHd3AdoDZq1cb1s11F5TMSwZYw==}
+  /@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.7.2):
+    resolution: {integrity: sha512-eZSMbVLyUFtXiZNORgCEvv580xKZeYQdMOWj2i/nxOcpXQcrEzTMTA7SZzWv4k4gveWCOSRoWmYDeOhfWXJv0g==}
     deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
       '@bufbuild/protobuf': 1.7.2
     dev: false
@@ -1265,12 +1265,14 @@ packages:
     engines: {node: '>=16.17.0'}
     dev: true
 
-  /infinimesh-proto@3.1.4-0:
-    resolution: {integrity: sha512-0DpjB7TZeQ2lV3tLQelQgN3XSQD1lSAzDQh7/t7ABfRdnqc1YTVnNS9e4UXQhJIPgiI19WXuK+OAfTmNz7w8jw==}
+  /infinimesh-proto@3.1.5:
+    resolution: {integrity: sha512-MSRn55X5cDQ7deBz5446mPyH11cEBREc2/fUA6NA3idMKDWPQ+7NFcfFH8ak9ssLBl9Rz+jc0JYRjuxbWV9TIg==}
     dependencies:
-      '@bufbuild/connect': 0.8.6(@bufbuild/protobuf@1.7.2)
-      '@bufbuild/connect-web': 0.8.6(@bufbuild/protobuf@1.7.2)
+      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.7.2)
+      '@bufbuild/connect-web': 0.13.0(@bufbuild/protobuf@1.7.2)
       '@bufbuild/protobuf': 1.7.2
+      '@connectrpc/connect': 1.3.0(@bufbuild/protobuf@1.7.2)
+      uuid: 9.0.1
     dev: false
 
   /inflight@1.0.6:
@@ -1932,6 +1934,11 @@ packages:
   /ufo@1.3.2:
     resolution: {integrity: sha512-o+ORpgGwaYQXgqGDwd+hkS4PuZ3QnmqMMxRuajK/a38L6fTpcE5GPIfrf+L/KemFzfUpeUQc1rRS1iDBozvnFA==}
     dev: true
+
+  /uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+    dev: false
 
   /v8-to-istanbul@9.2.0:
     resolution: {integrity: sha512-/EH/sDgxU2eGxajKdwLCDmQ4FWq+kpi3uCmBGpw1xJtnAxEjlD8j8PEiGWpCIMIs3ciNAgH0d3TTJiUkYzyZjA==}
