@@ -70,7 +70,8 @@ type NamespacesController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
-	ica InfinimeshCommonActionsRepo
+	ica  InfinimeshCommonActionsRepo
+	repo InfinimeshGenericActionsRepo[*nspb.Namespace]
 
 	db driver.Database
 }
@@ -80,11 +81,13 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
 	ica := NewInfinimeshCommonActionsRepo(db)
+	repo := NewGenericRepo[*nspb.Namespace](db)
 
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
-		ica: ica,
+		ica:  ica,
+		repo: repo,
 	}
 }
 
@@ -202,29 +205,13 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := c.ica.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.NAMESPACES_COL)
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		return nil, err
 	}
-	defer cr.Close()
-
-	var r []*nspb.Namespace
-	for {
-		var ns nspb.Namespace
-		meta, err := cr.ReadDocument(ctx, &ns)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			return nil, err
-		}
-		ns.Uuid = meta.ID.Key()
-
-		log.Debug("Got document", zap.Any("namespace", &ns))
-		r = append(r, &ns)
-	}
 
 	return connect.NewResponse(&nspb.Namespaces{
-		Namespaces: r,
+		Namespaces: result.Result,
 	}), nil
 }
 

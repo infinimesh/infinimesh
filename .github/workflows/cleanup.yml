@@ -57,7 +57,7 @@ jobs:
         uses: snok/container-retention-policy@v2
         with:
           image-names: infinimesh/${{matrix.tag}}
-          cut-off: 2 weeks ago UTC
+          cut-off: 1 day ago UTC
           account-type: org
           org-name: infinimesh
           filter-tags: dev-*, *-merge

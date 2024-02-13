@@ -75,16 +75,20 @@ jobs:
           echo "$TAGS_JSON" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
       
-      - name: Get latest Version Tag
+      - name: Get latest Version Tag and Hash
         id: latest-version-tag
         run: |
           VERSION=$(git describe --tags --abbrev=0)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "### Sewing \`$VERSION\` as build Version" >> $GITHUB_STEP_SUMMARY
+          HASH=$(git rev-parse --short HEAD)
+          echo "hash=$HASH" >> $GITHUB_OUTPUT
+          echo "### Sewing \`$HASH\` as build Hash" >> $GITHUB_STEP_SUMMARY
 
     outputs:
       matrix: ${{ steps.set-tags-matrix.outputs.matrix }}
       version: ${{ steps.latest-version-tag.outputs.version }}
+      commit_hash: ${{ steps.latest-version-tag.outputs.hash }}
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -102,7 +106,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5.5.0
+        uses: docker/metadata-action@v5.5.1
         with:
           tags: type=raw,value=${{env.IMAGE_TAG}}
           images: ${{ env.REGISTRY }}/infinimesh/infinimesh/${{matrix.tag}}
@@ -126,6 +130,7 @@ jobs:
           build-args: |
             "IMAGE_TAG=${{env.IMAGE_TAG}}"
             "INFINIMESH_VERSION_TAG=${{needs.prepare.outputs.version}}"
+            "INFINIMESH_COMMIT_HASH=${{needs.prepare.outputs.commit_hash}}"
       - name: Summary
         run: |
           echo "### :whale: Published new image" >> $GITHUB_STEP_SUMMARY

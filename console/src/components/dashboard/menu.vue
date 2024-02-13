@@ -20,6 +20,7 @@ const GitNetworkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/G
 const ImagesOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ImagesOutline"))
 const ExtensionPuzzleOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ExtensionPuzzleOutline"))
 const ChatbubblesOutline = defineAsyncComponent(() => import("@vicons/ionicons5/ChatbubblesOutline"))
+const StatsChartOutline = defineAsyncComponent(() => import("@vicons/ionicons5/StatsChartOutline"))
 
 const props = defineProps({
   collapsed: {
@@ -62,6 +63,13 @@ const services = computed(() => {
       label: renderLabelLink("Chats"),
       key: "Chats",
       icon: renderIcon(ChatbubblesOutline),
+    })
+  }
+  if (console_services.value.timeseries) {
+    r.push({
+      label: renderLabelLink("TimeSeries"),
+      key: "TimeSeries",
+      icon: renderIcon(StatsChartOutline),
     })
   }
   return r
