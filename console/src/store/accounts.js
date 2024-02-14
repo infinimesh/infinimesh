@@ -1,6 +1,7 @@
 import { useAppStore } from "@/store/app";
 import { useNSStore } from "@/store/namespaces";
 import { defineStore } from "pinia";
+import { computed, ref } from "vue";
 
 import { access_lvl_conv } from "@/utils/access";
 import { createPromiseClient } from "@connectrpc/connect";
@@ -17,185 +18,202 @@ import {
 } from "infinimesh-proto/build/es/node/node_pb";
 import { createConnectTransport } from "@connectrpc/connect-web";
 
-const as = useAppStore();
-const nss = useNSStore();
+import { transport } from "infinimesh-proto/mocks/es/accounts";
 
-export const useAccountsStore = defineStore("accounts", {
-  state: () => ({
-    loading: false,
-    accounts: {},
-    accountsApi: createPromiseClient(
+export const useAccountsStore = defineStore("accounts", () => {
+  const as = useAppStore();
+  const nss = useNSStore();
+
+  const loading = ref(false);
+  const accounts = ref({});
+
+  const accounts_ns_filtered = computed(() => {
+    let ns = nss.selected;
+    let pool = Object.values(accounts.value)
+      .map((acc) => {
+        acc.sorter = acc.enabled + access_lvl_conv(acc);
+        return acc;
+      })
+      .sort((a, b) => b.sorter - a.sorter);
+    if (ns == "all") {
+      return pool;
+    }
+    return pool.filter((a) => a.access.namespace == ns);
+  });
+
+  const accountsApi = computed(() => {
+    return createPromiseClient(
       AccountsService,
-      createConnectTransport(as.transport_options)
-    ),
-  }),
+      import.meta.env.VITE_MOCK
+        ? transport
+        : createConnectTransport(as.transport_options)
+    );
+  });
 
-  getters: {
-    accounts_ns_filtered: (state) => {
-      let ns = nss.selected;
-      let pool = Object.values(state.accounts)
-        .map((acc) => {
-          acc.sorter = acc.enabled + access_lvl_conv(acc);
-          return acc;
-        })
-        .sort((a, b) => b.sorter - a.sorter);
-      if (ns == "all") {
-        return pool;
-      }
-      return pool.filter((a) => a.access.namespace == ns);
-    },
-  },
-  actions: {
-    async sync_me() {
-      const data = await this.accountsApi.get({ uuid: "me" });
+  async function sync_me() {
+    const data = await accountsApi.value.get({ uuid: "me" });
 
-      as.me = { ...as.me, ...data };
-    },
-    async fetchAccounts(no_cache = false) {
-      this.loading = true;
+    as.me = { ...as.me, ...data };
+  }
 
-      const { accounts } = await this.accountsApi.list(new EmptyMessage());
+  async function fetchAccounts(no_cache = false) {
+    loading.value = true;
 
-      if (no_cache) {
-        this.accounts = accounts.reduce((result, account) => {
+    const { accounts: pool } = await accountsApi.value.list(new EmptyMessage());
+
+    if (no_cache) {
+      accounts.value = pool.reduce((result, account) => {
+        result[account.uuid] = account;
+
+        return result;
+      }, {});
+    } else {
+      accounts.value = {
+        ...accounts.value,
+        ...pool.reduce((result, account) => {
           result[account.uuid] = account;
 
           return result;
-        }, {});
-      } else {
-        this.accounts = {
-          ...this.accounts,
-          ...accounts.reduce((result, account) => {
-            result[account.uuid] = account;
+        }, {}),
+      };
+    }
 
-            return result;
-          }, {}),
-        };
-      }
+    loading.value = false;
+  }
 
-      this.loading = false;
-    },
-    async createAccount(request, bar) {
-      bar.start();
-      try {
-        await this.accountsApi.create(new CreateRequest(request));
+  async function createAccount(request, bar) {
+    bar.start();
+    try {
+      await accountsApi.value.create(new CreateRequest(request));
 
-        this.fetchAccounts();
-        bar.finish();
-        return false;
-      } catch (e) {
-        console.error(e);
-        bar.error();
-        return e;
-      }
-    },
-    async updateAccount(account, bar) {
-      if (bar) bar.start();
-      try {
-        if (!account.config) account.config = {}
-        const result = new Account(account);
+      fetchAccounts();
+      bar.finish();
+      return false;
+    } catch (e) {
+      console.error(e);
+      bar.error();
+      return e;
+    }
+  }
 
-        result.config = result.config.fromJson(account.config)
-        await this.accountsApi.update(result);
+  async function updateAccount(account, bar) {
+    if (bar) bar.start();
+    try {
+      if (!account.config) account.config = {};
+      const result = new Account(account);
 
-        this.fetchAccounts();
-        if (bar) bar.finish();
-        return false;
-      } catch (e) {
-        console.error(e);
-        if (bar) bar.error();
-        return e;
-      }
-    },
-    updateDefaultNamespace(account, ns) {
-      let acc = this.accounts[account];
-      return this.updateAccount({
-        ...acc,
-        defaultNamespace: ns,
-      });
-    },
-    async toggle(uuid, bar) {
-      bar.start();
+      result.config = result.config.fromJson(account.config);
+      await accountsApi.value.update(result);
 
-      try {
-        await this.accountsApi.toggle(new Account(this.accounts[uuid]));
+      fetchAccounts();
+      if (bar) bar.finish();
+      return false;
+    } catch (e) {
+      console.error(e);
+      if (bar) bar.error();
+      return e;
+    }
+  }
+  function updateDefaultNamespace(account, ns) {
+    let acc = accounts.value[account];
+    return updateAccount({
+      ...acc,
+      defaultNamespace: ns,
+    });
+  }
+  async function toggle(uuid, bar) {
+    bar.start();
 
-        this.fetchAccounts();
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-        return;
-      }
-    },
-    deletables(uuid) {
-      return this.accountsApi.deletables(new Account(this.accounts[uuid]));
-    },
-    async deleteAccount(uuid, bar) {
-      bar.start();
-      try {
-        await this.accountsApi.delete(new Account(this.accounts[uuid]));
+    try {
+      await accountsApi.value.toggle(new Account(accounts.value[uuid]));
 
-        this.fetchAccounts();
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-      }
-    },
-    async moveAccount(uuid, namespace) {
-      try {
-        await this.accountsApi.move(new MoveRequest({ uuid, namespace }));
+      fetchAccounts();
+      bar.finish();
+    } catch (e) {
+      console.error(e);
+      bar.error();
+      return;
+    }
+  }
+  function deletables(uuid) {
+    return accountsApi.value.deletables(new Account(accounts.value[uuid]));
+  }
+  async function deleteAccount(uuid, bar) {
+    bar.start();
+    try {
+      await accountsApi.value.delete(new Account(accounts.value[uuid]));
 
-        this.accounts[uuid].access.namespace = namespace;
-      } catch (err) {
-        console.error(err);
-        throw `Error Moving Device: ${err.message}`;
-      }
-    },
-    async getCredentials(uuid) {
-      try {
-        return await this.accountsApi.getCredentials({ uuid });
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    async setCredentials(uuid, credentials, bar) {
-      bar.start();
-      try {
-        await this.accountsApi.setCredentials(
-          new SetCredentialsRequest({ uuid, credentials })
-        );
+      fetchAccounts();
+      bar.finish();
+    } catch (e) {
+      console.error(e);
+      bar.error();
+    }
+  }
+  async function moveAccount(uuid, namespace) {
+    try {
+      await accountsApi.value.move(new MoveRequest({ uuid, namespace }));
 
-        this.fetchAccounts();
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-      }
-    },
-    token(data) {
-      try {
-        return this.accountsApi.token(new TokenRequest(data));
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    tokenFor(account, exp = 0) {
-      let res = {};
-      try {
-        res = new UAParser(navigator.userAgent).getResult();
-      } catch (e) {
-        console.warn("Failed to get user agent", e);
-      }
+      accounts.value[uuid].access.namespace = namespace;
+    } catch (err) {
+      console.error(err);
+      throw `Error Moving Device: ${err.message}`;
+    }
+  }
+  function getCredentials(uuid) {
+      return accountsApi.value.getCredentials({ uuid });
+  }
+  async function setCredentials(uuid, credentials, bar) {
+    bar.start();
+    try {
+      await accountsApi.value.setCredentials(
+        new SetCredentialsRequest({ uuid, credentials })
+      );
 
-      return this.token({
-        uuid: account,
-        client: `Console Admin | ${res.os?.name ?? "Unknown"} | ${
-          res.browser?.name ?? "Unknown"
-        }`,
-        exp,
-      });
-    },
-  },
+      fetchAccounts();
+      bar.finish();
+    } catch (e) {
+      console.error(e);
+      bar.error();
+    }
+  }
+  function token(data) {
+    return accountsApi.value.token(new TokenRequest(data));
+  }
+  function tokenFor(account, exp = 0) {
+    let res = {};
+    try {
+      res = new UAParser(navigator.userAgent).getResult();
+    } catch (e) {
+      console.warn("Failed to get user agent", e);
+    }
+
+    return token({
+      uuid: account,
+      client: `Console Admin | ${res.os?.name ?? "Unknown"} | ${
+        res.browser?.name ?? "Unknown"
+      }`,
+      exp,
+    });
+  }
+
+  return {
+    loading,
+    accounts,
+    accounts_ns_filtered,
+    accountsApi,
+    sync_me,
+    fetchAccounts,
+    createAccount,
+    updateAccount,
+    updateDefaultNamespace,
+    toggle,
+    deletables,
+    deleteAccount,
+    moveAccount,
+    getCredentials,
+    setCredentials,
+    token,
+    tokenFor,
+  };
 });
