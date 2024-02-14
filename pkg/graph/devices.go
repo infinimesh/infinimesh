@@ -467,7 +467,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	offset := q.GetOffset()
 
 	ctx = WithLimit(ctx, limit)
-	ctx = WithOffset(ctx, (offset-1)*limit)
+	ctx = WithOffset(ctx, offset)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 
