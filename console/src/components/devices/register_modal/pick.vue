@@ -47,7 +47,7 @@ import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
-const { devices_ns_filtered: devices } = storeToRefs(useDevicesStore());
+const { paginatedDevices: devices } = storeToRefs(useDevicesStore());
 const { namespaces } = storeToRefs(useNSStore())
 
 const UuidBadge = defineAsyncComponent(() => import("@/components/core/uuid-badge.vue"))

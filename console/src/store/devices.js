@@ -13,7 +13,10 @@ import { access_lvl_conv } from "@/utils/access";
 
 import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
 import { Shadow } from "infinimesh-proto/build/es/shadow/shadow_pb";
-import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
+import {
+  DevicesTokenRequest,
+  QueryRequest,
+} from "infinimesh-proto/build/es/node/node_pb";
 import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
 import { Struct } from "@bufbuild/protobuf";
 
@@ -25,6 +28,12 @@ export const useDevicesStore = defineStore("devices", {
     loading: false,
     devices: {},
     subscribed: [],
+
+    limit: 10,
+    page: 1,
+    paginatedDevices: [],
+    paginatedDevicesLoading: false,
+    total: 0,
 
     reported: new Map(),
     desired: new Map(),
@@ -100,6 +109,25 @@ export const useDevicesStore = defineStore("devices", {
 
       if (state) this.getDevicesState(data.devices.map((d) => d.uuid));
       this.loading = false;
+    },
+    async fetchDevicesWithPagination(state = true) {
+      this.paginatedDevicesLoading = true;
+      this.devices = {};
+      this.total = 0;
+
+      const data = await this.devices_client.list(
+        new QueryRequest({
+          offset: (this.page - 1) * this.limit,
+          limit: this.limit,
+          namespace: nss.selected === "all" ? undefined : nss.selected,
+        })
+      );
+
+      this.paginatedDevices = data.devices;
+      this.total = parseInt(data.total);
+      this.paginatedDevicesLoading = false;
+
+      state && this.getDevicesState(data.devices.map((d) => d.uuid));
     },
     async subscribe(devices) {
       let pool = this.subscribed.concat(devices);
@@ -268,7 +296,7 @@ export const useDevicesStore = defineStore("devices", {
         await this.devices_client.delete({ uuid: device });
         bar.finish();
 
-        this.fetchDevices(false, true);
+        this.fetchDevicesWithPagination(false);
       } catch (e) {
         console.error(e);
         bar.error();
@@ -279,7 +307,7 @@ export const useDevicesStore = defineStore("devices", {
       try {
         await this.devices_client.create(request);
 
-        this.fetchDevices();
+        this.fetchDevicesWithPagination();
         bar.finish();
         return false;
       } catch (e) {
