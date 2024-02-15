@@ -21,7 +21,8 @@ env:
   IMAGE_TAG: ${{github.ref_name == 'master' && 'latest' || github.ref_name}}
 
 jobs:
-  checks:
+  go-checks:
+    name: Run Go tests and checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,7 +50,44 @@ jobs:
         uses: vladopajic/go-test-coverage@v2
         with:
           config: ./.testcoverage.yml
-          
+
+  vue-checks:
+      name: Run Vue tests and checks
+      runs-on: ubuntu-latest
+      permissions: 
+        # Required to checkout the code
+        contents: read
+        # Required to put a comment into the pull-request
+        pull-requests: write
+      env:
+        working-directory: ./console
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: '16'
+
+        - name: Install dependencies
+          working-directory: ${{env.working-directory}}
+          run: |
+            npm install -g pnpm
+            pnpm i
+
+        - name: Run tests
+          working-directory: ${{env.working-directory}}
+          run: |
+            pnpm test
+        - name: 'Report Coverage'
+          # Set if: always() to also generate the report if tests are failing
+          # Only works if you set `reportOnFailure: true` in your vite config as specified above
+          if: always() 
+          uses:  davelosert/vitest-coverage-report-action@v2
+
   prepare:
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +130,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [prepare, checks]
+    needs: [prepare, go-checks, vue-checks]
     strategy:
       matrix:
         tag: ${{fromJson(needs.prepare.outputs.matrix)}}
