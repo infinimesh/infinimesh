@@ -28,14 +28,14 @@
   },
   "devDependencies": {
     "@types/markdown-it": "^13.0.7",
-    "@vitejs/plugin-vue": "^5.0.3",
+    "@vitejs/plugin-vue": "^5.0.4",
     "@vitest/coverage-v8": "^1.2.2",
-    "@vue/test-utils": "^2.4.3",
+    "@vue/test-utils": "^2.4.4",
     "happy-dom": "^13.3.1",
     "naive-ui": "^2.37.3",
     "vfonts": "^0.0.3",
     "vite": "^5.0.12",
-    "vitest": "^1.2.1"
+    "vitest": "^1.2.2"
   },
   "peerDependencies": {
     "@types/markdown-it": "^13.0.7"
