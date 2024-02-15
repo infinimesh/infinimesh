@@ -67,6 +67,7 @@ type PluginsController struct {
 	ns_ctrl *NamespacesController
 
 	ica_repo InfinimeshCommonActionsRepo
+	repo     InfinimeshGenericActionsRepo[*pb.Plugin]
 
 	db driver.Database
 }
@@ -78,6 +79,7 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 		log: log.Named("PluginsController"), col: col, db: db,
 		ns_ctrl:  NewNamespacesController(log, db),
 		ica_repo: NewInfinimeshCommonActionsRepo(db),
+		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }
 
@@ -174,6 +176,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 	r := req.Msg
 
 	var cr driver.Cursor
+
 	var err error
 
 	if ValidateRoot(ctx) {
@@ -182,7 +185,15 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		cr, err = c.ica_repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
+		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace))
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+		}
+
+		return connect.NewResponse(&pb.Plugins{
+			Pool: result.Result,
+		}), nil
+
 	} else {
 		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
 			"@plugins": schema.PLUGINS_COL,

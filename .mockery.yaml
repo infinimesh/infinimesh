@@ -12,6 +12,7 @@ packages:
     github.com/infinimesh/infinimesh/pkg/graph:
         interfaces:
             InfinimeshCommonActionsRepo:
+            InfinimeshGenericActionsRepo:
 
     # ProtoBuf Packages
     github.com/infinimesh/proto/node:
