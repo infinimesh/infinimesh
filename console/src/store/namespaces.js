@@ -64,9 +64,15 @@ export const useNSStore = defineStore("namespaces", {
     create(namespace) {
       return this.namespacesApi.create(new Namespace(namespace));
     },
+
+    /**
+     * Updates a namespace.
+     * @param {Namespace} namespace - The namespace object to be updated.
+     * @returns {Promise<Namespace>} - A promise that resolves with the updated namespace.
+     */
     update(namespace) {
       if (!namespace.config) namespace.config = {}
-      const result = new Namespace(namespace);
+      const result = Namespace.fromJson(namespace)
 
       result.config = result.config.fromJson(namespace.config)
       return this.namespacesApi.update(result);

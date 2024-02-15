@@ -48,7 +48,7 @@
 
             <template #action v-if="!props.preview">
                 <n-space justify="start">
-                    <n-button strong secondary round type="success" v-if="plugin.kind != 'UNKNOWN' && !update"
+                    <n-button strong secondary round type="success" v-if="plugin.kind != PluginKind.UNKNOWN && !update"
                         @click="handleUse">
                         <template #icon>
                             <n-icon>
@@ -108,6 +108,8 @@ import { useAppStore } from "@/store/app";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
 
+import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
+
 const VueMarkdownIt = defineAsyncComponent(() => import("vue3-markdown-it"))
 
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
@@ -157,17 +159,17 @@ async function handleUUIDClicked() {
 }
 
 const kinds = {
-    0: {
+    [PluginKind.UNKNOWN]: {
         label: "UNKNOWN",
         desc: "This App or Plugin will not work, please contact to Platform administrators",
         color: "#fc1703"
     },
-    1: {
+    [PluginKind.EMBEDDED]: {
         label: "Embedded",
         desc: "This Plugin will embed into this Console as the main Dashboard",
         color: "#8a2be2"
     },
-    2: {
+    [PluginKind.DEVICE]: {
         label: "Device",
         desc: "This Plugin will be embedded into Devices state",
         color: "#52c41a"

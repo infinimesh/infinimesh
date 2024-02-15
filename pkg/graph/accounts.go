@@ -95,7 +95,8 @@ type AccountsController struct {
 
 	sessions sessions.SessionsHandler
 
-	ica_repo InfinimeshCommonActionsRepo // Infinimesh Common Actions Repository
+	ica_repo InfinimeshCommonActionsRepo                  // Infinimesh Common Actions Repository
+	repo     InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
 
 	SIGNING_KEY []byte
 }
@@ -109,6 +110,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
 
 	ica := NewInfinimeshCommonActionsRepo(db)
+	repo := NewGenericRepo[*accpb.Account](db)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
@@ -121,6 +123,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
 
 		ica_repo: ica,
+		repo:     repo,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -225,31 +228,14 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	cr, err := c.ica_repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), schema.ACCOUNTS_COL)
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
 	}
-	defer cr.Close()
-
-	var r []*accpb.Account
-	for {
-		var acc accpb.Account
-		meta, err := cr.ReadDocument(ctx, &acc)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			log.Warn("Error unmarshalling Document", zap.Error(err))
-			return nil, status.Error(codes.Internal, "Couldn't execute query")
-		}
-		acc.Uuid = meta.ID.Key()
-
-		log.Debug("Got document", zap.Any("account", &acc))
-		r = append(r, &acc)
-	}
 
 	return connect.NewResponse(&accpb.Accounts{
-		Accounts: r,
+		Accounts: result.Result,
 	}), nil
 }
 
