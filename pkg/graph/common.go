@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	logger "github.com/infinimesh/infinimesh/pkg/log"
+
 	"github.com/arangodb/go-driver"
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
@@ -114,11 +116,11 @@ func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver
 }
 
 func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
+
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
-		zap.Any("level", lvl),
-		zap.Any("role", role),
+		logger.ZapAccess(lvl, role),
 	)
 
 	a := Access{
