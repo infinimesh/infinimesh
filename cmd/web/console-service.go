@@ -57,6 +57,15 @@ func init_cs(log *zap.Logger) {
 		SERVICES_ENABLED_MAP["chatting"] = chatting
 	}
 
+	viper.SetDefault("TIMESERIES", "")
+	timeseries := viper.GetString("TIMESERIES")
+	log.Debug("TIMESERIES", zap.String("value", timeseries))
+	if timeseries != "" {
+		log.Info("Timeseries service is enabled")
+		enabled["timeseries"] = timeseries
+		SERVICES_ENABLED_MAP["timeseries"] = timeseries
+	}
+
 	var err error
 	SERVICES_ENABLED, err = json.Marshal(enabled)
 	if err != nil {

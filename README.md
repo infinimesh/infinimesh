@@ -179,7 +179,8 @@ We have built an automated local development setup based on Docker.
 
 2. Clone this repo via `git clone https://github.com/infinimesh/infinimesh.git` 
 3. cd into the fresh cloned repo
-4. Run `docker compose up`
+4. Copy `.env.example` into `.env`, edit if needed
+5. Run `docker compose up`
 
 Swagger API: https://infinimesh.github.io/infinimesh/
 
@@ -237,4 +238,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-The authors of infinimesh are Infinite Devices GmbH, [birdayz](https://github.com/birdayz) and [2pk03](https://github.com/2pk03), all rights reserved.
+The authors of infinimesh are The Infinite AI Audio GmbH, [birdayz](https://github.com/birdayz), [2pk03](https://github.com/2pk03) and [slntopp](https://github.com/slntopp), all rights reserved.

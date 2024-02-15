@@ -22,9 +22,9 @@
                     <n-form ref="form" :model="model" :rules="rules" label-placement="top">
                         <n-form-item label="Kind" path="kind" label-placement="left" style="margin-top: 5px">
                             <n-radio-group v-model:value="model.kind" name="kind" @update:value="handleKindUpdate">
-                                <n-radio-button value="UNKNOWN" :disabled="true" label="Unknown" />
-                                <n-radio-button value="EMBEDDED" label="Embedded" />
-                                <n-radio-button value="DEVICE" label="Device" />
+                                <n-radio-button :value="PluginKind.UNKNOWN" :disabled="true" label="Unknown" />
+                                <n-radio-button :value="PluginKind.EMBEDDED" label="Embedded" />
+                                <n-radio-button :value="PluginKind.DEVICE" label="Device" />
                             </n-radio-group>
                         </n-form-item>
 
@@ -67,13 +67,13 @@
                             Hover your cursor over kind label in preview to see the differences
                         </n-alert>
 
-                        <template v-if="model.kind == 'EMBEDDED'">
+                        <template v-if="model.kind == PluginKind.EMBEDDED">
                             <n-form-item label="Frame URL" path="embedded_conf.frameUrl" style="margin-top: 5px">
                                 <n-input v-model:value="model.embedded_conf.frameUrl"
                                     placeholder="IFrame URL to embed" />
                             </n-form-item>
                         </template>
-                        <template v-else-if="model.kind == 'DEVICE'">
+                        <template v-else-if="model.kind == PluginKind.DEVICE">
                             <n-form-item label="State View Frame URL" path="device_conf.viewUrl"
                                 style="margin-top: 5px">
                                 <n-input v-model:value="model.device_conf.viewUrl" />
@@ -133,6 +133,8 @@ import {
 
 import { usePluginsStore } from "@/store/plugins"
 
+import { PluginKind } from "infinimesh-proto/build/es/plugins/plugins_pb";
+
 const AddOutline = defineAsyncComponent(() => import("@vicons/ionicons5/AddOutline"))
 const LogoMarkdown = defineAsyncComponent(() => import("@vicons/ionicons5/LogoMarkdown"))
 const BookmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BookmarkOutline"))
@@ -152,7 +154,7 @@ const form = ref();
 const model = ref({
     title: "Lorem Ipsum",
     description: "",
-    kind: "EMBEDDED",
+    kind: PluginKind.EMBEDDED,
     public: true,
     logo: "",
     embedded_conf: {
@@ -168,7 +170,7 @@ function reset() {
     model.value = {
         title: "Lorem Ipsum",
         description: "",
-        kind: "EMBEDDED",
+        kind: PluginKind.EMBEDDED,
         public: true,
         logo: "",
         embedded_conf: {
@@ -181,7 +183,7 @@ function reset() {
 
 function handleKindUpdate() {
     switch (model.value.kind) {
-        case 'EMBEDDED':
+        case PluginKind.EMBEDDED:
             delete model.value.device_conf
             delete rules.value.device_conf
 
@@ -192,7 +194,7 @@ function handleKindUpdate() {
                 frameUrl: [{ required: true, message: "Please input iframe URL" }]
             }
             break
-        case 'DEVICE':
+        case PluginKind.DEVICE:
             delete model.value.embedded_conf
             delete rules.value.embedded_conf
             model.value.device_conf = {

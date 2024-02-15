@@ -1,9 +1,17 @@
 <template>
   <n-space align="center" justify="space-between" style="min-height: 4vh; padding: 0 10px 0 10px">
     <span @click="e => e.preventDefault()">
-      <span style="font-family: 'Exo 2'">{{ platform }}</span> - <n-tooltip :show="min_clicked" placement="top">
+      <n-tooltip :show="min_clicked" placement="top">
         <template #trigger>
-          <span @click="handler">{{ tag }}</span>
+          <div>
+            <span style="font-family: 'Exo 2'">{{ platform }}</span> -
+            <n-tooltip placement="right">
+              <template #trigger>
+                <span @click="handler">{{ tag }}</span>
+              </template>
+              Commit hash: <n-code :inline="true" :style="{ color: theme.warningColor }">{{ hash }}</n-code>
+            </n-tooltip>
+          </div>
         </template>
         <span v-if="store.dev"> You are now in the developer mode</span>
         <span v-else> You are {{ 10 - clicked }} d's away from Developer mode</span>
@@ -22,13 +30,15 @@
 
 <script setup>
 import { h, ref } from "vue"
-import { NSpace, NTooltip } from "naive-ui";
+import { NSpace, NTooltip, NCode, useThemeVars } from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 
 const store = useAppStore();
+const theme = useThemeVars();
 
-const tag = "INFINIMESH_VERSION_TAG";
+const tag = __INFINIMESH_VERSION_TAG__
+const hash = __INFINIMESH_COMMIT_HASH__
 const platform = PLATFORM_NAME
 
 const clicked = ref(0)
@@ -56,7 +66,7 @@ function handler() {
 
 function links() {
   let children = FooterLinks.map(el => {
-    return h('span', { class: 'a', onClick: () => window.open(el.href, '_blank')}, el.title)
+    return h('span', { class: 'a', onClick: () => window.open(el.href, '_blank') }, el.title)
   })
 
   return h(NSpace, {}, () => children)
@@ -64,14 +74,12 @@ function links() {
 </script>
 
 <style>
-
 span.a {
-  cursor:pointer;
+  cursor: pointer;
   font-family: 'Exo 2'
 }
 
 span.a:hover {
-  text-decoration:underline;
+  text-decoration: underline;
 }
-
 </style>
