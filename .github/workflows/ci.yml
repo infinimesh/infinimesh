@@ -2,10 +2,6 @@ name: Run Checks and Build Docker Images
 
 on:
   push:
-    branches:
-      - master
-      - dev
-      - dev-*
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
       - "v[0-9]+.[0-9]+.[0-9]+-r[0-9]+"
