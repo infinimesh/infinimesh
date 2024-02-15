@@ -58,7 +58,6 @@ import { ref, computed, watch, defineAsyncComponent, toRefs } from 'vue';
 import { NCard, NModal, NButton, NIcon, NSelect, NAlert, NSpace, NTable, NInput } from "naive-ui"
 
 import { useNSStore } from "@/store/namespaces";
-
 import { access_lvl_conv } from "@/utils/access";
 
 const CloseOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CloseOutline"))

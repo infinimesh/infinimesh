@@ -444,67 +444,6 @@ func (_c *MockInfinimeshCommonActionsRepo_ListOwnedDeep_Call) RunAndReturn(run f
 	return _c
 }
 
-// ListQuery provides a mock function with given fields: ctx, log, from, children
-func (_m *MockInfinimeshCommonActionsRepo) ListQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string) (driver.Cursor, error) {
-	ret := _m.Called(ctx, log, from, children)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListQuery")
-	}
-
-	var r0 driver.Cursor
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (driver.Cursor, error)); ok {
-		return rf(ctx, log, from, children)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) driver.Cursor); ok {
-		r0 = rf(ctx, log, from, children)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(driver.Cursor)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) error); ok {
-		r1 = rf(ctx, log, from, children)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockInfinimeshCommonActionsRepo_ListQuery_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListQuery'
-type MockInfinimeshCommonActionsRepo_ListQuery_Call struct {
-	*mock.Call
-}
-
-// ListQuery is a helper method to define mock.On call
-//   - ctx context.Context
-//   - log *zap.Logger
-//   - from graph.InfinimeshGraphNode
-//   - children string
-func (_e *MockInfinimeshCommonActionsRepo_Expecter) ListQuery(ctx interface{}, log interface{}, from interface{}, children interface{}) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
-	return &MockInfinimeshCommonActionsRepo_ListQuery_Call{Call: _e.mock.On("ListQuery", ctx, log, from, children)}
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) Run(run func(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, children string)) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(graph.InfinimeshGraphNode), args[3].(string))
-	})
-	return _c
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) Return(_a0 driver.Cursor, _a1 error) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockInfinimeshCommonActionsRepo_ListQuery_Call) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (driver.Cursor, error)) *MockInfinimeshCommonActionsRepo_ListQuery_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // Move provides a mock function with given fields: ctx, c, obj, edge, ns
 func (_m *MockInfinimeshCommonActionsRepo) Move(ctx context.Context, c graph.InfinimeshController, obj graph.InfinimeshGraphNode, edge driver.Collection, ns string) error {
 	ret := _m.Called(ctx, c, obj, edge, ns)

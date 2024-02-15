@@ -33,6 +33,10 @@ var (
 	cap int
 )
 
+// Setup - Sets up RabbitMQ Queues and internal PubSub.
+// Should only be used when Queue is required.
+//
+// **IMPORTANT!** Should not be used with known Queues unless you know what you're doing (e.g. mqtt.incoming), as you will prevent workers from consuming messages
 func Setup(Log *zap.Logger, conn *amqp.Connection, pub, sub string, buffer_capacity int) (pubsub.PubSub, error) {
 	logger = Log
 	cap = buffer_capacity
