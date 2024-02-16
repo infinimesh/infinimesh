@@ -338,7 +338,8 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 			log.Warn("Root account cannot be deleted")
 			return errors.New("ERR_ROOT_OBJECT_CANNOT_BE_DELETED")
 		}
-		nodes, err := credentials.ListCredentialsAndEdges(ctx, log, col.Database(), driver.DocumentID(node))
+		cred := credentials.NewCredentialsController(log, db)
+		nodes, err := cred.ListCredentialsAndEdges(ctx, driver.DocumentID(node))
 		if err != nil {
 			return err
 		}

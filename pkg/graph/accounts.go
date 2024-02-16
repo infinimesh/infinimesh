@@ -85,8 +85,10 @@ func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 type AccountsController struct {
 	InfinimeshBaseController
 
-	col  driver.Collection // Accounts Collection
-	cred driver.Collection
+	col driver.Collection // Accounts Collection
+
+	cred_col driver.Collection
+	cred     credentials.CredentialsController
 
 	rdb redis.Cmdable
 
@@ -117,7 +119,7 @@ func NewAccountsController(
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
-		}, col: col, cred: cred, rdb: rdb,
+		}, col: col, cred_col: cred, rdb: rdb,
 
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
 		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
@@ -281,7 +283,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	}
 
 	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
-	cred, err := credentials.MakeCredentials(request.GetCredentials(), log)
+	cred, err := c.cred.MakeCredentials(request.GetCredentials())
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error making Credentials for Account", zap.Error(err))
@@ -414,7 +416,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string, args ...string) (Account, bool) {
 	ctrl.log.Debug("Authorization request", zap.String("type", auth_type))
 
-	credentials, err := credentials.Find(ctx, ctrl.col.Database(), ctrl.log, auth_type, args...)
+	credentials, err := ctrl.cred.Find(ctx, auth_type, args...)
 	// Check if could authorize
 	if err != nil {
 		ctrl.log.Info("Coudn't authorize", zap.Error(err))
@@ -463,14 +465,14 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
-	linked, err := credentials.ListCredentials(ctx, log, c.db, acc.ID())
+	linked, err := c.cred.ListCredentials(ctx, acc.ID())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Error listing Account's Credentials")
 	}
 
 	var creds []*accpb.Credentials
 	for _, res := range linked {
-		listable, err := credentials.MakeListable(res)
+		listable, err := c.cred.MakeListable(res)
 		if err != nil {
 			log.Warn("Couldn't make Listable", zap.Error(err))
 			continue
@@ -490,7 +492,7 @@ func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account
 	meta, err := edge.ReadDocument(ctx, key, &oldLink)
 	if err == nil {
 		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
-		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
+		_, err = ctrl.cred_col.UpdateDocument(ctx, oldLink.To.Key(), c)
 		if err != nil {
 			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
 			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
@@ -500,7 +502,7 @@ func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account
 	}
 	ctrl.log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
 
-	cred, err := ctrl.cred.CreateDocument(ctx, c)
+	cred, err := ctrl.cred_col.CreateDocument(ctx, c)
 	if err != nil {
 		ctrl.log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
 		return status.Error(codes.Internal, "Couldn't create credentials")
@@ -518,7 +520,7 @@ func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account
 		ctrl.log.Warn("Error Linking Credentials to Account",
 			zap.String("account", acc.Key), zap.String("type", c.Type()), zap.Error(err),
 		)
-		ctrl.cred.RemoveDocument(ctx, cred.Key)
+		ctrl.cred_col.RemoveDocument(ctx, cred.Key)
 		return status.Error(codes.Internal, "Couldn't assign credentials")
 	}
 	return nil
@@ -545,7 +547,7 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 	}
 
 	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
-	cred, err := credentials.MakeCredentials(req.GetCredentials(), log)
+	cred, err := c.cred.MakeCredentials(req.GetCredentials())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

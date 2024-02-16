@@ -53,6 +53,14 @@ type Credentials interface {
 	SetLogger(*zap.Logger)
 }
 
+type CredentialsController interface {
+	Find(ctx context.Context, auth_type string, args ...string) (cred Credentials, err error)
+	MakeCredentials(credentials *accountspb.Credentials) (Credentials, error)
+	ListCredentials(ctx context.Context, acc driver.DocumentID) (r []ListCredentialsResponse, err error)
+	ListCredentialsAndEdges(ctx context.Context, account driver.DocumentID) (nodes []string, err error)
+	MakeListable(r ListCredentialsResponse) (ListableCredentials, error)
+}
+
 func Determine(auth_type string) (cred Credentials, ok bool) {
 	switch auth_type {
 	case "standard":
@@ -62,7 +70,19 @@ func Determine(auth_type string) (cred Credentials, ok bool) {
 	}
 }
 
-func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type string, args ...string) (cred Credentials, err error) {
+type credentialsController struct {
+	log *zap.Logger
+	db  driver.Database
+}
+
+func NewCredentialsController(log *zap.Logger, db driver.Database) CredentialsController {
+	return &credentialsController{
+		log: log,
+		db:  db,
+	}
+}
+
+func (ctrl *credentialsController) Find(ctx context.Context, auth_type string, args ...string) (cred Credentials, err error) {
 	var ok bool
 	switch auth_type {
 	case "standard":
@@ -73,9 +93,9 @@ func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type st
 		return nil, errors.New("unknown auth type")
 	}
 
-	cred.SetLogger(log)
+	cred.SetLogger(ctrl.log)
 
-	ok = cred.Find(ctx, db)
+	ok = cred.Find(ctx, ctrl.db)
 	if !ok {
 		return nil, errors.New("couldn't find credentials")
 	}
@@ -87,7 +107,7 @@ func Find(ctx context.Context, db driver.Database, log *zap.Logger, auth_type st
 	return nil, errors.New("couldn't authorize")
 }
 
-func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Credentials, error) {
+func (ctrl *credentialsController) MakeCredentials(credentials *accountspb.Credentials) (Credentials, error) {
 	if credentials == nil {
 		return nil, errors.New("credentials aren't given")
 	}
@@ -112,7 +132,7 @@ func MakeCredentials(credentials *accountspb.Credentials, log *zap.Logger) (Cred
 		return nil, err
 	}
 
-	cred.SetLogger(log)
+	cred.SetLogger(ctrl.log)
 	return cred, nil
 }
 
@@ -124,8 +144,8 @@ GRAPH @credentials
 )
 `
 
-func ListCredentialsAndEdges(ctx context.Context, log *zap.Logger, db driver.Database, account driver.DocumentID) (nodes []string, err error) {
-	c, err := db.Query(ctx, listCredentialsAndEdgesQuery, map[string]interface{}{
+func (ctrl *credentialsController) ListCredentialsAndEdges(ctx context.Context, account driver.DocumentID) (nodes []string, err error) {
+	c, err := ctrl.db.Query(ctx, listCredentialsAndEdgesQuery, map[string]interface{}{
 		"account":     account,
 		"credentials": schema.CREDENTIALS_COL,
 	})
@@ -150,13 +170,13 @@ RETURN { type: edge.type, credentials }
 `
 
 // ListCredentials - Returns Credentials linked to Account
-func ListCredentials(ctx context.Context, log *zap.Logger, db driver.Database, acc driver.DocumentID) (r []ListCredentialsResponse, err error) {
-	c, err := db.Query(ctx, listCredentialsQuery, map[string]interface{}{
+func (ctrl *credentialsController) ListCredentials(ctx context.Context, acc driver.DocumentID) (r []ListCredentialsResponse, err error) {
+	c, err := ctrl.db.Query(ctx, listCredentialsQuery, map[string]interface{}{
 		"account":           acc.String(),
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
 	if err != nil {
-		log.Warn("Error executing query", zap.Error(err))
+		ctrl.log.Warn("Error executing query", zap.Error(err))
 		return nil, err
 	}
 	defer c.Close()
@@ -167,7 +187,7 @@ func ListCredentials(ctx context.Context, log *zap.Logger, db driver.Database, a
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
-			log.Debug("Error unmarshalling credentials response", zap.Error(err))
+			ctrl.log.Debug("Error unmarshalling credentials response", zap.Error(err))
 			return nil, err
 		}
 		r = append(r, cred)
@@ -186,7 +206,7 @@ var _Listables = map[string]ListableFabric{
 }
 
 // MakeListable - Accepts Credentials type as string t and Credentials data as map[string]interface{} d
-func MakeListable(r ListCredentialsResponse) (ListableCredentials, error) {
+func (ctrl *credentialsController) MakeListable(r ListCredentialsResponse) (ListableCredentials, error) {
 	f, ok := _Listables[r.Type]
 	if !ok {
 		return nil, fmt.Errorf("Credentials of type %s aren't Listable", r.Type)
