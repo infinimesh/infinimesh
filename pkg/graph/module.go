@@ -3,7 +3,9 @@ package graph
 import (
 	"github.com/arangodb/go-driver"
 	"github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/sessions"
 	"github.com/infinimesh/proto/handsfree"
+	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/devices"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"go.uber.org/zap"
@@ -58,6 +60,9 @@ func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.
 	return &accountsControllerModule{
 		handler: NewAccountsController(
 			log, db, rdb,
+			sessions.NewSessionsHandlerModule(rdb).Handler(),
+			NewInfinimeshCommonActionsRepo(db),
+			NewGenericRepo[*accounts.Account](db),
 		),
 	}
 }

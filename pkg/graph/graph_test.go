@@ -89,7 +89,8 @@ func init() {
 		panic(err)
 	}
 
-	ctrl = NewAccountsController(log, db, rdb)
+	ictrl := NewAccountsControllerModule(log, db, rdb).Handler()
+	ctrl = ictrl.(*AccountsController)
 
 	ns_ctrl = NewNamespacesController(log, db)
 

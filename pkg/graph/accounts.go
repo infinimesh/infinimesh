@@ -101,16 +101,18 @@ type AccountsController struct {
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database, rdb redis.Cmdable) *AccountsController {
+func NewAccountsController(
+	log *zap.Logger, db driver.Database, rdb redis.Cmdable,
+	sessions sessions.SessionsHandler,
+	ica InfinimeshCommonActionsRepo,
+	repo InfinimeshGenericActionsRepo[*accpb.Account],
+) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
 
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
 	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
-
-	ica := NewInfinimeshCommonActionsRepo(db)
-	repo := NewGenericRepo[*accpb.Account](db)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
@@ -120,7 +122,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb redis.Cmdabl
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
 		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
 
-		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
+		sessions: sessions,
 
 		ica_repo: ica,
 		repo:     repo,
