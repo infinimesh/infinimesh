@@ -111,11 +111,8 @@ func NewAccountsController(
 	cred credentials.CredentialsController,
 ) *AccountsController {
 	ctx := context.TODO()
-	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
-	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
-
-	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
-	cred_col, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
+	col := ica.GetVertexCol(ctx, schema.PERMISSIONS_GRAPH.Name, schema.ACCOUNTS_COL)
+	cred_col := ica.GetVertexCol(ctx, schema.CREDENTIALS_GRAPH.Name, schema.CREDENTIALS_COL)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{

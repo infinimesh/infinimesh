@@ -50,6 +50,7 @@ packages:
             Database:
             Collection:
             Cursor:
+            Graph:
 
     github.com/infinimesh/infinimesh/pkg/pubsub:
         interfaces:

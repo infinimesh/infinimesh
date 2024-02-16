@@ -79,6 +79,7 @@ func NewBlankDocument(col string, key string) driver.DocumentMeta {
 }
 
 type InfinimeshCommonActionsRepo interface {
+	GetVertexCol(ctx context.Context, graph, name string) driver.Collection
 	GetEdgeCol(ctx context.Context, name string) driver.Collection
 	CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool
 	Link(
@@ -102,6 +103,12 @@ type infinimeshCommonActionsRepo struct {
 
 func NewInfinimeshCommonActionsRepo(db driver.Database) InfinimeshCommonActionsRepo {
 	return &infinimeshCommonActionsRepo{db: db}
+}
+
+func (r *infinimeshCommonActionsRepo) GetVertexCol(ctx context.Context, graph, name string) driver.Collection {
+	g, _ := r.db.Graph(ctx, graph)
+	col, _ := g.VertexCollection(ctx, name)
+	return col
 }
 
 func (r *infinimeshCommonActionsRepo) GetEdgeCol(ctx context.Context, name string) driver.Collection {
