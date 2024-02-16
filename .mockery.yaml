@@ -14,6 +14,11 @@ packages:
             InfinimeshCommonActionsRepo:
             InfinimeshGenericActionsRepo:
 
+    github.com/infinimesh/infinimesh/pkg/credentials:
+        interfaces:
+            CredentialsController:
+
+
     # ProtoBuf Packages
     github.com/infinimesh/proto/node:
         interfaces:

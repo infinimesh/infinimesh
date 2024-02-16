@@ -108,22 +108,24 @@ func NewAccountsController(
 	sessions sessions.SessionsHandler,
 	ica InfinimeshCommonActionsRepo,
 	repo InfinimeshGenericActionsRepo[*accpb.Account],
+	cred credentials.CredentialsController,
 ) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
 
 	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
-	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
+	cred_col, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
-		}, col: col, cred_col: cred, rdb: rdb,
+		}, col: col, cred_col: cred_col, rdb: rdb,
 
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
 		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
 
+		cred:     cred,
 		sessions: sessions,
 
 		ica_repo: ica,
