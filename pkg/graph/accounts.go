@@ -88,7 +88,7 @@ type AccountsController struct {
 	col  driver.Collection // Accounts Collection
 	cred driver.Collection
 
-	rdb *redis.Client
+	rdb redis.Cmdable
 
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
@@ -101,7 +101,7 @@ type AccountsController struct {
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Client) *AccountsController {
+func NewAccountsController(log *zap.Logger, db driver.Database, rdb redis.Cmdable) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
