@@ -118,6 +118,9 @@ func (ctrl *credentialsController) MakeCredentials(credentials *accountspb.Crede
 	var err error
 	switch {
 	case credentials.Type == "standard":
+		if len(credentials.Data) != 2 {
+			return nil, errors.New("missing username or password")
+		}
 		cred, err = NewStandardCredentials(credentials.Data[0], credentials.Data[1])
 	case credentials.Type == "ldap":
 		if len(credentials.Data) != 2 {
@@ -125,9 +128,14 @@ func (ctrl *credentialsController) MakeCredentials(credentials *accountspb.Crede
 		}
 		cred, err = NewLDAPCredentials(credentials.Data[0], credentials.Data[1])
 	case strings.HasPrefix(credentials.Type, "oauth2"):
+		if len(credentials.Data) != 1 {
+			return nil, errors.New("missing oauth token")
+		}
 		cred, err = NewOauthCredentials(credentials.GetType(), credentials.GetData()[0])
+	case credentials.Type == "mock":
+		cred, err = NewMockCredentials(credentials.Data...)
 	default:
-		return nil, errors.New("auth type is wrong")
+		return nil, errors.New("unknown auth type")
 	}
 
 	if err != nil {
@@ -138,7 +146,7 @@ func (ctrl *credentialsController) MakeCredentials(credentials *accountspb.Crede
 	return cred, nil
 }
 
-const listCredentialsAndEdgesQuery = `
+const ListCredentialsAndEdgesQuery = `
 RETURN FLATTEN(
 FOR node, edge IN 1 OUTBOUND @account
 GRAPH @credentials
@@ -147,7 +155,7 @@ GRAPH @credentials
 `
 
 func (ctrl *credentialsController) ListCredentialsAndEdges(ctx context.Context, account driver.DocumentID) (nodes []string, err error) {
-	c, err := ctrl.db.Query(ctx, listCredentialsAndEdgesQuery, map[string]interface{}{
+	c, err := ctrl.db.Query(ctx, ListCredentialsAndEdgesQuery, map[string]interface{}{
 		"account":     account,
 		"credentials": schema.CREDENTIALS_COL,
 	})
@@ -165,7 +173,7 @@ type ListCredentialsResponse struct {
 	D    map[string]interface{} `json:"credentials"`
 }
 
-const listCredentialsQuery = `
+const ListCredentialsQuery = `
 FOR credentials, edge IN 1 OUTBOUND @account
 GRAPH @credentials_graph
 RETURN { type: edge.type, credentials }
@@ -173,7 +181,7 @@ RETURN { type: edge.type, credentials }
 
 // ListCredentials - Returns Credentials linked to Account
 func (ctrl *credentialsController) ListCredentials(ctx context.Context, acc driver.DocumentID) (r []ListCredentialsResponse, err error) {
-	c, err := ctrl.db.Query(ctx, listCredentialsQuery, map[string]interface{}{
+	c, err := ctrl.db.Query(ctx, ListCredentialsQuery, map[string]interface{}{
 		"account":           acc.String(),
 		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
 	})
