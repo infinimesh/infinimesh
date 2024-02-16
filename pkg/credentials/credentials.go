@@ -89,6 +89,8 @@ func (ctrl *credentialsController) Find(ctx context.Context, auth_type string, a
 		cred = &StandardCredentials{Username: args[0]}
 	case "ldap":
 		cred = &LDAPCredentials{Username: args[0]}
+	case "mock":
+		cred = &MockCredentials{Args: args}
 	default:
 		return nil, errors.New("unknown auth type")
 	}
