@@ -8,11 +8,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// MockCredentials is a mock implementation of the Credentials interface
+// Method name can be specified in the first argument to make it fail
 type MockCredentials struct {
 	Args []string
 
 	log   *zap.Logger
 	valid bool
+}
+
+func NewMockCredentials(args ...string) (Credentials, error) {
+	if args[0] == "NewMockCredentials" {
+		return nil, errors.New("invalid")
+	}
+	return &MockCredentials{Args: args}, nil
 }
 
 func (c *MockCredentials) SetLogger(l *zap.Logger) {
@@ -32,7 +41,7 @@ func (c *MockCredentials) Authorize(args ...string) bool {
 		return false
 	}
 
-	return c.Args[0] == "valid"
+	return c.Args[0] != "Authorize"
 }
 
 func (c *MockCredentials) Find(context.Context, driver.Database) bool {
@@ -41,7 +50,7 @@ func (c *MockCredentials) Find(context.Context, driver.Database) bool {
 		return false
 	}
 
-	if c.Args[0] == "valid" {
+	if c.Args[0] != "Find" {
 		c.valid = true
 		return true
 	}
@@ -51,7 +60,7 @@ func (c *MockCredentials) Find(context.Context, driver.Database) bool {
 }
 
 func (cred *MockCredentials) FindByKey(ctx context.Context, col driver.Collection, key string) error {
-	if key == "valid" {
+	if key != "FindByKey" {
 		return nil
 	}
 	return errors.New("not found")
