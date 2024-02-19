@@ -13,6 +13,7 @@ import (
 	credentials_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/credentials"
 	graph_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/graph"
 	sessions_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/sessions"
+	"github.com/infinimesh/infinimesh/pkg/credentials"
 	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
@@ -50,6 +51,8 @@ type accountsControllerFixture struct {
 		auth_data []string
 		account   graph.Account
 		session   *sessions.Session
+
+		create_request *accounts.CreateRequest
 	}
 }
 
@@ -97,10 +100,19 @@ func newAccountsControllerFixture(t *testing.T) accountsControllerFixture {
 	}
 	f.data.account.DocumentMeta = driver.DocumentMeta{
 		Key: f.data.account.Uuid,
+		ID:  driver.NewDocumentID(schema.ACCOUNTS_COL, f.data.account.Uuid),
 	}
 	f.data.session = &sessions.Session{
 		Id:     "session_id",
 		Client: "",
+	}
+
+	f.data.create_request = &accounts.CreateRequest{
+		Account: f.data.account.Account,
+		Credentials: &accounts.Credentials{
+			Type: "standard",
+			Data: f.data.auth_data,
+		},
 	}
 
 	return f
@@ -406,4 +418,160 @@ func TestListAccounts_Success(t *testing.T) {
 		assert.Equal(t, accs[i].Uuid, acc.GetUuid())
 		assert.Equal(t, accs[i].Title, acc.GetTitle())
 	}
+}
+
+// Create
+//
+
+func TestAccountCreate_FailsOn_AccessLevel(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(false, access.Level_NONE)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "permission_denied: no Access to Namespace infinimesh")
+}
+
+func TestAccountCreate_FailsOn_CreateDocument(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, assert.AnError)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "internal: Error while creating Account")
+}
+
+func TestAccountCreate_FailsOn_Link(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(f.data.account.DocumentMeta, nil)
+
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+		return ns.Key == "infinimesh"
+	}), mock.MatchedBy(func(acc *graph.Account) bool {
+		return acc.Uuid == f.data.account.Uuid
+	}), access.Level_ADMIN, access.Role_OWNER).
+		Return(assert.AnError)
+
+	// Deferred cleanup
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.account.DocumentMeta.Key).
+		Return(driver.DocumentMeta{}, nil)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "internal: Error while creating Account")
+}
+
+func TestAccountCreate_FailsOn_MakeCredentials(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(f.data.account.DocumentMeta, nil)
+
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+		return ns.Key == "infinimesh"
+	}), mock.MatchedBy(func(acc *graph.Account) bool {
+		return acc.Uuid == f.data.account.Uuid
+	}), access.Level_ADMIN, access.Role_OWNER).
+		Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(f.data.create_request.Credentials).
+		Return(nil, assert.AnError)
+
+	// Deferred cleanup
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.account.DocumentMeta.Key).
+		Return(driver.DocumentMeta{}, nil)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "internal: Error while creating Account: assert.AnError general error for testing")
+}
+
+func TestAccountCreate_FailsOn_SetCredentials(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(f.data.account.DocumentMeta, nil)
+
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+		return ns.Key == "infinimesh"
+	}), mock.MatchedBy(func(acc *graph.Account) bool {
+		return acc.Uuid == f.data.account.Uuid
+	}), access.Level_ADMIN, access.Role_OWNER).
+		Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(f.data.create_request.Credentials).
+		Return(&credentials.StandardCredentials{}, nil)
+
+	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.DocumentMeta.ID, &credentials.StandardCredentials{}).
+		Return(assert.AnError)
+
+	// Deferred cleanup
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.account.DocumentMeta.Key).
+		Return(driver.DocumentMeta{}, nil)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "internal: Error while creating Account: assert.AnError general error for testing")
+}
+
+func TestAccountCreate_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).
+		Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(f.data.account.DocumentMeta, nil)
+
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+		return ns.Key == "infinimesh"
+	}), mock.MatchedBy(func(acc *graph.Account) bool {
+		return acc.Uuid == f.data.account.Uuid
+	}), access.Level_ADMIN, access.Role_OWNER).
+		Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(f.data.create_request.Credentials).
+		Return(&credentials.StandardCredentials{}, nil)
+
+	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.DocumentMeta.ID, &credentials.StandardCredentials{}).
+		Return(nil)
+
+	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
+		Msg: f.data.create_request,
+	})
+
+	assert.NoError(t, err)
 }

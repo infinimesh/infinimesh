@@ -278,21 +278,21 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error Linking Namespace to Account", zap.Error(err))
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, StatusFromString(connect.CodeInternal, "Error while creating Account")
 	}
 
 	cred, err := c.cred.MakeCredentials(request.GetCredentials())
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error making Credentials for Account", zap.Error(err))
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 
 	err = c.cred.SetCredentials(ctx, account.ID(), cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
-		return nil, err
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 	return connect.NewResponse(
 		&accpb.CreateResponse{Account: account.Account},
