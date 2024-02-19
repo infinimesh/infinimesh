@@ -147,7 +147,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &account)
 		if err != nil {
 			log.Warn("Failed to get Account and access level", zap.Error(err))
-			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+			return nil, status.Error(codes.Unauthenticated, "Account not found")
 		}
 		if account.Access.Level < access.Level_ROOT && account.Access.Role != access.Role_OWNER {
 			log.Warn("Super-Admin Token Request attempted", zap.String("requestor", requestor), zap.String("account", account.Uuid))
