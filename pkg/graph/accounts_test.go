@@ -57,6 +57,8 @@ type accountsControllerFixture struct {
 }
 
 func newAccountsControllerFixture(t *testing.T) accountsControllerFixture {
+	t.Parallel()
+
 	f := accountsControllerFixture{}
 
 	f.mocks.db = &driver_mocks.MockDatabase{}

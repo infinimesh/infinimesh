@@ -35,8 +35,9 @@ type interceptorFixture struct {
 	}
 }
 
-func newInterceptorFixture(t *testing.T) *interceptorFixture {
-	f := &interceptorFixture{}
+func newInterceptorFixture(t *testing.T) interceptorFixture {
+	t.Parallel()
+	f := interceptorFixture{}
 
 	core, observer := observer.New(zap.DebugLevel)
 	f.mocks.log = zap.New(core)
