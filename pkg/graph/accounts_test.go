@@ -573,6 +573,8 @@ func TestAccountCreate_Success(t *testing.T) {
 	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.DocumentMeta.ID, &credentials.StandardCredentials{}).
 		Return(nil)
 
+	f.data.account.DefaultNamespace = ""
+
 	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
 		Msg: f.data.create_request,
 	})
