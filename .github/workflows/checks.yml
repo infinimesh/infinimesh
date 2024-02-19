@@ -1,0 +1,71 @@
+name: Tests and Checks
+
+on:
+  pull_request:
+  
+jobs:
+  go-checks:
+    name: Run Go tests and checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Go
+        uses: WillAbides/setup-go-faster@v1.14.0
+        with:
+          go-version: "1.20"
+
+      - name: Run Go tests
+        run: |
+          go test -v ./... -coverprofile=./coverage.out -covermode=count ./...
+      - uses: seriousben/go-patch-cover-action@v1
+        if: always() 
+      
+      - name: Run staticcheck
+        uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          install-go: false
+          min-go-version: "1.20"
+          version: 2023.1.6
+      
+  vue-checks:
+      name: Run Vue tests and checks
+      runs-on: ubuntu-latest
+      permissions: 
+        # Required to checkout the code
+        contents: read
+        # Required to put a comment into the pull-request
+        pull-requests: write
+      env:
+        working-directory: ./console
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '16'
+
+        - name: Install dependencies
+          working-directory: ${{env.working-directory}}
+          run: |
+            npm install -g pnpm
+            pnpm i
+
+        - name: Run tests
+          working-directory: ${{env.working-directory}}
+          run: |
+            pnpm test
+        - name: 'Report Coverage'
+          # Set if: always() to also generate the report if tests are failing
+          # Only works if you set `reportOnFailure: true` in your vite config as specified above
+          if: always() 
+          uses:  davelosert/vitest-coverage-report-action@v2
+          with:
+            working-directory: ${{env.working-directory}}
