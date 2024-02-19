@@ -403,7 +403,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	err = c.ica_repo.DeleteRecursive(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error deleting account")
+		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil

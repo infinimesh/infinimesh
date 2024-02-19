@@ -873,3 +873,94 @@ func TestAccountDeletables_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+// Delete
+//
+
+func TestAccountDelete_FailsOn_AccessLevelAndGet(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+	).Return(assert.AnError)
+
+	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+}
+
+func TestAccountDelete_FailsOn_NotEnoughAccess(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_READ,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access Rights")
+}
+
+func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+				Role:  access.Role_OWNER,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything, mock.Anything).
+		Return(assert.AnError)
+
+	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error while deleting Account")
+}
+
+func TestAccountDelete_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+				Role:  access.Role_OWNER,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything, mock.Anything).
+		Return(nil)
+
+	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.NoError(t, err)
+}
