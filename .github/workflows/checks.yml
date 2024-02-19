@@ -5,7 +5,7 @@ on:
   
 jobs:
   go-checks:
-    name: Run Go tests and checks
+    name: Go
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,7 +32,7 @@ jobs:
           version: 2023.1.6
       
   vue-checks:
-      name: Run Vue tests and checks
+      name: Vue
       runs-on: ubuntu-latest
       permissions: 
         # Required to checkout the code
