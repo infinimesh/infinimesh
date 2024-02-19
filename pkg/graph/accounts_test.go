@@ -363,3 +363,47 @@ func TestGet_Success(t *testing.T) {
 	assert.Equal(t, f.data.account.Uuid, res.Msg.GetUuid())
 	assert.Equal(t, f.data.account.Title, res.Msg.GetTitle())
 }
+
+// List
+//
+
+func TestListAccounts_FailsOn_ListQuery(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything).
+		Return(nil, assert.AnError)
+
+	_, err := f.repo.List(f.data.ctx, &connect.Request[node.EmptyMessage]{
+		Msg: &node.EmptyMessage{},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Failed to list accounts")
+}
+
+func TestListAccounts_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	accs := []*accounts.Account{
+		{Uuid: "1", Title: "1"},
+		{Uuid: "2", Title: "2"},
+	}
+
+	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything).
+		Return(&graph.ListQueryResult[*accounts.Account]{
+			Result: accs,
+			Count:  2,
+		}, nil)
+
+	res, err := f.repo.List(f.data.ctx, &connect.Request[node.EmptyMessage]{
+		Msg: &node.EmptyMessage{},
+	})
+
+	assert.NoError(t, err)
+	assert.Len(t, res.Msg.GetAccounts(), 2)
+
+	for i, acc := range res.Msg.GetAccounts() {
+		assert.Equal(t, accs[i].Uuid, acc.GetUuid())
+		assert.Equal(t, accs[i].Title, acc.GetTitle())
+	}
+}
