@@ -12,7 +12,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/handlers v1.5.2
-	github.com/infinimesh/proto v0.0.0-20240212185648-68bfc5710ae6
+	github.com/infinimesh/proto v0.0.0-20240219141216-a5c86b6acb6b
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.18.2
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
