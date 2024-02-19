@@ -87,8 +87,7 @@ type AccountsController struct {
 
 	col driver.Collection // Accounts Collection
 
-	cred_col driver.Collection
-	cred     credentials.CredentialsController
+	cred credentials.CredentialsController
 
 	rdb redis.Cmdable
 
@@ -112,12 +111,11 @@ func NewAccountsController(
 ) *AccountsController {
 	ctx := context.TODO()
 	col := ica.GetVertexCol(ctx, schema.PERMISSIONS_GRAPH.Name, schema.ACCOUNTS_COL)
-	cred_col := ica.GetVertexCol(ctx, schema.CREDENTIALS_GRAPH.Name, schema.CREDENTIALS_COL)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
-		}, col: col, cred_col: cred_col, rdb: rdb,
+		}, col: col, rdb: rdb,
 
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
 		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
@@ -419,14 +417,13 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
-
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights")
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
 	linked, err := c.cred.ListCredentials(ctx, acc.ID())
