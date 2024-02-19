@@ -456,24 +456,25 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
-
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights to set credentials for this Account")
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
 	cred, err := c.cred.MakeCredentials(req.GetCredentials())
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Warn("Error making Credentials", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
 	}
 
 	err = c.cred.SetCredentials(ctx, acc.ID(), cred)
 	if err != nil {
-		return nil, err
+		log.Warn("Error making Credentials", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
 	}
 	return connect.NewResponse(&pb.SetCredentialsResponse{}), nil
 }

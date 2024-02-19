@@ -1077,3 +1077,133 @@ func TestGetCredentials_Success(t *testing.T) {
 	assert.Len(t, res.Msg.GetCredentials(), 1)
 	assert.Equal(t, "standard", res.Msg.GetCredentials()[0].GetType())
 }
+
+// SetCredentials
+//
+
+func TestSetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+	).Return(assert.AnError)
+
+	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
+		Msg: &node.SetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting Account or not enough Access rights to set credentials for this Account")
+}
+
+func TestSetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_READ,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
+		Msg: &node.SetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
+}
+
+func TestSetCredentials_FailsOn_MakeCredentials(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ROOT,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(mock.Anything).
+		Return(nil, assert.AnError)
+
+	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
+		Msg: &node.SetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error setting Account's Credentials")
+}
+
+func TestSetCredentials_FailsOn_SetCredentials(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ROOT,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(mock.Anything).
+		Return(&credentials.StandardCredentials{}, nil)
+
+	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.ID(), mock.Anything).
+		Return(assert.AnError)
+
+	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
+		Msg: &node.SetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error setting Account's Credentials")
+}
+
+func TestSetCredentials_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ROOT,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.cred.EXPECT().MakeCredentials(mock.Anything).
+		Return(&credentials.StandardCredentials{}, nil)
+
+	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.ID(), mock.Anything).
+		Return(nil)
+
+	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
+		Msg: &node.SetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.NoError(t, err)
+}
