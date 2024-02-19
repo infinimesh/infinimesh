@@ -79,6 +79,7 @@ func NewBlankDocument(col string, key string) driver.DocumentMeta {
 }
 
 type InfinimeshCommonActionsRepo interface {
+	GetVertexCol(ctx context.Context, graph, name string) driver.Collection
 	GetEdgeCol(ctx context.Context, name string) driver.Collection
 	CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool
 	Link(
@@ -102,6 +103,12 @@ type infinimeshCommonActionsRepo struct {
 
 func NewInfinimeshCommonActionsRepo(db driver.Database) InfinimeshCommonActionsRepo {
 	return &infinimeshCommonActionsRepo{db: db}
+}
+
+func (r *infinimeshCommonActionsRepo) GetVertexCol(ctx context.Context, graph, name string) driver.Collection {
+	g, _ := r.db.Graph(ctx, graph)
+	col, _ := g.VertexCollection(ctx, name)
+	return col
 }
 
 func (r *infinimeshCommonActionsRepo) GetEdgeCol(ctx context.Context, name string) driver.Collection {
@@ -338,7 +345,8 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 			log.Warn("Root account cannot be deleted")
 			return errors.New("ERR_ROOT_OBJECT_CANNOT_BE_DELETED")
 		}
-		nodes, err := credentials.ListCredentialsAndEdges(ctx, log, col.Database(), driver.DocumentID(node))
+		cred := credentials.NewCredentialsController(ctx, log, db)
+		nodes, err := cred.ListCredentialsAndEdges(ctx, driver.DocumentID(node))
 		if err != nil {
 			return err
 		}
@@ -505,16 +513,18 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 		return err
 	}
 
-	ctrl := NewAccountsController(log, r.db, rdb)
+	ictrl := NewAccountsControllerModule(log, r.db, rdb).Handler()
+	ctrl := ictrl.(*AccountsController)
+
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
-		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)
+		err = ctrl.cred.SetCredentials(ctx, root.ID(), cred)
 		if err != nil {
 			log.Warn("Error setting Root Account Credentials")
 			return err
 		}
 	}
-	_, res := ctrl.Authorize(ctx, "standard", "infinimesh", passwd)
+	_, res := ctrl.cred.Authorize(ctx, "standard", "infinimesh", passwd)
 	if !res {
 		log.Warn("Error authorizing Root Account")
 		return errors.New("cannot authorize infinimesh")

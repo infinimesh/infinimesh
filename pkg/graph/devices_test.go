@@ -55,6 +55,7 @@ type devicesControllerFixture struct {
 }
 
 func newDevicesControllerFixture(t *testing.T) *devicesControllerFixture {
+	t.Parallel()
 	f := &devicesControllerFixture{}
 
 	f.mocks.db = driver_mocks.NewMockDatabase(t)

@@ -332,6 +332,56 @@ func (_c *MockInfinimeshCommonActionsRepo_GetEdgeCol_Call) RunAndReturn(run func
 	return _c
 }
 
+// GetVertexCol provides a mock function with given fields: ctx, _a1, name
+func (_m *MockInfinimeshCommonActionsRepo) GetVertexCol(ctx context.Context, _a1 string, name string) driver.Collection {
+	ret := _m.Called(ctx, _a1, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetVertexCol")
+	}
+
+	var r0 driver.Collection
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) driver.Collection); ok {
+		r0 = rf(ctx, _a1, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(driver.Collection)
+		}
+	}
+
+	return r0
+}
+
+// MockInfinimeshCommonActionsRepo_GetVertexCol_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetVertexCol'
+type MockInfinimeshCommonActionsRepo_GetVertexCol_Call struct {
+	*mock.Call
+}
+
+// GetVertexCol is a helper method to define mock.On call
+//   - ctx context.Context
+//   - _a1 string
+//   - name string
+func (_e *MockInfinimeshCommonActionsRepo_Expecter) GetVertexCol(ctx interface{}, _a1 interface{}, name interface{}) *MockInfinimeshCommonActionsRepo_GetVertexCol_Call {
+	return &MockInfinimeshCommonActionsRepo_GetVertexCol_Call{Call: _e.mock.On("GetVertexCol", ctx, _a1, name)}
+}
+
+func (_c *MockInfinimeshCommonActionsRepo_GetVertexCol_Call) Run(run func(ctx context.Context, _a1 string, name string)) *MockInfinimeshCommonActionsRepo_GetVertexCol_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockInfinimeshCommonActionsRepo_GetVertexCol_Call) Return(_a0 driver.Collection) *MockInfinimeshCommonActionsRepo_GetVertexCol_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockInfinimeshCommonActionsRepo_GetVertexCol_Call) RunAndReturn(run func(context.Context, string, string) driver.Collection) *MockInfinimeshCommonActionsRepo_GetVertexCol_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Link provides a mock function with given fields: ctx, log, edge, from, to, lvl, role
 func (_m *MockInfinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from graph.InfinimeshGraphNode, to graph.InfinimeshGraphNode, lvl access.Level, role access.Role) error {
 	ret := _m.Called(ctx, log, edge, from, to, lvl, role)

@@ -85,10 +85,11 @@ func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 type AccountsController struct {
 	InfinimeshBaseController
 
-	col  driver.Collection // Accounts Collection
-	cred driver.Collection
+	col driver.Collection // Accounts Collection
 
-	rdb *redis.Client
+	cred credentials.CredentialsController
+
+	rdb redis.Cmdable
 
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
@@ -101,26 +102,26 @@ type AccountsController struct {
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Client) *AccountsController {
+func NewAccountsController(
+	log *zap.Logger, db driver.Database, rdb redis.Cmdable,
+	sessions sessions.SessionsHandler,
+	ica InfinimeshCommonActionsRepo,
+	repo InfinimeshGenericActionsRepo[*accpb.Account],
+	cred credentials.CredentialsController,
+) *AccountsController {
 	ctx := context.TODO()
-	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
-	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
-
-	cred_graph, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
-	cred, _ := cred_graph.VertexCollection(ctx, schema.CREDENTIALS_COL)
-
-	ica := NewInfinimeshCommonActionsRepo(db)
-	repo := NewGenericRepo[*accpb.Account](db)
+	col := ica.GetVertexCol(ctx, schema.PERMISSIONS_GRAPH.Name, schema.ACCOUNTS_COL)
 
 	return &AccountsController{
 		InfinimeshBaseController: InfinimeshBaseController{
 			log: log.Named("AccountsController"), db: db,
-		}, col: col, cred: cred, rdb: rdb,
+		}, col: col, rdb: rdb,
 
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS),
 		ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
 
-		sessions: sessions.NewSessionsHandlerModule(rdb).Handler(),
+		cred:     cred,
+		sessions: sessions,
 
 		ica_repo: ica,
 		repo:     repo,
@@ -135,8 +136,6 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 	log.Debug("Token request received", zap.Any("request", req))
 
 	var account Account
-	var ok bool
-
 	if requestor := ctx.Value(inf.InfinimeshAccountCtxKey); requestor != nil && req.Uuid != nil {
 		account = *NewBlankAccountDocument(*req.Uuid)
 		requestor := requestor.(string)
@@ -146,7 +145,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &account)
 		if err != nil {
 			log.Warn("Failed to get Account and access level", zap.Error(err))
-			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+			return nil, status.Error(codes.Unauthenticated, "Account not found")
 		}
 		if account.Access.Level < access.Level_ROOT && account.Access.Role != access.Role_OWNER {
 			log.Warn("Super-Admin Token Request attempted", zap.String("requestor", requestor), zap.String("account", account.Uuid))
@@ -155,10 +154,12 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 
 		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds())*5
 	} else {
-		account, ok = c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
+		account_pb, ok := c.cred.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
 		if !ok {
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
+		account = *NewBlankAccountDocument(account_pb.GetUuid())
+		account.Account = account_pb
 	}
 
 	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
@@ -231,7 +232,7 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Couldn't execute query")
+		return nil, status.Error(codes.Internal, "Failed to list accounts")
 	}
 
 	return connect.NewResponse(&accpb.Accounts{
@@ -275,22 +276,21 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error Linking Namespace to Account", zap.Error(err))
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, StatusFromString(connect.CodeInternal, "Error while creating Account")
 	}
 
-	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
-	cred, err := credentials.MakeCredentials(request.GetCredentials(), log)
+	cred, err := c.cred.MakeCredentials(request.GetCredentials())
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error making Credentials for Account", zap.Error(err))
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 
-	err = c._SetCredentials(ctx, account, col, cred)
+	err = c.cred.SetCredentials(ctx, account.ID(), cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
-		return nil, err
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 	return connect.NewResponse(
 		&accpb.CreateResponse{Account: account.Account},
@@ -401,44 +401,10 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	err = c.ica_repo.DeleteRecursive(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error deleting account")
+		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
-}
-
-// Helper Functions
-
-func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string, args ...string) (Account, bool) {
-	ctrl.log.Debug("Authorization request", zap.String("type", auth_type))
-
-	credentials, err := credentials.Find(ctx, ctrl.col.Database(), ctrl.log, auth_type, args...)
-	// Check if could authorize
-	if err != nil {
-		ctrl.log.Info("Coudn't authorize", zap.Error(err))
-		return Account{}, false
-	}
-
-	account, ok := Authorisable(ctx, &credentials, ctrl.col.Database())
-	ctrl.log.Debug("Authorized account", zap.Bool("result", ok), zap.Any("account", account))
-	return account, ok
-}
-
-// Authorisable - Returns Account authorisable by this Credentials
-func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.Database) (Account, bool) {
-	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
-	c, err := db.Query(ctx, query, map[string]interface{}{
-		"credentials":       cred,
-		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
-	})
-	if err != nil {
-		return Account{}, false
-	}
-	defer c.Close()
-
-	var r Account
-	_, err = c.ReadDocument(ctx, &r)
-	return r, err == nil
 }
 
 func (c *AccountsController) GetCredentials(ctx context.Context, request *connect.Request[pb.GetCredentialsRequest]) (*connect.Response[pb.GetCredentialsResponse], error) {
@@ -451,24 +417,23 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
-
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights")
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
-	linked, err := credentials.ListCredentials(ctx, log, c.db, acc.ID())
+	linked, err := c.cred.ListCredentials(ctx, acc.ID())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Error listing Account's Credentials")
 	}
 
 	var creds []*accpb.Credentials
 	for _, res := range linked {
-		listable, err := credentials.MakeListable(res)
+		listable, err := c.cred.MakeListable(res)
 		if err != nil {
 			log.Warn("Couldn't make Listable", zap.Error(err))
 			continue
@@ -481,47 +446,6 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 	return connect.NewResponse(&pb.GetCredentialsResponse{Credentials: creds}), nil
 }
 
-// Set Account Credentials, ensure account has only one credentials document linked per credentials type
-func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) error {
-	key := c.Type() + "-" + acc.Key
-	var oldLink credentials.Link
-	meta, err := edge.ReadDocument(ctx, key, &oldLink)
-	if err == nil {
-		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
-		_, err = ctrl.cred.UpdateDocument(ctx, oldLink.To.Key(), c)
-		if err != nil {
-			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
-			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
-		}
-
-		return nil
-	}
-	ctrl.log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
-
-	cred, err := ctrl.cred.CreateDocument(ctx, c)
-	if err != nil {
-		ctrl.log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
-		return status.Error(codes.Internal, "Couldn't create credentials")
-	}
-
-	_, err = edge.CreateDocument(ctx, credentials.Link{
-		From: acc.ID(),
-		To:   cred.ID,
-		Type: c.Type(),
-		DocumentMeta: driver.DocumentMeta{
-			Key: key, // Ensures only one credentials vertex per type
-		},
-	})
-	if err != nil {
-		ctrl.log.Warn("Error Linking Credentials to Account",
-			zap.String("account", acc.Key), zap.String("type", c.Type()), zap.Error(err),
-		)
-		ctrl.cred.RemoveDocument(ctx, cred.Key)
-		return status.Error(codes.Internal, "Couldn't assign credentials")
-	}
-	return nil
-}
-
 func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.Request[pb.SetCredentialsRequest]) (*connect.Response[pb.SetCredentialsResponse], error) {
 	log := c.log.Named("SetCredentials")
 	req := _req.Msg
@@ -532,25 +456,25 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 
 	acc := *NewBlankAccountDocument(req.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &acc)
-
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access right to set credentials for this Account")
+		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights to set credentials for this Account")
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
-	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
-	cred, err := credentials.MakeCredentials(req.GetCredentials(), log)
+	cred, err := c.cred.MakeCredentials(req.GetCredentials())
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Warn("Error making Credentials", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
 	}
 
-	err = c._SetCredentials(ctx, acc, col, cred)
+	err = c.cred.SetCredentials(ctx, acc.ID(), cred)
 	if err != nil {
-		return nil, err
+		log.Warn("Error making Credentials", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
 	}
 	return connect.NewResponse(&pb.SetCredentialsResponse{}), nil
 }

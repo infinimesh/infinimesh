@@ -1,8 +1,14 @@
 package graph
 
 import (
+	"context"
+
 	"github.com/arangodb/go-driver"
+	"github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/credentials"
+	"github.com/infinimesh/infinimesh/pkg/sessions"
 	"github.com/infinimesh/proto/handsfree"
+	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/devices"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"go.uber.org/zap"
@@ -32,6 +38,35 @@ func NewDevicesControllerModule(log *zap.Logger, db driver.Database,
 			log, db, hfc,
 			NewInfinimeshCommonActionsRepo(db),
 			NewGenericRepo[*devices.Device](db),
+		),
+	}
+}
+
+type AccountsControllerModule interface {
+	Handler() nodeconnect.AccountsServiceHandler
+	SetSigningKey([]byte)
+}
+
+type accountsControllerModule struct {
+	handler *AccountsController
+}
+
+func (m *accountsControllerModule) Handler() nodeconnect.AccountsServiceHandler {
+	return m.handler
+}
+
+func (m *accountsControllerModule) SetSigningKey(key []byte) {
+	m.handler.SIGNING_KEY = key
+}
+
+func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.Cmdable) AccountsControllerModule {
+	return &accountsControllerModule{
+		handler: NewAccountsController(
+			log, db, rdb,
+			sessions.NewSessionsHandlerModule(rdb).Handler(),
+			NewInfinimeshCommonActionsRepo(db),
+			NewGenericRepo[*accounts.Account](db),
+			credentials.NewCredentialsController(context.Background(), log, db),
 		),
 	}
 }
