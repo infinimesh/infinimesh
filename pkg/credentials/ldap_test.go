@@ -1,6 +1,7 @@
 package credentials
 
 import (
+	"context"
 	"testing"
 
 	"github.com/infinimesh/proto/node/accounts"
@@ -11,7 +12,7 @@ func TestLDAPAuth(t *testing.T) {
 	// TODO: Fix this test
 	t.SkipNow()
 
-	ctrl := NewCredentialsController(zap.NewExample(), nil)
+	ctrl := NewCredentialsController(context.TODO(), zap.NewExample(), nil)
 
 	t.Log("LDAP Configured", LDAP_CONFIGURED)
 	if !LDAP_CONFIGURED {

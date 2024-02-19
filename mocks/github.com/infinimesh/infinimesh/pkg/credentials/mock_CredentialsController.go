@@ -468,6 +468,54 @@ func (_c *MockCredentialsController_MakeListable_Call) RunAndReturn(run func(cre
 	return _c
 }
 
+// SetCredentials provides a mock function with given fields: ctx, acc, c
+func (_m *MockCredentialsController) SetCredentials(ctx context.Context, acc driver.DocumentID, c credentials.Credentials) error {
+	ret := _m.Called(ctx, acc, c)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetCredentials")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, driver.DocumentID, credentials.Credentials) error); ok {
+		r0 = rf(ctx, acc, c)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockCredentialsController_SetCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetCredentials'
+type MockCredentialsController_SetCredentials_Call struct {
+	*mock.Call
+}
+
+// SetCredentials is a helper method to define mock.On call
+//   - ctx context.Context
+//   - acc driver.DocumentID
+//   - c credentials.Credentials
+func (_e *MockCredentialsController_Expecter) SetCredentials(ctx interface{}, acc interface{}, c interface{}) *MockCredentialsController_SetCredentials_Call {
+	return &MockCredentialsController_SetCredentials_Call{Call: _e.mock.On("SetCredentials", ctx, acc, c)}
+}
+
+func (_c *MockCredentialsController_SetCredentials_Call) Run(run func(ctx context.Context, acc driver.DocumentID, c credentials.Credentials)) *MockCredentialsController_SetCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(driver.DocumentID), args[2].(credentials.Credentials))
+	})
+	return _c
+}
+
+func (_c *MockCredentialsController_SetCredentials_Call) Return(_a0 error) *MockCredentialsController_SetCredentials_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockCredentialsController_SetCredentials_Call) RunAndReturn(run func(context.Context, driver.DocumentID, credentials.Credentials) error) *MockCredentialsController_SetCredentials_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockCredentialsController creates a new instance of MockCredentialsController. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockCredentialsController(t interface {

@@ -25,6 +25,8 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accountspb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Link struct {
@@ -62,6 +64,8 @@ type CredentialsController interface {
 
 	Authorize(ctx context.Context, auth_type string, args ...string) (*accountspb.Account, bool)
 	Authorisable(ctx context.Context, cred *Credentials) (*accountspb.Account, bool)
+
+	SetCredentials(ctx context.Context, acc driver.DocumentID, c Credentials) error
 }
 
 func Determine(auth_type string) (cred Credentials, ok bool) {
@@ -74,14 +78,22 @@ func Determine(auth_type string) (cred Credentials, ok bool) {
 }
 
 type credentialsController struct {
-	log *zap.Logger
-	db  driver.Database
+	log  *zap.Logger
+	db   driver.Database
+	col  driver.Collection
+	edge driver.Collection
 }
 
-func NewCredentialsController(log *zap.Logger, db driver.Database) CredentialsController {
+func NewCredentialsController(ctx context.Context, log *zap.Logger, db driver.Database) CredentialsController {
+	g, _ := db.Graph(ctx, schema.CREDENTIALS_GRAPH.Name)
+	col, _ := g.VertexCollection(ctx, schema.CREDENTIALS_COL)
+	edge, _, _ := g.EdgeCollection(ctx, schema.CREDENTIALS_EDGE_COL)
+
 	return &credentialsController{
-		log: log,
-		db:  db,
+		log:  log,
+		db:   db,
+		col:  col,
+		edge: edge,
 	}
 }
 
@@ -264,4 +276,46 @@ func (ctrl *credentialsController) Authorisable(ctx context.Context, cred *Crede
 	r.Account.Uuid = r.Key
 
 	return &r.Account, err == nil
+}
+
+// Set Account Credentials, ensure account has only one credentials document linked per credentials type
+func (ctrl *credentialsController) SetCredentials(ctx context.Context, acc driver.DocumentID, c Credentials) error {
+	log := ctrl.log.Named("SetCredentials")
+	key := c.Type() + "-" + acc.Key()
+	var oldLink Link
+	meta, err := ctrl.edge.ReadDocument(ctx, key, &oldLink)
+	if err == nil {
+		log.Debug("Link exists", zap.Any("meta", meta))
+		_, err = ctrl.col.UpdateDocument(ctx, oldLink.To.Key(), c)
+		if err != nil {
+			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
+			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
+		}
+
+		return nil
+	}
+	log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
+
+	cred, err := ctrl.col.CreateDocument(ctx, c)
+	if err != nil {
+		log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
+		return status.Error(codes.Internal, "Couldn't create credentials")
+	}
+
+	_, err = ctrl.edge.CreateDocument(ctx, Link{
+		From: acc,
+		To:   cred.ID,
+		Type: c.Type(),
+		DocumentMeta: driver.DocumentMeta{
+			Key: key, // Ensures only one credentials vertex per type
+		},
+	})
+	if err != nil {
+		log.Warn("Error Linking Credentials to Account",
+			zap.String("account", acc.Key()), zap.String("type", c.Type()), zap.Error(err),
+		)
+		ctrl.col.RemoveDocument(ctx, cred.Key)
+		return status.Error(codes.Internal, "Couldn't assign credentials")
+	}
+	return nil
 }

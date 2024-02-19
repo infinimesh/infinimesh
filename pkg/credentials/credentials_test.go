@@ -20,16 +20,37 @@ type credentialsControllerFixture struct {
 	ctrl credentials.CredentialsController
 
 	mocks struct {
-		db *driver_mocks.MockDatabase
+		db   *driver_mocks.MockDatabase
+		col  *driver_mocks.MockCollection
+		edge *driver_mocks.MockCollection
+	}
+	data struct {
+		ctx context.Context
+
+		acc driver.DocumentID
 	}
 }
 
 func newCredentialsControllerFixture(t *testing.T) *credentialsControllerFixture {
 	f := &credentialsControllerFixture{}
+	f.data.ctx = context.TODO()
 
 	f.mocks.db = &driver_mocks.MockDatabase{}
+	f.mocks.col = &driver_mocks.MockCollection{}
+	f.mocks.edge = &driver_mocks.MockCollection{}
 
-	f.ctrl = credentials.NewCredentialsController(zap.NewExample(), f.mocks.db)
+	g := &driver_mocks.MockGraph{}
+	f.mocks.db.EXPECT().Graph(f.data.ctx, schema.CREDENTIALS_GRAPH.Name).
+		Return(g, nil)
+
+	g.EXPECT().VertexCollection(f.data.ctx, schema.CREDENTIALS_COL).
+		Return(f.mocks.col, nil)
+	g.EXPECT().EdgeCollection(f.data.ctx, schema.CREDENTIALS_EDGE_COL).
+		Return(f.mocks.edge, driver.VertexConstraints{}, nil)
+
+	f.ctrl = credentials.NewCredentialsController(f.data.ctx, zap.NewExample(), f.mocks.db)
+
+	f.data.acc = driver.NewDocumentID(schema.ACCOUNTS_COL, uuid.New().String())
 
 	return f
 }
@@ -254,5 +275,80 @@ func TestMakeListable_Success(t *testing.T) {
 			"password": "valid",
 		},
 	})
+	assert.NoError(t, err)
+}
+
+// SetCredentials
+//
+
+func TestSetCredentials_Update_FailsOn_UpdateDocument(t *testing.T) {
+	f := newCredentialsControllerFixture(t)
+
+	key := "standard-" + f.data.acc.Key()
+	f.mocks.edge.EXPECT().ReadDocument(f.data.ctx, key, mock.Anything).Return(driver.DocumentMeta{}, nil)
+	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
+		Return(driver.DocumentMeta{}, assert.AnError)
+
+	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = Error updating Credentials of type")
+}
+
+func TestSetCredentials_Update_Success(t *testing.T) {
+	f := newCredentialsControllerFixture(t)
+
+	key := "standard-" + f.data.acc.Key()
+	f.mocks.edge.EXPECT().ReadDocument(f.data.ctx, key, mock.Anything).Return(driver.DocumentMeta{}, nil)
+	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+
+	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
+	assert.NoError(t, err)
+}
+
+func TestSetCredentials_FailsOn_CreateDocument(t *testing.T) {
+	f := newCredentialsControllerFixture(t)
+
+	key := "standard-" + f.data.acc.Key()
+	f.mocks.edge.EXPECT().ReadDocument(f.data.ctx, key, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, assert.AnError)
+
+	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Couldn't create credentials")
+}
+
+func TestSetCredentials_FailsOn_CreateEdge(t *testing.T) {
+	f := newCredentialsControllerFixture(t)
+
+	key := "standard-" + f.data.acc.Key()
+	f.mocks.edge.EXPECT().ReadDocument(f.data.ctx, key, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+	f.mocks.edge.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+
+	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Couldn't assign credentials")
+}
+
+func TestSetCredentials_Success(t *testing.T) {
+	f := newCredentialsControllerFixture(t)
+
+	key := "standard-" + f.data.acc.Key()
+	f.mocks.edge.EXPECT().ReadDocument(f.data.ctx, key, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+	f.mocks.edge.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+
+	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
 	assert.NoError(t, err)
 }

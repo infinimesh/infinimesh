@@ -345,7 +345,7 @@ func handleDeleteNodeInRecursion(ctx context.Context, log *zap.Logger, db driver
 			log.Warn("Root account cannot be deleted")
 			return errors.New("ERR_ROOT_OBJECT_CANNOT_BE_DELETED")
 		}
-		cred := credentials.NewCredentialsController(log, db)
+		cred := credentials.NewCredentialsController(ctx, log, db)
 		nodes, err := cred.ListCredentialsAndEdges(ctx, driver.DocumentID(node))
 		if err != nil {
 			return err
@@ -518,7 +518,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
-		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)
+		err = ctrl.cred.SetCredentials(ctx, root.ID(), cred)
 		if err != nil {
 			log.Warn("Error setting Root Account Credentials")
 			return err

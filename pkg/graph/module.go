@@ -1,6 +1,8 @@
 package graph
 
 import (
+	"context"
+
 	"github.com/arangodb/go-driver"
 	"github.com/go-redis/redis/v8"
 	"github.com/infinimesh/infinimesh/pkg/credentials"
@@ -64,7 +66,7 @@ func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.
 			sessions.NewSessionsHandlerModule(rdb).Handler(),
 			NewInfinimeshCommonActionsRepo(db),
 			NewGenericRepo[*accounts.Account](db),
-			credentials.NewCredentialsController(log, db),
+			credentials.NewCredentialsController(context.Background(), log, db),
 		),
 	}
 }

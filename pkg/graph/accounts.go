@@ -281,7 +281,6 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
 	cred, err := c.cred.MakeCredentials(request.GetCredentials())
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
@@ -289,7 +288,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	err = c._SetCredentials(ctx, account, col, cred)
+	err = c.cred.SetCredentials(ctx, account.ID(), cred)
 	if err != nil {
 		defer c.col.RemoveDocument(ctx, meta.Key)
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
@@ -450,47 +449,6 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 	return connect.NewResponse(&pb.GetCredentialsResponse{Credentials: creds}), nil
 }
 
-// Set Account Credentials, ensure account has only one credentials document linked per credentials type
-func (ctrl *AccountsController) _SetCredentials(ctx context.Context, acc Account, edge driver.Collection, c credentials.Credentials) error {
-	key := c.Type() + "-" + acc.Key
-	var oldLink credentials.Link
-	meta, err := edge.ReadDocument(ctx, key, &oldLink)
-	if err == nil {
-		ctrl.log.Debug("Link exists", zap.Any("meta", meta))
-		_, err = ctrl.cred_col.UpdateDocument(ctx, oldLink.To.Key(), c)
-		if err != nil {
-			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
-			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
-		}
-
-		return nil
-	}
-	ctrl.log.Debug("Credentials either not created yet or failed to get them from DB, overwriting", zap.Error(err), zap.String("key", key))
-
-	cred, err := ctrl.cred_col.CreateDocument(ctx, c)
-	if err != nil {
-		ctrl.log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
-		return status.Error(codes.Internal, "Couldn't create credentials")
-	}
-
-	_, err = edge.CreateDocument(ctx, credentials.Link{
-		From: acc.ID(),
-		To:   cred.ID,
-		Type: c.Type(),
-		DocumentMeta: driver.DocumentMeta{
-			Key: key, // Ensures only one credentials vertex per type
-		},
-	})
-	if err != nil {
-		ctrl.log.Warn("Error Linking Credentials to Account",
-			zap.String("account", acc.Key), zap.String("type", c.Type()), zap.Error(err),
-		)
-		ctrl.cred_col.RemoveDocument(ctx, cred.Key)
-		return status.Error(codes.Internal, "Couldn't assign credentials")
-	}
-	return nil
-}
-
 func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.Request[pb.SetCredentialsRequest]) (*connect.Response[pb.SetCredentialsResponse], error) {
 	log := c.log.Named("SetCredentials")
 	req := _req.Msg
@@ -511,13 +469,12 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access right to set credentials for this Account. Only Owner and Super-Admin can do this")
 	}
 
-	col, _ := c.db.Collection(ctx, schema.CREDENTIALS_EDGE_COL)
 	cred, err := c.cred.MakeCredentials(req.GetCredentials())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = c._SetCredentials(ctx, acc, col, cred)
+	err = c.cred.SetCredentials(ctx, acc.ID(), cred)
 	if err != nil {
 		return nil, err
 	}
