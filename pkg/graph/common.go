@@ -83,26 +83,30 @@ type InfinimeshCommonActionsRepo interface {
 	GetEdgeCol(ctx context.Context, name string) driver.Collection
 	CheckLink(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode) bool
 	Link(
-		ctx context.Context, log *zap.Logger, edge driver.Collection,
+		ctx context.Context, edge driver.Collection,
 		from InfinimeshGraphNode, to InfinimeshGraphNode,
 		lvl access.Level, role access.Role,
 	) error
 	Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error
 	AccessLevel(ctx context.Context, requestor InfinimeshGraphNode, node InfinimeshGraphNode) (bool, access.Level)
-	AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error
-	ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error)
-	DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
+	AccessLevelAndGet(ctx context.Context, account *Account, node InfinimeshGraphNode) error
+	ListOwnedDeep(ctx context.Context, from InfinimeshGraphNode) (res *access.Nodes, err error)
+	DeleteRecursive(ctx context.Context, from InfinimeshGraphNode) error
 	Toggle(ctx context.Context, node InfinimeshGraphNode, field string) error
 	//
-	EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error)
+	EnsureRootExists(rdb *redis.Client, passwd string) (err error)
 }
 
 type infinimeshCommonActionsRepo struct {
-	db driver.Database
+	log *zap.Logger
+	db  driver.Database
 }
 
-func NewInfinimeshCommonActionsRepo(db driver.Database) InfinimeshCommonActionsRepo {
-	return &infinimeshCommonActionsRepo{db: db}
+func NewInfinimeshCommonActionsRepo(log *zap.Logger, db driver.Database) InfinimeshCommonActionsRepo {
+	return &infinimeshCommonActionsRepo{
+		log: log,
+		db:  db,
+	}
 }
 
 func (r *infinimeshCommonActionsRepo) GetVertexCol(ctx context.Context, graph, name string) driver.Collection {
@@ -122,8 +126,8 @@ func (r *infinimeshCommonActionsRepo) CheckLink(ctx context.Context, edge driver
 	return err == nil && res
 }
 
-func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, log *zap.Logger, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
-
+func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, edge driver.Collection, from InfinimeshGraphNode, to InfinimeshGraphNode, lvl access.Level, role access.Role) error {
+	log := r.log.Named("Link")
 	log.Debug("Linking two nodes",
 		zap.Any("from", from.ID()),
 		zap.Any("to", to.ID()),
@@ -162,7 +166,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	)
 	log.Debug("Requestor", zap.String("id", requestor.Key))
 
-	err := r.AccessLevelAndGet(ctx, log, requestor, obj)
+	err := r.AccessLevelAndGet(ctx, requestor, obj)
 	if err != nil {
 		return status.Error(codes.NotFound, "Object not found or not enough Access Rights")
 	}
@@ -177,7 +181,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	old_namespace := NewBlankNamespaceDocument(*obj.GetAccess().Namespace)
 
 	namespace := NewBlankNamespaceDocument(ns)
-	err = r.AccessLevelAndGet(ctx, log, requestor, namespace)
+	err = r.AccessLevelAndGet(ctx, requestor, namespace)
 	if err != nil {
 		return status.Error(codes.NotFound, "Namespace not found or not enough Access Rights")
 	}
@@ -185,7 +189,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 		return status.Error(codes.PermissionDenied, "Must be Owner or Root to perform Move")
 	}
 
-	err = r.Link(ctx, log, edge, old_namespace, obj, access.Level_NONE, access.Role_UNSET)
+	err = r.Link(ctx, edge, old_namespace, obj, access.Level_NONE, access.Role_UNSET)
 	if err != nil {
 		log.Warn("Error unlinking Object from Namespace",
 			zap.String("object", obj.ID().String()),
@@ -194,7 +198,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 		return status.Error(codes.Internal, "Couldn't unlink the object")
 	}
 
-	err = r.Link(ctx, log, edge, namespace, obj, access.Level_ADMIN, role)
+	err = r.Link(ctx, edge, namespace, obj, access.Level_ADMIN, role)
 	if err != nil {
 		log.Warn("Error linking Object to Namespace",
 			zap.String("object", obj.ID().String()),
@@ -222,7 +226,8 @@ GRAPH @permissions SORT path.edges[0].level DESC
     )
 `
 
-func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, log *zap.Logger, account *Account, node InfinimeshGraphNode) error {
+func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, account *Account, node InfinimeshGraphNode) error {
+	log := r.log.Named("AccessLevelAndGet")
 	vars := map[string]interface{}{
 		"account":     account.ID(),
 		"node":        node.ID(),
@@ -260,7 +265,8 @@ FILTER !edge || edge.role == 1
     RETURN MERGE({ node: node._id }, edge ? { edge: edge._id, parent: edge._from } : { edge: null, parent: null })
 `
 
-func (r *infinimeshCommonActionsRepo) ListOwnedDeep(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (res *access.Nodes, err error) {
+func (r *infinimeshCommonActionsRepo) ListOwnedDeep(ctx context.Context, from InfinimeshGraphNode) (res *access.Nodes, err error) {
+	log := r.log.Named("ListOwnedDeep")
 	c, err := r.db.Query(ctx, listOwnedQuery, map[string]interface{}{
 		"from": from.ID(),
 	})
@@ -286,8 +292,9 @@ func (r *infinimeshCommonActionsRepo) ListOwnedDeep(ctx context.Context, log *za
 	return &access.Nodes{Nodes: nodes}, nil
 }
 
-func (r *infinimeshCommonActionsRepo) DeleteRecursive(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error {
-	nodes, err := r.ListOwnedDeep(ctx, log, from)
+func (r *infinimeshCommonActionsRepo) DeleteRecursive(ctx context.Context, from InfinimeshGraphNode) error {
+	log := r.log.Named("DeleteRecursive")
+	nodes, err := r.ListOwnedDeep(ctx, from)
 	if err != nil {
 		return err
 	}
@@ -425,10 +432,10 @@ func (r *infinimeshCommonActionsRepo) Toggle(ctx context.Context, node Infinimes
 	return err
 }
 
-func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *redis.Client, passwd string) (err error) {
+func (r *infinimeshCommonActionsRepo) EnsureRootExists(rdb *redis.Client, passwd string) (err error) {
 
 	ctx := context.TODO()
-	log := _log.Named("EnsureRootExists")
+	log := r.log.Named("EnsureRootExists")
 
 	log.Debug("Checking Root Account exists")
 	col, _ := r.db.Collection(ctx, schema.ACCOUNTS_COL)
@@ -498,7 +505,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 		log.Warn("Error checking link Root Account to Root Namespace", zap.Error(err))
 		return err
 	} else if !exists {
-		err = r.Link(ctx, log, edge_col, root, rootNS, access.Level_ROOT, access.Role_OWNER)
+		err = r.Link(ctx, edge_col, root, rootNS, access.Level_ROOT, access.Role_OWNER)
 		if err != nil {
 			log.Warn("Error linking Root Account to Root Namespace")
 			return err

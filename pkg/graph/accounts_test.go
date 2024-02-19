@@ -270,7 +270,7 @@ func TestToken_LoginAs_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Token(f.data.ctx, &connect.Request[node.TokenRequest]{
@@ -290,7 +290,7 @@ func TestToken_LoginAs_FailsOn_NotEnoughAccess(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Access = &access.Access{
 				Level: access.Level_NONE,
 			}
@@ -319,7 +319,7 @@ func TestGet_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Get(f.data.ctx, &connect.Request[accounts.Account]{
@@ -336,7 +336,7 @@ func TestGet_FailsOn_NotEnoughAccess(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Access = &access.Access{
 				Level: access.Level_NONE,
 			}
@@ -359,7 +359,7 @@ func TestGet_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -467,7 +467,7 @@ func TestAccountCreate_FailsOn_Link(t *testing.T) {
 	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
 		Return(f.data.account.DocumentMeta, nil)
 
-	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
 		return ns.Key == "infinimesh"
 	}), mock.MatchedBy(func(acc *graph.Account) bool {
 		return acc.Uuid == f.data.account.Uuid
@@ -495,7 +495,7 @@ func TestAccountCreate_FailsOn_MakeCredentials(t *testing.T) {
 	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
 		Return(f.data.account.DocumentMeta, nil)
 
-	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
 		return ns.Key == "infinimesh"
 	}), mock.MatchedBy(func(acc *graph.Account) bool {
 		return acc.Uuid == f.data.account.Uuid
@@ -526,7 +526,7 @@ func TestAccountCreate_FailsOn_SetCredentials(t *testing.T) {
 	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
 		Return(f.data.account.DocumentMeta, nil)
 
-	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
 		return ns.Key == "infinimesh"
 	}), mock.MatchedBy(func(acc *graph.Account) bool {
 		return acc.Uuid == f.data.account.Uuid
@@ -560,7 +560,7 @@ func TestAccountCreate_Success(t *testing.T) {
 	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).
 		Return(f.data.account.DocumentMeta, nil)
 
-	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+	f.mocks.ica_repo.EXPECT().Link(f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
 		return ns.Key == "infinimesh"
 	}), mock.MatchedBy(func(acc *graph.Account) bool {
 		return acc.Uuid == f.data.account.Uuid
@@ -589,7 +589,7 @@ func TestAccountUpdate_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
@@ -604,7 +604,7 @@ func TestAccountUpdate_FailsOn_NewNS_AccessLevel(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			buf := *f.data.account.Account
 			acc.Account = &buf
 			acc.Account.DefaultNamespace = "different_ns"
@@ -633,7 +633,7 @@ func TestAccountUpdate_FailsOn_UpdateDocument(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			buf := *f.data.account.Account
 			acc.Account = &buf
 			acc.Account.DefaultNamespace = "different_ns"
@@ -665,7 +665,7 @@ func TestAccountUpdate_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			buf := *f.data.account.Account
 			acc.Account = &buf
 			acc.Account.DefaultNamespace = "different_ns"
@@ -699,7 +699,7 @@ func TestAccountToggle_FailsOn_Get(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Toggle(f.data.ctx, &connect.Request[accounts.Account]{
@@ -714,7 +714,7 @@ func TestAccountToggle_FailsOn_NotEnoughAccess(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -736,7 +736,7 @@ func TestAccountToggle_FailsOn_RepoToggle(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_MGMT,
@@ -762,7 +762,7 @@ func TestAccountToggle_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_MGMT,
@@ -790,7 +790,7 @@ func TestAccountDeletables_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
@@ -805,7 +805,7 @@ func TestAccountDeletables_FailsOn_NotEnoughAccess(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -827,7 +827,7 @@ func TestAccountDeletables_FailsOn_ListOwnedDeep(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ADMIN,
@@ -838,7 +838,7 @@ func TestAccountDeletables_FailsOn_ListOwnedDeep(t *testing.T) {
 		}),
 	).Return(nil)
 
-	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything, mock.Anything).
+	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything).
 		Return(nil, assert.AnError)
 
 	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
@@ -853,7 +853,7 @@ func TestAccountDeletables_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ADMIN,
@@ -864,7 +864,7 @@ func TestAccountDeletables_Success(t *testing.T) {
 		}),
 	).Return(nil)
 
-	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything, mock.Anything).
+	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything).
 		Return(&access.Nodes{}, nil)
 
 	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
@@ -881,7 +881,7 @@ func TestAccountDelete_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
@@ -896,7 +896,7 @@ func TestAccountDelete_FailsOn_NotEnoughAccess(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -918,7 +918,7 @@ func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ADMIN,
@@ -929,7 +929,7 @@ func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
 		}),
 	).Return(nil)
 
-	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything, mock.Anything).
+	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(assert.AnError)
 
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
@@ -944,7 +944,7 @@ func TestAccountDelete_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ADMIN,
@@ -955,7 +955,7 @@ func TestAccountDelete_Success(t *testing.T) {
 		}),
 	).Return(nil)
 
-	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything, mock.Anything).
+	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(nil)
 
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
@@ -972,7 +972,7 @@ func TestGetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.GetCredentials(f.data.ctx, &connect.Request[node.GetCredentialsRequest]{
@@ -989,7 +989,7 @@ func TestGetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -1013,7 +1013,7 @@ func TestGetCredentials_FailsOn_ListCredentials(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ROOT,
@@ -1040,7 +1040,7 @@ func TestGetCredentials_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ROOT,
@@ -1085,7 +1085,7 @@ func TestSetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(assert.AnError)
 
 	_, err := f.repo.SetCredentials(f.data.ctx, &connect.Request[node.SetCredentialsRequest]{
@@ -1102,7 +1102,7 @@ func TestSetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_READ,
@@ -1126,7 +1126,7 @@ func TestSetCredentials_FailsOn_MakeCredentials(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ROOT,
@@ -1153,7 +1153,7 @@ func TestSetCredentials_FailsOn_SetCredentials(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ROOT,
@@ -1183,7 +1183,7 @@ func TestSetCredentials_Success(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
-		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
 			acc.Account = f.data.account.Account
 			acc.Access = &access.Access{
 				Level: access.Level_ROOT,

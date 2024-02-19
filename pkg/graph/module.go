@@ -36,7 +36,7 @@ func NewDevicesControllerModule(log *zap.Logger, db driver.Database,
 	return &devicesControllerModule{
 		handler: NewDevicesController(
 			log, db, hfc,
-			NewInfinimeshCommonActionsRepo(db),
+			NewInfinimeshCommonActionsRepo(log.Named("DevicesController"), db),
 			NewGenericRepo[*devices.Device](db),
 		),
 	}
@@ -64,7 +64,7 @@ func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.
 		handler: NewAccountsController(
 			log, db, rdb,
 			sessions.NewSessionsHandlerModule(rdb).Handler(),
-			NewInfinimeshCommonActionsRepo(db),
+			NewInfinimeshCommonActionsRepo(log.Named("AccountsController"), db),
 			NewGenericRepo[*accounts.Account](db),
 			credentials.NewCredentialsController(context.Background(), log, db),
 		),
