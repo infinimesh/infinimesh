@@ -312,7 +312,7 @@ async function handleToggle() {
   toggle_animation.value = true
 }
 async function handleBasicToggle() {
-  await store.toggle_basic(device.value.uuid, bar);
+  await store.toggleBasic(device.value.uuid, bar);
 }
 
 async function handleMakeToken() {
