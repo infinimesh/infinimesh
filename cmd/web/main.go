@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	logger "github.com/infinimesh/infinimesh/pkg/log"
+	"github.com/infinimesh/proto/eventbus"
 	hfpb "github.com/infinimesh/proto/handsfree"
 	pb "github.com/infinimesh/proto/node"
 	"github.com/infinimesh/proto/plugins"
@@ -123,6 +124,12 @@ func main() {
 	err = pb.RegisterInternalServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
 	if err != nil {
 		log.Fatal("Failed to register InternalService gateway")
+	}
+
+	log.Info("Registering Eventbus Service")
+	err = eventbus.RegisterEventsServiceHandlerFromEndpoint(context.Background(), gwmux, apiserver, opts)
+	if err != nil {
+		log.Fatal("Failed to register EventbusService gateway")
 	}
 
 	log.Info("Registering Console Services Service")
