@@ -13,6 +13,7 @@ packages:
         interfaces:
             InfinimeshCommonActionsRepo:
             InfinimeshGenericActionsRepo:
+            InfinimeshController:
 
     github.com/infinimesh/infinimesh/pkg/credentials:
         interfaces:

@@ -54,8 +54,8 @@ type InfinimeshGraphNode interface {
 }
 
 type InfinimeshController interface {
-	_DB() driver.Database
-	_log() *zap.Logger
+	DB() driver.Database
+	Log() *zap.Logger
 }
 
 type InfinimeshBaseController struct {
@@ -63,11 +63,11 @@ type InfinimeshBaseController struct {
 	db  driver.Database
 }
 
-func (c *InfinimeshBaseController) _DB() driver.Database {
+func (c *InfinimeshBaseController) DB() driver.Database {
 	return c.db
 }
 
-func (c *InfinimeshBaseController) _log() *zap.Logger {
+func (c *InfinimeshBaseController) Log() *zap.Logger {
 	return c.log
 }
 
@@ -158,7 +158,7 @@ func (r *infinimeshCommonActionsRepo) Link(ctx context.Context, edge driver.Coll
 }
 
 func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshController, obj InfinimeshGraphNode, edge driver.Collection, ns string) error {
-	log := c._log().Named("Move")
+	log := c.Log().Named("Move")
 	log.Debug("Move request received", zap.Any("object", obj), zap.String("namespace", ns))
 
 	requestor := NewBlankAccountDocument(
@@ -210,7 +210,7 @@ func (r *infinimeshCommonActionsRepo) Move(ctx context.Context, c InfinimeshCont
 	return nil
 }
 
-const getWithAccessLevelRoleAndNS = `
+const GetWithAccessLevelRoleAndNS = `
 FOR path IN OUTBOUND K_SHORTEST_PATHS @account TO @node
 GRAPH @permissions SORT path.edges[0].level DESC
     LET perm = path.edges[0]
@@ -226,6 +226,7 @@ GRAPH @permissions SORT path.edges[0].level DESC
     )
 `
 
+// TODO: Make this generic and move to IGA repo
 func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, account *Account, node InfinimeshGraphNode) error {
 	log := r.log.Named("AccessLevelAndGet")
 	vars := map[string]interface{}{
@@ -233,7 +234,7 @@ func (r *infinimeshCommonActionsRepo) AccessLevelAndGet(ctx context.Context, acc
 		"node":        node.ID(),
 		"permissions": schema.PERMISSIONS_GRAPH.Name,
 	}
-	c, err := r.db.Query(ctx, getWithAccessLevelRoleAndNS, vars)
+	c, err := r.db.Query(ctx, GetWithAccessLevelRoleAndNS, vars)
 	if err != nil {
 		log.Debug("Error while executing query", zap.Any("vars", vars), zap.Error(err))
 		return err
