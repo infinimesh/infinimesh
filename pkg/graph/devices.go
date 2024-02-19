@@ -22,6 +22,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
+	"github.com/infinimesh/proto/node/accounts"
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
@@ -90,8 +92,11 @@ type DevicesController struct {
 	ns2dev  driver.Collection // Namespaces to Devices permissions edge collection
 	acc2dev driver.Collection // Accounts to Devices permissions edge collection
 
-	ica_repo InfinimeshCommonActionsRepo                 // Infinimesh Common Actions Repository
-	repo     InfinimeshGenericActionsRepo[*devpb.Device] // Infinimesh Generic(Devices) Actions Repository
+	ica_repo  InfinimeshCommonActionsRepo                     // Infinimesh Common Actions Repository
+	repo      InfinimeshGenericActionsRepo[*devpb.Device]     // Infinimesh Generic(Devices) Actions Repository
+	accs_repo InfinimeshGenericActionsRepo[*accounts.Account] // Infinimesh Generic(Devices) Actions Repository
+
+	bus *EventBus
 
 	SIGNING_KEY []byte
 }
@@ -101,6 +106,8 @@ func NewDevicesController(
 	hfc handsfree.HandsfreeServiceClient,
 	ica InfinimeshCommonActionsRepo,
 	repo InfinimeshGenericActionsRepo[*devpb.Device],
+	accs_repo InfinimeshGenericActionsRepo[*accounts.Account],
+	bus *EventBus,
 ) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
@@ -113,8 +120,11 @@ func NewDevicesController(
 		ns2dev:  ica.GetEdgeCol(ctx, schema.NS2DEV),
 		acc2dev: ica.GetEdgeCol(ctx, schema.ACC2DEV),
 
-		ica_repo: ica,
-		repo:     repo,
+		ica_repo:  ica,
+		repo:      repo,
+		accs_repo: accs_repo,
+
+		bus: bus,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -195,6 +205,22 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, &device, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_CREATE,
+			Entity:    &proto_eventbus.Event_Device{Device: device.Device},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(&devpb.CreateResponse{
 		Device: device.Device,
 	}), nil
@@ -314,6 +340,22 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, NewBlankDeviceDocument(req.Msg.GetUuid()), "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return curr, nil
 }
 
@@ -337,6 +379,23 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 	if err != nil {
 		log.Warn("Error updating Device config", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device config")
+	}
+
+	query, err := c.accs_repo.ListQuery(ctx, log, NewBlankDeviceDocument(req.Msg.GetUuid()), "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
 	}
 
 	return curr, nil
@@ -363,6 +422,22 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, NewBlankDeviceDocument(req.Msg.GetUuid()), "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return curr, nil
 }
 
@@ -385,6 +460,23 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	query, err := c.accs_repo.ListQuery(ctx, log, NewBlankDeviceDocument(req.Msg.GetUuid()), "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
 	}
 
 	return curr, nil
@@ -469,7 +561,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
 
-	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), "")
 
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
@@ -505,6 +597,12 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, &dev, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
 	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Warn("Error removing document", zap.Error(err))
@@ -520,6 +618,16 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_DEVICE_DELETE,
+			Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"time"
 
 	"connectrpc.com/connect"
@@ -98,10 +99,12 @@ type AccountsController struct {
 	ica_repo InfinimeshCommonActionsRepo                  // Infinimesh Common Actions Repository
 	repo     InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
 
+	bus *EventBus
+
 	SIGNING_KEY []byte
 }
 
-func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Client) *AccountsController {
+func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Client, bus *EventBus) *AccountsController {
 	ctx := context.TODO()
 	perm_graph, _ := db.Graph(ctx, schema.PERMISSIONS_GRAPH.Name)
 	col, _ := perm_graph.VertexCollection(ctx, schema.ACCOUNTS_COL)
@@ -124,6 +127,7 @@ func NewAccountsController(log *zap.Logger, db driver.Database, rdb *redis.Clien
 
 		ica_repo: ica,
 		repo:     repo,
+		bus:      bus,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -228,7 +232,7 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), "")
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Couldn't execute query")
@@ -292,6 +296,25 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
 		return nil, err
 	}
+
+	result, err := c.repo.ListQuery(ctx, log, &account, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range result.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_ACCOUNT_CREATE,
+			Entity:    &proto_eventbus.Event_Account{Account: account.Account},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+
+	}
+
 	return connect.NewResponse(
 		&accpb.CreateResponse{Account: account.Account},
 	), nil
@@ -325,6 +348,23 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
+	result, err := c.repo.ListQuery(ctx, log, &old, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range result.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_ACCOUNT_UPDATE,
+			Entity:    &proto_eventbus.Event_Account{Account: acc},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
+
 	return connect.NewResponse(acc), nil
 }
 
@@ -350,6 +390,22 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
+	result, err := c.repo.ListQuery(ctx, log, res, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range result.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_ACCOUNT_UPDATE,
+			Entity:    &proto_eventbus.Event_Account{Account: curr},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(res.Account), nil
 }
 
@@ -398,12 +454,28 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	result, err := c.repo.ListQuery(ctx, log, &acc, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
 	err = c.ica_repo.DeleteRecursive(ctx, log, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting account")
 	}
 
+	for _, val := range result.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_ACCOUNT_DELETE,
+			Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

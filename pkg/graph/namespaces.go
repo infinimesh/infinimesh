@@ -16,10 +16,10 @@ limitations under the License.
 package graph
 
 import (
-	"context"
-
 	"connectrpc.com/connect"
+	"context"
 	"github.com/arangodb/go-driver"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -70,24 +70,30 @@ type NamespacesController struct {
 	acc2ns driver.Collection // Accounts to Namespaces permissions edge collection
 	ns2acc driver.Collection // Namespaces to Accounts permissions edge collection
 
-	ica  InfinimeshCommonActionsRepo
-	repo InfinimeshGenericActionsRepo[*nspb.Namespace]
+	ica       InfinimeshCommonActionsRepo
+	repo      InfinimeshGenericActionsRepo[*nspb.Namespace]
+	accs_repo InfinimeshGenericActionsRepo[*accpb.Account]
+
+	bus *EventBus
 
 	db driver.Database
 }
 
-func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesController {
+func NewNamespacesController(log *zap.Logger, db driver.Database, bus *EventBus) *NamespacesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
 	ica := NewInfinimeshCommonActionsRepo(db)
 	repo := NewGenericRepo[*nspb.Namespace](db)
+	accs_repo := NewGenericRepo[*accpb.Account](db)
 
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
-		ica:  ica,
-		repo: repo,
+		ica:       ica,
+		repo:      repo,
+		accs_repo: accs_repo,
+		bus:       bus,
 	}
 }
 
@@ -127,6 +133,22 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, &namespace, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_NAMESPACE_CREATE,
+			Entity:    &proto_eventbus.Event_Namespace{Namespace: namespace.Namespace},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(namespace.Namespace), nil
 }
 
@@ -194,6 +216,23 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Error while updating Namespace in DB: %v", err)
 		}
+
+		query, err := c.accs_repo.ListQuery(ctx, log, &curr, "INBOUND")
+		if err != nil {
+			log.Error("Failed to list accounts")
+			return nil, status.Error(codes.Internal, "Error listing accounts")
+		}
+
+		for _, val := range query.Result {
+			err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+				EventType: proto_eventbus.EventType_NAMESPACE_UPDATE,
+				Entity:    &proto_eventbus.Event_Namespace{Namespace: ns},
+			})
+
+			if err != nil {
+				log.Error("Failed to notify eventbus", zap.Error(err))
+			}
+		}
 	}
 
 	return connect.NewResponse(curr.Namespace), nil
@@ -205,7 +244,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), "")
 	if err != nil {
 		return nil, err
 	}
@@ -346,12 +385,28 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	query, err := c.accs_repo.ListQuery(ctx, log, &ns, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts")
+		return nil, status.Error(codes.Internal, "Error listing accounts")
+	}
+
 	err = c.ica.DeleteRecursive(ctx, log, &ns)
 	if err != nil {
 		log.Warn("Error deleting namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
 	}
 
+	for _, val := range query.Result {
+		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
+			EventType: proto_eventbus.EventType_NAMESPACE_DELETE,
+			Entity:    &proto_eventbus.Event_Namespace{Namespace: ns.Namespace},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
+		}
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 
