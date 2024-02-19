@@ -138,8 +138,6 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 	log.Debug("Token request received", zap.Any("request", req))
 
 	var account Account
-	var ok bool
-
 	if requestor := ctx.Value(inf.InfinimeshAccountCtxKey); requestor != nil && req.Uuid != nil {
 		account = *NewBlankAccountDocument(*req.Uuid)
 		requestor := requestor.(string)
@@ -158,10 +156,12 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 
 		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds())*5
 	} else {
-		account, ok = c.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
+		account_pb, ok := c.cred.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
 		if !ok {
 			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
 		}
+		account = *NewBlankAccountDocument(account_pb.GetUuid())
+		account.Account = account_pb
 	}
 
 	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
@@ -408,40 +408,6 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
-}
-
-// Helper Functions
-
-func (ctrl *AccountsController) Authorize(ctx context.Context, auth_type string, args ...string) (Account, bool) {
-	ctrl.log.Debug("Authorization request", zap.String("type", auth_type))
-
-	credentials, err := ctrl.cred.Find(ctx, auth_type, args...)
-	// Check if could authorize
-	if err != nil {
-		ctrl.log.Info("Coudn't authorize", zap.Error(err))
-		return Account{}, false
-	}
-
-	account, ok := Authorisable(ctx, &credentials, ctrl.col.Database())
-	ctrl.log.Debug("Authorized account", zap.Bool("result", ok), zap.Any("account", account))
-	return account, ok
-}
-
-// Authorisable - Returns Account authorisable by this Credentials
-func Authorisable(ctx context.Context, cred *credentials.Credentials, db driver.Database) (Account, bool) {
-	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
-	c, err := db.Query(ctx, query, map[string]interface{}{
-		"credentials":       cred,
-		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
-	})
-	if err != nil {
-		return Account{}, false
-	}
-	defer c.Close()
-
-	var r Account
-	_, err = c.ReadDocument(ctx, &r)
-	return r, err == nil
 }
 
 func (c *AccountsController) GetCredentials(ctx context.Context, request *connect.Request[pb.GetCredentialsRequest]) (*connect.Response[pb.GetCredentialsResponse], error) {

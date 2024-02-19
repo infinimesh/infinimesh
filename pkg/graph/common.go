@@ -524,7 +524,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 			return err
 		}
 	}
-	_, res := ctrl.Authorize(ctx, "standard", "infinimesh", passwd)
+	_, res := ctrl.cred.Authorize(ctx, "standard", "infinimesh", passwd)
 	if !res {
 		log.Warn("Error authorizing Root Account")
 		return errors.New("cannot authorize infinimesh")

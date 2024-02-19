@@ -59,6 +59,9 @@ type CredentialsController interface {
 	ListCredentials(ctx context.Context, acc driver.DocumentID) (r []ListCredentialsResponse, err error)
 	ListCredentialsAndEdges(ctx context.Context, account driver.DocumentID) (nodes []string, err error)
 	MakeListable(r ListCredentialsResponse) (ListableCredentials, error)
+
+	Authorize(ctx context.Context, auth_type string, args ...string) (*accountspb.Account, bool)
+	Authorisable(ctx context.Context, cred *Credentials) (*accountspb.Account, bool)
 }
 
 func Determine(auth_type string) (cred Credentials, ok bool) {
@@ -223,4 +226,42 @@ func (ctrl *credentialsController) MakeListable(r ListCredentialsResponse) (List
 	}
 
 	return f(r.D)
+}
+
+func (ctrl *credentialsController) Authorize(ctx context.Context, auth_type string, args ...string) (*accountspb.Account, bool) {
+	ctrl.log.Debug("Authorization request", zap.String("type", auth_type))
+
+	credentials, err := ctrl.Find(ctx, auth_type, args...)
+	// Check if could authorize
+	if err != nil {
+		ctrl.log.Info("Coudn't authorize", zap.Error(err))
+		return nil, false
+	}
+
+	account, ok := ctrl.Authorisable(ctx, &credentials)
+	ctrl.log.Debug("Authorized account", zap.Bool("result", ok), zap.Any("account", account))
+	return account, ok
+}
+
+// Authorisable - Returns Account authorisable by this Credentials
+func (ctrl *credentialsController) Authorisable(ctx context.Context, cred *Credentials) (*accountspb.Account, bool) {
+	query := `FOR account IN 1 INBOUND @credentials GRAPH @credentials_graph RETURN account`
+	c, err := ctrl.db.Query(ctx, query, map[string]interface{}{
+		"credentials":       cred,
+		"credentials_graph": schema.CREDENTIALS_GRAPH.Name,
+	})
+	if err != nil {
+		return nil, false
+	}
+	defer c.Close()
+
+	var r struct {
+		accountspb.Account
+		driver.DocumentMeta
+	}
+	_, err = c.ReadDocument(ctx, &r)
+
+	r.Account.Uuid = r.Key
+
+	return &r.Account, err == nil
 }

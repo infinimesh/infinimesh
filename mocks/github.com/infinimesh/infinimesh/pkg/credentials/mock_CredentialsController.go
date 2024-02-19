@@ -27,6 +27,139 @@ func (_m *MockCredentialsController) EXPECT() *MockCredentialsController_Expecte
 	return &MockCredentialsController_Expecter{mock: &_m.Mock}
 }
 
+// Authorisable provides a mock function with given fields: ctx, cred
+func (_m *MockCredentialsController) Authorisable(ctx context.Context, cred *credentials.Credentials) (*accounts.Account, bool) {
+	ret := _m.Called(ctx, cred)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Authorisable")
+	}
+
+	var r0 *accounts.Account
+	var r1 bool
+	if rf, ok := ret.Get(0).(func(context.Context, *credentials.Credentials) (*accounts.Account, bool)); ok {
+		return rf(ctx, cred)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *credentials.Credentials) *accounts.Account); ok {
+		r0 = rf(ctx, cred)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*accounts.Account)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *credentials.Credentials) bool); ok {
+		r1 = rf(ctx, cred)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	return r0, r1
+}
+
+// MockCredentialsController_Authorisable_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Authorisable'
+type MockCredentialsController_Authorisable_Call struct {
+	*mock.Call
+}
+
+// Authorisable is a helper method to define mock.On call
+//   - ctx context.Context
+//   - cred *credentials.Credentials
+func (_e *MockCredentialsController_Expecter) Authorisable(ctx interface{}, cred interface{}) *MockCredentialsController_Authorisable_Call {
+	return &MockCredentialsController_Authorisable_Call{Call: _e.mock.On("Authorisable", ctx, cred)}
+}
+
+func (_c *MockCredentialsController_Authorisable_Call) Run(run func(ctx context.Context, cred *credentials.Credentials)) *MockCredentialsController_Authorisable_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*credentials.Credentials))
+	})
+	return _c
+}
+
+func (_c *MockCredentialsController_Authorisable_Call) Return(_a0 *accounts.Account, _a1 bool) *MockCredentialsController_Authorisable_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockCredentialsController_Authorisable_Call) RunAndReturn(run func(context.Context, *credentials.Credentials) (*accounts.Account, bool)) *MockCredentialsController_Authorisable_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Authorize provides a mock function with given fields: ctx, auth_type, args
+func (_m *MockCredentialsController) Authorize(ctx context.Context, auth_type string, args ...string) (*accounts.Account, bool) {
+	_va := make([]interface{}, len(args))
+	for _i := range args {
+		_va[_i] = args[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, auth_type)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Authorize")
+	}
+
+	var r0 *accounts.Account
+	var r1 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) (*accounts.Account, bool)); ok {
+		return rf(ctx, auth_type, args...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...string) *accounts.Account); ok {
+		r0 = rf(ctx, auth_type, args...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*accounts.Account)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...string) bool); ok {
+		r1 = rf(ctx, auth_type, args...)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	return r0, r1
+}
+
+// MockCredentialsController_Authorize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Authorize'
+type MockCredentialsController_Authorize_Call struct {
+	*mock.Call
+}
+
+// Authorize is a helper method to define mock.On call
+//   - ctx context.Context
+//   - auth_type string
+//   - args ...string
+func (_e *MockCredentialsController_Expecter) Authorize(ctx interface{}, auth_type interface{}, args ...interface{}) *MockCredentialsController_Authorize_Call {
+	return &MockCredentialsController_Authorize_Call{Call: _e.mock.On("Authorize",
+		append([]interface{}{ctx, auth_type}, args...)...)}
+}
+
+func (_c *MockCredentialsController_Authorize_Call) Run(run func(ctx context.Context, auth_type string, args ...string)) *MockCredentialsController_Authorize_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]string, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(string)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockCredentialsController_Authorize_Call) Return(_a0 *accounts.Account, _a1 bool) *MockCredentialsController_Authorize_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockCredentialsController_Authorize_Call) RunAndReturn(run func(context.Context, string, ...string) (*accounts.Account, bool)) *MockCredentialsController_Authorize_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Find provides a mock function with given fields: ctx, auth_type, args
 func (_m *MockCredentialsController) Find(ctx context.Context, auth_type string, args ...string) (credentials.Credentials, error) {
 	_va := make([]interface{}, len(args))
