@@ -26,6 +26,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error)
+	UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -120,4 +121,11 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	}
 
 	return &resp, nil
+}
+
+func (r *infinimeshGenericActionsRepo[T]) UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error {
+
+	log.Debug("log uuid", zap.Any("uuid", from.ID()), zap.Any("uuid", from.GetUuid()))
+
+	return nil
 }
