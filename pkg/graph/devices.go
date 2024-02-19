@@ -305,6 +305,11 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.InvalidArgument, "Device Title cannot be empty")
 	}
 
+	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
+	log.Debug("Requestor", zap.String("id", requestor))
+
+	err = c.repo.UpdateDeviceModifyDate(ctx, log, NewBlankAccountDocument(requestor))
+
 	curr.Msg.Tags = dev.Tags
 	curr.Msg.Title = dev.Title
 
