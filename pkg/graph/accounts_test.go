@@ -782,3 +782,94 @@ func TestAccountToggle_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+// Deletables
+//
+
+func TestAccountDeletables_FailsOn_AccessLevelAndGet(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+	).Return(assert.AnError)
+
+	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+}
+
+func TestAccountDeletables_FailsOn_NotEnoughAccess(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_READ,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access Rights", f.data.account.Uuid)
+}
+
+func TestAccountDeletables_FailsOn_ListOwnedDeep(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+				Role:  access.Role_OWNER,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything, mock.Anything).
+		Return(nil, assert.AnError)
+
+	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting owned nodes", f.data.account.Uuid)
+}
+
+func TestAccountDeletables_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+				Role:  access.Role_OWNER,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().ListOwnedDeep(f.data.ctx, mock.Anything, mock.Anything).
+		Return(&access.Nodes{}, nil)
+
+	_, err := f.repo.Deletables(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.NoError(t, err)
+}
