@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -96,8 +97,9 @@ func newAccountsControllerFixture(t *testing.T) accountsControllerFixture {
 	f.data.auth_data = []string{"username", "password"}
 	f.data.account = graph.Account{
 		Account: &accounts.Account{
-			Uuid:    uuid.New().String(),
-			Enabled: true,
+			Uuid:             uuid.New().String(),
+			Enabled:          true,
+			DefaultNamespace: "infinimesh",
 		},
 	}
 	f.data.account.DocumentMeta = driver.DocumentMeta{
@@ -573,6 +575,116 @@ func TestAccountCreate_Success(t *testing.T) {
 
 	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{
 		Msg: f.data.create_request,
+	})
+
+	assert.NoError(t, err)
+}
+
+// Update
+//
+
+func TestAccountUpdate_FailsOn_AccessLevelAndGet(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+	).Return(assert.AnError)
+
+	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, fmt.Sprintf("rpc error: code = PermissionDenied desc = No Access to Account %s", f.data.account.Uuid))
+}
+
+func TestAccountUpdate_FailsOn_NewNS_AccessLevel(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			buf := *f.data.account.Account
+			acc.Account = &buf
+			acc.Account.DefaultNamespace = "different_ns"
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+			}
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+			return ns.Key == f.data.account.DefaultNamespace
+		}),
+	).Return(false, access.Level_NONE)
+
+	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Account has no Access to Namespace infinimesh")
+}
+
+func TestAccountUpdate_FailsOn_UpdateDocument(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			buf := *f.data.account.Account
+			acc.Account = &buf
+			acc.Account.DefaultNamespace = "different_ns"
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+			}
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+			return ns.Key == f.data.account.DefaultNamespace
+		}),
+	).Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
+		Return(driver.DocumentMeta{}, assert.AnError)
+
+	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error while updating Account")
+}
+
+func TestAccountUpdate_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			buf := *f.data.account.Account
+			acc.Account = &buf
+			acc.Account.DefaultNamespace = "different_ns"
+			acc.Access = &access.Access{
+				Level: access.Level_ADMIN,
+			}
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.ica_repo.EXPECT().AccessLevel(
+		f.data.ctx, mock.Anything, mock.MatchedBy(func(ns *graph.Namespace) bool {
+			return ns.Key == f.data.account.DefaultNamespace
+		}),
+	).Return(true, access.Level_ADMIN)
+
+	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
+		Return(driver.DocumentMeta{}, nil)
+
+	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
+		Msg: f.data.account.Account,
 	})
 
 	assert.NoError(t, err)
