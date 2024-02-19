@@ -3,6 +3,7 @@ package graph
 import (
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/proto/handsfree"
+	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/devices"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"go.uber.org/zap"
@@ -26,12 +27,14 @@ func (m *devicesControllerModule) SetSigningKey(key []byte) {
 }
 
 func NewDevicesControllerModule(log *zap.Logger, db driver.Database,
-	hfc handsfree.HandsfreeServiceClient) DevicesControllerModule {
+	hfc handsfree.HandsfreeServiceClient, bus *EventBus) DevicesControllerModule {
 	return &devicesControllerModule{
 		handler: NewDevicesController(
 			log, db, hfc,
 			NewInfinimeshCommonActionsRepo(db),
 			NewGenericRepo[*devices.Device](db),
+			NewGenericRepo[*accounts.Account](db),
+			bus,
 		),
 	}
 }

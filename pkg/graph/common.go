@@ -505,7 +505,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(_log *zap.Logger, rdb *re
 		return err
 	}
 
-	ctrl := NewAccountsController(log, r.db, rdb)
+	ctrl := NewAccountsController(log, r.db, rdb, nil)
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))
 	if err != nil || !exists {
 		err = ctrl._SetCredentials(ctx, *root, cred_edge_col, cred)

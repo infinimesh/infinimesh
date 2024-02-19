@@ -77,7 +77,7 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
 	return &PluginsController{
 		log: log.Named("PluginsController"), col: col, db: db,
-		ns_ctrl:  NewNamespacesController(log, db),
+		ns_ctrl:  NewNamespacesController(log, db, nil),
 		ica_repo: NewInfinimeshCommonActionsRepo(db),
 		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
@@ -185,7 +185,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace))
+		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), "")
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
 		}

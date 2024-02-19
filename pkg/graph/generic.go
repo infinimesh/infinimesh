@@ -25,7 +25,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 }
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
-	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error)
+	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, searchType string) (*ListQueryResult[T], error)
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -40,7 +40,7 @@ func NewGenericRepo[T InfinimeshProtobufEntity](db driver.Database) InfinimeshGe
 
 const ListObjectsOfKind = `
 LET result = (
-	FOR node, edge, path IN 0..@depth OUTBOUND @from
+	FOR node, edge, path IN 0..@depth @searchType @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
@@ -70,9 +70,13 @@ RETURN {
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error) {
+func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, searchType string) (*ListQueryResult[T], error) {
 	offset := OffsetValue(ctx)
 	limit := LimitValue(ctx)
+
+	if searchType == "" {
+		searchType = "OUTBOUND"
+	}
 
 	var kind string
 	switch fmt.Sprintf("%T", *new(T)) {
@@ -95,6 +99,7 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 		"@kind":             kind,
 		"offset":            offset,
 		"limit":             limit,
+		"searchType":        searchType,
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
 
