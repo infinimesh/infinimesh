@@ -964,3 +964,116 @@ func TestAccountDelete_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+// GetCredentials
+//
+
+func TestGetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.Anything,
+	).Return(assert.AnError)
+
+	_, err := f.repo.GetCredentials(f.data.ctx, &connect.Request[node.GetCredentialsRequest]{
+		Msg: &node.GetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting Account or not enough Access rights")
+}
+
+func TestGetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_READ,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	_, err := f.repo.GetCredentials(f.data.ctx, &connect.Request[node.GetCredentialsRequest]{
+		Msg: &node.GetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
+}
+
+func TestGetCredentials_FailsOn_ListCredentials(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ROOT,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	f.mocks.cred.EXPECT().ListCredentials(f.data.ctx, f.data.account.ID()).
+		Return(nil, assert.AnError)
+
+	_, err := f.repo.GetCredentials(f.data.ctx, &connect.Request[node.GetCredentialsRequest]{
+		Msg: &node.GetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "rpc error: code = Internal desc = Error listing Account's Credentials")
+}
+
+func TestGetCredentials_Success(t *testing.T) {
+	f := newAccountsControllerFixture(t)
+
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(
+		f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(acc *graph.Account) bool {
+			acc.Account = f.data.account.Account
+			acc.Access = &access.Access{
+				Level: access.Level_ROOT,
+			}
+
+			return acc.Uuid == f.data.account.Uuid
+		}),
+	).Return(nil)
+
+	standard_cred := credentials.ListCredentialsResponse{
+		Type: "standard",
+		D:    map[string]interface{}{},
+	}
+	notlistable_cred := credentials.ListCredentialsResponse{
+		Type: "notlistable",
+		D:    map[string]interface{}{},
+	}
+
+	f.mocks.cred.EXPECT().ListCredentials(f.data.ctx, f.data.account.ID()).
+		Return([]credentials.ListCredentialsResponse{
+			standard_cred, notlistable_cred,
+		}, nil)
+
+	f.mocks.cred.EXPECT().MakeListable(standard_cred).Return(&credentials.StandardCredentials{}, nil)
+	f.mocks.cred.EXPECT().MakeListable(notlistable_cred).Return(nil, assert.AnError)
+
+	res, err := f.repo.GetCredentials(f.data.ctx, &connect.Request[node.GetCredentialsRequest]{
+		Msg: &node.GetCredentialsRequest{
+			Uuid: f.data.account.Uuid,
+		},
+	})
+
+	assert.NoError(t, err)
+	assert.Len(t, res.Msg.GetCredentials(), 1)
+	assert.Equal(t, "standard", res.Msg.GetCredentials()[0].GetType())
+}
