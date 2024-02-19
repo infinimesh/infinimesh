@@ -53,7 +53,7 @@ require (
 )
 
 require (
-	connectrpc.com/connect v1.14.0
+	connectrpc.com/connect v1.15.0
 	connectrpc.com/grpchealth v1.3.0
 	github.com/go-faker/faker/v4 v4.3.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
