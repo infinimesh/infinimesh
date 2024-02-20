@@ -1,20 +1,21 @@
 package graph
 
 import (
-	"connectrpc.com/connect"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/arangodb/go-driver"
+	"time"
+
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
-	"github.com/infinimesh/proto/eventbus"
 	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"github.com/infinimesh/proto/node"
+
+	"connectrpc.com/connect"
+	"github.com/arangodb/go-driver"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
-	"time"
 )
 
 type EventsService struct {
@@ -30,7 +31,7 @@ func NewEventsService(log *zap.Logger, bus *EventBus) *EventsService {
 	}
 }
 
-func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node.EmptyMessage], stream *connect.ServerStream[eventbus.Event]) error {
+func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node.EmptyMessage], stream *connect.ServerStream[proto_eventbus.Event]) error {
 	log := e.log.Named("Subscribe")
 
 	outgoingContext, ok := metadata.FromOutgoingContext(ctx)

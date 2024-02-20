@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/infinimesh/proto/eventbus/eventbusconnect"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"gopkg.in/yaml.v2"
 	"net/http"
@@ -34,6 +33,7 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/oauth"
 	"github.com/infinimesh/infinimesh/pkg/oauth/config"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
+	"github.com/infinimesh/proto/eventbus/eventbusconnect"
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"github.com/infinimesh/proto/plugins/pluginsconnect"
