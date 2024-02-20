@@ -40,7 +40,7 @@ func NewGenericRepo[T InfinimeshProtobufEntity](db driver.Database) InfinimeshGe
 
 const ListObjectsOfKind = `
 LET result = (
-	FOR node, edge, path IN 0..@depth @searchType @from
+	FOR node, edge, path IN 0..@depth %s @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
@@ -99,7 +99,6 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 		"@kind":             kind,
 		"offset":            offset,
 		"limit":             limit,
-		"searchType":        searchType,
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
 
@@ -108,7 +107,7 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, filters), bindVars)
+	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, searchType, filters), bindVars)
 
 	if err != nil {
 		log.Debug("Error while executing query", zap.Error(err))
