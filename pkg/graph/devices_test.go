@@ -684,7 +684,7 @@ func TestList_Success(t *testing.T) {
 		Result: []*devpb.Device{},
 		Count:  count,
 	}
-	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "").Return(result, nil)
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(result, nil)
 
 	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 
@@ -695,7 +695,7 @@ func TestList_Success(t *testing.T) {
 func TestList_FailsOn_ListQuery(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "").Return(nil, errors.New("Error"))
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("Error"))
 
 	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 

@@ -389,7 +389,7 @@ func TestGet_Success(t *testing.T) {
 func TestListAccounts_FailsOn_ListQuery(t *testing.T) {
 	f := newAccountsControllerFixture(t)
 
-	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything, "").
+	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything).
 		Return(nil, assert.AnError)
 
 	_, err := f.repo.List(f.data.ctx, &connect.Request[node.EmptyMessage]{
@@ -408,7 +408,7 @@ func TestListAccounts_Success(t *testing.T) {
 		{Uuid: "2", Title: "2"},
 	}
 
-	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything, "").
+	f.mocks.repo.EXPECT().ListQuery(f.data.ctx, mock.Anything, mock.Anything).
 		Return(&graph.ListQueryResult[*accounts.Account]{
 			Result: accs,
 			Count:  2,

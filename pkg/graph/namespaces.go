@@ -244,7 +244,7 @@ func (c *NamespacesController) List(ctx context.Context, _ *connect.Request[pb.E
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), "")
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		return nil, err
 	}

@@ -561,7 +561,7 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
 
-	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor), "")
+	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))

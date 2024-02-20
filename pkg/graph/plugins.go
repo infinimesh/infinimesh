@@ -186,7 +186,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), "")
+		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace))
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
 		}

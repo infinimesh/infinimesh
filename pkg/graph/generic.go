@@ -3,7 +3,6 @@ package graph
 import (
 	"context"
 	"fmt"
-
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accpb "github.com/infinimesh/proto/node/accounts"
@@ -25,7 +24,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 }
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
-	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, searchType string) (*ListQueryResult[T], error)
+	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error)
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -70,12 +69,14 @@ RETURN {
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, searchType string) (*ListQueryResult[T], error) {
+func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error) {
 	offset := OffsetValue(ctx)
 	limit := LimitValue(ctx)
 
-	if searchType == "" {
-		searchType = "OUTBOUND"
+	searchType := "OUTBOUND"
+
+	if len(params) == 1 {
+		searchType = params[0]
 	}
 
 	var kind string

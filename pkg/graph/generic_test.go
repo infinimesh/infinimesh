@@ -84,7 +84,7 @@ func TestListOwned_Devices_Success(t *testing.T) {
 	})).Return(driver.DocumentMeta{}, nil)
 	f.mocks.cursor.EXPECT().Close().Return(nil)
 
-	res, err := f.repo.ListQuery(f.data.ctx, f.mocks.log, graph.NewBlankAccountDocument("infinimesh"), "")
+	res, err := f.repo.ListQuery(f.data.ctx, f.mocks.log, graph.NewBlankAccountDocument("infinimesh"))
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, res.Count)
