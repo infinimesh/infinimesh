@@ -17,10 +17,11 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"net/http"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
@@ -158,9 +159,9 @@ func main() {
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
 		log.Info("Registering accounts service")
-		acc_ctrl := graph.NewAccountsController(log, db, rdb)
-		acc_ctrl.SIGNING_KEY = SIGNING_KEY
-		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl, interceptors)
+		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb)
+		acc_ctrl.SetSigningKey(SIGNING_KEY)
+		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl.Handler(), interceptors)
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -175,8 +176,8 @@ func main() {
 	}
 
 	if ensure_root {
-		ica := graph.NewInfinimeshCommonActionsRepo(db)
-		err := ica.EnsureRootExists(log, rdb, rootPass)
+		ica := graph.NewInfinimeshCommonActionsRepo(log, db)
+		err := ica.EnsureRootExists(rdb, rootPass)
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}
