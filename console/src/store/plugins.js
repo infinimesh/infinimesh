@@ -5,58 +5,75 @@ import { useDevicesStore } from "@/store/devices";
 import { createPromiseClient } from "@connectrpc/connect";
 import { PluginsService } from "infinimesh-proto/build/es/plugins/plugins_connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
+import { ref, computed } from "vue";
 
-const as = useAppStore();
-const nss = useNSStore();
-const devs = useDevicesStore();
+import { transport } from "infinimesh-proto/mocks/es/plugins";
 
-export const usePluginsStore = defineStore("plugins", {
-  state: () => ({
-    loading: false,
-    plugins: [],
 
-    current: false,
+export const usePluginsStore = defineStore("plugins", () => {
+  const as = useAppStore();
+  const nss = useNSStore();
 
-    heights: new Map(),
-  }),
-  getters: {
-    plugins_client() {
-      return createPromiseClient(
-        PluginsService,
-        createConnectTransport(as.transport_options)
-      );
-    },
-  },
-  actions: {
-    async fetchPlugins() {
-      this.loading = true;
-      const data = await this.plugins_client.list({ namespace: nss.selected });
-      this.plugins = data.pool;
+  const loading = ref(false);
+  const current = ref(false);
+  const plugins = ref([]);
+  const heights = ref(new Map());
 
-      this.loading = false;
-    },
-    get(uuid) {
-      return this.plugins_client.get({ uuid });
-    },
-    create(plugin) {
-      return this.plugins_client.create({
-        ...plugin,
-        embeddedConf: plugin.embedded_conf,
-        deviceConf: plugin.device_conf,
-      });
-    },
-    delete(uuid) {
-      return this.plugins_client.delete({ uuid });
-    },
-    update(uuid, data) {
-      return this.plugins_client.update({ ...data, uuid });
-    },
-    height(device) {
-      let height = this.heights.get(device);
-      if (!height) return "10vh";
-      return height + "px";
-    },
-  },
+  const plugins_client = computed(() =>
+    createPromiseClient(
+      PluginsService,
+      import.meta.env.VITE_MOCK
+        ? transport
+        : createConnectTransport(as.transport_options)
+    )
+  );
+
+  async function fetchPlugins() {
+    loading.value = true;
+    const data = await plugins_client.value.list({ namespace: nss.selected });
+    plugins.value = data.pool;
+
+    loading.value = false;
+  }
+
+  function get(uuid) {
+    return plugins_client.value.get({ uuid });
+  }
+
+  function create(plugin) {
+    return plugins_client.value.create({
+      ...plugin,
+      embeddedConf: plugin.embedded_conf,
+      deviceConf: plugin.device_conf,
+    });
+  }
+
+  function deletePlugin(uuid) {
+    return plugins_client.value.delete({ uuid });
+  }
+
+  function update(uuid, data) {
+    return plugins_client.value.update({ ...data, uuid });
+  }
+
+  function height(device) {
+    let height = heights.value.get(device);
+    if (!height) return "10vh";
+    return height + "px";
+  }
+
+  return {
+    loading,
+    current,
+    fetchPlugins,
+    get,
+    heights,
+    plugins_client,
+    delete: deletePlugin,
+    create,
+    update,
+    height,
+  };
 });
 
 window.addEventListener("message", ({ origin, data }) => {
@@ -103,6 +120,7 @@ window.addEventListener("message", ({ origin, data }) => {
         );
       }
 
+      const devs = useDevicesStore();
       devs.patchDesiredState(data.device, data.state, null);
 
       break;
