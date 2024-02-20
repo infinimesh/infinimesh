@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*", "vitest.config.js"],
+  "include": ["./src/**/*", "./tests/**/*", "vitest.config.js"],
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
