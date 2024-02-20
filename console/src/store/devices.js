@@ -112,7 +112,7 @@ export const useDevicesStore = defineStore("devices", {
     },
     async fetchDevicesWithPagination(state = true) {
       this.paginatedDevicesLoading = true;
-      this.devices = {};
+      this.paginatedDevices = [];
       this.total = 0;
 
       const data = await this.devices_client.list(
@@ -221,7 +221,12 @@ export const useDevicesStore = defineStore("devices", {
             config: undefined,
           })
         );
-        this.devices[device] = data;
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid === device) {
+            return data;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Updating Device: ${err.message}`;
@@ -233,7 +238,13 @@ export const useDevicesStore = defineStore("devices", {
           uuid: device,
           config: new Struct().fromJson(config),
         });
-        this.devices[device] = data;
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid === device) {
+            return data;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Updating Config: ${err.message}`;
@@ -242,7 +253,13 @@ export const useDevicesStore = defineStore("devices", {
     async moveDevice(device, namespace) {
       try {
         await this.devices_client.move({ uuid: device, namespace });
-        this.devices[device].access.namespace = namespace;
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid === device) {
+            d.access.namespace = namespace;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Moving Device: ${err.message}`;
@@ -317,7 +334,7 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async toggle(uuid, bar) {
-      let device = this.devices[uuid];
+      let device = this.paginatedDevices.find((d) => d.uuid === uuid);
       if (!device) {
         return;
       }
@@ -327,7 +344,13 @@ export const useDevicesStore = defineStore("devices", {
 
       try {
         const data = await this.devices_client.toggle({ uuid });
-        this.devices[uuid] = { ...device, ...data };
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid === uuid) {
+            return { ...d, ...data };
+          }
+          return d;
+        });
         bar.finish();
       } catch (e) {
         console.error(e);
@@ -336,7 +359,7 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async toggle_basic(uuid, bar) {
-      let device = this.devices[uuid];
+      let device = this.paginatedDevices.find((d) => d.uuid === uuid);
       if (!device) {
         return;
       }
@@ -345,7 +368,14 @@ export const useDevicesStore = defineStore("devices", {
 
       try {
         const data = await this.devices_client.toggleBasic({ uuid });
-        this.devices[uuid] = { ...device, ...data };
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid === uuid) {
+            return { ...d, ...data };
+          }
+          return d;
+        });
+
         bar.finish();
       } catch (e) {
         console.error(e);
