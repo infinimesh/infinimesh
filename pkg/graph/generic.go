@@ -26,7 +26,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error)
-	UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error
+	UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, uuid string) error
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -123,9 +123,22 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	return &resp, nil
 }
 
-func (r *infinimeshGenericActionsRepo[T]) UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) error {
+const updateModifyDate = `UPDATE @uuid WITH { last_updated: DATE_NOW() } IN Devices`
 
-	log.Debug("log uuid", zap.Any("uuid", from.ID()), zap.Any("uuid", from.GetUuid()))
+func (r *infinimeshGenericActionsRepo[T]) UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, uuid string) error {
+
+	bindVars := map[string]interface{}{
+		"uuid": uuid,
+	}
+
+	cr, err := r.db.Query(ctx, updateModifyDate, bindVars)
+
+	if err != nil {
+		log.Debug("Error while executing query", zap.Error(err))
+		return err
+	}
+
+	defer cr.Close()
 
 	return nil
 }

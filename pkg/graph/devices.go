@@ -305,11 +305,6 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.InvalidArgument, "Device Title cannot be empty")
 	}
 
-	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
-	log.Debug("Requestor", zap.String("id", requestor))
-
-	err = c.repo.UpdateDeviceModifyDate(ctx, log, NewBlankAccountDocument(requestor))
-
 	curr.Msg.Tags = dev.Tags
 	curr.Msg.Title = dev.Title
 
@@ -317,6 +312,13 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	err = c.repo.UpdateDeviceModifyDate(ctx, log, dev.Uuid)
+
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating modify date")
 	}
 
 	return curr, nil
