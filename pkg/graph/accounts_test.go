@@ -694,6 +694,12 @@ func TestAccountUpdate_Success(t *testing.T) {
 	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
 		Return(driver.DocumentMeta{}, nil)
 
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
+
 	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
 	})
@@ -784,6 +790,12 @@ func TestAccountToggle_Success(t *testing.T) {
 	f.mocks.ica_repo.EXPECT().Toggle(
 		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(nil)
+
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	_, err := f.repo.Toggle(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
@@ -941,6 +953,12 @@ func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
 	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(assert.AnError)
 
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
+
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
 	})
@@ -966,6 +984,12 @@ func TestAccountDelete_Success(t *testing.T) {
 
 	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(nil)
+
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,

@@ -337,6 +337,12 @@ func TestCreateHf_FailsOn_Send(t *testing.T) {
 		return true
 	})).Return(nil)
 
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
+
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 	f.mocks.ica_repo.EXPECT().
 		Link(f.data.ctx, f.mocks.ns2dev,
@@ -393,6 +399,12 @@ func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 			access.Level_ADMIN, access.Role_OWNER,
 		).Return(nil)
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
@@ -457,6 +469,12 @@ func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 	}, nil)
 
 	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -543,6 +561,12 @@ func TestDelete_FailsOn_DeleteDocument(t *testing.T) {
 
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
 
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
+
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
 	}))
@@ -568,6 +592,12 @@ func TestDelete_Success(t *testing.T) {
 		Link(f.data.ctx, f.mocks.ns2dev,
 			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
 		).Return(assert.AnError)
+
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
