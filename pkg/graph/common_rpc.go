@@ -55,7 +55,7 @@ func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[
 		log.Error("Failed to notify move", zap.Error(err))
 	}
 
-	return connect.NewResponse(&node.EmptyMessage{}), ctrl.ica_repo.Move(ctx, ctrl, obj, ctrl.ns2acc, req.GetNamespace())
+	return connect.NewResponse(&node.EmptyMessage{}), nil
 }
 
 func StatusFromString(code connect.Code, format string, args ...any) *connect.Error {
