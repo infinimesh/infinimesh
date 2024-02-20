@@ -242,6 +242,11 @@ func TestCreate_Success(t *testing.T) {
 		mock.Anything,
 		access.Level_ADMIN, access.Role_OWNER,
 	).Return(nil)
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.NoError(t, err)
@@ -681,6 +686,11 @@ func TestPatchConfig_Success(t *testing.T) {
 	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devpb.Device) bool {
 		return true
 	})).Return(driver.DocumentMeta{}, nil)
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.accs_repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
 
 	res, err := f.ctrl.PatchConfig(f.data.ctx, connect.NewRequest(&f.data.patch_req))
 

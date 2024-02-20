@@ -213,7 +213,7 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_CREATE,
+			EventKind: proto_eventbus.EventKind_DEVICE_CREATE,
 			Entity:    &proto_eventbus.Event_Device{Device: device.Device},
 		})
 
@@ -348,7 +348,7 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 		})
 
@@ -389,7 +389,7 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 		})
 
@@ -430,7 +430,7 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 		})
 
@@ -470,7 +470,7 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_UPDATE,
+			EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 			Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 		})
 
@@ -620,7 +620,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_DEVICE_DELETE,
+			EventKind: proto_eventbus.EventKind_DEVICE_DELETE,
 			Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
 		})
 

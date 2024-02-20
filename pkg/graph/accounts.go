@@ -306,7 +306,7 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 
 	for _, val := range result.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_ACCOUNT_CREATE,
+			EventKind: proto_eventbus.EventKind_ACCOUNT_CREATE,
 			Entity:    &proto_eventbus.Event_Account{Account: account.Account},
 		})
 
@@ -357,7 +357,7 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 
 	for _, val := range result.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_ACCOUNT_UPDATE,
+			EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
 			Entity:    &proto_eventbus.Event_Account{Account: acc},
 		})
 
@@ -399,7 +399,7 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 
 	for _, val := range result.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_ACCOUNT_UPDATE,
+			EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
 			Entity:    &proto_eventbus.Event_Account{Account: curr},
 		})
 
@@ -469,7 +469,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 
 	for _, val := range result.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_ACCOUNT_DELETE,
+			EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
 			Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
 		})
 

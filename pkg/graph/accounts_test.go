@@ -576,6 +576,12 @@ func TestAccountCreate_Success(t *testing.T) {
 	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.DocumentMeta.ID, &credentials.StandardCredentials{}).
 		Return(nil)
 
+	result := &graph.ListQueryResult[*accounts.Account]{
+		Result: []*accounts.Account{},
+		Count:  0,
+	}
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "INBOUND").Return(result, nil)
+
 	f.data.account.DefaultNamespace = ""
 
 	_, err := f.repo.Create(f.data.ctx, &connect.Request[accounts.CreateRequest]{

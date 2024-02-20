@@ -141,7 +141,7 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_NAMESPACE_CREATE,
+			EventKind: proto_eventbus.EventKind_NAMESPACE_CREATE,
 			Entity:    &proto_eventbus.Event_Namespace{Namespace: namespace.Namespace},
 		})
 
@@ -225,7 +225,7 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 
 		for _, val := range query.Result {
 			err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-				EventType: proto_eventbus.EventType_NAMESPACE_UPDATE,
+				EventKind: proto_eventbus.EventKind_NAMESPACE_UPDATE,
 				Entity:    &proto_eventbus.Event_Namespace{Namespace: ns},
 			})
 
@@ -399,7 +399,7 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 
 	for _, val := range query.Result {
 		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventType: proto_eventbus.EventType_NAMESPACE_DELETE,
+			EventKind: proto_eventbus.EventKind_NAMESPACE_DELETE,
 			Entity:    &proto_eventbus.Event_Namespace{Namespace: ns.Namespace},
 		})
 
