@@ -6,7 +6,7 @@ import { createConnectTransport } from '@connectrpc/connect-web'
 import { NamespacesService } from 'infinimesh-proto/build/es/node/node_connect'
 import { EmptyMessage, JoinRequest } from 'infinimesh-proto/build/es/node/node_pb'
 import { Namespace } from 'infinimesh-proto/build/es/node/namespaces/namespaces_pb'
-import { transport } from 'infinimesh-proto/mocks/es/namespaces.js'
+import { transport } from 'infinimesh-proto/mocks/es/namespaces'
 import { useAppStore } from './app.js'
 
 export const useNSStore = defineStore('namespaces', () => {
