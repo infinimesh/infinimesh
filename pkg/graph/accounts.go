@@ -298,22 +298,13 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 
-	result, err := c.repo.ListQuery(ctx, log, &account, "INBOUND")
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_CREATE,
+		Entity:    &proto_eventbus.Event_Account{Account: account.Account},
+	})
+
 	if err != nil {
-		log.Error("Failed to list accounts")
-		return nil, status.Error(codes.Internal, "Error listing accounts")
-	}
-
-	for _, val := range result.Result {
-		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventKind: proto_eventbus.EventKind_ACCOUNT_CREATE,
-			Entity:    &proto_eventbus.Event_Account{Account: account.Account},
-		})
-
-		if err != nil {
-			log.Error("Failed to notify eventbus", zap.Error(err))
-		}
-
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
 	return connect.NewResponse(
@@ -349,21 +340,13 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	result, err := c.repo.ListQuery(ctx, log, &old, "INBOUND")
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
+		Entity:    &proto_eventbus.Event_Account{Account: acc},
+	})
+
 	if err != nil {
-		log.Error("Failed to list accounts")
-		return nil, status.Error(codes.Internal, "Error listing accounts")
-	}
-
-	for _, val := range result.Result {
-		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
-			Entity:    &proto_eventbus.Event_Account{Account: acc},
-		})
-
-		if err != nil {
-			log.Error("Failed to notify eventbus", zap.Error(err))
-		}
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
 	return connect.NewResponse(acc), nil
@@ -391,22 +374,15 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	result, err := c.repo.ListQuery(ctx, log, res, "INBOUND")
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
+		Entity:    &proto_eventbus.Event_Account{Account: curr},
+	})
+
 	if err != nil {
-		log.Error("Failed to list accounts")
-		return nil, status.Error(codes.Internal, "Error listing accounts")
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
-	for _, val := range result.Result {
-		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
-			Entity:    &proto_eventbus.Event_Account{Account: curr},
-		})
-
-		if err != nil {
-			log.Error("Failed to notify eventbus", zap.Error(err))
-		}
-	}
 	return connect.NewResponse(res.Account), nil
 }
 
@@ -455,27 +431,19 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	result, err := c.repo.ListQuery(ctx, log, &acc, "INBOUND")
-	if err != nil {
-		log.Error("Failed to list accounts")
-		return nil, status.Error(codes.Internal, "Error listing accounts")
-	}
-
 	err = c.ica_repo.DeleteRecursive(ctx, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
-	for _, val := range result.Result {
-		err = c.bus.Notify(ctx, val.GetUuid(), &proto_eventbus.Event{
-			EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
-			Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
-		})
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
+		Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
+	})
 
-		if err != nil {
-			log.Error("Failed to notify eventbus", zap.Error(err))
-		}
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }

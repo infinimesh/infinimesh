@@ -38,7 +38,6 @@ func NewDevicesControllerModule(log *zap.Logger, db driver.Database,
 			log, db, hfc,
 			NewInfinimeshCommonActionsRepo(log.Named("DevicesController"), db),
 			NewGenericRepo[*devices.Device](db),
-			NewGenericRepo[*accounts.Account](db),
 			bus,
 		),
 	}

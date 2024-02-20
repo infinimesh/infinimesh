@@ -23,17 +23,17 @@ func (_m *MockEventBusService) EXPECT() *MockEventBusService_Expecter {
 	return &MockEventBusService_Expecter{mock: &_m.Mock}
 }
 
-// Notify provides a mock function with given fields: _a0, _a1, _a2
-func (_m *MockEventBusService) Notify(_a0 context.Context, _a1 string, _a2 *eventbus.Event) error {
-	ret := _m.Called(_a0, _a1, _a2)
+// Notify provides a mock function with given fields: _a0, _a1
+func (_m *MockEventBusService) Notify(_a0 context.Context, _a1 *eventbus.Event) error {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Notify")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *eventbus.Event) error); ok {
-		r0 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(context.Context, *eventbus.Event) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -48,15 +48,14 @@ type MockEventBusService_Notify_Call struct {
 
 // Notify is a helper method to define mock.On call
 //   - _a0 context.Context
-//   - _a1 string
-//   - _a2 *eventbus.Event
-func (_e *MockEventBusService_Expecter) Notify(_a0 interface{}, _a1 interface{}, _a2 interface{}) *MockEventBusService_Notify_Call {
-	return &MockEventBusService_Notify_Call{Call: _e.mock.On("Notify", _a0, _a1, _a2)}
+//   - _a1 *eventbus.Event
+func (_e *MockEventBusService_Expecter) Notify(_a0 interface{}, _a1 interface{}) *MockEventBusService_Notify_Call {
+	return &MockEventBusService_Notify_Call{Call: _e.mock.On("Notify", _a0, _a1)}
 }
 
-func (_c *MockEventBusService_Notify_Call) Run(run func(_a0 context.Context, _a1 string, _a2 *eventbus.Event)) *MockEventBusService_Notify_Call {
+func (_c *MockEventBusService_Notify_Call) Run(run func(_a0 context.Context, _a1 *eventbus.Event)) *MockEventBusService_Notify_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*eventbus.Event))
+		run(args[0].(context.Context), args[1].(*eventbus.Event))
 	})
 	return _c
 }
@@ -66,7 +65,7 @@ func (_c *MockEventBusService_Notify_Call) Return(_a0 error) *MockEventBusServic
 	return _c
 }
 
-func (_c *MockEventBusService_Notify_Call) RunAndReturn(run func(context.Context, string, *eventbus.Event) error) *MockEventBusService_Notify_Call {
+func (_c *MockEventBusService_Notify_Call) RunAndReturn(run func(context.Context, *eventbus.Event) error) *MockEventBusService_Notify_Call {
 	_c.Call.Return(run)
 	return _c
 }

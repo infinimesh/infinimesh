@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	accpb "github.com/infinimesh/proto/node/accounts"
 	"time"
 
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
@@ -66,7 +67,7 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 
 type EventBusService interface {
 	Subscribe(context.Context, string) (<-chan proto_eventbus.Event, error)
-	Notify(context.Context, string, *proto_eventbus.Event) error
+	Notify(context.Context, *proto_eventbus.Event) error
 }
 
 type EventBus struct {
@@ -74,7 +75,7 @@ type EventBus struct {
 
 	channel *amqp.Channel
 
-	ica_repo InfinimeshCommonActionsRepo
+	repo InfinimeshGenericActionsRepo[*accpb.Account]
 }
 
 func NewEventBus(log *zap.Logger, db driver.Database, amqp *amqp.Connection) (*EventBus, error) {
@@ -90,12 +91,12 @@ func NewEventBus(log *zap.Logger, db driver.Database, amqp *amqp.Connection) (*E
 		return nil, err
 	}
 
-	ica := NewInfinimeshCommonActionsRepo(log, db)
+	repo := NewGenericRepo[*accpb.Account](db)
 
 	return &EventBus{
-		log:      log.Named("Eventbus"),
-		channel:  channel,
-		ica_repo: ica,
+		log:     log.Named("Eventbus"),
+		channel: channel,
+		repo:    repo,
 	}, nil
 }
 
@@ -140,7 +141,7 @@ func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan proto_eve
 	return events, nil
 }
 
-func (e *EventBus) Notify(ctx context.Context, account string, event *proto_eventbus.Event) error {
+func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) error {
 	log := e.log.Named("Notify")
 	log.Debug("Invoke")
 
@@ -150,13 +151,49 @@ func (e *EventBus) Notify(ctx context.Context, account string, event *proto_even
 		return err
 	}
 
-	err = e.channel.PublishWithContext(ctx, "events", account, false, false, amqp.Publishing{
-		ContentType: "text/plain",
-		Body:        marshal,
-	})
-	if err != nil {
-		log.Error("Failed to publish event", zap.Error(err))
-		return err
+	var accounts []*accpb.Account
+	switch event.GetEntity().(type) {
+	case *proto_eventbus.Event_Account:
+		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
+		if err != nil {
+			log.Error("Failed to list accounts", zap.Error(err))
+			return err
+		}
+		accounts = result.Result
+	case *proto_eventbus.Event_Device:
+		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
+		if err != nil {
+			log.Error("Failed to list accounts", zap.Error(err))
+			return err
+		}
+		accounts = result.Result
+	case *proto_eventbus.Event_Namespace:
+		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
+		if err != nil {
+			log.Error("Failed to list accounts", zap.Error(err))
+			return err
+		}
+		accounts = result.Result
+	default:
+		return errors.New("failed to define entity type")
 	}
+
+	var errs []string
+
+	for _, val := range accounts {
+		err = e.channel.PublishWithContext(ctx, "events", val.GetUuid(), false, false, amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        marshal,
+		})
+		if err != nil {
+			log.Error("Failed to publish event", zap.Error(err))
+			errs = append(errs, err.Error())
+		}
+	}
+
+	if len(errs) != 0 {
+		return fmt.Errorf("failed to publish some events. %v", errs)
+	}
+
 	return nil
 }
