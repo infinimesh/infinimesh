@@ -17,8 +17,6 @@ package main
 
 import (
 	"fmt"
-	amqp "github.com/rabbitmq/amqp091-go"
-	"gopkg.in/yaml.v2"
 	"net/http"
 	"os"
 	"strings"
@@ -38,6 +36,7 @@ import (
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"github.com/infinimesh/proto/plugins/pluginsconnect"
 	shadowpb "github.com/infinimesh/proto/shadow"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -45,6 +44,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -178,9 +178,9 @@ func main() {
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
 		log.Info("Registering accounts service")
-		acc_ctrl := graph.NewAccountsController(log, db, rdb, bus)
-		acc_ctrl.SIGNING_KEY = SIGNING_KEY
-		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl, interceptors)
+		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb, bus)
+		acc_ctrl.SetSigningKey(SIGNING_KEY)
+		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl.Handler(), interceptors)
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -195,8 +195,8 @@ func main() {
 	}
 
 	if ensure_root {
-		ica := graph.NewInfinimeshCommonActionsRepo(db)
-		err := ica.EnsureRootExists(log, rdb, rootPass)
+		ica := graph.NewInfinimeshCommonActionsRepo(log, db)
+		err := ica.EnsureRootExists(rdb, rootPass)
 		if err != nil {
 			log.Warn("Failed to ensure root exists", zap.Error(err))
 		}

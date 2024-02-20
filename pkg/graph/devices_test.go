@@ -3,6 +3,7 @@ package graph_test
 import (
 	"context"
 	"errors"
+	"github.com/infinimesh/proto/node/accounts"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -36,9 +37,11 @@ type devicesControllerFixture struct {
 		ns2dev  *driver_mocks.MockCollection
 		acc2dev *driver_mocks.MockCollection
 
-		hfc      *handsfree_mocks.MockHandsfreeServiceClient
-		ica_repo *graph_mocks.MockInfinimeshCommonActionsRepo
-		repo     *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
+		hfc       *handsfree_mocks.MockHandsfreeServiceClient
+		ica_repo  *graph_mocks.MockInfinimeshCommonActionsRepo
+		repo      *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
+		accs_repo *graph_mocks.MockInfinimeshGenericActionsRepo[*accounts.Account]
+		bus       *graph_mocks.MockEventBusService
 	}
 
 	data struct {
@@ -55,20 +58,23 @@ type devicesControllerFixture struct {
 }
 
 func newDevicesControllerFixture(t *testing.T) *devicesControllerFixture {
+	t.Parallel()
 	f := &devicesControllerFixture{}
 
 	f.mocks.db = driver_mocks.NewMockDatabase(t)
 	f.mocks.col = driver_mocks.NewMockCollection(t)
 	f.mocks.ns2dev = driver_mocks.NewMockCollection(t)
 	f.mocks.acc2dev = driver_mocks.NewMockCollection(t)
-	f.mocks.db.On("Collection", context.TODO(), schema.DEVICES_COL).Return(f.mocks.col, nil)
+	f.mocks.db.EXPECT().Collection(context.TODO(), schema.DEVICES_COL).Return(f.mocks.col, nil)
 
 	f.mocks.hfc = handsfree_mocks.NewMockHandsfreeServiceClient(t)
 	f.mocks.ica_repo = graph_mocks.NewMockInfinimeshCommonActionsRepo(t)
-	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.NS2DEV).Return(f.mocks.ns2dev, nil).Maybe()
-	f.mocks.ica_repo.On("GetEdgeCol", context.TODO(), schema.ACC2DEV).Return(f.mocks.acc2dev, nil).Maybe()
+	f.mocks.ica_repo.EXPECT().GetEdgeCol(context.TODO(), schema.NS2DEV).Return(f.mocks.ns2dev).Maybe()
+	f.mocks.ica_repo.EXPECT().GetEdgeCol(context.TODO(), schema.ACC2DEV).Return(f.mocks.acc2dev).Maybe()
+	f.mocks.bus = graph_mocks.NewMockEventBusService(t)
 
 	f.mocks.repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*devpb.Device](t)
+	f.mocks.accs_repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*accounts.Account](t)
 
 	f.data.acc_uuid = uuid.New().String()
 	f.data.dev_uuid = uuid.New().String()
@@ -144,6 +150,8 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 		zap.NewExample(), f.mocks.db,
 		f.mocks.hfc, f.mocks.ica_repo,
 		f.mocks.repo,
+		f.mocks.accs_repo,
+		f.mocks.bus,
 	)
 
 	return f
@@ -163,7 +171,7 @@ func TestCreate_FailsOn_NoNamespace(t *testing.T) {
 
 func TestCreate_FailsOn_NoAccessToNamespace(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		false, access.Level_NONE,
 	)
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
@@ -174,7 +182,7 @@ func TestCreate_FailsOn_NoAccessToNamespace(t *testing.T) {
 
 func TestCreate_FailsOn_GenerateFingerprint(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
 	f.data.create_req.Device.Certificate.PemData = "invalid"
@@ -186,10 +194,10 @@ func TestCreate_FailsOn_GenerateFingerprint(t *testing.T) {
 
 func TestCreate_FailsOn_CreateDocument(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.Nil(t, res)
 	assert.Error(t, err)
@@ -198,19 +206,19 @@ func TestCreate_FailsOn_CreateDocument(t *testing.T) {
 
 func TestCreate_FailsOn_Link(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+	f.mocks.ica_repo.EXPECT().Link(
+		f.data.ctx, f.mocks.ns2dev,
+		graph.NewBlankNamespaceDocument(f.data.ns_uuid),
 		mock.Anything,
 		access.Level_ADMIN, access.Role_OWNER,
 	).Return(assert.AnError)
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.Nil(t, res)
@@ -222,15 +230,15 @@ func TestCreate_FailsOn_Link(t *testing.T) {
 
 func TestCreate_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+	f.mocks.ica_repo.EXPECT().Link(
+		f.data.ctx, f.mocks.ns2dev,
+		graph.NewBlankNamespaceDocument(f.data.ns_uuid),
 		mock.Anything,
 		access.Level_ADMIN, access.Role_OWNER,
 	).Return(nil)
@@ -255,7 +263,7 @@ func TestCreateHf_FailsOn_NoNamespace(t *testing.T) {
 
 func TestCreateHf_FailsOn_NoAccessToNamespace(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		false, access.Level_NONE,
 	)
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
@@ -266,10 +274,10 @@ func TestCreateHf_FailsOn_NoAccessToNamespace(t *testing.T) {
 
 func TestCreateHf_FailsOn_CreateDocument(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
 	assert.Error(t, err)
@@ -278,19 +286,19 @@ func TestCreateHf_FailsOn_CreateDocument(t *testing.T) {
 
 func TestCreateHf_FailsOn_Link(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(assert.AnError)
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(assert.AnError)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -302,21 +310,21 @@ func TestCreateHf_FailsOn_Link(t *testing.T) {
 
 func TestCreateHf_FailsOn_Send(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(nil)
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_ADMIN,
 			Namespace: &f.data.ns_uuid,
@@ -324,13 +332,13 @@ func TestCreateHf_FailsOn_Send(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything, f.mocks.ns2dev,
-		mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
-	).Return(assert.AnError)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx, f.mocks.ns2dev,
+			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
+		).Return(assert.AnError)
 
-	f.mocks.hfc.On("Send", f.data.ctx, mock.Anything).Return(nil, assert.AnError)
+	f.mocks.hfc.EXPECT().Send(f.data.ctx, mock.Anything).Return(nil, assert.AnError)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -340,22 +348,22 @@ func TestCreateHf_FailsOn_Send(t *testing.T) {
 
 func TestCreateHf_FailsOn_EmptyPayloadAndDelete(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(nil)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.Anything).Return(assert.AnError)
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.Anything).Return(assert.AnError)
 
-	f.mocks.hfc.On("Send", f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
+	f.mocks.hfc.EXPECT().Send(f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
 		Payload: []string{},
 	}, nil)
 
@@ -367,21 +375,21 @@ func TestCreateHf_FailsOn_EmptyPayloadAndDelete(t *testing.T) {
 
 func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(nil)
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_ADMIN,
 			Namespace: &f.data.ns_uuid,
@@ -389,14 +397,14 @@ func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything, f.mocks.ns2dev,
-		mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
-	).Return(nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx, f.mocks.ns2dev,
+			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
+		).Return(nil)
 
 	app_id := "some-app"
-	f.mocks.hfc.On("Send", f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
+	f.mocks.hfc.EXPECT().Send(f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
 		Payload: []string{"invalid cert"},
 		AppId:   &app_id,
 	}, nil)
@@ -409,21 +417,21 @@ func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 
 func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(nil)
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, graph.NewBlankNamespaceDocument(f.data.ns_uuid),
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_ADMIN,
 			Namespace: &f.data.ns_uuid,
@@ -431,19 +439,19 @@ func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything, f.mocks.ns2dev,
-		mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
-	).Return(nil)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx, f.mocks.ns2dev,
+			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
+		).Return(nil)
 
 	app_id := "some-app"
-	f.mocks.hfc.On("Send", f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
+	f.mocks.hfc.EXPECT().Send(f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
 		Payload: []string{f.data.cert},
 		AppId:   &app_id,
 	}, nil)
 
-	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -453,26 +461,26 @@ func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 
 func TestCreateHf_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, graph.NewBlankNamespaceDocument(f.data.ns_uuid)).Return(
 		true, access.Level_ADMIN,
 	)
-	f.mocks.col.On("CreateDocument", f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
+	f.mocks.col.EXPECT().CreateDocument(f.data.ctx, mock.Anything).Return(driver.DocumentMeta{
 		ID: driver.NewDocumentID(schema.DEVICES_COL, f.data.dev_uuid),
 	}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything,
-		f.mocks.ns2dev, mock.Anything,
-		mock.Anything,
-		access.Level_ADMIN, access.Role_OWNER,
-	).Return(nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx,
+			f.mocks.ns2dev, mock.Anything,
+			mock.Anything,
+			access.Level_ADMIN, access.Role_OWNER,
+		).Return(nil)
 
 	app_id := "some-app"
-	f.mocks.hfc.On("Send", f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
+	f.mocks.hfc.EXPECT().Send(f.data.ctx, mock.Anything).Return(&handsfree.ControlPacket{
 		Payload: []string{f.data.cert},
 		AppId:   &app_id,
 	}, nil)
 
-	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, nil)
+	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.NoError(t, err)
@@ -485,7 +493,7 @@ func TestCreateHf_Success(t *testing.T) {
 func TestDelete_FailsOn_AccessLevelAndGet(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.Anything).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.Anything).Return(
 		assert.AnError,
 	)
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
@@ -500,7 +508,7 @@ func TestDelete_FailsOn_AccessLevelAndGet(t *testing.T) {
 func TestDelete_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level: access.Level_READ,
 		}
@@ -521,14 +529,14 @@ func TestDelete_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 func TestDelete_FailsOn_DeleteDocument(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level: access.Level_ADMIN,
 		}
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
@@ -542,7 +550,7 @@ func TestDelete_FailsOn_DeleteDocument(t *testing.T) {
 func TestDelete_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_ADMIN,
 			Namespace: &f.data.ns_uuid,
@@ -550,11 +558,11 @@ func TestDelete_Success(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("RemoveDocument", f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
-	f.mocks.ica_repo.On(
-		"Link", f.data.ctx, mock.Anything, f.mocks.ns2dev,
-		mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
-	).Return(assert.AnError)
+	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+	f.mocks.ica_repo.EXPECT().
+		Link(f.data.ctx, f.mocks.ns2dev,
+			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
+		).Return(assert.AnError)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
@@ -570,7 +578,7 @@ func TestDelete_Success(t *testing.T) {
 func TestMakeDevicesToken_FailsOn_AccessLevel_NotFound(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, mock.Anything).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).Return(
 		false, access.Level_NONE,
 	)
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
@@ -585,7 +593,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotFound(t *testing.T) {
 func TestMakeDevicesToken_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, mock.Anything).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).Return(
 		true, access.Level_READ,
 	)
 	res, err := f.ctrl.MakeDevicesToken(f.data.ctx, connect.NewRequest(&node.DevicesTokenRequest{
@@ -602,7 +610,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 // func TestMakeDevicesToken_FailsOn_MakeToken(t *testing.T) {
 // 	f := newDevicesControllerFixture(t)
 
-// 	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, mock.Anything).Return(
+// 	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).Return(
 // 		true, access.Level_ADMIN,
 // 	)
 
@@ -621,7 +629,7 @@ func TestMakeDevicesToken_FailsOn_AccessLevel_NotEnoughAccess(t *testing.T) {
 func TestMakeDevicesToken_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevel", f.data.ctx, mock.Anything, mock.Anything).Return(
+	f.mocks.ica_repo.EXPECT().AccessLevel(f.data.ctx, mock.Anything, mock.Anything).Return(
 		true, access.Level_ADMIN,
 	)
 
@@ -641,7 +649,7 @@ func TestList_Success(t *testing.T) {
 		Result: []*devpb.Device{},
 		Count:  count,
 	}
-	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(result, nil)
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "").Return(result, nil)
 
 	resp, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 
@@ -652,7 +660,7 @@ func TestList_Success(t *testing.T) {
 func TestList_FailsOn_ListQuery(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("Error"))
+	f.mocks.repo.EXPECT().ListQuery(mock.Anything, mock.Anything, mock.Anything, "").Return(nil, errors.New("Error"))
 
 	_, err := f.ctrl.List(f.data.ctx, connect.NewRequest(&node.QueryRequest{}))
 
@@ -662,7 +670,7 @@ func TestList_FailsOn_ListQuery(t *testing.T) {
 func TestPatchConfig_Success(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_ROOT,
 			Namespace: &f.data.ns_uuid,
@@ -670,7 +678,7 @@ func TestPatchConfig_Success(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.col.On("ReplaceDocument", f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devpb.Device) bool {
+	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devpb.Device) bool {
 		return true
 	})).Return(driver.DocumentMeta{}, nil)
 
@@ -683,7 +691,7 @@ func TestPatchConfig_Success(t *testing.T) {
 func TestPatchConfig_FailsOn_NoAccess(t *testing.T) {
 	f := newDevicesControllerFixture(t)
 
-	f.mocks.ica_repo.On("AccessLevelAndGet", f.data.ctx, mock.Anything, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
+	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
 			Level:     access.Level_MGMT,
 			Namespace: &f.data.ns_uuid,

@@ -90,7 +90,7 @@ func NewEventBus(log *zap.Logger, db driver.Database, amqp *amqp.Connection) (*E
 		return nil, err
 	}
 
-	ica := NewInfinimeshCommonActionsRepo(db)
+	ica := NewInfinimeshCommonActionsRepo(log, db)
 
 	return &EventBus{
 		log:      log.Named("Eventbus"),

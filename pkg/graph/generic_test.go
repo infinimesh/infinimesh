@@ -30,6 +30,7 @@ type serviceFixture[T graph.InfinimeshProtobufEntity] struct {
 }
 
 func newServiceFixture[T graph.InfinimeshProtobufEntity](t *testing.T) *serviceFixture[T] {
+	t.Parallel()
 	f := &serviceFixture[T]{}
 	f.mocks.db = driver_mocks.NewMockDatabase(t)
 	f.mocks.cursor = driver_mocks.NewMockCursor(t)
@@ -83,7 +84,7 @@ func TestListOwned_Devices_Success(t *testing.T) {
 	})).Return(driver.DocumentMeta{}, nil)
 	f.mocks.cursor.EXPECT().Close().Return(nil)
 
-	res, err := f.repo.ListQuery(f.data.ctx, f.mocks.log, graph.NewBlankAccountDocument("infinimesh"))
+	res, err := f.repo.ListQuery(f.data.ctx, f.mocks.log, graph.NewBlankAccountDocument("infinimesh"), "")
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, res.Count)

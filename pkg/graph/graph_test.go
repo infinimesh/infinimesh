@@ -50,6 +50,7 @@ var (
 
 	dev_ctrl *DevicesController
 	dev_repo InfinimeshGenericActionsRepo[*devices.Device]
+	acc_repo InfinimeshGenericActionsRepo[*accounts.Account]
 
 	plug_ctrl *PluginsController
 
@@ -82,19 +83,21 @@ func init() {
 		Addr: redisHost,
 	})
 
-	ica = NewInfinimeshCommonActionsRepo(db)
+	ica = NewInfinimeshCommonActionsRepo(log, db)
 
-	err := ica.EnsureRootExists(log, rdb, rootPass)
+	err := ica.EnsureRootExists(rdb, rootPass)
 	if err != nil {
 		panic(err)
 	}
 
-	ctrl = NewAccountsController(log, db, rdb)
+	ictrl := NewAccountsControllerModule(log, db, rdb, nil).Handler()
+	ctrl = ictrl.(*AccountsController)
 
-	ns_ctrl = NewNamespacesController(log, db)
+	ns_ctrl = NewNamespacesController(log, db, nil)
 
 	dev_repo = NewGenericRepo[*devices.Device](db)
-	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo)
+	acc_repo = NewGenericRepo[*accounts.Account](db)
+	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo, acc_repo, nil)
 
 	plug_ctrl = NewPluginsController(log, db)
 
@@ -839,7 +842,7 @@ func TestPermissionsRootNamespace(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
-	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	err = ica.Link(rootCtx, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -909,7 +912,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 
 	// Giving Account 1 Management access(MGMT) to Platform
 	edge := ica.GetEdgeCol(rootCtx, schema.ACC2NS)
-	err = ica.Link(rootCtx, log, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
+	err = ica.Link(rootCtx, edge, acc1, NewBlankNamespaceDocument(schema.ROOT_NAMESPACE_KEY), access.Level_MGMT, access.Role_UNSET)
 	if err != nil {
 		t.Fatalf("Error linking Account 1 to platform Namespace: %v", err)
 	}
@@ -917,7 +920,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	nacc1 := *NewBlankAccountDocument(acc1.Key)
 	nacc2 := *NewBlankAccountDocument(acc2.Key)
 	// Checking Account 1 access to Account 2
-	err = ica.AccessLevelAndGet(rootCtx, log, acc1, &nacc2)
+	err = ica.AccessLevelAndGet(rootCtx, acc1, &nacc2)
 	if err != nil {
 		t.Fatalf("Error checking Access or Access Level is 0(none)")
 	}
@@ -930,7 +933,7 @@ func TestPermissionsRootNamespaceAccessAndGet(t *testing.T) {
 	}
 
 	// Checking Account 2 access to Account 1
-	err = ica.AccessLevelAndGet(rootCtx, log, &nacc2, &nacc1)
+	err = ica.AccessLevelAndGet(rootCtx, &nacc2, &nacc1)
 	if err == nil && nacc1.Access.Level > access.Level_NONE {
 		t.Fatalf("Account 2 has higher access level than expected: %d(should be %d)", nacc1.Access.Level, access.Level_NONE)
 	}
@@ -943,7 +946,7 @@ func TestAccessLevelAndGetUnexistingAccountAndNode(t *testing.T) {
 	acc1 := *NewBlankAccountDocument(randomdata.SillyName())
 	acc2 := *NewBlankAccountDocument(randomdata.SillyName())
 
-	err := ica.AccessLevelAndGet(rootCtx, log, &acc1, &acc2)
+	err := ica.AccessLevelAndGet(rootCtx, &acc1, &acc2)
 	if err == nil {
 		t.Fatalf("Has to be error but it's not: %v", err)
 	}

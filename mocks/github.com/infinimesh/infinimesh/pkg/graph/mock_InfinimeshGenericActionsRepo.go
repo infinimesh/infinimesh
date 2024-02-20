@@ -24,9 +24,9 @@ func (_m *MockInfinimeshGenericActionsRepo[T]) EXPECT() *MockInfinimeshGenericAc
 	return &MockInfinimeshGenericActionsRepo_Expecter[T]{mock: &_m.Mock}
 }
 
-// ListQuery provides a mock function with given fields: ctx, log, from
-func (_m *MockInfinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode) (*graph.ListQueryResult[T], error) {
-	ret := _m.Called(ctx, log, from)
+// ListQuery provides a mock function with given fields: ctx, log, from, searchType
+func (_m *MockInfinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, searchType string) (*graph.ListQueryResult[T], error) {
+	ret := _m.Called(ctx, log, from, searchType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListQuery")
@@ -34,19 +34,19 @@ func (_m *MockInfinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, lo
 
 	var r0 *graph.ListQueryResult[T]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode) (*graph.ListQueryResult[T], error)); ok {
-		return rf(ctx, log, from)
+	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (*graph.ListQueryResult[T], error)); ok {
+		return rf(ctx, log, from, searchType)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode) *graph.ListQueryResult[T]); ok {
-		r0 = rf(ctx, log, from)
+	if rf, ok := ret.Get(0).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) *graph.ListQueryResult[T]); ok {
+		r0 = rf(ctx, log, from, searchType)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*graph.ListQueryResult[T])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode) error); ok {
-		r1 = rf(ctx, log, from)
+	if rf, ok := ret.Get(1).(func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) error); ok {
+		r1 = rf(ctx, log, from, searchType)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -63,13 +63,14 @@ type MockInfinimeshGenericActionsRepo_ListQuery_Call[T graph.InfinimeshProtobufE
 //   - ctx context.Context
 //   - log *zap.Logger
 //   - from graph.InfinimeshGraphNode
-func (_e *MockInfinimeshGenericActionsRepo_Expecter[T]) ListQuery(ctx interface{}, log interface{}, from interface{}) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
-	return &MockInfinimeshGenericActionsRepo_ListQuery_Call[T]{Call: _e.mock.On("ListQuery", ctx, log, from)}
+//   - searchType string
+func (_e *MockInfinimeshGenericActionsRepo_Expecter[T]) ListQuery(ctx interface{}, log interface{}, from interface{}, searchType interface{}) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
+	return &MockInfinimeshGenericActionsRepo_ListQuery_Call[T]{Call: _e.mock.On("ListQuery", ctx, log, from, searchType)}
 }
 
-func (_c *MockInfinimeshGenericActionsRepo_ListQuery_Call[T]) Run(run func(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode)) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
+func (_c *MockInfinimeshGenericActionsRepo_ListQuery_Call[T]) Run(run func(ctx context.Context, log *zap.Logger, from graph.InfinimeshGraphNode, searchType string)) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(graph.InfinimeshGraphNode))
+		run(args[0].(context.Context), args[1].(*zap.Logger), args[2].(graph.InfinimeshGraphNode), args[3].(string))
 	})
 	return _c
 }
@@ -79,7 +80,7 @@ func (_c *MockInfinimeshGenericActionsRepo_ListQuery_Call[T]) Return(_a0 *graph.
 	return _c
 }
 
-func (_c *MockInfinimeshGenericActionsRepo_ListQuery_Call[T]) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode) (*graph.ListQueryResult[T], error)) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
+func (_c *MockInfinimeshGenericActionsRepo_ListQuery_Call[T]) RunAndReturn(run func(context.Context, *zap.Logger, graph.InfinimeshGraphNode, string) (*graph.ListQueryResult[T], error)) *MockInfinimeshGenericActionsRepo_ListQuery_Call[T] {
 	_c.Call.Return(run)
 	return _c
 }
