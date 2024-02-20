@@ -97,7 +97,7 @@ func init() {
 
 	dev_repo = NewGenericRepo[*devices.Device](db)
 	acc_repo = NewGenericRepo[*accounts.Account](db)
-	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo, acc_repo, nil)
+	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo, nil)
 
 	plug_ctrl = NewPluginsController(log, db)
 
