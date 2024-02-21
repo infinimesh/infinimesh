@@ -53,7 +53,7 @@ describe("check_token_expired", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
 
     check_token_expired(
-      new ConnectError("Invalid token format", Code.Unknown),
+      new ConnectError("Session is expired, revoked or invalid", Code.Unknown),
       check_token_expired_store
     );
 
