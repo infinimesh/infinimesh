@@ -1,13 +1,65 @@
 http:
   routers:
+    traefik:
+      rule: Host(`traefik.infinimesh.local`)
+      entryPoints:
+        - http
+      service: api@internal
+
+    console:
+      rule: Host(`console.infinimesh.local`)
+      entryPoints:
+        - http
+      service: console
+
+    api:
+      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.node.", "/infinimesh.shadow", "/infinimesh.plugins", "/oauth")
+      entryPoints:
+        - http
+        - grpc
+      service: repo
+
+    web-api:
+      rule: Host(`api.infinimesh.local`)
+      entryPoints:
+        - http
+      service: web
+
     db:
       rule: Host(`db.infinimesh.local`)
       entryPoints:
         - http
       service: db
+    rbmq:
+      rule: Host(`rbmq.infinimesh.local`)
+      entryPoints:
+        - http
+      service: rbmq
 
   services:
+    repo:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8001
+    shadow:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8005
+    web:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8002
+
+    console:
+      loadBalancer:
+        servers:
+          - url: http://localhost:5173
+
     db:
       loadBalancer:
         servers:
           - url: http://localhost:8529
+    rbmq:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15672

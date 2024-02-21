@@ -7,9 +7,9 @@ providers:
     filename: ./vscode.routes.yml
 entryPoints:
   http:
-    address: "localhost:80"
+    address: ":80"
   grpc:
-    address: "localhost:8000"
+    address: ":8000"
 
 log:
   level: DEBUG
