@@ -209,7 +209,7 @@ export const useDevicesStore = defineStore('devices', () => {
 
   async function updateDeviceConfig(device, config) {
     try {
-      const data = await devicesApi.value.update({
+      const data = await devicesApi.value.patchConfig({
         uuid: device,
         config: Struct.fromJson(config)
       })
