@@ -11,7 +11,7 @@
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/hack/vscode.sh",
             "terminalKind": "integrated",
-          },
+        },
         {
             "name": "Launch Package",
             "type": "go",
