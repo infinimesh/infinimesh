@@ -114,6 +114,7 @@ func main() {
 		_ = log.Sync()
 	}()
 
+	log.Debug("Debug logs enabled")
 	log.Info("Starting MQTT Bridge")
 
 	http.Handle("/metrics", promhttp.Handler())
