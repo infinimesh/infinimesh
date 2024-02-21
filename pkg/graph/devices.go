@@ -403,7 +403,7 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 	device := *NewBlankDeviceDocument(dev.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &device)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+		return nil, status.Error(codes.NotFound, "Device not found or not enough Access Rights")
 	}
 	if device.Access.Level < access.Level_READ {
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
