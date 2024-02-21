@@ -71,9 +71,7 @@ export const useDevicesStore = defineStore('devices', () => {
       connection: connection.value.get(device_id) ?? {}
     })
   ))
-  const device_subscribed = computed((state) =>
-    (device_id) => state.subscribed.includes(device_id)
-  )
+  const device_subscribed = (device_id) => subscribed.value.includes(device_id)
 
   async function fetchDevices(state = true, no_cache = false) {
     loading.value = true
