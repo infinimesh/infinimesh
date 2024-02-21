@@ -42,7 +42,7 @@ export function check_token_expired_http(err, store) {
 export function check_token_expired(err, store) {
   if (
     err?.code == 2 &&
-    err.message.toLowerCase().includes("invalid token format")
+    err.message.toLowerCase().includes("invalid token format: no session id")
   ) {
     store.logout({
       title: "Signed Out",
