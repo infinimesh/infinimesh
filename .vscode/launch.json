@@ -8,7 +8,6 @@
         {
             "name": "Spin the backend up",
             "configurations": [
-                "Launch Debug Environment",
                 "Launch Node(repo)",
                 "Launch REST-API Gateway",
                 "Launch Shadow",
@@ -26,7 +25,6 @@
         {
             "name": "Spin the infinimesh up",
             "configurations": [
-                "Launch Debug Environment",
                 "Launch Node(repo)",
                 "Launch REST-API Gateway",
                 "Launch Shadow",
@@ -42,7 +40,8 @@
             "name": "Launch Debug Environment",
             "command": "make vscode",
             "request": "launch",
-            "type": "node-terminal"
+            "type": "node-terminal",
+            "internalConsoleOptions": "openOnSessionStart",
         },
         {
             "name": "Launch Console Dev Server",
