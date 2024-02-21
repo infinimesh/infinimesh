@@ -147,6 +147,12 @@ export const useDevicesStore = defineStore('devices', () => {
     }
   }
 
+  /**
+   * 
+   * @param {string[]} pool - Array of device UUIDs
+   * @param {boolean?} post - Whether to request permission to Write state
+   * @returns 
+   */
   async function makeDevicesToken(pool, post = false) {
     const level = (post) ? Level.MGMT : Level.READ
 
@@ -159,7 +165,12 @@ export const useDevicesStore = defineStore('devices', () => {
     return data.token
   }
 
-  // pool - array of devices UUIDs
+  /**
+   * 
+   * @param {[]string} pool - Array of device UUIDs
+   * @param {string?} token - Optional token to use
+   * @returns 
+   */
   async function getDevicesState(pool, token) {
     if (pool.length == 0) return
     if (!token) {
