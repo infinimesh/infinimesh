@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run --dom --coverage.enabled true"
+    "test": "vitest run --dom --coverage.enabled true",
+    "vitest-ui": "vitest --ui"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.7.2",
