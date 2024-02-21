@@ -1,6 +1,6 @@
 node_modules
 dist
-.vscode
+.vscode/settings.json
 coverage
 .DS_Store
 CronJobs/bkp.yaml

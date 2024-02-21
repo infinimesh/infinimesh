@@ -47,8 +47,7 @@ check-coverage-html: check-coverage
 .PHONY: build-all build-console mocks
 
 vscode:
-	@docker compose -f vscode.docker-compose.yaml up -d
-	@traefik --configfile vscode.traefik.yml
+	@sh hack/vscode.sh
 
 vscode-logs:
 	@docker compose -f vscode.docker-compose.yaml logs -f
