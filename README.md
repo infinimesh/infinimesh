@@ -201,7 +201,7 @@ Requirements:
 How to launch:
 
 1. Go to Run and Debug
-2. Click `Lauch Debug Environment`
+2. Click `Lauch Debug Environment` | [!NOTE] You'll be asked the root password to launch `traefik`, don't miss it
 3. Click `Spin the infinimesh up` to launch all services
 4. Enjoy
 
