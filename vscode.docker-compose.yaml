@@ -13,7 +13,6 @@ services:
       - data:/var/lib/arangodb3
 
   redis:
-    network_mode: host
     image: redis:latest
     ports:
       - 6379:6379
