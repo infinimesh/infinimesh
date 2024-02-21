@@ -3,11 +3,13 @@ package graph
 import (
 	"context"
 	"fmt"
-	proto_eventbus "github.com/infinimesh/proto/eventbus"
-	"go.uber.org/zap"
+
+	"github.com/infinimesh/proto/node"
 
 	"connectrpc.com/connect"
-	"github.com/infinimesh/proto/node"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func (ctrl *DevicesController) Move(ctx context.Context, msg *connect.Request[node.MoveRequest]) (*connect.Response[node.EmptyMessage], error) {
@@ -22,13 +24,24 @@ func (ctrl *DevicesController) Move(ctx context.Context, msg *connect.Request[no
 		return nil, err
 	}
 
-	err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
-		EventKind: proto_eventbus.EventKind_DEVICE_MOVE,
-		Entity:    &proto_eventbus.Event_Device{Device: obj.Device},
-	})
+	var metaMap = map[string]any{
+		"new_ns": req.GetNamespace(),
+	}
 
-	if err != nil {
-		log.Error("Failed to notify move", zap.Error(err))
+	meta, err := structpb.NewStruct(metaMap)
+
+	if err == nil {
+		err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
+			EventKind: proto_eventbus.EventKind_DEVICE_MOVE,
+			Entity:    &proto_eventbus.Event_Device{Device: obj.Device},
+			Meta:      meta,
+		})
+
+		if err != nil {
+			log.Error("Failed to notify move", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create struct", zap.Error(err))
 	}
 
 	return connect.NewResponse(&node.EmptyMessage{}), nil
