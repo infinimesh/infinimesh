@@ -41,14 +41,14 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:8001
-    shadow:
-      loadBalancer:
-        servers:
-          - url: http://localhost:8005
     web:
       loadBalancer:
         servers:
           - url: http://localhost:8002
+    shadow:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8003
 
     console:
       loadBalancer:

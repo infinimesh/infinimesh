@@ -205,6 +205,29 @@ How to launch:
 3. Click `Spin the infinimesh up` to launch all services
 4. Enjoy
 
+This will run all services locally (not in Docker and with Debuggers attached). Since about everything needs a port or two, here are the reserved ports and hostnames:
+
+|       Service             |    Ports   |
+|---------------------------|------------|
+| api.infinimesh.local      | 80/http    |
+| db.infinimesh.local       | 80/http    |
+| console.infinimesh.local  | 80/http    |
+| traefik.infinimesh.local  | 80/http    |
+| rbmq.infinimesh.local     | 80/http    |
+| MQTT Bridge (Basic Auth)  | 1883/http  |
+| RabbitMQ API              | 5672/tcp   |
+| Redis                     | 6379/tcp   |
+| Redis Timeseries          | 6380/tcp   |
+| Console Dev server        | 5173/http  |
+| api.infinimesh.local      | 8000/grpc  |
+| Node (repo)               | 8001       |
+| REST API Gateway          | 8002       |
+| Shadow                    | 8003/grpc  |
+| _TimeSeries API_          | 8004       |
+| ArangoDB                  | 8529/http  |
+| MQTT Bridge               | 8883/https |
+| RabbitMQ UI               | 15672/http |
+
 ### Generating proto files
 
 Clone [proto repo](https://github.com/infinimesh/proto)

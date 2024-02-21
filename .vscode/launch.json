@@ -95,7 +95,7 @@
                 "PORT": "8001",
                 "DB_HOST": "localhost:8529",
                 "REDIS_HOST": "localhost:6379",
-                "SHADOW_HOST": "localhost:8005"
+                "SHADOW_HOST": "localhost:8003"
             }
         },
         {
@@ -127,7 +127,7 @@
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "PORT": "8005",
+                "PORT": "8003",
                 "DEVICES_HOST": "localhost:8001",
                 "REDIS_HOST": "localhost:6379",
             }
@@ -143,9 +143,9 @@
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "PORT": "8005",
+                "PORT": "8003",
                 "DEVICES_HOST": "localhost:8001",
-                "SHADOW_HOST": "localhost:8005",
+                "SHADOW_HOST": "localhost:8003",
                 "TLS_CERT_FILE": "${workspaceFolder}/cmd/mqtt-bridge/server.crt",
                 "TLS_KEY_FILE": "${workspaceFolder}/cmd/mqtt-bridge/server.key",
                 "DEBUG": "true",
@@ -162,7 +162,7 @@
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "PORT": "8005",
+                "PORT": "8003",
                 "DEVICES_HOST": "localhost:8001",
                 "REDIS_HOST": "localhost:6379",
             }
