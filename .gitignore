@@ -11,3 +11,4 @@ cover.out
 cover.html
 
 .env
+__debug_*
