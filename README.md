@@ -196,6 +196,7 @@ Requirements:
 - Traefik
 - Bash Debug Extention
 - Go Extention
+- **Hosts entries from the above must be present**
 
 How to launch:
 
