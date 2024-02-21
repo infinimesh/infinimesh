@@ -75,10 +75,11 @@ type PluginsController struct {
 func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
+	log = log.Named("PluginsController")
 	return &PluginsController{
-		log: log.Named("PluginsController"), col: col, db: db,
+		log: log, col: col, db: db,
 		ns_ctrl:  NewNamespacesController(log, db),
-		ica_repo: NewInfinimeshCommonActionsRepo(db),
+		ica_repo: NewInfinimeshCommonActionsRepo(log, db),
 		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }

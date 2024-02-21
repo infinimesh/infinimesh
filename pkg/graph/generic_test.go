@@ -30,6 +30,7 @@ type serviceFixture[T graph.InfinimeshProtobufEntity] struct {
 }
 
 func newServiceFixture[T graph.InfinimeshProtobufEntity](t *testing.T) *serviceFixture[T] {
+	t.Parallel()
 	f := &serviceFixture[T]{}
 	f.mocks.db = driver_mocks.NewMockDatabase(t)
 	f.mocks.cursor = driver_mocks.NewMockCursor(t)

@@ -170,7 +170,7 @@ const message = useMessage()
 async function handleDelete(uuid) {
   loading.value = true
   try {
-    await store.delete(uuid)
+    await store.remove(uuid)
     message.success("Namespace successfuly deleted")
   } catch (e) {
     message.error("Failed to delete namespace: " + e.message)
