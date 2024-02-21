@@ -70,7 +70,6 @@ services:
       - ./hack/server.key:/cert/tls.key
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
-      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       DEVICES_HOST: repo:8000
       SHADOW_HOST: shadow:8000
       SIGNING_KEY: "${SIGNING_KEY}"
@@ -119,7 +118,6 @@ services:
       - rabbitmq
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
-      RABBITMQ_CONN: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       REDIS_HOST: redis:6379
       DEVICES_HOST: repo:8000
       SIGNING_KEY: "${SIGNING_KEY}"
