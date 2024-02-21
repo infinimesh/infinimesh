@@ -3,21 +3,143 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "envFile": "${workspaceFolder}/.env",
+    "compounds": [
+        {
+            "name": "Spin the backend up",
+            "configurations": [
+                "Launch Debug Environment",
+                "Launch Node(repo)",
+                "Launch REST-API Gateway",
+                "Launch Shadow",
+                "Launch MQTT-Bridge",
+                "Launch Handsfree"
+            ]
+        },
+        {
+            "name": "Spin the frontend up",
+            "configurations": [
+                "Launch Console Dev Server",
+                "Launch Chrome against Console Dev server"
+            ]
+        },
+        {
+            "name": "Spin the infinimesh up",
+            "configurations": [
+                "Launch Debug Environment",
+                "Launch Node(repo)",
+                "Launch REST-API Gateway",
+                "Launch Shadow",
+                "Launch MQTT-Bridge",
+                "Launch Handsfree",
+                "Launch Console Dev Server",
+                "Launch Chrome against Console Dev server"
+            ]
+        }
+    ],
     "configurations": [
         {
             "name": "Launch Debug Environment",
-            "type": "bashdb",
+            "command": "make vscode",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/hack/vscode.sh",
-            "terminalKind": "integrated",
+            "type": "node-terminal"
         },
         {
-            "name": "Launch Package",
+            "name": "Launch Console Dev Server",
+            "command": "pnpm dev",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/console",
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against Console Dev server",
+            "url": "http://console.infinimesh.local",
+            "webRoot": "${workspaceFolder}/console/src"
+        },
+        {
+            "name": "Launch Node(repo)",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}"
-        }
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/repo",
+            "stopOnEntry": false,
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "PORT": "8001",
+                "DB_HOST": "localhost:8529",
+                "REDIS_HOST": "localhost:6379",
+                "SHADOW_HOST": "localhost:8005"
+            }
+        },
+        {
+            "name": "Launch REST-API Gateway",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/web",
+            "stopOnEntry": false,
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "PORT": "8002",
+                "APISERVER_HOST": "api.infinimesh.local:8000"
+            }
+        },
+        {
+            "name": "Launch Shadow",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/shadow",
+            "stopOnEntry": false,
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "PORT": "8005",
+                "DEVICES_HOST": "localhost:8001",
+                "REDIS_HOST": "localhost:6379",
+            }
+        },
+        {
+            "name": "Launch MQTT-Bridge",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/mqtt-bridge",
+            "stopOnEntry": false,
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "PORT": "8005",
+                "DEVICES_HOST": "localhost:8001",
+                "SHADOW_HOST": "localhost:8005",
+                "TLS_CERT_FILE": "${workspaceFolder}/cmd/mqtt-bridge/server.crt",
+                "TLS_KEY_FILE": "${workspaceFolder}/cmd/mqtt-bridge/server.key",
+                "DEBUG": "true",
+            }
+        },
+        {
+            "name": "Launch Handsfree",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/cmd/handsfree",
+            "stopOnEntry": false,
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "PORT": "8005",
+                "DEVICES_HOST": "localhost:8001",
+                "REDIS_HOST": "localhost:6379",
+            }
+        },
     ]
 }
