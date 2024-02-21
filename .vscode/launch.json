@@ -4,6 +4,30 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "envFile": "${workspaceFolder}/.env",
+    "inputs": [
+        {
+            "id": "handsfreeEnabled",
+            "default": "enabled",
+            "type": "pickString",
+            "description": "Should Handsfree Console plugin be enabled?",
+            "options": [
+                {"label": "Enabled", "value": "enabled"},
+                {"label": "Disabled", "value": ""}
+            ]
+        },
+        {
+            "id": "timeseriesEnabled",
+            "default": "http://api.infinimesh.local/infinimesh.timeseries.ui/",
+            "type": "promptString",
+            "description": "Timeseries API Console Plugin URL (leave empty to disable)",
+        },
+        {
+            "id": "httpFsEnabled",
+            "default": "http://media.infinimesh.local/",
+            "type": "promptString",
+            "description": "Should HTTP FS Console Plugin URL (leave empty to disable)",
+        },
+    ],
     "compounds": [
         {
             "name": "Spin the backend up",
@@ -86,7 +110,10 @@
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
                 "PORT": "8002",
-                "APISERVER_HOST": "api.infinimesh.local:8000"
+                "APISERVER_HOST": "api.infinimesh.local:8000",
+                "HANDSFREE": "${input:handsfreeEnabled}",
+                "TIMESERIES": "${input:timeseriesEnabled}",
+                "HTTP_FS": "${input:httpFsEnabled}",
             }
         },
         {
