@@ -177,8 +177,10 @@ export const useDevicesStore = defineStore('devices', () => {
       token = await makeDevicesToken(pool)
     }
 
+    const headers = new Headers()
+    headers.set('Authorization', `Bearer ${token}`)
     const data = await shadowApi.value.get(
-      {}, { headers: { Authorization: `Bearer ${token}` } }
+      {}, { headers }
     )
 
     for (const shadow of data.shadows) {
