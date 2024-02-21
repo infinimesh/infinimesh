@@ -163,6 +163,8 @@ See [CLI repo](https://github.com/infinimesh/inf) for source and instructions.
 
 ### Local development installation
 
+#### Production like
+
 We have built an automated local development setup based on Docker.
 
 1. Add this entries to `/etc/hosts`:
@@ -183,6 +185,24 @@ We have built an automated local development setup based on Docker.
 5. Run `docker compose up`
 
 Swagger API: https://infinimesh.github.io/infinimesh/
+
+#### Debugging
+
+This repo contains VS Code `launch.json` commands you can use to spin up `infinimesh` locally with debugger attached.
+
+Requirements:
+
+- Docker with Docker Compose module
+- Traefik
+- Bash Debug Extention
+- Go Extention
+
+How to launch:
+
+1. Go to Run and Debug
+2. Click `Lauch Debug Environment`
+3. Click `Spin the infinimesh up` to launch all services
+4. Enjoy
 
 ### Generating proto files
 
