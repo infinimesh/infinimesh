@@ -161,14 +161,14 @@ func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) erro
 		}
 		accounts = result.Result
 	case *proto_eventbus.Event_Device:
-		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
+		result, err := e.repo.ListQuery(ctx, log, NewBlankDeviceDocument(event.GetDevice().GetUuid()), "INBOUND")
 		if err != nil {
 			log.Error("Failed to list accounts", zap.Error(err))
 			return err
 		}
 		accounts = result.Result
 	case *proto_eventbus.Event_Namespace:
-		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
+		result, err := e.repo.ListQuery(ctx, log, NewBlankNamespaceDocument(event.GetNamespace().GetUuid()), "INBOUND")
 		if err != nil {
 			log.Error("Failed to list accounts", zap.Error(err))
 			return err
