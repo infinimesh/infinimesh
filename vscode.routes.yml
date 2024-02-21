@@ -1,0 +1,13 @@
+http:
+  routers:
+    db:
+      rule: Host(`db.infinimesh.local`)
+      entryPoints:
+        - http
+      service: db
+
+  services:
+    db:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8529

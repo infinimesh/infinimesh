@@ -1,0 +1,25 @@
+version: "3.8"
+name: infinimesh-debug-env
+
+services:
+  db:
+    image: arangodb/arangodb:latest
+    restart: always
+    environment:
+      ARANGO_ROOT_PASSWORD: openSesame
+    ports:
+      - 8529:8529
+    volumes:
+      - data:/var/lib/arangodb3
+
+  redis:
+    network_mode: host
+    image: redis:latest
+    ports:
+      - 6379:6379
+    labels:
+      - traefik.enable=false
+    command: [ "redis-server", "--appendonly", "yes" ]
+
+volumes:
+  data:

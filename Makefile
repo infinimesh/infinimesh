@@ -43,5 +43,12 @@ check-coverage: install-go-test-coverage
 check-coverage-html: check-coverage
 	rm cover.html 2> /dev/null
 	go tool cover -html=cover.out -o=cover.html
-	
+
 .PHONY: build-all build-console mocks
+
+vscode:
+	@docker compose -f vscode.docker-compose.yaml up -d
+	@traefik --configfile vscode.traefik.yml
+
+vscode-logs:
+	@docker compose -f vscode.docker-compose.yaml logs -f
