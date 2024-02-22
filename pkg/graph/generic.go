@@ -123,12 +123,15 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	return &resp, nil
 }
 
-const updateModifyDate = `UPDATE @uuid WITH { last_updated: DATE_NOW() } IN Devices`
+const updateModifyDate = `
+LET ts_seconds = FLOOR(DATE_NOW() / 1000)
+UPDATE @uuid WITH { last_updated: { "seconds": ts_seconds } } IN @@kind`
 
 func (r *infinimeshGenericActionsRepo[T]) UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, uuid string) error {
 
 	bindVars := map[string]interface{}{
-		"uuid": uuid,
+		"uuid":  uuid,
+		"@kind": schema.DEVICES_COL,
 	}
 
 	cr, err := r.db.Query(ctx, updateModifyDate, bindVars)

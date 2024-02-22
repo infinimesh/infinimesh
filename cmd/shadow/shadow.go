@@ -21,6 +21,7 @@ import (
 	"net"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/graph"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -51,6 +52,9 @@ var (
 	RabbitMQConn    string
 	SIGNING_KEY     string
 	buffer_capacity int
+	arangodbHost    string
+	arangodbCred    string
+	rootPass        string
 )
 
 func init() {
@@ -64,7 +68,13 @@ func init() {
 	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@rabbitmq:5672/")
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("BUFFER_CAPACITY", 10)
+	viper.SetDefault("DB_HOST", "db:8529")
+	viper.SetDefault("DB_CRED", "root:openSesame")
+	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 
+	arangodbHost = viper.GetString("DB_HOST")
+	arangodbCred = viper.GetString("DB_CRED")
+	rootPass = viper.GetString("INF_DEFAULT_ROOT_PASS")
 	port = viper.GetString("PORT")
 	redisHost = viper.GetString("REDIS_HOST")
 	devicesHost = viper.GetString("DEVICES_HOST")
@@ -77,6 +87,10 @@ func main() {
 	defer func() {
 		_ = log.Sync()
 	}()
+
+	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
+	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
+	log.Info("DB connection established")
 
 	log.Info("Setting up RedisDB Connection")
 	rdb := redis.NewClient(&redis.Options{
@@ -141,7 +155,9 @@ func main() {
 		log.Fatal("Failed to listen", zap.String("address", port), zap.Error(err))
 	}
 
-	srv := shadow.NewShadowServiceServer(log, rdb, ps)
+	repo := graph.NewGenericRepo[*devpb.Device](db)
+
+	srv := shadow.NewShadowServiceServer(log, rdb, ps, repo)
 
 	s := grpc.NewServer()
 	pb.RegisterShadowServiceServer(s, srv)

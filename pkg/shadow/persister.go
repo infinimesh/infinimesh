@@ -101,6 +101,13 @@ set:
 		log.Warn("Error Storing State", zap.String("key", key), zap.Error(err))
 		return
 	}
+
+	err = s.repo.UpdateDeviceModifyDate(context.Background(), log, device)
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
+		return
+	}
+
 }
 
 func MergeJSON(old, new []byte) ([]byte, error) {
@@ -129,6 +136,12 @@ func (s *ShadowServiceServer) Store(log *zap.Logger, device string, skey pb.Stat
 	r := s.rdb.Set(context.Background(), key, string(new), 0)
 	if r.Err() != nil {
 		log.Warn("Error Storing State", zap.String("key", key), zap.Error(r.Err()))
+		return key, false
+	}
+
+	err = s.repo.UpdateDeviceModifyDate(context.Background(), log, device)
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
 		return key, false
 	}
 

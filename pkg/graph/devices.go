@@ -188,6 +188,13 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
+	err = c.repo.UpdateDeviceModifyDate(ctx, log, device.Uuid)
+
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating modify date")
+	}
+
 	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
