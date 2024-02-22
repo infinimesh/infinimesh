@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent, watch, ref } from "vue";
+import { defineAsyncComponent, watch, ref, computed } from "vue";
 import {
   NSpin,
   NH1,
@@ -100,13 +100,15 @@ const DeviceRegister = defineAsyncComponent(() =>
 
 const store = useDevicesStore();
 const {
-  paginatedDevicesLoading: loading,
-  paginatedDevices: devices,
+  loading,
+  devices: devicesMap,
   show_ns,
   limit,
   page,
   total,
 } = storeToRefs(store);
+
+const devices = computed(() => Object.values(devicesMap.value));
 
 const filterTerm = ref([]);
 const filterDeviceOptions = [

@@ -40,15 +40,17 @@
 </template>
 
 <script setup>
-import { ref, watch, defineAsyncComponent } from "vue"
+import { ref, watch, defineAsyncComponent, computed } from "vue"
 import { NTable, NCheckbox, NCheckboxGroup, NSwitch, NAlert } from "naive-ui"
 
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
-const { paginatedDevices: devices } = storeToRefs(useDevicesStore());
-const { namespaces } = storeToRefs(useNSStore())
+const { devices: devicesMap } = storeToRefs(useDevicesStore());
+const { namespaces } = storeToRefs(useNSStore());
+
+const devices = computed(() => Object.values(devicesMap.value));
 
 const UuidBadge = defineAsyncComponent(() => import("@/components/core/uuid-badge.vue"))
 

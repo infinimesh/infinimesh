@@ -22,6 +22,15 @@ describe('devices store', () => {
     )
   })
 
+  test.concurrent('fetch devices with pagination', async () => {
+    const store = useDevicesStore()
+
+    await store.fetchDevicesWithPagination(true)
+    expect({ devices: Object.values(store.devices), total: store.total }).toEqual(
+      new Devices({ devices: Object.values(store.devices), total: store.total })
+    )
+  })
+
   test.concurrent('make devices token with read level', async () => {
     const store = useDevicesStore()
 

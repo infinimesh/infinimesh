@@ -30,8 +30,6 @@ export const useDevicesStore = defineStore("devices", () => {
 
   const limit = ref(10);
   const page = ref(1);
-  const paginatedDevices = ref([]);
-  const paginatedDevicesLoading = ref(false);
   const total = ref(0);
 
   const reported = ref(new Map());
@@ -111,8 +109,8 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   async function fetchDevicesWithPagination(state = true) {
-    paginatedDevicesLoading.value = true;
-    paginatedDevices.value = [];
+    loading.value = true;
+    devices.value = {};
     total.value = 0;
 
     const data = await devicesApi.value.list(
@@ -126,9 +124,13 @@ export const useDevicesStore = defineStore("devices", () => {
       })
     );
 
-    paginatedDevices.value = data.devices;
+    devices.value = data.devices.reduce((result, device) => {
+      result[device.uuid] = device;
+      return result;
+    }, {});
+
     total.value = parseInt(data.total);
-    paginatedDevicesLoading.value = false;
+    loading.value = false;
 
     state && getDevicesState(data.devices.map((d) => d.uuid));
   }
@@ -223,12 +225,7 @@ export const useDevicesStore = defineStore("devices", () => {
         new Device({ ...patch, uuid: device })
       );
 
-      paginatedDevices.value = paginatedDevices.value.map((dev) => {
-        if (dev.uuid === device) {
-          return data;
-        }
-        return dev;
-      });
+      devices.value[device] = data;
     } catch (error) {
       console.error(error);
       throw `Error Updating Device: ${error.message}`;
@@ -242,12 +239,7 @@ export const useDevicesStore = defineStore("devices", () => {
         config: Struct.fromJson(config),
       });
 
-      paginatedDevices.value = paginatedDevices.value.map((dev) => {
-        if (dev.uuid === device) {
-          return data;
-        }
-        return dev;
-      });
+      devices.value[device] = data;
     } catch (error) {
       console.error(error);
       throw `Error Updating Config: ${error.message}`;
@@ -258,13 +250,7 @@ export const useDevicesStore = defineStore("devices", () => {
     try {
       await devicesApi.value.move({ uuid: device, namespace });
 
-      paginatedDevices.value = paginatedDevices.value.map((dev) => {
-        if (dev.uuid === device) {
-          dev.access.namespace = namespace;
-          return dev;
-        }
-        return dev;
-      });
+      devices.value[device].access.namespace = namespace;
     } catch (error) {
       console.error(error);
       throw `Error Moving Device: ${error.message}`;
@@ -342,20 +328,13 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   async function toggle(uuid, bar) {
-    const device = paginatedDevices.value.find((dev) => dev.uuid === uuid);
+    const device = devices.value[uuid];
     if (!device) return;
-
     bar.start();
     device.enabled = null;
     try {
       const data = await devicesApi.value.toggle({ uuid });
-
-      paginatedDevices.value = paginatedDevices.value.map((dev) => {
-        if (dev.uuid === uuid) {
-          return { ...dev, ...data };
-        }
-        return dev;
-      });
+      devices.value[uuid] = { ...device, ...data };
       bar.finish();
     } catch (error) {
       console.error(error);
@@ -364,19 +343,14 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   async function toggleBasic(uuid, bar) {
-    const device = paginatedDevices.value.find((dev) => dev.uuid === uuid);
+    const device = devices.value[uuid];
     if (!device) return;
 
     bar.start();
     try {
       const data = await devicesApi.value.toggleBasic({ uuid });
 
-      paginatedDevices.value = paginatedDevices.value.map((dev) => {
-        if (dev.uuid === uuid) {
-          return { ...dev, ...data };
-        }
-        return dev;
-      });
+      devices.value[uuid] = { ...device, ...data };
 
       bar.finish();
     } catch (error) {
@@ -396,11 +370,9 @@ export const useDevicesStore = defineStore("devices", () => {
   return {
     loading,
     devices,
-    paginatedDevices,
     limit,
     page,
     total,
-    paginatedDevicesLoading,
     subscribed,
 
     reported,
