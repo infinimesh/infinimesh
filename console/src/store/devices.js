@@ -1,336 +1,348 @@
-import { useAppStore } from "@/store/app";
-import { useNSStore } from "@/store/namespaces";
-import { defineStore } from "pinia";
-import { createPromiseClient } from "@connectrpc/connect";
-import { createConnectTransport } from "@connectrpc/connect-web";
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
 
-import {
-  DevicesService,
-  ShadowService,
-} from "infinimesh-proto/build/es/node/node_connect";
+import { Struct } from '@bufbuild/protobuf'
+import { createPromiseClient } from '@connectrpc/connect'
+import { createConnectTransport } from '@connectrpc/connect-web'
 
-import { access_lvl_conv } from "@/utils/access";
+import { DevicesService, ShadowService } from 'infinimesh-proto/build/es/node/node_connect'
+import { Level } from 'infinimesh-proto/build/es/node/access/access_pb'
+import { Shadow } from 'infinimesh-proto/build/es/shadow/shadow_pb'
+import { Device } from 'infinimesh-proto/build/es/node/devices/devices_pb'
+import { transport as devicesTransport } from 'infinimesh-proto/mocks/es/devices'
+import { transport as shadowTransport } from 'infinimesh-proto/mocks/es/shadows'
 
-import { Level } from "infinimesh-proto/build/es/node/access/access_pb";
-import { Shadow } from "infinimesh-proto/build/es/shadow/shadow_pb";
-import { DevicesTokenRequest } from "infinimesh-proto/build/es/node/node_pb";
-import { Device } from "infinimesh-proto/build/es/node/devices/devices_pb";
-import { Struct } from "@bufbuild/protobuf";
+import { useAppStore } from '@/store/app.js'
+import { useNSStore } from '@/store/namespaces.js'
+import { access_lvl_conv } from '@/utils/access'
 
-const as = useAppStore();
-const nss = useNSStore();
+export const useDevicesStore = defineStore('devices', () => {
+  const appStore = useAppStore()
+  const namespacesStore = useNSStore()
 
-export const useDevicesStore = defineStore("devices", {
-  state: () => ({
-    loading: false,
-    devices: {},
-    subscribed: [],
+  const loading = ref(false)
+  const devices = ref({})
+  const subscribed = ref([])
 
-    reported: new Map(),
-    desired: new Map(),
-    connection: new Map(),
-  }),
+  const reported = ref(new Map())
+  const desired = ref(new Map())
+  const connection = ref(new Map())
 
-  getters: {
-    devices_client() {
-      return createPromiseClient(
-        DevicesService,
-        createConnectTransport(as.transport_options)
-      );
-    },
-    shadow_client() {
-      return createPromiseClient(
-        ShadowService,
-        createConnectTransport({ ...as.transport_options, interceptors: [] })
-      );
-    },
-    show_ns: (state) => nss.selected == "all",
-    devices_ns_filtered: (state) => {
-      let ns = nss.selected;
-      let subscribed = new Set(state.subscribed);
-      let pool = Object.values(state.devices)
-        .map((d) => {
-          d.sorter =
-            d.enabled +
-            access_lvl_conv(d) +
-            d.basicEnabled +
-            subscribed.has(d.uuid);
-          return d;
-        })
-        .sort((a, b) => b.sorter - a.sorter);
-      if (ns == "all") {
-        return pool;
+  const devicesApi = computed(() =>
+    createPromiseClient(
+      DevicesService,
+      (import.meta.env.VITE_MOCK) ? devicesTransport : createConnectTransport(appStore.transport_options)
+    )
+  )
+
+  const shadowApi = computed(() =>
+    createPromiseClient(
+      ShadowService,
+      (import.meta.env.VITE_MOCK) ? shadowTransport : createConnectTransport(appStore.transport_options)
+    )
+  )
+
+  const show_ns = computed(() =>
+    namespacesStore.selected === 'all'
+  )
+  const devices_ns_filtered = computed(() => {
+    const ns = namespacesStore.selected
+    const subscribedSet = new Set(subscribed.value.keys())
+
+    const pool = Object.values(devices.value).map((device) => {
+      const { enabled, basicEnabled } = device
+      const level = access_lvl_conv(device)
+      const included = subscribedSet.has(device.uuid)
+
+      device.sorter = enabled + level + basicEnabled + included
+      return device
+    })
+
+    pool.sort((a, b) => b.sorter - a.sorter)
+
+    if (ns === 'all') return pool
+    return pool.filter((d) => d.access.namespace === ns)
+  })
+
+  const device_state = computed(() => (
+    (device_id) => ({
+      reported: reported.value.get(device_id) ?? {},
+      desired: desired.value.get(device_id) ?? {},
+      connection: connection.value.get(device_id) ?? {}
+    })
+  ))
+  const device_subscribed = computed((state) =>
+    (device_id) => state.subscribed.includes(device_id)
+  )
+
+  async function fetchDevices(state = true, no_cache = false) {
+    loading.value = true
+    const data = await devicesApi.value.list()
+
+    if (no_cache) {
+      devices.value = data.devices.reduce((result, device) => {
+        result[device.uuid] = device
+
+        return result
+      }, {})
+    } else {
+      devices.value = {
+        ...devices.value,
+        ...data.devices.reduce((result, device) => {
+          result[device.uuid] = device
+
+          return result
+        }, {}),
       }
-      return pool.filter((d) => d.access.namespace == ns);
-    },
-    device_state: (state) => {
-      return (device_id) => {
-        return {
-          reported: state.reported.get(device_id) ?? {},
-          desired: state.desired.get(device_id) ?? {},
-          connection: state.connection.get(device_id) ?? {},
-        };
-      };
-    },
-    device_subscribed: (state) => {
-      return (device_id) => state.subscribed.includes(device_id);
-    },
-  },
+    }
 
-  actions: {
-    async fetchDevices(state = true, no_cache = false) {
-      this.loading = true;
+    if (state) getDevicesState(data.devices.map(({ uuid }) => uuid))
+    loading.value = false
+  }
 
-      const data = await this.devices_client.list();
+  async function subscribe(devices) {
+    let pool = subscribed.value.concat(devices)
 
-      if (no_cache) {
-        this.devices = data.devices.reduce((r, d) => {
-          r[d.uuid] = d;
-          return r;
-        }, {});
-      } else {
-        this.devices = {
-          ...this.devices,
-          ...data.devices.reduce((r, d) => {
-            r[d.uuid] = d;
-            return r;
-          }, {}),
-        };
+    let token = await makeDevicesToken(pool)
+    let socket = new WebSocket(
+      `${appStore.base_url.replace('http', 'ws')}/devices/states/stream`,
+      ['Bearer', token]
+    )
+    socket.onmessage = (msg) => {
+      let response = JSON.parse(msg.data).result
+      if (!response) {
+        console.log('Empty response', msg)
+        return
       }
 
-      if (state) this.getDevicesState(data.devices.map((d) => d.uuid));
-      this.loading = false;
-    },
-    async subscribe(devices) {
-      let pool = this.subscribed.concat(devices);
-
-      let token = await this.makeDevicesToken(pool);
-      let socket = new WebSocket(
-        `${as.base_url.replace("http", "ws")}/devices/states/stream`,
-        ["Bearer", token]
-      );
-      socket.onmessage = (msg) => {
-        let response = JSON.parse(msg.data).result;
-        if (!response) {
-          console.log("Empty response", msg);
-          return;
-        }
-
-        if (response.reported) {
-          if (this.reported.get(response.device)) {
-            response.reported.data = {
-              ...this.reported.get(response.device).data,
-              ...response.reported.data,
-            };
+      if (response.reported) {
+        if (reported.value.get(response.device)) {
+          response.reported.data = {
+            ...reported.value.get(response.device).data,
+            ...response.reported.data,
           }
-          this.reported.set(response.device, response.reported);
         }
-        if (response.desired) {
-          if (this.desired.get(response.device)) {
-            response.desired.data = {
-              ...this.desired.get(response.device).data,
-              ...response.desired.data,
-            };
+        reported.value.set(response.device, response.reported)
+      }
+      if (response.desired) {
+        if (desired.value.get(response.device)) {
+          response.desired.data = {
+            ...desired.value.get(response.device).data,
+            ...response.desired.data,
           }
-          this.desired.set(response.device, response.desired);
         }
-        if (response.connection) {
-          this.connection.set(response.device, response.connection);
+        desired.value.set(response.device, response.desired)
+      }
+      if (response.connection) {
+        connection.value.set(response.device, response.connection)
+      }
+    }
+
+    socket.onclose = () => {
+      subscribed.value = []
+    }
+    socket.onerror = () => {
+      subscribed.value = []
+    }
+    socket.onopen = () => {
+      subscribed.value = pool
+    }
+  }
+
+  async function makeDevicesToken(pool, post = false) {
+    const level = (post) ? Level.MGMT : Level.READ
+
+    const devices = {}
+    pool.forEach((uuid) => {
+      devices[uuid] = level
+    })
+
+    const data = await devicesApi.value.makeDevicesToken({ devices })
+    return data.token
+  }
+
+  // pool - array of devices UUIDs
+  async function getDevicesState(pool, token) {
+    if (pool.length == 0) return
+    if (!token) {
+      token = await makeDevicesToken(pool)
+    }
+
+    const data = await shadowApi.value.get(
+      {}, { headers: { Authorization: `Bearer ${token}` } }
+    )
+
+    for (const shadow of data.shadows) {
+      reported.value.set(shadow.device, shadow.reported)
+      desired.value.set(shadow.device, shadow.desired)
+      connection.value.set(shadow.device, shadow.connection)
+    }
+  }
+
+  async function updateDevice(device, patch) {
+    if (!patch.title || !patch.tags) {
+      throw 'Both device Title and Tags must be specified while update'
+    }
+
+    try {
+      const data = await devicesApi.value.update(
+        new Device({ ...patch, uuid: device })
+      )
+
+      devices.value[device] = data
+    } catch (error) {
+      console.error(error)
+      throw `Error Updating Device: ${error.message}`
+    }
+  }
+
+  async function updateDeviceConfig(device, config) {
+    try {
+      const data = await devicesApi.value.update({
+        uuid: device,
+        config: Struct.fromJson(config)
+      })
+
+      devices.value[device] = data
+    } catch (error) {
+      console.error(error)
+      throw `Error Updating Config: ${error.message}`
+    }
+  }
+
+  async function moveDevice(device, namespace) {
+    try {
+      await devicesApi.value.move({ uuid: device, namespace })
+      devices.value[device].access.namespace = namespace
+    } catch (error) {
+      console.error(error)
+      throw `Error Moving Device: ${error.message}`
+    }
+  }
+
+  async function patchDesiredState(device, state, bar) {
+    bar?.start()
+    try {
+      const token = await makeDevicesToken([device], true)
+      const data = Struct.fromJson(state)
+      const request = new Shadow({ device, desired: { data } })
+
+      await shadowApi.value.patch(request, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      };
-      socket.onclose = () => {
-        this.subscribed = [];
-      };
-      socket.onerror = () => {
-        this.subscribed = [];
-      };
-      socket.onopen = () => {
-        this.subscribed = pool;
-      };
-    },
-    async makeDevicesToken(pool, post = false) {
-      const level = post ? Level.MGMT : Level.READ;
+      })
+      getDevicesState([device], token)
+      bar?.finish()
+    } catch (e) {
+      console.error(e)
+      bar?.error()
+    }
+  }
 
-      const devices = {};
-      pool.forEach((uuid) => {
-        devices[uuid] = level;
-      });
+  async function patchReportedState(device, state, bar) {
+    bar.start()
+    try {
+      const token = await makeDevicesToken([device], true)
+      const data = Struct.fromJson(state)
+      const request = new Shadow({ device, reported: { data } })
 
-      const data = await this.devices_client.makeDevicesToken({ devices });
-
-      return data.token;
-    },
-    // pool - array of devices UUIDs
-    async getDevicesState(pool, token) {
-      if (pool.length == 0) return;
-      if (!token) {
-        token = await this.makeDevicesToken(pool);
-      }
-
-      const data = await this.shadow_client.get(
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      await shadowApi.value.patch(request, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      })
+      getDevicesState([device], token)
+      bar.finish()
+    } catch (e) {
+      console.error(e)
+      bar.error()
+    }
+  }
 
-      for (let shadow of data.shadows) {
-        this.reported.set(shadow.device, shadow.reported);
-        this.desired.set(shadow.device, shadow.desired);
-        this.connection.set(shadow.device, shadow.connection);
-      }
-    },
-    async updateDevice(device, patch) {
-      if (!patch.title || !patch.tags)
-        throw "Both device Title and Tags must be specified while update";
-      try {
-        const data = await this.devices_client.update(
-          new Device({
-            ...patch,
-            uuid: device,
-            config: undefined,
-          })
-        );
-        this.devices[device] = data;
-      } catch (err) {
-        console.error(err);
-        throw `Error Updating Device: ${err.message}`;
-      }
-    },
-    async updateDeviceConfig(device, config) {
-      try {
-        const data = await this.devices_client.patchConfig({
-          uuid: device,
-          config: new Struct().fromJson(config),
-        });
-        this.devices[device] = data;
-      } catch (err) {
-        console.error(err);
-        throw `Error Updating Config: ${err.message}`;
-      }
-    },
-    async moveDevice(device, namespace) {
-      try {
-        await this.devices_client.move({ uuid: device, namespace });
-        this.devices[device].access.namespace = namespace;
-      } catch (err) {
-        console.error(err);
-        throw `Error Moving Device: ${err.message}`;
-      }
-    },
-    async patchDesiredState(device, state, bar) {
-      if (bar) bar.start();
-      try {
-        let token = await this.makeDevicesToken([device], true);
-        const data = Struct.fromJson(state);
-        const request = new Shadow({
-          device,
-          desired: { data },
-        });
-        await this.shadow_client.patch(request, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        this.getDevicesState([device], token);
-        if (bar) bar.finish();
-      } catch (e) {
-        console.error(e);
-        if (bar) bar.error();
-      }
-    },
-    async patchReportedState(device, state, bar) {
-      bar.start();
-      try {
-        let token = await this.makeDevicesToken([device], true);
-        const data = Struct.fromJson(state);
-        const request = new Shadow({
-          device,
-          reported: { data },
-        });
-        await this.shadow_client.patch(request, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        this.getDevicesState([device], token);
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-      }
-    },
-    async deleteDevice(device, bar) {
-      bar.start();
-      try {
-        await this.devices_client.delete({ uuid: device });
-        bar.finish();
+  async function deleteDevice(device, bar) {
+    bar.start()
+    try {
+      await devicesApi.value.delete({ uuid: device })
+      bar.finish()
 
-        this.fetchDevices(false, true);
-      } catch (e) {
-        console.error(e);
-        bar.error();
-      }
-    },
-    async createDevice(request, bar) {
-      bar.start();
-      try {
-        await this.devices_client.create(request);
+      fetchDevices(false, true)
+    } catch (error) {
+      console.error(error)
+      bar.error()
+    }
+  }
 
-        this.fetchDevices();
-        bar.finish();
-        return false;
-      } catch (e) {
-        console.error(e);
-        bar.error();
-        return e;
-      }
-    },
-    async toggle(uuid, bar) {
-      let device = this.devices[uuid];
-      if (!device) {
-        return;
-      }
+  async function createDevice(request, bar) {
+    bar.start()
+    try {
+      await devicesApi.value.create(request)
 
-      bar.start();
-      device.enabled = null;
+      fetchDevices()
+      bar.finish()
 
-      try {
-        const data = await this.devices_client.toggle({ uuid });
-        this.devices[uuid] = { ...device, ...data };
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-        return;
-      }
-    },
-    async toggle_basic(uuid, bar) {
-      let device = this.devices[uuid];
-      if (!device) {
-        return;
-      }
+      return false
+    } catch (error) {
+      console.error(error)
+      bar.error()
 
-      bar.start();
+      return error
+    }
+  }
 
-      try {
-        const data = await this.devices_client.toggleBasic({ uuid });
-        this.devices[uuid] = { ...device, ...data };
-        bar.finish();
-      } catch (e) {
-        console.error(e);
-        bar.error();
-        return;
-      }
-    },
-    async fetchJoins(device) {
-      const data = await this.devices_client.joins({ uuid: device });
-      return data;
-    },
-    async join(params) {
-      return this.devices_client.join(params);
-    },
-  },
-});
+  async function toggle(uuid, bar) {
+    const device = devices.value[uuid]
+    if (!device) return
+
+    bar.start()
+    try {
+      const data = await devicesApi.value.toggle(device)
+
+      devices.value[uuid] = { ...device, ...data }
+      bar.finish()
+    } catch (error) {
+      console.error(error)
+      bar.error()
+    }
+  }
+
+  async function toggleBasic(uuid, bar) {
+    const device = devices.value[uuid]
+    if (!device) return
+
+    bar.start()
+    try {
+      const data = await devicesApi.value.toggleBasic({ uuid })
+
+      devices.value[uuid] = { ...device, ...data }
+      bar.finish()
+    } catch (error) {
+      console.error(error)
+      bar.error()
+    }
+  }
+
+  function fetchJoins(device) {
+    return devicesApi.value.joins({ uuid: device })
+  }
+
+  async function join(params) {
+    return devicesApi.value.join(params)
+  }
+
+  return {
+    loading, devices, subscribed,
+
+    reported, desired, connection,
+
+    devicesApi, shadowApi, show_ns, devices_ns_filtered, device_state, device_subscribed,
+
+    fetchDevices, fetchJoins, subscribe, getDevicesState,
+
+    moveDevice, updateDevice, deleteDevice, createDevice,
+
+    makeDevicesToken, updateDeviceConfig, patchDesiredState, patchReportedState,
+
+    join, toggle, toggleBasic
+  }
+})

@@ -195,7 +195,8 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.Internal, "Error while updating modify date")
 	}
 
-	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -238,7 +239,7 @@ func (c *DevicesController) _HandsfreeCreate(ctx context.Context, req *devpb.Cre
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
-	err = c.ica_repo.Link(ctx, log, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
+	err = c.ica_repo.Link(ctx, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		c.col.RemoveDocument(ctx, device.Uuid)
@@ -415,7 +416,7 @@ func (c *DevicesController) Get(ctx context.Context, req *connect.Request[devpb.
 	// Getting Account from DB
 	// and Check requestor access
 	device := *NewBlankDeviceDocument(dev.GetUuid())
-	err := c.ica_repo.AccessLevelAndGet(ctx, log, NewBlankAccountDocument(requestor), &device)
+	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &device)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -511,7 +512,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 
 	acc := *NewBlankAccountDocument(requestor)
 	dev := *NewBlankDeviceDocument(req.GetUuid())
-	err := c.ica_repo.AccessLevelAndGet(ctx, log, &acc, &dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, &acc, &dev)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
 	}
@@ -526,7 +527,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 	}
 
 	err = c.ica_repo.Link(
-		ctx, log, c.ns2dev,
+		ctx, c.ns2dev,
 		NewBlankNamespaceDocument(*dev.Access.Namespace),
 		&dev, access.Level_NONE, access.Role_UNSET,
 	)
@@ -686,7 +687,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 	requestor := NewBlankAccountDocument(requestor_id)
 	dev := NewBlankDeviceDocument(req.Msg.Node)
 
-	err := c.ica_repo.AccessLevelAndGet(ctx, log, requestor, dev)
+	err := c.ica_repo.AccessLevelAndGet(ctx, requestor, dev)
 	if err != nil {
 		log.Warn("Error getting Device and access level", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Device not found or not enough Access Rights")
@@ -712,7 +713,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Unable to determine Object type")
 	}
 
-	err = c.ica_repo.AccessLevelAndGet(ctx, log, requestor, obj)
+	err = c.ica_repo.AccessLevelAndGet(ctx, requestor, obj)
 	if err != nil {
 		log.Warn("Error getting Object and access level", zap.String("id", req.Msg.Join), zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Object not found or not enough Access Rights")
@@ -723,7 +724,7 @@ func (c *DevicesController) Join(ctx context.Context, req *connect.Request[pb.Jo
 		return nil, status.Error(codes.InvalidArgument, "Not allowed to share Admin or Root priviliges")
 	}
 
-	err = c.ica_repo.Link(ctx, log, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
+	err = c.ica_repo.Link(ctx, edge, obj, dev, req.Msg.Access, access.Role_SHARED)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
 		return nil, status.Error(codes.Internal, "error creating Permission")
