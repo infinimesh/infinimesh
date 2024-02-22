@@ -151,36 +151,28 @@ func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) erro
 		return err
 	}
 
-	var accounts []*accpb.Account
+	var doc InfinimeshGraphNode
+
 	switch event.GetEntity().(type) {
 	case *proto_eventbus.Event_Account:
-		result, err := e.repo.ListQuery(ctx, log, NewBlankAccountDocument(event.GetAccount().GetUuid()), "INBOUND")
-		if err != nil {
-			log.Error("Failed to list accounts", zap.Error(err))
-			return err
-		}
-		accounts = result.Result
+		doc = NewBlankAccountDocument(event.GetAccount().GetUuid())
 	case *proto_eventbus.Event_Device:
-		result, err := e.repo.ListQuery(ctx, log, NewBlankDeviceDocument(event.GetDevice().GetUuid()), "INBOUND")
-		if err != nil {
-			log.Error("Failed to list accounts", zap.Error(err))
-			return err
-		}
-		accounts = result.Result
+		doc = NewBlankDeviceDocument(event.GetDevice().GetUuid())
 	case *proto_eventbus.Event_Namespace:
-		result, err := e.repo.ListQuery(ctx, log, NewBlankNamespaceDocument(event.GetNamespace().GetUuid()), "INBOUND")
-		if err != nil {
-			log.Error("Failed to list accounts", zap.Error(err))
-			return err
-		}
-		accounts = result.Result
+		doc = NewBlankNamespaceDocument(event.GetNamespace().GetUuid())
 	default:
 		return errors.New("failed to define entity type")
 	}
 
+	result, err := e.repo.ListQuery(ctx, log, doc, "INBOUND")
+	if err != nil {
+		log.Error("Failed to list accounts", zap.Error(err))
+		return err
+	}
+
 	var errs []string
 
-	for _, val := range accounts {
+	for _, val := range result.Result {
 		err = e.channel.PublishWithContext(ctx, "events", val.GetUuid(), false, false, amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        marshal,
