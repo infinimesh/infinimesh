@@ -76,7 +76,9 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	searchType := "OUTBOUND"
 
 	if len(params) == 1 {
-		searchType = params[0]
+		if params[0] == "OUTBOUND" || params[0] == "INBOUND" || params[0] == "ANY" {
+			searchType = params[0]
+		}
 	}
 
 	var kind string

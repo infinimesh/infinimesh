@@ -81,7 +81,7 @@ onMounted(() => {
 const snowflakes = defineAsyncComponent(() => import("@/components/core/snowflakes.vue"))
 
 function current_thing() {
-  if (!store.current_thing) h('')
+  if (!store.current_thing) h('<span/>')
 
   switch (store.current_thing.k) {
     case 'jolly':

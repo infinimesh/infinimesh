@@ -1,0 +1,15 @@
+api:
+  insecure: true
+  dashboard: true
+accessLog: {}
+providers:
+  file:
+    filename: ./vscode.routes.yml
+entryPoints:
+  http:
+    address: ":80"
+  grpc:
+    address: ":8000"
+
+log:
+  level: DEBUG
