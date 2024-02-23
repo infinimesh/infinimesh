@@ -328,14 +328,15 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   async function toggle(uuid, bar) {
-    const device = devices.value[uuid];
-    if (!device) return;
-    bar.start();
-    device.enabled = null;
+    const device = devices.value[uuid]
+    if (!device) return
+
+    bar.start()
     try {
-      const data = await devicesApi.value.toggle({ uuid });
-      devices.value[uuid] = { ...device, ...data };
-      bar.finish();
+      const data = await devicesApi.value.toggle(device)
+
+      devices.value[uuid] = { ...device, ...data }
+      bar.finish()
     } catch (error) {
       console.error(error);
       bar.error();
