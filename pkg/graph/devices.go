@@ -16,18 +16,18 @@ limitations under the License.
 package graph
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
-
-	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	"github.com/golang-jwt/jwt"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"github.com/infinimesh/proto/handsfree"
 	pb "github.com/infinimesh/proto/node"
 	access "github.com/infinimesh/proto/node/access"
@@ -93,6 +93,8 @@ type DevicesController struct {
 	ica_repo InfinimeshCommonActionsRepo                 // Infinimesh Common Actions Repository
 	repo     InfinimeshGenericActionsRepo[*devpb.Device] // Infinimesh Generic(Devices) Actions Repository
 
+	bus EventBusService
+
 	SIGNING_KEY []byte
 }
 
@@ -101,6 +103,7 @@ func NewDevicesController(
 	hfc handsfree.HandsfreeServiceClient,
 	ica InfinimeshCommonActionsRepo,
 	repo InfinimeshGenericActionsRepo[*devpb.Device],
+	bus EventBusService,
 ) *DevicesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.DEVICES_COL)
@@ -115,6 +118,8 @@ func NewDevicesController(
 
 		ica_repo: ica,
 		repo:     repo,
+
+		bus: bus,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -195,6 +200,14 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_CREATE,
+		Entity:    &proto_eventbus.Event_Device{Device: device.Device},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return connect.NewResponse(&devpb.CreateResponse{
 		Device: device.Device,
 	}), nil
@@ -314,6 +327,14 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
+		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return curr, nil
 }
 
@@ -337,6 +358,15 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 	if err != nil {
 		log.Warn("Error updating Device config", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device config")
+	}
+
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
+		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
 	return curr, nil
@@ -363,6 +393,14 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
+		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return curr, nil
 }
 
@@ -385,6 +423,15 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Device")
+	}
+
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
+		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
 	return curr, nil
@@ -520,6 +567,14 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_DELETE,
+		Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

@@ -50,6 +50,7 @@ var (
 
 	dev_ctrl *DevicesController
 	dev_repo InfinimeshGenericActionsRepo[*devices.Device]
+	acc_repo InfinimeshGenericActionsRepo[*accounts.Account]
 
 	plug_ctrl *PluginsController
 
@@ -89,13 +90,14 @@ func init() {
 		panic(err)
 	}
 
-	ictrl := NewAccountsControllerModule(log, db, rdb).Handler()
+	ictrl := NewAccountsControllerModule(log, db, rdb, nil).Handler()
 	ctrl = ictrl.(*AccountsController)
 
-	ns_ctrl = NewNamespacesController(log, db)
+	ns_ctrl = NewNamespacesController(log, db, nil)
 
 	dev_repo = NewGenericRepo[*devices.Device](db)
-	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo)
+	acc_repo = NewGenericRepo[*accounts.Account](db)
+	dev_ctrl = NewDevicesController(log, db, nil, ica, dev_repo, nil)
 
 	plug_ctrl = NewPluginsController(log, db)
 
