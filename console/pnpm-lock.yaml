@@ -24,8 +24,8 @@ dependencies:
     specifier: ^11.9.0
     version: 11.9.0
   infinimesh-proto:
-    specifier: 3.1.5-4
-    version: 3.1.5-4
+    specifier: 3.1.5-6
+    version: 3.1.5-6
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -1246,8 +1246,8 @@ packages:
     engines: {node: '>=16.17.0'}
     dev: true
 
-  /infinimesh-proto@3.1.5-4:
-    resolution: {integrity: sha512-wNCYTwnRMfTJGbb6BlJ1Y/sjOg4O270j8LXRy5GZ9WzZTbO06chucebf7QFPgI5o+JbIcE47gBb4FXSagg612g==}
+  /infinimesh-proto@3.1.5-6:
+    resolution: {integrity: sha512-DxS4vj0bj+hZv4lCtFDkCPuMa80C7k+GfohabofRSLNhjKGx2GGgLT1D63Dm76XWe/iynOn475gyU7J3YJ5DyA==}
     dependencies:
       '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.7.2)
       '@bufbuild/connect-web': 0.13.0(@bufbuild/protobuf@1.7.2)
