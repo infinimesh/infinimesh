@@ -21,8 +21,6 @@ import (
 	"os"
 	"strings"
 
-	"gopkg.in/yaml.v2"
-
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
 	"github.com/go-redis/redis/v8"
@@ -33,10 +31,12 @@ import (
 	"github.com/infinimesh/infinimesh/pkg/oauth"
 	"github.com/infinimesh/infinimesh/pkg/oauth/config"
 	auth "github.com/infinimesh/infinimesh/pkg/shared/auth"
+	"github.com/infinimesh/proto/eventbus/eventbusconnect"
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"github.com/infinimesh/proto/plugins/pluginsconnect"
 	shadowpb "github.com/infinimesh/proto/shadow"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -44,6 +44,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -64,6 +65,8 @@ var (
 
 	SIGNING_KEY []byte
 	services    map[string]bool
+
+	RabbitMQConn string
 )
 
 func init() {
@@ -78,7 +81,7 @@ func init() {
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
 
-	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal,oauth")
+	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal,oauth,eventbus")
 
 	port = viper.GetString("PORT")
 
@@ -89,6 +92,8 @@ func init() {
 	rootPass = viper.GetString("INF_DEFAULT_ROOT_PASS")
 
 	redisHost = viper.GetString("REDIS_HOST")
+
+	RabbitMQConn = viper.GetString("RABBITMQ_CONN")
 
 	services = make(map[string]bool)
 	for _, s := range strings.Split(viper.GetString("SERVICES"), ",") {
@@ -137,6 +142,20 @@ func main() {
 		})
 	})
 
+	log.Info("Connecting to RabbitMQ", zap.String("url", RabbitMQConn))
+	rbmq, err := amqp.Dial(RabbitMQConn)
+	if err != nil {
+		log.Fatal("Error dialing RabbitMQ", zap.Error(err))
+	}
+	defer rbmq.Close()
+	log.Info("Connected to RabbitMQ")
+
+	bus, err := graph.NewEventBus(log, db, rbmq)
+
+	if err != nil {
+		log.Fatal("Error creating eventbus", zap.Error(err))
+	}
+
 	authInterceptor := auth.NewAuthInterceptor(log, rdb, nil, SIGNING_KEY)
 
 	interceptors := connect.WithInterceptors(authInterceptor)
@@ -159,7 +178,7 @@ func main() {
 	ensure_root := false
 	if _, ok := services["accounts"]; ok {
 		log.Info("Registering accounts service")
-		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb)
+		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb, bus)
 		acc_ctrl.SetSigningKey(SIGNING_KEY)
 		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl.Handler(), interceptors)
 		router.PathPrefix(path).Handler(handler)
@@ -168,7 +187,7 @@ func main() {
 	}
 	if _, ok := services["namespaces"]; ok {
 		log.Info("Registering namespaces service")
-		ns_ctrl := graph.NewNamespacesController(log, db)
+		ns_ctrl := graph.NewNamespacesController(log, db, bus)
 		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl, interceptors)
 		router.PathPrefix(path).Handler(handler)
 
@@ -199,7 +218,7 @@ func main() {
 			log.Fatal("Failed to connect to handsfree", zap.String("address", host), zap.Error(err))
 		}
 
-		dev_ctrl := graph.NewDevicesControllerModule(log, db, handsfree.NewHandsfreeServiceClient(conn))
+		dev_ctrl := graph.NewDevicesControllerModule(log, db, handsfree.NewHandsfreeServiceClient(conn), bus)
 		dev_ctrl.SetSigningKey(SIGNING_KEY)
 
 		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl.Handler(), interceptors)
@@ -234,6 +253,13 @@ func main() {
 		router.PathPrefix(path).Handler(handler)
 	}
 
+	if _, ok := services["eventbus"]; ok {
+		log.Info("Registring events")
+		service := graph.NewEventsService(log, bus)
+		path, handler := eventbusconnect.NewEventsServiceHandler(service, interceptors)
+		router.PathPrefix(path).Handler(handler)
+	}
+
 	checker := grpchealth.NewStaticChecker()
 	path, handler := grpchealth.NewHandler(checker)
 	router.PathPrefix(path).Handler(handler)
@@ -249,7 +275,7 @@ func main() {
 	}).Handler(h2c.NewHandler(router, &http2.Server{}))
 
 	log.Info("Serving", zap.String("host", host))
-	err := http.ListenAndServe(host, handler)
+	err = http.ListenAndServe(host, handler)
 	if err != nil {
 		log.Fatal("Failed to start server", zap.Error(err))
 	}

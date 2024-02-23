@@ -16,10 +16,10 @@ limitations under the License.
 package graph
 
 import (
-	"context"
-
 	"connectrpc.com/connect"
+	"context"
 	"github.com/arangodb/go-driver"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -73,10 +73,12 @@ type NamespacesController struct {
 	ica  InfinimeshCommonActionsRepo
 	repo InfinimeshGenericActionsRepo[*nspb.Namespace]
 
+	bus EventBusService
+
 	db driver.Database
 }
 
-func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesController {
+func NewNamespacesController(log *zap.Logger, db driver.Database, bus EventBusService) *NamespacesController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
@@ -88,6 +90,7 @@ func NewNamespacesController(log *zap.Logger, db driver.Database) *NamespacesCon
 		acc2ns: ica.GetEdgeCol(ctx, schema.ACC2NS), ns2acc: ica.GetEdgeCol(ctx, schema.NS2ACC),
 		ica:  ica,
 		repo: repo,
+		bus:  bus,
 	}
 }
 
@@ -127,6 +130,14 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_NAMESPACE_CREATE,
+		Entity:    &proto_eventbus.Event_Namespace{Namespace: namespace.Namespace},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return connect.NewResponse(namespace.Namespace), nil
 }
 
@@ -193,6 +204,15 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 		_, err := c.col.ReplaceDocument(ctx, curr.Uuid, curr)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "Error while updating Namespace in DB: %v", err)
+		}
+
+		err = c.bus.Notify(ctx, &proto_eventbus.Event{
+			EventKind: proto_eventbus.EventKind_NAMESPACE_UPDATE,
+			Entity:    &proto_eventbus.Event_Namespace{Namespace: ns},
+		})
+
+		if err != nil {
+			log.Error("Failed to notify eventbus", zap.Error(err))
 		}
 	}
 
@@ -352,6 +372,14 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_NAMESPACE_DELETE,
+		Entity:    &proto_eventbus.Event_Namespace{Namespace: ns.Namespace},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

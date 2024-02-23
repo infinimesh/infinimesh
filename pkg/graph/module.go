@@ -32,12 +32,13 @@ func (m *devicesControllerModule) SetSigningKey(key []byte) {
 }
 
 func NewDevicesControllerModule(log *zap.Logger, db driver.Database,
-	hfc handsfree.HandsfreeServiceClient) DevicesControllerModule {
+	hfc handsfree.HandsfreeServiceClient, bus *EventBus) DevicesControllerModule {
 	return &devicesControllerModule{
 		handler: NewDevicesController(
 			log, db, hfc,
 			NewInfinimeshCommonActionsRepo(log.Named("DevicesController"), db),
 			NewGenericRepo[*devices.Device](db),
+			bus,
 		),
 	}
 }
@@ -59,7 +60,7 @@ func (m *accountsControllerModule) SetSigningKey(key []byte) {
 	m.handler.SIGNING_KEY = key
 }
 
-func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.Cmdable) AccountsControllerModule {
+func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.Cmdable, bus *EventBus) AccountsControllerModule {
 	return &accountsControllerModule{
 		handler: NewAccountsController(
 			log, db, rdb,
@@ -67,6 +68,7 @@ func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.
 			NewInfinimeshCommonActionsRepo(log.Named("AccountsController"), db),
 			NewGenericRepo[*accounts.Account](db),
 			credentials.NewCredentialsController(context.Background(), log, db),
+			bus,
 		),
 	}
 }
