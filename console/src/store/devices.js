@@ -71,9 +71,7 @@ export const useDevicesStore = defineStore('devices', () => {
       connection: connection.value.get(device_id) ?? {}
     })
   ))
-  const device_subscribed = computed((state) =>
-    (device_id) => state.subscribed.includes(device_id)
-  )
+  const device_subscribed = (device_id) => subscribed.value.includes(device_id)
 
   async function fetchDevices(state = true, no_cache = false) {
     loading.value = true
@@ -149,6 +147,12 @@ export const useDevicesStore = defineStore('devices', () => {
     }
   }
 
+  /**
+   * 
+   * @param {string[]} pool - Array of device UUIDs
+   * @param {boolean?} post - Whether to request permission to Write state
+   * @returns 
+   */
   async function makeDevicesToken(pool, post = false) {
     const level = (post) ? Level.MGMT : Level.READ
 
@@ -161,15 +165,22 @@ export const useDevicesStore = defineStore('devices', () => {
     return data.token
   }
 
-  // pool - array of devices UUIDs
+  /**
+   * 
+   * @param {[]string} pool - Array of device UUIDs
+   * @param {string?} token - Optional token to use
+   * @returns 
+   */
   async function getDevicesState(pool, token) {
     if (pool.length == 0) return
     if (!token) {
       token = await makeDevicesToken(pool)
     }
 
+    const headers = new Headers()
+    headers.set('Authorization', `Bearer ${token}`)
     const data = await shadowApi.value.get(
-      {}, { headers: { Authorization: `Bearer ${token}` } }
+      {}, { headers }
     )
 
     for (const shadow of data.shadows) {
@@ -198,7 +209,7 @@ export const useDevicesStore = defineStore('devices', () => {
 
   async function updateDeviceConfig(device, config) {
     try {
-      const data = await devicesApi.value.update({
+      const data = await devicesApi.value.patchConfig({
         uuid: device,
         config: Struct.fromJson(config)
       })

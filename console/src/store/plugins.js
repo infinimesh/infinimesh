@@ -30,8 +30,12 @@ export const usePluginsStore = defineStore("plugins", () => {
 
   async function fetchPlugins() {
     loading.value = true;
-    const data = await plugins_client.value.list({ namespace: nss.selected });
-    plugins.value = data.pool;
+    const request = {}
+    if (nss.selected != "all") {
+      request.namespace = nss.selected;
+    }
+    const data = await plugins_client.value.list(request);
+    plugins.value = data.pool ?? [];
 
     loading.value = false;
   }
@@ -68,6 +72,7 @@ export const usePluginsStore = defineStore("plugins", () => {
     fetchPlugins,
     get,
     heights,
+    plugins,
     plugins_client,
     delete: deletePlugin,
     create,
