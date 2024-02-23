@@ -78,7 +78,7 @@ func main() {
 		_ = log.Sync()
 	}()
 
-	log.Info("Setting up RedisDB Connection")
+	log.Info("Setting up RedisDB Connection", zap.String("host", redisHost))
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redisHost,
 		DB:   0, // use default DB

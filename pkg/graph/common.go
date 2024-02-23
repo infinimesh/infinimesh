@@ -521,7 +521,7 @@ func (r *infinimeshCommonActionsRepo) EnsureRootExists(rdb *redis.Client, passwd
 		return err
 	}
 
-	ictrl := NewAccountsControllerModule(log, r.db, rdb).Handler()
+	ictrl := NewAccountsControllerModule(log, r.db, rdb, nil).Handler()
 	ctrl := ictrl.(*AccountsController)
 
 	exists, err = cred_edge_col.DocumentExists(ctx, fmt.Sprintf("standard-%s", schema.ROOT_ACCOUNT_KEY))

@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"time"
 
 	"connectrpc.com/connect"
@@ -99,6 +100,8 @@ type AccountsController struct {
 	ica_repo InfinimeshCommonActionsRepo                  // Infinimesh Common Actions Repository
 	repo     InfinimeshGenericActionsRepo[*accpb.Account] // Infinimesh Generic(Accounts) Actions Repository
 
+	bus EventBusService
+
 	SIGNING_KEY []byte
 }
 
@@ -108,6 +111,7 @@ func NewAccountsController(
 	ica InfinimeshCommonActionsRepo,
 	repo InfinimeshGenericActionsRepo[*accpb.Account],
 	cred credentials.CredentialsController,
+	bus EventBusService,
 ) *AccountsController {
 	ctx := context.TODO()
 	col := ica.GetVertexCol(ctx, schema.PERMISSIONS_GRAPH.Name, schema.ACCOUNTS_COL)
@@ -125,6 +129,7 @@ func NewAccountsController(
 
 		ica_repo: ica,
 		repo:     repo,
+		bus:      bus,
 
 		SIGNING_KEY: []byte("just-an-init-thing-replace-me"),
 	}
@@ -292,6 +297,16 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		log.Warn("Error setting Credentials for Account", zap.Error(err))
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
+
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_CREATE,
+		Entity:    &proto_eventbus.Event_Account{Account: account.Account},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
+
 	return connect.NewResponse(
 		&accpb.CreateResponse{Account: account.Account},
 	), nil
@@ -325,6 +340,15 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
+		Entity:    &proto_eventbus.Event_Account{Account: acc},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
+
 	return connect.NewResponse(acc), nil
 }
 
@@ -348,6 +372,15 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 	if err != nil {
 		log.Warn("Error updating Account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while updating Account")
+	}
+
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
+		Entity:    &proto_eventbus.Event_Account{Account: curr},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
 	}
 
 	return connect.NewResponse(res.Account), nil
@@ -404,6 +437,14 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
+	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
+		Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
+	})
+
+	if err != nil {
+		log.Error("Failed to notify eventbus", zap.Error(err))
+	}
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

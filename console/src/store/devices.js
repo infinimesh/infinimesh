@@ -74,14 +74,14 @@ export const useDevicesStore = defineStore("devices", () => {
     return pool.filter((d) => d.access.namespace === ns);
   });
 
-  const device_state = computed(() => (device_id) => ({
-    reported: reported.value.get(device_id) ?? {},
-    desired: desired.value.get(device_id) ?? {},
-    connection: connection.value.get(device_id) ?? {},
-  }));
-  const device_subscribed = computed(
-    () => (device_id) => subscribed.value.includes(device_id)
-  );
+  const device_state = computed(() => (
+    (device_id) => ({
+      reported: reported.value.get(device_id) ?? {},
+      desired: desired.value.get(device_id) ?? {},
+      connection: connection.value.get(device_id) ?? {}
+    })
+  ))
+  const device_subscribed = (device_id) => subscribed.value.includes(device_id)
 
   async function fetchDevices(state = true, no_cache = false) {
     loading.value = true;
@@ -184,6 +184,12 @@ export const useDevicesStore = defineStore("devices", () => {
     };
   }
 
+  /**
+   * 
+   * @param {string[]} pool - Array of device UUIDs
+   * @param {boolean?} post - Whether to request permission to Write state
+   * @returns 
+   */
   async function makeDevicesToken(pool, post = false) {
     const level = post ? Level.MGMT : Level.READ;
 
@@ -196,17 +202,23 @@ export const useDevicesStore = defineStore("devices", () => {
     return data.token;
   }
 
-  // pool - array of devices UUIDs
+  /**
+   * 
+   * @param {[]string} pool - Array of device UUIDs
+   * @param {string?} token - Optional token to use
+   * @returns 
+   */
   async function getDevicesState(pool, token) {
     if (pool.length == 0) return;
     if (!token) {
       token = await makeDevicesToken(pool);
     }
 
+    const headers = new Headers()
+    headers.set('Authorization', `Bearer ${token}`)
     const data = await shadowApi.value.get(
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+      {}, { headers }
+    )
 
     for (const shadow of data.shadows) {
       reported.value.set(shadow.device, shadow.reported);
@@ -234,7 +246,7 @@ export const useDevicesStore = defineStore("devices", () => {
 
   async function updateDeviceConfig(device, config) {
     try {
-      const data = await devicesApi.value.update({
+      const data = await devicesApi.value.patchConfig({
         uuid: device,
         config: Struct.fromJson(config),
       });

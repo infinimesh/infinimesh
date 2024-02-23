@@ -3,6 +3,7 @@ package graph_test
 import (
 	"context"
 	"errors"
+	"github.com/infinimesh/proto/node/accounts"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -36,9 +37,11 @@ type devicesControllerFixture struct {
 		ns2dev  *driver_mocks.MockCollection
 		acc2dev *driver_mocks.MockCollection
 
-		hfc      *handsfree_mocks.MockHandsfreeServiceClient
-		ica_repo *graph_mocks.MockInfinimeshCommonActionsRepo
-		repo     *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
+		hfc       *handsfree_mocks.MockHandsfreeServiceClient
+		ica_repo  *graph_mocks.MockInfinimeshCommonActionsRepo
+		repo      *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
+		accs_repo *graph_mocks.MockInfinimeshGenericActionsRepo[*accounts.Account]
+		bus       *graph_mocks.MockEventBusService
 	}
 
 	data struct {
@@ -68,8 +71,10 @@ func newDevicesControllerFixture(t *testing.T) *devicesControllerFixture {
 	f.mocks.ica_repo = graph_mocks.NewMockInfinimeshCommonActionsRepo(t)
 	f.mocks.ica_repo.EXPECT().GetEdgeCol(context.TODO(), schema.NS2DEV).Return(f.mocks.ns2dev).Maybe()
 	f.mocks.ica_repo.EXPECT().GetEdgeCol(context.TODO(), schema.ACC2DEV).Return(f.mocks.acc2dev).Maybe()
+	f.mocks.bus = graph_mocks.NewMockEventBusService(t)
 
 	f.mocks.repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*devpb.Device](t)
+	f.mocks.accs_repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*accounts.Account](t)
 
 	f.data.acc_uuid = uuid.New().String()
 	f.data.dev_uuid = uuid.New().String()
@@ -145,6 +150,7 @@ cgSqKFgDFRxlHXLo9TZnxyBrIvN/siE+ZQI=
 		zap.NewExample(), f.mocks.db,
 		f.mocks.hfc, f.mocks.ica_repo,
 		f.mocks.repo,
+		f.mocks.bus,
 	)
 
 	return f
@@ -236,6 +242,8 @@ func TestCreate_Success(t *testing.T) {
 		access.Level_ADMIN, access.Role_OWNER,
 	).Return(nil)
 
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
@@ -325,6 +333,8 @@ func TestCreateHf_FailsOn_Send(t *testing.T) {
 		return true
 	})).Return(nil)
 
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 	f.mocks.ica_repo.EXPECT().
 		Link(f.data.ctx, f.mocks.ns2dev,
@@ -381,6 +391,8 @@ func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 			access.Level_ADMIN, access.Role_OWNER,
 		).Return(nil)
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
+
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
@@ -445,6 +457,8 @@ func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 	}, nil)
 
 	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
+
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -556,6 +570,8 @@ func TestDelete_Success(t *testing.T) {
 		Link(f.data.ctx, f.mocks.ns2dev,
 			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
 		).Return(assert.AnError)
+
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
@@ -674,6 +690,8 @@ func TestPatchConfig_Success(t *testing.T) {
 	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *devpb.Device) bool {
 		return true
 	})).Return(driver.DocumentMeta{}, nil)
+
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
 
 	res, err := f.ctrl.PatchConfig(f.data.ctx, connect.NewRequest(&f.data.patch_req))
 

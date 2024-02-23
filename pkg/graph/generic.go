@@ -3,7 +3,6 @@ package graph
 import (
 	"context"
 	"fmt"
-
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accpb "github.com/infinimesh/proto/node/accounts"
@@ -25,7 +24,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 }
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
-	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error)
+	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error)
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -40,7 +39,7 @@ func NewGenericRepo[T InfinimeshProtobufEntity](db driver.Database) InfinimeshGe
 
 const ListObjectsOfKind = `
 LET result = (
-	FOR node, edge, path IN 0..@depth OUTBOUND @from
+	FOR node, edge, path IN 0..@depth %s @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
 	FILTER IS_SAME_COLLECTION(@@kind, node)
@@ -70,9 +69,17 @@ RETURN {
 // from - Graph node to start traversal from
 // children - children type(collection name)
 // depth
-func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode) (*ListQueryResult[T], error) {
+func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error) {
 	offset := OffsetValue(ctx)
 	limit := LimitValue(ctx)
+
+	searchType := "OUTBOUND"
+
+	if len(params) == 1 {
+		if params[0] == "OUTBOUND" || params[0] == "INBOUND" || params[0] == "ANY" {
+			searchType = params[0]
+		}
+	}
 
 	var kind string
 	switch fmt.Sprintf("%T", *new(T)) {
@@ -103,7 +110,7 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, filters), bindVars)
+	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, searchType, filters), bindVars)
 
 	if err != nil {
 		log.Debug("Error while executing query", zap.Error(err))
