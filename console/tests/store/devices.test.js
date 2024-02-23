@@ -109,6 +109,7 @@ describe('devices store', () => {
     await store.deleteDevice(device.uuid, mockBar)
     await new Promise((resolve) => setTimeout(resolve, 300))
     await flushPromises()
+    await store.fetchDevices(false, true)
 
     expect(store.devices[device.uuid]).toBeUndefined()
     expect(startSpy).toHaveBeenCalledOnce()

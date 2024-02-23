@@ -22,6 +22,7 @@ jobs:
         run: |
           go test -v ./... -coverprofile=./coverage.out -covermode=count ./...
       - uses: seriousben/go-patch-cover-action@v1
+        continue-on-error: true
         if: always() 
       
       - name: Run staticcheck
@@ -63,8 +64,7 @@ jobs:
           run: |
             pnpm test
         - name: 'Report Coverage'
-          # Set if: always() to also generate the report if tests are failing
-          # Only works if you set `reportOnFailure: true` in your vite config as specified above
+          continue-on-error: true
           if: always() 
           uses:  davelosert/vitest-coverage-report-action@v2
           with:

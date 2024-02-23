@@ -295,9 +295,8 @@ export const useDevicesStore = defineStore('devices', () => {
     if (!device) return
 
     bar.start()
-    device.enabled = null
     try {
-      const data = await devicesApi.value.toggle({ uuid })
+      const data = await devicesApi.value.toggle(device)
 
       devices.value[uuid] = { ...device, ...data }
       bar.finish()
