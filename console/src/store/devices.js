@@ -19,6 +19,7 @@ import { useAppStore } from "@/store/app.js";
 import { useNSStore } from "@/store/namespaces.js";
 import { access_lvl_conv } from "@/utils/access";
 import { QueryRequest } from "infinimesh-proto/build/es/node/node_pb";
+import { EventKind } from "infinimesh-proto/build/es/eventbus/eventbus_pb";
 
 export const useDevicesStore = defineStore("devices", () => {
   const appStore = useAppStore();
@@ -74,14 +75,12 @@ export const useDevicesStore = defineStore("devices", () => {
     return pool.filter((d) => d.access.namespace === ns);
   });
 
-  const device_state = computed(() => (
-    (device_id) => ({
-      reported: reported.value.get(device_id) ?? {},
-      desired: desired.value.get(device_id) ?? {},
-      connection: connection.value.get(device_id) ?? {}
-    })
-  ))
-  const device_subscribed = (device_id) => subscribed.value.includes(device_id)
+  const device_state = computed(() => (device_id) => ({
+    reported: reported.value.get(device_id) ?? {},
+    desired: desired.value.get(device_id) ?? {},
+    connection: connection.value.get(device_id) ?? {},
+  }));
+  const device_subscribed = (device_id) => subscribed.value.includes(device_id);
 
   async function fetchDevices(state = true, no_cache = false) {
     loading.value = true;
@@ -185,10 +184,10 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   /**
-   * 
+   *
    * @param {string[]} pool - Array of device UUIDs
    * @param {boolean?} post - Whether to request permission to Write state
-   * @returns 
+   * @returns
    */
   async function makeDevicesToken(pool, post = false) {
     const level = post ? Level.MGMT : Level.READ;
@@ -203,10 +202,10 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   /**
-   * 
+   *
    * @param {[]string} pool - Array of device UUIDs
    * @param {string?} token - Optional token to use
-   * @returns 
+   * @returns
    */
   async function getDevicesState(pool, token) {
     if (pool.length == 0) return;
@@ -214,11 +213,9 @@ export const useDevicesStore = defineStore("devices", () => {
       token = await makeDevicesToken(pool);
     }
 
-    const headers = new Headers()
-    headers.set('Authorization', `Bearer ${token}`)
-    const data = await shadowApi.value.get(
-      {}, { headers }
-    )
+    const headers = new Headers();
+    headers.set("Authorization", `Bearer ${token}`);
+    const data = await shadowApi.value.get({}, { headers });
 
     for (const shadow of data.shadows) {
       reported.value.set(shadow.device, shadow.reported);
@@ -340,15 +337,15 @@ export const useDevicesStore = defineStore("devices", () => {
   }
 
   async function toggle(uuid, bar) {
-    const device = devices.value[uuid]
-    if (!device) return
+    const device = devices.value[uuid];
+    if (!device) return;
 
-    bar.start()
+    bar.start();
     try {
-      const data = await devicesApi.value.toggle(device)
+      const data = await devicesApi.value.toggle(device);
 
-      devices.value[uuid] = { ...device, ...data }
-      bar.finish()
+      devices.value[uuid] = { ...device, ...data };
+      bar.finish();
     } catch (error) {
       console.error(error);
       bar.error();
@@ -379,6 +376,41 @@ export const useDevicesStore = defineStore("devices", () => {
   async function join(params) {
     return devicesApi.value.join(params);
   }
+
+  appStore.event_bus.subscribe(
+    EventKind.DEVICE_MOVE,
+    ({ device, meta: { new_ns } }) => {
+      if (new_ns === namespacesStore.selected)
+        return fetchDevicesWithPagination();
+
+      if (!devices.value[device.uuid]) return;
+
+      if (namespacesStore.selected === "all") {
+        devices.value[device.uuid].access.namespace = new_ns;
+      } else {
+        delete devices.value[device.uuid];
+      }
+    }
+  );
+
+  appStore.event_bus.subscribe(EventKind.DEVICE_DELETE, ({ device }) => {
+    if (devices.value[device.uuid]) {
+      delete devices.value[device.uuid];
+    }
+  });
+
+  appStore.event_bus.subscribe(EventKind.DEVICE_CREATE, (d) => {
+    fetchDevicesWithPagination();
+  });
+
+  appStore.event_bus.subscribe(EventKind.DEVICE_UPDATE, ({ device }) => {
+    if (devices.value[device.uuid]) {
+      devices.value[device.uuid] = {
+        ...device,
+        tags: device.tags ? device.tags : [],
+      };
+    }
+  });
 
   return {
     loading,
