@@ -1,4 +1,4 @@
-import { inject, nextTick } from "vue";
+import { inject } from "vue";
 import { defineStore } from "pinia";
 import {
   check_token_expired,
@@ -6,6 +6,7 @@ import {
   check_offline_http,
   check_token_expired_http,
 } from "@/utils/access";
+import { EventBus } from "@/utils/event-bus";
 
 export const baseURL = import.meta.env.DEV
   ? "http://api.infinimesh.local" // jshint ignore:line
@@ -52,7 +53,7 @@ export const useAppStore = defineStore("app", {
         useBinaryFormat: !import.meta.env.DEV,
         interceptors: [
           (next) => async (req) => {
-            if (!req.header.get('Authorization'))
+            if (!req.header.get("Authorization"))
               req.header.set("Authorization", `Bearer ${state.token}`);
             return next(req);
           },
@@ -69,6 +70,9 @@ export const useAppStore = defineStore("app", {
         ],
       };
       return options;
+    },
+    event_bus() {
+      return new EventBus();
     },
   },
   actions: {
