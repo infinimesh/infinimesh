@@ -59,13 +59,24 @@ func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[
 		return nil, err
 	}
 
-	err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
-		EventKind: proto_eventbus.EventKind_ACCOUNT_MOVE,
-		Entity:    &proto_eventbus.Event_Account{Account: obj.Account},
-	})
+	var metaMap = map[string]any{
+		"new_ns": req.GetNamespace(),
+	}
 
-	if err != nil {
-		log.Error("Failed to notify move", zap.Error(err))
+	meta, err := structpb.NewStruct(metaMap)
+
+	if err == nil {
+		err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
+			EventKind: proto_eventbus.EventKind_ACCOUNT_MOVE,
+			Entity:    &proto_eventbus.Event_Account{Account: obj.Account},
+			Meta:      meta,
+		})
+
+		if err != nil {
+			log.Error("Failed to notify move", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create struct", zap.Error(err))
 	}
 
 	return connect.NewResponse(&node.EmptyMessage{}), nil
