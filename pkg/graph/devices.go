@@ -580,7 +580,7 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, notify_err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_DELETE,
 		Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
 	})
@@ -600,13 +600,13 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
-	if err == nil {
+	if notify_err == nil {
 		err = notifier()
 		if err != nil {
 			log.Error("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Error("Failed to create notifier", zap.Error(notify_err))
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil

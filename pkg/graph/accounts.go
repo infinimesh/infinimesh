@@ -446,7 +446,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
-	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, notify_err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
 		Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
 	})
@@ -457,13 +457,13 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
-	if err == nil {
+	if notify_err == nil {
 		err = notifier()
 		if err != nil {
 			log.Error("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Error("Failed to create notifier", zap.Error(notify_err))
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
