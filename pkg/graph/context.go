@@ -1,6 +1,8 @@
 package graph
 
-import "context"
+import (
+	"context"
+)
 
 type GraphContextKey[T any] struct {
 	Key     string
@@ -28,6 +30,11 @@ var NamespaceFilterKey = GraphContextKey[string]{
 	Default: "",
 }
 
+var FiltersKey = GraphContextKey[string]{
+	Key:     "filters",
+	Default: "",
+}
+
 var LimitKey = GraphContextKey[int64]{
 	Key:     "limit",
 	Default: 0,
@@ -40,6 +47,10 @@ var OffsetKey = GraphContextKey[int64]{
 
 func WithNamespaceFilter(ctx context.Context, ns string) context.Context {
 	return context.WithValue(ctx, NamespaceFilterKey, ns)
+}
+
+func WithFilters(ctx context.Context, filters string) context.Context {
+	return context.WithValue(ctx, FiltersKey, filters)
 }
 
 func WithLimit(ctx context.Context, limit int64) context.Context {
@@ -69,4 +80,11 @@ func NSFilterValue(ctx context.Context) string {
 		return v.(string)
 	}
 	return NamespaceFilterKey.Default
+}
+
+func FiltersValue(ctx context.Context) string {
+	if v := ctx.Value(FiltersKey); v != nil {
+		return v.(string)
+	}
+	return FiltersKey.Default
 }

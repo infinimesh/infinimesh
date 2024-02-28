@@ -22,6 +22,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
@@ -465,9 +466,38 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 
 	limit := q.GetLimit()
 	offset := q.GetOffset()
+	filtersValue := q.GetFilters()
+
+	parsedFilters := ""
+
+	if uuid, ok := filtersValue["uuid"]; ok {
+		parsedFilters += fmt.Sprintf("FILTER node._key == \"%s\"\n", uuid.GetStringValue())
+	}
+
+	if tags, ok := filtersValue["tags"]; ok {
+		tagsArray := tags.GetListValue().Values
+		for _, tag := range tagsArray {
+			parsedFilters += fmt.Sprintf("FILTER \"%s\" IN node.tags\n", tag.GetStringValue())
+		}
+	}
+
+	if title, ok := filtersValue["title"]; ok {
+		parsedFilters += fmt.Sprintf("FILTER CONTAINS(LOWER(node.title), \"%s\")\n", strings.ToLower(title.GetStringValue()))
+	}
+
+	if enabled, ok := filtersValue["enabled"]; ok {
+		val := enabled.GetBoolValue()
+		if val == true {
+			parsedFilters += fmt.Sprintf("FILTER node.enabled == %t\n", val)
+		} else {
+			parsedFilters += "FILTER NOT HAS(node, \"enabled\") "
+
+		}
+	}
 
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
+	ctx = WithFilters(ctx, parsedFilters)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 

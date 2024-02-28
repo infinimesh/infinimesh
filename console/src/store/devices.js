@@ -34,6 +34,7 @@ export const useDevicesStore = defineStore("devices", {
     paginatedDevices: [],
     paginatedDevicesLoading: false,
     total: 0,
+    filterTerm: [],
 
     reported: new Map(),
     desired: new Map(),
@@ -112,14 +113,65 @@ export const useDevicesStore = defineStore("devices", {
     },
     async fetchDevicesWithPagination(state = true) {
       this.paginatedDevicesLoading = true;
-      this.devices = {};
+      this.paginatedDevices = [];
       this.total = 0;
+
+      let filters = {};
+
+      this.filterTerm.forEach((term) => {
+        const [_, key, value] = term.split(":");
+        if (["uuid", "title"].includes(key)) {
+          filters[key] = {
+            kind: {
+              case: "stringValue",
+              value,
+            },
+          };
+        }
+
+        if (["enabled"].includes(key)) {
+          filters[key] = {
+            kind: {
+              case: "boolValue",
+              value: value === "true",
+            },
+          };
+        }
+
+        if (key === "tag") {
+          if ("tags" in filters) {
+            filters["tags"].kind.value.values.push({
+              kind: {
+                case: "stringValue",
+                value: value,
+              },
+            });
+          } else {
+            filters["tags"] = {
+              kind: {
+                case: "listValue",
+                value: {
+                  values: [
+                    {
+                      kind: {
+                        case: "stringValue",
+                        value: value,
+                      },
+                    },
+                  ],
+                },
+              },
+            };
+          }
+        }
+      });
 
       const data = await this.devices_client.list(
         new QueryRequest({
           offset: (this.page - 1) * this.limit,
           limit: this.limit,
           namespace: nss.selected === "all" ? undefined : nss.selected,
+          filters,
         })
       );
 
@@ -221,7 +273,13 @@ export const useDevicesStore = defineStore("devices", {
             config: undefined,
           })
         );
-        this.devices[device] = data;
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid == device) {
+            return data;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Updating Device: ${err.message}`;
@@ -233,7 +291,13 @@ export const useDevicesStore = defineStore("devices", {
           uuid: device,
           config: new Struct().fromJson(config),
         });
-        this.devices[device] = data;
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid == device) {
+            return data;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Updating Config: ${err.message}`;
@@ -242,7 +306,13 @@ export const useDevicesStore = defineStore("devices", {
     async moveDevice(device, namespace) {
       try {
         await this.devices_client.move({ uuid: device, namespace });
-        this.devices[device].access.namespace = namespace;
+
+        this.paginatedDevices = this.paginatedDevices.map((d) => {
+          if (d.uuid == device) {
+            d.access.namespace = namespace;
+          }
+          return d;
+        });
       } catch (err) {
         console.error(err);
         throw `Error Moving Device: ${err.message}`;
@@ -317,7 +387,7 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async toggle(uuid, bar) {
-      let device = this.devices[uuid];
+      let device = this.paginatedDevices.find((device) => device.uuid == uuid);
       if (!device) {
         return;
       }
@@ -327,7 +397,11 @@ export const useDevicesStore = defineStore("devices", {
 
       try {
         const data = await this.devices_client.toggle({ uuid });
-        this.devices[uuid] = { ...device, ...data };
+
+        this.paginatedDevices[this.paginatedDevices.indexOf(device)] = {
+          ...device,
+          ...data,
+        };
         bar.finish();
       } catch (e) {
         console.error(e);
@@ -336,7 +410,7 @@ export const useDevicesStore = defineStore("devices", {
       }
     },
     async toggle_basic(uuid, bar) {
-      let device = this.devices[uuid];
+      let device = this.paginatedDevices.find((device) => device.uuid == uuid);
       if (!device) {
         return;
       }
@@ -345,7 +419,10 @@ export const useDevicesStore = defineStore("devices", {
 
       try {
         const data = await this.devices_client.toggleBasic({ uuid });
-        this.devices[uuid] = { ...device, ...data };
+        this.paginatedDevices[this.paginatedDevices.indexOf(device)] = {
+          ...device,
+          ...data,
+        };
         bar.finish();
       } catch (e) {
         console.error(e);
