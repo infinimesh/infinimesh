@@ -67,7 +67,7 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 
 type EventBusService interface {
 	Subscribe(context.Context, string) (<-chan proto_eventbus.Event, error)
-	Notify(context.Context, *proto_eventbus.Event) error
+	Notify(context.Context, *proto_eventbus.Event) (Notifier, error)
 }
 
 type EventBus struct {
@@ -141,14 +141,16 @@ func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan proto_eve
 	return events, nil
 }
 
-func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) error {
+type Notifier func() error
+
+func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) (Notifier, error) {
 	log := e.log.Named("Notify")
 	log.Debug("Invoke")
 
 	marshal, err := proto.Marshal(event)
 	if err != nil {
 		log.Error("Failed to marshal event", zap.Error(err))
-		return err
+		return nil, err
 	}
 
 	var doc InfinimeshGraphNode
@@ -161,31 +163,32 @@ func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) erro
 	case *proto_eventbus.Event_Namespace:
 		doc = NewBlankNamespaceDocument(event.GetNamespace().GetUuid())
 	default:
-		return errors.New("failed to define entity type")
+		return nil, errors.New("failed to define entity type")
 	}
 
 	result, err := e.repo.ListQuery(ctx, log, doc, "INBOUND")
 	if err != nil {
 		log.Error("Failed to list accounts", zap.Error(err))
-		return err
+		return nil, err
 	}
 
-	var errs []string
+	return func() error {
+		var errs []string
 
-	for _, val := range result.Result {
-		err = e.channel.PublishWithContext(ctx, "events", val.GetUuid(), false, false, amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        marshal,
-		})
-		if err != nil {
-			log.Error("Failed to publish event", zap.Error(err))
-			errs = append(errs, err.Error())
+		for _, val := range result.Result {
+			err = e.channel.PublishWithContext(ctx, "events", val.GetUuid(), false, false, amqp.Publishing{
+				ContentType: "text/plain",
+				Body:        marshal,
+			})
+			if err != nil {
+				log.Error("Failed to publish event", zap.Error(err))
+				errs = append(errs, err.Error())
+			}
 		}
-	}
 
-	if len(errs) != 0 {
-		return fmt.Errorf("failed to publish some events. %v", errs)
-	}
-
-	return nil
+		if len(errs) != 0 {
+			return fmt.Errorf("failed to publish some events. %v", errs)
+		}
+		return nil
+	}, nil
 }

@@ -130,14 +130,20 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_NAMESPACE_CREATE,
 		Entity:    &proto_eventbus.Event_Namespace{Namespace: namespace.Namespace},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return connect.NewResponse(namespace.Namespace), nil
 }
 
@@ -206,13 +212,18 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 			return nil, status.Errorf(codes.Internal, "Error while updating Namespace in DB: %v", err)
 		}
 
-		err = c.bus.Notify(ctx, &proto_eventbus.Event{
+		notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 			EventKind: proto_eventbus.EventKind_NAMESPACE_UPDATE,
 			Entity:    &proto_eventbus.Event_Namespace{Namespace: ns},
 		})
 
-		if err != nil {
-			log.Error("Failed to notify eventbus", zap.Error(err))
+		if err == nil {
+			err = notifier()
+			if err != nil {
+				log.Error("Failed to notify", zap.Error(err))
+			}
+		} else {
+			log.Error("Failed to create notifier", zap.Error(err))
 		}
 	}
 
@@ -366,20 +377,26 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_NAMESPACE_DELETE,
+		Entity:    &proto_eventbus.Event_Namespace{Namespace: ns.Namespace},
+	})
+
 	err = c.ica.DeleteRecursive(ctx, &ns)
 	if err != nil {
 		log.Warn("Error deleting namespace", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error deleting namespace")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
-		EventKind: proto_eventbus.EventKind_NAMESPACE_DELETE,
-		Entity:    &proto_eventbus.Event_Namespace{Namespace: ns.Namespace},
-	})
-
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

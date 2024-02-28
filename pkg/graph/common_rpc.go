@@ -31,14 +31,19 @@ func (ctrl *DevicesController) Move(ctx context.Context, msg *connect.Request[no
 	meta, err := structpb.NewStruct(metaMap)
 
 	if err == nil {
-		err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
+		notifier, err := ctrl.bus.Notify(ctx, &proto_eventbus.Event{
 			EventKind: proto_eventbus.EventKind_DEVICE_MOVE,
 			Entity:    &proto_eventbus.Event_Device{Device: obj.Device},
 			Meta:      meta,
 		})
 
-		if err != nil {
-			log.Error("Failed to notify move", zap.Error(err))
+		if err == nil {
+			err = notifier()
+			if err != nil {
+				log.Error("Failed to notify", zap.Error(err))
+			}
+		} else {
+			log.Error("Failed to create notifier", zap.Error(err))
 		}
 	} else {
 		log.Error("Failed to create struct", zap.Error(err))
@@ -66,14 +71,19 @@ func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[
 	meta, err := structpb.NewStruct(metaMap)
 
 	if err == nil {
-		err = ctrl.bus.Notify(ctx, &proto_eventbus.Event{
+		notifier, err := ctrl.bus.Notify(ctx, &proto_eventbus.Event{
 			EventKind: proto_eventbus.EventKind_ACCOUNT_MOVE,
 			Entity:    &proto_eventbus.Event_Account{Account: obj.Account},
 			Meta:      meta,
 		})
 
-		if err != nil {
-			log.Error("Failed to notify move", zap.Error(err))
+		if err == nil {
+			err = notifier()
+			if err != nil {
+				log.Error("Failed to notify", zap.Error(err))
+			}
+		} else {
+			log.Error("Failed to create notifier", zap.Error(err))
 		}
 	} else {
 		log.Error("Failed to create struct", zap.Error(err))

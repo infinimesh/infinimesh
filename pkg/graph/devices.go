@@ -200,14 +200,20 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.Internal, "error creating Permission")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_CREATE,
 		Entity:    &proto_eventbus.Event_Device{Device: device.Device},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return connect.NewResponse(&devpb.CreateResponse{
 		Device: device.Device,
 	}), nil
@@ -327,14 +333,20 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return curr, nil
 }
 
@@ -360,13 +372,18 @@ func (c *DevicesController) PatchConfig(ctx context.Context, req *connect.Reques
 		return nil, status.Error(codes.Internal, "Error while updating Device config")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
 
 	return curr, nil
@@ -393,14 +410,20 @@ func (c *DevicesController) Toggle(ctx context.Context, req *connect.Request[dev
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return curr, nil
 }
 
@@ -425,13 +448,18 @@ func (c *DevicesController) ToggleBasic(ctx context.Context, req *connect.Reques
 		return nil, status.Error(codes.Internal, "Error while updating Device")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_DEVICE_UPDATE,
 		Entity:    &proto_eventbus.Event_Device{Device: curr.Msg},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
 
 	return curr, nil
@@ -552,6 +580,11 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_DEVICE_DELETE,
+		Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
+	})
+
 	_, err = c.col.RemoveDocument(ctx, dev.ID().Key())
 	if err != nil {
 		log.Warn("Error removing document", zap.Error(err))
@@ -567,14 +600,15 @@ func (c *DevicesController) Delete(ctx context.Context, _req *connect.Request[de
 		log.Warn("Error removing device from namespace", zap.Error(err))
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
-		EventKind: proto_eventbus.EventKind_DEVICE_DELETE,
-		Entity:    &proto_eventbus.Event_Device{Device: dev.Device},
-	})
-
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Error("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Error("Failed to create notifier", zap.Error(err))
 	}
+
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 

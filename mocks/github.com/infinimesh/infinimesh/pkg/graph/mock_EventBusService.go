@@ -5,6 +5,7 @@ package graph_mocks
 import (
 	context "context"
 
+	graph "github.com/infinimesh/infinimesh/pkg/graph"
 	eventbus "github.com/infinimesh/proto/eventbus"
 
 	mock "github.com/stretchr/testify/mock"
@@ -24,21 +25,33 @@ func (_m *MockEventBusService) EXPECT() *MockEventBusService_Expecter {
 }
 
 // Notify provides a mock function with given fields: _a0, _a1
-func (_m *MockEventBusService) Notify(_a0 context.Context, _a1 *eventbus.Event) error {
+func (_m *MockEventBusService) Notify(_a0 context.Context, _a1 *eventbus.Event) (graph.Notifier, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Notify")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *eventbus.Event) error); ok {
+	var r0 graph.Notifier
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *eventbus.Event) (graph.Notifier, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *eventbus.Event) graph.Notifier); ok {
 		r0 = rf(_a0, _a1)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(graph.Notifier)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, *eventbus.Event) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockEventBusService_Notify_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Notify'
@@ -60,12 +73,12 @@ func (_c *MockEventBusService_Notify_Call) Run(run func(_a0 context.Context, _a1
 	return _c
 }
 
-func (_c *MockEventBusService_Notify_Call) Return(_a0 error) *MockEventBusService_Notify_Call {
-	_c.Call.Return(_a0)
+func (_c *MockEventBusService_Notify_Call) Return(_a0 graph.Notifier, _a1 error) *MockEventBusService_Notify_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockEventBusService_Notify_Call) RunAndReturn(run func(context.Context, *eventbus.Event) error) *MockEventBusService_Notify_Call {
+func (_c *MockEventBusService_Notify_Call) RunAndReturn(run func(context.Context, *eventbus.Event) (graph.Notifier, error)) *MockEventBusService_Notify_Call {
 	_c.Call.Return(run)
 	return _c
 }
