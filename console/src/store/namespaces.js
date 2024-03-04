@@ -50,7 +50,12 @@ export const useNSStore = defineStore("namespaces", () => {
   async function fetchNamespaces(no_cache = false) {
     loading.value = true;
 
-    const data = await namespacesApi.value.list(new EmptyMessage());
+
+    if(no_cache){
+      namespaces.value={}
+    }
+    
+    const data = await namespacesApi.value.list(new EmptyMessage())
 
     if (no_cache) {
       namespaces.value = data.namespaces.reduce((result, namespace) => {
