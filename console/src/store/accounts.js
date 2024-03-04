@@ -19,7 +19,6 @@ import {
 import { createConnectTransport } from "@connectrpc/connect-web";
 
 import { transport } from "infinimesh-proto/mocks/es/accounts";
-import { EventKind } from "infinimesh-proto/build/es/eventbus/eventbus_pb";
 
 export const useAccountsStore = defineStore("accounts", () => {
   const as = useAppStore();
@@ -193,38 +192,35 @@ export const useAccountsStore = defineStore("accounts", () => {
     });
   }
 
-  as.event_bus.subscribe(
-    EventKind.ACCOUNT_MOVE,
-    ({ account, meta: { new_ns } }) => {
-      if (new_ns === nss.selected) return fetchAccounts();
+  function onAccountMove({ account, meta: { new_ns } }) {
+    if (new_ns === nss.selected) return fetchAccounts();
 
-      if (!accounts.value[account.uuid]) return;
+    if (!accounts.value[account.uuid]) return;
 
-      if (nss.selected === "all") {
-        accounts.value[account.uuid].access.namespace = new_ns;
-      } else {
-        delete accounts.value[account.uuid];
-      }
+    if (nss.selected === "all") {
+      accounts.value[account.uuid].access.namespace = new_ns;
+    } else {
+      delete accounts.value[account.uuid];
     }
-  );
+  }
 
-  as.event_bus.subscribe(EventKind.ACCOUNT_DELETE, ({ account }) => {
+  function onAccountDelete({ account }) {
     if (accounts.value[account.uuid]) {
       delete accounts.value[account.uuid];
     }
-  });
+  }
 
-  as.event_bus.subscribe(EventKind.ACCOUNT_CREATE, () => {
+  function onAccountCreate() {
     fetchAccounts();
-  });
+  }
 
-  as.event_bus.subscribe(EventKind.ACCOUNT_UPDATE, ({ account }) => {
+  function onAccountUpdate({ account }) {
     if (accounts.value[account.uuid]) {
       accounts.value[account.uuid] = {
         ...account,
       };
     }
-  });
+  }
 
   return {
     loading,
@@ -244,5 +240,9 @@ export const useAccountsStore = defineStore("accounts", () => {
     setCredentials,
     token,
     tokenFor,
+    onAccountCreate,
+    onAccountDelete,
+    onAccountMove,
+    onAccountUpdate,
   };
 });
