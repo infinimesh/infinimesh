@@ -1,5 +1,5 @@
-import { inject, nextTick } from "vue";
 import { defineStore } from "pinia";
+import axios from "axios";
 import {
   check_token_expired,
   check_offline,
@@ -29,7 +29,7 @@ export const useAppStore = defineStore("app", {
     base_url: () => baseURL,
     logged_in: (state) => state.token !== "",
     http(state) {
-      const instance = inject("axios").create({
+      const instance = axios.create({
         baseURL,
         headers: {
           Authorization: `Bearer ${state.token}`,
