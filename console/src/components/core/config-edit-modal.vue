@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineAsyncComponent } from 'vue';
+import { ref, computed, defineAsyncComponent, toRefs } from 'vue';
 
 import { NSpace, NInput } from 'naive-ui';
 
@@ -26,15 +26,17 @@ const CogOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CogOutli
 const ModalButton = defineAsyncComponent(() => import("@/components/core/modal-button.vue"))
 
 
-const { o } = defineProps({
+const props = defineProps({
     o: {
         type: Object,
         required: true
     }
 })
 
+const { o } = toRefs(props)
+
 const emit = defineEmits(["submit"])
-const config = ref(o.config ? JSON.stringify(o.config, null, 2) : '{}');
+const config = ref(o.value.config ? JSON.stringify(o.value.config, null, 2) : '{}');
 
 const validation = computed(() => {
     try {
@@ -48,14 +50,13 @@ const validation = computed(() => {
 
 function handleSubmit(close) {
     if (validation.value) {
-        o.config = JSON.parse(config.value);
-        emit("submit", o)
+        o.value.config = JSON.parse(config.value);
+        emit("submit", o.value)
         close()
     }
 }
 
 function reset() {
-    config.value = o.config ? JSON.stringify(o.config, null, 2) : '{}';
+    config.value = o.value.config ? JSON.stringify(o.value.config, null, 2) : '{}';
 }
-
 </script>
