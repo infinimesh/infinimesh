@@ -22,7 +22,7 @@ export class EventBus {
     const id = Symbol(eventName);
 
     this.#eventsMap.get(eventName)[id] = callback;
-    const unSubscribe = () => {
+    const unsubscribe = () => {
       delete this.#eventsMap.get(eventName)[id];
 
       if (Object.keys(this.#eventsMap.get(eventName)).length === 0) {
@@ -30,6 +30,6 @@ export class EventBus {
       }
     };
 
-    return { unSubscribe };
+    return { unsubscribe };
   }
 }
