@@ -181,7 +181,7 @@ func (e *EventBus) Notify(ctx context.Context, event *proto_eventbus.Event) (Not
 				Body:        marshal,
 			})
 			if err != nil {
-				log.Error("Failed to publish event", zap.Error(err))
+				log.Warn("Failed to publish event", zap.Error(err))
 				errs = append(errs, err.Error())
 			}
 		}

@@ -306,10 +306,10 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 	if err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(
@@ -353,10 +353,10 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 	if err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(acc), nil
@@ -392,10 +392,10 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 	if err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(res.Account), nil
@@ -460,10 +460,10 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	if notify_err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(notify_err))
+		log.Warn("Failed to create notifier", zap.Error(notify_err))
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil

@@ -40,13 +40,13 @@ func (ctrl *DevicesController) Move(ctx context.Context, msg *connect.Request[no
 		if err == nil {
 			err = notifier()
 			if err != nil {
-				log.Error("Failed to notify", zap.Error(err))
+				log.Warn("Failed to notify", zap.Error(err))
 			}
 		} else {
-			log.Error("Failed to create notifier", zap.Error(err))
+			log.Warn("Failed to create notifier", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create struct", zap.Error(err))
+		log.Warn("Failed to create struct", zap.Error(err))
 	}
 
 	return connect.NewResponse(&node.EmptyMessage{}), nil
@@ -80,13 +80,13 @@ func (ctrl *AccountsController) Move(ctx context.Context, _req *connect.Request[
 		if err == nil {
 			err = notifier()
 			if err != nil {
-				log.Error("Failed to notify", zap.Error(err))
+				log.Warn("Failed to notify", zap.Error(err))
 			}
 		} else {
-			log.Error("Failed to create notifier", zap.Error(err))
+			log.Warn("Failed to create notifier", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create struct", zap.Error(err))
+		log.Warn("Failed to create struct", zap.Error(err))
 	}
 
 	return connect.NewResponse(&node.EmptyMessage{}), nil

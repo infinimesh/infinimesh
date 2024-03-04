@@ -138,10 +138,10 @@ func (c *NamespacesController) Create(ctx context.Context, req *connect.Request[
 	if err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(err))
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(namespace.Namespace), nil
@@ -220,10 +220,10 @@ func (c *NamespacesController) Update(ctx context.Context, req *connect.Request[
 		if err == nil {
 			err = notifier()
 			if err != nil {
-				log.Error("Failed to notify", zap.Error(err))
+				log.Warn("Failed to notify", zap.Error(err))
 			}
 		} else {
-			log.Error("Failed to create notifier", zap.Error(err))
+			log.Warn("Failed to create notifier", zap.Error(err))
 		}
 	}
 
@@ -391,10 +391,10 @@ func (c *NamespacesController) Delete(ctx context.Context, request *connect.Requ
 	if notify_err == nil {
 		err = notifier()
 		if err != nil {
-			log.Error("Failed to notify", zap.Error(err))
+			log.Warn("Failed to notify", zap.Error(err))
 		}
 	} else {
-		log.Error("Failed to create notifier", zap.Error(notify_err))
+		log.Warn("Failed to create notifier", zap.Error(notify_err))
 	}
 
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
