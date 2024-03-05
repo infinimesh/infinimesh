@@ -6,20 +6,34 @@
         <template #header-extra>
           <n-space>
             <theme-picker />
-            <n-button type="info" ghost @click="login">Login</n-button>
+            <n-button v-if="type !== 'oauth'" type="info" ghost @click="login">Login</n-button>
           </n-space>
         </template>
         <n-space vertical>
-          <n-input v-model:value="username" placeholder="Username" @focus="() => handleDBlock(true)"
-            @blur="() => handleDBlock(false)"></n-input>
-          <n-input v-model:value="password" type="password" placeholder="Password" @focus="() => handleDBlock(true)"
-            @blur="() => handleDBlock(false)" show-password-on="mousedown"></n-input>
-          <n-alert :title="error.title" type="error" v-if="error" />
+          <template v-if="type !== 'oauth'">
+            <n-input
+              v-model:value="username"
+              placeholder="Username"
+              @focus="handleDBlock(true)"
+              @blur="handleDBlock(false)"
+            />
+            <n-input
+              v-model:value="password"
+              type="password"
+              placeholder="Password"
+              show-password-on="mousedown"
+              @focus="handleDBlock(true)"
+              @blur="handleDBlock(false)"
+            />
+            <n-alert :title="error.title" type="error" v-if="error" />
+          </template>
+          <n-button v-else ghost type="primary" @click="oauthLogin('github')">GitHub</n-button>
 
           <n-space justify="center">
             <n-radio-group v-model:value="type" name="credentials_type">
               <n-radio-button value="standard" label="Standard" />
               <n-radio-button value="ldap" label="LDAP" />
+              <n-radio-button value="oauth" label="OAuth 2.0" />
             </n-radio-group>
           </n-space>
 
@@ -37,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, defineAsyncComponent } from "vue";
+import { ref, onMounted, defineAsyncComponent } from "vue";
 import {
   NCard, NSpace, NInput,
   NButton, NRadioButton,
@@ -67,6 +81,40 @@ const success = ref(false);
 const alert = ref(false);
 
 const bar = useLoadingBar();
+
+async function oauthLogin (type) {
+  success.value = false
+  error.value = false
+  alert.value = false
+  bar.start()
+
+  try {
+    await store.http.get(
+      `/oauth/${type}/login`,
+      { params: {
+        method: 'sign_in',
+        state: Math.random().toString(16).slice(2),
+        redirect: `https://${location.host}/login`
+      } }
+    )
+
+    success.value = true
+    bar.finish()
+  } catch (err) {
+    console.error(err)
+    error.value = true
+    bar.error()
+  }
+}
+
+onMounted(() => {
+  if (route.query.token) {
+    store.token = route.query.token
+    router.replace({ name: 'root' }).then(() =>
+      location.reload()
+    )
+  }
+})
 
 async function login() {
   success.value = false;

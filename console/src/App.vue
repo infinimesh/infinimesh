@@ -48,7 +48,9 @@ let timeout = 1000
 const axios = inject("axios");
 function loadConsoleServices() {
   axios
-    .get(store.base_url + "/console/services")
+    .get(store.base_url + "/console/services", {
+      headers: { Authorization: `Bearer ${store.token}` }
+    })
     .then((res) => {
       store.console_services = res.data;
     })
