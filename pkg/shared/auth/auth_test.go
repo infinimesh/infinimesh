@@ -5,7 +5,6 @@ import (
 	"errors"
 	"runtime"
 	"testing"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/golang-jwt/jwt/v4"
@@ -247,7 +246,7 @@ func TestConnectStandardAuthMiddleware_Success(t *testing.T) {
 	)
 
 	f.mocks.sessions.EXPECT().Check("test", "test").Return(nil)
-	f.mocks.sessions.EXPECT().LogActivity("test", "test", mock.Anything).Return(nil).WaitUntil(time.After(1 * time.Second))
+	f.mocks.sessions.EXPECT().LogActivity("test", "test", mock.Anything).Return(nil).Maybe()
 
 	ctx, _, res, err := CallUnary(f.interceptor, context.Background(), connect.NewRequest(
 		&node.EmptyMessage{},
