@@ -8,7 +8,7 @@
     </n-space>
 
     <n-form ref="form" :model="model" label-placement="left" style="max-width: 640px;">
-        <n-tabs v-model="model.type">
+        <n-tabs v-model:value="model.type">
             <n-tab-pane name="standard" display-directive="if" tab="Standard(user/pass)">
                 <n-form-item label="Username" path="data[0]">
                     <n-input v-model:value="model.data[0]" />
@@ -24,10 +24,13 @@
                     </n-input>
                 </n-form-item>
             </n-tab-pane>
+            <n-tab-pane name="oauth" tab="OAuth 2.0">
+                <n-button round type="primary" style="margin-bottom: 20px" @click="linkOauth">GitHub</n-button>
+            </n-tab-pane>
         </n-tabs>
     </n-form>
 
-    <n-space justify="start" align="center">
+    <n-space v-if="model.type !== 'oauth'" justify="start" align="center">
         <n-button type="info" round secondary @click="reset">Reset</n-button>
         <n-button type="warning" round @click="handleSubmit">Submit</n-button>
     </n-space>
@@ -82,8 +85,28 @@ async function handleSubmit() {
     }
 }
 
-onMounted(() => {
-    default_data()
-})
+onMounted(default_data)
+
+async function linkOauth (type) {
+  bar.start()
+
+  try {
+    await as.http.get(
+      `/oauth/${type}/login`,
+      { params: {
+        method: "link",
+        state: Math.random().toString(16).slice(2),
+        redirect: `https://${location.host}/login`
+      } }
+    )
+
+    message.success("Done")
+    bar.finish()
+  } catch (err) {
+    message.error(`${err.code}: ${(err.message ?? "Unexpected Error")}`)
+    console.error(err)
+    bar.error()
+  }
+}
 
 </script>

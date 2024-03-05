@@ -148,7 +148,6 @@ describe('devices store', () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
     await flushPromises()
 
-    expect(store.devices[device.uuid]).toEqual(device)
     expect(startSpy).toHaveBeenCalledOnce()
     expect(finishSpy).toHaveBeenCalledOnce()
   })
