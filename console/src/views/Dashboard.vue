@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import {
   NLayout,
   NLayoutHeader,
@@ -29,15 +29,21 @@ import {
 } from "naive-ui";
 import { useRoute } from "vue-router";
 import { useAccountsStore } from "@/store/accounts";
+import { useEventsStore } from "@/store/events";
 
 import DashboardNav from "@/components/dashboard/nav.vue";
 import DashboardMenu from "@/components/dashboard/menu.vue";
 import DashboardFooter from "@/components/core/footer.vue";
 
-const store = useAccountsStore();
+const accountsStore = useAccountsStore();
+const eventsStore = useEventsStore();
 const route = useRoute();
 
-store.sync_me()
+
+onMounted(async () => {
+  await accountsStore.sync_me()
+  eventsStore.startEventsStream()
+})
 
 const collapsed = ref(true);
 const noContentPadding = computed(() => {
