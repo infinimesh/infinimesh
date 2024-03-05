@@ -298,13 +298,18 @@ func (c *AccountsController) Create(ctx context.Context, req *connect.Request[ac
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Account: %s", err.Error()))
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_ACCOUNT_CREATE,
 		Entity:    &proto_eventbus.Event_Account{Account: account.Account},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Warn("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(
@@ -340,13 +345,18 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
 		Entity:    &proto_eventbus.Event_Account{Account: acc},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Warn("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(acc), nil
@@ -374,13 +384,18 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 		return nil, status.Error(codes.Internal, "Error while updating Account")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
+	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
 		EventKind: proto_eventbus.EventKind_ACCOUNT_UPDATE,
 		Entity:    &proto_eventbus.Event_Account{Account: curr},
 	})
 
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if err == nil {
+		err = notifier()
+		if err != nil {
+			log.Warn("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Warn("Failed to create notifier", zap.Error(err))
 	}
 
 	return connect.NewResponse(res.Account), nil
@@ -431,20 +446,26 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
 	}
 
+	notifier, notify_err := c.bus.Notify(ctx, &proto_eventbus.Event{
+		EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
+		Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
+	})
+
 	err = c.ica_repo.DeleteRecursive(ctx, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Error while deleting Account")
 	}
 
-	err = c.bus.Notify(ctx, &proto_eventbus.Event{
-		EventKind: proto_eventbus.EventKind_ACCOUNT_DELETE,
-		Entity:    &proto_eventbus.Event_Account{Account: acc.Account},
-	})
-
-	if err != nil {
-		log.Error("Failed to notify eventbus", zap.Error(err))
+	if notify_err == nil {
+		err = notifier()
+		if err != nil {
+			log.Warn("Failed to notify", zap.Error(err))
+		}
+	} else {
+		log.Warn("Failed to create notifier", zap.Error(notify_err))
 	}
+
 	return connect.NewResponse(&pb.DeleteResponse{}), nil
 }
 
