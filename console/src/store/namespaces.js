@@ -1,46 +1,55 @@
-import { ref, computed, watch, reactive } from 'vue'
-import { defineStore } from 'pinia'
-import { createPromiseClient } from '@connectrpc/connect'
-import { createConnectTransport } from '@connectrpc/connect-web'
+import { ref, computed, watch, reactive } from "vue";
+import { defineStore } from "pinia";
+import { createPromiseClient } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
-import { NamespacesService } from 'infinimesh-proto/build/es/node/node_connect'
-import { EmptyMessage, JoinRequest } from 'infinimesh-proto/build/es/node/node_pb'
-import { Namespace } from 'infinimesh-proto/build/es/node/namespaces/namespaces_pb'
-import { transport } from 'infinimesh-proto/mocks/es/namespaces'
-import { useAppStore } from './app.js'
+import { NamespacesService } from "infinimesh-proto/build/es/node/node_connect";
+import {
+  EmptyMessage,
+  JoinRequest,
+} from "infinimesh-proto/build/es/node/node_pb";
+import { Namespace } from "infinimesh-proto/build/es/node/namespaces/namespaces_pb";
+import { transport } from "infinimesh-proto/mocks/es/namespaces";
+import { useAppStore } from "./app.js";
+import { EventKind } from "infinimesh-proto/build/es/eventbus/eventbus_pb.js";
 
-export const useNSStore = defineStore('namespaces', () => {
-  const appStore = useAppStore()
+export const useNSStore = defineStore("namespaces", () => {
+  const appStore = useAppStore();
 
-  const loading = ref(false)
-  const selected = ref('')
-  const namespaces = ref({})
+  const loading = ref(false);
+  const selected = ref("");
+  const namespaces = ref({});
 
-  const state = reactive({ loading, selected, namespaces })
-  const rawState = JSON.parse(localStorage.getItem('infinimesh.ns'))
+  const state = reactive({ loading, selected, namespaces });
+  const rawState = JSON.parse(localStorage.getItem("infinimesh.ns"));
 
-  watch(() => state, (value) => {
-    localStorage.setItem('infinimesh.ns', JSON.stringify(value))
-  }, { deep: true })
+  watch(
+    () => state,
+    (value) => {
+      localStorage.setItem("infinimesh.ns", JSON.stringify(value));
+    },
+    { deep: true }
+  );
 
   if (rawState) {
     Object.keys(state).forEach((key) => {
-      state[key] = rawState[key]
-    })
+      state[key] = rawState[key];
+    });
   }
 
-  const namespaces_list = computed(() =>
-    Object.values(namespaces.value)
-  )
+  const namespaces_list = computed(() => Object.values(namespaces.value));
   const namespacesApi = computed(() =>
     createPromiseClient(
       NamespacesService,
-      (import.meta.env.VITE_MOCK) ? transport : createConnectTransport(appStore.transport_options)
+      import.meta.env.VITE_MOCK
+        ? transport
+        : createConnectTransport(appStore.transport_options)
     )
-  )
+  );
 
   async function fetchNamespaces(no_cache = false) {
-    loading.value = true
+    loading.value = true;
+
 
     if(no_cache){
       namespaces.value={}
@@ -50,36 +59,36 @@ export const useNSStore = defineStore('namespaces', () => {
 
     if (no_cache) {
       namespaces.value = data.namespaces.reduce((result, namespace) => {
-        result[namespace.uuid] = namespace
+        result[namespace.uuid] = namespace;
 
-        return result
-      }, {})
+        return result;
+      }, {});
     } else {
       namespaces.value = {
         ...namespaces.value,
         ...data.namespaces.reduce((result, namespace) => {
-          result[namespace.uuid] = namespace
+          result[namespace.uuid] = namespace;
 
-          return result
+          return result;
         }, {}),
-      }
+      };
     }
 
-    loading.value = false
+    loading.value = false;
   }
 
   function loadJoins(uuid) {
-    return namespacesApi.value.joins(new Namespace(namespaces.value[uuid]))
+    return namespacesApi.value.joins(new Namespace(namespaces.value[uuid]));
   }
 
   function join(namespace, account, access) {
     return namespacesApi.value.join(
       new JoinRequest({ namespace, account, access })
-    )
+    );
   }
 
   function create(namespace) {
-    return namespacesApi.value.create(new Namespace(namespace))
+    return namespacesApi.value.create(new Namespace(namespace));
   }
 
   /**
@@ -88,25 +97,43 @@ export const useNSStore = defineStore('namespaces', () => {
    * @returns {Promise<Namespace>} - A promise that resolves with the updated namespace.
    */
   function update(namespace) {
-    if (!namespace.config) namespace.config = {}
-    const result = Namespace.fromJson(namespace)
+    if (!namespace.config) namespace.config = {};
+    const result = Namespace.fromJson(namespace);
 
-    result.config = result.config.fromJson(namespace.config)
-    return namespacesApi.value.update(result)
+    result.config = result.config.fromJson(namespace.config);
+    return namespacesApi.value.update(result);
   }
 
   function deletables(uuid) {
     return namespacesApi.value.deletables(
       new Namespace(namespaces.value[uuid])
-    )
+    );
   }
 
   function remove(uuid) {
-    const namespace = namespaces.value[uuid]
+    const namespace = namespaces.value[uuid];
 
-    delete namespaces.value[uuid]
-    return namespacesApi.value.delete(new Namespace(namespace))
+    delete namespaces.value[uuid];
+    return namespacesApi.value.delete(new Namespace(namespace));
   }
+
+  appStore.event_bus.subscribe(EventKind.NAMESPACE_DELETE, ({ namespace }) => {
+    delete namespaces.value[namespace.uuid];
+  });
+
+  appStore.event_bus.subscribe(EventKind.NAMESPACE_CREATE, () => {
+    fetchNamespaces();
+  });
+
+  appStore.event_bus.subscribe(EventKind.NAMESPACE_UPDATE, ({ namespace }) => {
+    if (namespaces.value[namespace.uuid]) {
+      namespaces.value[namespace.uuid] = {
+        ...namespace,
+      };
+    } else {
+      fetchNamespaces();
+    }
+  });
 
   return {
     loading,
@@ -121,6 +148,6 @@ export const useNSStore = defineStore('namespaces', () => {
     create,
     update,
     deletables,
-    remove
-  }
-})
+    remove,
+  };
+});
