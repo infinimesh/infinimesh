@@ -86,7 +86,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     try {
       await accountsApi.value.create(new CreateRequest(request));
 
-      fetchAccounts();
       bar.finish();
       return false;
     } catch (e) {
@@ -105,7 +104,6 @@ export const useAccountsStore = defineStore("accounts", () => {
       result.config = result.config.fromJson(account.config);
       await accountsApi.value.update(result);
 
-      fetchAccounts();
       if (bar) bar.finish();
       return false;
     } catch (e) {
@@ -127,7 +125,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     try {
       await accountsApi.value.toggle(new Account(accounts.value[uuid]));
 
-      fetchAccounts();
       bar.finish();
     } catch (e) {
       console.error(e);
@@ -143,7 +140,6 @@ export const useAccountsStore = defineStore("accounts", () => {
     try {
       await accountsApi.value.delete(new Account(accounts.value[uuid]));
 
-      fetchAccounts();
       bar.finish();
     } catch (e) {
       console.error(e);
@@ -161,7 +157,7 @@ export const useAccountsStore = defineStore("accounts", () => {
     }
   }
   function getCredentials(uuid) {
-      return accountsApi.value.getCredentials({ uuid });
+    return accountsApi.value.getCredentials({ uuid });
   }
   async function setCredentials(uuid, credentials, bar) {
     bar.start();
@@ -170,7 +166,6 @@ export const useAccountsStore = defineStore("accounts", () => {
         new SetCredentialsRequest({ uuid, credentials })
       );
 
-      fetchAccounts();
       bar.finish();
     } catch (e) {
       console.error(e);
@@ -197,6 +192,36 @@ export const useAccountsStore = defineStore("accounts", () => {
     });
   }
 
+  function onAccountMove({ account, meta: { new_ns } }) {
+    if (new_ns === nss.selected) return fetchAccounts();
+
+    if (!accounts.value[account.uuid]) return;
+
+    if (nss.selected === "all") {
+      accounts.value[account.uuid].access.namespace = new_ns;
+    } else {
+      delete accounts.value[account.uuid];
+    }
+  }
+
+  function onAccountDelete({ account }) {
+    if (accounts.value[account.uuid]) {
+      delete accounts.value[account.uuid];
+    }
+  }
+
+  function onAccountCreate() {
+    fetchAccounts();
+  }
+
+  function onAccountUpdate({ account }) {
+    if (accounts.value[account.uuid]) {
+      accounts.value[account.uuid] = {
+        ...account,
+      };
+    }
+  }
+
   return {
     loading,
     accounts,
@@ -215,5 +240,9 @@ export const useAccountsStore = defineStore("accounts", () => {
     setCredentials,
     token,
     tokenFor,
+    onAccountCreate,
+    onAccountDelete,
+    onAccountMove,
+    onAccountUpdate,
   };
 });

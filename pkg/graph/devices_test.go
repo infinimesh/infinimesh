@@ -242,7 +242,9 @@ func TestCreate_Success(t *testing.T) {
 		access.Level_ADMIN, access.Role_OWNER,
 	).Return(nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.NoError(t, err)
@@ -333,7 +335,9 @@ func TestCreateHf_FailsOn_Send(t *testing.T) {
 		return true
 	})).Return(nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 	f.mocks.ica_repo.EXPECT().
@@ -392,7 +396,9 @@ func TestCreateHf_FailsOn_GenerateFingerprint(t *testing.T) {
 		).Return(nil)
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	f.mocks.ica_repo.EXPECT().AccessLevelAndGet(f.data.ctx, mock.Anything, mock.MatchedBy(func(d *graph.Device) bool {
 		d.Access = &access.Access{
@@ -458,7 +464,9 @@ func TestCreateHf_FailsOn_ReplaceDocument(t *testing.T) {
 
 	f.mocks.col.EXPECT().ReplaceDocument(f.data.ctx, mock.Anything, mock.Anything).Return(driver.DocumentMeta{}, assert.AnError)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_hf_req))
 	assert.Nil(t, res)
@@ -543,6 +551,10 @@ func TestDelete_FailsOn_DeleteDocument(t *testing.T) {
 		return true
 	})).Return(nil)
 
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
+
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, assert.AnError)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
@@ -571,7 +583,9 @@ func TestDelete_Success(t *testing.T) {
 			mock.Anything, mock.Anything, access.Level_NONE, access.Role_UNSET,
 		).Return(assert.AnError)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	res, err := f.ctrl.Delete(f.data.ctx, connect.NewRequest(&devpb.Device{
 		Uuid: f.data.dev_uuid,
@@ -691,7 +705,9 @@ func TestPatchConfig_Success(t *testing.T) {
 		return true
 	})).Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	res, err := f.ctrl.PatchConfig(f.data.ctx, connect.NewRequest(&f.data.patch_req))
 
