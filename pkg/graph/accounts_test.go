@@ -576,7 +576,9 @@ func TestAccountCreate_Success(t *testing.T) {
 	f.mocks.cred.EXPECT().SetCredentials(f.data.ctx, f.data.account.DocumentMeta.ID, &credentials.StandardCredentials{}).
 		Return(nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	f.data.account.DefaultNamespace = ""
 
@@ -690,7 +692,9 @@ func TestAccountUpdate_Success(t *testing.T) {
 	f.mocks.col.EXPECT().UpdateDocument(f.data.ctx, mock.Anything, mock.Anything).
 		Return(driver.DocumentMeta{}, nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	_, err := f.repo.Update(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
@@ -783,7 +787,9 @@ func TestAccountToggle_Success(t *testing.T) {
 		f.data.ctx, mock.Anything, mock.Anything,
 	).Return(nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	_, err := f.repo.Toggle(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
@@ -938,6 +944,10 @@ func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
 		}),
 	).Return(nil)
 
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
+
 	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(assert.AnError)
 
@@ -973,7 +983,9 @@ func TestAccountDelete_Success(t *testing.T) {
 	f.mocks.ica_repo.EXPECT().DeleteRecursive(f.data.ctx, mock.Anything).
 		Return(nil)
 
-	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(nil)
+	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
+		return nil
+	}, nil)
 
 	_, err := f.repo.Delete(f.data.ctx, &connect.Request[accounts.Account]{
 		Msg: f.data.account.Account,
