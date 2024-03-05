@@ -174,6 +174,8 @@ async function handleDelete(uuid) {
     message.success("Account successfuly deleted")
   } catch (e) {
     message.error("Failed to delete account: " + e.message)
+  } finally {
+    loading.value = false
   }
 }
 
