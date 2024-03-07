@@ -10,7 +10,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/handlers v1.5.2
 	github.com/infinimesh/proto v0.0.0-20240220180804-fff72465b8c8
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
@@ -19,7 +19,7 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.21.0
 	google.golang.org/grpc v1.62.1
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
