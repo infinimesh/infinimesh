@@ -30,16 +30,9 @@
           </n-space>
         </n-grid-item>
       </n-grid>
-      <n-select
-        style="width: 92.5vw; min-width: 640px"
-        v-model:value="filterTerm"
-        tag
-        filterable
-        multiple
-        placeholder="Filter devices eg. :uuid:abc"
-        :options="filterDeviceOptions"
-        :show-arrow="false"
-        class="filter-input"
+      <device-search
+        v-bind:filterTerm="filterTerm"
+        v-on:update:value="updateFilterTerm"
       />
     </n-flex>
     <n-flex vertical align="center" size="large">
@@ -98,6 +91,10 @@ const DeviceRegister = defineAsyncComponent(() =>
   import("@/components/devices/register-modal.vue")
 );
 
+const DeviceSearch = defineAsyncComponent(() =>
+  import("@/components/dashboard/device-search.vue")
+);
+
 const store = useDevicesStore();
 const {
   loading,
@@ -111,33 +108,10 @@ const {
 const devices = computed(() => Object.values(devicesMap.value));
 
 const filterTerm = ref([]);
-const filterDeviceOptions = [
-  {
-    label: ":uuid:",
-    value: ":uuid:",
-    disabled: true,
-  },
-  {
-    label: ":enabled:",
-    value: ":enabled:",
-    disabled: true,
-  },
-  {
-    label: ":tag:",
-    value: ":tag:",
-    disabled: true,
-  },
-  {
-    label: ":title:",
-    value: ":title:",
-    disabled: true,
-  },
-  {
-    label: ":namespace:",
-    value: ":namespace:",
-    disabled: true,
-  },
-];
+
+const updateFilterTerm = (value) => {
+  filterTerm.value = value;
+};
 
 function parseFilterText() {
   const filters = {};
