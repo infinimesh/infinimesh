@@ -84,23 +84,23 @@ func (_c *MockEventBusService_Notify_Call) RunAndReturn(run func(context.Context
 }
 
 // Subscribe provides a mock function with given fields: _a0, _a1
-func (_m *MockEventBusService) Subscribe(_a0 context.Context, _a1 string) (<-chan eventbus.Event, error) {
+func (_m *MockEventBusService) Subscribe(_a0 context.Context, _a1 string) (<-chan *eventbus.Event, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Subscribe")
 	}
 
-	var r0 <-chan eventbus.Event
+	var r0 <-chan *eventbus.Event
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (<-chan eventbus.Event, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (<-chan *eventbus.Event, error)); ok {
 		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) <-chan eventbus.Event); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) <-chan *eventbus.Event); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(<-chan eventbus.Event)
+			r0 = ret.Get(0).(<-chan *eventbus.Event)
 		}
 	}
 
@@ -132,12 +132,12 @@ func (_c *MockEventBusService_Subscribe_Call) Run(run func(_a0 context.Context, 
 	return _c
 }
 
-func (_c *MockEventBusService_Subscribe_Call) Return(_a0 <-chan eventbus.Event, _a1 error) *MockEventBusService_Subscribe_Call {
+func (_c *MockEventBusService_Subscribe_Call) Return(_a0 <-chan *eventbus.Event, _a1 error) *MockEventBusService_Subscribe_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockEventBusService_Subscribe_Call) RunAndReturn(run func(context.Context, string) (<-chan eventbus.Event, error)) *MockEventBusService_Subscribe_Call {
+func (_c *MockEventBusService_Subscribe_Call) RunAndReturn(run func(context.Context, string) (<-chan *eventbus.Event, error)) *MockEventBusService_Subscribe_Call {
 	_c.Call.Return(run)
 	return _c
 }

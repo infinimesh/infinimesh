@@ -61,7 +61,7 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 
 	for event := range subscribe {
 		log.Info("Received event", zap.Any("Event", event))
-		err := stream.Send(&event)
+		err := stream.Send(event)
 		if err != nil {
 			log.Error("Failed to send event", zap.Error(err))
 		}
@@ -70,7 +70,7 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 }
 
 type EventBusService interface {
-	Subscribe(context.Context, string) (<-chan proto_eventbus.Event, error)
+	Subscribe(context.Context, string) (<-chan *proto_eventbus.Event, error)
 	Notify(context.Context, *proto_eventbus.Event) (Notifier, error)
 }
 
@@ -104,7 +104,7 @@ func NewEventBus(log *zap.Logger, db driver.Database, amqp *amqp.Connection) (*E
 	}, nil
 }
 
-func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan proto_eventbus.Event, error) {
+func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan *proto_eventbus.Event, error) {
 	log := e.log.Named("Subscribe").Named(uuid)
 	now := time.Now().Unix()
 
@@ -125,9 +125,9 @@ func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan proto_eve
 		log.Error("Failed to consume queue", zap.Error(err))
 		return nil, err
 	}
-	events := make(chan proto_eventbus.Event)
+	events := make(chan *proto_eventbus.Event)
 
-	go func(log *zap.Logger, msgs <-chan amqp.Delivery, events chan<- proto_eventbus.Event) {
+	go func(log *zap.Logger, msgs <-chan amqp.Delivery, events chan<- *proto_eventbus.Event) {
 		for msg := range msgs {
 			log.Debug("Received msg")
 			var event proto_eventbus.Event
@@ -137,8 +137,8 @@ func (e *EventBus) Subscribe(ctx context.Context, uuid string) (<-chan proto_eve
 				continue
 			}
 
-			log.Debug("Send event", zap.Any("Event", event))
-			events <- event
+			log.Debug("Send event", zap.Any("Event", &event))
+			events <- &event
 		}
 	}(log, consume, events)
 
