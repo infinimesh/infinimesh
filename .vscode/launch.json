@@ -162,7 +162,7 @@
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "PORT": "8003",
+                "PORT": "8004",
                 "DEVICES_HOST": "localhost:8001",
                 "REDIS_HOST": "localhost:6379",
             }
