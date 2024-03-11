@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	accpb "github.com/infinimesh/proto/node/accounts"
 	"time"
+
+	accpb "github.com/infinimesh/proto/node/accounts"
 
 	infinimesh "github.com/infinimesh/infinimesh/pkg/shared"
 	proto_eventbus "github.com/infinimesh/proto/eventbus"
@@ -34,6 +35,7 @@ func NewEventsService(log *zap.Logger, bus *EventBus) *EventsService {
 
 func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node.EmptyMessage], stream *connect.ServerStream[proto_eventbus.Event]) error {
 	log := e.log.Named("Subscribe")
+	log.Debug("Subscribe request received")
 
 	outgoingContext, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
