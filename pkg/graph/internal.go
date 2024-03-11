@@ -20,8 +20,6 @@ import (
 
 	"connectrpc.com/connect"
 	pb "github.com/infinimesh/proto/node"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	cred "github.com/infinimesh/infinimesh/pkg/credentials"
 )
@@ -32,7 +30,7 @@ type InternalService struct {
 
 func (*InternalService) GetLDAPProviders(ctx context.Context, _ *connect.Request[pb.EmptyMessage]) (*connect.Response[pb.LDAPProviders], error) {
 	if !cred.LDAP_CONFIGURED {
-		return nil, status.Error(codes.OK, "LDAP Auth is not configured")
+		return connect.NewResponse(&pb.LDAPProviders{}), nil
 	}
 
 	res := make(map[string]string)
