@@ -182,6 +182,7 @@ func main() {
 		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb, bus)
 		acc_ctrl.SetSigningKey(SIGNING_KEY)
 		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl.Handler(), interceptors)
+		log.Debug("Accounts service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -190,6 +191,7 @@ func main() {
 		log.Info("Registering namespaces service")
 		ns_ctrl := graph.NewNamespacesController(log, db, bus)
 		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl, interceptors)
+		log.Debug("Namespaces service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -207,6 +209,7 @@ func main() {
 		log.Info("Registering sessions service")
 		sess_ctrl := graph.NewSessionsController(log, rdb)
 		path, handler := nodeconnect.NewSessionsServiceHandler(sess_ctrl, interceptors)
+		log.Debug("Sessions service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -223,6 +226,7 @@ func main() {
 		dev_ctrl.SetSigningKey(SIGNING_KEY)
 
 		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl.Handler(), interceptors)
+		log.Debug("Devices service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 	if _, ok := services["shadow"]; ok {
@@ -236,6 +240,7 @@ func main() {
 		client := shadowpb.NewShadowServiceClient(conn)
 
 		path, handler := nodeconnect.NewShadowServiceHandler(NewShadowAPI(log, client), interceptors)
+		log.Debug("Shadow service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -244,6 +249,7 @@ func main() {
 		plug_ctrl := graph.NewPluginsController(log, db)
 
 		path, handler := pluginsconnect.NewPluginsServiceHandler(plug_ctrl, interceptors)
+		log.Debug("Plugins service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -251,6 +257,7 @@ func main() {
 		log.Info("Registering Internal service")
 		is := graph.InternalService{}
 		path, handler := nodeconnect.NewInternalServiceHandler(&is, interceptors)
+		log.Debug("Internal service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -258,6 +265,7 @@ func main() {
 		log.Info("Registring Events Bus service")
 		service := graph.NewEventsService(log, bus)
 		path, handler := eventbusconnect.NewEventsServiceHandler(service, interceptors)
+		log.Debug("Events service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
