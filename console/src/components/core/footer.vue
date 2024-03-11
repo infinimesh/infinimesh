@@ -23,7 +23,7 @@
       <a href="https://www.github.com/infinimesh/infinimesh" target="_blank">
         <strong>GitHub</strong>
       </a>
-      ©2020-2023
+      ©2018-2024
     </span>
   </n-space>
 </template>
