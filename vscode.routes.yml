@@ -36,6 +36,12 @@ http:
         - http
       service: rbmq
 
+    timeseries:
+      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.timeseries.")
+      entryPoints:
+        - http
+      service: timeseries
+
   services:
     repo:
       loadBalancer:
@@ -63,3 +69,8 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:15672
+    
+    timeseries:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8005
