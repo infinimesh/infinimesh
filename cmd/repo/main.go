@@ -124,6 +124,8 @@ func main() {
 		_ = log.Sync()
 	}()
 
+	log.Debug("Debug logging enabled")
+
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
 	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
 	log.Info("DB connection established")
