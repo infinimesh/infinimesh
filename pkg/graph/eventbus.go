@@ -57,6 +57,8 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 		return connect.NewError(connect.CodeInternal, errors.New("failed to subscribe"))
 	}
 
+	log.Debug("Subscribed, waiting for events")
+
 	for event := range subscribe {
 		log.Info("Received event", zap.Any("Event", event))
 		err := stream.Send(&event)
