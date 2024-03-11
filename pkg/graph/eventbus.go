@@ -54,7 +54,7 @@ func (e *EventsService) Subscribe(ctx context.Context, req *connect.Request[node
 	subscribe, err := e.bus.Subscribe(ctx, uuid)
 	if err != nil {
 		log.Error("Failed to subscribe", zap.Error(err))
-		return err
+		return connect.NewError(connect.CodeInternal, errors.New("failed to subscribe"))
 	}
 
 	for event := range subscribe {
