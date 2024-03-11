@@ -13,7 +13,7 @@ http:
       service: console
 
     api:
-      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.node.", "/infinimesh.shadow", "/infinimesh.plugins", "/oauth")
+      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.node.", "/infinimesh.shadow", "/infinimesh.plugins", "/infinimesh.eventbus", "/oauth")
       entryPoints:
         - http
         - grpc
