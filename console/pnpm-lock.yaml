@@ -24,8 +24,8 @@ dependencies:
     specifier: ^11.9.0
     version: 11.9.0
   infinimesh-proto:
-    specifier: 3.1.5-6
-    version: 3.1.5-6
+    specifier: 3.1.5-7
+    version: 3.1.5-7
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -129,25 +129,6 @@ packages:
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
-
-  /@bufbuild/connect-web@0.13.0(@bufbuild/protobuf@1.7.2):
-    resolution: {integrity: sha512-Ys9VFDWYktD9yFQSLOlkpsD42LonDNMCysLCfjXFuxlupYuf4f7qg0zkT5bESyTfqk4xtRDSSGR3xygaj/ONIQ==}
-    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
-    peerDependencies:
-      '@bufbuild/protobuf': ^1.2.1
-    dependencies:
-      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.7.2)
-      '@bufbuild/protobuf': 1.7.2
-    dev: false
-
-  /@bufbuild/connect@0.13.0(@bufbuild/protobuf@1.7.2):
-    resolution: {integrity: sha512-eZSMbVLyUFtXiZNORgCEvv580xKZeYQdMOWj2i/nxOcpXQcrEzTMTA7SZzWv4k4gveWCOSRoWmYDeOhfWXJv0g==}
-    deprecated: Connect has moved to its own org @connectrpc and has a stable v1. Run `npx @connectrpc/connect-migrate@latest` to update. See https://github.com/connectrpc/connect-es/releases/tag/v0.13.1 for details.
-    peerDependencies:
-      '@bufbuild/protobuf': ^1.2.1
-    dependencies:
-      '@bufbuild/protobuf': 1.7.2
-    dev: false
 
   /@bufbuild/protobuf@1.7.2:
     resolution: {integrity: sha512-i5GE2Dk5ekdlK1TR7SugY4LWRrKSfb5T1Qn4unpIMbfxoeGKERKQ59HG3iYewacGD10SR7UzevfPnh6my4tNmQ==}
@@ -1335,13 +1316,12 @@ packages:
     engines: {node: '>=16.17.0'}
     dev: true
 
-  /infinimesh-proto@3.1.5-6:
-    resolution: {integrity: sha512-DxS4vj0bj+hZv4lCtFDkCPuMa80C7k+GfohabofRSLNhjKGx2GGgLT1D63Dm76XWe/iynOn475gyU7J3YJ5DyA==}
+  /infinimesh-proto@3.1.5-7:
+    resolution: {integrity: sha512-iLaDGVxP1x8C7nVeAb6Q1VC3Cu076SVDtI2Lu52XvwiUgXR3beJ8zM6rONB5tHO1OmRl9Kx68nQzigz+Ih+jxg==}
     dependencies:
-      '@bufbuild/connect': 0.13.0(@bufbuild/protobuf@1.7.2)
-      '@bufbuild/connect-web': 0.13.0(@bufbuild/protobuf@1.7.2)
       '@bufbuild/protobuf': 1.7.2
       '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.7.2)
+      '@connectrpc/connect-web': 1.4.0(@bufbuild/protobuf@1.7.2)(@connectrpc/connect@1.4.0)
       uuid: 9.0.1
     dev: false
 
