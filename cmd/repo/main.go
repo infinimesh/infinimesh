@@ -255,7 +255,7 @@ func main() {
 	}
 
 	if _, ok := services["eventbus"]; ok {
-		log.Info("Registring events")
+		log.Info("Registring Events Bus service")
 		service := graph.NewEventsService(log, bus)
 		path, handler := eventbusconnect.NewEventsServiceHandler(service, interceptors)
 		router.PathPrefix(path).Handler(handler)
