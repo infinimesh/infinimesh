@@ -21,12 +21,11 @@ import (
 	"fmt"
 	"strings"
 
+	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accountspb "github.com/infinimesh/proto/node/accounts"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type Link struct {
@@ -54,6 +53,12 @@ type Credentials interface {
 	// Set Logger for Credentials methods
 	SetLogger(*zap.Logger)
 }
+
+var (
+	ErrUpdatingCredOfType = errors.New("Error updating Credentials of type")
+	ErrCreateCred         = errors.New("Couldn't create credentials")
+	ErrAssignCred         = errors.New("Couldn't assign credentials")
+)
 
 type CredentialsController interface {
 	Find(ctx context.Context, auth_type string, args ...string) (cred Credentials, err error)
@@ -289,7 +294,7 @@ func (ctrl *credentialsController) SetCredentials(ctx context.Context, acc drive
 		_, err = ctrl.col.UpdateDocument(ctx, oldLink.To.Key(), c)
 		if err != nil {
 			ctrl.log.Warn("Error updating Credentials of type", zap.Error(err), zap.String("key", key))
-			return status.Error(codes.InvalidArgument, "Error updating Credentials of type")
+			return connect.NewError(connect.CodeInvalidArgument, ErrUpdatingCredOfType)
 		}
 
 		return nil
@@ -299,7 +304,7 @@ func (ctrl *credentialsController) SetCredentials(ctx context.Context, acc drive
 	cred, err := ctrl.col.CreateDocument(ctx, c)
 	if err != nil {
 		log.Warn("Error creating Credentials Document", zap.String("type", c.Type()), zap.Error(err))
-		return status.Error(codes.Internal, "Couldn't create credentials")
+		return connect.NewError(connect.CodeInternal, ErrCreateCred)
 	}
 
 	_, err = ctrl.edge.CreateDocument(ctx, Link{
@@ -315,7 +320,7 @@ func (ctrl *credentialsController) SetCredentials(ctx context.Context, acc drive
 			zap.String("account", acc.Key()), zap.String("type", c.Type()), zap.Error(err),
 		)
 		ctrl.col.RemoveDocument(ctx, cred.Key)
-		return status.Error(codes.Internal, "Couldn't assign credentials")
+		return connect.NewError(connect.CodeInternal, ErrAssignCred)
 	}
 	return nil
 }
