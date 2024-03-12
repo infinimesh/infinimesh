@@ -35,11 +35,11 @@ func newCredentialsControllerFixture(t *testing.T) *credentialsControllerFixture
 	f := &credentialsControllerFixture{}
 	f.data.ctx = context.TODO()
 
-	f.mocks.db = &driver_mocks.MockDatabase{}
-	f.mocks.col = &driver_mocks.MockCollection{}
-	f.mocks.edge = &driver_mocks.MockCollection{}
+	f.mocks.db = driver_mocks.NewMockDatabase(t)
+	f.mocks.col = driver_mocks.NewMockCollection(t)
+	f.mocks.edge = driver_mocks.NewMockCollection(t)
 
-	g := &driver_mocks.MockGraph{}
+	g := driver_mocks.NewMockGraph(t)
 	f.mocks.db.EXPECT().Graph(f.data.ctx, schema.CREDENTIALS_GRAPH.Name).
 		Return(g, nil)
 
