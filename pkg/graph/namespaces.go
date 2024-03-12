@@ -83,8 +83,6 @@ func NewNamespacesController(log *zap.Logger, db driver.Database, bus EventBusSe
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.NAMESPACES_COL)
 	accs, _ := db.Collection(ctx, schema.ACCOUNTS_COL)
-	// ica := NewInfinimeshCommonActionsRepo(log.Named("NamespacesController"), db)
-	// repo := NewGenericRepo[*nspb.Namespace](db)
 
 	return &NamespacesController{
 		log: log.Named("NamespacesController"), col: col, db: db, accs: accs,
