@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2018-2024 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	proto_eventbus "github.com/infinimesh/proto/eventbus"
 	"time"
+
+	proto_eventbus "github.com/infinimesh/proto/eventbus"
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"

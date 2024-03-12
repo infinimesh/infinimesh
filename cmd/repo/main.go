@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH
+Copyright © 2018-2024 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ func init() {
 	viper.SetDefault("SIGNING_KEY", "seeeecreet")
 	viper.SetDefault("INF_DEFAULT_ROOT_PASS", "infinimesh")
 	viper.SetDefault("REDIS_HOST", "redis:6379")
+	viper.SetDefault("RABBITMQ_CONN", "amqp://infinimesh:infinimesh@localhost:5672/")
 
 	viper.SetDefault("SERVICES", "accounts,namespaces,sessions,devices,shadow,plugins,internal,oauth,eventbus")
 
@@ -122,6 +123,8 @@ func main() {
 	defer func() {
 		_ = log.Sync()
 	}()
+
+	log.Debug("Debug logging enabled")
 
 	log.Info("Connecting to DB", zap.String("URL", arangodbHost))
 	db := schema.InitDB(log, arangodbHost, arangodbCred, rootPass, false)
@@ -181,6 +184,7 @@ func main() {
 		acc_ctrl := graph.NewAccountsControllerModule(log, db, rdb, bus)
 		acc_ctrl.SetSigningKey(SIGNING_KEY)
 		path, handler := nodeconnect.NewAccountsServiceHandler(acc_ctrl.Handler(), interceptors)
+		log.Debug("Accounts service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -189,6 +193,7 @@ func main() {
 		log.Info("Registering namespaces service")
 		ns_ctrl := graph.NewNamespacesController(log, db, bus)
 		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl, interceptors)
+		log.Debug("Namespaces service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 
 		ensure_root = true
@@ -206,6 +211,7 @@ func main() {
 		log.Info("Registering sessions service")
 		sess_ctrl := graph.NewSessionsController(log, rdb)
 		path, handler := nodeconnect.NewSessionsServiceHandler(sess_ctrl, interceptors)
+		log.Debug("Sessions service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -222,6 +228,7 @@ func main() {
 		dev_ctrl.SetSigningKey(SIGNING_KEY)
 
 		path, handler := nodeconnect.NewDevicesServiceHandler(dev_ctrl.Handler(), interceptors)
+		log.Debug("Devices service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 	if _, ok := services["shadow"]; ok {
@@ -235,6 +242,7 @@ func main() {
 		client := shadowpb.NewShadowServiceClient(conn)
 
 		path, handler := nodeconnect.NewShadowServiceHandler(NewShadowAPI(log, client), interceptors)
+		log.Debug("Shadow service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -243,6 +251,7 @@ func main() {
 		plug_ctrl := graph.NewPluginsController(log, db)
 
 		path, handler := pluginsconnect.NewPluginsServiceHandler(plug_ctrl, interceptors)
+		log.Debug("Plugins service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
@@ -250,13 +259,15 @@ func main() {
 		log.Info("Registering Internal service")
 		is := graph.InternalService{}
 		path, handler := nodeconnect.NewInternalServiceHandler(&is, interceptors)
+		log.Debug("Internal service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
 	if _, ok := services["eventbus"]; ok {
-		log.Info("Registring events")
+		log.Info("Registring Events Bus service")
 		service := graph.NewEventsService(log, bus)
 		path, handler := eventbusconnect.NewEventsServiceHandler(service, interceptors)
+		log.Debug("Events service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 	}
 
