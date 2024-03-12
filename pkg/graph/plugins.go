@@ -76,10 +76,11 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
 	log = log.Named("PluginsController")
+	ica := NewInfinimeshCommonActionsRepo(log, db)
 	return &PluginsController{
 		log: log, col: col, db: db,
-		ns_ctrl:  NewNamespacesController(log, db, nil),
-		ica_repo: NewInfinimeshCommonActionsRepo(log, db),
+		ns_ctrl:  NewNamespacesController(log, db, nil, ica, NewGenericRepo[*namespaces.Namespace](db)),
+		ica_repo: ica,
 		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }

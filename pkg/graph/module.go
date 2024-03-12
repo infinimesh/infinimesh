@@ -10,6 +10,7 @@ import (
 	"github.com/infinimesh/proto/handsfree"
 	"github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/devices"
+	"github.com/infinimesh/proto/node/namespaces"
 	"github.com/infinimesh/proto/node/nodeconnect"
 	"go.uber.org/zap"
 )
@@ -70,5 +71,23 @@ func NewAccountsControllerModule(log *zap.Logger, db driver.Database, rdb redis.
 			credentials.NewCredentialsController(context.Background(), log, db),
 			bus,
 		),
+	}
+}
+
+type NamespacesControllerModule interface {
+	Handler() nodeconnect.NamespacesServiceHandler
+}
+
+type namespacesControllerModule struct {
+	handler *NamespacesController
+}
+
+func (m *namespacesControllerModule) Handler() nodeconnect.NamespacesServiceHandler {
+	return m.handler
+}
+
+func NewNamespacesControllerModule(log *zap.Logger, db driver.Database, bus *EventBus) NamespacesControllerModule {
+	return &namespacesControllerModule{
+		handler: NewNamespacesController(log, db, bus, NewInfinimeshCommonActionsRepo(log.Named("NamespacesController"), db), NewGenericRepo[*namespaces.Namespace](db)),
 	}
 }

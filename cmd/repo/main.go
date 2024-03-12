@@ -191,8 +191,8 @@ func main() {
 	}
 	if _, ok := services["namespaces"]; ok {
 		log.Info("Registering namespaces service")
-		ns_ctrl := graph.NewNamespacesController(log, db, bus)
-		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl, interceptors)
+		ns_ctrl := graph.NewNamespacesControllerModule(log, db, bus)
+		path, handler := nodeconnect.NewNamespacesServiceHandler(ns_ctrl.Handler(), interceptors)
 		log.Debug("Namespaces service registered", zap.String("path", path))
 		router.PathPrefix(path).Handler(handler)
 
