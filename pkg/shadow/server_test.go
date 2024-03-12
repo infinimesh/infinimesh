@@ -87,7 +87,7 @@ func TestGet_FailsOn_NoDevices(t *testing.T) {
 		Pool: []string{},
 	})
 
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no devices specified")
+	assert.EqualError(t, err, "invalid_argument: no devices specified")
 }
 
 func TestGet_FailsOn_RedisError(t *testing.T) {
@@ -104,7 +104,7 @@ func TestGet_FailsOn_RedisError(t *testing.T) {
 		Pool: []string{"device1"},
 	})
 
-	assert.EqualError(t, err, "rpc error: code = Internal desc = failed to get Shadows")
+	assert.EqualError(t, err, "internal: failed to get Shadows")
 }
 
 func TestGet_Success(t *testing.T) {
@@ -160,7 +160,7 @@ func TestPatch_FailsOn_NoDevice(t *testing.T) {
 
 	_, err := f.service.Patch(f.data.ctx, &pb.Shadow{})
 
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no device specified")
+	assert.EqualError(t, err, "invalid_argument: no device specified")
 }
 
 func TestPatch_Success(t *testing.T) {
@@ -208,7 +208,7 @@ func TestRemove_FailsOn_NoDevice(t *testing.T) {
 
 	_, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{})
 
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no device specified")
+	assert.EqualError(t, err, "invalid_argument: no device specified")
 }
 
 func TestRemove_FailsOn_NoKey(t *testing.T) {
@@ -218,7 +218,7 @@ func TestRemove_FailsOn_NoKey(t *testing.T) {
 		Device: uuid.New().String(),
 	})
 
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = key not specified")
+	assert.EqualError(t, err, "invalid_argument: key not specified")
 }
 
 func TestRemove_FailsOn_RedisGet(t *testing.T) {
@@ -231,7 +231,7 @@ func TestRemove_FailsOn_RedisGet(t *testing.T) {
 		Key:    "diff",
 	})
 
-	assert.EqualError(t, err, "rpc error: code = Internal desc = failed to get Shadow")
+	assert.EqualError(t, err, "internal: failed to get Shadow")
 }
 
 func TestRemove_FailsOn_Unmarshal(t *testing.T) {
@@ -244,7 +244,7 @@ func TestRemove_FailsOn_Unmarshal(t *testing.T) {
 		Key:    "diff",
 	})
 
-	assert.EqualError(t, err, "rpc error: code = Internal desc = cannot Unmarshal state")
+	assert.EqualError(t, err, "internal: cannot Unmarshal state")
 }
 
 func TestRemove_Reported_Success(t *testing.T) {
@@ -319,7 +319,7 @@ func TestStreamShadow_FailsOn_NoDevices(t *testing.T) {
 
 	err := f.service.StreamShadow(&pb.StreamShadowRequest{}, f.mocks.srv)
 
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = no devices specified")
+	assert.EqualError(t, err, "invalid_argument: no devices specified")
 }
 
 func TestStreamShadow_Success_ServerClosed(t *testing.T) {
