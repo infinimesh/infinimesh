@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accpb "github.com/infinimesh/proto/node/accounts"
@@ -105,9 +106,9 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	}
 	log.Debug("Ready to build query", zap.Any("bindVars", bindVars))
 
-	filters := ""
+	filters := FiltersValue(ctx)
 	if ns := NSFilterValue(ctx); ns != "" {
-		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
+		filters = fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns) + filters
 	}
 
 	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, searchType, filters), bindVars)

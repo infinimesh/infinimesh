@@ -32,6 +32,7 @@ export const useDevicesStore = defineStore("devices", () => {
   const limit = ref(10);
   const page = ref(1);
   const total = ref(0);
+  const filterTerm = ref([]);
 
   const reported = ref(new Map());
   const desired = ref(new Map());
@@ -107,10 +108,75 @@ export const useDevicesStore = defineStore("devices", () => {
     loading.value = false;
   }
 
-  async function fetchDevicesWithPagination(state = true) {
+  async function fetchDevicesWithPagination(state = true, reset = true) {
     loading.value = true;
-    devices.value = {};
+    if (reset) {
+      devices.value = {};
+    }
     total.value = 0;
+
+    let filters = {};
+
+    filterTerm.value.forEach((term) => {
+      const [_, key, value] = term.split(":");
+      if (["uuid", "title", "namespace"].includes(key)) {
+        filters[key] = {
+          kind: {
+            case: "stringValue",
+            value,
+          },
+        };
+      }
+      if (["namespace"].includes(key)) {
+        const ns = namespacesStore.namespaces_list.find(
+          (n) => n.title.toLowerCase() === value.toLowerCase()
+        );
+        if (ns.uuid) {
+          filters[key] = {
+            kind: {
+              case: "stringValue",
+              value: ns.uuid,
+            },
+          };
+        }
+      }
+
+      if (["enabled"].includes(key)) {
+        filters[key] = {
+          kind: {
+            case: "boolValue",
+            value: value === "true",
+          },
+        };
+      }
+
+      if (key === "tag") {
+        if ("tags" in filters) {
+          filters["tags"].kind.value.values.push({
+            kind: {
+              case: "stringValue",
+              value: value,
+            },
+          });
+        } else {
+          filters["tags"] = {
+            kind: {
+              case: "listValue",
+              value: {
+                values: [
+                  {
+                    kind: {
+                      case: "stringValue",
+                      value: value,
+                    },
+                  },
+                ],
+              },
+            },
+          };
+        }
+      }
+    });
 
     const data = await devicesApi.value.list(
       new QueryRequest({
@@ -120,6 +186,7 @@ export const useDevicesStore = defineStore("devices", () => {
           namespacesStore.selected === "all"
             ? undefined
             : namespacesStore.selected,
+        filters,
       })
     );
 
@@ -312,7 +379,7 @@ export const useDevicesStore = defineStore("devices", () => {
       await devicesApi.value.delete({ uuid: device });
       bar.finish();
 
-      fetchDevicesWithPagination();
+      fetchDevicesWithPagination(true, false);
     } catch (error) {
       console.error(error);
       bar.error();
@@ -324,7 +391,7 @@ export const useDevicesStore = defineStore("devices", () => {
     try {
       await devicesApi.value.create(request);
 
-      fetchDevicesWithPagination();
+      fetchDevicesWithPagination(true, false);
       bar.finish();
 
       return false;
@@ -345,6 +412,8 @@ export const useDevicesStore = defineStore("devices", () => {
       const data = await devicesApi.value.toggle(device);
 
       devices.value[uuid] = { ...device, ...data };
+      fetchDevicesWithPagination(true, false);
+
       bar.finish();
     } catch (error) {
       console.error(error);
@@ -359,8 +428,9 @@ export const useDevicesStore = defineStore("devices", () => {
     bar.start();
     try {
       const data = await devicesApi.value.toggleBasic({ uuid });
-
       devices.value[uuid] = { ...device, ...data };
+
+      fetchDevicesWithPagination(true, false);
 
       bar.finish();
     } catch (error) {
@@ -418,6 +488,7 @@ export const useDevicesStore = defineStore("devices", () => {
     limit,
     page,
     total,
+    filterTerm,
     subscribed,
 
     reported,
