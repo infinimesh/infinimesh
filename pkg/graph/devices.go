@@ -22,6 +22,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
@@ -533,15 +534,48 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 	requestor := ctx.Value(inf.InfinimeshAccountCtxKey).(string)
 	log.Debug("Requestor", zap.String("id", requestor))
 
-	if q.GetNamespace() != "" {
-		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
-	}
-
 	limit := q.GetLimit()
 	offset := q.GetOffset()
+	filtersValue := q.GetFilters()
+
+	parsedFilters := ""
+
+	if uuid, ok := filtersValue["uuid"]; ok {
+		parsedFilters += fmt.Sprintf("FILTER node._key == \"%s\"\n", uuid.GetStringValue())
+	}
+
+	if tags, ok := filtersValue["tags"]; ok {
+		tagsArray := tags.GetListValue().Values
+		for _, tag := range tagsArray {
+			parsedFilters += fmt.Sprintf("FILTER \"%s\" IN node.tags\n", tag.GetStringValue())
+		}
+	}
+
+	if title, ok := filtersValue["title"]; ok {
+		parsedFilters += fmt.Sprintf("FILTER CONTAINS(LOWER(node.title), \"%s\")\n", strings.ToLower(title.GetStringValue()))
+	}
+
+	if enabled, ok := filtersValue["enabled"]; ok {
+		val := enabled.GetBoolValue()
+		if val == true {
+			parsedFilters += fmt.Sprintf("FILTER node.enabled == %t\n", val)
+		} else {
+			parsedFilters += fmt.Sprintf("FILTER NOT HAS(node, \"enabled\") OR node.enabled == %t\n", val)
+
+		}
+	}
+
+	if q.GetNamespace() != "" {
+		ctx = WithNamespaceFilter(ctx, q.GetNamespace())
+	} else {
+		if ns, ok := filtersValue["namespace"]; ok {
+			ctx = WithNamespaceFilter(ctx, ns.GetStringValue())
+		}
+	}
 
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
+	ctx = WithFilters(ctx, parsedFilters)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 

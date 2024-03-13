@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, h } from "vue";
+import { ref, h } from "vue";
 import { NSelect, NTag } from "naive-ui";
 
 const { filterTerm } = defineProps(["filterTerm"]);

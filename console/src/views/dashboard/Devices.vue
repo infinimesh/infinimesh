@@ -7,10 +7,7 @@
             <n-h1 prefix="bar" align-text type="info" style="margin: 0">
               <n-text type="info"> Devices </n-text>
               (
-              <n-number-animation
-                :from="0"
-                :to="filteredDevices().length || 0"
-              />
+              <n-number-animation :from="0" :to="devices.length || 0" />
               )
             </n-h1>
             <n-button strong secondary round type="info" @click="handleRefresh">
@@ -37,7 +34,7 @@
     </n-flex>
     <n-flex vertical align="center" size="large">
       <devices-pool
-        :devices="filteredDevices()"
+        :devices="devices"
         :show_ns="show_ns"
         @refresh="handleRefresh()"
       />
@@ -103,71 +100,10 @@ const {
   limit,
   page,
   total,
+  filterTerm,
 } = storeToRefs(store);
 
 const devices = computed(() => Object.values(devicesMap.value));
-
-const filterTerm = ref([]);
-
-const updateFilterTerm = (value) => {
-  filterTerm.value = value;
-};
-
-function parseFilterText() {
-  const filters = {};
-  const parts = filterTerm.value;
-  parts.forEach((part) => {
-    const [key, value] = part.split(":").filter(String);
-    if (key && value) {
-      filters[key] = value;
-    }
-  });
-  return filters;
-}
-
-function matchFilterDevice(device, filters) {
-  for (let key in filters) {
-    const filterValue = filters[key];
-
-    const matchFilterValue = (val) => val.toLowerCase().includes(filterValue);
-
-    if (["uuid", "title"].includes(key) && !matchFilterValue(device[key])) {
-      return false;
-    }
-
-    if (key === "namespace" && !matchFilterValue(device.access.namespace)) {
-      return false;
-    }
-
-    if (key === "enabled") {
-      const expectedValue = filterValue === "true";
-      if (device.enabled !== expectedValue) {
-        return false;
-      }
-    }
-
-    if (key === "tag") {
-      const filterTags = filterValue.split(",");
-
-      if (
-        !device.tags.some((tag) =>
-          filterTags.some((filterTag) => tag.toLowerCase().includes(filterTag))
-        )
-      ) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-function filteredDevices() {
-  const filters = parseFilterText();
-  return devices.value.filter((device) => {
-    return matchFilterDevice(device, filters);
-  });
-}
 
 store.fetchDevicesWithPagination();
 
@@ -176,6 +112,10 @@ const { console_services } = storeToRefs(app);
 
 const { selected, namespaces } = storeToRefs(useNSStore());
 const plugins = usePluginsStore();
+
+const updateFilterTerm = (value) => {
+  filterTerm.value = value;
+};
 
 async function load_plugin() {
   plugins.current = false;
@@ -197,7 +137,7 @@ async function load_plugin() {
 
 watch(selected, [load_plugin, () => (page.value = 1)]);
 watch(limit, () => (page.value = 1));
-watch([selected, limit, page], store.fetchDevicesWithPagination);
+watch([selected, limit, page, filterTerm], store.fetchDevicesWithPagination);
 
 // Scroll to top when page changes
 watch(page, () => {
