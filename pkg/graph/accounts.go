@@ -36,8 +36,6 @@ import (
 	accpb "github.com/infinimesh/proto/node/accounts"
 	"github.com/infinimesh/proto/node/namespaces"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type Account struct {
@@ -83,6 +81,18 @@ func NewAccountFromPB(acc *accpb.Account) (res *Account) {
 		DocumentMeta: NewBlankDocument(schema.ACCOUNTS_COL, acc.Uuid),
 	}
 }
+
+var (
+	ErrCantLoginAsYourself       = errors.New("You can't create such token for yourself")
+	ErrAccountNotFound           = errors.New("Account not found")
+	ErrWrongCredentials          = errors.New("Wrong credentials given")
+	ErrAccountDisabled           = errors.New("Account is disabled")
+	ErrFailedToIssueToken        = errors.New("Failed to issue token")
+	ErrFailedToIssueTokenSession = errors.New("Failed to issue token: session")
+	ErrAccNotFoundOrNoAccess     = errors.New("Account not found or not enough Access Rights")
+	ErrNoAccess                  = errors.New("Not enough Access Rights")
+	ErrFailedToListAccounts      = errors.New("Failed to list accounts")
+)
 
 type AccountsController struct {
 	InfinimeshBaseController
@@ -146,23 +156,23 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 		account = *NewBlankAccountDocument(*req.Uuid)
 		requestor := requestor.(string)
 		if *req.Uuid == requestor {
-			return nil, status.Error(codes.PermissionDenied, "You can't create such token for yourself")
+			return nil, connect.NewError(connect.CodePermissionDenied, ErrCantLoginAsYourself)
 		}
 		err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &account)
 		if err != nil {
 			log.Warn("Failed to get Account and access level", zap.Error(err))
-			return nil, status.Error(codes.Unauthenticated, "Account not found")
+			return nil, connect.NewError(connect.CodeUnauthenticated, ErrAccountNotFound)
 		}
 		if account.Access.Level < access.Level_ROOT && account.Access.Role != access.Role_OWNER {
 			log.Warn("Super-Admin Token Request attempted", zap.String("requestor", requestor), zap.String("account", account.Uuid))
-			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+			return nil, connect.NewError(connect.CodeUnauthenticated, ErrWrongCredentials)
 		}
 
 		req.Exp = time.Now().Unix() + int64(time.Minute.Seconds())*5
 	} else {
 		account_pb, ok := c.cred.Authorize(ctx, req.Auth.Type, req.Auth.Data...)
 		if !ok {
-			return nil, status.Error(codes.Unauthenticated, "Wrong credentials given")
+			return nil, connect.NewError(connect.CodeUnauthenticated, ErrWrongCredentials)
 		}
 		account = *NewBlankAccountDocument(account_pb.GetUuid())
 		account.Account = account_pb
@@ -170,13 +180,13 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 
 	log.Debug("Authorized user", zap.String("ID", account.ID().String()))
 	if !account.Enabled {
-		return nil, status.Error(codes.PermissionDenied, "Account is disabled")
+		return nil, connect.NewError(connect.CodePermissionDenied, ErrAccountDisabled)
 	}
 
 	session := c.sessions.New(req.Exp, req.GetClient())
 	if err := c.sessions.Store(account.Key, session); err != nil {
 		log.Error("Failed to store session", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Failed to issue token: session")
+		return nil, connect.NewError(connect.CodeInternal, ErrFailedToIssueTokenSession)
 	}
 
 	claims := jwt.MapClaims{}
@@ -192,7 +202,7 @@ func (c *AccountsController) Token(ctx context.Context, _req *connect.Request[pb
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token_string, err := token.SignedString(c.SIGNING_KEY)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Failed to issue token")
+		return nil, connect.NewError(connect.CodeInternal, ErrFailedToIssueToken)
 	}
 
 	return connect.NewResponse(&pb.TokenResponse{Token: token_string}), nil
@@ -220,10 +230,10 @@ func (c *AccountsController) Get(ctx context.Context, req *connect.Request[accpb
 	err = c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &result)
 	if err != nil {
 		log.Warn("Failed to get Account and access level", zap.Error(err))
-		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+		return nil, connect.NewError(connect.CodeNotFound, ErrAccNotFoundOrNoAccess)
 	}
 	if result.Access.Level < access.Level_READ {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+		return nil, connect.NewError(connect.CodePermissionDenied, ErrNoAccess)
 	}
 
 	return connect.NewResponse(result.Account), nil
@@ -238,7 +248,7 @@ func (c *AccountsController) List(ctx context.Context, _ *connect.Request[pb.Emp
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 	if err != nil {
 		log.Warn("Error executing query", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Failed to list accounts")
+		return nil, connect.NewError(connect.CodeInternal, ErrFailedToListAccounts)
 	}
 
 	return connect.NewResponse(&accpb.Accounts{
@@ -330,20 +340,20 @@ func (c *AccountsController) Update(ctx context.Context, req *connect.Request[ac
 	old := *NewBlankAccountDocument(acc.GetUuid())
 	err := c.ica_repo.AccessLevelAndGet(ctx, requestorAccount, &old)
 	if err != nil || old.Access.Level < access.Level_ADMIN {
-		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.GetUuid())
+		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("No Access to Account %s", acc.GetUuid()))
 	}
 
 	if old.GetDefaultNamespace() != acc.GetDefaultNamespace() {
 		ok, level := c.ica_repo.AccessLevel(ctx, &old, NewBlankNamespaceDocument(acc.GetDefaultNamespace()))
 		if !ok || level < access.Level_READ {
-			return nil, status.Errorf(codes.PermissionDenied, "Account has no Access to Namespace %s", acc.GetDefaultNamespace())
+			return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("Account has no Access to Namespace %s", acc.GetDefaultNamespace()))
 		}
 	}
 
 	_, err = c.col.UpdateDocument(ctx, acc.GetUuid(), acc)
 	if err != nil {
 		log.Warn("Internal error while updating Document", zap.Any("request", acc), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error while updating Account")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error while updating Account"))
 	}
 
 	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
@@ -375,14 +385,14 @@ func (c *AccountsController) Toggle(ctx context.Context, req *connect.Request[ac
 	curr := resp.Msg
 
 	if curr.Access.Level < access.Level_MGMT {
-		return nil, status.Errorf(codes.PermissionDenied, "No Access to Account %s", acc.Uuid)
+		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("No Access to Account %s", acc.Uuid))
 	}
 
 	res := NewAccountFromPB(curr)
 	err = c.ica_repo.Toggle(ctx, res, "enabled")
 	if err != nil {
 		log.Warn("Error updating Account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error while updating Account")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error while updating Account"))
 	}
 
 	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
@@ -414,16 +424,16 @@ func (c *AccountsController) Deletables(ctx context.Context, req *connect.Reques
 	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account and access level", zap.Error(err))
-		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+		return nil, connect.NewError(connect.CodeNotFound, ErrAccNotFoundOrNoAccess)
 	}
 	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ROOT {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+		return nil, connect.NewError(connect.CodePermissionDenied, ErrNoAccess)
 	}
 
 	nodes, err := c.ica_repo.ListOwnedDeep(ctx, &acc)
 	if err != nil {
 		log.Warn("Error getting owned nodes", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting owned nodes")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error getting owned nodes"))
 	}
 
 	return connect.NewResponse(nodes), nil
@@ -441,10 +451,10 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account and access level", zap.Error(err))
-		return nil, status.Error(codes.NotFound, "Account not found or not enough Access Rights")
+		return nil, connect.NewError(connect.CodeNotFound, ErrAccNotFoundOrNoAccess)
 	}
 	if acc.Access.Role != access.Role_OWNER && acc.Access.Level < access.Level_ADMIN {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access Rights")
+		return nil, connect.NewError(connect.CodePermissionDenied, ErrNoAccess)
 	}
 
 	notifier, notify_err := c.bus.Notify(ctx, &proto_eventbus.Event{
@@ -455,7 +465,7 @@ func (c *AccountsController) Delete(ctx context.Context, request *connect.Reques
 	err = c.ica_repo.DeleteRecursive(ctx, &acc)
 	if err != nil {
 		log.Warn("Error deleting account", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error while deleting Account")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error while deleting Account"))
 	}
 
 	if notify_err == nil {
@@ -482,16 +492,16 @@ func (c *AccountsController) GetCredentials(ctx context.Context, request *connec
 	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights")
+		return nil, connect.NewError(connect.CodeNotFound, ErrAccNotFoundOrNoAccess)
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this"))
 	}
 
 	linked, err := c.cred.ListCredentials(ctx, acc.ID())
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Error listing Account's Credentials")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error listing Account's Credentials"))
 	}
 
 	var creds []*accpb.Credentials
@@ -521,23 +531,23 @@ func (c *AccountsController) SetCredentials(ctx context.Context, _req *connect.R
 	err := c.ica_repo.AccessLevelAndGet(ctx, NewBlankAccountDocument(requestor), &acc)
 	if err != nil {
 		log.Warn("Error getting Account", zap.String("requestor", requestor), zap.String("account", req.GetUuid()), zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error getting Account or not enough Access rights to set credentials for this Account")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error getting Account or not enough Access rights to set credentials for this Account"))
 	}
 
 	if acc.Access.Level < access.Level_ROOT && acc.Access.Role != access.Role_OWNER {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this"))
 	}
 
 	cred, err := c.cred.MakeCredentials(req.GetCredentials())
 	if err != nil {
 		log.Warn("Error making Credentials", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error setting Account's Credentials"))
 	}
 
 	err = c.cred.SetCredentials(ctx, acc.ID(), cred)
 	if err != nil {
 		log.Warn("Error making Credentials", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Error setting Account's Credentials")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Error setting Account's Credentials"))
 	}
 	return connect.NewResponse(&pb.SetCredentialsResponse{}), nil
 }

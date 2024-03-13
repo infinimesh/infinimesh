@@ -143,7 +143,7 @@ func TestToken_FailsOn_WrongCredentials(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Wrong credentials given")
+	assert.EqualError(t, err, "unauthenticated: Wrong credentials given")
 }
 
 func TestToken_FailsOn_AccountDisabled(t *testing.T) {
@@ -161,7 +161,7 @@ func TestToken_FailsOn_AccountDisabled(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Account is disabled")
+	assert.EqualError(t, err, "permission_denied: Account is disabled")
 }
 
 func TestToken_FailsOn_Session(t *testing.T) {
@@ -183,7 +183,7 @@ func TestToken_FailsOn_Session(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Failed to issue token: session")
+	assert.EqualError(t, err, "internal: Failed to issue token: session")
 }
 
 func TestToken_User_Success(t *testing.T) {
@@ -266,7 +266,7 @@ func TestToken_LoginAs_FailsOn_RecursiveToken(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = You can't create such token for yourself")
+	assert.EqualError(t, err, "permission_denied: You can't create such token for yourself")
 }
 
 func TestToken_LoginAs_FailsOn_AccessLevelAndGet(t *testing.T) {
@@ -286,7 +286,7 @@ func TestToken_LoginAs_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Account not found")
+	assert.EqualError(t, err, "unauthenticated: Account not found")
 }
 
 func TestToken_LoginAs_FailsOn_NotEnoughAccess(t *testing.T) {
@@ -312,7 +312,7 @@ func TestToken_LoginAs_FailsOn_NotEnoughAccess(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Unauthenticated desc = Wrong credentials given")
+	assert.EqualError(t, err, "unauthenticated: Wrong credentials given")
 }
 
 // Get
@@ -332,7 +332,7 @@ func TestGet_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+	assert.EqualError(t, err, "not_found: Account not found or not enough Access Rights")
 }
 
 func TestGet_FailsOn_NotEnoughAccess(t *testing.T) {
@@ -355,7 +355,7 @@ func TestGet_FailsOn_NotEnoughAccess(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access Rights")
+	assert.EqualError(t, err, "permission_denied: Not enough Access Rights")
 }
 
 func TestGet_Success(t *testing.T) {
@@ -397,7 +397,7 @@ func TestListAccounts_FailsOn_ListQuery(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Failed to list accounts")
+	assert.EqualError(t, err, "internal: Failed to list accounts")
 }
 
 func TestListAccounts_Success(t *testing.T) {
@@ -604,7 +604,7 @@ func TestAccountUpdate_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, fmt.Sprintf("rpc error: code = PermissionDenied desc = No Access to Account %s", f.data.account.Uuid))
+	assert.EqualError(t, err, fmt.Sprintf("permission_denied: No Access to Account %s", f.data.account.Uuid))
 }
 
 func TestAccountUpdate_FailsOn_NewNS_AccessLevel(t *testing.T) {
@@ -633,7 +633,7 @@ func TestAccountUpdate_FailsOn_NewNS_AccessLevel(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Account has no Access to Namespace infinimesh")
+	assert.EqualError(t, err, "permission_denied: Account has no Access to Namespace infinimesh")
 }
 
 func TestAccountUpdate_FailsOn_UpdateDocument(t *testing.T) {
@@ -665,7 +665,7 @@ func TestAccountUpdate_FailsOn_UpdateDocument(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error while updating Account")
+	assert.EqualError(t, err, "internal: Error while updating Account")
 }
 
 func TestAccountUpdate_Success(t *testing.T) {
@@ -718,7 +718,7 @@ func TestAccountToggle_FailsOn_Get(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+	assert.EqualError(t, err, "not_found: Account not found or not enough Access Rights")
 }
 
 func TestAccountToggle_FailsOn_NotEnoughAccess(t *testing.T) {
@@ -740,7 +740,7 @@ func TestAccountToggle_FailsOn_NotEnoughAccess(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, fmt.Sprintf("rpc error: code = PermissionDenied desc = No Access to Account %s", f.data.account.Uuid))
+	assert.EqualError(t, err, fmt.Sprintf("permission_denied: No Access to Account %s", f.data.account.Uuid))
 }
 
 func TestAccountToggle_FailsOn_RepoToggle(t *testing.T) {
@@ -766,7 +766,7 @@ func TestAccountToggle_FailsOn_RepoToggle(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error while updating Account")
+	assert.EqualError(t, err, "internal: Error while updating Account")
 }
 
 func TestAccountToggle_Success(t *testing.T) {
@@ -813,7 +813,7 @@ func TestAccountDeletables_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+	assert.EqualError(t, err, "not_found: Account not found or not enough Access Rights")
 }
 
 func TestAccountDeletables_FailsOn_NotEnoughAccess(t *testing.T) {
@@ -835,7 +835,7 @@ func TestAccountDeletables_FailsOn_NotEnoughAccess(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access Rights", f.data.account.Uuid)
+	assert.EqualError(t, err, "permission_denied: Not enough Access Rights", f.data.account.Uuid)
 }
 
 func TestAccountDeletables_FailsOn_ListOwnedDeep(t *testing.T) {
@@ -861,7 +861,7 @@ func TestAccountDeletables_FailsOn_ListOwnedDeep(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting owned nodes", f.data.account.Uuid)
+	assert.EqualError(t, err, "internal: Error getting owned nodes", f.data.account.Uuid)
 }
 
 func TestAccountDeletables_Success(t *testing.T) {
@@ -904,7 +904,7 @@ func TestAccountDelete_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = NotFound desc = Account not found or not enough Access Rights")
+	assert.EqualError(t, err, "not_found: Account not found or not enough Access Rights")
 }
 
 func TestAccountDelete_FailsOn_NotEnoughAccess(t *testing.T) {
@@ -926,7 +926,7 @@ func TestAccountDelete_FailsOn_NotEnoughAccess(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access Rights")
+	assert.EqualError(t, err, "permission_denied: Not enough Access Rights")
 }
 
 func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
@@ -962,7 +962,7 @@ func TestAccountDelete_FailsOn_DeleteRecursive(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error while deleting Account")
+	assert.EqualError(t, err, "internal: Error while deleting Account")
 }
 
 func TestAccountDelete_Success(t *testing.T) {
@@ -1011,7 +1011,7 @@ func TestGetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting Account or not enough Access rights")
+	assert.EqualError(t, err, "not_found: Account not found or not enough Access Rights")
 }
 
 func TestGetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
@@ -1035,7 +1035,7 @@ func TestGetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
+	assert.EqualError(t, err, "permission_denied: Not enough Access rights to get credentials for this Account. Only Owner and Super-Admin can do this")
 }
 
 func TestGetCredentials_FailsOn_ListCredentials(t *testing.T) {
@@ -1062,7 +1062,7 @@ func TestGetCredentials_FailsOn_ListCredentials(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error listing Account's Credentials")
+	assert.EqualError(t, err, "internal: Error listing Account's Credentials")
 }
 
 func TestGetCredentials_Success(t *testing.T) {
@@ -1124,7 +1124,7 @@ func TestSetCredentials_FailsOn_AccessLevelAndGet(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error getting Account or not enough Access rights to set credentials for this Account")
+	assert.EqualError(t, err, "internal: Error getting Account or not enough Access rights to set credentials for this Account")
 }
 
 func TestSetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
@@ -1148,7 +1148,7 @@ func TestSetCredentials_FailsOn_NotEnoughAccessRights(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = PermissionDenied desc = Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
+	assert.EqualError(t, err, "permission_denied: Not enough Access rights to set credentials for this Account. Only Owner and Super-Admin can do this")
 }
 
 func TestSetCredentials_FailsOn_MakeCredentials(t *testing.T) {
@@ -1175,7 +1175,7 @@ func TestSetCredentials_FailsOn_MakeCredentials(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error setting Account's Credentials")
+	assert.EqualError(t, err, "internal: Error setting Account's Credentials")
 }
 
 func TestSetCredentials_FailsOn_SetCredentials(t *testing.T) {
@@ -1205,7 +1205,7 @@ func TestSetCredentials_FailsOn_SetCredentials(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Error setting Account's Credentials")
+	assert.EqualError(t, err, "internal: Error setting Account's Credentials")
 }
 
 func TestSetCredentials_Success(t *testing.T) {
