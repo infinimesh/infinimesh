@@ -35,11 +35,11 @@ func newCredentialsControllerFixture(t *testing.T) *credentialsControllerFixture
 	f := &credentialsControllerFixture{}
 	f.data.ctx = context.TODO()
 
-	f.mocks.db = &driver_mocks.MockDatabase{}
-	f.mocks.col = &driver_mocks.MockCollection{}
-	f.mocks.edge = &driver_mocks.MockCollection{}
+	f.mocks.db = driver_mocks.NewMockDatabase(t)
+	f.mocks.col = driver_mocks.NewMockCollection(t)
+	f.mocks.edge = driver_mocks.NewMockCollection(t)
 
-	g := &driver_mocks.MockGraph{}
+	g := driver_mocks.NewMockGraph(t)
 	f.mocks.db.EXPECT().Graph(f.data.ctx, schema.CREDENTIALS_GRAPH.Name).
 		Return(g, nil)
 
@@ -291,7 +291,7 @@ func TestSetCredentials_Update_FailsOn_UpdateDocument(t *testing.T) {
 
 	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = InvalidArgument desc = Error updating Credentials of type")
+	assert.EqualError(t, err, "invalid_argument: Error updating Credentials of type")
 }
 
 func TestSetCredentials_Update_Success(t *testing.T) {
@@ -317,7 +317,7 @@ func TestSetCredentials_FailsOn_CreateDocument(t *testing.T) {
 
 	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Couldn't create credentials")
+	assert.EqualError(t, err, "internal: Couldn't create credentials")
 }
 
 func TestSetCredentials_FailsOn_CreateEdge(t *testing.T) {
@@ -335,7 +335,7 @@ func TestSetCredentials_FailsOn_CreateEdge(t *testing.T) {
 
 	err := f.ctrl.SetCredentials(f.data.ctx, f.data.acc, &credentials.StandardCredentials{})
 	assert.Error(t, err)
-	assert.EqualError(t, err, "rpc error: code = Internal desc = Couldn't assign credentials")
+	assert.EqualError(t, err, "internal: Couldn't assign credentials")
 }
 
 func TestSetCredentials_Success(t *testing.T) {
