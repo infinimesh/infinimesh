@@ -63,6 +63,7 @@ import { useNSStore } from "@/store/namespaces";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
 import usePaginationHistory from "@/hooks/usePaginationHistory";
+import { useAccountsStore } from "@/store/accounts";
 
 const RefreshOutline = defineAsyncComponent(() =>
   import("@vicons/ionicons5/RefreshOutline")
@@ -184,6 +185,7 @@ const { console_services } = storeToRefs(app);
 
 const { selected, namespaces } = storeToRefs(useNSStore());
 const plugins = usePluginsStore();
+const accs = useAccountsStore();
 
 async function load_plugin() {
   plugins.current = false;
@@ -214,6 +216,10 @@ watch(page, () => {
 
 function handleRefresh() {
   store.fetchDevicesWithPagination();
+}
+
+if (Object.keys(accs.accounts).length == 0) {
+  accs.fetchAccounts()
 }
 
 load_plugin();
