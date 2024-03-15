@@ -62,6 +62,7 @@ import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
+import usePaginationHistory from "@/hooks/usePaginationHistory";
 import { useAccountsStore } from "@/store/accounts";
 
 const RefreshOutline = defineAsyncComponent(() =>
@@ -87,6 +88,8 @@ const {
   page,
   total,
 } = storeToRefs(store);
+
+usePaginationHistory('devices', { limit: limit }, (newState) => limit.value = newState.limit)
 
 const devices = computed(() => Object.values(devicesMap.value));
 
