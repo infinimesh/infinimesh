@@ -77,12 +77,7 @@ const EyeOffOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOf
 const EyeOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOutline"))
 
 const show = ref(false);
-watch(
-  () => show.value,
-  (val) => {
-    val && reset();
-  }
-);
+watch(show, (val) => { if (val) reset() });
 
 const nss = useNSStore();
 const namespaces = computed(() => {

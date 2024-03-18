@@ -143,12 +143,7 @@ const PluginCard = defineAsyncComponent(() => import("./plugin-card.vue"))
 
 const show = ref(false);
 
-watch(
-    () => show.value,
-    (val) => {
-        val && reset();
-    }
-);
+watch(show, (val) => { if (val) reset() });
 
 const form = ref();
 const model = ref({

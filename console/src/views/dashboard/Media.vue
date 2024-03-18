@@ -41,7 +41,7 @@
           </div>
           <n-p style="font-size: 16px">
             Limit is:
-            <n-number-animation :from="0" :to="limit[0]" /> {{ limit[1] }}
+            <n-number-animation :from="0" :to="+limit[0]" /> {{ limit[1] }}
           </n-p>
           <n-text style="font-size: 16px">
             Click or drag a file to this area to upload
