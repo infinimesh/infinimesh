@@ -1,5 +1,5 @@
 <template>
-  <n-space align="center" justify="center" class="fullscreen">
+  <n-space align="center" justify="center" class="fullscreen" :wrap-item="false">
     <LoginCard />
   </n-space>
 </template>
@@ -11,7 +11,9 @@ import LoginCard from "@/components/login-card.vue";
 
 <style>
 .fullscreen {
-  height: 99vh !important;
-  width: 99vw !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  padding: 15px;
+  box-sizing: border-box;
 }
 </style>

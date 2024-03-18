@@ -25,7 +25,13 @@
                 </n-form-item>
             </n-tab-pane>
             <n-tab-pane name="oauth" tab="OAuth 2.0">
-                <n-button round type="primary" style="margin-bottom: 20px" @click="linkOauth">GitHub</n-button>
+                <oauth-login
+                    type="link"
+                    style="margin-bottom: 20px"
+                    :button-props="{ round: true, type: 'primary' }"
+                    :space-props="{ wrapItem: true }"
+                    @message="message[$event.type]($event.text)"
+                />
             </n-tab-pane>
         </n-tabs>
     </n-form>
@@ -45,6 +51,7 @@ import { useAccountsStore } from "@/store/accounts";
 
 const EyeOffOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOffOutline"))
 const EyeOutline = defineAsyncComponent(() => import("@vicons/ionicons5/EyeOutline"))
+const OauthLogin = defineAsyncComponent(() => import("@/components/oauth-login.vue"))
 
 const as = useAppStore();
 const store = useAccountsStore();
@@ -86,27 +93,4 @@ async function handleSubmit() {
 }
 
 onMounted(default_data)
-
-async function linkOauth (type) {
-  bar.start()
-
-  try {
-    await as.http.get(
-      `/oauth/${type}/login`,
-      { params: {
-        method: "link",
-        state: Math.random().toString(16).slice(2),
-        redirect: `https://${location.host}/login`
-      } }
-    )
-
-    message.success("Done")
-    bar.finish()
-  } catch (err) {
-    message.error(`${err.code}: ${(err.message ?? "Unexpected Error")}`)
-    console.error(err)
-    bar.error()
-  }
-}
-
 </script>

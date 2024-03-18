@@ -1,41 +1,45 @@
 <template>
   <n-tooltip :show="min_dpressed" placement="bottom">
     <template #trigger>
-      <n-card embedded :bordered="false" hoverable size="huge" :title="platform"
-        header-style="font-family: 'Exo 2', sans-serif; font-size: 2vh" class="login-card">
-        <template #header-extra>
-          <n-space>
-            <theme-picker />
-            <n-button v-if="type !== 'oauth'" type="info" ghost @click="login">Login</n-button>
-          </n-space>
-        </template>
+      <n-card
+        embedded
+        hoverable
+        size="huge"
+        class="login-card"
+        header-style="font-family: 'Exo 2', sans-serif; font-size: 2rem; padding-bottom: 10px"
+        :title="platform"
+        :bordered="false"
+      >
+        <template #header-extra> <theme-picker /> </template>
         <n-space vertical>
-          <template v-if="type !== 'oauth'">
-            <n-input
-              v-model:value="username"
-              placeholder="Username"
-              @focus="handleDBlock(true)"
-              @blur="handleDBlock(false)"
-            />
-            <n-input
-              v-model:value="password"
-              type="password"
-              placeholder="Password"
-              show-password-on="mousedown"
-              @focus="handleDBlock(true)"
-              @blur="handleDBlock(false)"
-            />
-            <n-alert :title="error.title" type="error" v-if="error" />
-          </template>
-          <n-button v-else ghost type="primary" @click="oauthLogin('github')">GitHub</n-button>
-
           <n-space justify="center">
             <n-radio-group v-model:value="type" name="credentials_type">
               <n-radio-button value="standard" label="Standard" />
               <n-radio-button value="ldap" label="LDAP" />
-              <n-radio-button value="oauth" label="OAuth 2.0" />
             </n-radio-group>
           </n-space>
+
+          <n-input
+            v-model:value="username"
+            placeholder="Username"
+            @focus="handleDBlock(true)"
+            @blur="handleDBlock(false)"
+            @keyup.enter="login"
+          />
+          <n-input
+            v-model:value="password"
+            type="password"
+            placeholder="Password"
+            show-password-on="mousedown"
+            @focus="handleDBlock(true)"
+            @blur="handleDBlock(false)"
+            @keyup.enter="login"
+          />
+          <n-alert :title="error.title ?? '[Error]: Unknown'" type="error" v-if="error" />
+          <n-button ghost type="info" style="width: 100%" @click="login">Login</n-button>
+
+          <n-divider style="margin-top: 10px; margin-bottom: 5px">Or</n-divider>
+          <oauth-login @success="success = $event" @error="error = $event" />
 
           <n-alert title="Success! Redirecting..." type="success" v-if="success" />
 
@@ -55,7 +59,7 @@ import { ref, onMounted, defineAsyncComponent } from "vue";
 import {
   NCard, NSpace, NInput,
   NButton, NRadioButton,
-  NAlert, NRadioGroup,
+  NAlert, NRadioGroup, NDivider,
   useLoadingBar, NTooltip
 } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
@@ -64,7 +68,8 @@ import { useAccountsStore } from "@/store/accounts";
 
 import { UAParser } from "ua-parser-js"
 
-const ThemePicker = defineAsyncComponent(() => import("@/components/core/theme-picker.vue"))
+const ThemePicker = defineAsyncComponent(() => import('@/components/core/theme-picker.vue'))
+const OauthLogin = defineAsyncComponent(() => import('@/components/oauth-login.vue'))
 
 const platform = PLATFORM_NAME
 
@@ -81,31 +86,6 @@ const success = ref(false);
 const alert = ref(false);
 
 const bar = useLoadingBar();
-
-async function oauthLogin (type) {
-  success.value = false
-  error.value = false
-  alert.value = false
-  bar.start()
-
-  try {
-    await store.http.get(
-      `/oauth/${type}/login`,
-      { params: {
-        method: 'sign_in',
-        state: Math.random().toString(16).slice(2),
-        redirect: `https://${location.host}/login`
-      } }
-    )
-
-    success.value = true
-    bar.finish()
-  } catch (err) {
-    console.error(err)
-    error.value = true
-    bar.error()
-  }
-}
 
 onMounted(() => {
   if (route.query.token) {
@@ -222,7 +202,7 @@ onMounted(() => {
 
 <style>
 .login-card {
-  min-width: 30vw;
-  max-width: 90vw;
+  min-width: 345px;
+  max-width: 600px;
 }
 </style>
