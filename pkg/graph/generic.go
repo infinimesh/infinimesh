@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	accpb "github.com/infinimesh/proto/node/accounts"
@@ -25,6 +26,7 @@ type ListQueryResult[T InfinimeshProtobufEntity] struct {
 
 type InfinimeshGenericActionsRepo[T InfinimeshProtobufEntity] interface {
 	ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error)
+	UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, uuid string) error
 }
 
 type infinimeshGenericActionsRepo[T InfinimeshProtobufEntity] struct {
@@ -127,4 +129,27 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	}
 
 	return &resp, nil
+}
+
+const updateModifyDate = `
+LET ts_seconds = FLOOR(DATE_NOW() / 1000)
+UPDATE @uuid WITH { last_updated: { "seconds": ts_seconds } } IN @@kind`
+
+func (r *infinimeshGenericActionsRepo[T]) UpdateDeviceModifyDate(ctx context.Context, log *zap.Logger, uuid string) error {
+
+	bindVars := map[string]interface{}{
+		"uuid":  uuid,
+		"@kind": schema.DEVICES_COL,
+	}
+
+	cr, err := r.db.Query(ctx, updateModifyDate, bindVars)
+
+	if err != nil {
+		log.Debug("Error while executing query", zap.Error(err))
+		return err
+	}
+
+	defer cr.Close()
+
+	return nil
 }

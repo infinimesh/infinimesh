@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 
 	redis "github.com/go-redis/redis/v8"
+	"github.com/infinimesh/infinimesh/pkg/graph"
 	"github.com/infinimesh/infinimesh/pkg/pubsub"
+	devpb "github.com/infinimesh/proto/node/devices"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,16 +35,18 @@ import (
 type ShadowServiceServer struct {
 	pb.UnimplementedShadowServiceServer
 
-	log *zap.Logger
-	rdb redis.Cmdable
-	ps  pubsub.PubSub
+	log  *zap.Logger
+	rdb  redis.Cmdable
+	ps   pubsub.PubSub
+	repo graph.InfinimeshGenericActionsRepo[*devpb.Device]
 }
 
-func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps pubsub.PubSub) *ShadowServiceServer {
+func NewShadowServiceServer(log *zap.Logger, rdb redis.Cmdable, ps pubsub.PubSub, repo graph.InfinimeshGenericActionsRepo[*devpb.Device]) *ShadowServiceServer {
 	return &ShadowServiceServer{
-		log: log.Named("shadow"),
-		rdb: rdb,
-		ps:  ps,
+		log:  log.Named("shadow"),
+		rdb:  rdb,
+		ps:   ps,
+		repo: repo,
 	}
 }
 
