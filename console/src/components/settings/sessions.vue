@@ -152,7 +152,7 @@ const now = ref(new Date())
 setInterval(() => now.value = new Date(), 1000)
 
 function relative_time({ timestamp }) {
-    timestamp = new Date(timestamp)
+    timestamp = new Date(timestamp.nanos / 1000 + Number(timestamp.seconds) * 1000)
     let label = timestamp < now.value.getTime() ? relative_time_past(timestamp) : relative_time_future(timestamp)
 
     return h(NTooltip, { trigger: 'hover' }, {
