@@ -205,8 +205,8 @@ async function load_plugin() {
   plugins.current = data;
 }
 
-watch(selected, [load_plugin, () => (page.value = 1)]);
-watch(limit, () => (page.value = 1));
+watch(limit, () => { page.value = 1 });
+watch(selected, () => { page.value = 1; load_plugin() });
 watch([selected, limit, page], store.fetchDevicesWithPagination);
 
 // Scroll to top when page changes
