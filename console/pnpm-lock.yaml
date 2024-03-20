@@ -6,14 +6,14 @@ settings:
 
 dependencies:
   '@bufbuild/protobuf':
-    specifier: ^1.7.2
-    version: 1.7.2
+    specifier: ^1.8.0
+    version: 1.8.0
   '@connectrpc/connect':
     specifier: ^1.4.0
-    version: 1.4.0(@bufbuild/protobuf@1.7.2)
+    version: 1.4.0(@bufbuild/protobuf@1.8.0)
   '@connectrpc/connect-web':
     specifier: ^1.4.0
-    version: 1.4.0(@bufbuild/protobuf@1.7.2)(@connectrpc/connect@1.4.0)
+    version: 1.4.0(@bufbuild/protobuf@1.8.0)(@connectrpc/connect@1.4.0)
   '@vicons/ionicons5':
     specifier: ^0.12.0
     version: 0.12.0
@@ -130,26 +130,26 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@bufbuild/protobuf@1.7.2:
-    resolution: {integrity: sha512-i5GE2Dk5ekdlK1TR7SugY4LWRrKSfb5T1Qn4unpIMbfxoeGKERKQ59HG3iYewacGD10SR7UzevfPnh6my4tNmQ==}
+  /@bufbuild/protobuf@1.8.0:
+    resolution: {integrity: sha512-qR9FwI8QKIveDnUYutvfzbC21UZJJryYrLuZGjeZ/VGz+vXelUkK+xgkOHsvPEdYEdxtgUUq4313N8QtOehJ1Q==}
     dev: false
 
-  /@connectrpc/connect-web@1.4.0(@bufbuild/protobuf@1.7.2)(@connectrpc/connect@1.4.0):
+  /@connectrpc/connect-web@1.4.0(@bufbuild/protobuf@1.8.0)(@connectrpc/connect@1.4.0):
     resolution: {integrity: sha512-13aO4psFbbm7rdOFGV0De2Za64DY/acMspgloDlcOKzLPPs0yZkhp1OOzAQeiAIr7BM/VOHIA3p8mF0inxCYTA==}
     peerDependencies:
       '@bufbuild/protobuf': ^1.4.2
       '@connectrpc/connect': 1.4.0
     dependencies:
-      '@bufbuild/protobuf': 1.7.2
-      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.7.2)
+      '@bufbuild/protobuf': 1.8.0
+      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.8.0)
     dev: false
 
-  /@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.7.2):
+  /@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.8.0):
     resolution: {integrity: sha512-vZeOkKaAjyV4+RH3+rJZIfDFJAfr+7fyYr6sLDKbYX3uuTVszhFe9/YKf5DNqrDb5cKdKVlYkGn6DTDqMitAnA==}
     peerDependencies:
       '@bufbuild/protobuf': ^1.4.2
     dependencies:
-      '@bufbuild/protobuf': 1.7.2
+      '@bufbuild/protobuf': 1.8.0
     dev: false
 
   /@css-render/plugin-bem@0.15.12(css-render@0.15.12):
@@ -1312,9 +1312,9 @@ packages:
   /infinimesh-proto@3.1.5-7:
     resolution: {integrity: sha512-iLaDGVxP1x8C7nVeAb6Q1VC3Cu076SVDtI2Lu52XvwiUgXR3beJ8zM6rONB5tHO1OmRl9Kx68nQzigz+Ih+jxg==}
     dependencies:
-      '@bufbuild/protobuf': 1.7.2
-      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.7.2)
-      '@connectrpc/connect-web': 1.4.0(@bufbuild/protobuf@1.7.2)(@connectrpc/connect@1.4.0)
+      '@bufbuild/protobuf': 1.8.0
+      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.8.0)
+      '@connectrpc/connect-web': 1.4.0(@bufbuild/protobuf@1.8.0)(@connectrpc/connect@1.4.0)
       uuid: 9.0.1
     dev: false
 

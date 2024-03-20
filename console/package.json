@@ -10,7 +10,7 @@
     "vitest-ui": "vitest --ui"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.7.2",
+    "@bufbuild/protobuf": "^1.8.0",
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-web": "^1.4.0",
     "@vicons/ionicons5": "^0.12.0",
