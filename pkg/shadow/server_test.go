@@ -40,6 +40,7 @@ type shadowServiceServerFixture struct {
 }
 
 func newShadowServiceServerFixture(t *testing.T, args ...bool) *shadowServiceServerFixture {
+	t.Parallel()
 	f := &shadowServiceServerFixture{}
 
 	core, observer := observer.New(zap.DebugLevel)

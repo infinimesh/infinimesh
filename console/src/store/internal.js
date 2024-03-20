@@ -1,21 +1,33 @@
-import { useAppStore } from "@/store/app";
-import { defineStore } from "pinia";
+import { ref, computed } from "vue"
+import { defineStore } from "pinia"
+import { createPromiseClient } from "@connectrpc/connect"
+import { createConnectTransport } from "@connectrpc/connect-web"
+import { InternalService } from "infinimesh-proto/build/es/node/node_connect"
+import { EmptyMessage } from "infinimesh-proto/build/es/node/node_pb"
+import { useAppStore } from "@/store/app.js"
 
-const as = useAppStore();
+export const useIStore = defineStore("internal", () => {
+  const appStore = useAppStore()
 
-export const useIStore = defineStore("internal", {
-    state: () => ({
-        ldap_providers: {}
-    }),
+  const internalApi = computed(() => {
+    return createPromiseClient(
+      InternalService,
+      import.meta.env.VITE_MOCK
+        ? {}
+        : createConnectTransport(appStore.transport_options)
+    )
+  })
+  const ldap_providers = ref({})
 
-    actions: {
-        async getLDAPProviders() {
-            try {
-                const { data } = await as.http.get("/i/ldapp");
-                this.ldap_providers = data.providers
-            } catch (e) {
-                console.warn("Error while getting LDAP providers", e)
-            }
-        }
+  return {
+    async getLDAPProviders() {
+      try {
+        const { providers } = await internalApi.value.getLDAPProviders(new EmptyMessage())
+
+        ldap_providers.value = providers
+      } catch (error) {
+        console.warn("Error while getting LDAP providers", error)
+      }
     }
+  }
 })

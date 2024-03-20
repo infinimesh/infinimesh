@@ -69,6 +69,7 @@
           <td>
             <n-space>
               <n-tooltip trigger="hover">
+
                 <template #trigger>
                   <n-button tertiary circle :type="account.enabled ? 'error' : 'success'"
                     @click="e => handleToggleAccountEnabled(account)">
@@ -84,6 +85,7 @@
               </n-tooltip>
 
               <n-tooltip v-if="access_lvl_conv(account) > 3 || access_role_conv(account) == Role.OWNER" trigger="hover">
+
                 <template #trigger>
                   <n-button type="warning" @click="() => { active_account = account; show_mc = true }" tertiary circle>
                     <template #icon>
@@ -130,6 +132,7 @@ import { useNSStore } from "@/store/namespaces";
 import { storeToRefs } from "pinia";
 
 import { access_lvl_conv, access_role_conv } from "@/utils/access";
+import { EventKind } from "infinimesh-proto/build/es/eventbus/eventbus_pb";
 
 const CheckmarkOutline = defineAsyncComponent(() => import("@vicons/ionicons5/CheckmarkOutline"))
 const BanOutline = defineAsyncComponent(() => import("@vicons/ionicons5/BanOutline"))
@@ -174,6 +177,8 @@ async function handleDelete(uuid) {
     message.success("Account successfuly deleted")
   } catch (e) {
     message.error("Failed to delete account: " + e.message)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -216,4 +221,13 @@ async function handleMove(account, [ns, resolve, reject]) {
     reject(e)
   }
 }
+
+//listen events
+as.event_bus.subscribe(EventKind.ACCOUNT_MOVE, store.onAccountMove);
+
+as.event_bus.subscribe(EventKind.ACCOUNT_DELETE, store.onAccountDelete);
+
+as.event_bus.subscribe(EventKind.ACCOUNT_CREATE, store.onAccountCreate);
+
+as.event_bus.subscribe(EventKind.ACCOUNT_UPDATE, store.onAccountUpdate);
 </script>

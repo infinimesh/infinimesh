@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH
+Copyright © 2018-2024 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,12 +44,14 @@ var (
 	corsAllowed []string
 	secure      bool
 	with_block  bool
+	port        string
 )
 
 func init() {
 	viper.AutomaticEnv()
 	log = logger.NewLogger()
 
+	viper.SetDefault("PORT", "8000")
 	viper.SetDefault("CORS_ALLOWED", []string{"*"})
 	viper.SetDefault("APISERVER_HOST", "proxy:8000")
 	viper.SetDefault("SECURE", false)
@@ -61,6 +64,7 @@ func init() {
 	}
 	secure = viper.GetBool("SECURE")
 	with_block = viper.GetBool("WITH_BLOCK")
+	port = viper.GetString("PORT")
 }
 
 func main() {
@@ -147,6 +151,6 @@ func main() {
 		handlers.AllowedMethods([]string{"GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS", "HEAD"}),
 	)(gwmux)
 
-	log.Info("Serving gRPC-Gateway on http://0.0.0.0:8000")
-	log.Fatal("Failed to Listen and Serve Gateway-Server", zap.Error(http.ListenAndServe(":8000", wsproxy.WebsocketProxy(handler))))
+	log.Info("Serving gRPC-Gateway", zap.String("port", port))
+	log.Fatal("Failed to Listen and Serve Gateway-Server", zap.Error(http.ListenAndServe(fmt.Sprintf(":%s", port), wsproxy.WebsocketProxy(handler))))
 }

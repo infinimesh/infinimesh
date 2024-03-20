@@ -12,6 +12,14 @@ packages:
     github.com/infinimesh/infinimesh/pkg/graph:
         interfaces:
             InfinimeshCommonActionsRepo:
+            InfinimeshGenericActionsRepo:
+            InfinimeshController:
+            EventBusService:
+
+    github.com/infinimesh/infinimesh/pkg/credentials:
+        interfaces:
+            CredentialsController:
+
 
     # ProtoBuf Packages
     github.com/infinimesh/proto/node:
@@ -44,6 +52,7 @@ packages:
             Database:
             Collection:
             Cursor:
+            Graph:
 
     github.com/infinimesh/infinimesh/pkg/pubsub:
         interfaces:

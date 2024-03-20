@@ -15,7 +15,7 @@ describe("check_offline", () => {
   test("check is online", () => {
     const offlineSpy = vi.spyOn(check_offline_store, "offline");
 
-    check_offline(new Error("Another error"), check_offline_store);
+    check_offline({}, new Error("Another error"), check_offline_store);
 
     expect(offlineSpy).not.toHaveBeenCalled();
   });
@@ -23,7 +23,11 @@ describe("check_offline", () => {
   test("check is offline", () => {
     const offlineSpy = vi.spyOn(check_offline_store, "offline");
 
-    check_offline(new Error("Failed to fetch"), check_offline_store);
+    check_offline(
+      { method: { name: "Get" }, message: { uuid: "me" } },
+      new Error("Failed to fetch"),
+      check_offline_store
+    );
 
     expect(offlineSpy).toHaveBeenCalledOnce();
   });
@@ -53,7 +57,7 @@ describe("check_token_expired", () => {
     const expiredSpy = vi.spyOn(check_token_expired_store, "logout");
 
     check_token_expired(
-      new ConnectError("Invalid token format", Code.Unknown),
+      new ConnectError("Session is expired, revoked or invalid", Code.Unknown),
       check_token_expired_store
     );
 

@@ -93,12 +93,7 @@ function default_data() {
     })
 }
 
-watch(
-    () => props.show,
-    () => {
-        reset();
-    }
-);
+watch(() => props.show, reset);
 
 const message = useMessage();
 const bar = useLoadingBar();

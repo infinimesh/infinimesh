@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2018-2024 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ type PluginsController struct {
 	ns_ctrl *NamespacesController
 
 	ica_repo InfinimeshCommonActionsRepo
+	repo     InfinimeshGenericActionsRepo[*pb.Plugin]
 
 	db driver.Database
 }
@@ -74,10 +75,12 @@ type PluginsController struct {
 func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsController {
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
+	log = log.Named("PluginsController")
 	return &PluginsController{
-		log: log.Named("PluginsController"), col: col, db: db,
-		ns_ctrl:  NewNamespacesController(log, db),
-		ica_repo: NewInfinimeshCommonActionsRepo(db),
+		log: log, col: col, db: db,
+		ns_ctrl:  NewNamespacesController(log, db, nil),
+		ica_repo: NewInfinimeshCommonActionsRepo(log, db),
+		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }
 
@@ -174,6 +177,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 	r := req.Msg
 
 	var cr driver.Cursor
+
 	var err error
 
 	if ValidateRoot(ctx) {
@@ -182,7 +186,15 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 		})
 
 	} else if r.Namespace != nil && *r.Namespace != "" {
-		cr, err = c.ica_repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace), schema.PLUGINS_COL)
+		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace))
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+		}
+
+		return connect.NewResponse(&pb.Plugins{
+			Pool: result.Result,
+		}), nil
+
 	} else {
 		cr, err = c.db.Query(ctx, listAllPublicPluginsQuery, map[string]interface{}{
 			"@plugins": schema.PLUGINS_COL,

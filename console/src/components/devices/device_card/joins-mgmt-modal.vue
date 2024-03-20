@@ -151,9 +151,6 @@ function handleSubmit(close) {
 }
 
 const accs = useAccountsStore()
-if (Object.keys(accs.accounts).length == 0) {
-    accs.fetchAccounts()
-}
 
 const accounts = computed(() => Object.values(accs.accounts).map(acc => {
     return {

@@ -35,6 +35,7 @@ func newSessionsFixture(
 	protoUnmarshal func(b []byte, m protoreflect.ProtoMessage) error,
 ) (f *sessionsFixture) {
 
+	t.Parallel()
 	f = &sessionsFixture{}
 	f.mocks.rdb = redis_mocks.NewMockCmdable(t)
 

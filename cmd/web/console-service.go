@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH
+Copyright © 2018-2024 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,6 +55,15 @@ func init_cs(log *zap.Logger) {
 		log.Info("Chatting service is enabled")
 		enabled["chatting"] = chatting
 		SERVICES_ENABLED_MAP["chatting"] = chatting
+	}
+
+	viper.SetDefault("TIMESERIES", "")
+	timeseries := viper.GetString("TIMESERIES")
+	log.Debug("TIMESERIES", zap.String("value", timeseries))
+	if timeseries != "" {
+		log.Info("Timeseries service is enabled")
+		enabled["timeseries"] = timeseries
+		SERVICES_ENABLED_MAP["timeseries"] = timeseries
 	}
 
 	var err error

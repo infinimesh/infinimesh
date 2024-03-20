@@ -28,8 +28,40 @@ var NamespaceFilterKey = GraphContextKey[string]{
 	Default: "",
 }
 
+var LimitKey = GraphContextKey[int64]{
+	Key:     "limit",
+	Default: 0,
+}
+
+var OffsetKey = GraphContextKey[int64]{
+	Key:     "offset",
+	Default: 0,
+}
+
 func WithNamespaceFilter(ctx context.Context, ns string) context.Context {
 	return context.WithValue(ctx, NamespaceFilterKey, ns)
+}
+
+func WithLimit(ctx context.Context, limit int64) context.Context {
+	return context.WithValue(ctx, LimitKey, limit)
+}
+
+func WithOffset(ctx context.Context, offset int64) context.Context {
+	return context.WithValue(ctx, OffsetKey, offset)
+}
+
+func LimitValue(ctx context.Context) int64 {
+	if v := ctx.Value(LimitKey); v != nil {
+		return v.(int64)
+	}
+	return LimitKey.Default
+}
+
+func OffsetValue(ctx context.Context) int64 {
+	if v := ctx.Value(OffsetKey); v != nil {
+		return v.(int64)
+	}
+	return OffsetKey.Default
 }
 
 func NSFilterValue(ctx context.Context) string {

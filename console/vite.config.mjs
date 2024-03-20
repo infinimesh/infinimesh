@@ -14,19 +14,15 @@ export default defineConfig(({ command }) => {
     },
     define: {
       STATE_MAX_ROWS: "10",
+      __INFINIMESH_VERSION_TAG__: !process.env.INFINIMESH_VERSION_TAG ? "'development'" :`'${process.env.INFINIMESH_VERSION_TAG}'`,
+      __INFINIMESH_COMMIT_HASH__: !process.env.INFINIMESH_COMMIT_HASH ? "'unstaged'" :`'${process.env.INFINIMESH_COMMIT_HASH}'`,
     },
     build: {
       chunkSizeWarningLimit: 2000,
     },
   };
 
-  if (command == "build") {
-    conf.define.INFINIMESH_VERSION_TAG = `'${process.env.INFINIMESH_VERSION_TAG}'`;
-    if (!process.env.INFINIMESH_VERSION_TAG)
-      conf.define.INFINIMESH_VERSION_TAG = "development";
-
-    console.log(`Using version tag: ${conf.define.INFINIMESH_VERSION_TAG}`);
-  }
+  console.log(`Using version tag: ${conf.define.__INFINIMESH_VERSION_TAG__}`);
 
   return conf;
 });

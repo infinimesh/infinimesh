@@ -1,5 +1,5 @@
 /*
-Copyright © 2018-2023 Infinite Devices GmbH
+Copyright © 2018-2024 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ func main() {
 		_ = log.Sync()
 	}()
 
+	log.Debug("Debug logs enabled")
 	log.Info("Starting MQTT Bridge")
 
 	http.Handle("/metrics", promhttp.Handler())

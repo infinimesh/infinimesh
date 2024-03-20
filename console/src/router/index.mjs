@@ -78,6 +78,14 @@ const routes = [
         }
       },
       {
+        path: "ts",
+        name: "TimeSeries",
+        component: () => import("@/views/dashboard/Timeseries.vue"),
+        meta: {
+          title: "TimeSeries",
+        }
+      },
+      {
         path: "plugins",
         name: "Plugins",
         component: () => import("@/views/dashboard/Plugins.vue"),

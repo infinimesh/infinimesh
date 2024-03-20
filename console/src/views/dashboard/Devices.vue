@@ -1,12 +1,14 @@
 <template>
   <n-spin :show="loading">
     <n-flex>
-      <n-grid item-responsive y-gap="10" x-gap="10" style="width: 100%;">
+      <n-grid item-responsive y-gap="10" x-gap="10" style="width: 100%">
         <n-grid-item span="24 500:14 600:12 1000:12">
           <n-space justify="space-between" align="flex-end">
-            <n-h1 prefix="bar" align-text type="info" style="margin: 0;">
+            <n-h1 prefix="bar" align-text type="info" style="margin: 0">
               <n-text type="info"> Devices </n-text>
-              ( <n-number-animation :from="0" :to="filteredDevices().length || 0" /> )
+              (
+              <n-number-animation :from="0" :to="filteredDevices().length || 0" />
+              )
             </n-h1>
             <n-button strong secondary round type="info" @click="handleRefresh">
               <template #icon>
@@ -19,82 +21,112 @@
           </n-space>
         </n-grid-item>
         <n-grid-item span="24 300:24 500:10 600:12 1000:12">
-          <n-space justify="end" align="flex-end" style="height: 100%;">
+          <n-space justify="end" align="flex-end" style="height: 100%">
             <device-create />
             <device-register v-if="console_services.handsfree != undefined" />
           </n-space>
         </n-grid-item>
       </n-grid>
-      <n-select
-        style="width: 92.5vw; min-width: 640px"
-        v-model:value="filterTerm"
-        tag
-        filterable
-        multiple
-        placeholder="Filter devices eg. :uuid:abc"
-        :options="filterDeviceOptions"
-        :show-arrow="false"
-        class="filter-input"
-      />
+      <n-select style="width: 92.5vw; min-width: 640px" v-model:value="filterTerm" tag filterable multiple
+        placeholder="Filter devices eg. :uuid:abc" :options="filterDeviceOptions" :show-arrow="false"
+        class="filter-input" />
     </n-flex>
-    <devices-pool :devices="filteredDevices()" :show_ns="show_ns" @refresh="() => store.fetchDevices(true, true)" />
+    <n-flex vertical align="center" size="large">
+      <devices-pool :devices="filteredDevices()" :show_ns="show_ns" @refresh="handleRefresh()" />
+
+      <n-pagination v-model:page="page" v-model:page-size="limit" :disabled="loading" :item-count="total"
+        :page-sizes="[10, 20, 30, 40]" show-size-picker />
+    </n-flex>
   </n-spin>
 </template>
 
 <script setup>
-import { defineAsyncComponent, watch, ref } from "vue"
-import { NSpin, NH1, NText, NIcon, NButton, NGrid, NGridItem, NSpace, NNumberAnimation, NSelect, NFlex } from "naive-ui";
+import { defineAsyncComponent, watch, ref, computed } from "vue";
+import {
+  NSpin,
+  NH1,
+  NText,
+  NIcon,
+  NButton,
+  NGrid,
+  NGridItem,
+  NSpace,
+  NNumberAnimation,
+  NSelect,
+  NFlex,
+  NPagination,
+} from "naive-ui";
 
 import { useAppStore } from "@/store/app";
 import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
+import usePaginationHistory from "@/hooks/usePaginationHistory";
+import { useAccountsStore } from "@/store/accounts";
 
-const RefreshOutline = defineAsyncComponent(() => import("@vicons/ionicons5/RefreshOutline"))
-const DevicesPool = defineAsyncComponent(() => import("@/components/devices/pool.vue"))
+const RefreshOutline = defineAsyncComponent(() =>
+  import("@vicons/ionicons5/RefreshOutline")
+);
+const DevicesPool = defineAsyncComponent(() =>
+  import("@/components/devices/pool.vue")
+);
 
-const DeviceCreate = defineAsyncComponent(() => import("@/components/devices/create-drawer.vue"))
-const DeviceRegister = defineAsyncComponent(() => import("@/components/devices/register-modal.vue"))
-
+const DeviceCreate = defineAsyncComponent(() =>
+  import("@/components/devices/create-drawer.vue")
+);
+const DeviceRegister = defineAsyncComponent(() =>
+  import("@/components/devices/register-modal.vue")
+);
 
 const store = useDevicesStore();
-const { loading, devices_ns_filtered: devices, show_ns } = storeToRefs(store);
+const {
+  loading,
+  devices: devicesMap,
+  show_ns,
+  limit,
+  page,
+  total,
+} = storeToRefs(store);
+
+usePaginationHistory('devices', { limit: limit }, (newState) => limit.value = newState.limit)
+
+const devices = computed(() => Object.values(devicesMap.value));
 
 const filterTerm = ref([]);
 const filterDeviceOptions = [
   {
     label: ":uuid:",
     value: ":uuid:",
-    disabled: true
+    disabled: true,
   },
   {
     label: ":enabled:",
     value: ":enabled:",
-    disabled: true
+    disabled: true,
   },
   {
     label: ":tag:",
     value: ":tag:",
-    disabled: true
+    disabled: true,
   },
   {
     label: ":title:",
     value: ":title:",
-    disabled: true
+    disabled: true,
   },
   {
     label: ":namespace:",
     value: ":namespace:",
-    disabled: true
-  }
-]
+    disabled: true,
+  },
+];
 
 function parseFilterText() {
   const filters = {};
   const parts = filterTerm.value;
-  parts.forEach(part => {
-    const [key, value] = part.split(':').filter(String);
+  parts.forEach((part) => {
+    const [key, value] = part.split(":").filter(String);
     if (key && value) {
       filters[key] = value;
     }
@@ -103,32 +135,32 @@ function parseFilterText() {
 }
 
 function matchFilterDevice(device, filters) {
-  for(let key in filters) {
+  for (let key in filters) {
     const filterValue = filters[key];
 
-    const matchFilterValue = (val) => val.toLowerCase().includes(filterValue)
+    const matchFilterValue = (val) => val.toLowerCase().includes(filterValue);
 
-    if(["uuid", "title"].includes(key) && !matchFilterValue(device[key])) {
+    if (["uuid", "title"].includes(key) && !matchFilterValue(device[key])) {
       return false;
     }
 
-    if(key === "namespace" && !matchFilterValue(device.access.namespace)) {
+    if (key === "namespace" && !matchFilterValue(device.access.namespace)) {
       return false;
     }
-    
-    if(key === "enabled") {
+
+    if (key === "enabled") {
       const expectedValue = filterValue === "true";
       if (device.enabled !== expectedValue) {
         return false;
       }
     }
 
-    if(key === "tag") {
+    if (key === "tag") {
       const filterTags = filterValue.split(",");
 
-      if(!device.tags.some(tag => 
-        filterTags.some(filterTag => 
-          tag.toLowerCase().includes(filterTag))
+      if (
+        !device.tags.some((tag) =>
+          filterTags.some((filterTag) => tag.toLowerCase().includes(filterTag))
         )
       ) {
         return false;
@@ -140,43 +172,55 @@ function matchFilterDevice(device, filters) {
 }
 
 function filteredDevices() {
-  const filters = parseFilterText()
+  const filters = parseFilterText();
   return devices.value.filter((device) => {
-    return matchFilterDevice(device, filters)
-  })
+    return matchFilterDevice(device, filters);
+  });
 }
 
-store.fetchDevices(true, true);
+store.fetchDevicesWithPagination();
 
-const app = useAppStore()
-const { console_services } = storeToRefs(app)
+const app = useAppStore();
+const { console_services } = storeToRefs(app);
 
-const { selected, namespaces } = storeToRefs(useNSStore())
-const plugins = usePluginsStore()
+const { selected, namespaces } = storeToRefs(useNSStore());
+const plugins = usePluginsStore();
+const accs = useAccountsStore();
 
 async function load_plugin() {
-  plugins.current = false
-  if (selected.value == 'all') {
-    return
+  plugins.current = false;
+  if (selected.value == "all") {
+    return;
   }
 
-  let ns = namespaces.value[selected.value]
+  let ns = namespaces.value[selected.value];
 
   if (!ns || !ns.plugin) {
-    plugins.current = false
-    return
+    plugins.current = false;
+    return;
   }
 
-  const data = await plugins.get(ns.plugin.uuid)
-  if (ns.vars) data.vars = ns.vars
-  plugins.current = data
+  const data = await plugins.get(ns.plugin.uuid);
+  if (ns.vars) data.vars = ns.vars;
+  plugins.current = data;
 }
 
-watch(selected, load_plugin)
+watch(limit, () => { page.value = 1 });
+watch(selected, () => { page.value = 1; load_plugin() });
+watch([selected, limit, page], store.fetchDevicesWithPagination);
+
+// Scroll to top when page changes
+watch(page, () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
 function handleRefresh() {
-  store.fetchDevices(true);
+  store.fetchDevicesWithPagination();
 }
 
-load_plugin()
+if (Object.keys(accs.accounts).length == 0) {
+  accs.fetchAccounts()
+}
+
+load_plugin();
 </script>

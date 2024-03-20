@@ -1,11 +1,13 @@
-import { inject, nextTick } from "vue";
+import { inject } from "vue";
 import { defineStore } from "pinia";
+import axios from "axios";
 import {
   check_token_expired,
   check_offline,
   check_offline_http,
   check_token_expired_http,
 } from "@/utils/access";
+import { EventBus } from "@/utils/event-bus";
 
 export const baseURL = import.meta.env.DEV
   ? "http://api.infinimesh.local" // jshint ignore:line
@@ -29,7 +31,7 @@ export const useAppStore = defineStore("app", {
     base_url: () => baseURL,
     logged_in: (state) => state.token !== "",
     http(state) {
-      const instance = inject("axios").create({
+      const instance = axios.create({
         baseURL,
         headers: {
           Authorization: `Bearer ${state.token}`,
@@ -52,7 +54,8 @@ export const useAppStore = defineStore("app", {
         useBinaryFormat: !import.meta.env.DEV,
         interceptors: [
           (next) => async (req) => {
-            req.header.set("Authorization", `Bearer ${state.token}`);
+            if (!req.header.get("Authorization"))
+              req.header.set("Authorization", `Bearer ${state.token}`);
             return next(req);
           },
           (next) => async (req) => {
@@ -67,8 +70,10 @@ export const useAppStore = defineStore("app", {
           },
         ],
       };
-
       return options;
+    },
+    event_bus() {
+      return new EventBus();
     },
   },
   actions: {

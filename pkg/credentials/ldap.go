@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 Infinite Devices GmbH
+Copyright © 2018-2024 Infinite Devices GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
-	viper.SetDefault("LDAP_CONF", "/home/slnt_opp/repos/infinimesh/e2e/ldap.yml")
+	viper.SetDefault("LDAP_CONF", "/ldap.yml")
 
 	log := logger.NewLogger().Named("LDAP Credentials Init")
 	path := viper.GetString("LDAP_CONF")

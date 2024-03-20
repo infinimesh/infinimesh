@@ -1,14 +1,18 @@
 package credentials
 
 import (
+	"context"
 	"testing"
 
 	"github.com/infinimesh/proto/node/accounts"
+	"go.uber.org/zap"
 )
 
 func TestLDAPAuth(t *testing.T) {
 	// TODO: Fix this test
 	t.SkipNow()
+
+	ctrl := NewCredentialsController(context.TODO(), zap.NewExample(), nil)
 
 	t.Log("LDAP Configured", LDAP_CONFIGURED)
 	if !LDAP_CONFIGURED {
@@ -16,25 +20,25 @@ func TestLDAPAuth(t *testing.T) {
 	}
 
 	t.Log("Test Make Credentials with no provider key")
-	_, err := MakeCredentials(&accounts.Credentials{
+	_, err := ctrl.MakeCredentials(&accounts.Credentials{
 		Type: "ldap", Data: []string{"user"},
-	}, log)
+	})
 	if err == nil {
 		t.Fatalf("Expected error but could create credentials with no Provider Key")
 	}
 
 	t.Log("Test Make Credentials with wrong provider key")
-	_, err = MakeCredentials(&accounts.Credentials{
+	_, err = ctrl.MakeCredentials(&accounts.Credentials{
 		Type: "ldap", Data: []string{"user", "unexistent"},
-	}, log)
+	})
 	if err == nil {
 		t.Fatalf("Expected error but could create credentials with wrong Provider Key")
 	}
 
 	t.Log("Test Make Credentials")
-	cred, err := MakeCredentials(&accounts.Credentials{
+	cred, err := ctrl.MakeCredentials(&accounts.Credentials{
 		Type: "ldap", Data: []string{"user", "local"},
-	}, log)
+	})
 	if err != nil {
 		t.Fatalf("Couldn't create credentials: %v", err)
 	}

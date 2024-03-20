@@ -163,6 +163,8 @@ See [CLI repo](https://github.com/infinimesh/inf) for source and instructions.
 
 ### Local development installation
 
+#### Production like
+
 We have built an automated local development setup based on Docker.
 
 1. Add this entries to `/etc/hosts`:
@@ -179,9 +181,52 @@ We have built an automated local development setup based on Docker.
 
 2. Clone this repo via `git clone https://github.com/infinimesh/infinimesh.git` 
 3. cd into the fresh cloned repo
-4. Run `docker compose up`
+4. Copy `.env.example` into `.env`, edit if needed
+5. Run `docker compose up`
 
 Swagger API: https://infinimesh.github.io/infinimesh/
+
+#### Debugging
+
+This repo contains VS Code `launch.json` commands you can use to spin up `infinimesh` locally with debugger attached.
+
+Requirements:
+
+- Docker with Docker Compose module
+- Traefik
+- Bash Debug Extention
+- Go Extention
+- **Hosts entries from the above must be present**
+
+How to launch:
+
+1. Go to Run and Debug
+2. Click `Lauch Debug Environment` | [!NOTE] You'll be asked the root password to launch `traefik`, don't miss it
+3. Click `Spin the infinimesh up` to launch all services
+4. Enjoy
+
+This will run all services locally (not in Docker and with Debuggers attached). Since about everything needs a port or two, here are the reserved ports and hostnames:
+
+|       Service             |    Ports   |
+|---------------------------|------------|
+| api.infinimesh.local      | 80/http    |
+| db.infinimesh.local       | 80/http    |
+| console.infinimesh.local  | 80/http    |
+| traefik.infinimesh.local  | 80/http    |
+| rbmq.infinimesh.local     | 80/http    |
+| MQTT Bridge (Basic Auth)  | 1883/http  |
+| RabbitMQ API              | 5672/tcp   |
+| Redis                     | 6379/tcp   |
+| Redis Timeseries          | 6380/tcp   |
+| Console Dev server        | 5173/http  |
+| api.infinimesh.local      | 8000/grpc  |
+| Node (repo)               | 8001       |
+| REST API Gateway          | 8002       |
+| Shadow                    | 8003/grpc  |
+| _TimeSeries API_          | 8004       |
+| ArangoDB                  | 8529/http  |
+| MQTT Bridge               | 8883/https |
+| RabbitMQ UI               | 15672/http |
 
 ### Generating proto files
 

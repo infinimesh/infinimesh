@@ -3,7 +3,7 @@ import { Role, Level } from "infinimesh-proto/build/es/node/access/access_pb";
 export function access_lvl_conv(item = { access: {} }) {
   const { level = "READ" } = item.access;
 
-  if (level >= 0 && level <= 4) return level
+  if (level >= 0 && level <= 4) return level;
   return Level[level] ?? Level.READ;
 }
 
@@ -42,7 +42,7 @@ export function check_token_expired_http(err, store) {
 export function check_token_expired(err, store) {
   if (
     err?.code == 2 &&
-    err.message.toLowerCase().includes("invalid token format")
+    err.message.toLowerCase().includes("invalid token format: no session id")
   ) {
     store.logout({
       title: "Signed Out",
@@ -75,8 +75,12 @@ export function check_offline_http(err, store) {
   }
 }
 
-export function check_offline(err, store) {
-  if (err?.message == "Failed to fetch") {
+export function check_offline(req, err, store) {
+  if (
+    err?.message == "Failed to fetch" &&
+    req.method.name === "Get" &&
+    req.message.uuid === "me"
+  ) {
     store.offline();
   }
 }

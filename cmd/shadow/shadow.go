@@ -1,5 +1,5 @@
 /*
-Copyright © 2021-2023 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
+Copyright © 2018-2024 Infinite Devices GmbH, Nikita Ivanovski info@slnt-opp.xyz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ func main() {
 		_ = log.Sync()
 	}()
 
-	log.Info("Setting up RedisDB Connection")
+	log.Info("Setting up RedisDB Connection", zap.String("host", redisHost))
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redisHost,
 		DB:   0, // use default DB

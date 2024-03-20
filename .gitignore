@@ -1,6 +1,6 @@
 node_modules
 dist
-.vscode
+.vscode/settings.json
 coverage
 .DS_Store
 CronJobs/bkp.yaml
@@ -9,3 +9,6 @@ CronJobs/bkp.yaml
 # Ignore auto-generated coverage files
 cover.out
 cover.html
+
+.env
+__debug_*

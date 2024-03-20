@@ -1,0 +1,76 @@
+http:
+  routers:
+    traefik:
+      rule: Host(`traefik.infinimesh.local`)
+      entryPoints:
+        - http
+      service: api@internal
+
+    console:
+      rule: Host(`console.infinimesh.local`)
+      entryPoints:
+        - http
+      service: console
+
+    api:
+      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.node.", "/infinimesh.shadow", "/infinimesh.plugins", "/infinimesh.eventbus", "/oauth")
+      entryPoints:
+        - http
+        - grpc
+      service: repo
+
+    web-api:
+      rule: Host(`api.infinimesh.local`)
+      entryPoints:
+        - http
+      service: web
+
+    db:
+      rule: Host(`db.infinimesh.local`)
+      entryPoints:
+        - http
+      service: db
+    rbmq:
+      rule: Host(`rbmq.infinimesh.local`)
+      entryPoints:
+        - http
+      service: rbmq
+
+    timeseries:
+      rule: Host(`api.infinimesh.local`)&&PathPrefix("/infinimesh.timeseries.")
+      entryPoints:
+        - http
+      service: timeseries
+
+  services:
+    repo:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8001
+    web:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8002
+    shadow:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8003
+
+    console:
+      loadBalancer:
+        servers:
+          - url: http://localhost:5173
+
+    db:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8529
+    rbmq:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15672
+    
+    timeseries:
+      loadBalancer:
+        servers:
+          - url: http://localhost:8005
