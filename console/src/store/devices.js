@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 
-import { Struct } from "@bufbuild/protobuf";
+import { Struct, Timestamp } from "@bufbuild/protobuf";
 import { createPromiseClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 
@@ -150,24 +150,35 @@ export const useDevicesStore = defineStore("devices", () => {
       }
 
       if (response.reported) {
+        response.reported.timestamp = Timestamp.fromDate(
+          new Date(response.reported.timestamp)
+        );
+
         if (reported.value.get(response.device)) {
           response.reported.data = {
-            ...reported.value.get(response.device).data,
+            ...reported.value.get(response.device).data.fields,
             ...response.reported.data,
           };
         }
         reported.value.set(response.device, response.reported);
       }
       if (response.desired) {
+        response.desired.timestamp = Timestamp.fromDate(
+          new Date(response.desired.timestamp)
+        );
+
         if (desired.value.get(response.device)) {
           response.desired.data = {
-            ...desired.value.get(response.device).data,
+            ...desired.value.get(response.device).data.fields,
             ...response.desired.data,
           };
         }
         desired.value.set(response.device, response.desired);
       }
       if (response.connection) {
+        response.connection.timestamp = Timestamp.fromDate(
+          new Date(response.connection.timestamp)
+        );
         connection.value.set(response.device, response.connection);
       }
     };
