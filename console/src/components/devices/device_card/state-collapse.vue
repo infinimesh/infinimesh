@@ -166,8 +166,8 @@ async function handleCopy(state) {
 }
 
 const desired_state = ref(JSON.stringify(desired.value.data, null, 2));
-watch(toRef(props.patch), () => {
-  desired_state.value = ref(JSON.stringify(desired.value.data, null, 2));
+watch(() => props.patch, () => {
+  desired_state.value = JSON.stringify(desired.value.data, null, 2);
 })
 
 const validation = computed(() => {
@@ -185,8 +185,8 @@ function handleSubmit() {
 }
 
 const reported_state = ref(JSON.stringify(reported.value.data, null, 2));
-watch(toRef(props.debug), () => {
-  reported_state.value = ref(JSON.stringify(reported.value.data, null, 2));
+watch(() => props.debug, () => {
+  reported_state.value = JSON.stringify(reported.value.data, null, 2);
 })
 
 const reported_validation = computed(() => {

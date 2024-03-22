@@ -7,10 +7,7 @@
             <n-h1 prefix="bar" align-text type="info" style="margin: 0">
               <n-text type="info"> Devices </n-text>
               (
-              <n-number-animation
-                :from="0"
-                :to="filteredDevices().length || 0"
-              />
+              <n-number-animation :from="0" :to="filteredDevices().length || 0" />
               )
             </n-h1>
             <n-button strong secondary round type="info" @click="handleRefresh">
@@ -30,33 +27,15 @@
           </n-space>
         </n-grid-item>
       </n-grid>
-      <n-select
-        style="width: 92.5vw; min-width: 640px"
-        v-model:value="filterTerm"
-        tag
-        filterable
-        multiple
-        placeholder="Filter devices eg. :uuid:abc"
-        :options="filterDeviceOptions"
-        :show-arrow="false"
-        class="filter-input"
-      />
+      <n-select style="width: 92.5vw; min-width: 640px" v-model:value="filterTerm" tag filterable multiple
+        placeholder="Filter devices eg. :uuid:abc" :options="filterDeviceOptions" :show-arrow="false"
+        class="filter-input" />
     </n-flex>
     <n-flex vertical align="center" size="large">
-      <devices-pool
-        :devices="filteredDevices()"
-        :show_ns="show_ns"
-        @refresh="handleRefresh()"
-      />
+      <devices-pool :devices="filteredDevices()" :show_ns="show_ns" @refresh="handleRefresh()" />
 
-      <n-pagination
-        v-model:page="page"
-        v-model:page-size="limit"
-        :disabled="loading"
-        :item-count="total"
-        :page-sizes="[10, 20, 30, 40]"
-        show-size-picker
-      />
+      <n-pagination v-model:page="page" v-model:page-size="limit" :disabled="loading" :item-count="total"
+        :page-sizes="[10, 20, 30, 40]" show-size-picker />
     </n-flex>
   </n-spin>
 </template>
@@ -83,6 +62,8 @@ import { useDevicesStore } from "@/store/devices";
 import { useNSStore } from "@/store/namespaces";
 import { usePluginsStore } from "@/store/plugins";
 import { storeToRefs } from "pinia";
+import usePaginationHistory from "@/hooks/usePaginationHistory";
+import { useAccountsStore } from "@/store/accounts";
 
 const RefreshOutline = defineAsyncComponent(() =>
   import("@vicons/ionicons5/RefreshOutline")
@@ -107,6 +88,8 @@ const {
   page,
   total,
 } = storeToRefs(store);
+
+usePaginationHistory('devices', { limit: limit }, (newState) => limit.value = newState.limit)
 
 const devices = computed(() => Object.values(devicesMap.value));
 
@@ -202,6 +185,7 @@ const { console_services } = storeToRefs(app);
 
 const { selected, namespaces } = storeToRefs(useNSStore());
 const plugins = usePluginsStore();
+const accs = useAccountsStore();
 
 async function load_plugin() {
   plugins.current = false;
@@ -221,8 +205,8 @@ async function load_plugin() {
   plugins.current = data;
 }
 
-watch(selected, [load_plugin, () => (page.value = 1)]);
-watch(limit, () => (page.value = 1));
+watch(limit, () => { page.value = 1 });
+watch(selected, () => { page.value = 1; load_plugin() });
 watch([selected, limit, page], store.fetchDevicesWithPagination);
 
 // Scroll to top when page changes
@@ -232,6 +216,10 @@ watch(page, () => {
 
 function handleRefresh() {
   store.fetchDevicesWithPagination();
+}
+
+if (Object.keys(accs.accounts).length == 0) {
+  accs.fetchAccounts()
 }
 
 load_plugin();

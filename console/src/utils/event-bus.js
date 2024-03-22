@@ -25,7 +25,10 @@ export class EventBus {
     const unsubscribe = () => {
       delete this.#eventsMap.get(eventName)[id];
 
-      if (Object.keys(this.#eventsMap.get(eventName)).length === 0) {
+      if (
+        Object.getOwnPropertySymbols(this.#eventsMap.get(eventName)).length ===
+        0
+      ) {
         this.#eventsMap.delete(eventName);
       }
     };
