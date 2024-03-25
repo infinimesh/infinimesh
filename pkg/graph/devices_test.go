@@ -218,6 +218,8 @@ func TestCreate_FailsOn_Link(t *testing.T) {
 	).Return(assert.AnError)
 	f.mocks.col.EXPECT().RemoveDocument(f.data.ctx, f.data.dev_uuid).Return(driver.DocumentMeta{}, nil)
 
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, mock.Anything, f.data.dev_uuid).Return(nil)
+
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.Nil(t, res)
 	assert.Error(t, err)
@@ -244,6 +246,8 @@ func TestCreate_Success(t *testing.T) {
 	f.mocks.bus.EXPECT().Notify(f.data.ctx, mock.Anything).Return(func() error {
 		return nil
 	}, nil)
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, mock.Anything, f.data.dev_uuid).Return(nil)
 
 	res, err := f.ctrl.Create(f.data.ctx, connect.NewRequest(&f.data.create_req))
 	assert.NoError(t, err)

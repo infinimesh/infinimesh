@@ -9,9 +9,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	redis_mocks "github.com/infinimesh/infinimesh/mocks/github.com/go-redis/redis/v8"
+	graph_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/graph"
 	pubsub_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/infinimesh/pkg/pubsub"
 	shadow_mocks "github.com/infinimesh/infinimesh/mocks/github.com/infinimesh/proto/shadow"
 	"github.com/infinimesh/infinimesh/pkg/shadow"
+	devpb "github.com/infinimesh/proto/node/devices"
 	pb "github.com/infinimesh/proto/shadow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -23,8 +25,9 @@ import (
 type shadowServiceServerFixture struct {
 	service *shadow.ShadowServiceServer
 	mocks   struct {
-		ps  *pubsub_mocks.MockPubSub
-		rdb *redis_mocks.MockCmdable
+		ps   *pubsub_mocks.MockPubSub
+		rdb  *redis_mocks.MockCmdable
+		repo *graph_mocks.MockInfinimeshGenericActionsRepo[*devpb.Device]
 
 		srv *shadow_mocks.MockShadowService_StreamShadowServer
 
@@ -50,9 +53,10 @@ func newShadowServiceServerFixture(t *testing.T, args ...bool) *shadowServiceSer
 	f.mocks.ps = pubsub_mocks.NewMockPubSub(t)
 	f.mocks.rdb = redis_mocks.NewMockCmdable(t)
 	f.mocks.srv = shadow_mocks.NewMockShadowService_StreamShadowServer(t)
+	f.mocks.repo = graph_mocks.NewMockInfinimeshGenericActionsRepo[*devpb.Device](t)
 
 	f.service = shadow.NewShadowServiceServer(
-		f.mocks.log, f.mocks.rdb, f.mocks.ps,
+		f.mocks.log, f.mocks.rdb, f.mocks.ps, f.mocks.repo,
 	)
 
 	f.data.ctx = context.Background()
@@ -267,6 +271,10 @@ func TestRemove_Reported_Success(t *testing.T) {
 		return true
 	}), time.Duration(0)).Return(redis.NewStatusResult("", nil))
 
+	log := f.mocks.log.Named("shadow.remove")
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, "device1").Return(nil)
+
 	res, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
 		Device: "device1",
 		Key:    "diff",
@@ -298,6 +306,10 @@ func TestRemove_Desired_Success(t *testing.T) {
 
 		return true
 	}), time.Duration(0)).Return(redis.NewStatusResult("", nil))
+
+	log := f.mocks.log.Named("shadow.remove")
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, "device1").Return(nil)
 
 	res, err := f.service.Remove(f.data.ctx, &pb.RemoveRequest{
 		Device:   "device1",
@@ -411,7 +423,11 @@ func TestStore_Success(t *testing.T) {
 		f.data.ctx, key, "{}", time.Duration(0),
 	).Return(redis.NewStatusResult("", nil))
 
-	res, ok := f.service.Store(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{}) // ensure Marshal fails
+	log := zap.NewExample()
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, f.data.uuid).Return(nil)
+
+	res, ok := f.service.Store(log, f.data.uuid, pb.StateKey_REPORTED, &pb.State{}) // ensure Marshal fails
 
 	assert.Equal(t, true, ok)
 	assert.Equal(t, key, res)
@@ -444,7 +460,11 @@ func TestStoreConnectionState_Success(t *testing.T) {
 		f.data.ctx, key, time.Hour*24,
 	).Return(redis.NewBoolResult(false, assert.AnError))
 
-	f.service.StoreConnectionState(zap.NewExample(), f.data.uuid, &pb.ConnectionState{})
+	log := zap.NewExample()
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, f.data.uuid).Return(nil)
+
+	f.service.StoreConnectionState(log, f.data.uuid, &pb.ConnectionState{})
 
 	f.mocks.rdb.AssertNumberOfCalls(t, "Set", 1)
 	f.mocks.rdb.AssertNumberOfCalls(t, "Expire", 1)
@@ -508,7 +528,11 @@ func TestMergeAndStore_SuccessWithMerge(t *testing.T) {
 		}), time.Duration(0),
 	).Return(redis.NewStatusResult("", nil))
 
-	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{
+	log := zap.NewExample()
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, f.data.uuid).Return(nil)
+
+	f.service.MergeAndStore(log, f.data.uuid, pb.StateKey_REPORTED, &pb.State{
 		Data: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"foo": structpb.NewStringValue("bar"),
@@ -544,7 +568,11 @@ func TestMergeAndStore_SuccessWithMergeOldEmpty(t *testing.T) {
 		}), time.Duration(0),
 	).Return(redis.NewStatusResult("", nil))
 
-	f.service.MergeAndStore(zap.NewExample(), f.data.uuid, pb.StateKey_REPORTED, &pb.State{
+	log := zap.NewExample()
+
+	f.mocks.repo.EXPECT().UpdateDeviceModifyDate(f.data.ctx, log, f.data.uuid).Return(nil)
+
+	f.service.MergeAndStore(log, f.data.uuid, pb.StateKey_REPORTED, &pb.State{
 		Data: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"foo": structpb.NewStringValue("bar"),
