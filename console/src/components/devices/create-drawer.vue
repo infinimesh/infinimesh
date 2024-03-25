@@ -118,12 +118,7 @@ const show = ref(false);
 const handsfree = ref(false);
 const mode = ref('certificate')
 
-watch(
-  () => show.value,
-  (val) => {
-    val && reset();
-  }
-);
+watch(show, (val) => { if (val) reset() });
 
 const nss = useNSStore();
 
