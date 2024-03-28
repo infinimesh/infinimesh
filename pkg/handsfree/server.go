@@ -17,6 +17,7 @@ package handsfree
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -25,8 +26,6 @@ import (
 	"connectrpc.com/connect"
 	pb "github.com/infinimesh/proto/handsfree"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func init() {
@@ -69,7 +68,7 @@ func (s *HandsfreeServer) Send(ctx context.Context, req *connect.Request[pb.Cont
 	packet := req.Msg
 
 	if len(packet.GetPayload()) < 2 {
-		return nil, status.Error(codes.InvalidArgument, "Payload must consist of code and actual payload")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("Payload must consist of code and actual payload"))
 	}
 	log.Debug("Request received", zap.Strings("payload", packet.GetPayload()))
 
@@ -77,7 +76,7 @@ func (s *HandsfreeServer) Send(ctx context.Context, req *connect.Request[pb.Cont
 
 	conn, ok := s.db[code]
 	if !ok {
-		return nil, status.Error(codes.NotFound, "No App's awaiting with this code")
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("No App's awaiting with this code"))
 	}
 
 	conn.Channel <- packet.GetPayload()[1:]
@@ -97,7 +96,7 @@ func (s *HandsfreeServer) Connect(ctx context.Context, req *connect.Request[pb.C
 	log.Debug("Request received", zap.String("app", connReq.GetAppId()), zap.Strings("payload", connReq.GetPayload()))
 
 	if connReq.GetAppId() == "" {
-		return status.Error(codes.InvalidArgument, "Application ID must be present upon connection")
+		return connect.NewError(connect.CodeInvalidArgument, errors.New("Application ID must be present upon connection"))
 	}
 
 	code := GenerateCode(s.db)

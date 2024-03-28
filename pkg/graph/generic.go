@@ -2,7 +2,9 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"connectrpc.com/connect"
 	"strings"
 
 	"github.com/arangodb/go-driver"
@@ -12,8 +14,6 @@ import (
 	nspb "github.com/infinimesh/proto/node/namespaces"
 	"github.com/infinimesh/proto/plugins"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type InfinimeshProtobufEntity interface {
@@ -148,7 +148,7 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 	_, err = cr.ReadDocument(ctx, &resp)
 	if err != nil {
 		log.Warn("Error unmarshalling Document", zap.Error(err))
-		return nil, status.Error(codes.Internal, "Couldn't execute query")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("Couldn't execute query"))
 	}
 
 	return &resp, nil

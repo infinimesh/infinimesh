@@ -17,13 +17,13 @@ package graph
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	"github.com/arangodb/go-driver"
 	inf "github.com/infinimesh/infinimesh/pkg/shared"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
 	"github.com/infinimesh/proto/node/access"
@@ -76,10 +76,11 @@ func NewPluginsController(log *zap.Logger, db driver.Database) *PluginsControlle
 	ctx := context.TODO()
 	col, _ := db.Collection(ctx, schema.PLUGINS_COL)
 	log = log.Named("PluginsController")
+	ica := NewInfinimeshCommonActionsRepo(log, db)
 	return &PluginsController{
 		log: log, col: col, db: db,
-		ns_ctrl:  NewNamespacesController(log, db, nil),
-		ica_repo: NewInfinimeshCommonActionsRepo(log, db),
+		ns_ctrl:  NewNamespacesController(log, db, nil, ica, NewGenericRepo[*namespaces.Namespace](db)),
+		ica_repo: ica,
 		repo:     NewGenericRepo[*pb.Plugin](db),
 	}
 }
@@ -113,19 +114,19 @@ func (c *PluginsController) Create(ctx context.Context, req *connect.Request[pb.
 	plug := req.Msg
 
 	if !ValidateRoot(ctx) {
-		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to create Plugin")
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("Not enough access rights to create Plugin"))
 	}
 
 	log.Debug("Creating", zap.Any("plugin", plug))
 	msg := ValidatePluginDocument(plug)
 	if msg != "" {
-		return nil, status.Error(codes.InvalidArgument, msg)
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(msg))
 	}
 
 	plugin := Plugin{Plugin: plug}
 	meta, err := c.col.CreateDocument(ctx, plugin)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error while creating Plugin in DB: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while creating Plugin in DB: %v", err))
 	}
 	plugin.Uuid = meta.ID.Key()
 	plugin.DocumentMeta = meta
@@ -148,7 +149,7 @@ func (c *PluginsController) Get(ctx context.Context, req *connect.Request[pb.Plu
 	meta, err := c.col.ReadDocument(ctx, plug.Uuid, plug)
 	if err != nil {
 		log.Warn("Couldn't get plugin", zap.Error(err))
-		return nil, status.Error(codes.NotFound, "Plugin not found")
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("Plugin not found"))
 	}
 	plug.Uuid = meta.ID.Key()
 
@@ -157,7 +158,7 @@ func (c *PluginsController) Get(ctx context.Context, req *connect.Request[pb.Plu
 	}
 
 	if plug.Namespace == nil || *plug.Namespace == "" {
-		return nil, status.Error(codes.InvalidArgument, "Namespace is not given")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("Namespace is not given"))
 	}
 
 	ns, err := c.ns_ctrl.Get(ctx, connect.NewRequest(&namespaces.Namespace{Uuid: *plug.Namespace}))
@@ -166,7 +167,7 @@ func (c *PluginsController) Get(ctx context.Context, req *connect.Request[pb.Plu
 	}
 
 	if ns.Msg.Access.Level < access.Level_READ {
-		return nil, status.Error(codes.PermissionDenied, "Not enough Access")
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("Not enough Access"))
 	}
 
 	return connect.NewResponse(plug), nil
@@ -188,7 +189,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 	} else if r.Namespace != nil && *r.Namespace != "" {
 		result, err := c.repo.ListQuery(WithDepth(ctx, 1), log, NewBlankNamespaceDocument(*r.Namespace))
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error getting Plugins from DB: %v", err))
 		}
 
 		return connect.NewResponse(&pb.Plugins{
@@ -202,7 +203,7 @@ func (c *PluginsController) List(ctx context.Context, req *connect.Request[pb.Li
 	}
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error getting Plugins from DB: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error getting Plugins from DB: %v", err))
 	}
 	defer cr.Close()
 
@@ -231,22 +232,22 @@ func (c *PluginsController) Update(ctx context.Context, req *connect.Request[pb.
 	plug := req.Msg
 
 	if !ValidateRoot(ctx) {
-		return nil, status.Error(codes.PermissionDenied, "Not enough access rights to update Plugin")
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("Not enough access rights to update Plugin"))
 	}
 
 	msg := ValidatePluginDocument(plug)
 	if msg != "" {
-		return nil, status.Error(codes.InvalidArgument, msg)
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New(msg))
 	}
 
 	if plug.Uuid == "" {
-		return nil, status.Error(codes.InvalidArgument, "No Plugin UUID has been provided")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("No Plugin UUID has been provided"))
 	}
 
 	plugin := Plugin{Plugin: plug}
 	_, err := c.col.ReplaceDocument(ctx, plug.Uuid, plugin)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error while updating Plugin in DB: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("Error while updating Plugin in DB: %v", err))
 	}
 
 	log.Debug("Updated", zap.Any("plugin", plugin))

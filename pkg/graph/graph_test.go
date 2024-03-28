@@ -93,7 +93,8 @@ func init() {
 	ictrl := NewAccountsControllerModule(log, db, rdb, nil).Handler()
 	ctrl = ictrl.(*AccountsController)
 
-	ns_ctrl = NewNamespacesController(log, db, nil)
+	ns_repo := NewGenericRepo[*namespaces.Namespace](db)
+	ns_ctrl = NewNamespacesController(log, db, nil, ica, ns_repo)
 
 	dev_repo = NewGenericRepo[*devices.Device](db)
 	acc_repo = NewGenericRepo[*accounts.Account](db)

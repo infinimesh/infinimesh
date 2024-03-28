@@ -18,15 +18,14 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 
 	"github.com/infinimesh/proto/handsfree/handsfreeconnect"
 	"github.com/infinimesh/proto/node/access"
@@ -173,21 +172,21 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 
 	log := i.log.Named("StandardAuthMiddleware")
 
-	token, err := connectValidateToken(i.jwt, signingKey, tokenString)
+	var token jwt.MapClaims
+	token, err = connectValidateToken(i.jwt, signingKey, tokenString)
 	if err != nil {
-		err = status.Error(codes.Unauthenticated, "Invalid token format")
 		return
 	}
 	log.Debug("Validated token", zap.Any("claims", token))
 
 	account := token[infinimesh.INFINIMESH_ACCOUNT_CLAIM]
 	if account == nil {
-		err = status.Error(codes.Unauthenticated, "Invalid token format: no requestor ID")
+		err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: no requestor ID"))
 		return
 	}
 	uuid, ok := account.(string)
 	if !ok {
-		err = status.Error(codes.Unauthenticated, "Invalid token format: requestor ID isn't string")
+		err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: requestor ID isn't string"))
 		return
 	}
 
@@ -195,19 +194,19 @@ func (i *interceptor) ConnectStandardAuthMiddleware(_ctx context.Context, signin
 		log_activity = true
 		session := token[infinimesh.INFINIMESH_SESSION_CLAIM]
 		if session == nil {
-			err = status.Error(codes.Unauthenticated, "Invalid token format: no session ID")
+			err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: no session ID"))
 			return
 		}
 		sid, ok := session.(string)
 		if !ok {
-			err = status.Error(codes.Unauthenticated, "Invalid token format: session ID isn't string")
+			err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: session ID isn't string"))
 			return
 		}
 
 		// Check if session is valid
 		if err = i.sessions.Check(uuid, sid); err != nil {
 			i.log.Debug("Session check failed", zap.Any("error", err))
-			err = status.Error(codes.Unauthenticated, "Session is expired, revoked or invalid")
+			err = connect.NewError(connect.CodeUnauthenticated, errors.New("Session is expired, revoked or invalid"))
 			return
 		}
 
@@ -250,13 +249,13 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 
 	devices := token[infinimesh.INFINIMESH_DEVICES_CLAIM]
 	if devices == nil {
-		err = status.Error(codes.Unauthenticated, "Invalid token format: no devices scope")
+		err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: no devices scope"))
 		return
 	}
 
 	ipool, ok := devices.(map[string]any)
 	if !ok {
-		err = status.Error(codes.Unauthenticated, "Invalid token format: devices scope isn't a map")
+		err = connect.NewError(connect.CodeUnauthenticated, errors.New("Invalid token format: devices scope isn't a map"))
 		return
 	}
 
@@ -264,7 +263,7 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 	for key, value := range ipool {
 		val, ok := value.(float64)
 		if !ok {
-			err = status.Errorf(codes.Unauthenticated, "Invalid token format: element %v is not a number", value)
+			err = connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("Invalid token format: element %v is not a number", value))
 			return
 		}
 		pool[key] = access.Level(val)
@@ -277,24 +276,24 @@ func (i *interceptor) ConnectDeviceAuthMiddleware(_ctx context.Context, signingK
 func connectValidateToken(jwth JWTHandler, signing_key []byte, tokenString string) (jwt.MapClaims, error) {
 	token, err := jwth.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
+			return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"]))
 		}
 		return signing_key, nil
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeUnauthenticated, err)
 	}
 
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid token"))
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return claims, nil
 	}
 
-	return nil, status.Error(codes.Unauthenticated, "Cannot Validate Token")
+	return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("Cannot Validate Token"))
 }
 
 func (i *interceptor) connectHandleLogActivity(ctx context.Context) {
