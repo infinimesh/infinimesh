@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/arangodb/go-driver"
 	"github.com/infinimesh/infinimesh/pkg/graph/schema"
@@ -44,6 +45,7 @@ LET result = (
 	FOR node, edge, path IN 0..@depth %s @from
 	GRAPH @permissions_graph
 	OPTIONS {order: "bfs", uniqueVertices: "global"}
+	%s
 	FILTER IS_SAME_COLLECTION(@@kind, node)
 	FILTER edge.level > 0
 	%s
@@ -74,6 +76,27 @@ RETURN {
 func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *zap.Logger, from InfinimeshGraphNode, params ...string) (*ListQueryResult[T], error) {
 	offset := OffsetValue(ctx)
 	limit := LimitValue(ctx)
+	sorter := SorterValue(ctx)
+
+	var sort string
+
+	if len(sorter) != 0 {
+		sort = "SORT "
+		for i, field := range sorter {
+			if i != 0 {
+				sort += ", "
+			}
+
+			firstSymbol := field[0]
+
+			if firstSymbol == '-' {
+				newField := strings.ReplaceAll(field, "-", "")
+				sort += "node." + newField + " ASC"
+			} else {
+				sort += "node." + field + " DESC"
+			}
+		}
+	}
 
 	searchType := "OUTBOUND"
 
@@ -112,7 +135,7 @@ func (r *infinimeshGenericActionsRepo[T]) ListQuery(ctx context.Context, log *za
 		filters += fmt.Sprintf("FILTER path.vertices[-2]._key == \"%s\"\n", ns)
 	}
 
-	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, searchType, filters), bindVars)
+	cr, err := r.db.Query(ctx, fmt.Sprintf(ListObjectsOfKind, searchType, sort, filters), bindVars)
 
 	if err != nil {
 		log.Debug("Error while executing query", zap.Error(err))
