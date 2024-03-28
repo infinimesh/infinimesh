@@ -555,9 +555,11 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 
 	limit := q.GetLimit()
 	offset := q.GetOffset()
+	sorter := q.GetSorter()
 
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
+	ctx = WithSorter(ctx, sorter)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 
