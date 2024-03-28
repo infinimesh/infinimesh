@@ -128,6 +128,7 @@
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
                 "PORT": "8003",
+                "DB_HOST": "localhost:8529",
                 "DEVICES_HOST": "localhost:8001",
                 "REDIS_HOST": "localhost:6379",
             }

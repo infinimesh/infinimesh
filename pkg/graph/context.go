@@ -38,6 +38,11 @@ var OffsetKey = GraphContextKey[int64]{
 	Default: 0,
 }
 
+var SorterKey = GraphContextKey[[]string]{
+	Key:     "sorter",
+	Default: []string{"enabled"},
+}
+
 func WithNamespaceFilter(ctx context.Context, ns string) context.Context {
 	return context.WithValue(ctx, NamespaceFilterKey, ns)
 }
@@ -48,6 +53,10 @@ func WithLimit(ctx context.Context, limit int64) context.Context {
 
 func WithOffset(ctx context.Context, offset int64) context.Context {
 	return context.WithValue(ctx, OffsetKey, offset)
+}
+
+func WithSorter(ctx context.Context, sorter []string) context.Context {
+	return context.WithValue(ctx, &SorterKey, sorter)
 }
 
 func LimitValue(ctx context.Context) int64 {
@@ -69,4 +78,16 @@ func NSFilterValue(ctx context.Context) string {
 		return v.(string)
 	}
 	return NamespaceFilterKey.Default
+}
+
+func SorterValue(ctx context.Context) []string {
+	if v := ctx.Value(&SorterKey); v != nil {
+		val := v.([]string)
+		if len(val) != 0 {
+			return v.([]string)
+		} else {
+			return SorterKey.Default
+		}
+	}
+	return SorterKey.Default
 }

@@ -123,6 +123,9 @@ services:
       REDIS_HOST: redis:6379
       DEVICES_HOST: repo:8000
       SIGNING_KEY: "${SIGNING_KEY}"
+      DB_HOST: db:8529
+      DB_CRED: root:openSesame
+      INF_DEFAULT_ROOT_PASS: infinimesh
 
   redis:
     image: redis:latest

@@ -34,6 +34,8 @@ import (
 	access "github.com/infinimesh/proto/node/access"
 	devpb "github.com/infinimesh/proto/node/devices"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Device struct {
@@ -192,6 +194,13 @@ func (c *DevicesController) Create(ctx context.Context, _req *connect.Request[de
 	device.Uuid = meta.ID.Key()
 	device.DocumentMeta = meta
 
+	err = c.repo.UpdateDeviceModifyDate(ctx, log, device.Uuid)
+
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating modify date")
+	}
+
 	err = c.ica_repo.Link(ctx, c.ns2dev, ns, &device, access.Level_ADMIN, access.Role_OWNER)
 	if err != nil {
 		log.Warn("Error creating edge", zap.Error(err))
@@ -330,6 +339,13 @@ func (c *DevicesController) Update(ctx context.Context, req *connect.Request[dev
 	if err != nil {
 		log.Warn("Error updating Device", zap.Error(err))
 		return nil, connect.NewError(connect.CodeInternal, errors.New("Error while updating Device"))
+	}
+
+	err = c.repo.UpdateDeviceModifyDate(ctx, log, dev.Uuid)
+
+	if err != nil {
+		log.Warn("Error updating modify date", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Error while updating modify date")
 	}
 
 	notifier, err := c.bus.Notify(ctx, &proto_eventbus.Event{
@@ -539,9 +555,11 @@ func (c *DevicesController) List(ctx context.Context, req *connect.Request[pb.Qu
 
 	limit := q.GetLimit()
 	offset := q.GetOffset()
+	sorter := q.GetSorter()
 
 	ctx = WithLimit(ctx, limit)
 	ctx = WithOffset(ctx, offset)
+	ctx = WithSorter(ctx, sorter)
 
 	result, err := c.repo.ListQuery(ctx, log, NewBlankAccountDocument(requestor))
 

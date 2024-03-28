@@ -12,7 +12,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/handlers v1.5.2
-	github.com/infinimesh/proto v0.0.0-20240220180804-fff72465b8c8
+	github.com/infinimesh/proto v0.0.0-20240326094546-46e922d8dc82
 	github.com/slntopp/mqtt-go v0.0.0-20220907123405-b74a704b056b
 	github.com/spf13/viper v1.18.2
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75
@@ -53,7 +53,7 @@ require (
 )
 
 require (
-	connectrpc.com/connect v1.15.0
+	connectrpc.com/connect v1.16.0
 	connectrpc.com/grpchealth v1.3.0
 	github.com/go-faker/faker/v4 v4.3.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
