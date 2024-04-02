@@ -71,8 +71,8 @@ devDependencies:
     specifier: ^2.4.5
     version: 2.4.5
   happy-dom:
-    specifier: ^14.3.9
-    version: 14.3.9
+    specifier: ^14.3.10
+    version: 14.3.10
   naive-ui:
     specifier: ^2.38.1
     version: 2.38.1(vue@3.4.21)
@@ -84,7 +84,7 @@ devDependencies:
     version: 5.2.7
   vitest:
     specifier: ^1.3.1
-    version: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.9)
+    version: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.10)
 
 packages:
 
@@ -652,7 +652,7 @@ packages:
       std-env: 3.7.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.2.0
-      vitest: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.9)
+      vitest: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.10)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -699,7 +699,7 @@ packages:
       pathe: 1.1.2
       picocolors: 1.0.0
       sirv: 2.0.4
-      vitest: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.9)
+      vitest: 1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.10)
     dev: true
 
   /@vitest/utils@1.3.1:
@@ -1282,8 +1282,8 @@ packages:
       path-is-absolute: 1.0.1
     dev: true
 
-  /happy-dom@14.3.9:
-    resolution: {integrity: sha512-0kPQchwthekcYpYN8CvCiq+/z5bqFYDLbTxZ+yDLwT8AFRVJDFadShHRxp3VAZRy7a5isOZ1j/LzsU1dtAIZMQ==}
+  /happy-dom@14.3.10:
+    resolution: {integrity: sha512-Rh5li9vA9MF9Gkg85CbFABKTa3uoSAByILRNGb92u/vswDd561gBg2p1UW1ZauvDWWwRxPcbACK5zv3BR+gHnQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
       entities: 4.5.0
@@ -2155,7 +2155,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitest@1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.9):
+  /vitest@1.3.1(@vitest/ui@1.3.1)(happy-dom@14.3.10):
     resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -2190,7 +2190,7 @@ packages:
       chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
-      happy-dom: 14.3.9
+      happy-dom: 14.3.10
       local-pkg: 0.5.0
       magic-string: 0.30.8
       pathe: 1.1.2
