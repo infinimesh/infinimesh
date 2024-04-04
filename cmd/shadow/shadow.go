@@ -123,7 +123,7 @@ func main() {
 	internal_ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 
 	log.Info("Connecting to registry", zap.String("host", devicesHost))
-	conn, err := grpc.Dial(devicesHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(devicesHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal("Error dialing device registry", zap.Error(err))
 	}

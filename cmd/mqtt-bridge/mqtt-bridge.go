@@ -134,13 +134,13 @@ func main() {
 	}
 
 	log.Info("Connecting to registry", zap.String("host", devicesHost))
-	conn, err = grpc.Dial(devicesHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err = grpc.NewClient(devicesHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal("Error dialing device registry", zap.Error(err))
 	}
 	client = pb.NewDevicesServiceClient(conn)
 
-	conn, err = grpc.Dial(shadowHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err = grpc.NewClient(shadowHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Warn("Error dialing shadow registry", zap.Error(err))
 	} else {
