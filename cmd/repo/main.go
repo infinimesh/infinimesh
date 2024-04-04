@@ -219,7 +219,7 @@ func main() {
 		log.Info("Registering devices service")
 		viper.SetDefault("HANDSFREE_HOST", "handsfree:8000")
 		host := viper.GetString("HANDSFREE_HOST")
-		conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := grpc.NewClient(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Fatal("Failed to connect to handsfree", zap.String("address", host), zap.Error(err))
 		}
@@ -235,7 +235,7 @@ func main() {
 		log.Info("Registering shadow service")
 		viper.SetDefault("SHADOW_HOST", "shadow-api:8000")
 		host := viper.GetString("SHADOW_HOST")
-		conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := grpc.NewClient(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Fatal("Failed to connect to shadow", zap.String("address", host), zap.Error(err))
 		}
