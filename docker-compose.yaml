@@ -2,7 +2,7 @@ version: "3.8"
 services:
 
   proxy:
-    image: traefik:latest
+    image: traefik:2.10.4
     labels:
       - traefik.http.routers.api.rule=Host(`traefik.${BASE_DOMAIN}`)
       - traefik.http.routers.api.entrypoints=http
