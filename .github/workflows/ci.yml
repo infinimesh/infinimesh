@@ -115,7 +115,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v6.2.0
         id: build
         with:
           context: .
